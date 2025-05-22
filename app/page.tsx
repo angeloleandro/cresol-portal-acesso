@@ -12,12 +12,13 @@ export default function Home() {
               alt="Logo Cresol" 
               fill
               priority
+              sizes="(max-width: 768px) 100vw, 160px"
               style={{ objectFit: 'contain' }}
             />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Portal de Acesso</h1>
           <p className="text-gray-600 text-center mt-2">
-            Acesse os sistemas de informação empresarial da Cresol
+            Acesse os sistemas de informação empresarial da Cresol Fronteiras PR/SC/SP/ES
           </p>
         </div>
         

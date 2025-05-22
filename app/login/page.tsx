@@ -24,7 +24,14 @@ export default function Login() {
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message === 'Email not confirmed') {
+          setError('Email não confirmado. Por favor, verifique sua caixa de entrada para confirmar seu email ou entre em contato com o administrador.');
+        } else {
+          throw error;
+        }
+        return;
+      }
       
       // Redireciona para o dashboard após login bem-sucedido
       router.push('/dashboard');
@@ -46,6 +53,7 @@ export default function Login() {
               alt="Logo Cresol" 
               fill
               priority
+              sizes="(max-width: 768px) 100vw, 160px"
               style={{ objectFit: 'contain' }}
             />
           </div>
