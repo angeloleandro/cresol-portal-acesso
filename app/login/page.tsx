@@ -4,11 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
+import { supabase } from '@/lib/supabase';
 
 // Função de utilitário para logs detalhados da sessão
 const logSessionDetails = async (prefix: string) => {
-  const supabase = createClient();
   const { data, error } = await supabase.auth.getSession();
   console.log(`[${prefix}] Sessão atual:`, data.session ? {
     id: data.session.user.id,
@@ -42,8 +41,6 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const supabase = createClient();
   
   // Verificar se o usuário já está autenticado ao carregar a página
   useEffect(() => {
@@ -60,7 +57,7 @@ export default function Login() {
       }
     };
     checkSession();
-  }, [router, supabase]);
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

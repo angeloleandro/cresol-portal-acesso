@@ -60,6 +60,10 @@ export default function UsersManagement() {
 
   const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(null);
   const [roleUpdateError, setRoleUpdateError] = useState<string | null>(null);
+  const [resetPasswordUserId, setResetPasswordUserId] = useState<string | null>(null);
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
+  const [resetPasswordSuccess, setResetPasswordSuccess] = useState<{userId: string, password: string} | null>(null);
+  const [resetPasswordError, setResetPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -742,6 +746,64 @@ export default function UsersManagement() {
     return matchesSearch && matchesRole && matchesLocation;
   });
 
+  // Função para resetar a senha de um usuário
+  const handleResetPassword = async (userId: string) => {
+    if (!userId) return;
+    
+    setResetPasswordUserId(userId);
+    setResetPasswordLoading(true);
+    setResetPasswordError(null);
+    setResetPasswordSuccess(null);
+    
+    try {
+      // Obter o token de acesso atual para autenticação
+      const { data: { session } } = await supabase.auth.getSession();
+      const adminToken = session?.access_token;
+      
+      if (!adminToken) {
+        throw new Error('Sessão de administrador inválida. Faça login novamente.');
+      }
+      
+      // Gerar nova senha aleatória
+      const newPassword = Math.random().toString(36).slice(-10);
+      
+      // Chamar a API do Next.js para resetar a senha
+      const response = await fetch('/api/admin/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          newPassword,
+          adminToken
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Falha ao redefinir senha');
+      }
+      
+      setResetPasswordSuccess({
+        userId,
+        password: newPassword
+      });
+      
+    } catch (error: unknown) {
+      console.error('Erro ao resetar senha:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
+      // Verificar se é um erro de autenticação
+      if (!handleAuthError(errorMessage)) {
+        setResetPasswordError(`Erro ao resetar senha: ${errorMessage}`);
+      }
+    } finally {
+      setResetPasswordLoading(false);
+    }
+  };
+
   if (loading && !users.length) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -1256,6 +1318,40 @@ export default function UsersManagement() {
                               <option key={loc.id} value={loc.id}>{loc.name}</option>
                             ))}
                           </select>
+                        </div>
+                        
+                        {/* Redefinição de senha */}
+                        <div className="border-t border-cresol-gray-light pt-4 mt-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="block text-sm font-medium text-cresol-gray">
+                              Senha
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => handleResetPassword(u.id)}
+                              className="text-xs text-primary hover:underline"
+                              disabled={resetPasswordLoading && resetPasswordUserId === u.id}
+                            >
+                              {resetPasswordLoading && resetPasswordUserId === u.id ? 'Gerando...' : 'Redefinir senha'}
+                            </button>
+                          </div>
+                          
+                          {resetPasswordSuccess && resetPasswordSuccess.userId === u.id && (
+                            <div className="bg-green-50 text-green-600 p-3 rounded-md mb-4 text-sm">
+                              <p>Nova senha gerada: <strong>{resetPasswordSuccess.password}</strong></p>
+                              <p className="text-xs mt-1">Anote esta senha e forneça ao usuário de forma segura.</p>
+                            </div>
+                          )}
+                          
+                          {resetPasswordError && resetPasswordUserId === u.id && (
+                            <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">
+                              {resetPasswordError}
+                            </div>
+                          )}
+                          
+                          <p className="text-xs text-cresol-gray">
+                            Ao redefinir a senha, uma nova senha aleatória será gerada e exibida aqui.
+                          </p>
                         </div>
                       </div>
                       

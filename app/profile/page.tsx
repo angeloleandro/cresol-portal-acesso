@@ -42,6 +42,15 @@ export default function ProfilePage() {
   // Estados para o upload de imagem
   const [isUploading, setIsUploading] = useState(false);
 
+  // Estados para alteração de senha
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const [changingPassword, setChangingPassword] = useState(false);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
@@ -235,6 +244,55 @@ export default function ProfilePage() {
     }
   };
 
+  // Função para alterar a senha
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(null);
+    
+    if (!user) {
+      router.replace('/login');
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      setPasswordError('As novas senhas não coincidem.');
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      setPasswordError('A nova senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    
+    try {
+      setChangingPassword(true);
+      
+      // Alterar a senha usando o Supabase Auth
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      setPasswordSuccess('Senha alterada com sucesso!');
+      
+      // Limpar os campos
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      
+    } catch (error: unknown) {
+      console.error('Erro ao alterar senha:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      setPasswordError(`Falha ao alterar senha: ${errorMessage}`);
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -302,7 +360,8 @@ export default function ProfilePage() {
           </div>
         )}
         
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* Formulário de informações pessoais */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Avatar */}
             <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -458,6 +517,76 @@ export default function ProfilePage() {
               </button>
             </div>
           </form>
+        </div>
+        
+        {/* Formulário de alteração de senha */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-primary">Alterar Senha</h3>
+            <button
+              type="button"
+              onClick={() => setShowPasswordForm(!showPasswordForm)}
+              className="text-sm text-primary hover:underline"
+            >
+              {showPasswordForm ? 'Cancelar' : 'Alterar minha senha'}
+            </button>
+          </div>
+          
+          {passwordError && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">
+              {passwordError}
+            </div>
+          )}
+          
+          {passwordSuccess && (
+            <div className="bg-green-50 text-green-600 p-3 rounded-md mb-4 text-sm">
+              {passwordSuccess}
+            </div>
+          )}
+          
+          {showPasswordForm && (
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div>
+                <label htmlFor="newPassword" className="block text-sm font-medium text-cresol-gray mb-2">
+                  Nova Senha
+                </label>
+                <input
+                  type="password"
+                  id="newPassword"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  placeholder="Mínimo de 6 caracteres"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-cresol-gray mb-2">
+                  Confirmar Nova Senha
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  placeholder="Digite novamente a nova senha"
+                />
+              </div>
+              
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-70"
+                  disabled={changingPassword}
+                >
+                  {changingPassword ? 'Alterando...' : 'Salvar Nova Senha'}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </main>
     </div>
