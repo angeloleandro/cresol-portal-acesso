@@ -106,6 +106,39 @@ CREATE POLICY "Usuários autenticados podem deletar seus próprios uploads" ON s
 CREATE POLICY "Imagens públicas para visualização" ON storage.objects
   FOR SELECT
   USING (bucket_id = 'images');
+
+-- Permitir upload de avatares
+CREATE POLICY "Usuários podem fazer upload de avatares" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'images' AND (storage.foldername(name))[1] = 'avatars');
+
+-- Permitir que usuários atualizem seus próprios avatares
+CREATE POLICY "Usuários podem atualizar seus próprios avatares" ON storage.objects
+  FOR UPDATE TO authenticated
+  USING (bucket_id = 'images' AND owner = auth.uid() AND (storage.foldername(name))[1] = 'avatars');
+
+-- Permitir que usuários deletem seus próprios avatares
+CREATE POLICY "Usuários podem deletar seus próprios avatares" ON storage.objects
+  FOR DELETE TO authenticated
+  USING (bucket_id = 'images' AND owner = auth.uid() AND (storage.foldername(name))[1] = 'avatars');
 ```
 
 Um arquivo de referência `supabase-bucket-setup.js` está disponível no repositório com todas as consultas SQL necessárias e instruções detalhadas.
+
+### Funcionalidades do Portal
+
+O Portal Cresol inclui as seguintes funcionalidades:
+
+1. **Autenticação e Autorização**
+   - Login/Logout de usuários
+   - Diferentes níveis de acesso (Administrador, Administrador de Setor, Usuário)
+   - Solicitações de acesso e aprovação por administradores
+
+2. **Perfil de Usuário**
+   - Visualização e edição de informações pessoais
+   - Upload de foto de perfil
+   - Gerenciamento de dados como nome, cargo e local de atuação
+
+3. **Gerenciamento de Setores**
+   - Visualização hierárquica de setores da organização
+   - Notícias e eventos específicos de cada setor

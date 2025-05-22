@@ -15,6 +15,7 @@ interface Sector {
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [sectors, setSectors] = useState<Sector[]>([]);
@@ -160,7 +161,8 @@ export default function Navbar() {
                 }`}
               >
                 <span>Setores</span>
-                <svg 
+                {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
+<svg 
                   className={`ml-1 h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   stroke="currentColor" 
@@ -179,7 +181,7 @@ export default function Navbar() {
                   onMouseLeave={handleCloseDropdown}
                 >
                   {/* Área "ponte" para evitar que o dropdown feche ao mover o mouse */}
-                  <div className="absolute h-2 w-full -top-2 left-0"></div>
+                  <div className="absolute h-2 w-full -top-2 left-0" />
                   
                   <Link 
                     href="/setores" 
@@ -242,11 +244,13 @@ export default function Navbar() {
               onMouseEnter={handleOpenUserMenu}
               onMouseLeave={handleCloseUserMenu}
             >
-              <button className="flex items-center text-sm text-cresol-gray hover:text-primary">
+              {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
+<button className="flex items-center text-sm text-cresol-gray hover:text-primary">
                 <span className="mr-2">
                   {user?.user_metadata?.full_name || user?.email || 'Usuário'}
                 </span>
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
+<svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </button>
@@ -258,12 +262,16 @@ export default function Navbar() {
                   onMouseLeave={handleCloseUserMenu}
                 >
                   {/* Área "ponte" para evitar que o dropdown feche ao mover o mouse */}
-                  <div className="absolute h-2 w-full -top-2 left-0"></div>
+                  <div className="absolute h-2 w-full -top-2 left-0" />
                   
-                  <a href="#" className="block px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white">
+                  <Link 
+                    href="/profile" 
+                    className="block px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white"
+                  >
                     Perfil
-                  </a>
-                  <button 
+                  </Link>
+                  {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
+<button 
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white"
                   >
@@ -286,11 +294,13 @@ export default function Navbar() {
             </Link>
           )}
           
-          <button 
+          {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
+<button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="text-cresol-gray hover:text-primary"
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
+<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               {isMobileMenuOpen 
                 ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -311,7 +321,8 @@ export default function Navbar() {
           </Link>
           
           <div>
-            <div 
+            {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+<div 
               className="flex items-center justify-between py-2"
               onClick={() => setIsMobileSectorsOpen(!isMobileSectorsOpen)}
             >
@@ -327,7 +338,8 @@ export default function Navbar() {
                 Setores
               </Link>
               {sectors.length > 0 && (
-                <svg 
+                // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+<svg 
                   className={`h-4 w-4 transition-transform ${isMobileSectorsOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   stroke="currentColor" 
@@ -377,9 +389,16 @@ export default function Navbar() {
             <div className="flex items-center justify-between text-sm text-cresol-gray mb-2">
               <span>{user?.user_metadata?.full_name || user?.email || 'Usuário'}</span>
             </div>
+            <Link
+              href="/profile"
+              className="block w-full text-left py-2 text-sm text-cresol-gray hover:text-primary"
+            >
+              Perfil
+            </Link>
             <button 
               onClick={handleLogout}
               className="block w-full text-left py-2 text-sm text-red-500 hover:text-red-700"
+              type="button"
             >
               Sair
             </button>

@@ -55,6 +55,16 @@ const ADMIN_CARDS: DashboardCard[] = [
     ),
     link: '/admin/systems',
   },
+  {
+    title: 'Locais',
+    description: 'Gerenciar locais de atuação disponíveis',
+    iconPath: (
+      <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 12.414a2 2 0 00-2.828 0l-4.243 4.243M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+    link: '/admin/work-locations',
+  },
 ];
 
 export default function AdminDashboard() {

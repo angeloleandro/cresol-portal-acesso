@@ -26,6 +26,21 @@ CREATE POLICY "Usuários autenticados podem deletar seus próprios uploads 1" ON
   FOR DELETE TO authenticated
   USING (bucket_id = 'images' AND owner = auth.uid() AND (storage.foldername(name))[1] = 'sector-news');
 
+-- Permitir upload de avatares
+CREATE POLICY "Usuários podem fazer upload de avatares" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'images' AND (storage.foldername(name))[1] = 'avatars');
+
+-- Permitir que usuários atualizem seus próprios avatares
+CREATE POLICY "Usuários podem atualizar seus próprios avatares" ON storage.objects
+  FOR UPDATE TO authenticated
+  USING (bucket_id = 'images' AND owner = auth.uid() AND (storage.foldername(name))[1] = 'avatars');
+
+-- Permitir que usuários deletem seus próprios avatares
+CREATE POLICY "Usuários podem deletar seus próprios avatares" ON storage.objects
+  FOR DELETE TO authenticated
+  USING (bucket_id = 'images' AND owner = auth.uid() AND (storage.foldername(name))[1] = 'avatars');
+
 -- Permitir que os administradores gerenciem todos os arquivos
 CREATE POLICY "Admins podem gerenciar todos os arquivos" ON storage.objects
   FOR ALL TO authenticated

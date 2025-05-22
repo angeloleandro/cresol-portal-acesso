@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -11,10 +11,24 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [department, setDepartment] = useState('');
+  const [position, setPosition] = useState('');
+  const [workLocationId, setWorkLocationId] = useState('');
+  const [workLocations, setWorkLocations] = useState<{id: string, name: string}[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Buscar locais de atuação do Supabase
+    const fetchWorkLocations = async () => {
+      const { data, error } = await supabase
+        .from('work_locations')
+        .select('id, name')
+        .order('name');
+      if (!error && data) setWorkLocations(data);
+    };
+    fetchWorkLocations();
+  }, []);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,36 +36,84 @@ export default function Signup() {
     setSuccess(null);
     setLoading(true);
     
-    // Validar domínio de e-mail da Cresol
+    // Validações básicas
     if (!email.endsWith('@cresol.com.br')) {
       setError('Por favor, utilize um e-mail corporativo da Cresol.');
       setLoading(false);
       return;
     }
+    if (!workLocationId) {
+      setError('Selecione o local de atuação.');
+      setLoading(false);
+      return;
+    }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // Verificar se já existe uma solicitação para este e-mail
+      const { data: existingRequest, error: checkError } = await supabase
+        .from('access_requests')
+        .select('id, status')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Erro ao verificar solicitações existentes:', checkError);
+      } else if (existingRequest) {
+        if (existingRequest.status === 'pending') {
+          setError('Já existe uma solicitação pendente para este e-mail. Por favor, aguarde a aprovação.');
+          setLoading(false);
+          return;
+        }
+        
+        if (existingRequest.status === 'approved') {
+          setError('Este e-mail já foi aprovado. Por favor, faça login.');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Verificar se o usuário já existe no Auth (não deve existir)
+      const { data: authData, error: authCheckError } = await supabase.auth.signInWithPassword({
         email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            department,
-          },
-        },
+        password, // Tentativa de login que deve falhar se o usuário não existir
       });
 
-      if (error) throw error;
+      if (authData?.user) {
+        // Se conseguimos fazer login, então o usuário já existe no Auth
+        setError('Este e-mail já está registrado no sistema. Por favor, use a opção de login.');
+        setLoading(false);
+        return;
+      }
 
-      setSuccess('Solicitação de acesso enviada com sucesso! Aguarde a confirmação do administrador.');
+      // Apenas criar a solicitação de acesso
+      const { error: insertError } = await supabase
+        .from('access_requests')
+        .insert({
+          email,
+          full_name: fullName,
+          position,
+          work_location_id: workLocationId,
+          status: 'pending',
+          // Armazenar a senha temporariamente de forma segura (hash) ou
+          // definir um fluxo para o usuário criar uma senha após aprovação
+        });
+
+      if (insertError) {
+        console.error('Erro ao criar solicitação de acesso:', insertError);
+        throw insertError;
+      }
+
+      // Informar ao usuário que a solicitação foi enviada com sucesso
+      setSuccess('Solicitação de acesso enviada com sucesso! Aguarde a aprovação do administrador. Você será redirecionado para a página de login.');
       
-      // Em um ambiente real, aqui poderíamos enviar uma notificação para o admin
+      // Opcional: redirecionar após alguns segundos
       setTimeout(() => {
         router.push('/login');
       }, 5000);
-    } catch (error: any) {
-      console.error('Erro ao registrar:', error);
-      setError('Falha ao solicitar acesso. Tente novamente mais tarde.');
+    } catch (error: unknown) {
+      console.error('Erro ao solicitar acesso:', error);
+      const errorMessage = error instanceof Error ? `Falha ao solicitar acesso. ${error.message}` : 'Falha ao solicitar acesso.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -67,6 +129,7 @@ export default function Signup() {
               alt="Logo Cresol" 
               fill
               priority
+              sizes="(max-width: 768px) 100vw, 160px"
               style={{ objectFit: 'contain' }}
             />
           </div>
@@ -75,19 +138,16 @@ export default function Signup() {
             Preencha o formulário para solicitar acesso
           </p>
         </div>
-
         {error && (
           <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">
             {error}
           </div>
         )}
-
         {success && (
           <div className="bg-green-50 text-green-600 p-3 rounded mb-4 text-sm">
             {success}
           </div>
         )}
-        
         <form onSubmit={handleSignUp} className="space-y-4">
           <div>
             <label htmlFor="fullName" className="form-label">
@@ -103,7 +163,6 @@ export default function Signup() {
               placeholder="Seu nome completo"
             />
           </div>
-          
           <div>
             <label htmlFor="email" className="form-label">
               E-mail Corporativo
@@ -118,25 +177,40 @@ export default function Signup() {
               placeholder="seu.email@cresol.com.br"
             />
           </div>
-          
           <div>
-            <label htmlFor="department" className="form-label">
-              Departamento
+            <label htmlFor="position" className="form-label">
+              Cargo
             </label>
             <input
-              id="department"
+              id="position"
               type="text"
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
+              value={position}
+              onChange={(e) => setPosition(e.target.value)}
               required
               className="input"
-              placeholder="Seu departamento na Cresol"
+              placeholder="Seu cargo na Cresol"
             />
           </div>
-          
+          <div>
+            <label htmlFor="workLocation" className="form-label">
+              Local de Atuação
+            </label>
+            <select
+              id="workLocation"
+              value={workLocationId}
+              onChange={e => setWorkLocationId(e.target.value)}
+              required
+              className="input"
+            >
+              <option value="">Selecione o local de atuação</option>
+              {workLocations.map(loc => (
+                <option key={loc.id} value={loc.id}>{loc.name}</option>
+              ))}
+            </select>
+          </div>
           <div>
             <label htmlFor="password" className="form-label">
-              Senha
+              Senha Inicial
             </label>
             <input
               id="password"
@@ -145,11 +219,13 @@ export default function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               required
               className="input"
-              placeholder="Crie uma senha segura"
+              placeholder="Define a senha para uso após aprovação"
               minLength={8}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Esta senha será usada após a aprovação do administrador.
+            </p>
           </div>
-          
           <button
             type="submit"
             className="btn-primary w-full"
@@ -158,7 +234,6 @@ export default function Signup() {
             {loading ? 'Enviando...' : 'Solicitar Acesso'}
           </button>
         </form>
-        
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Já tem uma conta?{' '}

@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import type { User } from '@supabase/supabase-js';
 
 interface System {
   id: string;
@@ -30,7 +31,7 @@ export default function SectorSystemsManagement() {
   const params = useParams();
   const sectorId = params.id as string;
   
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [systems, setSystems] = useState<System[]>([]);
   const [sector, setSector] = useState<Sector | null>(null);
@@ -209,7 +210,7 @@ export default function SectorSystemsManagement() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto" />
           <p className="mt-4 text-gray-600">Carregando...</p>
         </div>
       </div>
@@ -263,6 +264,7 @@ export default function SectorSystemsManagement() {
               Olá, {user?.user_metadata?.full_name || user?.email}
             </span>
             <button 
+              type="button"
               onClick={handleLogout}
               className="text-sm text-primary hover:text-primary-dark"
             >
@@ -280,6 +282,7 @@ export default function SectorSystemsManagement() {
           </div>
           
           <button 
+            type="button"
             onClick={() => setIsAddModalOpen(true)}
             className="btn-primary"
           >
@@ -310,6 +313,7 @@ export default function SectorSystemsManagement() {
                   </div>
                   <div className="flex space-x-2">
                     <button 
+                      type="button"
                       onClick={() => {
                         setEditingSystem(system);
                         setIsEditModalOpen(true);
@@ -317,14 +321,17 @@ export default function SectorSystemsManagement() {
                       className="text-gray-500 hover:text-primary"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <title>Editar</title>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
                     <button 
+                      type="button"
                       onClick={() => handleDeleteSystem(system.id)}
                       className="text-gray-500 hover:text-red-600"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <title>Excluir</title>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
@@ -392,8 +399,8 @@ export default function SectorSystemsManagement() {
               </div>
               
               <div className="mb-6">
-                <label className="form-label">Ícone</label>
-                <div className="grid grid-cols-5 gap-2 mt-2">
+                <label htmlFor="icon-select" className="form-label">Ícone</label>
+                <div className="grid grid-cols-5 gap-2 mt-2" id="icon-select">
                   {[
                     '/icons/default-app.svg',
                     '/icons/finance-app.svg',
@@ -401,9 +408,15 @@ export default function SectorSystemsManagement() {
                     '/icons/chat-app.svg',
                     '/icons/calendar-app.svg'
                   ].map((icon) => (
-                    <div 
+                    <button 
                       key={icon}
+                      type="button"
                       onClick={() => setNewSystem({...newSystem, icon})}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setNewSystem({...newSystem, icon});
+                        }
+                      }}
                       className={`
                         w-12 h-12 rounded border cursor-pointer flex items-center justify-center
                         ${newSystem.icon === icon ? 'border-primary bg-primary/10' : 'border-gray-300'}
@@ -412,7 +425,7 @@ export default function SectorSystemsManagement() {
                       <div className="relative w-8 h-8">
                         <Image src={icon} alt="Ícone" fill style={{ objectFit: 'contain' }} />
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -480,8 +493,8 @@ export default function SectorSystemsManagement() {
               </div>
               
               <div className="mb-6">
-                <label className="form-label">Ícone</label>
-                <div className="grid grid-cols-5 gap-2 mt-2">
+                <label htmlFor="edit-icon-select" className="form-label">Ícone</label>
+                <div className="grid grid-cols-5 gap-2 mt-2" id="edit-icon-select">
                   {[
                     '/icons/default-app.svg',
                     '/icons/finance-app.svg',
@@ -489,9 +502,15 @@ export default function SectorSystemsManagement() {
                     '/icons/chat-app.svg',
                     '/icons/calendar-app.svg'
                   ].map((icon) => (
-                    <div 
+                    <button 
                       key={icon}
+                      type="button"
                       onClick={() => setEditingSystem({...editingSystem, icon})}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setEditingSystem({...editingSystem, icon});
+                        }
+                      }}
                       className={`
                         w-12 h-12 rounded border cursor-pointer flex items-center justify-center
                         ${editingSystem.icon === icon ? 'border-primary bg-primary/10' : 'border-gray-300'}
@@ -500,7 +519,7 @@ export default function SectorSystemsManagement() {
                       <div className="relative w-8 h-8">
                         <Image src={icon} alt="Ícone" fill style={{ objectFit: 'contain' }} />
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
