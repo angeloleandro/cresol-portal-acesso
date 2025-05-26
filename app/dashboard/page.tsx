@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
 import NoticiasDestaque from '../components/NoticiasDestaque';
 import EventosDestaque from '../components/EventosDestaque';
+import BannerCarousel from '@/app/components/BannerCarousel';
 
 interface System {
   id: string;
@@ -204,7 +205,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-cresol-gray-light/30">
       {/* Header */}
       <Navbar />
-
+      <BannerCarousel />
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Banner principal */}

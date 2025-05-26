@@ -18,11 +18,14 @@ export default function Navbar() {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSectorAdmin, setIsSectorAdmin] = useState(false);
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAdminSectorDropdownOpen, setIsAdminSectorDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const adminSectorDropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isMobileSectorsOpen, setIsMobileSectorsOpen] = useState(false);
   const userMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -44,6 +47,25 @@ export default function Navbar() {
     dropdownTimeoutRef.current = setTimeout(() => {
       setIsDropdownOpen(false);
     }, 300); // 300ms de delay
+  };
+
+  // Funções para controlar o dropdown de admin setor
+  const handleOpenAdminSectorDropdown = () => {
+    if (adminSectorDropdownTimeoutRef.current) {
+      clearTimeout(adminSectorDropdownTimeoutRef.current);
+      adminSectorDropdownTimeoutRef.current = null;
+    }
+    setIsAdminSectorDropdownOpen(true);
+  };
+
+  const handleCloseAdminSectorDropdown = () => {
+    if (adminSectorDropdownTimeoutRef.current) {
+      clearTimeout(adminSectorDropdownTimeoutRef.current);
+    }
+    
+    adminSectorDropdownTimeoutRef.current = setTimeout(() => {
+      setIsAdminSectorDropdownOpen(false);
+    }, 300);
   };
 
   // Função para abrir o menu de usuário
@@ -72,6 +94,9 @@ export default function Navbar() {
       if (dropdownTimeoutRef.current) {
         clearTimeout(dropdownTimeoutRef.current);
       }
+      if (adminSectorDropdownTimeoutRef.current) {
+        clearTimeout(adminSectorDropdownTimeoutRef.current);
+      }
       if (userMenuTimeoutRef.current) {
         clearTimeout(userMenuTimeoutRef.current);
       }
@@ -85,9 +110,11 @@ export default function Navbar() {
   }, []);
 
   const checkUser = async () => {
+    console.log("Navbar: Verificando usuário...");
     const { data } = await supabase.auth.getUser();
     if (data.user) {
       setUser(data.user);
+      console.log("Navbar: Usuário encontrado:", data.user.email);
       
       // Verificar se é admin
       const { data: profile } = await supabase
@@ -96,9 +123,42 @@ export default function Navbar() {
         .eq('id', data.user.id)
         .single();
       
-      if (profile?.role === 'admin' || profile?.role === 'sector_admin') {
+      console.log("Navbar: Perfil do usuário:", profile);
+      
+      if (profile?.role === 'admin') {
+        console.log("Navbar: Usuário é admin");
         setIsAdmin(true);
+      } else if (profile?.role === 'sector_admin') {
+        console.log("Navbar: Usuário é admin de setor");
+        setIsSectorAdmin(true);
+        
+        // Se for admin de setor, buscar os setores que ele administra
+        const { data: sectorAdmins } = await supabase
+          .from('sector_admins')
+          .select('sector_id')
+          .eq('user_id', data.user.id);
+        
+        console.log("Navbar: Setores administrados:", sectorAdmins);
+        
+        if (sectorAdmins && sectorAdmins.length > 0) {
+          const sectorIds = sectorAdmins.map(admin => admin.sector_id);
+          
+          // Filtrar apenas os setores que o usuário administra
+          const { data: userSectors } = await supabase
+            .from('sectors')
+            .select('id, name, description')
+            .in('id', sectorIds)
+            .order('name');
+            
+          console.log("Navbar: Lista de setores do usuário:", userSectors);
+          
+          if (userSectors) {
+            setSectors(userSectors);
+          }
+        }
       }
+    } else {
+      console.log("Navbar: Nenhum usuário autenticado");
     }
   };
 
@@ -110,7 +170,7 @@ export default function Navbar() {
     
     if (error) {
       console.error('Erro ao buscar setores:', error);
-    } else {
+    } else if (!isSectorAdmin) { // Se não for admin de setor, carrega todos os setores 
       setSectors(data || []);
     }
   };
@@ -161,8 +221,7 @@ export default function Navbar() {
                 }`}
               >
                 <span>Setores</span>
-                {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-<svg 
+                <svg 
                   className={`ml-1 h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   stroke="currentColor" 
@@ -229,6 +288,7 @@ export default function Navbar() {
           </nav>
           
           <div className="flex items-center border-l border-cresol-gray-light pl-4">
+            {/* Opção de Admin ou Admin Setor */}
             {isAdmin && (
               <Link
                 href="/admin"
@@ -238,19 +298,75 @@ export default function Navbar() {
               </Link>
             )}
             
+            {isSectorAdmin && (
+              <div 
+                className="relative mr-4"
+                onMouseEnter={handleOpenAdminSectorDropdown}
+                onMouseLeave={handleCloseAdminSectorDropdown}
+              >
+                <Link
+                  href="/admin-setor"
+                  className="text-sm text-cresol-gray hover:text-primary flex items-center"
+                >
+                  <span>Painel Admin Setor</span>
+                  <svg 
+                    className={`ml-1 h-4 w-4 transition-transform ${isAdminSectorDropdownOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </Link>
+                
+                {/* Admin Setor Dropdown menu */}
+                {isAdminSectorDropdownOpen && (
+                  <div 
+                    className="absolute right-0 mt-0 w-56 bg-white rounded-md shadow-lg py-1 z-10"
+                    onMouseEnter={handleOpenAdminSectorDropdown}
+                    onMouseLeave={handleCloseAdminSectorDropdown}
+                  >
+                    {/* Área "ponte" para evitar que o dropdown feche ao mover o mouse */}
+                    <div className="absolute h-2 w-full -top-2 left-0" />
+                    
+                    <Link 
+                      href="/admin-setor" 
+                      className="block px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white"
+                    >
+                      Painel Principal
+                    </Link>
+                    
+                    {sectors.length > 0 && (
+                      <div className="border-t border-gray-100 mt-1 pt-1">
+                        {sectors.map((sector) => (
+                          <Link 
+                            key={sector.id} 
+                            href={`/admin-setor/setores/${sector.id}`}
+                            className="block px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white truncate"
+                            title={sector.name}
+                          >
+                            {sector.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            
             {/* Menu de usuário */}
             <div 
               className="relative"
               onMouseEnter={handleOpenUserMenu}
               onMouseLeave={handleCloseUserMenu}
             >
-              {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-<button className="flex items-center text-sm text-cresol-gray hover:text-primary">
+              <button className="flex items-center text-sm text-cresol-gray hover:text-primary" type="button">
                 <span className="mr-2">
                   {user?.user_metadata?.full_name || user?.email || 'Usuário'}
                 </span>
-                {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-<svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </button>
@@ -270,10 +386,10 @@ export default function Navbar() {
                   >
                     Perfil
                   </Link>
-                  {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-<button 
+                  <button 
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white"
+                    type="button"
                   >
                     Sair
                   </button>
@@ -294,13 +410,21 @@ export default function Navbar() {
             </Link>
           )}
           
-          {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-<button 
+          {isSectorAdmin && (
+            <Link
+              href="/admin-setor"
+              className="text-sm text-cresol-gray hover:text-primary"
+            >
+              Admin Setor
+            </Link>
+          )}
+          
+          <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="text-cresol-gray hover:text-primary"
+            type="button"
           >
-            {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               {isMobileMenuOpen 
                 ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -321,8 +445,7 @@ export default function Navbar() {
           </Link>
           
           <div>
-            {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
-<div 
+            <div 
               className="flex items-center justify-between py-2"
               onClick={() => setIsMobileSectorsOpen(!isMobileSectorsOpen)}
             >
@@ -338,8 +461,7 @@ export default function Navbar() {
                 Setores
               </Link>
               {sectors.length > 0 && (
-                // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-<svg 
+                <svg 
                   className={`h-4 w-4 transition-transform ${isMobileSectorsOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   stroke="currentColor" 

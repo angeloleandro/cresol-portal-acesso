@@ -1,0 +1,8 @@
+# CONFIGURAÇÕES NECESSÁRIAS PARA O ARQUIVO .env.local
+# Copie o conteúdo abaixo para um arquivo chamado .env.local na raiz do projeto
+
+NEXT_PUBLIC_SUPABASE_URL=https://taodkzafqgoparihaljx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhb2RremFmcWdvcGFyaWhhbGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MzEyNTEsImV4cCI6MjA2MTUwNzI1MX0.J8O2DoHLLz5qTRktXbcnVqhL5KtkVML28w1XyM827CY
+
+# Para funções de servidor (opcional)
+SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key_aqui 

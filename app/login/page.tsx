@@ -4,35 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
-
-// Função de utilitário para logs detalhados da sessão
-const logSessionDetails = async (prefix: string) => {
-  const { data, error } = await supabase.auth.getSession();
-  console.log(`[${prefix}] Sessão atual:`, data.session ? {
-    id: data.session.user.id,
-    email: data.session.user.email,
-    expires_at: data.session.expires_at ? new Date(data.session.expires_at * 1000).toISOString() : 'N/A',
-    token_length: data.session.access_token.length,
-    refresh_token_length: data.session.refresh_token.length
-  } : 'null');
-  
-  if (error) {
-    console.error(`[${prefix}] Erro ao obter sessão:`, error.message);
-  }
-  
-  // Log das variáveis de ambiente para debug (valores parciais)
-  console.log(`[${prefix}] NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 15)}...`);
-  console.log(`[${prefix}] NEXT_PUBLIC_SUPABASE_ANON_KEY set: ${!!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`);
-  
-  // Log da configuração do cliente
-  console.log(`[${prefix}] Supabase client config:`, {
-    persistSession: true, // Não podemos acessar diretamente autoRefreshToken
-    storageKey: 'sb-cresol-portal-acesso-auth-token'
-  });
-}
-
-export default function Login() {
+import { supabase } from '@/lib/supabase';export default function Login() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirectedFrom') || '/dashboard';
@@ -46,7 +18,6 @@ export default function Login() {
   useEffect(() => {
     const checkSession = async () => {
       console.log('[Login] Verificando sessão existente...');
-      await logSessionDetails('Login-Initial');
       
       const { data } = await supabase.auth.getSession();
       if (data.session) {
@@ -66,78 +37,32 @@ export default function Login() {
     console.log('[Login] Iniciando processo de login para email:', email);
 
     try {
-      // Tentar login
-      console.log('[Login] Enviando credenciais para Supabase...');
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (authError) {
-        console.error('[Login] Erro de autenticação:', authError.message, authError);
-        if (authError.message.includes('Email not confirmed')) {
+      if (error) {
+        console.error('[Login] Erro de autenticação:', error.message);
+        if (error.message.includes('Email not confirmed')) {
           setError('Email não confirmado. Por favor, verifique sua caixa de entrada ou entre em contato com o administrador.');
-        } else if (authError.message.includes('Invalid login credentials')) {
+        } else if (error.message.includes('Invalid login credentials')) {
           setError('Email ou senha incorretos.');
         } else {
-          setError(`Falha ao fazer login: ${authError.message}`);
+          setError(`Falha ao fazer login: ${error.message}`);
         }
         setLoading(false);
         return;
       }
       
-      console.log('[Login] Login bem-sucedido, redirecionando para:', redirectPath);
-      console.log('[Login] Sessão estabelecida:', authData?.session?.user?.id);
+      console.log('[Login] Login bem-sucedido! Usuário:', data.user?.email);
       
-      // Log detalhado dos dados da sessão
-      console.log('[Login] Dados da sessão obtida:', {
-        user_id: authData?.session?.user?.id,
-        email: authData?.session?.user?.email,
-        token_present: !!authData?.session?.access_token,
-        token_length: authData?.session?.access_token?.length,
-        expires_at: authData?.session?.expires_at ? new Date(authData.session.expires_at * 1000).toISOString() : 'N/A',
-      });
+      // Redirecionar imediatamente após login bem-sucedido
+      router.push(redirectPath);
       
-      // Armazenar explicitamente a sessão após login
-      if (authData?.session) {
-        console.log('[Login] Armazenando explicitamente a sessão...');
-        
-        try {
-          // Força a sessão a ser armazenada no cliente
-          const { error: setSessionError } = await supabase.auth.setSession({
-            access_token: authData.session.access_token,
-            refresh_token: authData.session.refresh_token
-          });
-          
-          if (setSessionError) {
-            console.error('[Login] Erro ao definir a sessão:', setSessionError.message);
-          } else {
-            console.log('[Login] Sessão definida com sucesso!');
-          }
-        } catch (sessionError) {
-          console.error('[Login] Exceção ao definir sessão:', sessionError instanceof Error ? sessionError.message : 'Erro desconhecido');
-        }
-        
-        // Verificar se a sessão foi armazenada corretamente
-        await logSessionDetails('Login-AfterSetSession');
-      } else {
-        console.warn('[Login] Nenhuma sessão retornada após login!');
-      }
-      
-      // Adicionar um pequeno delay para garantir que os cookies sejam definidos
-      console.log('[Login] Aguardando cookies serem processados antes de redirecionar...');
-      setTimeout(async () => {
-        await logSessionDetails('Login-BeforeRedirect');
-        console.log('[Login] Redirecionando para:', redirectPath);
-        router.push(redirectPath);
-      }, 1000); // Aumentado para 1 segundo para garantir mais tempo
     } catch (error) {
       console.error('[Login] Erro geral ao fazer login:', error);
-      if (error instanceof Error) {
-        setError(`Falha na autenticação: ${error.message}. Tente novamente mais tarde.`);
-      } else {
-        setError('Falha na autenticação. Tente novamente mais tarde.');
-      }
+      setError('Falha na autenticação. Tente novamente mais tarde.');
       setLoading(false);
     }
   };

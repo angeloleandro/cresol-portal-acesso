@@ -65,6 +65,10 @@ export default function UsersManagement() {
   const [resetPasswordSuccess, setResetPasswordSuccess] = useState<{userId: string, password: string} | null>(null);
   const [resetPasswordError, setResetPasswordError] = useState<string | null>(null);
 
+  const [sectors, setSectors] = useState<{ id: string, name: string }[]>([]);
+  const [userSectors, setUserSectors] = useState<Record<string, string[]>>({});
+  const [loadingSectors, setLoadingSectors] = useState(false);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -87,6 +91,7 @@ export default function UsersManagement() {
         setIsAdmin(true);
         fetchUsers();
         fetchWorkLocations();
+        fetchSectors();
       } else {
         // Redirecionar usuários não-admin para o dashboard
         router.replace('/dashboard');
@@ -156,6 +161,43 @@ export default function UsersManagement() {
       .order('name');
     
     if (!error && data) setWorkLocations(data);
+  };
+
+  const fetchSectors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sectors')
+        .select('id, name')
+        .order('name');
+      
+      if (error) throw error;
+      setSectors(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar setores:', error);
+    }
+  };
+
+  const fetchUserSectors = async (userId: string) => {
+    try {
+      setLoadingSectors(true);
+      const { data, error } = await supabase
+        .from('sector_admins')
+        .select('sector_id')
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      
+      // Armazenar os setores associados ao usuário
+      const sectorIds = data ? data.map(item => item.sector_id) : [];
+      setUserSectors({
+        ...userSectors,
+        [userId]: sectorIds
+      });
+    } catch (error) {
+      console.error('Erro ao buscar setores do usuário:', error);
+    } finally {
+      setLoadingSectors(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -303,8 +345,12 @@ export default function UsersManagement() {
           email: user.email,
           position: user.position || '',
           work_location_id: user.work_location_id || '',
+          role: user.role, // Adicionar a role para que possa ser usada nas condições de renderização
         },
       });
+      
+      // Buscar os setores administrados pelo usuário
+      fetchUserSectors(id);
     }
   };
 
@@ -421,13 +467,39 @@ export default function UsersManagement() {
       const { error: updateError } = await supabase
         .from('profiles')
         .update(updateData)
-        .eq('id', id);
+      .eq('id', id);
       
       if (updateError) {
         if (!handleAuthError(updateError.message)) {
           throw new Error(`Erro ao atualizar usuário: ${updateError.message}`);
         }
         return;
+      }
+      
+      // Atualizar os setores administrados pelo usuário
+      const existingSectors = userSectors[id] || [];
+      const selectedSectors = userSectors[id] || [];
+      
+      // Primeiro remover todos os setores deste usuário
+      await supabase
+        .from('sector_admins')
+        .delete()
+        .eq('user_id', id);
+      
+      // Depois adicionar os setores selecionados
+      if (selectedSectors.length > 0) {
+        const sectorInserts = selectedSectors.map(sectorId => ({
+          user_id: id,
+          sector_id: sectorId
+        }));
+        
+        const { error: insertError } = await supabase
+          .from('sector_admins')
+          .insert(sectorInserts);
+        
+        if (insertError) {
+          console.error('Erro ao atualizar setores administrados:', insertError);
+        }
       }
     
       // Limpar estados de avatar após salvar
@@ -449,9 +521,9 @@ export default function UsersManagement() {
         });
       }
       
-      setEditingUserId(null);
+    setEditingUserId(null);
       setEditingAvatar(null);
-      fetchUsers();
+    fetchUsers();
     } catch (error: unknown) {
       console.error('Erro ao salvar edição:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
@@ -505,10 +577,10 @@ export default function UsersManagement() {
       
       try {
         const directUpdateResult = await supabase
-          .from('profiles')
-          .update({ role: newRole })
-          .eq('id', userId);
-        
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
+      
         if (!directUpdateResult.error) {
           // Verificar se a atualização realmente aconteceu
           const { data: updatedProfile } = await supabase
@@ -732,6 +804,26 @@ export default function UsersManagement() {
       // Limpar mensagens de erro
       setFormError(null);
     }
+  };
+
+  const handleSectorChange = (userId: string, sectorId: string, isChecked: boolean) => {
+    setUserSectors(prev => {
+      const currentSectors = prev[userId] || [];
+      
+      if (isChecked) {
+        // Adicionar setor se não estiver já incluído
+        return {
+          ...prev,
+          [userId]: [...currentSectors, sectorId].filter((v, i, a) => a.indexOf(v) === i)
+        };
+      } else {
+        // Remover setor
+        return {
+          ...prev,
+          [userId]: currentSectors.filter(id => id !== sectorId)
+        };
+      }
+    });
   };
 
   const filteredUsers = users.filter(user => {
@@ -1230,7 +1322,7 @@ export default function UsersManagement() {
                       <div className="mb-4 flex justify-center">
                         <label className="cursor-pointer bg-white border border-cresol-gray-light px-3 py-2 rounded-md text-sm text-cresol-gray hover:bg-gray-50 transition-colors" htmlFor={`avatarUpload-${u.id}`}>
                           {isUploading && editingAvatar === u.id ? 'Carregando...' : 'Alterar foto'}
-                          <input
+                        <input
                             type="file"
                             id={`avatarUpload-${u.id}`}
                             className="hidden"
@@ -1270,10 +1362,10 @@ export default function UsersManagement() {
                           </label>
                           <input
                             id={`name-${u.id}`}
-                            type="text"
+                          type="text"
                             className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                            value={editData[u.id]?.full_name || ''}
-                            onChange={e => handleEditChange(u.id, 'full_name', e.target.value)}
+                          value={editData[u.id]?.full_name || ''}
+                          onChange={e => handleEditChange(u.id, 'full_name', e.target.value)}
                           />
                         </div>
                         
@@ -1281,12 +1373,12 @@ export default function UsersManagement() {
                           <label htmlFor={`email-${u.id}`} className="block text-sm font-medium text-cresol-gray mb-1">
                             E-mail
                           </label>
-                          <input
+                        <input
                             id={`email-${u.id}`}
-                            type="email"
+                          type="email"
                             className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                            value={editData[u.id]?.email || ''}
-                            onChange={e => handleEditChange(u.id, 'email', e.target.value)}
+                          value={editData[u.id]?.email || ''}
+                          onChange={e => handleEditChange(u.id, 'email', e.target.value)}
                           />
                         </div>
                         
@@ -1294,12 +1386,12 @@ export default function UsersManagement() {
                           <label htmlFor={`position-${u.id}`} className="block text-sm font-medium text-cresol-gray mb-1">
                             Cargo
                           </label>
-                          <input
+                        <input
                             id={`position-${u.id}`}
-                            type="text"
+                          type="text"
                             className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                            value={editData[u.id]?.position || ''}
-                            onChange={e => handleEditChange(u.id, 'position', e.target.value)}
+                          value={editData[u.id]?.position || ''}
+                          onChange={e => handleEditChange(u.id, 'position', e.target.value)}
                           />
                         </div>
                         
@@ -1307,18 +1399,65 @@ export default function UsersManagement() {
                           <label htmlFor={`location-${u.id}`} className="block text-sm font-medium text-cresol-gray mb-1">
                             Local de Atuação
                           </label>
-                          <select
+                        <select
                             id={`location-${u.id}`}
                             className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                            value={editData[u.id]?.work_location_id || ''}
-                            onChange={e => handleEditChange(u.id, 'work_location_id', e.target.value)}
-                          >
-                            <option value="">Selecione</option>
-                            {workLocations.map(loc => (
-                              <option key={loc.id} value={loc.id}>{loc.name}</option>
-                            ))}
-                          </select>
+                          value={editData[u.id]?.work_location_id || ''}
+                          onChange={e => handleEditChange(u.id, 'work_location_id', e.target.value)}
+                        >
+                          <option value="">Selecione</option>
+                          {workLocations.map(loc => (
+                            <option key={loc.id} value={loc.id}>{loc.name}</option>
+                          ))}
+                        </select>
                         </div>
+                        
+                        {/* Setores administrados - apenas para admins de setor */}
+                        {editData[u.id]?.role === 'sector_admin' && (
+                          <div className="border-t border-cresol-gray-light pt-4 mt-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <label className="block text-sm font-medium text-cresol-gray">
+                                Setores administrados
+                              </label>
+                            </div>
+                            
+                            {loadingSectors ? (
+                              <div className="text-center py-2">
+                                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary mx-auto"></div>
+                              </div>
+                            ) : (
+                              <div className="max-h-40 overflow-y-auto">
+                                {sectors.length === 0 ? (
+                                  <p className="text-sm text-cresol-gray">Nenhum setor disponível</p>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {sectors.map(sector => (
+                                      <div key={sector.id} className="flex items-center">
+                                        <input
+                                          type="checkbox"
+                                          id={`sector-${u.id}-${sector.id}`}
+                                          checked={userSectors[u.id]?.includes(sector.id) || false}
+                                          onChange={(e) => handleSectorChange(u.id, sector.id, e.target.checked)}
+                                          className="h-4 w-4 text-primary border-cresol-gray-light rounded focus:ring-primary"
+                                        />
+                                        <label 
+                                          htmlFor={`sector-${u.id}-${sector.id}`}
+                                          className="ml-2 text-sm text-cresol-gray"
+                                        >
+                                          {sector.name}
+                                        </label>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            <p className="text-xs text-cresol-gray mt-2">
+                              Selecione os setores que este administrador setorial irá gerenciar.
+                            </p>
+                          </div>
+                        )}
                         
                         {/* Redefinição de senha */}
                         <div className="border-t border-cresol-gray-light pt-4 mt-4">
@@ -1326,7 +1465,7 @@ export default function UsersManagement() {
                             <label className="block text-sm font-medium text-cresol-gray">
                               Senha
                             </label>
-                            <button
+                        <button
                               type="button"
                               onClick={() => handleResetPassword(u.id)}
                               className="text-xs text-primary hover:underline"

@@ -65,6 +65,17 @@ const ADMIN_CARDS: DashboardCard[] = [
     ),
     link: '/admin/work-locations',
   },
+  {
+    title: 'Banners',
+    description: 'Gerencie os banners iniciais do portal',
+    iconPath: (
+      <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      </svg>
+    ),
+    link: '/admin/banners',
+  },
 ];
 
 export default function AdminDashboard() {
