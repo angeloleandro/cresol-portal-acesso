@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { supabase } from '@/lib/supabase';export default function Login() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get('redirectedFrom') || '/dashboard';
+  const redirectPath = searchParams.get('redirectedFrom') || '/home';
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,8 +21,8 @@ import { supabase } from '@/lib/supabase';export default function Login() {
       
       const { data } = await supabase.auth.getSession();
       if (data.session) {
-        console.log('[Login] Usuário já autenticado, redirecionando para dashboard...');
-        router.push('/dashboard');
+              console.log('[Login] Usuário já autenticado, redirecionando para home...');
+      router.push('/home');
       } else {
         console.log('[Login] Nenhuma sessão encontrada, exibindo formulário de login.');
       }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import Footer from '../components/Footer';
 
 interface NewsItem {
   id: string;
@@ -164,7 +165,7 @@ export default function NoticiasPage() {
       <header className="bg-white border-b border-cresol-gray-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center">
-            <Link href="/dashboard" className="flex items-center">
+            <Link href="/home" className="flex items-center">
               <div className="relative h-10 w-24 mr-3">
                 <Image 
                   src="/logo-cresol.png" 
@@ -179,7 +180,7 @@ export default function NoticiasPage() {
           </div>
           
           <Link 
-            href="/dashboard" 
+            href="/home" 
             className="inline-flex items-center text-sm text-cresol-gray hover:text-primary"
           >
             <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -275,6 +276,8 @@ export default function NoticiasPage() {
           </div>
         )}
       </main>
+      
+      <Footer />
     </div>
   );
 } 

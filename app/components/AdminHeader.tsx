@@ -62,10 +62,10 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
             Locais
           </Link>
           <Link 
-            href="/dashboard" 
+            href="/home" 
             className="px-3 py-2 text-sm font-medium text-cresol-gray hover:text-primary rounded-md hover:bg-cresol-gray-light transition-colors"
           >
-            Dashboard
+            Home
           </Link>
           <div className="hidden md:block h-6 w-px bg-cresol-gray-light mx-1"></div>
           <div className="flex items-center">

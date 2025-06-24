@@ -43,10 +43,10 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(redirectUrl);
       }
     } else {
-      // Se estiver tentando acessar a página de login, redirecionar para o dashboard
+      // Se estiver tentando acessar a página de login, redirecionar para o home
       if (request.nextUrl.pathname === '/login') {
-        console.log('[Middleware] Redirecionando para dashboard (usuário já autenticado)');
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+        console.log('[Middleware] Redirecionando para home (usuário já autenticado)');
+        return NextResponse.redirect(new URL('/home', request.url));
       }
       
       // Se o usuário estiver autenticado, verificar seu papel
@@ -78,9 +78,9 @@ export async function middleware(request: NextRequest) {
             console.log('[Middleware] Redirecionando admin de setor para /admin-setor');
             return NextResponse.redirect(new URL('/admin-setor', request.url));
           } else {
-            // Se não for nem admin nem admin de setor, redirecionar para o dashboard
-            console.log('[Middleware] Redirecionando para dashboard (usuário sem permissões)');
-            return NextResponse.redirect(new URL('/dashboard', request.url));
+                    // Se não for nem admin nem admin de setor, redirecionar para o home
+        console.log('[Middleware] Redirecionando para home (usuário sem permissões)');
+        return NextResponse.redirect(new URL('/home', request.url));
           }
         } else {
           console.log('[Middleware] Usuário admin acessando área administrativa - permitido');
@@ -102,10 +102,10 @@ export async function middleware(request: NextRequest) {
         const role = profileData?.role;
         console.log(`[Middleware] Papel do usuário para admin-setor: ${role || 'desconhecido'}`);
         
-        // Se não for admin de setor nem admin geral, redirecionar para o dashboard
+        // Se não for admin de setor nem admin geral, redirecionar para o home
         if (role !== 'sector_admin' && role !== 'admin') {
-          console.log('[Middleware] Redirecionando para dashboard (não é admin de setor nem admin geral)');
-          return NextResponse.redirect(new URL('/dashboard', request.url));
+          console.log('[Middleware] Redirecionando para home (não é admin de setor nem admin geral)');
+          return NextResponse.redirect(new URL('/home', request.url));
         } else {
           console.log('[Middleware] Usuário tem permissão para acessar admin-setor');
         }

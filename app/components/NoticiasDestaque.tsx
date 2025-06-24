@@ -145,12 +145,13 @@ export default function NoticiasDestaque() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-primary">Últimas Notícias</h2>
+        <h2 className="text-xl font-medium component-title">Últimas Notícias</h2>
         <Link 
           href="/noticias" 
-          className="text-sm text-primary hover:underline flex items-center"
+          className="text-sm font-medium transition-colors flex items-center hover:shadow-sm px-3 py-1.5 rounded-md"
+          style={{ color: '#F38332' }}
         >
           Ver todas
           <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -160,8 +161,8 @@ export default function NoticiasDestaque() {
       </div>
       
       {featuredNews.length === 0 ? (
-        <div className="p-6 text-center">
-          <p className="text-cresol-gray">Nenhuma notícia em destaque disponível</p>
+        <div className="p-8 text-center">
+          <p className="text-gray-500">Nenhuma notícia em destaque disponível</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -170,7 +171,7 @@ export default function NoticiasDestaque() {
             <Link 
               key={news.id} 
               href={`/noticias/${news.id}`}
-              className="block bg-white border border-cresol-gray-light rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+              className="block bg-gray-50 border border-gray-100 rounded-lg overflow-hidden hover:shadow-md hover:border-gray-200 transition-all duration-200"
             >
               <div className="flex flex-col md:flex-row">
                 {news.image_url ? (
@@ -185,8 +186,8 @@ export default function NoticiasDestaque() {
                     />
                   </div>
                 ) : (
-                  <div className="md:w-1/3 h-56 md:h-auto bg-primary/5 flex items-center justify-center">
-                    <span className="text-primary font-medium">Cresol</span>
+                  <div className="md:w-1/3 h-56 md:h-auto bg-gray-100 flex items-center justify-center">
+                    <span className="font-medium" style={{ color: '#F38332' }}>Cresol</span>
                   </div>
                 )}
                 
@@ -194,17 +195,17 @@ export default function NoticiasDestaque() {
                   <div className="flex flex-col h-full">
                     <div className="mb-auto">
                       <div className="flex justify-between items-start mb-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white" style={{ backgroundColor: '#F38332' }}>
                           {news.category}
                         </span>
-                        <span className="text-xs text-cresol-gray">
+                        <span className="text-xs text-gray-500">
                           {formatDate(news.created_at)}
                         </span>
                       </div>
-                      <h3 className="text-xl font-semibold text-cresol-gray mb-3">{news.title}</h3>
-                      <p className="text-cresol-gray mb-4">{news.summary}</p>
+                      <h3 className="text-lg font-medium text-gray-900 mb-3 leading-tight">{news.title}</h3>
+                      <p className="text-gray-600 mb-4 text-sm leading-relaxed">{news.summary}</p>
                     </div>
-                    <div className="text-primary text-sm font-medium">
+                    <div className="text-sm font-medium" style={{ color: '#F38332' }}>
                       Leia mais →
                     </div>
                   </div>

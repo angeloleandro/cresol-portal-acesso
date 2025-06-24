@@ -226,12 +226,13 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
 
   // Versão normal (não compacta)
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-primary">Próximos Eventos</h2>
+        <h2 className="text-xl font-medium component-title">Próximos Eventos</h2>
         <Link 
           href="/eventos" 
-          className="text-sm text-primary hover:underline flex items-center"
+          className="text-sm font-medium transition-colors flex items-center hover:shadow-sm px-3 py-1.5 rounded-md"
+          style={{ color: '#F38332' }}
         >
           Ver todos
           <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -241,8 +242,8 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
       </div>
       
       {featuredEvents.length === 0 ? (
-        <div className="p-6 text-center">
-          <p className="text-cresol-gray">Nenhum evento programado disponível</p>
+        <div className="p-8 text-center">
+          <p className="text-gray-500">Nenhum evento programado disponível</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -250,11 +251,11 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
             <Link 
               key={event.id} 
               href={`/eventos/${event.id}`}
-              className="block bg-white border border-cresol-gray-light rounded-lg overflow-hidden hover:shadow-md transition-shadow p-4"
+                              className="block bg-gray-50 border border-gray-100 rounded-lg hover:shadow-md hover:border-gray-200 transition-all duration-200 p-4"
             >
               <div className="flex flex-col">
                 <div className="flex justify-between items-start mb-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white" style={{ backgroundColor: '#F38332' }}>
                     Evento
                   </span>
                   {event.is_featured && (
@@ -264,18 +265,18 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
                   )}
                 </div>
                 
-                <h3 className="text-lg font-semibold text-cresol-gray mb-2">{event.title}</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2 leading-tight">{event.title}</h3>
                 
-                <div className="text-sm text-cresol-gray mb-3">
+                <div className="text-sm text-gray-600 mb-3">
                   <div className="flex items-center mb-1">
-                    <svg className="h-4 w-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ color: '#F38332' }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span>{formatEventPeriod(event.start_date, event.end_date)}</span>
                   </div>
                   
                   <div className="flex items-center">
-                    <svg className="h-4 w-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ color: '#F38332' }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -283,9 +284,9 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
                   </div>
                 </div>
                 
-                <p className="text-cresol-gray mb-4 line-clamp-2">{event.description}</p>
+                <p className="text-gray-600 mb-4 line-clamp-2 text-sm leading-relaxed">{event.description}</p>
                 
-                <div className="text-primary text-sm font-medium mt-auto">
+                <div className="text-sm font-medium mt-auto" style={{ color: '#F38332' }}>
                   Ver detalhes →
                 </div>
               </div>

@@ -73,8 +73,8 @@ export default function SystemsManagement() {
           fetchSystems(sectorAdmin[0].sector_id);
           fetchSectors();
         } else {
-          // Redirecionar usuários regulares para o dashboard
-          router.replace('/dashboard');
+              // Redirecionar usuários regulares para o home
+    router.replace('/home');
         }
       }
     };

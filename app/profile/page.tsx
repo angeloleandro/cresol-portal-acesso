@@ -19,6 +19,8 @@ interface Profile {
 interface WorkLocation {
   id: string;
   name: string;
+  address?: string;
+  phone?: string;
 }
 
 export default function ProfilePage() {
@@ -96,7 +98,7 @@ export default function ProfilePage() {
     try {
       const { data, error } = await supabase
         .from('work_locations')
-        .select('id, name')
+        .select('id, name, address, phone')
         .order('name');
       
       if (error) {
@@ -311,7 +313,7 @@ export default function ProfilePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <button
-              onClick={() => router.push('/dashboard')}
+              onClick={() => router.push('/home')}
               className="flex items-center"
               type="button"
             >
@@ -329,14 +331,14 @@ export default function ProfilePage() {
           </div>
           
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/home')}
             className="inline-flex items-center text-sm text-cresol-gray hover:text-primary"
             type="button"
           >
             <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            Voltar para Dashboard
+            Voltar para Home
           </button>
         </div>
       </header>
@@ -479,9 +481,46 @@ export default function ProfilePage() {
               >
                 <option value="">Selecione o local</option>
                 {workLocations.map((loc) => (
-                  <option key={loc.id} value={loc.id}>{loc.name}</option>
+                  <option key={loc.id} value={loc.id}>
+                    {loc.name}{loc.address ? ` - ${loc.address.split('\n')[0]}` : ''}
+                  </option>
                 ))}
               </select>
+              
+              {/* Mostrar informações adicionais do local selecionado */}
+              {workLocationId && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-200">
+                  {(() => {
+                    const selectedLocation = workLocations.find(loc => loc.id === workLocationId);
+                    if (!selectedLocation) return null;
+                    
+                    return (
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <div className="font-medium text-gray-800">{selectedLocation.name}</div>
+                        {selectedLocation.address && (
+                          <div className="flex items-start">
+                            <svg className="w-4 h-4 text-gray-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>{selectedLocation.address}</span>
+                          </div>
+                        )}
+                        {selectedLocation.phone && (
+                          <div className="flex items-center">
+                            <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <a href={`tel:${selectedLocation.phone}`} className="text-primary hover:underline">
+                              {selectedLocation.phone}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
             
             {/* Tipo de conta (não editável) */}
@@ -503,7 +542,7 @@ export default function ProfilePage() {
             <div className="flex justify-end pt-4">
               <button
                 type="button"
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push('/home')}
                 className="px-4 py-2 border border-cresol-gray-light rounded-md text-cresol-gray mr-3 hover:bg-gray-50"
               >
                 Cancelar

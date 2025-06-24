@@ -5,6 +5,7 @@
 :root {
   --primary-color: #F58220; /* Laranja Cresol */
   --secondary-color: #005C46; /* Verde Cresol */
+  --title-color: #616160; /* Cor dos títulos - cinza escuro */
   --gray-medium: #727176;
   --gray-light: #D0D0CE;
 }
@@ -47,7 +48,18 @@ a {
 
 /* Cabeçalhos */
 h1, h2, h3, h4, h5, h6 {
-  @apply text-gray-800 font-semibold;
+  @apply font-semibold;
+  color: var(--title-color);
+}
+
+/* Classe para títulos dos componentes */
+.component-title {
+  color: var(--title-color);
+}
+
+/* Gradiente radial para o banner hero */
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
 }
 
 /* Badges/Tags */

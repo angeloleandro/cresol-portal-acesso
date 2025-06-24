@@ -1,45 +1,37 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function Home() {
+export default function RootPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuthAndRedirect = async () => {
+      const { data } = await supabase.auth.getUser();
+      
+      if (data.user) {
+        // Se estiver logado, redireciona para home
+        router.replace('/home');
+      } else {
+        // Se não estiver logado, redireciona para login
+        router.replace('/login');
+      }
+    };
+
+    checkAuthAndRedirect();
+  }, [router]);
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
-      <div className="card max-w-md w-full">
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative w-40 h-20 mb-4">
-            <Image 
-              src="/logo-cresol.png" 
-              alt="Logo Cresol" 
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 160px"
-              style={{ objectFit: 'contain' }}
-            />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">Portal de Acesso</h1>
-          <p className="text-gray-600 text-center mt-2">
-            Acesse os sistemas de informação empresarial da Cresol Fronteiras PR/SC/SP/ES
-          </p>
-        </div>
-        
-        <div className="space-y-4">
-          <Link 
-            href="/login" 
-            className="btn-primary w-full flex justify-center"
-          >
-            Entrar
-          </Link>
-          
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Novo usuário?{' '}
-              <Link href="/signup" className="text-primary hover:underline">
-                Solicitar acesso
-              </Link>
-            </p>
-          </div>
-        </div>
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-cresol-gray">Redirecionando...</p>
       </div>
     </div>
   );
 }
+

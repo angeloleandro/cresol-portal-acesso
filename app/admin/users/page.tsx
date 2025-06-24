@@ -93,8 +93,8 @@ export default function UsersManagement() {
         fetchWorkLocations();
         fetchSectors();
       } else {
-        // Redirecionar usuários não-admin para o dashboard
-        router.replace('/dashboard');
+            // Redirecionar usuários não-admin para o home
+    router.replace('/home');
       }
     };
 

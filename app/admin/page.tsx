@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
+import { LuUserPlus, LuUsers, LuBuilding2, LuAppWindow, LuMapPin, LuImage, LuLayoutPanelTop, LuVideo } from 'react-icons/lu';
 
 interface DashboardCard {
   title: string;
@@ -18,63 +18,44 @@ const ADMIN_CARDS: DashboardCard[] = [
   {
     title: 'Solicitações de Acesso',
     description: 'Aprovar ou rejeitar solicitações de acesso ao portal',
-    iconPath: (
-      <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-      </svg>
-    ),
+    iconPath: <LuUserPlus className="h-8 w-8 text-primary" />,
     link: '/admin/access-requests',
   },
   {
     title: 'Usuários',
     description: 'Gerenciar usuários e suas permissões',
-    iconPath: (
-      <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-      </svg>
-    ),
+    iconPath: <LuUsers className="h-8 w-8 text-primary" />,
     link: '/admin/users',
   },
   {
     title: 'Setores',
     description: 'Gerenciar setores e administradores setoriais',
-    iconPath: (
-      <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-      </svg>
-    ),
+    iconPath: <LuBuilding2 className="h-8 w-8 text-primary" />,
     link: '/admin/sectors',
   },
   {
     title: 'Sistemas',
     description: 'Configurar sistemas e aplicações disponíveis',
-    iconPath: (
-      <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-      </svg>
-    ),
+    iconPath: <LuAppWindow className="h-8 w-8 text-primary" />,
     link: '/admin/systems',
   },
   {
     title: 'Locais',
     description: 'Gerenciar locais de atuação disponíveis',
-    iconPath: (
-      <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 12.414a2 2 0 00-2.828 0l-4.243 4.243M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
+    iconPath: <LuMapPin className="h-8 w-8 text-primary" />,
     link: '/admin/work-locations',
   },
   {
     title: 'Banners',
     description: 'Gerencie os banners iniciais do portal',
-    iconPath: (
-      <svg className="w-6 h-6 stroke-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
-        <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.5" fill="none" />
-      </svg>
-    ),
+    iconPath: <LuLayoutPanelTop className="h-8 w-8 text-primary" />,
     link: '/admin/banners',
+  },
+  {
+    title: 'Vídeos',
+    description: 'Gerencie os vídeos exibidos no dashboard',
+    iconPath: <LuVideo className="h-8 w-8 text-primary" />,
+    link: '/admin/videos',
   },
 ];
 
@@ -144,27 +125,25 @@ export default function AdminDashboard() {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {ADMIN_CARDS.map((card) => (
+          {[...ADMIN_CARDS,
+            {
+              title: 'Galeria de Imagens',
+              description: 'Gerencie as imagens exibidas na galeria do portal',
+              iconPath: <LuImage className="h-8 w-8 text-primary" />,
+              link: '/admin/gallery',
+            }
+          ].map((card) => (
             <Link 
               key={card.title}
               href={card.link}
-              className="bg-white rounded-lg shadow-sm border border-cresol-gray-light overflow-hidden hover:shadow-md transition-all"
+              className="bg-white rounded-lg shadow p-6 flex flex-col items-start hover:shadow-md transition-all"
             >
-              <div className="p-6 flex flex-col">
-                <div className="mb-4 rounded-full w-12 h-12 bg-primary/10 flex items-center justify-center">
-                  {card.iconPath}
-                </div>
-                <h3 className="text-lg font-semibold text-cresol-gray mb-2">{card.title}</h3>
-                <p className="text-sm text-cresol-gray">{card.description}</p>
+              <div className="bg-primary/10 rounded-full p-3 mb-4">
+                {card.iconPath}
               </div>
-              <div className="bg-primary/5 px-6 py-3 border-t border-cresol-gray-light">
-                <span className="text-sm text-primary font-medium flex items-center">
-                  Acessar
-                  <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path>
-                  </svg>
-                </span>
-              </div>
+              <h3 className="text-lg font-semibold mb-1">{card.title}</h3>
+              <p className="text-cresol-gray mb-4">{card.description}</p>
+              <span className="mt-auto bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary-dark transition text-sm font-semibold">Acessar</span>
             </Link>
           ))}
         </div>

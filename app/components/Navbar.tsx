@@ -20,7 +20,8 @@ export default function Navbar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSectorAdmin, setIsSectorAdmin] = useState(false);
   const [sectors, setSectors] = useState<Sector[]>([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSectorsDropdownOpen, setIsSectorsDropdownOpen] = useState(false);
+  const [isGalleryDropdownOpen, setIsGalleryDropdownOpen] = useState(false);
   const [isAdminSectorDropdownOpen, setIsAdminSectorDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -35,7 +36,7 @@ export default function Navbar() {
       clearTimeout(dropdownTimeoutRef.current);
       dropdownTimeoutRef.current = null;
     }
-    setIsDropdownOpen(true);
+    setIsSectorsDropdownOpen(true);
   };
 
   // Função para fechar o dropdown com um pequeno delay
@@ -45,7 +46,7 @@ export default function Navbar() {
     }
     
     dropdownTimeoutRef.current = setTimeout(() => {
-      setIsDropdownOpen(false);
+      setIsSectorsDropdownOpen(false);
     }, 300); // 300ms de delay
   };
 
@@ -180,21 +181,35 @@ export default function Navbar() {
     router.replace('/login');
   };
 
+  // Handlers para setores
+  const handleOpenSectorsDropdown = () => setIsSectorsDropdownOpen(true);
+  const handleCloseSectorsDropdown = () => setIsSectorsDropdownOpen(false);
+
+  // Handlers para galeria
+  const handleOpenGalleryDropdown = () => setIsGalleryDropdownOpen(true);
+  const handleCloseGalleryDropdown = () => setIsGalleryDropdownOpen(false);
+
   return (
-    <header className="bg-white border-b border-cresol-gray-light">
+    <header className="bg-primary border-b border-primary-dark z-30 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center">
-          <Link href="/dashboard" className="flex items-center">
+          <Link href="/home" className="flex items-center">
             <div className="relative h-10 w-24 mr-3">
-              <Image 
-                src="/logo-cresol.png" 
-                alt="Logo Cresol" 
-                fill
-                sizes="(max-width: 768px) 100vw, 96px"
-                style={{ objectFit: 'contain' }}
-              />
+              <svg 
+                className="h-8 w-auto text-white"
+                viewBox="0 0 151.02 29.93"
+                fill="currentColor"
+              >
+                <path d="M27.49,14.96c0,6.91-5.62,12.53-12.53,12.53S2.43,21.87,2.43,14.96,8.06,2.43,14.96,2.43s12.53,5.62,12.53,12.53M29.93,14.96C29.93,6.71,23.22,0,14.96,0S0,6.71,0,14.96s6.71,14.96,14.96,14.96,14.96-6.71,14.96-14.96"/>
+                <path d="M22.25,15.72l-3.52,3.46-2.12-2.09.83-.82c1.36-1.49-.38-2.8-.38-2.8-.01,0-.02,0-.03-.01l-2.99,2.96-.18.18-2.62,2.58-3.52-3.46c-.48-.48-.49-1.25,0-1.73l3.52-3.47,2.12,2.09-.83.82c-1.36,1.49.38,2.8.38,2.8.01,0,.02,0,.03.01l5.79-5.73,3.52,3.46c.48.48.48,1.26,0,1.73M23.87,12.39l-4.94-4.87c-.1-.1-.31-.1-.41,0l-3.54,3.5-3.54-3.49c-.1-.1-.3-.1-.41,0l-4.94,4.87c-.67.66-1.04,1.54-1.04,2.47s.37,1.81,1.04,2.47l4.94,4.87c.1.1.3.11.41,0l3.54-3.5,3.54,3.49c.12.12.29.12.41,0l4.94-4.87c.67-.66,1.04-1.54,1.04-2.47s-.37-1.81-1.04-2.47"/>
+                <path d="M124.56,21.47c-3.2,0-5.2-2.51-5.2-6.56s1.94-6.5,5.2-6.5,5.16,2.43,5.16,6.5-1.98,6.56-5.16,6.56M124.56,4.89c-6.01,0-9.75,3.84-9.75,10.03s3.74,10.05,9.75,10.05,9.72-3.85,9.72-10.05-3.72-10.03-9.72-10.03"/>
+                <path d="M94.6,21.37h-10.75v-4.89h6.64c.7-.09,1.51-.38,1.51-1.24l.02-2.17h-8.18v-4.3h8.54c.89-.07,1.42-.76,1.64-1.23.27-.58.74-2.46.74-2.46,0,0-13.63,0-13.65,0-1,0-1.82.72-1.82,1.6v16.51c0,.88.82,1.6,1.82,1.6h11.8c.94-.07,1.68-.76,1.68-1.59,0-.03,0-1.82,0-1.82"/>
+                <path d="M149.36,24.8c.93-.07,1.64-.74,1.66-1.56v-1.85h-9.6V5.06h-4.56v19.73h12.5Z"/>
+                <path d="M98.77,24.05c2.65.77,4.32.92,6.17.92,3.67,0,8.05-.98,8.05-5.65,0-2.89-1.41-4.28-5.79-5.75l-2.66-.88c-1.75-.57-2.99-1.08-2.99-2.3s1.31-1.98,3.27-1.98c1.4,0,2.68.29,3.85.6l.61.17c.9.13,1.58-.25,2.01-1.14l.73-1.78-2.21-.66c-1.61-.48-3.29-.72-4.99-.72-4.92,0-7.86,2.06-7.86,5.51,0,2.85,1.39,4.22,5.73,5.66l2.66.9c1.42.48,3.05,1.19,3.05,2.36,0,2.15-2.6,2.15-3.46,2.15-1.5,0-2.95-.21-4.7-.69l-.85-.23c-.14-.03-.29-.04-.44-.04-.94,0-1.44.66-1.7,1.22l-.68,1.69,2.2.63h0Z"/>
+                <path d="M70.6,21.63l.7,1.52c.62,1.22,1.51,1.62,2.49,1.62h3.18s-2.29-4.65-2.35-4.8c-.63-1.22-1.78-2.94-2.63-3.28-.09-.04-.59-.23-.59-.23,0,0,.53-.22.64-.27,1.65-.65,3.57-2.44,3.57-5.03,0-3.71-2.81-6.06-7.7-6.06,0,0-7.13,0-7.17,0-.89,0-1.8.99-1.8,1.75v17.93h4.56V8.74h4.41c1.86,0,3.11,1.1,3.11,2.74,0,1.85-1.28,2.74-3.78,2.74-.79,0-1.18.15-1.47.47-.63.67-.69,1.96-.62,2.96,3.42.12,4.39,1.65,5.46,3.96"/>
+                <path d="M54.02,21.04s-2.16.44-3.61.44c-3.37,0-5.39-2.43-5.39-6.5v-.1c0-4.07,2.01-6.5,5.39-6.5,1.44,0,3.61.44,3.61.44.76.09,1.51-.24,1.91-1.08.21-.44.66-1.85.66-1.85l-1.54-.46c-1.47-.42-2.77-.58-4.64-.58-6.15,0-9.98,3.84-9.98,10.02v.1c0,6.18,3.82,10.02,9.98,10.02,1.87,0,3.17-.16,4.64-.58l1.54-.46s-.45-1.4-.66-1.85c-.4-.84-1.16-1.18-1.91-1.08"/>
+              </svg>
             </div>
-            <h1 className="text-xl font-semibold text-cresol-gray">Portal Cresol</h1>
           </Link>
         </div>
         
@@ -202,27 +217,27 @@ export default function Navbar() {
         <div className="hidden md:flex items-center space-x-4">
           <nav className="flex space-x-4 mr-4">
             <Link 
-              href="/dashboard" 
-              className={`text-sm font-medium ${pathname === '/dashboard' ? 'text-primary' : 'text-cresol-gray hover:text-primary'}`}
+              href="/home" 
+              className={`text-sm font-medium ${pathname === '/home' || pathname === '/dashboard' ? 'text-white' : 'text-white/80 hover:text-white'}`}
             >
-              Início
+              Home
             </Link>
             
             {/* Dropdown de Setores */}
             <div 
               className="relative"
-              onMouseEnter={handleOpenDropdown}
-              onMouseLeave={handleCloseDropdown}
+              onMouseEnter={handleOpenSectorsDropdown}
+              onMouseLeave={handleCloseSectorsDropdown}
             >
               <Link 
                 href="/setores" 
                 className={`text-sm font-medium flex items-center ${
-                  pathname.startsWith('/setores') ? 'text-primary' : 'text-cresol-gray hover:text-primary'
+                  pathname.startsWith('/setores') ? 'text-white' : 'text-white/80 hover:text-white'
                 }`}
               >
                 <span>Setores</span>
                 <svg 
-                  className={`ml-1 h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                  className={`ml-1 h-4 w-4 transition-transform ${isSectorsDropdownOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24" 
@@ -233,11 +248,11 @@ export default function Navbar() {
               </Link>
               
               {/* Dropdown menu */}
-              {isDropdownOpen && (
+              {isSectorsDropdownOpen && (
                 <div 
                   className="absolute left-0 mt-0 w-56 bg-white rounded-md shadow-lg py-1 z-10"
-                  onMouseEnter={handleOpenDropdown}
-                  onMouseLeave={handleCloseDropdown}
+                  onMouseEnter={handleOpenSectorsDropdown}
+                  onMouseLeave={handleCloseSectorsDropdown}
                 >
                   {/* Área "ponte" para evitar que o dropdown feche ao mover o mouse */}
                   <div className="absolute h-2 w-full -top-2 left-0" />
@@ -267,32 +282,68 @@ export default function Navbar() {
               )}
             </div>
             
-            <Link 
-              href="/galeria" 
-              className={`text-sm font-medium ${pathname === '/galeria' ? 'text-primary' : 'text-cresol-gray hover:text-primary'}`}
+            <div 
+              className="relative"
+              onMouseEnter={handleOpenGalleryDropdown}
+              onMouseLeave={handleCloseGalleryDropdown}
             >
-              Galeria
-            </Link>
+              <button
+                className={`text-sm font-medium flex items-center ${pathname.startsWith('/galeria') || pathname.startsWith('/videos') ? 'text-white' : 'text-white/80 hover:text-white'}`}
+                type="button"
+              >
+                <span>Galeria</span>
+                <svg 
+                  className={`ml-1 h-4 w-4 transition-transform ${isGalleryDropdownOpen ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {isGalleryDropdownOpen && (
+                <div 
+                  className="absolute left-0 mt-0 w-56 bg-white rounded-md shadow-lg py-1 z-10"
+                  onMouseEnter={handleOpenGalleryDropdown}
+                  onMouseLeave={handleCloseGalleryDropdown}
+                >
+                  <a 
+                    href="/galeria" 
+                    className="block px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white"
+                  >
+                    Galeria de Imagens
+                  </a>
+                  <a 
+                    href="/videos" 
+                    className="block px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white"
+                  >
+                    Galeria de Vídeos
+                  </a>
+                </div>
+              )}
+            </div>
+            
             <Link 
               href="/eventos?view=calendar" 
-              className={`text-sm font-medium ${pathname === '/eventos' && pathname.includes('view=calendar') ? 'text-primary' : 'text-cresol-gray hover:text-primary'}`}
+              className={`text-sm font-medium ${pathname === '/eventos' && pathname.includes('view=calendar') ? 'text-white' : 'text-white/80 hover:text-white'}`}
             >
               Calendário
             </Link>
             <Link 
               href="/sistemas" 
-              className={`text-sm font-medium ${pathname === '/sistemas' ? 'text-primary' : 'text-cresol-gray hover:text-primary'}`}
+              className={`text-sm font-medium ${pathname === '/sistemas' ? 'text-white' : 'text-white/80 hover:text-white'}`}
             >
               Sistemas
             </Link>
           </nav>
           
-          <div className="flex items-center border-l border-cresol-gray-light pl-4">
+          <div className="flex items-center border-l border-white/30 pl-4">
             {/* Opção de Admin ou Admin Setor */}
             {isAdmin && (
               <Link
                 href="/admin"
-                className="text-sm text-cresol-gray mr-4 hover:text-primary"
+                className="text-sm text-white/80 mr-4 hover:text-white"
               >
                 Painel Admin
               </Link>
@@ -306,7 +357,7 @@ export default function Navbar() {
               >
                 <Link
                   href="/admin-setor"
-                  className="text-sm text-cresol-gray hover:text-primary flex items-center"
+                  className="text-sm text-white/80 hover:text-white flex items-center"
                 >
                   <span>Painel Admin Setor</span>
                   <svg 
@@ -362,7 +413,7 @@ export default function Navbar() {
               onMouseEnter={handleOpenUserMenu}
               onMouseLeave={handleCloseUserMenu}
             >
-              <button className="flex items-center text-sm text-cresol-gray hover:text-primary" type="button">
+              <button className="flex items-center text-sm text-white/80 hover:text-white" type="button">
                 <span className="mr-2">
                   {user?.user_metadata?.full_name || user?.email || 'Usuário'}
                 </span>
@@ -404,7 +455,7 @@ export default function Navbar() {
           {isAdmin && (
             <Link
               href="/admin"
-              className="text-sm text-cresol-gray hover:text-primary"
+              className="text-sm text-white/80 hover:text-white"
             >
               Admin
             </Link>
@@ -413,7 +464,7 @@ export default function Navbar() {
           {isSectorAdmin && (
             <Link
               href="/admin-setor"
-              className="text-sm text-cresol-gray hover:text-primary"
+              className="text-sm text-white/80 hover:text-white"
             >
               Admin Setor
             </Link>
@@ -421,7 +472,7 @@ export default function Navbar() {
           
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="text-cresol-gray hover:text-primary"
+            className="text-white/80 hover:text-white"
             type="button"
           >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -436,12 +487,12 @@ export default function Navbar() {
       
       {/* Menu mobile expandido */}
       {isMobileMenuOpen && (
-        <div className="md:hidden px-4 py-2 pb-4 bg-white border-t border-cresol-gray-light">
+        <div className="md:hidden px-4 py-2 pb-4 bg-primary border-t border-primary-dark">
           <Link 
-            href="/dashboard" 
-            className={`block py-2 text-sm font-medium ${pathname === '/dashboard' ? 'text-primary' : 'text-cresol-gray'}`}
+            href="/home" 
+            className={`block py-2 text-sm font-medium ${pathname === '/home' || pathname === '/dashboard' ? 'text-white' : 'text-white/80'}`}
           >
-            Início
+            Home
           </Link>
           
           <div>
@@ -451,7 +502,7 @@ export default function Navbar() {
             >
               <Link 
                 href="/setores" 
-                className={`text-sm font-medium ${pathname.startsWith('/setores') ? 'text-primary' : 'text-cresol-gray'}`}
+                className={`text-sm font-medium ${pathname.startsWith('/setores') ? 'text-white' : 'text-white/80'}`}
                 onClick={(e) => {
                   if (sectors.length > 0) {
                     e.preventDefault(); // Não navegar se houver setores
@@ -462,7 +513,7 @@ export default function Navbar() {
               </Link>
               {sectors.length > 0 && (
                 <svg 
-                  className={`h-4 w-4 transition-transform ${isMobileSectorsOpen ? 'rotate-180' : ''}`} 
+                  className={`h-4 w-4 transition-transform text-white/80 ${isMobileSectorsOpen ? 'rotate-180' : ''}`} 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24" 
@@ -474,12 +525,12 @@ export default function Navbar() {
             </div>
             
             {isMobileSectorsOpen && sectors.length > 0 && (
-              <div className="pl-4 border-l border-cresol-gray-light ml-2 mt-1">
+              <div className="pl-4 border-l border-white/30 ml-2 mt-1">
                 {sectors.map((sector) => (
                   <Link 
                     key={sector.id} 
                     href={`/setores/${sector.id}`}
-                    className="block py-1 text-sm text-cresol-gray"
+                    className="block py-1 text-sm text-white/80"
                   >
                     {sector.name}
                   </Link>
@@ -490,36 +541,36 @@ export default function Navbar() {
           
           <Link 
             href="/galeria" 
-            className={`block py-2 text-sm font-medium ${pathname === '/galeria' ? 'text-primary' : 'text-cresol-gray'}`}
+            className={`block py-2 text-sm font-medium ${pathname === '/galeria' ? 'text-white' : 'text-white/80'}`}
           >
             Galeria
           </Link>
           <Link 
             href="/eventos?view=calendar" 
-            className={`block py-2 text-sm font-medium ${pathname === '/eventos' && pathname.includes('view=calendar') ? 'text-primary' : 'text-cresol-gray'}`}
+            className={`block py-2 text-sm font-medium ${pathname === '/eventos' && pathname.includes('view=calendar') ? 'text-white' : 'text-white/80'}`}
           >
             Calendário
           </Link>
           <Link 
             href="/sistemas" 
-            className={`block py-2 text-sm font-medium ${pathname === '/sistemas' ? 'text-primary' : 'text-cresol-gray'}`}
+            className={`block py-2 text-sm font-medium ${pathname === '/sistemas' ? 'text-white' : 'text-white/80'}`}
           >
             Sistemas
           </Link>
           
-          <div className="mt-4 pt-4 border-t border-cresol-gray-light">
-            <div className="flex items-center justify-between text-sm text-cresol-gray mb-2">
+          <div className="mt-4 pt-4 border-t border-white/30">
+            <div className="flex items-center justify-between text-sm text-white/80 mb-2">
               <span>{user?.user_metadata?.full_name || user?.email || 'Usuário'}</span>
             </div>
             <Link
               href="/profile"
-              className="block w-full text-left py-2 text-sm text-cresol-gray hover:text-primary"
+              className="block w-full text-left py-2 text-sm text-white/80 hover:text-white"
             >
               Perfil
             </Link>
             <button 
               onClick={handleLogout}
-              className="block w-full text-left py-2 text-sm text-red-500 hover:text-red-700"
+              className="block w-full text-left py-2 text-sm text-red-200 hover:text-red-100"
               type="button"
             >
               Sair
