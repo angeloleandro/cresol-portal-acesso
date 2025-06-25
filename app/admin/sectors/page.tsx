@@ -2,14 +2,24 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import AdminHeader from '@/app/components/AdminHeader';
+import { LuBuilding2, LuPlus, LuPencil, LuTrash2, LuUsers, LuBuilding, LuFolder, LuFolderPlus, LuSettings, LuExternalLink } from 'react-icons/lu';
 
 interface Sector {
   id: string;
   name: string;
   description: string;
+  created_at: string;
+}
+
+interface Subsector {
+  id: string;
+  name: string;
+  description: string;
+  sector_id: string;
+  sector_name?: string;
   created_at: string;
 }
 
@@ -28,12 +38,19 @@ export default function SectorsManagement() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sectors, setSectors] = useState<Sector[]>([]);
+  const [subsectors, setSubsectors] = useState<Subsector[]>([]);
   const [sectorAdmins, setSectorAdmins] = useState<SectorAdmin[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [newSector, setNewSector] = useState({ name: '', description: '' });
+  const [activeTab, setActiveTab] = useState<'sectors' | 'subsectors'>('sectors');
+  
+  // Estados para modals
+  const [showSectorModal, setShowSectorModal] = useState(false);
+  const [showSubsectorModal, setShowSubsectorModal] = useState(false);
   const [editingSector, setEditingSector] = useState<Sector | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingSubsector, setEditingSubsector] = useState<Subsector | null>(null);
+  
+  // Estados para formulários
+  const [sectorForm, setSectorForm] = useState({ name: '', description: '' });
+  const [subsectorForm, setSubsectorForm] = useState({ name: '', description: '', sector_id: '' });
 
   useEffect(() => {
     const checkUser = async () => {
@@ -44,43 +61,60 @@ export default function SectorsManagement() {
         return;
       }
 
-      setUser(userData.user);
-
-      // Verificar se o usuário é admin
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', userData.user.id)
         .single();
 
-      if (profile?.role === 'admin') {
-        setIsAdmin(true);
-        fetchSectors();
-        fetchSectorAdmins();
-      } else {
-        // Redirecionar usuários não-admin para o dashboard
-        router.replace('/dashboard');
+      if (profile?.role !== 'admin') {
+        router.replace('/home');
+        return;
       }
+
+      setUser(userData.user);
+      await Promise.all([
+        fetchSectors(),
+        fetchSubsectors(),
+        fetchSectorAdmins()
+      ]);
+      setLoading(false);
     };
 
     checkUser();
   }, [router]);
 
   const fetchSectors = async () => {
-    setLoading(true);
-    
     const { data, error } = await supabase
       .from('sectors')
       .select('*')
-      .order('name', { ascending: true });
+      .order('name');
     
     if (error) {
       console.error('Erro ao buscar setores:', error);
     } else {
       setSectors(data || []);
     }
+  };
+
+  const fetchSubsectors = async () => {
+    const { data, error } = await supabase
+      .from('subsectors')
+      .select(`
+        *,
+        sectors(name)
+      `)
+      .order('name');
     
-    setLoading(false);
+    if (error) {
+      console.error('Erro ao buscar sub-setores:', error);
+    } else {
+      const formattedData = (data || []).map(subsector => ({
+        ...subsector,
+        sector_name: subsector.sectors?.name || 'Setor não encontrado'
+      }));
+      setSubsectors(formattedData);
+    }
   };
 
   const fetchSectorAdmins = async () => {
@@ -90,371 +124,602 @@ export default function SectorsManagement() {
         id,
         user_id,
         sector_id,
-        profiles:profiles(full_name, email)
+        profiles(full_name, email)
       `);
     
     if (error) {
       console.error('Erro ao buscar administradores de setor:', error);
     } else {
-      // O Supabase retorna 'profiles' como um array mesmo para relações one-to-one/many-to-one via select aninhado.
-      // Precisamos transformar os dados para que 'profiles' seja um objeto, como esperado pelo tipo SectorAdmin.
       const formattedData = (data || []).map(admin => ({
         ...admin,
-        // Pega o primeiro perfil do array (se existir) ou usa um objeto padrão.
-        // Garante que full_name e email sejam strings.
         profiles: admin.profiles && Array.isArray(admin.profiles) && admin.profiles.length > 0
           ? {
               full_name: String(admin.profiles[0].full_name || ''),
               email: String(admin.profiles[0].email || '')
             }
-          : { full_name: '', email: '' } // Objeto padrão se profiles for nulo, não for array ou estiver vazio
+          : { full_name: '', email: '' }
       }));
-      // O tipo explícito aqui pode ajudar o TypeScript, mas a transformação acima é a chave.
       setSectorAdmins(formattedData as SectorAdmin[]);
     }
   };
 
-  const handleAddSector = async (e: React.FormEvent) => {
+  const handleSectorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newSector.name) return;
-    
-    try {
-      // Adicionar o setor ao banco de dados
-      const { data, error } = await supabase
-        .from('sectors')
-        .insert([
-          { 
-            name: newSector.name,
-            description: newSector.description
-          }
-        ])
-        .select(); // Retorna os dados inseridos
-      
-      if (error) throw error;
-      
-      // Configurar as políticas de acesso para este setor 
-      // (todos os usuários poderão visualizar o setor na interface pública)
-      // Essas políticas já devem estar configuradas no Supabase a nível de tabela
-      
-      setNewSector({ name: '', description: '' });
-      setIsAddModalOpen(false);
-      fetchSectors();
-      
-      // Exibir mensagem de sucesso
-      alert(`Setor "${newSector.name}" adicionado com sucesso! Agora está disponível na interface pública.`);
-    } catch (error) {
-      console.error('Erro ao adicionar setor:', error);
-      alert('Ocorreu um erro ao adicionar o setor.');
-    }
-  };
-
-  const handleEditSector = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!editingSector || !editingSector.name) return;
-    
-    try {
-      await supabase
-        .from('sectors')
-        .update({ 
-          name: editingSector.name,
-          description: editingSector.description,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingSector.id);
-      
-      setIsEditModalOpen(false);
-      fetchSectors();
-    } catch (error) {
-      console.error('Erro ao editar setor:', error);
-    }
-  };
-
-  const handleDeleteSector = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este setor? Esta ação não pode ser desfeita.')) {
+    if (!sectorForm.name.trim()) {
+      alert('Nome do setor é obrigatório');
       return;
     }
     
     try {
-      // Primeiro remover relações com administradores de setor
-      await supabase
-        .from('sector_admins')
-        .delete()
-        .eq('sector_id', id);
+      if (editingSector) {
+        // Editar setor
+        const { error } = await supabase
+          .from('sectors')
+          .update({
+            name: sectorForm.name.trim(),
+            description: sectorForm.description.trim()
+          })
+          .eq('id', editingSector.id);
+        
+        if (error) throw error;
+        alert('Setor atualizado com sucesso!');
+      } else {
+        // Criar setor
+        const { error } = await supabase
+          .from('sectors')
+          .insert([{
+            name: sectorForm.name.trim(),
+            description: sectorForm.description.trim()
+          }]);
+        
+        if (error) throw error;
+        alert('Setor criado com sucesso!');
+      }
       
-      // Depois remover o setor
-      await supabase
-        .from('sectors')
-        .delete()
-        .eq('id', id);
+      resetSectorForm();
+      fetchSectors();
+    } catch (error) {
+      console.error('Erro ao salvar setor:', error);
+      alert('Erro ao salvar setor. Tente novamente.');
+    }
+  };
+
+  const handleSubsectorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!subsectorForm.name.trim() || !subsectorForm.sector_id) {
+      alert('Nome do sub-setor e setor são obrigatórios');
+      return;
+    }
+    
+    try {
+      if (editingSubsector) {
+        // Editar sub-setor
+        const { error } = await supabase
+          .from('subsectors')
+          .update({
+            name: subsectorForm.name.trim(),
+            description: subsectorForm.description.trim(),
+            sector_id: subsectorForm.sector_id
+          })
+          .eq('id', editingSubsector.id);
+        
+        if (error) throw error;
+        alert('Sub-setor atualizado com sucesso!');
+      } else {
+        // Criar sub-setor
+        const { error } = await supabase
+          .from('subsectors')
+          .insert([{
+            name: subsectorForm.name.trim(),
+            description: subsectorForm.description.trim(),
+            sector_id: subsectorForm.sector_id
+          }]);
+        
+        if (error) throw error;
+        alert('Sub-setor criado com sucesso!');
+      }
       
+      resetSubsectorForm();
+      fetchSubsectors();
+    } catch (error) {
+      console.error('Erro ao salvar sub-setor:', error);
+      alert('Erro ao salvar sub-setor. Tente novamente.');
+    }
+  };
+
+  const handleDeleteSector = async (sector: Sector) => {
+    const relatedSubsectors = subsectors.filter(s => s.sector_id === sector.id);
+    
+    if (relatedSubsectors.length > 0) {
+      alert(`Não é possível excluir este setor. Há ${relatedSubsectors.length} sub-setor(es) vinculado(s) a ele.`);
+      return;
+    }
+    
+    if (!confirm(`Tem certeza que deseja excluir o setor "${sector.name}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    
+    try {
+      await supabase.from('sector_admins').delete().eq('sector_id', sector.id);
+      await supabase.from('sectors').delete().eq('id', sector.id);
+      
+      alert('Setor excluído com sucesso!');
       fetchSectors();
       fetchSectorAdmins();
     } catch (error) {
       console.error('Erro ao excluir setor:', error);
+      alert('Erro ao excluir setor. Tente novamente.');
     }
   };
 
-  const removeSectorAdmin = async (sectorAdminId: string) => {
+  const handleDeleteSubsector = async (subsector: Subsector) => {
+    if (!confirm(`Tem certeza que deseja excluir o sub-setor "${subsector.name}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    
     try {
-      await supabase
-        .from('sector_admins')
-        .delete()
-        .eq('id', sectorAdminId);
+      await supabase.from('subsector_admins').delete().eq('subsector_id', subsector.id);
+      await supabase.from('subsectors').delete().eq('id', subsector.id);
       
-      fetchSectorAdmins();
+      alert('Sub-setor excluído com sucesso!');
+      fetchSubsectors();
     } catch (error) {
-      console.error('Erro ao remover administrador de setor:', error);
+      console.error('Erro ao excluir sub-setor:', error);
+      alert('Erro ao excluir sub-setor. Tente novamente.');
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.replace('/login');
+  const resetSectorForm = () => {
+    setSectorForm({ name: '', description: '' });
+    setEditingSector(null);
+    setShowSectorModal(false);
   };
 
-  if (loading && sectors.length === 0) {
+  const resetSubsectorForm = () => {
+    setSubsectorForm({ name: '', description: '', sector_id: '' });
+    setEditingSubsector(null);
+    setShowSubsectorModal(false);
+  };
+
+  const openEditSector = (sector: Sector) => {
+    setSectorForm({ name: sector.name, description: sector.description });
+    setEditingSector(sector);
+    setShowSectorModal(true);
+  };
+
+  const openEditSubsector = (subsector: Subsector) => {
+    setSubsectorForm({ 
+      name: subsector.name, 
+      description: subsector.description, 
+      sector_id: subsector.sector_id 
+    });
+    setEditingSubsector(subsector);
+    setShowSubsectorModal(true);
+  };
+
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto" />
+          <p className="mt-4 text-cresol-gray">Carregando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="relative h-10 w-24 mr-4">
-              <Image 
-                src="/logo-cresol.png" 
-                alt="Logo Cresol" 
-                fill
-                style={{ objectFit: 'contain' }}
-              />
-            </div>
-            <h1 className="text-xl font-semibold text-gray-800">Painel Administrativo</h1>
-          </div>
-          
-          <div className="flex items-center">
-            <Link href="/admin" className="text-sm text-gray-600 mr-4 hover:text-primary">
-              Painel Admin
-            </Link>
-            <Link href="/dashboard" className="text-sm text-gray-600 mr-4 hover:text-primary">
-              Dashboard
-            </Link>
-            <span className="text-sm text-gray-600 mr-4">
-              Olá, {user?.user_metadata?.full_name || user?.email}
-            </span>
-            <button 
-              onClick={handleLogout}
-              className="text-sm text-primary hover:text-primary-dark"
-            >
-              Sair
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-cresol-gray-light/30">
+      <AdminHeader user={user} />
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Gerenciamento de Setores</h2>
-            <p className="text-gray-600">Gerencie os setores da Cresol e seus administradores.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-primary flex items-center">
+                <LuBuilding2 className="mr-3 h-8 w-8" />
+                Gerenciamento de Setores
+              </h2>
+              <p className="text-cresol-gray mt-2">
+                Gerencie os setores da Cresol e seus sub-setores
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowSectorModal(true)}
+                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+              >
+                <LuPlus className="h-4 w-4" />
+                Novo Setor
+              </button>
+              <button
+                onClick={() => setShowSubsectorModal(true)}
+                className="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary-dark transition-colors flex items-center gap-2"
+              >
+                <LuFolderPlus className="h-4 w-4" />
+                Novo Sub-setor
+              </button>
+            </div>
           </div>
-          
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="btn-primary"
-          >
-            Adicionar Setor
-          </button>
         </div>
-        
-        {sectors.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <p className="text-gray-600">Nenhum setor cadastrado. Adicione o primeiro setor clicando no botão acima.</p>
+
+        {/* Tabs */}
+        <div className="mb-6">
+          <div className="border-b border-cresol-gray-light">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('sectors')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'sectors'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray'
+                }`}
+              >
+                <LuBuilding className="inline mr-2 h-4 w-4" />
+                Setores ({sectors.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('subsectors')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'subsectors'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray'
+                }`}
+              >
+                <LuFolder className="inline mr-2 h-4 w-4" />
+                Sub-setores ({subsectors.length})
+              </button>
+            </nav>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sectors.map((sector) => {
-              // Filtrar administradores deste setor
+        </div>
+
+        {/* Content */}
+        {activeTab === 'sectors' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {sectors.map(sector => {
+              const sectorSubsectors = subsectors.filter(s => s.sector_id === sector.id);
               const admins = sectorAdmins.filter(admin => admin.sector_id === sector.id);
               
               return (
-                <div key={sector.id} className="bg-white rounded-lg shadow-md p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800">{sector.name}</h3>
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => {
-                          setEditingSector(sector);
-                          setIsEditModalOpen(true);
-                        }}
-                        className="text-gray-500 hover:text-primary"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteSector(sector.id)}
-                        className="text-gray-500 hover:text-red-600"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                <div key={sector.id} className="bg-white rounded-xl shadow-sm border border-cresol-gray-light hover:shadow-md transition-all">
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-cresol-gray-dark mb-1">
+                          {sector.name}
+                        </h3>
+                        {sector.description && (
+                          <p className="text-sm text-cresol-gray line-clamp-2">
+                            {sector.description}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="flex gap-2 ml-4">
+                        <Link
+                          href={`/admin/sectors/${sector.id}`}
+                          className="p-2 text-cresol-gray hover:text-secondary hover:bg-secondary/10 rounded-lg transition-colors"
+                          title="Gerenciar conteúdo do setor"
+                        >
+                          <LuSettings className="h-4 w-4" />
+                        </Link>
+                        <button
+                          onClick={() => openEditSector(sector)}
+                          className="p-2 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          title="Editar setor"
+                        >
+                          <LuPencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSector(sector)}
+                          className="p-2 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Excluir setor"
+                        >
+                          <LuTrash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <p className="text-gray-600 mb-4">{sector.description || 'Sem descrição'}</p>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Administradores do Setor:</h4>
-                    {admins.length === 0 ? (
-                      <p className="text-sm text-gray-500">Nenhum administrador atribuído</p>
-                    ) : (
-                      <ul className="space-y-2">
-                        {admins.map((admin) => (
-                          <li key={admin.id} className="flex justify-between items-center text-sm">
-                            <span>{admin.profiles.full_name || admin.profiles.email}</span>
-                            <button
-                              onClick={() => removeSectorAdmin(admin.id)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              Remover
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <Link 
-                      href={`/admin/sectors/${sector.id}`}
-                      className="text-primary hover:text-primary-dark text-sm font-medium inline-block mr-4"
-                    >
-                      Gerenciar conteúdo do setor →
-                    </Link>
-                    <Link 
-                      href={`/admin/sectors/${sector.id}/systems`}
-                      className="text-primary hover:text-primary-dark text-sm font-medium inline-block"
-                    >
-                      Gerenciar sistemas →
-                    </Link>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-cresol-gray">Sub-setores:</span>
+                        <span className="font-medium text-primary">{sectorSubsectors.length}</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-cresol-gray">Administradores:</span>
+                        <span className="font-medium text-secondary">{admins.length}</span>
+                      </div>
+                      
+                      {sectorSubsectors.length > 0 && (
+                        <div className="pt-3 border-t border-cresol-gray-light">
+                          <p className="text-xs text-cresol-gray mb-2">Sub-setores:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {sectorSubsectors.slice(0, 3).map(sub => (
+                              <span key={sub.id} className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                                {sub.name}
+                              </span>
+                            ))}
+                            {sectorSubsectors.length > 3 && (
+                              <span className="inline-block px-2 py-1 bg-cresol-gray-light text-cresol-gray text-xs rounded-full">
+                                +{sectorSubsectors.length - 3} mais
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Ações do Setor */}
+                      <div className="pt-3 border-t border-cresol-gray-light">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/sectors/${sector.id}`}
+                            className="flex-1 text-center px-3 py-2 bg-secondary/10 text-secondary text-xs font-medium rounded-lg hover:bg-secondary/20 transition-colors"
+                          >
+                            Gerenciar Conteúdo
+                          </Link>
+                          <Link
+                            href={`/admin/sectors/${sector.id}/systems`}
+                            className="flex-1 text-center px-3 py-2 bg-primary/10 text-primary text-xs font-medium rounded-lg hover:bg-primary/20 transition-colors"
+                          >
+                            Sistemas
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
         )}
+
+        {activeTab === 'subsectors' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {subsectors.map(subsector => (
+              <div key={subsector.id} className="bg-white rounded-xl shadow-sm border border-cresol-gray-light hover:shadow-md transition-all">
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-cresol-gray-dark mb-1">
+                        {subsector.name}
+                      </h3>
+                      <p className="text-sm text-primary font-medium mb-2">
+                        {subsector.sector_name}
+                      </p>
+                      {subsector.description && (
+                        <p className="text-sm text-cresol-gray line-clamp-2">
+                          {subsector.description}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="flex gap-2 ml-4">
+                      <Link
+                        href={`/admin-subsetor/subsetores/${subsector.id}`}
+                        className="p-2 text-cresol-gray hover:text-secondary hover:bg-secondary/10 rounded-lg transition-colors"
+                        title="Gerenciar sub-setor"
+                      >
+                        <LuSettings className="h-4 w-4" />
+                      </Link>
+                      <button
+                        onClick={() => openEditSubsector(subsector)}
+                        className="p-2 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                        title="Editar sub-setor"
+                      >
+                        <LuPencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSubsector(subsector)}
+                        className="p-2 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Excluir sub-setor"
+                      >
+                        <LuTrash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="pt-3 border-t border-cresol-gray-light">
+                      <p className="text-xs text-cresol-gray mb-2">
+                        Criado em {new Date(subsector.created_at).toLocaleDateString('pt-BR')}
+                      </p>
+                      
+                      {/* Ações do Sub-setor */}
+                      <div className="flex gap-2 mt-3">
+                        <Link
+                          href={`/admin-subsetor/subsetores/${subsector.id}`}
+                          className="flex-1 text-center px-3 py-2 bg-secondary/10 text-secondary text-xs font-medium rounded-lg hover:bg-secondary/20 transition-colors"
+                        >
+                          Gerenciar Conteúdo
+                        </Link>
+                        <Link
+                          href={`/subsetores/${subsector.id}/equipe`}
+                          className="flex-1 text-center px-3 py-2 bg-primary/10 text-primary text-xs font-medium rounded-lg hover:bg-primary/20 transition-colors flex items-center justify-center gap-1"
+                        >
+                          <LuUsers className="h-3 w-3" />
+                          Equipe
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty States */}
+        {activeTab === 'sectors' && sectors.length === 0 && (
+          <div className="text-center py-12">
+            <LuBuilding className="mx-auto h-12 w-12 text-cresol-gray" />
+            <h3 className="mt-4 text-lg font-medium text-cresol-gray-dark">Nenhum setor cadastrado</h3>
+            <p className="mt-2 text-cresol-gray">Comece criando o primeiro setor da organização.</p>
+            <button
+              onClick={() => setShowSectorModal(true)}
+              className="mt-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"
+            >
+              Criar Primeiro Setor
+            </button>
+          </div>
+        )}
+
+        {activeTab === 'subsectors' && subsectors.length === 0 && (
+          <div className="text-center py-12">
+            <LuFolder className="mx-auto h-12 w-12 text-cresol-gray" />
+            <h3 className="mt-4 text-lg font-medium text-cresol-gray-dark">Nenhum sub-setor cadastrado</h3>
+            <p className="mt-2 text-cresol-gray">
+              {sectors.length === 0 
+                ? 'Primeiro crie um setor, depois adicione sub-setores a ele.'
+                : 'Comece criando o primeiro sub-setor.'}
+            </p>
+            {sectors.length > 0 && (
+              <button
+                onClick={() => setShowSubsectorModal(true)}
+                className="mt-4 bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary-dark transition-colors"
+              >
+                Criar Primeiro Sub-setor
+              </button>
+            )}
+          </div>
+        )}
       </main>
 
-      {/* Modal Adicionar Setor */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Adicionar Novo Setor</h3>
-            
-            <form onSubmit={handleAddSector}>
-              <div className="mb-4">
-                <label htmlFor="name" className="form-label">Nome do Setor</label>
-                <input
-                  id="name"
-                  type="text"
-                  value={newSector.name}
-                  onChange={(e) => setNewSector({...newSector, name: e.target.value})}
-                  className="input"
-                  required
-                />
-              </div>
+      {/* Modal Setor */}
+      {showSectorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-cresol-gray-dark mb-4">
+                {editingSector ? 'Editar Setor' : 'Novo Setor'}
+              </h3>
               
-              <div className="mb-6">
-                <label htmlFor="description" className="form-label">Descrição</label>
-                <textarea
-                  id="description"
-                  value={newSector.description}
-                  onChange={(e) => setNewSector({...newSector, description: e.target.value})}
-                  className="input"
-                  rows={3}
-                />
-              </div>
-              
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                >
-                  Adicionar
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleSectorSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-cresol-gray-dark mb-2">
+                    Nome do Setor *
+                  </label>
+                  <input
+                    type="text"
+                    value={sectorForm.name}
+                    onChange={(e) => setSectorForm({ ...sectorForm, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-cresol-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    placeholder="Ex: Tecnologia da Informação"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-cresol-gray-dark mb-2">
+                    Descrição
+                  </label>
+                  <textarea
+                    value={sectorForm.description}
+                    onChange={(e) => setSectorForm({ ...sectorForm, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-cresol-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    placeholder="Descrição opcional do setor..."
+                    rows={3}
+                  />
+                </div>
+                
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetSectorForm}
+                    className="flex-1 px-4 py-2 border border-cresol-gray-light text-cresol-gray hover:bg-cresol-gray-light/50 rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-primary text-white hover:bg-primary-dark rounded-lg transition-colors"
+                  >
+                    {editingSector ? 'Atualizar' : 'Criar'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Modal Editar Setor */}
-      {isEditModalOpen && editingSector && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Editar Setor</h3>
-            
-            <form onSubmit={handleEditSector}>
-              <div className="mb-4">
-                <label htmlFor="edit-name" className="form-label">Nome do Setor</label>
-                <input
-                  id="edit-name"
-                  type="text"
-                  value={editingSector.name}
-                  onChange={(e) => setEditingSector({...editingSector, name: e.target.value})}
-                  className="input"
-                  required
-                />
-              </div>
+      {/* Modal Sub-setor */}
+      {showSubsectorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-cresol-gray-dark mb-4">
+                {editingSubsector ? 'Editar Sub-setor' : 'Novo Sub-setor'}
+              </h3>
               
-              <div className="mb-6">
-                <label htmlFor="edit-description" className="form-label">Descrição</label>
-                <textarea
-                  id="edit-description"
-                  value={editingSector.description}
-                  onChange={(e) => setEditingSector({...editingSector, description: e.target.value})}
-                  className="input"
-                  rows={3}
-                />
-              </div>
-              
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                >
-                  Salvar Alterações
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleSubsectorSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-cresol-gray-dark mb-2">
+                    Setor *
+                  </label>
+                  <select
+                    value={subsectorForm.sector_id}
+                    onChange={(e) => setSubsectorForm({ ...subsectorForm, sector_id: e.target.value })}
+                    className="w-full px-3 py-2 border border-cresol-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    required
+                  >
+                    <option value="">Selecione um setor</option>
+                    {sectors.map(sector => (
+                      <option key={sector.id} value={sector.id}>
+                        {sector.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-cresol-gray-dark mb-2">
+                    Nome do Sub-setor *
+                  </label>
+                  <input
+                    type="text"
+                    value={subsectorForm.name}
+                    onChange={(e) => setSubsectorForm({ ...subsectorForm, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-cresol-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    placeholder="Ex: Desenvolvimento de Software"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-cresol-gray-dark mb-2">
+                    Descrição
+                  </label>
+                  <textarea
+                    value={subsectorForm.description}
+                    onChange={(e) => setSubsectorForm({ ...subsectorForm, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-cresol-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    placeholder="Descrição opcional do sub-setor..."
+                    rows={3}
+                  />
+                </div>
+                
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetSubsectorForm}
+                    className="flex-1 px-4 py-2 border border-cresol-gray-light text-cresol-gray hover:bg-cresol-gray-light/50 rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-secondary text-white hover:bg-secondary-dark rounded-lg transition-colors"
+                  >
+                    {editingSubsector ? 'Atualizar' : 'Criar'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

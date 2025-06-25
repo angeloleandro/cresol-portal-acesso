@@ -6,11 +6,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../../components/Navbar';
+import SubsectorTeam from '../../components/SubsectorTeam';
 
 interface Sector {
   id: string;
   name: string;
   description: string;
+  created_at: string;
+}
+
+interface Subsector {
+  id: string;
+  name: string;
+  description?: string;
   created_at: string;
 }
 
@@ -49,6 +57,7 @@ export default function SetorDetalhesPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sector, setSector] = useState<Sector | null>(null);
+  const [subsectors, setSubsectors] = useState<Subsector[]>([]);
   const [news, setNews] = useState<SectorNews[]>([]);
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [activeTab, setActiveTab] = useState('news');
@@ -66,6 +75,7 @@ export default function SetorDetalhesPage() {
 
       await Promise.all([
         fetchSector(),
+        fetchSubsectors(),
         fetchNews(),
         fetchEvents()
       ]);
@@ -90,6 +100,21 @@ export default function SetorDetalhesPage() {
     }
     
     setSector(data);
+  };
+
+  const fetchSubsectors = async () => {
+    const { data, error } = await supabase
+      .from('subsectors')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('name');
+    
+    if (error) {
+      console.error('Erro ao buscar sub-setores:', error);
+      return;
+    }
+    
+    setSubsectors(data || []);
   };
 
   const fetchNews = async () => {
@@ -201,6 +226,16 @@ export default function SetorDetalhesPage() {
               >
                 Eventos
               </button>
+              <button
+                onClick={() => setActiveTab('subsectors')}
+                className={`${
+                  activeTab === 'subsectors'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray-light'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Sub-setores ({subsectors.length})
+              </button>
             </nav>
           </div>
         </div>
@@ -311,6 +346,46 @@ export default function SetorDetalhesPage() {
                     </div>
                     
                     <p className="text-cresol-gray">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Conteúdo da aba de Sub-setores */}
+        {activeTab === 'subsectors' && (
+          <div>
+            {subsectors.length === 0 ? (
+              <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-8 text-center">
+                <p className="text-cresol-gray">Nenhum sub-setor cadastrado para este setor.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {subsectors.map((subsector) => (
+                  <div 
+                    key={subsector.id}
+                    className="bg-white rounded-lg shadow-sm border border-cresol-gray-light overflow-hidden"
+                  >
+                    <div className="p-6 border-b border-cresol-gray-light">
+                      <h3 className="text-xl font-semibold text-cresol-gray-dark mb-2">
+                        {subsector.name}
+                      </h3>
+                      {subsector.description && (
+                        <p className="text-cresol-gray text-sm">
+                          {subsector.description}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="p-4">
+                      <SubsectorTeam 
+                        subsectorId={subsector.id}
+                        subsectorName={subsector.name}
+                        showFullPage={true}
+                        maxMembers={4}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>

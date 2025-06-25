@@ -24,10 +24,17 @@ module.exports = {
           gray: {
             DEFAULT: '#727176',  // Cinza médio
             light: '#D0D0CE',    // Cinza claro
+            dark: '#4A4A4A',     // Cinza escuro
           },
           black: '#000000',      // Preto
           white: '#FFFFFF',      // Branco
         },
+        // Cores alias para compatibilidade
+        'cresol-gray': '#727176',
+        'cresol-gray-light': '#D0D0CE',
+        'cresol-gray-dark': '#4A4A4A',
+        'primary-dark': '#E06D10',
+        'secondary-dark': '#004935',
       },
     },
   },

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface Profile {
@@ -12,7 +12,7 @@ interface Profile {
   email: string;
   position?: string;
   work_location_id?: string;
-  role: 'admin' | 'sector_admin' | 'user';
+  role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
   avatar_url?: string;
 }
 
@@ -54,15 +54,23 @@ export default function ProfilePage() {
   const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
+    // Só executar no lado do cliente
+    if (typeof window === 'undefined') return;
+    
     const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
+      try {
+        const { data } = await getSupabaseClient().auth.getUser();
+        if (!data.user) {
+          router.replace('/login');
+          return;
+        }
+        setUser(data.user);
+        await fetchProfile(data.user.id);
+        await fetchWorkLocations();
+      } catch (error) {
+        console.error('Erro ao verificar usuário:', error);
         router.replace('/login');
-        return;
       }
-      setUser(data.user);
-      await fetchProfile(data.user.id);
-      await fetchWorkLocations();
     };
 
     checkUser();
@@ -70,7 +78,7 @@ export default function ProfilePage() {
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await getSupabaseClient()
         .from('profiles')
         .select('*')
         .eq('id', userId)
@@ -96,7 +104,7 @@ export default function ProfilePage() {
 
   const fetchWorkLocations = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await getSupabaseClient()
         .from('work_locations')
         .select('id, name, address, phone')
         .order('name');
@@ -153,7 +161,7 @@ export default function ProfilePage() {
       const filePath = `avatars/${fileName}`;
       
       // Fazer upload para o bucket 'images' no Supabase Storage
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await getSupabaseClient().storage
         .from('images')
         .upload(filePath, avatarFile, {
           cacheControl: '3600',
@@ -165,7 +173,7 @@ export default function ProfilePage() {
       }
       
       // Obter a URL pública da imagem
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = getSupabaseClient().storage
         .from('images')
         .getPublicUrl(filePath);
       
@@ -215,7 +223,7 @@ export default function ProfilePage() {
       }
       
       // Atualizar o perfil
-      const { error: updateError } = await supabase
+      const { error: updateError } = await getSupabaseClient()
         .from('profiles')
         .update(updateData)
         .eq('id', user.id);
@@ -271,7 +279,7 @@ export default function ProfilePage() {
       setChangingPassword(true);
       
       // Alterar a senha usando o Supabase Auth
-      const { error } = await supabase.auth.updateUser({
+      const { error } = await getSupabaseClient().auth.updateUser({
         password: newPassword
       });
       
@@ -531,6 +539,7 @@ export default function ProfilePage() {
               <div id="accountType" className="px-3 py-2 bg-gray-50 border border-cresol-gray-light rounded-md text-cresol-gray">
                 {profile?.role === 'admin' && 'Administrador'}
                 {profile?.role === 'sector_admin' && 'Administrador de Setor'}
+                {profile?.role === 'subsector_admin' && 'Administrador de Sub-setor'}
                 {profile?.role === 'user' && 'Usuário'}
               </div>
               <p className="mt-1 text-xs text-cresol-gray">

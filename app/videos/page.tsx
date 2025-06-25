@@ -3,7 +3,7 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import Image from "next/image";
 
 interface DashboardVideo {
@@ -22,14 +22,22 @@ export default function VideosPage() {
   const [selectedVideo, setSelectedVideo] = useState<DashboardVideo | null>(null);
 
   useEffect(() => {
+    // Só executar no lado do cliente
+    if (typeof window === 'undefined') return;
+    
     const fetchVideos = async () => {
-      const { data } = await supabase
-        .from("dashboard_videos")
-        .select("*")
-        .eq("is_active", true)
-        .order("order_index", { ascending: true });
-      setVideos(data || []);
-      setLoading(false);
+      try {
+        const { data } = await getSupabaseClient()
+          .from("dashboard_videos")
+          .select("*")
+          .eq("is_active", true)
+          .order("order_index", { ascending: true });
+        setVideos(data || []);
+      } catch (error) {
+        console.error('Erro ao buscar vídeos:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchVideos();
   }, []);

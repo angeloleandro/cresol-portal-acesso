@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export default function Signup() {
   const router = useRouter();
@@ -19,13 +19,21 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Só executar no lado do cliente
+    if (typeof window === 'undefined') return;
+    
     // Buscar locais de atuação do Supabase
     const fetchWorkLocations = async () => {
-      const { data, error } = await supabase
-        .from('work_locations')
-        .select('id, name')
-        .order('name');
-      if (!error && data) setWorkLocations(data);
+      try {
+        const supabase = getSupabaseClient();
+        const { data, error } = await supabase
+          .from('work_locations')
+          .select('id, name')
+          .order('name');
+        if (!error && data) setWorkLocations(data);
+      } catch (error) {
+        console.error('Erro ao buscar locais de trabalho:', error);
+      }
     };
     fetchWorkLocations();
   }, []);
@@ -49,6 +57,8 @@ export default function Signup() {
     }
 
     try {
+      const supabase = getSupabaseClient();
+      
       // Verificar se já existe uma solicitação para este e-mail
       const { data: existingRequest, error: checkError } = await supabase
         .from('access_requests')

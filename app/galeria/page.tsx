@@ -3,7 +3,7 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import Image from "next/image";
 
 interface GalleryImage {
@@ -21,14 +21,22 @@ export default function GalleryPage() {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
 
   useEffect(() => {
+    // Só executar no lado do cliente
+    if (typeof window === 'undefined') return;
+    
     const fetchImages = async () => {
-      const { data } = await supabase
-        .from("gallery_images")
-        .select("*")
-        .eq("is_active", true)
-        .order("order_index", { ascending: true });
-      setImages(data || []);
-      setLoading(false);
+      try {
+        const { data } = await getSupabaseClient()
+          .from("gallery_images")
+          .select("*")
+          .eq("is_active", true)
+          .order("order_index", { ascending: true });
+        setImages(data || []);
+      } catch (error) {
+        console.error('Erro ao buscar imagens:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchImages();
   }, []);

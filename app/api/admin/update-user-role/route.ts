@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar o papel (role) enviado
-    if (newRole !== 'user' && newRole !== 'sector_admin' && newRole !== 'admin') {
+    if (newRole !== 'user' && newRole !== 'sector_admin' && newRole !== 'subsector_admin' && newRole !== 'admin') {
       return NextResponse.json({ error: 'Papel inválido.' }, { status: 400 });
     }
 
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Credenciais de administrador não fornecidas.' }, { status: 401 });
     }
     
-    // Verificar se o usuário que faz a solicitação é um administrador
+    // Verificar se o usuário que faz a solicitação tem permissões adequadas
     const { data: adminProfile, error: adminError } = await supabaseAdmin
       .from('profiles')
       .select('role')
@@ -64,8 +64,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Falha ao verificar permissões de administrador.' }, { status: 403 });
     }
 
-    if (adminProfile.role !== 'admin') {
-      return NextResponse.json({ error: 'Apenas administradores podem alterar papéis de usuários.' }, { status: 403 });
+    // Verificar hierarquia de permissões
+    const isAdmin = adminProfile.role === 'admin';
+    const isSectorAdmin = adminProfile.role === 'sector_admin';
+    
+    // Admin geral pode alterar qualquer role
+    // Admin de setor pode alterar apenas para 'sector_admin' e 'subsector_admin'
+    if (!isAdmin && !isSectorAdmin) {
+      return NextResponse.json({ error: 'Você não tem permissão para alterar papéis de usuários.' }, { status: 403 });
+    }
+    
+    // Admin de setor não pode promover para admin geral
+    if (isSectorAdmin && newRole === 'admin') {
+      return NextResponse.json({ error: 'Administradores de setor não podem promover usuários para administrador geral.' }, { status: 403 });
+    }
+    
+    // Admin de setor só pode alterar para roles específicos
+    if (isSectorAdmin && !['user', 'sector_admin', 'subsector_admin'].includes(newRole)) {
+      return NextResponse.json({ error: 'Papel não permitido para seu nível de acesso.' }, { status: 403 });
     }
 
     // Impedir que o administrador altere seu próprio papel
