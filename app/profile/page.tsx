@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import Navbar from '../components/Navbar';
+import Breadcrumbs from '../components/Breadcrumbs';
+import Footer from '../components/Footer';
 
 interface Profile {
   id: string;
@@ -14,6 +17,10 @@ interface Profile {
   work_location_id?: string;
   role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
   avatar_url?: string;
+  phone?: string;
+  bio?: string;
+  created_at?: string;
+  last_login?: string;
 }
 
 interface WorkLocation {
@@ -21,6 +28,14 @@ interface WorkLocation {
   name: string;
   address?: string;
   phone?: string;
+}
+
+interface ActivityLog {
+  id: string;
+  action: string;
+  description: string;
+  created_at: string;
+  ip_address?: string;
 }
 
 export default function ProfilePage() {
@@ -32,16 +47,19 @@ export default function ProfilePage() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'activity' | 'privacy'>('profile');
   
   // Campos editáveis
   const [fullName, setFullName] = useState('');
   const [position, setPosition] = useState('');
   const [workLocationId, setWorkLocationId] = useState('');
+  const [phone, setPhone] = useState('');
+  const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   
-  // Estados para o upload de imagem
+  // Estados para upload de imagem
   const [isUploading, setIsUploading] = useState(false);
 
   // Estados para alteração de senha
@@ -53,8 +71,20 @@ export default function ProfilePage() {
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
   const [changingPassword, setChangingPassword] = useState(false);
 
+  // Estados para atividade recente
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const [loadingActivity, setLoadingActivity] = useState(false);
+
+  // Estados para configurações de privacidade
+  const [privacySettings, setPrivacySettings] = useState({
+    showEmail: true,
+    showPhone: false,
+    showPosition: true,
+    allowNotifications: true,
+    allowDirectMessages: true
+  });
+
   useEffect(() => {
-    // Só executar no lado do cliente
     if (typeof window === 'undefined') return;
     
     const checkUser = async () => {
@@ -65,8 +95,11 @@ export default function ProfilePage() {
           return;
         }
         setUser(data.user);
-        await fetchProfile(data.user.id);
-        await fetchWorkLocations();
+        await Promise.all([
+          fetchProfile(data.user.id),
+          fetchWorkLocations(),
+          fetchActivityLogs(data.user.id)
+        ]);
       } catch (error) {
         console.error('Erro ao verificar usuário:', error);
         router.replace('/login');
@@ -93,6 +126,8 @@ export default function ProfilePage() {
         setFullName(data.full_name || '');
         setPosition(data.position || '');
         setWorkLocationId(data.work_location_id || '');
+        setPhone(data.phone || '');
+        setBio(data.bio || '');
         setAvatarUrl(data.avatar_url || null);
       }
     } catch (error) {
@@ -121,17 +156,50 @@ export default function ProfilePage() {
     }
   };
 
+  const fetchActivityLogs = async (userId: string) => {
+    setLoadingActivity(true);
+    try {
+      // Simulação de logs de atividade (implementar com dados reais depois)
+      const mockLogs = [
+        {
+          id: '1',
+          action: 'Login',
+          description: 'Login realizado com sucesso',
+          created_at: new Date().toISOString(),
+          ip_address: '192.168.1.100'
+        },
+        {
+          id: '2',
+          action: 'Perfil atualizado',
+          description: 'Informações do perfil foram atualizadas',
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          ip_address: '192.168.1.100'
+        },
+        {
+          id: '3',
+          action: 'Senha alterada',
+          description: 'Senha foi alterada com sucesso',
+          created_at: new Date(Date.now() - 172800000).toISOString(),
+          ip_address: '192.168.1.101'
+        }
+      ];
+      setActivityLogs(mockLogs);
+    } catch (error) {
+      console.error('Erro ao buscar logs de atividade:', error);
+    } finally {
+      setLoadingActivity(false);
+    }
+  };
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       
-      // Verificar o tipo de arquivo
       if (!file.type.startsWith('image/')) {
         setError('Por favor, selecione apenas arquivos de imagem.');
         return;
       }
       
-      // Verificar o tamanho do arquivo (limite de 2MB)
       if (file.size > 2 * 1024 * 1024) {
         setError('A imagem deve ter menos de 2MB.');
         return;
@@ -139,11 +207,9 @@ export default function ProfilePage() {
       
       setAvatarFile(file);
       
-      // Criar URL temporária para preview
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
       
-      // Limpar mensagens
       setError(null);
       setSuccess(null);
     }
@@ -155,12 +221,10 @@ export default function ProfilePage() {
     try {
       setIsUploading(true);
       
-      // Gerar um nome único para o arquivo
       const fileExt = avatarFile.name.split('.').pop();
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
       
-      // Fazer upload para o bucket 'images' no Supabase Storage
       const { error: uploadError } = await getSupabaseClient().storage
         .from('images')
         .upload(filePath, avatarFile, {
@@ -172,7 +236,6 @@ export default function ProfilePage() {
         throw uploadError;
       }
       
-      // Obter a URL pública da imagem
       const { data: { publicUrl } } = getSupabaseClient().storage
         .from('images')
         .getPublicUrl(filePath);
@@ -199,15 +262,15 @@ export default function ProfilePage() {
     try {
       setUpdating(true);
       
-      // Dados a serem atualizados
       const updateData: Record<string, unknown> = {
         full_name: fullName,
         position,
+        phone,
+        bio,
         work_location_id: workLocationId || null,
         updated_at: new Date().toISOString()
       };
       
-      // Se houver um novo avatar, fazer o upload e incluir a URL
       if (avatarFile) {
         try {
           const newAvatarUrl = await uploadAvatar();
@@ -222,7 +285,6 @@ export default function ProfilePage() {
         }
       }
       
-      // Atualizar o perfil
       const { error: updateError } = await getSupabaseClient()
         .from('profiles')
         .update(updateData)
@@ -234,7 +296,6 @@ export default function ProfilePage() {
       
       setSuccess('Perfil atualizado com sucesso!');
       
-      // Limpar o preview e o arquivo após o upload bem-sucedido
       if (avatarFile) {
         setAvatarFile(null);
         if (avatarPreview) {
@@ -243,7 +304,6 @@ export default function ProfilePage() {
         }
       }
       
-      // Atualizar os dados do perfil local
       await fetchProfile(user.id);
     } catch (error: unknown) {
       console.error('Erro ao atualizar perfil:', error);
@@ -254,7 +314,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Função para alterar a senha
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError(null);
@@ -278,7 +337,6 @@ export default function ProfilePage() {
     try {
       setChangingPassword(true);
       
-      // Alterar a senha usando o Supabase Auth
       const { error } = await getSupabaseClient().auth.updateUser({
         password: newPassword
       });
@@ -289,7 +347,6 @@ export default function ProfilePage() {
       
       setPasswordSuccess('Senha alterada com sucesso!');
       
-      // Limpar os campos
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -303,12 +360,25 @@ export default function ProfilePage() {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(dateString));
+  };
+
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto" />
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto" />
+            <p className="mt-4 text-gray-600">Carregando perfil...</p>
+          </div>
         </div>
       </div>
     );
@@ -316,327 +386,529 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-cresol-gray-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <button
-              onClick={() => router.push('/home')}
-              className="flex items-center"
-              type="button"
-            >
-              <div className="relative h-10 w-24 mr-3">
-                <Image 
-                  src="/logo-cresol.png" 
-                  alt="Logo Cresol" 
-                  fill
-                  sizes="(max-width: 768px) 100vw, 96px"
-                  style={{ objectFit: 'contain' }}
-                />
-              </div>
-              <h1 className="text-xl font-semibold text-cresol-gray">Portal Cresol</h1>
-            </button>
-          </div>
-          
-          <button
-            onClick={() => router.push('/home')}
-            className="inline-flex items-center text-sm text-cresol-gray hover:text-primary"
-            type="button"
-          >
-            <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            Voltar para Home
-          </button>
-        </div>
-      </header>
-
-      {/* Conteúdo principal */}
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-primary">Meu Perfil</h2>
-          <p className="text-cresol-gray mt-1">Gerencie suas informações pessoais</p>
-        </div>
+      <Navbar />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumbs */}
+        <Breadcrumbs className="mb-6" />
         
+        {/* Header do Perfil */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
+          <div className="h-32 bg-gradient-to-r from-primary to-primary-dark"></div>
+          <div className="relative px-6 pb-6">
+            {/* Avatar */}
+            <div className="absolute -top-16 left-6">
+              <div className="relative h-32 w-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100">
+                {(avatarPreview || avatarUrl) ? (
+                  <Image
+                    src={avatarPreview || avatarUrl || ''}
+                    alt="Avatar do usuário"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
+                    <svg className="h-16 w-16" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Info do Usuário */}
+            <div className="ml-40 pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">{profile?.full_name || 'Nome não informado'}</h1>
+                  <p className="text-gray-600">{profile?.position || 'Cargo não informado'}</p>
+                  <p className="text-sm text-gray-500">
+                    {workLocations.find(loc => loc.id === profile?.work_location_id)?.name || 'Local não informado'}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                    profile?.role === 'admin' ? 'bg-red-100 text-red-800' :
+                    profile?.role === 'sector_admin' ? 'bg-blue-100 text-blue-800' :
+                    profile?.role === 'subsector_admin' ? 'bg-purple-100 text-purple-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {profile?.role === 'admin' && 'Administrador'}
+                    {profile?.role === 'sector_admin' && 'Admin. de Setor'}
+                    {profile?.role === 'subsector_admin' && 'Admin. de Sub-setor'}
+                    {profile?.role === 'user' && 'Usuário'}
+                  </span>
+                  {profile?.created_at && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Membro desde {formatDate(profile.created_at)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Messages */}
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4">
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
         
         {success && (
-          <div className="bg-green-50 text-green-600 p-3 rounded-md mb-4">
+          <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6">
             {success}
           </div>
         )}
-        
-        {/* Formulário de informações pessoais */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Avatar */}
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="flex-shrink-0">
-                <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border border-cresol-gray-light">
-                  {(avatarPreview || avatarUrl) ? (
-                    <Image
-                      src={avatarPreview || avatarUrl || ''}
-                      alt="Avatar do usuário"
-                      fill
-                      className="object-cover"
+
+        {/* Tabs de Navegação */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6">
+              {[
+                { id: 'profile', label: 'Informações Pessoais', icon: 'user' },
+                { id: 'security', label: 'Segurança', icon: 'shield' },
+                { id: 'activity', label: 'Atividade Recente', icon: 'clock' },
+                { id: 'privacy', label: 'Privacidade', icon: 'eye' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
+                    activeTab === tab.id
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {tab.icon === 'user' && (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    )}
+                    {tab.icon === 'shield' && (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    )}
+                    {tab.icon === 'clock' && (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    )}
+                    {tab.icon === 'eye' && (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    )}
+                  </svg>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Conteúdo das Tabs */}
+          <div className="p-6">
+            {/* Tab: Informações Pessoais */}
+            {activeTab === 'profile' && (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Upload de Avatar */}
+                <div className="flex items-start space-x-6">
+                  <div className="flex-shrink-0">
+                    <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200">
+                      {(avatarPreview || avatarUrl) ? (
+                        <Image
+                          src={avatarPreview || avatarUrl || ''}
+                          alt="Avatar do usuário"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
+                          <svg className="h-12 w-12" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex-grow">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Foto de Perfil
+                    </label>
+                    <div className="flex items-center space-x-3">
+                      <label className="cursor-pointer bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
+                        {isUploading ? 'Carregando...' : 'Escolher arquivo'}
+                        <input
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={handleAvatarChange}
+                          disabled={isUploading}
+                        />
+                      </label>
+                      {avatarPreview && (
+                        <button
+                          type="button"
+                          className="text-sm text-red-600 hover:text-red-800"
+                          onClick={() => {
+                            URL.revokeObjectURL(avatarPreview);
+                            setAvatarPreview(null);
+                            setAvatarFile(null);
+                          }}
+                        >
+                          Remover
+                        </button>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Formatos aceitos: JPG, PNG. Máximo: 2MB.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Campos do Formulário */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      E-mail
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={profile?.email || ''}
+                      disabled
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-500"
                     />
+                    <p className="mt-1 text-xs text-gray-500">
+                      O e-mail não pode ser alterado.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+                      Nome Completo *
+                    </label>
+                    <input
+                      type="text"
+                      id="fullName"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-2">
+                      Cargo
+                    </label>
+                    <input
+                      type="text"
+                      id="position"
+                      value={position}
+                      onChange={(e) => setPosition(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                      Telefone
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="(00) 00000-0000"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label htmlFor="workLocation" className="block text-sm font-medium text-gray-700 mb-2">
+                      Local de Trabalho
+                    </label>
+                    <select
+                      id="workLocation"
+                      value={workLocationId}
+                      onChange={(e) => setWorkLocationId(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                      <option value="">Selecione um local</option>
+                      {workLocations.map((location) => (
+                        <option key={location.id} value={location.id}>
+                          {location.name}
+                        </option>
+                      ))}
+                    </select>
+                    
+                    {workLocationId && (() => {
+                      const selectedLocation = workLocations.find(loc => loc.id === workLocationId);
+                      return selectedLocation && (
+                        <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                          <div className="font-medium">{selectedLocation.name}</div>
+                          {selectedLocation.address && (
+                            <div className="flex items-center mt-1">
+                              <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              </svg>
+                              <span>{selectedLocation.address}</span>
+                            </div>
+                          )}
+                          {selectedLocation.phone && (
+                            <div className="flex items-center mt-1">
+                              <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                              </svg>
+                              <a href={`tel:${selectedLocation.phone}`} className="text-primary hover:underline">
+                                {selectedLocation.phone}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
+                      Biografia
+                    </label>
+                    <textarea
+                      id="bio"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="Conte um pouco sobre você..."
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tipo de Conta
+                    </label>
+                    <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-600">
+                      {profile?.role === 'admin' && 'Administrador'}
+                      {profile?.role === 'sector_admin' && 'Administrador de Setor'}
+                      {profile?.role === 'subsector_admin' && 'Administrador de Sub-setor'}
+                      {profile?.role === 'user' && 'Usuário'}
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      O tipo de conta só pode ser alterado por um administrador.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Botões */}
+                <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => router.push('/dashboard')}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={updating}
+                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-70"
+                  >
+                    {updating ? 'Salvando...' : 'Salvar Alterações'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Tab: Segurança */}
+            {activeTab === 'security' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Configurações de Segurança</h3>
+                  
+                  {/* Seção de Alteração de Senha */}
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h4 className="text-md font-medium text-gray-900">Alterar Senha</h4>
+                        <p className="text-sm text-gray-600">Mantenha sua conta segura com uma senha forte</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswordForm(!showPasswordForm)}
+                        className="px-4 py-2 text-sm font-medium text-primary border border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
+                      >
+                        {showPasswordForm ? 'Cancelar' : 'Alterar Senha'}
+                      </button>
+                    </div>
+
+                    {passwordError && (
+                      <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4 text-sm">
+                        {passwordError}
+                      </div>
+                    )}
+                    
+                    {passwordSuccess && (
+                      <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md mb-4 text-sm">
+                        {passwordSuccess}
+                      </div>
+                    )}
+
+                    {showPasswordForm && (
+                      <form onSubmit={handlePasswordChange} className="space-y-4">
+                        <div>
+                          <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                            Nova Senha
+                          </label>
+                          <input
+                            type="password"
+                            id="newPassword"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            required
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="Mínimo de 6 caracteres"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                            Confirmar Nova Senha
+                          </label>
+                          <input
+                            type="password"
+                            id="confirmPassword"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="Digite novamente a nova senha"
+                          />
+                        </div>
+                        
+                        <div className="pt-2">
+                          <button
+                            type="submit"
+                            disabled={changingPassword}
+                            className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-70"
+                          >
+                            {changingPassword ? 'Alterando...' : 'Salvar Nova Senha'}
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tab: Atividade Recente */}
+            {activeTab === 'activity' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Atividade Recente</h3>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Histórico de ações realizadas em sua conta nos últimos 30 dias.
+                  </p>
+                  
+                  {loadingActivity ? (
+                    <div className="space-y-3">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="animate-pulse bg-gray-100 h-16 rounded-lg"></div>
+                      ))}
+                    </div>
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-                      <svg className="h-12 w-12" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                      </svg>
+                    <div className="space-y-4">
+                      {activityLogs.map((log) => (
+                        <div key={log.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0">
+                              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                                <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                            </div>
+                            <div className="flex-grow">
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-medium text-gray-900">{log.action}</h4>
+                                <span className="text-xs text-gray-500">{formatDate(log.created_at)}</span>
+                              </div>
+                              <p className="text-sm text-gray-600 mt-1">{log.description}</p>
+                              {log.ip_address && (
+                                <p className="text-xs text-gray-500 mt-2">IP: {log.ip_address}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
               </div>
-              
-              <div className="flex-grow">
-                <label className="block text-sm font-medium text-cresol-gray mb-2" htmlFor="avatarUpload">
-                  Foto de Perfil
-                </label>
-                <div className="flex items-center">
-                  <label className="cursor-pointer bg-white border border-cresol-gray-light px-3 py-2 rounded-md text-sm text-cresol-gray hover:bg-gray-50 transition-colors" htmlFor="avatarUpload">
-                    {isUploading ? 'Carregando...' : 'Escolher arquivo'}
-                    <input
-                      type="file"
-                      id="avatarUpload"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleAvatarChange}
-                      disabled={isUploading}
-                    />
-                  </label>
-                  {avatarPreview && (
+            )}
+
+            {/* Tab: Privacidade */}
+            {activeTab === 'privacy' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Configurações de Privacidade</h3>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Controle quais informações são visíveis para outros usuários.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    {[
+                      { key: 'showEmail', label: 'Mostrar e-mail no perfil público', description: 'Outros usuários poderão ver seu endereço de e-mail' },
+                      { key: 'showPhone', label: 'Mostrar telefone no perfil público', description: 'Outros usuários poderão ver seu número de telefone' },
+                      { key: 'showPosition', label: 'Mostrar cargo no perfil público', description: 'Outros usuários poderão ver seu cargo atual' },
+                      { key: 'allowNotifications', label: 'Receber notificações por e-mail', description: 'Receba atualizações importantes por e-mail' },
+                      { key: 'allowDirectMessages', label: 'Permitir mensagens diretas', description: 'Outros usuários podem enviar mensagens para você' }
+                    ].map((setting) => (
+                      <div key={setting.key} className="flex items-start justify-between py-4 border-b border-gray-200 last:border-b-0">
+                        <div className="flex-grow">
+                          <h4 className="text-sm font-medium text-gray-900">{setting.label}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{setting.description}</p>
+                        </div>
+                        <div className="flex-shrink-0 ml-4">
+                          <button
+                            type="button"
+                            onClick={() => setPrivacySettings(prev => ({
+                              ...prev,
+                              [setting.key]: !prev[setting.key as keyof typeof prev]
+                            }))}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                              privacySettings[setting.key as keyof typeof privacySettings]
+                                ? 'bg-primary'
+                                : 'bg-gray-200'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                privacySettings[setting.key as keyof typeof privacySettings]
+                                  ? 'translate-x-6'
+                                  : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="pt-6 border-t border-gray-200">
                     <button
                       type="button"
-                      className="ml-2 text-sm text-red-500 hover:text-red-700"
-                      onClick={() => {
-                        URL.revokeObjectURL(avatarPreview);
-                        setAvatarPreview(null);
-                        setAvatarFile(null);
-                      }}
+                      className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     >
-                      Remover
+                      Salvar Configurações
                     </button>
-                  )}
+                  </div>
                 </div>
-                <p className="mt-1 text-xs text-cresol-gray">
-                  Recomendado: JPG, PNG. Máximo 2MB.
-                </p>
               </div>
-            </div>
-            
-            {/* Email (não editável) */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-cresol-gray mb-2">
-                E-mail
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={profile?.email || ''}
-                disabled
-                className="w-full px-3 py-2 bg-gray-50 border border-cresol-gray-light rounded-md text-cresol-gray"
-              />
-              <p className="mt-1 text-xs text-cresol-gray">
-                O e-mail não pode ser alterado.
-              </p>
-            </div>
-            
-            {/* Nome completo */}
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-cresol-gray mb-2">
-                Nome Completo
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              />
-            </div>
-            
-            {/* Cargo */}
-            <div>
-              <label htmlFor="position" className="block text-sm font-medium text-cresol-gray mb-2">
-                Cargo
-              </label>
-              <input
-                type="text"
-                id="position"
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-                className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              />
-            </div>
-            
-            {/* Local de atuação */}
-            <div>
-              <label htmlFor="workLocation" className="block text-sm font-medium text-cresol-gray mb-2">
-                Local de Atuação
-              </label>
-              <select
-                id="workLocation"
-                value={workLocationId}
-                onChange={(e) => setWorkLocationId(e.target.value)}
-                className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              >
-                <option value="">Selecione o local</option>
-                {workLocations.map((loc) => (
-                  <option key={loc.id} value={loc.id}>
-                    {loc.name}{loc.address ? ` - ${loc.address.split('\n')[0]}` : ''}
-                  </option>
-                ))}
-              </select>
-              
-              {/* Mostrar informações adicionais do local selecionado */}
-              {workLocationId && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-200">
-                  {(() => {
-                    const selectedLocation = workLocations.find(loc => loc.id === workLocationId);
-                    if (!selectedLocation) return null;
-                    
-                    return (
-                      <div className="text-sm text-gray-600 space-y-1">
-                        <div className="font-medium text-gray-800">{selectedLocation.name}</div>
-                        {selectedLocation.address && (
-                          <div className="flex items-start">
-                            <svg className="w-4 h-4 text-gray-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span>{selectedLocation.address}</span>
-                          </div>
-                        )}
-                        {selectedLocation.phone && (
-                          <div className="flex items-center">
-                            <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                            </svg>
-                            <a href={`tel:${selectedLocation.phone}`} className="text-primary hover:underline">
-                              {selectedLocation.phone}
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
-            </div>
-            
-            {/* Tipo de conta (não editável) */}
-            <div>
-              <label className="block text-sm font-medium text-cresol-gray mb-2" htmlFor="accountType">
-                Tipo de Conta
-              </label>
-              <div id="accountType" className="px-3 py-2 bg-gray-50 border border-cresol-gray-light rounded-md text-cresol-gray">
-                {profile?.role === 'admin' && 'Administrador'}
-                {profile?.role === 'sector_admin' && 'Administrador de Setor'}
-                {profile?.role === 'subsector_admin' && 'Administrador de Sub-setor'}
-                {profile?.role === 'user' && 'Usuário'}
-              </div>
-              <p className="mt-1 text-xs text-cresol-gray">
-                O tipo de conta só pode ser alterado por um administrador.
-              </p>
-            </div>
-            
-            {/* Botões */}
-            <div className="flex justify-end pt-4">
-              <button
-                type="button"
-                onClick={() => router.push('/home')}
-                className="px-4 py-2 border border-cresol-gray-light rounded-md text-cresol-gray mr-3 hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-70"
-                disabled={updating}
-              >
-                {updating ? 'Salvando...' : 'Salvar Alterações'}
-              </button>
-            </div>
-          </form>
-        </div>
-        
-        {/* Formulário de alteração de senha */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-primary">Alterar Senha</h3>
-            <button
-              type="button"
-              onClick={() => setShowPasswordForm(!showPasswordForm)}
-              className="text-sm text-primary hover:underline"
-            >
-              {showPasswordForm ? 'Cancelar' : 'Alterar minha senha'}
-            </button>
+            )}
           </div>
-          
-          {passwordError && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">
-              {passwordError}
-            </div>
-          )}
-          
-          {passwordSuccess && (
-            <div className="bg-green-50 text-green-600 p-3 rounded-md mb-4 text-sm">
-              {passwordSuccess}
-            </div>
-          )}
-          
-          {showPasswordForm && (
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-              <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-cresol-gray mb-2">
-                  Nova Senha
-                </label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  placeholder="Mínimo de 6 caracteres"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-cresol-gray mb-2">
-                  Confirmar Nova Senha
-                </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  placeholder="Digite novamente a nova senha"
-                />
-              </div>
-              
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-70"
-                  disabled={changingPassword}
-                >
-                  {changingPassword ? 'Alterando...' : 'Salvar Nova Senha'}
-                </button>
-              </div>
-            </form>
-          )}
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 } 

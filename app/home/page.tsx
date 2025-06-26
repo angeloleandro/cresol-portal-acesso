@@ -12,6 +12,7 @@ import BannerCarousel from '@/app/components/BannerCarousel';
 import VideoGallery from '@/app/components/VideoGallery';
 import ImageGallery from '../components/ImageGallery';
 import Footer from '../components/Footer';
+import GlobalSearch from '../components/GlobalSearch';
 
 interface System {
   id: string;
@@ -46,6 +47,13 @@ interface Stats {
   totalLocations: number
 }
 
+interface QuickStats {
+  activeUsers: number;
+  systemsOnline: number;
+  unreadNotifications: number;
+  pendingApprovals: number;
+}
+
 export default function Home() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -60,6 +68,12 @@ export default function Home() {
     totalNews: 0,
     totalUsers: 0,
     totalLocations: 0
+  });
+  const [quickStats, setQuickStats] = useState<QuickStats>({
+    activeUsers: 0,
+    systemsOnline: 0,
+    unreadNotifications: 0,
+    pendingApprovals: 0
   });
 
   // Dados de exemplo para notícias (remover quando implementar a busca no Supabase)
@@ -138,6 +152,7 @@ export default function Home() {
       // Se for um admin, buscar todos os sistemas
       if (profile?.role === 'admin' || profile?.role === 'sector_admin') {
         await fetchAllSystems();
+        await fetchQuickStats(); // Carregar estatísticas rápidas para admins
       } else {
         // Senão, buscar apenas sistemas permitidos para o usuário
         await fetchUserSystems(data.user.id);
@@ -226,6 +241,20 @@ export default function Home() {
     }
   };
 
+  const fetchQuickStats = async () => {
+    try {
+      // Simular estatísticas rápidas para admins (implementar com dados reais depois)
+      setQuickStats({
+        activeUsers: Math.floor(Math.random() * 50) + 100,
+        systemsOnline: 12,
+        unreadNotifications: Math.floor(Math.random() * 20),
+        pendingApprovals: Math.floor(Math.random() * 5)
+      });
+    } catch (error) {
+      console.error('Erro ao buscar estatísticas rápidas:', error);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.replace('/login');
@@ -263,6 +292,18 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Carrossel de Banners */}
         <BannerCarousel />
+
+        {/* Busca Global */}
+        <div className="mb-6">
+          <div className="max-w-2xl mx-auto">
+            <GlobalSearch 
+              className="w-full"
+              placeholder="Buscar sistemas, eventos, notícias..."
+              showAdvancedButton={true}
+              autoFocus={false}
+            />
+          </div>
+        </div>
 
         {/* Banner Hero Minimalista */}
         <section className="relative overflow-hidden rounded-xl shadow-lg mb-6" style={{ background: 'linear-gradient(135deg, #F58220, #E5751F, #D9691D)' }}>
@@ -317,6 +358,18 @@ export default function Home() {
                 >
                   Ver Agenda
                 </Link>
+
+                {isAdmin && (
+                  <Link 
+                    href="/admin/monitoring" 
+                    className="inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-white border border-white/30 rounded-lg hover:bg-white/10 transition-all duration-200"
+                  >
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Monitoramento
+                  </Link>
+                )}
               </div>
               
               {/* Stats Dinâmicos */}
@@ -344,6 +397,67 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Widget de Status para Admins */}
+        {isAdmin && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <div className="flex items-center">
+                <div className="p-2 rounded-lg bg-green-100 mr-3">
+                  <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">{quickStats.activeUsers}</div>
+                  <div className="text-xs text-gray-500">Usuários Ativos</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <div className="flex items-center">
+                <div className="p-2 rounded-lg bg-blue-100 mr-3">
+                  <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">{quickStats.systemsOnline}</div>
+                  <div className="text-xs text-gray-500">Sistemas Online</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <div className="flex items-center">
+                <div className="p-2 rounded-lg bg-yellow-100 mr-3">
+                  <svg className="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 17l5 5v-5H4zM3 3h18v12H3V3z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">{quickStats.unreadNotifications}</div>
+                  <div className="text-xs text-gray-500">Notificações</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <div className="flex items-center">
+                <div className="p-2 rounded-lg bg-purple-100 mr-3">
+                  <svg className="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h2m0-8H5m4 8h6m-6 0v-2m6 2v-2m-6-4h6m-6-4v2m6-2v2" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">{quickStats.pendingApprovals}</div>
+                  <div className="text-xs text-gray-500">Pendências</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Layout de duas colunas */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Coluna principal */}
@@ -360,6 +474,84 @@ export default function Home() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Widget de Notificações */}
+            <section className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Notificações</h3>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                  3 novas
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        Nova mensagem do RH
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Treinamento de segurança agendado
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">5 min atrás</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        Evento confirmado
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Workshop de Crédito Rural
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">1h atrás</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        Sistema atualizado
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Novas funcionalidades disponíveis
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">1 dia atrás</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <Link 
+                  href="/admin/notifications"
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+                >
+                  Ver todas as notificações →
+                </Link>
+              </div>
+            </section>
+            
             {/* Próximos Eventos */}
             <EventosDestaque />
 
@@ -420,6 +612,26 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
+
+                {isAdmin && (
+                  <Link 
+                    href="/admin/analytics" 
+                    className="flex items-center p-4 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all duration-200 group bg-blue-50/50 hover:bg-blue-50"
+                  >
+                    <div className="p-2 rounded-lg mr-4 transition-colors bg-blue-500">
+                      <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 text-sm">Analytics</div>
+                      <div className="text-xs text-gray-500">Métricas e relatórios</div>
+                    </div>
+                    <svg className="h-4 w-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                )}
               </div>
             </section>
           </div>

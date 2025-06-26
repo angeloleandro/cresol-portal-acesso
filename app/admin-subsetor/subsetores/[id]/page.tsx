@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
+import Cropper from 'react-easy-crop';
 import { supabase } from '@/lib/supabase';
 
 interface Profile {
@@ -46,6 +48,67 @@ interface System {
   icon?: string;
 }
 
+// Função auxiliar para criar imagem
+const createImage = (url: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const image = new HTMLImageElement();
+    image.addEventListener('load', () => resolve(image));
+    image.addEventListener('error', (error: any) => reject(error));
+    image.setAttribute('crossOrigin', 'anonymous');
+    image.src = url;
+  });
+
+// Função para obter o recorte final da imagem
+async function getCroppedImg(
+  imageSrc: string,
+  pixelCrop: { x: number; y: number; width: number; height: number },
+  rotation = 0
+): Promise<{ file: Blob; url: string }> {
+  const image = await createImage(imageSrc);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    throw new Error('No 2d context');
+  }
+
+  const maxSize = Math.max(image.width, image.height);
+  const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
+
+  // Definir as dimensões do canvas para a área de recorte
+  canvas.width = pixelCrop.width;
+  canvas.height = pixelCrop.height;
+
+  // Translação para permitir rotação da imagem
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate((rotation * Math.PI) / 180);
+  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
+  // Desenhar a imagem recortada no canvas
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height
+  );
+
+  // Criar um blob do canvas
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        throw new Error('Canvas is empty');
+      }
+      const url = URL.createObjectURL(blob);
+      resolve({ file: blob, url });
+    }, 'image/jpeg', 0.95);
+  });
+}
+
 export default function SubsectorManagePage() {
   const router = useRouter();
   const params = useParams();
@@ -58,12 +121,59 @@ export default function SubsectorManagePage() {
   const [systems, setSystems] = useState<System[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'events' | 'news' | 'systems'>('events');
+  const [activeTab, setActiveTab] = useState<'events' | 'news' | 'systems' | 'groups' | 'messages'>('events');
 
   // Estados para criação de novos itens
   const [showEventForm, setShowEventForm] = useState(false);
   const [showNewsForm, setShowNewsForm] = useState(false);
   const [showSystemForm, setShowSystemForm] = useState(false);
+
+  // Estados para modais
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // Estados para dados dos modais
+  const [currentEvent, setCurrentEvent] = useState<Partial<SubsectorEvent>>({});
+  const [currentNews, setCurrentNews] = useState<Partial<SubsectorNews>>({});
+
+  // Estados para upload de imagens
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [isEditingImage, setIsEditingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Estados para grupos
+  const [groups, setGroups] = useState<any[]>([]);
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [currentGroup, setCurrentGroup] = useState({
+    name: '',
+    description: '',
+    members: [] as string[]
+  });
+
+  // Estados para mensagens
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState({
+    title: '',
+    message: '',
+    type: 'general',
+    groups: [] as string[],
+    users: [] as string[]
+  });
+
+  // Estados para seleção de usuários
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [workLocations, setWorkLocations] = useState<any[]>([]);
+  
+  // Estados para filtros de usuários
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userLocationFilter, setUserLocationFilter] = useState('all');
 
   useEffect(() => {
     const checkUser = async () => {
@@ -149,6 +259,11 @@ export default function SubsectorManagePage() {
       // Buscar sistemas
       await fetchSystems();
 
+      // Buscar grupos, usuários e locais de trabalho
+      await fetchGroups();
+      await fetchUsers();
+      await fetchWorkLocations();
+
     } catch (error) {
       console.error('Erro ao buscar dados do sub-setor:', error);
       setError('Erro ao carregar dados do sub-setor');
@@ -202,6 +317,55 @@ export default function SubsectorManagePage() {
     }
   };
 
+  const fetchGroups = async () => {
+    try {
+      const response = await fetch('/api/notifications/groups');
+      const result = await response.json();
+      
+      if (result.groups) {
+        setGroups(result.groups.filter((group: any) => group.subsector_id === subsectorId));
+      }
+    } catch (error) {
+      console.error('Erro ao buscar grupos:', error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, work_location_id')
+        .order('full_name');
+        
+      if (error) {
+        console.error('Erro ao buscar usuários:', error);
+        return;
+      }
+      
+      setAllUsers(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error);
+    }
+  };
+
+  const fetchWorkLocations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('work_locations')
+        .select('id, name')
+        .order('name');
+
+      if (error) {
+        console.error('Erro ao buscar locais de trabalho:', error);
+        return;
+      }
+
+      setWorkLocations(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar locais de trabalho:', error);
+    }
+  };
+
   const toggleEventPublished = async (eventId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
@@ -227,6 +391,277 @@ export default function SubsectorManagePage() {
       await fetchNews();
     } catch (error) {
       console.error('Erro ao atualizar notícia:', error);
+    }
+  };
+
+  // Funções para modais de eventos
+  const handleOpenEventModal = (event?: SubsectorEvent) => {
+    if (event) {
+      setCurrentEvent(event);
+      setIsEditing(true);
+    } else {
+      setCurrentEvent({
+        title: '',
+        description: '',
+        start_date: new Date().toISOString(),
+        is_featured: false,
+        is_published: false
+      });
+      setIsEditing(false);
+    }
+    setIsEventModalOpen(true);
+  };
+
+  const handleSaveEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!currentEvent.title || !currentEvent.description || !currentEvent.start_date) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+    
+    try {
+      if (isEditing && currentEvent.id) {
+        const { error } = await supabase
+          .from('subsector_events')
+          .update({
+            title: currentEvent.title,
+            description: currentEvent.description,
+            start_date: currentEvent.start_date,
+            is_featured: currentEvent.is_featured,
+            is_published: currentEvent.is_published
+          })
+          .eq('id', currentEvent.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('subsector_events')
+          .insert([{
+            subsector_id: subsectorId,
+            title: currentEvent.title,
+            description: currentEvent.description,
+            start_date: currentEvent.start_date,
+            is_featured: currentEvent.is_featured,
+            is_published: currentEvent.is_published
+          }]);
+
+        if (error) throw error;
+      }
+
+      setIsEventModalOpen(false);
+      await fetchEvents();
+    } catch (error) {
+      console.error('Erro ao salvar evento:', error);
+      alert('Erro ao salvar evento. Tente novamente.');
+    }
+  };
+
+  const handleDeleteEvent = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este evento?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('subsector_events')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      await fetchEvents();
+    } catch (error) {
+      console.error('Erro ao excluir evento:', error);
+      alert('Erro ao excluir evento. Tente novamente.');
+    }
+  };
+
+  // Funções para modais de notícias
+  const handleOpenNewsModal = (news?: SubsectorNews) => {
+    if (news) {
+      setCurrentNews(news);
+      setIsEditing(true);
+    } else {
+      setCurrentNews({
+        title: '',
+        summary: '',
+        is_featured: false,
+        is_published: false
+      });
+      setIsEditing(false);
+    }
+    setIsNewsModalOpen(true);
+  };
+
+  const handleSaveNews = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!currentNews.title || !currentNews.summary) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+    
+    try {
+      if (isEditing && currentNews.id) {
+        const { error } = await supabase
+          .from('subsector_news')
+          .update({
+            title: currentNews.title,
+            summary: currentNews.summary,
+            is_featured: currentNews.is_featured,
+            is_published: currentNews.is_published
+          })
+          .eq('id', currentNews.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('subsector_news')
+          .insert([{
+            subsector_id: subsectorId,
+            title: currentNews.title,
+            summary: currentNews.summary,
+            is_featured: currentNews.is_featured,
+            is_published: currentNews.is_published
+          }]);
+
+        if (error) throw error;
+      }
+
+      setIsNewsModalOpen(false);
+      await fetchNews();
+    } catch (error) {
+      console.error('Erro ao salvar notícia:', error);
+      alert('Erro ao salvar notícia. Tente novamente.');
+    }
+  };
+
+  const handleDeleteNews = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta notícia?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('subsector_news')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      await fetchNews();
+    } catch (error) {
+      console.error('Erro ao excluir notícia:', error);
+      alert('Erro ao excluir notícia. Tente novamente.');
+    }
+  };
+
+  // Funções para grupos
+  const handleOpenGroupModal = () => {
+    setCurrentGroup({
+      name: '',
+      description: '',
+      members: []
+    });
+    setUserSearchTerm('');
+    setUserLocationFilter('all');
+    setIsGroupModalOpen(true);
+  };
+
+  const handleSaveGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!currentGroup.name.trim()) {
+      alert('Por favor, informe o nome do grupo.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/notifications/groups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: currentGroup.name,
+          description: currentGroup.description,
+          subsector_id: subsectorId,
+          members: currentGroup.members
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Erro ao criar grupo');
+      }
+
+      setIsGroupModalOpen(false);
+      await fetchGroups();
+      alert('Grupo criado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar grupo:', error);
+      alert('Erro ao salvar grupo. Tente novamente.');
+    }
+  };
+
+  // Funções para mensagens
+  const handleOpenMessageModal = () => {
+    setCurrentMessage({
+      title: '',
+      message: '',
+      type: 'general',
+      groups: [],
+      users: []
+    });
+    setUserSearchTerm('');
+    setUserLocationFilter('all');
+    setIsMessageModalOpen(true);
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!currentMessage.title.trim() || !currentMessage.message.trim()) {
+      alert('Por favor, preencha o título e a mensagem.');
+      return;
+    }
+
+    if (currentMessage.groups.length === 0 && currentMessage.users.length === 0) {
+      alert('Por favor, selecione pelo menos um grupo ou usuário para enviar a mensagem.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/notifications/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: currentMessage.title,
+          message: currentMessage.message,
+          type: currentMessage.type,
+          priority: currentMessage.type === 'urgent' ? 'urgent' : 'normal',
+          groups: currentMessage.groups,
+          users: currentMessage.users,
+          context_type: 'subsector',
+          context_id: subsectorId
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Erro ao enviar mensagem');
+      }
+
+      setIsMessageModalOpen(false);
+      alert('Mensagem enviada com sucesso!');
+    } catch (error) {
+      console.error('Erro ao enviar mensagem:', error);
+      alert('Erro ao enviar mensagem. Tente novamente.');
     }
   };
 
@@ -259,265 +694,258 @@ export default function SubsectorManagePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-cresol-gray-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <button
-              onClick={() => router.push('/home')}
-              className="flex items-center"
-              type="button"
-            >
-              <div className="relative h-10 w-24 mr-3">
-                <Image 
-                  src="/logo-cresol.png" 
-                  alt="Logo Cresol" 
-                  fill
-                  sizes="(max-width: 768px) 100vw, 96px"
-                  style={{ objectFit: 'contain' }}
-                />
+      {/* Header Minimalista */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center space-x-6">
+              <Link 
+                href="/admin-subsetor" 
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+              <div>
+                <h1 className="text-2xl font-semibold text-gray-900">{subsector?.name}</h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  Setor: {subsector?.sector_name} • {subsector?.description}
+                </p>
               </div>
-              <h1 className="text-xl font-semibold text-cresol-gray">Portal Cresol</h1>
-            </button>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => router.push('/admin-subsetor')}
-              className="inline-flex items-center text-sm text-cresol-gray hover:text-primary"
-              type="button"
-            >
-              <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Voltar para Admin Sub-setores
-            </button>
+            </div>
+            <div className="flex items-center space-x-3">
+              <span className="text-sm text-gray-600">
+                {profile?.full_name || profile?.email}
+              </span>
+              <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+                Sair
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Conteúdo principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Cabeçalho do sub-setor */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl font-bold text-primary">{subsector.name}</h2>
-              <p className="text-cresol-gray mt-1">
-                Setor: {subsector.sector_name}
-              </p>
-              {subsector.description && (
-                <p className="text-cresol-gray mt-2">{subsector.description}</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs de navegação */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
+      {/* Navegação por Abas - Design Minimalista */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex space-x-12">
             <button
               onClick={() => setActiveTab('events')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
                 activeTab === 'events'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               Eventos ({events.length})
+              {activeTab === 'events' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+              )}
             </button>
             <button
               onClick={() => setActiveTab('news')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
                 activeTab === 'news'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               Notícias ({news.length})
+              {activeTab === 'news' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+              )}
             </button>
             <button
               onClick={() => setActiveTab('systems')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
                 activeTab === 'systems'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               Sistemas ({systems.length})
+              {activeTab === 'systems' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+              )}
             </button>
-          </nav>
+            <button
+              onClick={() => setActiveTab('groups')}
+              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
+                activeTab === 'groups'
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Grupos
+              {activeTab === 'groups' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('messages')}
+              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
+                activeTab === 'messages'
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Mensagens
+              {activeTab === 'messages' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+              )}
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* Conteúdo das tabs */}
+      {/* Conteúdo Principal */}
+      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+
+        {/* Aba de Eventos */}
         {activeTab === 'events' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-cresol-gray">Eventos do Sub-setor</h3>
-              <button
-                onClick={() => setShowEventForm(true)}
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-              >
-                Novo Evento
-              </button>
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Eventos do Subsetor</h2>
+                          <button 
+              onClick={() => handleOpenEventModal()}
+              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+            >
+              + Novo Evento
+            </button>
             </div>
 
             {events.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                <div className="text-6xl text-gray-300 mb-4">📅</div>
-                <h4 className="text-lg font-semibold text-cresol-gray mb-2">
-                  Nenhum evento encontrado
-                </h4>
-                <p className="text-cresol-gray">
-                  Crie o primeiro evento para este sub-setor.
-                </p>
+              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum evento cadastrado</h3>
+                <p className="text-gray-500">Crie o primeiro evento para este subsetor.</p>
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Título
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Data
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Ações
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {events.map((event) => (
-                        <tr key={event.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
-                              {event.title}
-                            </div>
-                            <div className="text-sm text-gray-500 truncate max-w-xs">
-                              {event.description}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(event.start_date).toLocaleDateString('pt-BR')}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div className="divide-y divide-gray-100">
+                  {events.map((event) => (
+                    <div key={event.id} className="p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900 mb-2">{event.title}</h3>
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{event.description}</p>
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>{new Date(event.start_date).toLocaleDateString('pt-BR')}</span>
+                            <span className={`px-2 py-1 rounded-full ${
                               event.is_published 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-yellow-100 text-yellow-700'
                             }`}>
                               {event.is_published ? 'Publicado' : 'Rascunho'}
                             </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                            <button
-                              onClick={() => toggleEventPublished(event.id, event.is_published)}
-                              className={`px-3 py-1 rounded text-xs ${
-                                event.is_published
-                                  ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                                  : 'bg-green-100 text-green-800 hover:bg-green-200'
-                              }`}
-                            >
-                              {event.is_published ? 'Despublicar' : 'Publicar'}
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                            {event.is_featured && (
+                              <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                                Destaque
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-4">
+                          <button 
+                            onClick={() => handleOpenEventModal(event)}
+                            className="p-2 text-gray-400 hover:text-primary transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteEvent(event.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
           </div>
         )}
 
+        {/* Aba de Notícias */}
         {activeTab === 'news' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-cresol-gray">Notícias do Sub-setor</h3>
-              <button
-                onClick={() => setShowNewsForm(true)}
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Notícias do Subsetor</h2>
+              <button 
+                onClick={() => handleOpenNewsModal()}
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
-                Nova Notícia
+                + Nova Notícia
               </button>
             </div>
 
             {news.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                <div className="text-6xl text-gray-300 mb-4">📰</div>
-                <h4 className="text-lg font-semibold text-cresol-gray mb-2">
-                  Nenhuma notícia encontrada
-                </h4>
-                <p className="text-cresol-gray">
-                  Crie a primeira notícia para este sub-setor.
-                </p>
+              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-2-2h-2" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma notícia cadastrada</h3>
+                <p className="text-gray-500">Crie a primeira notícia para este subsetor.</p>
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Título
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Data
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Ações
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {news.map((newsItem) => (
-                        <tr key={newsItem.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
-                              {newsItem.title}
-                            </div>
-                            <div className="text-sm text-gray-500 truncate max-w-xs">
-                              {newsItem.summary}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(newsItem.created_at).toLocaleDateString('pt-BR')}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              newsItem.is_published 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-yellow-100 text-yellow-800'
+              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div className="divide-y divide-gray-100">
+                  {news.map((item) => (
+                    <div key={item.id} className="p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900 mb-2">{item.title}</h3>
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.summary}</p>
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>{new Date(item.created_at).toLocaleDateString('pt-BR')}</span>
+                            <span className={`px-2 py-1 rounded-full ${
+                              item.is_published 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-yellow-100 text-yellow-700'
                             }`}>
-                              {newsItem.is_published ? 'Publicado' : 'Rascunho'}
+                              {item.is_published ? 'Publicado' : 'Rascunho'}
                             </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                            <button
-                              onClick={() => toggleNewsPublished(newsItem.id, newsItem.is_published)}
-                              className={`px-3 py-1 rounded text-xs ${
-                                newsItem.is_published
-                                  ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                                  : 'bg-green-100 text-green-800 hover:bg-green-200'
-                              }`}
-                            >
-                              {newsItem.is_published ? 'Despublicar' : 'Publicar'}
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                            {item.is_featured && (
+                              <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                                Destaque
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-4">
+                          <button 
+                            onClick={() => handleOpenNewsModal(item)}
+                            className="p-2 text-gray-400 hover:text-primary transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteNews(item.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -591,7 +1019,528 @@ export default function SubsectorManagePage() {
             )}
           </div>
         )}
+
+        {/* Aba de Grupos */}
+        {activeTab === 'groups' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Grupos de Notificação</h2>
+              <button 
+                onClick={handleOpenGroupModal}
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                + Criar Grupo
+              </button>
+            </div>
+
+            {groups.length === 0 ? (
+              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum grupo cadastrado</h3>
+                <p className="text-gray-500">Crie o primeiro grupo de notificação para este subsetor.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {groups.map((group) => (
+                  <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-md transition-all">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-2">{group.name}</h3>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{group.description}</p>
+                    <div className="text-xs text-gray-500">
+                      Criado em {new Date(group.created_at).toLocaleDateString('pt-BR')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Aba de Mensagens */}
+        {activeTab === 'messages' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Enviar Mensagem</h2>
+              <button 
+                onClick={handleOpenMessageModal}
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                + Nova Mensagem
+              </button>
+            </div>
+
+            <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Envio de Notificações</h3>
+              <p className="text-gray-500 mb-4">Envie mensagens para grupos ou usuários específicos.</p>
+              <button 
+                onClick={handleOpenMessageModal}
+                className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              >
+                Enviar Nova Mensagem
+              </button>
+            </div>
+          </div>
+        )}
       </main>
+
+      {/* Modal para Eventos */}
+      {isEventModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {isEditing ? 'Editar Evento' : 'Novo Evento'}
+            </h3>
+            <form onSubmit={handleSaveEvent} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Título *
+                </label>
+                <input
+                  type="text"
+                  value={currentEvent.title || ''}
+                  onChange={(e) => setCurrentEvent({...currentEvent, title: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição *
+                </label>
+                <textarea
+                  value={currentEvent.description || ''}
+                  onChange={(e) => setCurrentEvent({...currentEvent, description: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={4}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Data/Hora *
+                </label>
+                <input
+                  type="datetime-local"
+                  value={currentEvent.start_date ? new Date(currentEvent.start_date).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setCurrentEvent({...currentEvent, start_date: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  required
+                />
+              </div>
+              <div className="flex space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={currentEvent.is_featured || false}
+                    onChange={(e) => setCurrentEvent({...currentEvent, is_featured: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Destacar</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={currentEvent.is_published || false}
+                    onChange={(e) => setCurrentEvent({...currentEvent, is_published: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Publicar</span>
+                </label>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsEventModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  {isEditing ? 'Salvar' : 'Criar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Notícias */}
+      {isNewsModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {isEditing ? 'Editar Notícia' : 'Nova Notícia'}
+            </h3>
+            <form onSubmit={handleSaveNews} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Título *
+                </label>
+                <input
+                  type="text"
+                  value={currentNews.title || ''}
+                  onChange={(e) => setCurrentNews({...currentNews, title: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Resumo *
+                </label>
+                <textarea
+                  value={currentNews.summary || ''}
+                  onChange={(e) => setCurrentNews({...currentNews, summary: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={4}
+                  required
+                />
+              </div>
+              <div className="flex space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={currentNews.is_featured || false}
+                    onChange={(e) => setCurrentNews({...currentNews, is_featured: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Destacar</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={currentNews.is_published || false}
+                    onChange={(e) => setCurrentNews({...currentNews, is_published: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Publicar</span>
+                </label>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsNewsModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  {isEditing ? 'Salvar' : 'Criar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Grupos */}
+      {isGroupModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Criar Grupo de Notificação
+            </h3>
+            <form onSubmit={handleSaveGroup} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome do Grupo *
+                </label>
+                <input
+                  type="text"
+                  value={currentGroup.name}
+                  onChange={(e) => setCurrentGroup({...currentGroup, name: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição
+                </label>
+                <textarea
+                  value={currentGroup.description}
+                  onChange={(e) => setCurrentGroup({...currentGroup, description: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={3}
+                  placeholder="Descrição opcional do grupo"
+                />
+              </div>
+              {/* Filtros de usuários */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Buscar Usuários
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      value={userSearchTerm}
+                      onChange={(e) => setUserSearchTerm(e.target.value)}
+                      placeholder="Nome ou e-mail"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Filtrar por Local
+                  </label>
+                  <select
+                    value={userLocationFilter}
+                    onChange={(e) => setUserLocationFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  >
+                    <option value="all">Todos os locais</option>
+                    {workLocations.map(loc => (
+                      <option key={loc.id} value={loc.id}>{loc.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Selecionar Membros
+                </label>
+                <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
+                  {allUsers
+                    .filter(user => {
+                      const matchesSearch = userSearchTerm === '' || 
+                        user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                        user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
+                      const matchesLocation = userLocationFilter === 'all' || user.work_location_id === userLocationFilter;
+                      return matchesSearch && matchesLocation;
+                    })
+                    .map((user) => (
+                    <label key={user.id} className="flex items-center py-1">
+                      <input
+                        type="checkbox"
+                        checked={currentGroup.members.includes(user.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCurrentGroup({
+                              ...currentGroup,
+                              members: [...currentGroup.members, user.id]
+                            });
+                          } else {
+                            setCurrentGroup({
+                              ...currentGroup,
+                              members: currentGroup.members.filter(id => id !== user.id)
+                            });
+                          }
+                        }}
+                        className="mr-2"
+                      />
+                      <div className="flex-1">
+                        <span className="text-sm font-medium">{user.full_name}</span>
+                        <div className="text-xs text-gray-500">{user.email}</div>
+                        {user.work_location_id && (
+                          <div className="text-xs text-gray-400">
+                            {workLocations.find(loc => loc.id === user.work_location_id)?.name}
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                  {allUsers.filter(user => {
+                    const matchesSearch = userSearchTerm === '' || 
+                      user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                      user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
+                    const matchesLocation = userLocationFilter === 'all' || user.work_location_id === userLocationFilter;
+                    return matchesSearch && matchesLocation;
+                  }).length === 0 && (
+                    <div className="text-sm text-gray-500 text-center py-4">
+                      Nenhum usuário encontrado com os filtros aplicados
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsGroupModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  Criar Grupo
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Mensagens */}
+      {isMessageModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Enviar Mensagem
+            </h3>
+            <form onSubmit={handleSendMessage} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Título da Mensagem *
+                </label>
+                <input
+                  type="text"
+                  value={currentMessage.title}
+                  onChange={(e) => setCurrentMessage({...currentMessage, title: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mensagem *
+                </label>
+                <textarea
+                  value={currentMessage.message}
+                  onChange={(e) => setCurrentMessage({...currentMessage, message: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={4}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo
+                </label>
+                <select
+                  value={currentMessage.type}
+                  onChange={(e) => setCurrentMessage({...currentMessage, type: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                >
+                  <option value="general">Geral</option>
+                  <option value="important">Importante</option>
+                  <option value="urgent">Urgente</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Enviar para Grupos
+                </label>
+                <div className="border border-gray-300 rounded-lg p-3 max-h-32 overflow-y-auto">
+                  {groups.map((group) => (
+                    <label key={group.id} className="flex items-center py-1">
+                      <input
+                        type="checkbox"
+                        checked={currentMessage.groups.includes(group.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCurrentMessage({
+                              ...currentMessage,
+                              groups: [...currentMessage.groups, group.id]
+                            });
+                          } else {
+                            setCurrentMessage({
+                              ...currentMessage,
+                              groups: currentMessage.groups.filter(id => id !== group.id)
+                            });
+                          }
+                        }}
+                        className="mr-2"
+                      />
+                      <span className="text-sm">{group.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Enviar para Usuários Específicos
+                </label>
+                <div className="border border-gray-300 rounded-lg p-3 max-h-32 overflow-y-auto">
+                  {allUsers
+                    .filter(user => {
+                      const matchesSearch = userSearchTerm === '' || 
+                        user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                        user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
+                      const matchesLocation = userLocationFilter === 'all' || user.work_location_id === userLocationFilter;
+                      return matchesSearch && matchesLocation;
+                    })
+                    .map((user) => (
+                    <label key={user.id} className="flex items-center py-1">
+                      <input
+                        type="checkbox"
+                        checked={currentMessage.users.includes(user.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCurrentMessage({
+                              ...currentMessage,
+                              users: [...currentMessage.users, user.id]
+                            });
+                          } else {
+                            setCurrentMessage({
+                              ...currentMessage,
+                              users: currentMessage.users.filter(id => id !== user.id)
+                            });
+                          }
+                        }}
+                        className="mr-2"
+                      />
+                      <div className="flex-1">
+                        <span className="text-sm font-medium">{user.full_name}</span>
+                        <div className="text-xs text-gray-500">{user.email}</div>
+                        {user.work_location_id && (
+                          <div className="text-xs text-gray-400">
+                            {workLocations.find(loc => loc.id === user.work_location_id)?.name}
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsMessageModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  Enviar Mensagem
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

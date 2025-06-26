@@ -6,6 +6,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import EventCalendar from '../components/EventCalendar';
+import Navbar from '../components/Navbar';
+import Breadcrumbs from '../components/Breadcrumbs';
+import Footer from '../components/Footer';
 
 interface EventItem {
   id: string;
@@ -31,6 +34,11 @@ export default function EventosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'upcoming' | 'past'>('upcoming');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [sectorFilter, setSectorFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'date' | 'title' | 'sector'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
+  const [sectors, setSectors] = useState<any[]>([]);
 
   useEffect(() => {
     // Definir o modo de visualização com base no parâmetro da URL
@@ -140,9 +148,13 @@ export default function EventosPage() {
   }, [router]);
 
   useEffect(() => {
-    // Aplicar filtros sempre que events, searchTerm ou filterType mudarem
+    // Aplicar filtros sempre que algum filtro mudar
     applyFilters();
-  }, [events, searchTerm, filterType]);
+  }, [events, searchTerm, filterType, sectorFilter, sortBy, sortOrder, showFeaturedOnly]);
+
+  useEffect(() => {
+    fetchSectors();
+  }, []);
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -181,7 +193,25 @@ export default function EventosPage() {
     }
   };
 
-  // Filtrar eventos com base nos critérios
+  const fetchSectors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sectors')
+        .select('id, name')
+        .order('name');
+
+      if (error) {
+        console.error('Erro ao buscar setores:', error);
+        return;
+      }
+
+      setSectors(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar setores:', error);
+    }
+  };
+
+  // Filtrar e ordenar eventos com base nos critérios
   const applyFilters = () => {
     const now = new Date();
     let filtered = [...events];
@@ -191,6 +221,16 @@ export default function EventosPage() {
       filtered = filtered.filter(event => new Date(event.start_date) >= now);
     } else if (filterType === 'past') {
       filtered = filtered.filter(event => new Date(event.start_date) < now);
+    }
+
+    // Filtrar por setor
+    if (sectorFilter !== 'all') {
+      filtered = filtered.filter(event => event.sector_id === sectorFilter);
+    }
+
+    // Filtrar por eventos em destaque
+    if (showFeaturedOnly) {
+      filtered = filtered.filter(event => event.is_featured);
     }
 
     // Filtrar por termo de busca
@@ -205,12 +245,24 @@ export default function EventosPage() {
       );
     }
 
-    // Ordenar eventos (próximos em ordem crescente de data, passados em ordem decrescente)
-    if (filterType === 'past') {
-      filtered.sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
-    } else {
-      filtered.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
-    }
+    // Ordenar eventos
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'date':
+          comparison = new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+          break;
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'sector':
+          comparison = (a.sector_name || '').localeCompare(b.sector_name || '');
+          break;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
 
     setFilteredEvents(filtered);
   };
@@ -253,39 +305,11 @@ export default function EventosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cresol-gray-light/30">
-      {/* Header simples com navegação */}
-      <header className="bg-white border-b border-cresol-gray-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-                          <Link href="/home" className="flex items-center">
-              <div className="relative h-10 w-24 mr-3">
-                <Image 
-                  src="/logo-cresol.png" 
-                  alt="Logo Cresol" 
-                  fill
-                  sizes="(max-width: 768px) 100vw, 96px"
-                  style={{ objectFit: 'contain' }}
-                />
-              </div>
-              <h1 className="text-xl font-semibold text-cresol-gray">Portal Cresol</h1>
-            </Link>
-          </div>
-          
-          <Link 
-                          href="/home" 
-            className="inline-flex items-center text-sm text-cresol-gray hover:text-primary"
-          >
-            <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-                          Voltar para Home
-          </Link>
-        </div>
-      </header>
-
-      {/* Conteúdo principal */}
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Breadcrumbs className="mb-6" />
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-cresol-gray mb-4">Eventos</h1>
           
@@ -325,12 +349,14 @@ export default function EventosPage() {
           
           {viewMode === 'list' && (
             <>
-              {/* Filtros e Busca */}
-              <div className="flex flex-col md:flex-row gap-4 mt-6">
-                <div className="flex flex-1 max-w-md">
-                  <div className="relative flex-1">
+              {/* Barra de Filtros Avançados */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Busca */}
+                  <div className="flex-1 max-w-md">
+                    <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-cresol-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
@@ -339,32 +365,131 @@ export default function EventosPage() {
                       placeholder="Buscar eventos..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-2 border border-cresol-gray-light rounded-md leading-5 bg-white text-cresol-gray focus:outline-none focus:border-primary"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2">
-                  <span className="text-cresol-gray">Filtrar:</span>
-                  <div className="flex border border-cresol-gray-light rounded-md overflow-hidden">
+                  {/* Filtro por Período */}
+                  <div className="flex border border-gray-300 rounded-md overflow-hidden">
                     <button
-                      className={`px-4 py-2 text-sm ${filterType === 'upcoming' ? 'bg-primary text-white' : 'bg-white text-cresol-gray hover:bg-cresol-gray-light/20'}`}
+                      className={`px-4 py-2 text-sm font-medium ${filterType === 'upcoming' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                       onClick={() => setFilterType('upcoming')}
                     >
                       Próximos
                     </button>
                     <button
-                      className={`px-4 py-2 text-sm ${filterType === 'past' ? 'bg-primary text-white' : 'bg-white text-cresol-gray hover:bg-cresol-gray-light/20'}`}
+                      className={`px-4 py-2 text-sm font-medium ${filterType === 'past' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                       onClick={() => setFilterType('past')}
                     >
                       Anteriores
                     </button>
                     <button
-                      className={`px-4 py-2 text-sm ${filterType === 'all' ? 'bg-primary text-white' : 'bg-white text-cresol-gray hover:bg-cresol-gray-light/20'}`}
+                      className={`px-4 py-2 text-sm font-medium ${filterType === 'all' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                       onClick={() => setFilterType('all')}
                     >
                       Todos
                     </button>
+                  </div>
+
+                  {/* Filtro por Setor */}
+                  <select
+                    value={sectorFilter}
+                    onChange={(e) => setSectorFilter(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="all">Todos os setores</option>
+                    {sectors.map((sector) => (
+                      <option key={sector.id} value={sector.id}>
+                        {sector.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Ordenação */}
+                  <div className="flex space-x-2">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                      <option value="date">Data</option>
+                      <option value="title">Título</option>
+                      <option value="sector">Setor</option>
+                    </select>
+                    
+                    <button
+                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      title={`Ordenar ${sortOrder === 'asc' ? 'decrescente' : 'crescente'}`}
+                    >
+                      <svg className={`h-4 w-4 text-gray-600 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Segunda linha de filtros */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex items-center space-x-4">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={showFeaturedOnly}
+                        onChange={(e) => setShowFeaturedOnly(e.target.checked)}
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Apenas eventos em destaque</span>
+                    </label>
+                    
+                    <div className="text-sm text-gray-600">
+                      {filteredEvents.length} evento{filteredEvents.length !== 1 ? 's' : ''} encontrado{filteredEvents.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+
+                  {/* Ações */}
+                  <div className="flex items-center space-x-2 mt-2 sm:mt-0">
+                    <button
+                      onClick={() => {
+                        setSearchTerm('');
+                        setFilterType('upcoming');
+                        setSectorFilter('all');
+                        setSortBy('date');
+                        setSortOrder('asc');
+                        setShowFeaturedOnly(false);
+                      }}
+                      className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50"
+                    >
+                      Limpar filtros
+                    </button>
+                    
+                    {filteredEvents.length > 0 && (
+                      <button
+                        onClick={() => {
+                          const csvContent = [
+                            ['Título', 'Descrição', 'Local', 'Data Início', 'Data Fim', 'Setor'],
+                            ...filteredEvents.map(event => [
+                              event.title,
+                              event.description,
+                              event.location,
+                              formatDate(event.start_date),
+                              event.end_date ? formatDate(event.end_date) : '',
+                              event.sector_name || ''
+                            ])
+                          ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
+
+                          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                          const link = document.createElement('a');
+                          link.href = URL.createObjectURL(blob);
+                          link.download = `eventos_${new Date().toISOString().split('T')[0]}.csv`;
+                          link.click();
+                        }}
+                        className="px-3 py-1 text-sm text-white bg-primary hover:bg-primary-dark rounded-md border"
+                      >
+                        Exportar CSV
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -380,34 +505,45 @@ export default function EventosPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                   {filteredEvents.map((event) => (
-                    <Link 
+                    <div 
                       key={event.id} 
-                      href={`/eventos/${event.id}`}
-                      className="bg-white rounded-lg shadow-sm border border-cresol-gray-light overflow-hidden hover:shadow-md transition-shadow"
+                      className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                     >
                       <div className="p-6">
                         <div className="flex justify-between items-start mb-3">
+                          <div className="flex space-x-2">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                             Evento
                           </span>
+                            {event.is_featured && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                ⭐ Destaque
+                              </span>
+                            )}
+                          </div>
                           {event.sector_name && (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                               {event.sector_name}
                             </span>
                           )}
                         </div>
-                        <h3 className="text-lg font-semibold text-cresol-gray mb-3">{event.title}</h3>
                         
-                        <div className="text-sm text-cresol-gray mb-3">
-                          <div className="flex items-center mb-2">
-                            <svg className="h-4 w-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3 hover:text-primary cursor-pointer">
+                          <Link href={`/eventos/${event.id}`}>
+                            {event.title}
+                          </Link>
+                        </h3>
+                        
+                        <div className="text-sm text-gray-600 mb-3 space-y-2">
+                          <div className="flex items-center">
+                            <svg className="h-4 w-4 mr-2 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             <span>{formatEventPeriod(event.start_date, event.end_date)}</span>
                           </div>
                           
                           <div className="flex items-center">
-                            <svg className="h-4 w-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg className="h-4 w-4 mr-2 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
@@ -415,13 +551,78 @@ export default function EventosPage() {
                           </div>
                         </div>
                         
-                        <p className="text-cresol-gray mb-4 line-clamp-3">{event.description}</p>
+                        <p className="text-gray-600 mb-4 text-sm line-clamp-2 leading-relaxed">{event.description}</p>
                         
-                        <div className="text-primary text-sm font-medium">
+                        {/* Ações do evento */}
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                          <Link 
+                            href={`/eventos/${event.id}`}
+                            className="text-primary text-sm font-medium hover:text-primary-dark transition-colors"
+                          >
                           Ver detalhes →
+                          </Link>
+                          
+                          <div className="flex items-center space-x-2">
+                            {/* Botão para adicionar ao calendário */}
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const startDate = new Date(event.start_date);
+                                const endDate = event.end_date ? new Date(event.end_date) : new Date(startDate.getTime() + 60 * 60 * 1000);
+                                
+                                const formatCalendarDate = (date: Date) => {
+                                  return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                                };
+
+                                const details = encodeURIComponent(event.description);
+                                const location = encodeURIComponent(event.location);
+                                const title = encodeURIComponent(event.title);
+                                
+                                const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formatCalendarDate(startDate)}/${formatCalendarDate(endDate)}&details=${details}&location=${location}`;
+                                
+                                window.open(googleCalendarUrl, '_blank');
+                              }}
+                              className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-md transition-colors"
+                              title="Adicionar ao Google Calendar"
+                            >
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </button>
+                            
+                            {/* Botão de compartilhar */}
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (navigator.share) {
+                                  navigator.share({
+                                    title: event.title,
+                                    text: event.description,
+                                    url: `${window.location.origin}/eventos/${event.id}`
+                                  });
+                                } else {
+                                  // Fallback para copiar URL
+                                  navigator.clipboard.writeText(`${window.location.origin}/eventos/${event.id}`);
+                                  // Feedback visual (opcional)
+                                  const button = e.currentTarget;
+                                  const originalText = button.title;
+                                  button.title = 'Link copiado!';
+                                  setTimeout(() => {
+                                    button.title = originalText;
+                                  }, 2000);
+                                }
+                              }}
+                              className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-md transition-colors"
+                              title="Compartilhar evento"
+                            >
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               )}
@@ -435,6 +636,7 @@ export default function EventosPage() {
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 } 

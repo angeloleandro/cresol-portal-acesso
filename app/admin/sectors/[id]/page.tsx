@@ -14,6 +14,14 @@ interface Sector {
   created_at: string;
 }
 
+interface Subsector {
+  id: string;
+  name: string;
+  description: string;
+  sector_id: string;
+  created_at: string;
+}
+
 interface SectorNews {
   id: string;
   sector_id: string;
@@ -117,9 +125,10 @@ export default function SectorDashboard() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sector, setSector] = useState<Sector | null>(null);
+  const [subsectors, setSubsectors] = useState<Subsector[]>([]);
   const [news, setNews] = useState<SectorNews[]>([]);
   const [events, setEvents] = useState<SectorEvent[]>([]);
-  const [activeTab, setActiveTab] = useState('news');
+  const [activeTab, setActiveTab] = useState<'news' | 'events' | 'subsectors' | 'groups' | 'messages'>('news');
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   // Notícia que está sendo editada/criada
@@ -143,9 +152,16 @@ export default function SectorDashboard() {
     is_published: false
   });
 
+  const [currentSubsector, setCurrentSubsector] = useState<Partial<Subsector>>({
+    name: '',
+    description: '',
+    sector_id: sectorId
+  });
+
   // Estados de modais
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [isSubsectorModalOpen, setIsSubsectorModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   // Adicionando novos estados para lidar com upload de imagens
@@ -159,6 +175,33 @@ export default function SectorDashboard() {
   const [rotation, setRotation] = useState(0);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [originalImage, setOriginalImage] = useState<string | null>(null);
+
+  // Estados para grupos
+  const [groups, setGroups] = useState<any[]>([]);
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [currentGroup, setCurrentGroup] = useState({
+    name: '',
+    description: '',
+    members: [] as string[]
+  });
+
+  // Estados para mensagens
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState({
+    title: '',
+    message: '',
+    type: 'general',
+    groups: [] as string[],
+    users: [] as string[]
+  });
+
+  // Estados para seleção de usuários
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [workLocations, setWorkLocations] = useState<any[]>([]);
+  
+  // Estados para filtros de usuários
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userLocationFilter, setUserLocationFilter] = useState('all');
 
   useEffect(() => {
     const checkUser = async () => {
@@ -199,9 +242,15 @@ export default function SectorDashboard() {
 
       await Promise.all([
         fetchSector(),
+        fetchSubsectors(),
         fetchNews(),
         fetchEvents()
       ]);
+      
+      // Buscar grupos, usuários e locais de trabalho
+      await fetchGroups();
+      await fetchUsers();
+      await fetchWorkLocations();
       
       setLoading(false);
     };
@@ -224,6 +273,20 @@ export default function SectorDashboard() {
     setSector(data);
   };
 
+  const fetchSubsectors = async () => {
+    const { data, error } = await supabase
+      .from('subsectors')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('name');
+    
+    if (error) {
+      console.error('Erro ao buscar subsetores:', error);
+    } else {
+      setSubsectors(data || []);
+    }
+  };
+
   const fetchNews = async () => {
     const { data, error } = await supabase
       .from('sector_news')
@@ -244,7 +307,7 @@ export default function SectorDashboard() {
       .from('sector_events')
       .select('*')
       .eq('sector_id', sectorId)
-      .order('start_date', { ascending: true });
+      .order('start_date', { ascending: false });
     
     if (error) {
       console.error('Erro ao buscar eventos:', error);
@@ -252,6 +315,55 @@ export default function SectorDashboard() {
     }
     
     setEvents(data || []);
+  };
+
+  const fetchGroups = async () => {
+    try {
+      const response = await fetch('/api/notifications/groups');
+      const result = await response.json();
+      
+      if (result.groups) {
+        setGroups(result.groups.filter((group: any) => group.sector_id === sectorId));
+      }
+    } catch (error) {
+      console.error('Erro ao buscar grupos:', error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, work_location_id')
+        .order('full_name');
+        
+      if (error) {
+        console.error('Erro ao buscar usuários:', error);
+        return;
+      }
+      
+      setAllUsers(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error);
+    }
+  };
+
+  const fetchWorkLocations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('work_locations')
+        .select('id, name')
+        .order('name');
+
+      if (error) {
+        console.error('Erro ao buscar locais de trabalho:', error);
+        return;
+      }
+
+      setWorkLocations(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar locais de trabalho:', error);
+    }
   };
 
   const handleLogout = async () => {
@@ -684,9 +796,183 @@ export default function SectorDashboard() {
     return null;
   };
 
+  // Funções de gerenciamento de subsetores
+  const handleOpenSubsectorModal = (subsector?: Subsector) => {
+    if (subsector) {
+      setCurrentSubsector(subsector);
+      setIsEditing(true);
+    } else {
+      setCurrentSubsector({
+        name: '',
+        description: '',
+        sector_id: sectorId
+      });
+      setIsEditing(false);
+    }
+    setIsSubsectorModalOpen(true);
+  };
+
+  const handleSaveSubsector = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      if (isEditing && currentSubsector.id) {
+        const { error } = await supabase
+          .from('subsectors')
+          .update({
+            name: currentSubsector.name,
+            description: currentSubsector.description,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', currentSubsector.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('subsectors')
+          .insert([{
+            name: currentSubsector.name,
+            description: currentSubsector.description,
+            sector_id: sectorId
+          }]);
+
+        if (error) throw error;
+      }
+
+      setIsSubsectorModalOpen(false);
+      await fetchSubsectors();
+    } catch (error) {
+      console.error('Erro ao salvar subsetor:', error);
+      alert('Erro ao salvar subsetor. Tente novamente.');
+    }
+  };
+
+  const handleDeleteSubsector = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este subsetor?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('subsectors')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      await fetchSubsectors();
+    } catch (error) {
+      console.error('Erro ao excluir subsetor:', error);
+      alert('Erro ao excluir subsetor. Tente novamente.');
+    }
+  };
+
+  // Funções para grupos
+  const handleOpenGroupModal = () => {
+    setCurrentGroup({
+      name: '',
+      description: '',
+      members: []
+    });
+    setUserSearchTerm('');
+    setUserLocationFilter('all');
+    setIsGroupModalOpen(true);
+  };
+
+  const handleSaveGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!currentGroup.name.trim()) {
+      alert('Por favor, preencha o nome do grupo.');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/notifications/groups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: currentGroup.name,
+          description: currentGroup.description,
+          sectorId: sectorId,
+          members: currentGroup.members
+        }),
+      });
+
+      if (response.ok) {
+        setIsGroupModalOpen(false);
+        await fetchGroups();
+      } else {
+        const error = await response.json();
+        alert(`Erro ao criar grupo: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao salvar grupo:', error);
+      alert('Erro ao salvar grupo. Tente novamente.');
+    }
+  };
+
+  // Funções para mensagens
+  const handleOpenMessageModal = () => {
+    setCurrentMessage({
+      title: '',
+      message: '',
+      type: 'general',
+      groups: [],
+      users: []
+    });
+    setUserSearchTerm('');
+    setUserLocationFilter('all');
+    setIsMessageModalOpen(true);
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!currentMessage.title.trim() || !currentMessage.message.trim()) {
+      alert('Por favor, preencha o título e a mensagem.');
+      return;
+    }
+
+    if (currentMessage.groups.length === 0 && currentMessage.users.length === 0) {
+      alert('Por favor, selecione pelo menos um grupo ou usuário.');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/notifications/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: currentMessage.title,
+          message: currentMessage.message,
+          type: currentMessage.type,
+          groups: currentMessage.groups,
+          users: currentMessage.users,
+          sectorId: sectorId
+        }),
+      });
+
+      if (response.ok) {
+        setIsMessageModalOpen(false);
+        alert('Mensagem enviada com sucesso!');
+      } else {
+        const error = await response.json();
+        alert(`Erro ao enviar mensagem: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao enviar mensagem:', error);
+      alert('Erro ao enviar mensagem. Tente novamente.');
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">Carregando...</p>
@@ -697,10 +983,10 @@ export default function SectorDashboard() {
 
   if (!isAuthorized) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-center">
-          <p className="text-red-600">Você não tem autorização para acessar esta página.</p>
-          <Link href="/dashboard" className="mt-4 text-primary hover:underline block">
+          <p className="text-red-600 mb-4">Você não tem autorização para acessar esta página.</p>
+          <Link href="/dashboard" className="text-primary hover:underline">
             Voltar para o Dashboard
           </Link>
         </div>
@@ -710,374 +996,465 @@ export default function SectorDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="relative h-10 w-24 mr-4">
-              <Image 
-                src="/logo-cresol.png" 
-                alt="Logo Cresol" 
-                fill
-                style={{ objectFit: 'contain' }}
-              />
+      {/* Header Minimalista */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center space-x-6">
+              <Link 
+                href="/admin" 
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+              <div>
+                <h1 className="text-2xl font-semibold text-gray-900">{sector?.name}</h1>
+                <p className="text-sm text-gray-500 mt-1">{sector?.description}</p>
             </div>
-            <h1 className="text-xl font-semibold text-gray-800">Painel Administrativo</h1>
           </div>
-          
-          <div className="flex items-center">
-            <Link href="/admin" className="text-sm text-gray-600 mr-4 hover:text-primary">
+            <div className="flex items-center space-x-3">
+              <Link 
+                href="/admin" 
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+              >
               Painel Admin
             </Link>
-            <Link href="/admin/sectors" className="text-sm text-gray-600 mr-4 hover:text-primary">
-              Setores
-            </Link>
-            <Link href="/dashboard" className="text-sm text-gray-600 mr-4 hover:text-primary">
-              Dashboard
-            </Link>
-            <span className="text-sm text-gray-600 mr-4">
-              Olá, {user?.user_metadata?.full_name || user?.email}
-            </span>
             <button 
               onClick={handleLogout}
-              className="text-sm text-primary hover:text-primary-dark"
+                className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
             >
               Sair
             </button>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Setor: {sector?.name}</h2>
-              <p className="text-gray-600">{sector?.description}</p>
-            </div>
-          </div>
-          
-          {/* Abas */}
-          <div className="border-b border-gray-200 mt-6">
-            <nav className="-mb-px flex space-x-8">
+      {/* Navegação por Abas - Design Minimalista */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex space-x-12">
               <button
                 onClick={() => setActiveTab('news')}
-                className={`${
+              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
                   activeTab === 'news'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-              >
-                Notícias
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Notícias ({news.length})
+              {activeTab === 'news' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+              )}
               </button>
               <button
                 onClick={() => setActiveTab('events')}
-                className={`${
+              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
                   activeTab === 'events'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-              >
-                Eventos
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Eventos ({events.length})
+              {activeTab === 'events' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+              )}
               </button>
-            </nav>
+            <button
+              onClick={() => setActiveTab('subsectors')}
+              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
+                activeTab === 'subsectors'
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Subsetores ({subsectors.length})
+              {activeTab === 'subsectors' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('groups')}
+              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
+                activeTab === 'groups'
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Grupos
+              {activeTab === 'groups' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('messages')}
+              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
+                activeTab === 'messages'
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Mensagens
+              {activeTab === 'messages' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+              )}
+            </button>
+          </div>
           </div>
         </div>
 
-        {/* Conteúdo da aba de Notícias */}
+      {/* Conteúdo Principal */}
+      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+        
+        {/* Aba de Notícias */}
         {activeTab === 'news' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-medium text-gray-800">Notícias do Setor</h3>
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Notícias do Setor</h2>
               <button
                 onClick={() => handleOpenNewsModal()}
-                className="btn-primary"
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
-                Adicionar Notícia
+                + Nova Notícia
               </button>
             </div>
 
             {news.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                <p className="text-gray-600">Nenhuma notícia cadastrada para este setor.</p>
+              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-2-2h-2" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma notícia cadastrada</h3>
+                <p className="text-gray-500">Crie a primeira notícia para este setor.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 bg-white shadow-sm rounded-lg">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Título
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Data
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Destaque
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Ações
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
+              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div className="divide-y divide-gray-100">
                     {news.map((item) => (
-                      <tr key={item.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {item.title}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(item.created_at)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    <div key={item.id} className="p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900 mb-2">{item.title}</h3>
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.summary}</p>
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>{formatDate(item.created_at)}</span>
+                            <span className={`px-2 py-1 rounded-full ${
                             item.is_published 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-yellow-100 text-yellow-700'
                           }`}>
                             {item.is_published ? 'Publicado' : 'Rascunho'}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            item.is_featured 
-                              ? 'bg-blue-100 text-blue-800' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {item.is_featured ? 'Destaque' : 'Normal'}
+                            {item.is_featured && (
+                              <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                                Destaque
                           </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-4">
                           <button 
                             onClick={() => handleOpenNewsModal(item)}
-                            className="text-primary hover:text-primary-dark mr-4"
+                            className="p-2 text-gray-400 hover:text-primary transition-colors"
                           >
-                            Editar
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
                           </button>
                           <button 
                             onClick={() => handleDeleteNews(item.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                           >
-                            Excluir
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
+                    </div>
                     ))}
-                  </tbody>
-                </table>
+                </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Conteúdo da aba de Eventos */}
+        {/* Aba de Eventos */}
         {activeTab === 'events' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-medium text-gray-800">Eventos do Setor</h3>
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Eventos do Setor</h2>
               <button
                 onClick={() => handleOpenEventModal()}
-                className="btn-primary"
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
-                Adicionar Evento
+                + Novo Evento
               </button>
             </div>
 
             {events.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                <p className="text-gray-600">Nenhum evento cadastrado para este setor.</p>
+              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum evento cadastrado</h3>
+                <p className="text-gray-500">Crie o primeiro evento para este setor.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 bg-white shadow-sm rounded-lg">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Título
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Data Início
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Local
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Ações
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
+              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div className="divide-y divide-gray-100">
                     {events.map((item) => (
-                      <tr key={item.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {item.title}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(item.start_date)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.location || 'Não definido'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    <div key={item.id} className="p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900 mb-2">{item.title}</h3>
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>{formatDate(item.start_date)}</span>
+                            {item.location && <span>📍 {item.location}</span>}
+                            <span className={`px-2 py-1 rounded-full ${
                             item.is_published 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-yellow-100 text-yellow-700'
                           }`}>
                             {item.is_published ? 'Publicado' : 'Rascunho'}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            {item.is_featured && (
+                              <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                                Destaque
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-4">
                           <button 
                             onClick={() => handleOpenEventModal(item)}
-                            className="text-primary hover:text-primary-dark mr-4"
+                            className="p-2 text-gray-400 hover:text-primary transition-colors"
                           >
-                            Editar
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
                           </button>
                           <button 
                             onClick={() => handleDeleteEvent(item.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                           >
-                            Excluir
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
+                    </div>
                     ))}
-                  </tbody>
-                </table>
+                </div>
               </div>
             )}
           </div>
         )}
+
+        {/* Aba de Subsetores */}
+        {activeTab === 'subsectors' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Subsetores</h2>
+              <button 
+                onClick={() => handleOpenSubsectorModal()}
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                + Novo Subsetor
+              </button>
+            </div>
+
+            {subsectors.length === 0 ? (
+              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum subsetor cadastrado</h3>
+                <p className="text-gray-500">Crie o primeiro subsetor para este setor.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {subsectors.map((subsector) => (
+                  <div key={subsector.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-md transition-all">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      </div>
+                      <div className="flex space-x-1">
+                        <button 
+                          onClick={() => handleOpenSubsectorModal(subsector)}
+                          className="p-2 text-gray-400 hover:text-primary transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteSubsector(subsector.id)}
+                          className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                        <Link 
+                          href={`/admin-subsetor/subsetores/${subsector.id}`}
+                          className="p-2 text-gray-400 hover:text-primary transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </Link>
+                      </div>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-2">{subsector.name}</h3>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-3">{subsector.description}</p>
+                    <div className="text-xs text-gray-500">
+                      Criado em {formatDate(subsector.created_at)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Aba de Grupos */}
+        {activeTab === 'groups' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Grupos de Notificação</h2>
+              <button 
+                onClick={handleOpenGroupModal}
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                + Criar Grupo
+              </button>
+            </div>
+
+            {groups.length === 0 ? (
+              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum grupo cadastrado</h3>
+                <p className="text-gray-500">Crie o primeiro grupo de notificação para este setor.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {groups.map((group) => (
+                  <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-md transition-all">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-2">{group.name}</h3>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{group.description}</p>
+                    <div className="text-xs text-gray-500">
+                      Criado em {formatDate(group.created_at)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Aba de Mensagens */}
+        {activeTab === 'messages' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Enviar Mensagem</h2>
+              <button 
+                onClick={handleOpenMessageModal}
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                + Nova Mensagem
+              </button>
+            </div>
+
+            <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Envio de Notificações</h3>
+              <p className="text-gray-500 mb-4">Envie mensagens para grupos ou usuários específicos.</p>
+              <button 
+                onClick={handleOpenMessageModal}
+                className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              >
+                Enviar Nova Mensagem
+              </button>
+            </div>
+          </div>
+        )}
+
+
       </main>
 
-      {/* Modal para adicionar/editar notícia */}
-      {isNewsModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 overflow-y-auto max-h-[90vh]">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">
-              {isEditing ? 'Editar Notícia' : 'Adicionar Nova Notícia'}
+      {/* Modal para Subsetores */}
+      {isSubsectorModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {isEditing ? 'Editar Subsetor' : 'Novo Subsetor'}
             </h3>
-            
-            <form onSubmit={handleSaveNews}>
-              <div className="mb-4">
-                <label htmlFor="title" className="form-label">Título da Notícia*</label>
+            <form onSubmit={handleSaveSubsector} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome
+                </label>
                 <input
-                  id="title"
                   type="text"
-                  value={currentNews.title}
-                  onChange={(e) => setCurrentNews({...currentNews, title: e.target.value})}
-                  className="input"
+                  value={currentSubsector.name || ''}
+                  onChange={(e) => setCurrentSubsector({...currentSubsector, name: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                   required
                 />
               </div>
-              
-              <div className="mb-4">
-                <label htmlFor="summary" className="form-label">Resumo*</label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição
+                </label>
                 <textarea
-                  id="summary"
-                  value={currentNews.summary}
-                  onChange={(e) => setCurrentNews({...currentNews, summary: e.target.value})}
-                  className="input"
-                  rows={2}
-                  required
+                  value={currentSubsector.description || ''}
+                  onChange={(e) => setCurrentSubsector({...currentSubsector, description: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={3}
                 />
               </div>
-              
-              <div className="mb-4">
-                <label htmlFor="content" className="form-label">Conteúdo*</label>
-                <textarea
-                  id="content"
-                  value={currentNews.content}
-                  onChange={(e) => setCurrentNews({...currentNews, content: e.target.value})}
-                  className="input"
-                  rows={8}
-                  required
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label htmlFor="image" className="form-label">Imagem</label>
-                <div className="mt-1 flex flex-col space-y-2">
-                  {/* Campo de upload de imagem */}
-                  <input
-                    id="image"
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    className="block w-full text-sm text-gray-500
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-md file:border-0
-                      file:text-sm file:font-medium
-                      file:bg-primary file:text-white
-                      hover:file:bg-primary-dark"
-                  />
-                  
-                  {/* Loading indicator */}
-                  {uploadingImage && (
-                    <div className="flex items-center space-x-2 text-sm text-primary">
-                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary"></div>
-                      <span>Enviando imagem...</span>
-                    </div>
-                  )}
-                  
-                  {/* Preview de imagem */}
-                  {renderImagePreview()}
-                  
-                  <p className="text-xs text-gray-500">
-                    Tamanho máximo: 5MB. Formatos suportados: JPG, PNG, GIF.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="mb-6 flex space-x-6">
-                <div className="flex items-center">
-                  <input
-                    id="is_published"
-                    type="checkbox"
-                    checked={currentNews.is_published}
-                    onChange={(e) => setCurrentNews({...currentNews, is_published: e.target.checked})}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
-                  <label htmlFor="is_published" className="ml-2 block text-sm text-gray-700">
-                    Publicar
-                  </label>
-                </div>
-                
-                <div className="flex items-center">
-                  <input
-                    id="is_featured"
-                    type="checkbox"
-                    checked={currentNews.is_featured}
-                    onChange={(e) => setCurrentNews({...currentNews, is_featured: e.target.checked})}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
-                  <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-700">
-                    Destacar no Dashboard
-                  </label>
-                </div>
-              </div>
-              
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setIsNewsModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsSubsectorModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
                 >
-                  {isEditing ? 'Salvar Alterações' : 'Adicionar Notícia'}
+                  {isEditing ? 'Salvar' : 'Criar'}
                 </button>
               </div>
             </form>
@@ -1085,116 +1462,565 @@ export default function SectorDashboard() {
         </div>
       )}
 
-      {/* Modal para adicionar/editar evento */}
-      {isEventModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 overflow-y-auto max-h-[90vh]">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">
-              {isEditing ? 'Editar Evento' : 'Adicionar Novo Evento'}
+      {/* Modal para Notícias */}
+      {isNewsModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {isEditing ? 'Editar Notícia' : 'Nova Notícia'}
             </h3>
-            
-            <form onSubmit={handleSaveEvent}>
-              <div className="mb-4">
-                <label htmlFor="event_title" className="form-label">Título do Evento*</label>
+            <form onSubmit={handleSaveNews} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Título *
+                </label>
                 <input
-                  id="event_title"
                   type="text"
-                  value={currentEvent.title}
-                  onChange={(e) => setCurrentEvent({...currentEvent, title: e.target.value})}
-                  className="input"
+                  value={currentNews.title || ''}
+                  onChange={(e) => setCurrentNews({...currentNews, title: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                   required
                 />
               </div>
-              
-              <div className="mb-4">
-                <label htmlFor="event_description" className="form-label">Descrição*</label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Resumo *
+                </label>
                 <textarea
-                  id="event_description"
-                  value={currentEvent.description}
-                  onChange={(e) => setCurrentEvent({...currentEvent, description: e.target.value})}
-                  className="input"
-                  rows={4}
+                  value={currentNews.summary || ''}
+                  onChange={(e) => setCurrentNews({...currentNews, summary: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={3}
                   required
                 />
               </div>
-              
-              <div className="mb-4">
-                <label htmlFor="event_location" className="form-label">Local</label>
-                <input
-                  id="event_location"
-                  type="text"
-                  value={currentEvent.location || ''}
-                  onChange={(e) => setCurrentEvent({...currentEvent, location: e.target.value})}
-                  className="input"
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Conteúdo *
+                </label>
+                <textarea
+                  value={currentNews.content || ''}
+                  onChange={(e) => setCurrentNews({...currentNews, content: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={6}
+                  required
                 />
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label htmlFor="event_start_date" className="form-label">Data de Início*</label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Imagem da Notícia
+                </label>
+                <div className="mt-2">
+                  <div className="flex items-center gap-4">
                   <input
-                    id="event_start_date"
-                    type="datetime-local"
-                    value={currentEvent.start_date ? new Date(currentEvent.start_date).toISOString().slice(0, 16) : ''}
-                    onChange={(e) => setCurrentEvent({...currentEvent, start_date: e.target.value ? new Date(e.target.value).toISOString() : ''})}
-                    className="input"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="event_end_date" className="form-label">Data de Término</label>
-                  <input
-                    id="event_end_date"
-                    type="datetime-local"
-                    value={currentEvent.end_date ? new Date(currentEvent.end_date).toISOString().slice(0, 16) : ''}
-                    onChange={(e) => setCurrentEvent({...currentEvent, end_date: e.target.value ? new Date(e.target.value).toISOString() : null})}
-                    className="input"
-                  />
-                </div>
-              </div>
-              
-              <div className="mb-6 flex space-x-6">
-                <div className="flex items-center">
-                  <input
-                    id="event_is_published"
-                    type="checkbox"
-                    checked={currentEvent.is_published}
-                    onChange={(e) => setCurrentEvent({...currentEvent, is_published: e.target.checked})}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
-                  <label htmlFor="event_is_published" className="ml-2 block text-sm text-gray-700">
-                    Publicar
-                  </label>
-                </div>
-                
-                <div className="flex items-center">
-                  <input
-                    id="event_is_featured"
-                    type="checkbox"
-                    checked={currentEvent.is_featured}
-                    onChange={(e) => setCurrentEvent({...currentEvent, is_featured: e.target.checked})}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
-                  <label htmlFor="event_is_featured" className="ml-2 block text-sm text-gray-700">
-                    Destacar no Dashboard
-                  </label>
+                    ref={fileInputRef}
+                      type="file"
+                    accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      {uploadingImage ? 'Carregando...' : 'Selecionar Imagem'}
+                    </button>
+                    {imagePreview && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800 transition-colors"
+                      >
+                        Remover
+                      </button>
+                    )}
+                  </div>
+                  {renderImagePreview()}
                 </div>
               </div>
-              
-              <div className="flex justify-end space-x-2">
+              <div className="flex space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={currentNews.is_featured || false}
+                    onChange={(e) => setCurrentNews({...currentNews, is_featured: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Destacar</span>
+                  </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={currentNews.is_published || false}
+                    onChange={(e) => setCurrentNews({...currentNews, is_published: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Publicar</span>
+                  </label>
+                </div>
+              <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setIsEventModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsNewsModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
                 >
-                  {isEditing ? 'Salvar Alterações' : 'Adicionar Evento'}
+                  {isEditing ? 'Salvar' : 'Criar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Eventos */}
+      {isEventModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {isEditing ? 'Editar Evento' : 'Novo Evento'}
+            </h3>
+            <form onSubmit={handleSaveEvent} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Título *
+                </label>
+                <input
+                  type="text"
+                  value={currentEvent.title || ''}
+                  onChange={(e) => setCurrentEvent({...currentEvent, title: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição *
+                </label>
+                <textarea
+                  value={currentEvent.description || ''}
+                  onChange={(e) => setCurrentEvent({...currentEvent, description: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={4}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Local
+                </label>
+                <input
+                  type="text"
+                  value={currentEvent.location || ''}
+                  onChange={(e) => setCurrentEvent({...currentEvent, location: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Data/Hora de Início *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={currentEvent.start_date ? new Date(currentEvent.start_date).toISOString().slice(0, 16) : ''}
+                    onChange={(e) => setCurrentEvent({...currentEvent, start_date: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Data/Hora de Fim
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={currentEvent.end_date ? new Date(currentEvent.end_date).toISOString().slice(0, 16) : ''}
+                    onChange={(e) => setCurrentEvent({...currentEvent, end_date: e.target.value || null})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  />
+                </div>
+              </div>
+              <div className="flex space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={currentEvent.is_featured || false}
+                    onChange={(e) => setCurrentEvent({...currentEvent, is_featured: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Destacar</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={currentEvent.is_published || false}
+                    onChange={(e) => setCurrentEvent({...currentEvent, is_published: e.target.checked})}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Publicar</span>
+                  </label>
+                </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsEventModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  {isEditing ? 'Salvar' : 'Criar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Subsetores */}
+      {isSubsectorModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {isEditing ? 'Editar Subsetor' : 'Novo Subsetor'}
+            </h3>
+            <form onSubmit={handleSaveSubsector} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome *
+                </label>
+                  <input
+                  type="text"
+                  value={currentSubsector.name || ''}
+                  onChange={(e) => setCurrentSubsector({...currentSubsector, name: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição *
+                </label>
+                <textarea
+                  value={currentSubsector.description || ''}
+                  onChange={(e) => setCurrentSubsector({...currentSubsector, description: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={4}
+                  required
+                />
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsSubsectorModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  {isEditing ? 'Salvar' : 'Criar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Grupos */}
+      {isGroupModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Criar Grupo de Notificação
+            </h3>
+            <form onSubmit={handleSaveGroup} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome do Grupo *
+                </label>
+                <input
+                  type="text"
+                  value={currentGroup.name}
+                  onChange={(e) => setCurrentGroup({...currentGroup, name: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição
+                </label>
+                <textarea
+                  value={currentGroup.description}
+                  onChange={(e) => setCurrentGroup({...currentGroup, description: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={3}
+                  placeholder="Descrição opcional do grupo"
+                />
+              </div>
+              {/* Filtros de usuários */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Buscar Usuários
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      value={userSearchTerm}
+                      onChange={(e) => setUserSearchTerm(e.target.value)}
+                      placeholder="Nome ou e-mail"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Filtrar por Local
+                  </label>
+                  <select
+                    value={userLocationFilter}
+                    onChange={(e) => setUserLocationFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  >
+                    <option value="all">Todos os locais</option>
+                    {workLocations.map(loc => (
+                      <option key={loc.id} value={loc.id}>{loc.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Selecionar Membros
+                </label>
+                <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
+                  {allUsers
+                    .filter(user => {
+                      const matchesSearch = userSearchTerm === '' || 
+                        user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                        user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
+                      const matchesLocation = userLocationFilter === 'all' || user.work_location_id === userLocationFilter;
+                      return matchesSearch && matchesLocation;
+                    })
+                    .map((user) => (
+                    <label key={user.id} className="flex items-center py-1">
+                      <input
+                    type="checkbox"
+                        checked={currentGroup.members.includes(user.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCurrentGroup({
+                              ...currentGroup,
+                              members: [...currentGroup.members, user.id]
+                            });
+                          } else {
+                            setCurrentGroup({
+                              ...currentGroup,
+                              members: currentGroup.members.filter(id => id !== user.id)
+                            });
+                          }
+                        }}
+                        className="mr-2"
+                      />
+                      <div className="flex-1">
+                        <span className="text-sm font-medium">{user.full_name}</span>
+                        <div className="text-xs text-gray-500">{user.email}</div>
+                        {user.work_location_id && (
+                          <div className="text-xs text-gray-400">
+                            {workLocations.find(loc => loc.id === user.work_location_id)?.name}
+                          </div>
+                        )}
+                      </div>
+                  </label>
+                  ))}
+                  {allUsers.filter(user => {
+                    const matchesSearch = userSearchTerm === '' || 
+                      user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                      user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
+                    const matchesLocation = userLocationFilter === 'all' || user.work_location_id === userLocationFilter;
+                    return matchesSearch && matchesLocation;
+                  }).length === 0 && (
+                    <div className="text-sm text-gray-500 text-center py-4">
+                      Nenhum usuário encontrado com os filtros aplicados
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsGroupModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  Criar Grupo
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Mensagens */}
+      {isMessageModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Enviar Mensagem
+            </h3>
+            <form onSubmit={handleSendMessage} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Título da Mensagem *
+                </label>
+                <input
+                  type="text"
+                  value={currentMessage.title}
+                  onChange={(e) => setCurrentMessage({...currentMessage, title: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mensagem *
+                </label>
+                <textarea
+                  value={currentMessage.message}
+                  onChange={(e) => setCurrentMessage({...currentMessage, message: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  rows={4}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo
+                </label>
+                <select
+                  value={currentMessage.type}
+                  onChange={(e) => setCurrentMessage({...currentMessage, type: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                >
+                  <option value="general">Geral</option>
+                  <option value="important">Importante</option>
+                  <option value="urgent">Urgente</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Enviar para Grupos
+                </label>
+                <div className="border border-gray-300 rounded-lg p-3 max-h-32 overflow-y-auto">
+                  {groups.map((group) => (
+                    <label key={group.id} className="flex items-center py-1">
+                      <input
+                        type="checkbox"
+                        checked={currentMessage.groups.includes(group.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCurrentMessage({
+                              ...currentMessage,
+                              groups: [...currentMessage.groups, group.id]
+                            });
+                          } else {
+                            setCurrentMessage({
+                              ...currentMessage,
+                              groups: currentMessage.groups.filter(id => id !== group.id)
+                            });
+                          }
+                        }}
+                        className="mr-2"
+                      />
+                      <span className="text-sm">{group.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Enviar para Usuários Específicos
+                </label>
+                <div className="border border-gray-300 rounded-lg p-3 max-h-32 overflow-y-auto">
+                  {allUsers
+                    .filter(user => {
+                      const matchesSearch = userSearchTerm === '' || 
+                        user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                        user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
+                      const matchesLocation = userLocationFilter === 'all' || user.work_location_id === userLocationFilter;
+                      return matchesSearch && matchesLocation;
+                    })
+                    .map((user) => (
+                    <label key={user.id} className="flex items-center py-1">
+                      <input
+                        type="checkbox"
+                        checked={currentMessage.users.includes(user.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCurrentMessage({
+                              ...currentMessage,
+                              users: [...currentMessage.users, user.id]
+                            });
+                          } else {
+                            setCurrentMessage({
+                              ...currentMessage,
+                              users: currentMessage.users.filter(id => id !== user.id)
+                            });
+                          }
+                        }}
+                        className="mr-2"
+                      />
+                      <div className="flex-1">
+                        <span className="text-sm font-medium">{user.full_name}</span>
+                        <div className="text-xs text-gray-500">{user.email}</div>
+                        {user.work_location_id && (
+                          <div className="text-xs text-gray-400">
+                            {workLocations.find(loc => loc.id === user.work_location_id)?.name}
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsMessageModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  Enviar Mensagem
                 </button>
               </div>
             </form>

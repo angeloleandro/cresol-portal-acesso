@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import GlobalSearch from './GlobalSearch';
 
 interface Sector {
   id: string;
@@ -404,6 +405,30 @@ export default function Navbar() {
                     )}
                   </div>
                 )}
+              </div>
+            )}
+            
+            {/* Busca Global */}
+            {user && (
+              <GlobalSearch compact />
+            )}
+            
+            {/* Notificações */}
+            {user && (
+              <div className="relative">
+                <button 
+                  type="button"
+                  className="text-white/80 hover:text-white transition-colors relative"
+                  title="Notificações"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 17l5 5v-5H4zM3 3h18v12H3V3z" />
+                  </svg>
+                  {/* Badge de notificações não lidas */}
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    3
+                  </span>
+                </button>
               </div>
             )}
             

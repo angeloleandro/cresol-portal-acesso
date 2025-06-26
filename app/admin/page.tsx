@@ -33,66 +33,82 @@ const ADMIN_CARDS: DashboardCard[] = [
   {
     title: 'Solicitações de Acesso',
     description: 'Aprovar ou rejeitar solicitações de acesso ao portal',
-    icon: <LuUserPlus className="h-6 w-6" />,
+    icon: <LuUserPlus className="h-5 w-5" />,
     link: '/admin/access-requests',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 border-blue-200',
+    color: 'text-gray-600',
+    bgColor: 'bg-white border-gray-200',
   },
   {
     title: 'Usuários',
     description: 'Gerenciar usuários e suas permissões',
-    icon: <LuUsers className="h-6 w-6" />,
+    icon: <LuUsers className="h-5 w-5" />,
     link: '/admin/users',
-    color: 'text-primary',
-    bgColor: 'bg-primary/5 border-primary/20',
+    color: 'text-gray-600',
+    bgColor: 'bg-white border-gray-200',
   },
   {
     title: 'Setores & Sub-setores',
     description: 'Gerenciar estrutura organizacional e hierarquia',
-    icon: <LuBuilding2 className="h-6 w-6" />,
+    icon: <LuBuilding2 className="h-5 w-5" />,
     link: '/admin/sectors',
-    color: 'text-secondary',
-    bgColor: 'bg-secondary/5 border-secondary/20',
+    color: 'text-gray-600',
+    bgColor: 'bg-white border-gray-200',
   },
   {
     title: 'Sistemas',
     description: 'Configurar sistemas e aplicações disponíveis',
-    icon: <LuAppWindow className="h-6 w-6" />,
+    icon: <LuAppWindow className="h-5 w-5" />,
     link: '/admin/systems',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50 border-purple-200',
+    color: 'text-gray-600',
+    bgColor: 'bg-white border-gray-200',
   },
   {
     title: 'Locais de Trabalho',
     description: 'Gerenciar locais de atuação disponíveis',
-    icon: <LuMapPin className="h-6 w-6" />,
+    icon: <LuMapPin className="h-5 w-5" />,
     link: '/admin/work-locations',
-    color: 'text-green-600',
-    bgColor: 'bg-green-50 border-green-200',
+    color: 'text-gray-600',
+    bgColor: 'bg-white border-gray-200',
   },
   {
     title: 'Banners',
     description: 'Gerencie os banners iniciais do portal',
-    icon: <LuLayoutPanelTop className="h-6 w-6" />,
+    icon: <LuLayoutPanelTop className="h-5 w-5" />,
     link: '/admin/banners',
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50 border-pink-200',
+    color: 'text-gray-600',
+    bgColor: 'bg-white border-gray-200',
   },
   {
     title: 'Vídeos',
     description: 'Gerencie os vídeos exibidos no dashboard',
-    icon: <LuVideo className="h-6 w-6" />,
+    icon: <LuVideo className="h-5 w-5" />,
     link: '/admin/videos',
-    color: 'text-red-600',
-    bgColor: 'bg-red-50 border-red-200',
+    color: 'text-gray-600',
+    bgColor: 'bg-white border-gray-200',
   },
   {
     title: 'Galeria de Imagens',
     description: 'Gerencie as imagens exibidas na galeria do portal',
-    icon: <LuImage className="h-6 w-6" />,
+    icon: <LuImage className="h-5 w-5" />,
     link: '/admin/gallery',
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50 border-yellow-200',
+    color: 'text-gray-600',
+    bgColor: 'bg-white border-gray-200',
+  },
+  {
+    title: 'Notificações',
+    description: 'Gerenciar notificações e comunicações do sistema',
+    icon: <LuSettings className="h-5 w-5" />,
+    link: '/admin/notifications',
+    color: 'text-gray-600',
+    bgColor: 'bg-white border-gray-200',
+  },
+  {
+    title: 'Analytics',
+    description: 'Visualizar métricas e relatórios do sistema',
+    icon: <LuTrendingUp className="h-5 w-5" />,
+    link: '/admin/analytics',
+    color: 'text-gray-600',
+    bgColor: 'bg-white border-gray-200',
   },
 ];
 
@@ -185,147 +201,103 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cresol-gray-light/20 to-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <AdminHeader user={user} />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header com estatísticas */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-3xl font-bold text-primary flex items-center">
-                <LuShield className="mr-3 h-8 w-8" />
-                Painel Administrativo
-              </h2>
-              <p className="text-cresol-gray mt-2">Gerencie usuários, setores e sistemas do portal de acesso Cresol.</p>
-            </div>
+        <div className="mb-6">
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+              Painel Administrativo
+            </h1>
+            <p className="text-gray-600">Gerencie usuários, setores e sistemas do portal de acesso Cresol.</p>
           </div>
 
-          {/* Cards de Estatísticas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-xl shadow-sm border border-cresol-gray-light/50 p-4">
+          {/* Estatísticas */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
               <div className="flex items-center">
-                <div className="bg-primary/10 rounded-full p-3">
-                  <LuUsers className="h-6 w-6 text-primary" />
+                <div className="p-2 rounded-lg bg-gray-100 mr-3">
+                  <LuUsers className="h-5 w-5 text-gray-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-cresol-gray">Total de Usuários</p>
-                  <p className="text-2xl font-bold text-cresol-gray-dark">{stats.totalUsers}</p>
+                <div>
+                  <div className="text-xl font-semibold text-gray-900">{stats.totalUsers}</div>
+                  <div className="text-sm text-gray-500">Usuários</div>
                 </div>
               </div>
             </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-cresol-gray-light/50 p-4">
+            
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
               <div className="flex items-center">
-                <div className="bg-blue-50 rounded-full p-3">
-                  <LuUserPlus className="h-6 w-6 text-blue-600" />
+                <div className="p-2 rounded-lg bg-gray-100 mr-3">
+                  <LuUserPlus className="h-5 w-5 text-gray-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-cresol-gray">Solicitações Pendentes</p>
-                  <p className="text-2xl font-bold text-cresol-gray-dark">{stats.pendingRequests}</p>
+                <div>
+                  <div className="text-xl font-semibold text-gray-900">{stats.pendingRequests}</div>
+                  <div className="text-sm text-gray-500">Pendentes</div>
                 </div>
               </div>
             </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-cresol-gray-light/50 p-4">
+            
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
               <div className="flex items-center">
-                <div className="bg-secondary/10 rounded-full p-3">
-                  <LuBuilding2 className="h-6 w-6 text-secondary" />
+                <div className="p-2 rounded-lg bg-gray-100 mr-3">
+                  <LuBuilding2 className="h-5 w-5 text-gray-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-cresol-gray">Setores</p>
-                  <p className="text-2xl font-bold text-cresol-gray-dark">{stats.totalSectors}</p>
+                <div>
+                  <div className="text-xl font-semibold text-gray-900">{stats.totalSectors}</div>
+                  <div className="text-sm text-gray-500">Setores</div>
                 </div>
               </div>
             </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-cresol-gray-light/50 p-4">
+            
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
               <div className="flex items-center">
-                <div className="bg-secondary/10 rounded-full p-3">
-                  <LuFolderOpen className="h-6 w-6 text-secondary" />
+                <div className="p-2 rounded-lg bg-gray-100 mr-3">
+                  <LuFolderOpen className="h-5 w-5 text-gray-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-cresol-gray">Sub-setores</p>
-                  <p className="text-2xl font-bold text-cresol-gray-dark">{stats.totalSubsectors}</p>
+                <div>
+                  <div className="text-xl font-semibold text-gray-900">{stats.totalSubsectors}</div>
+                  <div className="text-sm text-gray-500">Subsetores</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
-        {/* Cards de Funcionalidades */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {ADMIN_CARDS.map((card) => (
-            <Link 
-              key={card.title}
-              href={card.link}
-              className={`${card.bgColor} rounded-xl shadow-sm border p-6 flex flex-col items-start hover:shadow-md transition-all hover:scale-105 group`}
-            >
-              <div className={`${card.bgColor.includes('primary') ? 'bg-primary/20' : card.bgColor.includes('secondary') ? 'bg-secondary/20' : 'bg-white'} rounded-full p-3 mb-4 group-hover:scale-110 transition-transform`}>
-                <div className={card.color}>
-                  {card.icon}
-                </div>
-              </div>
-              
-              <h3 className="text-lg font-semibold mb-2 text-cresol-gray-dark group-hover:text-primary transition-colors">
-                {card.title}
-              </h3>
-              
-              <p className="text-sm text-cresol-gray mb-4 leading-relaxed">
-                {card.description}
-              </p>
-              
-              <div className="mt-auto">
-                <span className={`${card.color} text-sm font-semibold flex items-center group-hover:translate-x-1 transition-transform`}>
-                  Acessar
-                  <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Seção de Ações Rápidas */}
-        <div className="mt-12">
-          <h3 className="text-xl font-semibold text-cresol-gray-dark mb-4 flex items-center">
-            <LuSettings className="mr-2 h-5 w-5" />
-            Ações Rápidas
-          </h3>
-          
+        {/* Módulos Administrativos */}
+        <div>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Módulos Administrativos</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Link
-              href="/admin/users"
-              className="bg-white rounded-lg border border-cresol-gray-light/50 p-4 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center">
-                <LuUserPlus className="h-5 w-5 text-primary mr-3" />
-                <span className="font-medium text-cresol-gray-dark">Criar Novo Usuário</span>
-              </div>
-            </Link>
-            
-            <Link
-              href="/admin/sectors"
-              className="bg-white rounded-lg border border-cresol-gray-light/50 p-4 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center">
-                <LuBuilding2 className="h-5 w-5 text-secondary mr-3" />
-                <span className="font-medium text-cresol-gray-dark">Adicionar Setor</span>
-              </div>
-            </Link>
-            
-            <Link
-              href="/admin/access-requests"
-              className="bg-white rounded-lg border border-cresol-gray-light/50 p-4 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center">
-                <LuTrendingUp className="h-5 w-5 text-blue-600 mr-3" />
-                <span className="font-medium text-cresol-gray-dark">Ver Solicitações</span>
-              </div>
-            </Link>
+            {ADMIN_CARDS.map((card) => (
+              <Link 
+                key={card.title}
+                href={card.link}
+                className={`${card.bgColor} rounded-lg shadow-sm p-5 flex items-start hover:shadow-md transition-all group`}
+              >
+                <div className="p-2.5 rounded-lg bg-gray-100 mr-4 flex-shrink-0">
+                  <div className={card.color}>
+                    {card.icon}
+                  </div>
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-gray-900 mb-1 group-hover:text-primary transition-colors">
+                    {card.title}
+                  </h3>
+                  
+                  <p className="text-sm text-gray-500 leading-snug">
+                    {card.description}
+                  </p>
+                </div>
+                
+                <svg className="h-4 w-4 text-gray-400 group-hover:text-gray-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ))}
           </div>
         </div>
       </main>
