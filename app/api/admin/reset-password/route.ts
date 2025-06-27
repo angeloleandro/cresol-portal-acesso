@@ -66,9 +66,8 @@ export async function POST(request: NextRequest) {
       
       isAdmin = adminProfile?.role === 'admin';
       console.log('É administrador:', isAdmin);
-    } else {
-      // Método legado usando cookies - como fallback
-      console.warn('Token de administrador não fornecido. Usando método legado com cookies.');
+          } else {
+        // Método legado usando cookies - como fallback
       
       try {
         // Tentar extrair manualmente o token do cookie

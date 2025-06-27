@@ -162,7 +162,6 @@ export default function UsersManagement() {
         }
       }
     } catch (error: unknown) {
-      console.error('Erro ao buscar usuários:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       if (!handleAuthError(errorMessage)) {
         alert(`Erro ao buscar usuários: ${errorMessage}`);
@@ -182,7 +181,11 @@ export default function UsersManagement() {
       if (error) throw error;
       if (data) setWorkLocations(data);
     } catch (error) {
-      console.error('Erro ao buscar locais de trabalho:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      // Apenas log em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao buscar locais de trabalho:', errorMessage);
+      }
     }
   };
 
@@ -196,7 +199,11 @@ export default function UsersManagement() {
       if (error) throw error;
       if (data) setSectors(data);
     } catch (error) {
-      console.error('Erro ao buscar setores:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      // Apenas log em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao buscar setores:', errorMessage);
+      }
     }
   };
 
@@ -216,7 +223,11 @@ export default function UsersManagement() {
       if (error) throw error;
       if (data) setSubsectors(data);
     } catch (error) {
-      console.error('Erro ao buscar sub-setores:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      // Apenas log em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao buscar sub-setores:', errorMessage);
+      }
     }
   };
 

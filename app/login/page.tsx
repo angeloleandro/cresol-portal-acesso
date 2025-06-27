@@ -17,14 +17,9 @@ import { supabase } from '@/lib/supabase';export default function Login() {
   // Verificar se o usuário já está autenticado ao carregar a página
   useEffect(() => {
     const checkSession = async () => {
-      console.log('[Login] Verificando sessão existente...');
-      
       const { data } = await supabase.auth.getSession();
       if (data.session) {
-              console.log('[Login] Usuário já autenticado, redirecionando para home...');
-      router.push('/home');
-      } else {
-        console.log('[Login] Nenhuma sessão encontrada, exibindo formulário de login.');
+        router.push('/home');
       }
     };
     checkSession();
@@ -34,7 +29,6 @@ import { supabase } from '@/lib/supabase';export default function Login() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    console.log('[Login] Iniciando processo de login para email:', email);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -43,7 +37,6 @@ import { supabase } from '@/lib/supabase';export default function Login() {
       });
 
       if (error) {
-        console.error('[Login] Erro de autenticação:', error.message);
         if (error.message.includes('Email not confirmed')) {
           setError('Email não confirmado. Por favor, verifique sua caixa de entrada ou entre em contato com o administrador.');
         } else if (error.message.includes('Invalid login credentials')) {
@@ -55,14 +48,12 @@ import { supabase } from '@/lib/supabase';export default function Login() {
         return;
       }
       
-      console.log('[Login] Login bem-sucedido! Usuário:', data.user?.email);
-      
       // Redirecionar imediatamente após login bem-sucedido
       router.push(redirectPath);
       
     } catch (error) {
-      console.error('[Login] Erro geral ao fazer login:', error);
-      setError('Falha na autenticação. Tente novamente mais tarde.');
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      setError(`Falha na autenticação: ${errorMessage}`);
       setLoading(false);
     }
   };

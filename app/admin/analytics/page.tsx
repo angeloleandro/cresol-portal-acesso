@@ -212,19 +212,19 @@ export default function AnalyticsPage() {
             }
           }),
           values: Object.values(analytics.users.byRole),
-          colors: ['#ef4444', '#3b82f6', '#8b5cf6', '#10b981']
+          colors: ['#f97316', '#fb923c', '#fdba74', '#fed7aa']
         };
       case 'systems':
         return {
           labels: analytics.systems.mostUsed.map(s => s.name),
           values: analytics.systems.mostUsed.map(s => s.usage),
-          colors: ['#f59e0b', '#06b6d4', '#84cc16', '#f97316']
+          colors: ['#f97316', '#fb923c', '#fdba74', '#fed7aa']
         };
       case 'activity':
         return {
           labels: ['Logins', 'Acessos a Sistemas', 'Notificações Lidas'],
           values: [analytics.activity.logins, analytics.activity.systemAccess, analytics.activity.notificationsRead],
-          colors: ['#6366f1', '#ec4899', '#14b8a6']
+          colors: ['#f97316', '#fb923c', '#fdba74']
         };
       default:
         return { labels: [], values: [], colors: [] };
@@ -300,11 +300,11 @@ export default function AnalyticsPage() {
             {/* Cards de Estatísticas Principais */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {/* Usuários */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-blue-100">
-                    <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <div className="p-3 rounded-lg bg-orange-50">
+                    <svg className="h-6 w-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                     </svg>
                   </div>
                   <div className="ml-4">
@@ -316,11 +316,11 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Sistemas */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-purple-100">
-                    <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  <div className="p-3 rounded-lg bg-orange-50">
+                    <svg className="h-6 w-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3V6a3 3 0 013-3h13.5a3 3 0 013 3v5.25a3 3 0 01-3 3m-13.5 0V9a1.5 1.5 0 011.5-1.5h2.25A1.5 1.5 0 019 9v5.25" />
                     </svg>
                   </div>
                   <div className="ml-4">
@@ -332,11 +332,11 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Conteúdo */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-green-100">
-                    <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <div className="p-3 rounded-lg bg-orange-50">
+                    <svg className="h-6 w-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
                   </div>
                   <div className="ml-4">
@@ -348,11 +348,11 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Atividade */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-orange-100">
-                    <svg className="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <div className="p-3 rounded-lg bg-orange-50">
+                    <svg className="h-6 w-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
                     </svg>
                   </div>
                   <div className="ml-4">
@@ -367,7 +367,7 @@ export default function AnalyticsPage() {
             {/* Gráficos e Tabelas */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Gráfico Principal */}
-              <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">Distribuição por Categoria</h3>
                   <div className="flex space-x-2">
@@ -381,7 +381,7 @@ export default function AnalyticsPage() {
                         onClick={() => setActiveChart(option.key as any)}
                         className={`px-3 py-1 text-sm rounded-md transition-colors ${
                           activeChart === option.key
-                            ? 'bg-primary text-white'
+                            ? 'bg-orange-500 text-white'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
@@ -416,7 +416,7 @@ export default function AnalyticsPage() {
               {/* Sidebar com Informações Adicionais */}
               <div className="space-y-6">
                 {/* Top Localizações */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Usuários por Local</h3>
                   <div className="space-y-3">
                     {analytics.locations.userDistribution
@@ -426,9 +426,9 @@ export default function AnalyticsPage() {
                         <div key={location.name} className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <div className={`w-3 h-3 rounded-full ${
-                              index === 0 ? 'bg-blue-500' :
-                              index === 1 ? 'bg-green-500' :
-                              index === 2 ? 'bg-yellow-500' :
+                              index === 0 ? 'bg-orange-500' :
+                              index === 1 ? 'bg-orange-400' :
+                              index === 2 ? 'bg-orange-300' :
                               'bg-gray-400'
                             }`} />
                             <span className="text-sm text-gray-600 truncate">{location.name}</span>
@@ -440,7 +440,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Sistemas Mais Usados */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Sistemas Populares</h3>
                   <div className="space-y-3">
                     {analytics.systems.mostUsed.map((system, index) => (
@@ -449,7 +449,7 @@ export default function AnalyticsPage() {
                         <div className="flex items-center space-x-2">
                           <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
                             <div 
-                              className="h-full bg-primary rounded-full transition-all duration-1000"
+                              className="h-full bg-orange-500 rounded-full transition-all duration-1000"
                               style={{ width: `${system.usage}%` }}
                             />
                           </div>
@@ -461,24 +461,24 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Resumo Rápido */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumo</h3>
                   <div className="space-y-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Taxa de Usuários Ativos</span>
-                      <span className="font-medium text-green-600">
+                      <span className="font-medium text-orange-600">
                         {Math.round((analytics.users.active / analytics.users.total) * 100)}%
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Notificações Lidas</span>
-                      <span className="font-medium text-blue-600">
+                      <span className="font-medium text-orange-600">
                         {Math.round((analytics.activity.notificationsRead / analytics.content.notifications) * 100) || 0}%
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Crescimento de Usuários</span>
-                      <span className="font-medium text-purple-600">
+                      <span className="font-medium text-orange-600">
                         +{Math.round((analytics.users.new / analytics.users.total) * 100) || 0}%
                       </span>
                     </div>
@@ -488,30 +488,30 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Ações Rápidas */}
-            <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
               <div className="flex flex-wrap gap-3">
                 <button
                   onClick={() => router.push('/admin/users')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                  className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors text-sm"
                 >
                   Gerenciar Usuários
                 </button>
                 <button
                   onClick={() => router.push('/admin/systems')}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm"
+                  className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors text-sm"
                 >
                   Gerenciar Sistemas
                 </button>
                 <button
                   onClick={() => router.push('/admin/notifications')}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
+                  className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors text-sm"
                 >
                   Enviar Notificação
                 </button>
                 <button
                   onClick={() => window.print()}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm"
+                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
                 >
                   Imprimir Relatório
                 </button>

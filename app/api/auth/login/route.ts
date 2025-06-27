@@ -56,9 +56,10 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error: any) {
-    console.error('Erro no serviço de autenticação:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
     return NextResponse.json({
-      error: 'Falha no serviço de autenticação.'
+      error: 'Falha no serviço de autenticação.',
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     }, { status: 500 });
   }
 } 

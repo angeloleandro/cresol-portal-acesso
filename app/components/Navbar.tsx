@@ -112,11 +112,9 @@ export default function Navbar() {
   }, []);
 
   const checkUser = async () => {
-    console.log("Navbar: Verificando usuário...");
     const { data } = await supabase.auth.getUser();
     if (data.user) {
       setUser(data.user);
-      console.log("Navbar: Usuário encontrado:", data.user.email);
       
       // Verificar se é admin
       const { data: profile } = await supabase
@@ -125,13 +123,9 @@ export default function Navbar() {
         .eq('id', data.user.id)
         .single();
       
-      console.log("Navbar: Perfil do usuário:", profile);
-      
       if (profile?.role === 'admin') {
-        console.log("Navbar: Usuário é admin");
         setIsAdmin(true);
       } else if (profile?.role === 'sector_admin') {
-        console.log("Navbar: Usuário é admin de setor");
         setIsSectorAdmin(true);
         
         // Se for admin de setor, buscar os setores que ele administra
@@ -139,8 +133,6 @@ export default function Navbar() {
           .from('sector_admins')
           .select('sector_id')
           .eq('user_id', data.user.id);
-        
-        console.log("Navbar: Setores administrados:", sectorAdmins);
         
         if (sectorAdmins && sectorAdmins.length > 0) {
           const sectorIds = sectorAdmins.map(admin => admin.sector_id);
@@ -151,16 +143,12 @@ export default function Navbar() {
             .select('id, name, description')
             .in('id', sectorIds)
             .order('name');
-            
-          console.log("Navbar: Lista de setores do usuário:", userSectors);
           
           if (userSectors) {
             setSectors(userSectors);
           }
         }
       }
-    } else {
-      console.log("Navbar: Nenhum usuário autenticado");
     }
   };
 
@@ -170,9 +158,7 @@ export default function Navbar() {
       .select('id, name, description')
       .order('name', { ascending: true });
     
-    if (error) {
-      console.error('Erro ao buscar setores:', error);
-    } else if (!isSectorAdmin) { // Se não for admin de setor, carrega todos os setores 
+    if (!error && !isSectorAdmin) { // Se não for admin de setor, carrega todos os setores 
       setSectors(data || []);
     }
   };
@@ -243,8 +229,9 @@ export default function Navbar() {
                   stroke="currentColor" 
                   viewBox="0 0 24 24" 
                   xmlns="http://www.w3.org/2000/svg"
+                  strokeWidth={1.5}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </Link>
               
@@ -299,8 +286,9 @@ export default function Navbar() {
                   stroke="currentColor" 
                   viewBox="0 0 24 24" 
                   xmlns="http://www.w3.org/2000/svg"
+                  strokeWidth={1.5}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </button>
               {isGalleryDropdownOpen && (
@@ -367,8 +355,9 @@ export default function Navbar() {
                     stroke="currentColor" 
                     viewBox="0 0 24 24" 
                     xmlns="http://www.w3.org/2000/svg"
+                    strokeWidth={1.5}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
                 </Link>
                 
@@ -421,8 +410,8 @@ export default function Navbar() {
                   className="text-white/80 hover:text-white transition-colors relative"
                   title="Notificações"
                 >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 17l5 5v-5H4zM3 3h18v12H3V3z" />
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                   </svg>
                   {/* Badge de notificações não lidas */}
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
@@ -500,10 +489,10 @@ export default function Navbar() {
             className="text-white/80 hover:text-white"
             type="button"
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" strokeWidth={1.5}>
               {isMobileMenuOpen 
-                ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                : <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               }
             </svg>
           </button>
@@ -543,8 +532,9 @@ export default function Navbar() {
                   stroke="currentColor" 
                   viewBox="0 0 24 24" 
                   xmlns="http://www.w3.org/2000/svg"
+                  strokeWidth={1.5}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               )}
             </div>

@@ -609,4 +609,63 @@ BEGIN
   
   RETURN inserted_count;
 END;
-$$; 
+$$;
+
+-- Tabela para armazenar indicadores econômicos da Cresol
+CREATE TABLE IF NOT EXISTS economic_indicators (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    title text NOT NULL,
+    value text NOT NULL,
+    icon text NOT NULL,
+    description text,
+    display_order integer DEFAULT 0,
+    is_active boolean DEFAULT true,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+-- Inserir dados iniciais dos indicadores econômicos
+INSERT INTO economic_indicators (title, value, icon, description, display_order, is_active) 
+VALUES 
+    ('Cooperados', '36.7 mil', 'users', 'Número total de cooperados ativos', 1, true),
+    ('Cooperativa', '01', 'building', 'Número de cooperativas', 2, true),
+    ('Agências', '35', 'bank', 'Total de agências em funcionamento', 3, true),
+    ('Ativos', 'R$ 1.95 bi', 'money', 'Total de ativos da cooperativa', 4, true),
+    ('Patrimônio', 'R$ 273.8 mi', 'treasure', 'Patrimônio líquido atual', 5, true),
+    ('Depósitos Totais', 'R$ 821.7 mi', 'piggy-bank', 'Volume total de depósitos', 6, true),
+    ('Crédito Comercial', 'R$ 809.8 mi', 'handshake', 'Volume de crédito comercial', 7, true),
+    ('Créd. de Repasse Rural/Empresarial', 'R$ 709.8 mi', 'tractor', 'Crédito de repasse rural e empresarial', 8, true),
+    ('Carteira Total', 'R$ 1.52 bi', 'briefcase', 'Volume total da carteira', 9, true)
+ON CONFLICT DO NOTHING;
+
+-- RLS para economic_indicators
+ALTER TABLE economic_indicators ENABLE ROW LEVEL SECURITY;
+
+-- Política para leitura pública dos indicadores
+CREATE POLICY "indicators_public_read" ON economic_indicators
+    FOR SELECT USING (is_active = true);
+
+-- Política para admins gerenciarem indicadores
+CREATE POLICY "indicators_admin_all" ON economic_indicators
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE profiles.id = auth.uid() 
+            AND profiles.role = 'admin'
+        )
+    );
+
+-- Função para atualizar timestamp automático
+CREATE OR REPLACE FUNCTION update_economic_indicators_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Trigger para atualizar automaticamente o updated_at
+CREATE TRIGGER update_economic_indicators_updated_at
+    BEFORE UPDATE ON economic_indicators
+    FOR EACH ROW
+    EXECUTE PROCEDURE update_economic_indicators_updated_at(); 

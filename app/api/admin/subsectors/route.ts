@@ -277,7 +277,10 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ message: 'Sub-setor deletado com sucesso.' });
   } catch (error) {
-    console.error('Erro ao deletar sub-setor:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+    return NextResponse.json({ 
+      error: 'Erro interno do servidor.',
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+    }, { status: 500 });
   }
 } 

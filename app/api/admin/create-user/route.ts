@@ -78,10 +78,9 @@ export async function POST(request: NextRequest) {
       }
       
       isAdmin = adminProfile?.role === 'admin';
-    } else {
-      // Método legado usando cookies - como fallback
-      // Mas não devemos depender disso devido a problemas de parsing de cookies
-      console.warn('Token de administrador não fornecido. Usando método legado com cookies.');
+          } else {
+        // Método legado usando cookies - como fallback
+        // Mas não devemos depender disso devido a problemas de parsing de cookies
       
       try {
         // Tentar extrair manualmente o token do cookie
@@ -195,7 +194,6 @@ export async function POST(request: NextRequest) {
       .eq('id', userId);
 
     if (updateProfileError) {
-      console.error('Erro ao atualizar perfil:', updateProfileError);
       return NextResponse.json({ 
         error: `Falha ao atualizar perfil: ${updateProfileError.message}` 
       }, { status: 500 });
@@ -209,9 +207,10 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Erro geral na API de criação de usuário:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro interno do servidor';
     return NextResponse.json({ 
-      error: error.message || 'Erro interno do servidor' 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error : undefined
     }, { status: 500 });
   }
 } 
