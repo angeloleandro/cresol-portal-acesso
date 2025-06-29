@@ -201,9 +201,14 @@ export default function VideoUploadForm({ initialData, onSave, onCancel }: Video
             )}
           </>
         )}
-        {!useCustomThumb && videoUrl && (
+        {!useCustomThumb && videoUrl && getYoutubeThumbnail(videoUrl) && (
           <div className="mt-2 relative w-full h-32">
-            <img src={getYoutubeThumbnail(videoUrl) || undefined} alt="Thumbnail automática" className="object-contain rounded border w-full h-full" />
+            <Image 
+              src={getYoutubeThumbnail(videoUrl)!} 
+              alt="Thumbnail automática" 
+              fill
+              className="object-contain rounded border"
+            />
           </div>
         )}
       </div>

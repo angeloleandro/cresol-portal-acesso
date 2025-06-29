@@ -196,11 +196,11 @@ export default function Dashboard() {
   };
 
   if (loading) {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-cresol-gray">Carregando dashboard...</p>
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="loading-spinner"></div>
+          <p className="mt-4 text-muted">Carregando dashboard...</p>
         </div>
       </div>
     );
@@ -210,82 +210,82 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container py-8">
         {/* Breadcrumbs */}
         <Breadcrumbs className="mb-6" />
         
         {/* Header com saudação */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+        <div className="mb-8">
+          <h1 className="heading-1 mb-2">
             {getCurrentGreeting()}, {profile?.full_name || user?.user_metadata?.full_name || 'Colaborador'}!
           </h1>
-          <p className="text-gray-600">
+          <p className="body-text text-muted">
             {profile?.position && `${profile.position} • `}
             {profile?.work_locations?.name || 'Portal Cresol'}
           </p>
         </div>
 
         {/* Busca Global */}
-        <div className="mb-6">
+        <div className="mb-8">
           <div className="max-w-2xl">
             <GlobalSearch placeholder="Buscar sistemas, eventos, notícias..." />
           </div>
         </div>
 
         {/* Estatísticas Rápidas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="card-status">
             <div className="flex items-center">
-              <div className="p-2 rounded-lg bg-gray-100 mr-3">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 rounded-lg bg-primary/10 mr-3">
+                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
               <div>
-                <p className="text-xl font-semibold text-gray-900">{stats.systemsCount}</p>
-                <p className="text-sm text-gray-500">Sistemas</p>
+                <p className="text-xl font-semibold text-title">{stats.systemsCount}</p>
+                <p className="body-text-small text-muted">Sistemas</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="card-status">
             <div className="flex items-center">
-              <div className="p-2 rounded-lg bg-gray-100 mr-3">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 rounded-lg bg-primary/10 mr-3">
+                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
               <div>
-                <p className="text-xl font-semibold text-gray-900">{stats.upcomingEventsCount}</p>
-                <p className="text-sm text-gray-500">Eventos</p>
+                <p className="text-xl font-semibold text-title">{stats.upcomingEventsCount}</p>
+                <p className="body-text-small text-muted">Eventos</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="card-status">
             <div className="flex items-center">
-              <div className="p-2 rounded-lg bg-gray-100 mr-3">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 rounded-lg bg-primary/10 mr-3">
+                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 17l5 5v-5H4zM3 3h18v12H3V3z" />
                 </svg>
               </div>
               <div>
-                <p className="text-xl font-semibold text-gray-900">{stats.unreadNotificationsCount}</p>
-                <p className="text-sm text-gray-500">Notificações</p>
+                <p className="text-xl font-semibold text-title">{stats.unreadNotificationsCount}</p>
+                <p className="body-text-small text-muted">Notificações</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="card-status">
             <div className="flex items-center">
-              <div className="p-2 rounded-lg bg-gray-100 mr-3">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 rounded-lg bg-primary/10 mr-3">
+                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
               </div>
               <div>
-                <p className="text-xl font-semibold text-gray-900">{stats.favoriteSystemsCount}</p>
-                <p className="text-sm text-gray-500">Favoritos</p>
+                <p className="text-xl font-semibold text-title">{stats.favoriteSystemsCount}</p>
+                <p className="body-text-small text-muted">Favoritos</p>
               </div>
             </div>
           </div>
@@ -293,21 +293,25 @@ export default function Dashboard() {
 
         {/* Ações Rápidas */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-cresol-gray mb-4">Ações Rápidas</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="heading-2 mb-4">Ações Rápidas</h2>
+          <div className="grid-responsive">
             {quickActions.map((action, index) => (
               <Link
                 key={index}
                 href={action.href}
-                className={`${action.color} text-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+                className="card text-white hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+                style={{ backgroundColor: action.color.includes('bg-purple') ? 'var(--color-secondary)' : 
+                         action.color.includes('bg-blue') ? '#2563EB' :
+                         action.color.includes('bg-green') ? '#15803D' :
+                         '#EC4899' }}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="p-2 bg-white/20 rounded-lg">
                     {action.icon}
                   </div>
                 </div>
-                <h3 className="text-lg font-semibold mb-1">{action.title}</h3>
-                <p className="text-sm opacity-90">{action.description}</p>
+                <h3 className="heading-4 text-white mb-1">{action.title}</h3>
+                <p className="body-text-small text-white/90">{action.description}</p>
               </Link>
             ))}
           </div>
@@ -317,37 +321,44 @@ export default function Dashboard() {
         {recentSystems.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-cresol-gray">Sistemas Disponíveis</h2>
-              <Link href="/sistemas" className="text-primary hover:text-primary-dark text-sm font-medium">
+              <h2 className="heading-2">Sistemas Disponíveis</h2>
+              <Link href="/sistemas" className="text-primary hover:text-primary font-medium text-sm">
                 Ver todos →
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid-responsive">
               {recentSystems.slice(0, 6).map((system) => (
                 <a
                   key={system.id}
                   href={system.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200"
+                  className="card hover:shadow-md transition-all duration-200 hover:-translate-y-1"
                 >
                   <div className="flex items-center mb-3">
-                    <div className="relative h-10 w-10 mr-3 flex-shrink-0">
-                      <Image 
-                        src={system.icon || '/icons/default-app.svg'} 
-                        alt={system.name}
-                        fill
-                        className="object-contain"
-                      />
+                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                      {system.icon ? (
+                        <Image 
+                          src={system.icon} 
+                          alt={system.name}
+                          width={24}
+                          height={24}
+                          className="object-contain"
+                        />
+                      ) : (
+                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{system.name}</h3>
+                      <h3 className="heading-4 line-clamp-1">{system.name}</h3>
                       {system.sectors && (
-                        <span className="text-xs text-gray-500">{system.sectors.name}</span>
+                        <span className="badge-text text-muted">{system.sectors.name}</span>
                       )}
                     </div>
                   </div>
-                  <p className="text-gray-600 text-sm line-clamp-2">{system.description}</p>
+                  <p className="body-text-small text-muted line-clamp-2">{system.description}</p>
                 </a>
               ))}
             </div>
@@ -359,8 +370,8 @@ export default function Dashboard() {
           {/* Eventos em Destaque */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-cresol-gray">Próximos Eventos</h2>
-              <Link href="/eventos" className="text-primary hover:text-primary-dark text-sm font-medium">
+              <h2 className="heading-2">Próximos Eventos</h2>
+              <Link href="/eventos" className="text-primary hover:text-primary font-medium text-sm">
                 Ver todos →
               </Link>
             </div>
@@ -370,8 +381,8 @@ export default function Dashboard() {
           {/* Notícias em Destaque */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-cresol-gray">Últimas Notícias</h2>
-              <Link href="/noticias" className="text-primary hover:text-primary-dark text-sm font-medium">
+              <h2 className="heading-2">Últimas Notícias</h2>
+              <Link href="/noticias" className="text-primary hover:text-primary font-medium text-sm">
                 Ver todas →
               </Link>
             </div>

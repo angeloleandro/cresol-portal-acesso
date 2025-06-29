@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import AdminHeader from "@/app/components/AdminHeader";
 import { supabase } from "@/lib/supabase";
 import VideoUploadForm from '@/app/components/VideoUploadForm';
@@ -91,7 +92,13 @@ export default function AdminVideos() {
           {videos.map((video) => (
             <div key={video.id} className="bg-white rounded-lg shadow border border-cresol-gray-light overflow-hidden flex flex-col">
               {video.thumbnail_url ? (
-                <img src={video.thumbnail_url} alt={video.title} className="w-full h-48 object-cover" />
+                                            <Image
+                              src={video.thumbnail_url}
+                              alt={video.title}
+                              width={400}
+                              height={192}
+                              className="w-full h-48 object-cover"
+                            />
               ) : (
                 <div className="flex items-center justify-center h-48 bg-cresol-gray-light text-cresol-gray">Sem thumbnail</div>
               )}

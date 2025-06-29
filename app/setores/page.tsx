@@ -53,41 +53,64 @@ export default function SetoresPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
+          <div className="loading-spinner"></div>
+          <p className="mt-4 text-muted">Carregando setores...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cresol-gray-light/30">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       {/* Conteúdo principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Setores</h1>
-          <p className="text-cresol-gray">Conheça os setores da Cresol e acesse informações específicas de cada área.</p>
+          <h1 className="heading-1 mb-2">Setores</h1>
+          <p className="body-text text-muted">Conheça os setores da Cresol e acesse informações específicas de cada área.</p>
         </div>
 
         {/* Lista de setores */}
         {sectors.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-8 text-center">
-            <p className="text-cresol-gray">Nenhum setor cadastrado no momento.</p>
+          <div className="card text-center py-12">
+            <div className="text-center">
+              <svg className="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <h3 className="heading-3 mt-4 mb-2">Nenhum setor cadastrado</h3>
+              <p className="body-text text-muted">Ainda não há setores disponíveis no momento.</p>
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid-responsive">
             {sectors.map((sector) => (
               <Link 
                 key={sector.id}
                 href={`/setores/${sector.id}`}
-                className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-6 hover:shadow-md transition-shadow"
+                className="card hover:shadow-md transition-all duration-200 hover:-translate-y-1 block"
               >
-                <h2 className="text-xl font-semibold text-cresol-gray mb-2">{sector.name}</h2>
-                <p className="text-cresol-gray mb-4">{sector.description || 'Sem descrição'}</p>
-                <div className="mt-2 text-primary text-sm font-medium">
-                  Ver detalhes →
+                {/* Ícone visual do setor */}
+                <div className="mb-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                </div>
+
+                <h2 className="heading-3 mb-3">{sector.name}</h2>
+                <p className="body-text text-muted mb-4 line-clamp-3">
+                  {sector.description || 'Clique para ver mais informações sobre este setor.'}
+                </p>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-primary font-medium text-sm">
+                    Ver detalhes →
+                  </span>
+                  <div className="text-xs text-muted">
+                    Setor
+                  </div>
                 </div>
               </Link>
             ))}

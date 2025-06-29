@@ -25,16 +25,16 @@ export default function ParecerSolicitacao() {
 
   return (
     <section className="flex items-center justify-center min-h-[60vh] p-4 bg-gray-50">
-      {/* Container principal do relatório financeiro */}
-      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-sm border border-gray-200/80 p-6 md:p-10">
+      {/* Container principal do relatório financeiro - Padronizado */}
+      <div className="w-full max-w-5xl card-standard">
         
-        {/* Seção do Cabeçalho */}
+        {/* Seção do Cabeçalho - Usando tipografia padronizada */}
         <header className="text-center mb-10">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          <h1 className="heading-2 md:heading-1">
             Parecer da Solicitação
           </h1>
-          <p className="text-sm text-gray-500 mt-2">
-            <span className="inline-block bg-orange-50 text-orange-600 font-semibold rounded-full px-4 py-1.5">
+          <p className="body-text-small mt-2">
+            <span className="badge-warning">
               Dados Referentes a 05/2025
             </span>
           </p>
@@ -47,12 +47,12 @@ export default function ParecerSolicitacao() {
             {primaryStats.map((stat, index) => (
               <div 
                 key={index}
-                className="bg-gray-50/70 p-5 rounded-xl border border-gray-200/80 text-center transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg"
+                className="card-status"
               >
-                <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+                <h2 className="body-text-small uppercase tracking-wider text-muted">
                   {stat.title}
                 </h2>
-                <p className="text-4xl font-bold text-gray-900 mt-2">
+                <p className="text-4xl font-bold text-body mt-2">
                   {stat.value}
                 </p>
               </div>
@@ -64,12 +64,12 @@ export default function ParecerSolicitacao() {
             {financialMetrics.map((metric, index) => (
               <div 
                 key={index}
-                className="bg-white border border-gray-200/80 p-5 rounded-xl transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg"
+                className="card-standard"
               >
-                <h3 className="text-base font-medium text-gray-600">
+                <h3 className="body-text-bold text-muted">
                   {metric.title}
                 </h3>
-                <p className="text-2xl font-semibold text-gray-800 mt-1">
+                <p className="text-2xl font-semibold text-title mt-1">
                   {metric.value}
                 </p>
               </div>
@@ -79,7 +79,7 @@ export default function ParecerSolicitacao() {
 
         {/* Seção do Rodapé */}
         <footer className="text-center mt-8 pt-8 border-t border-gray-200/80">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted">
             Dados oficiais • Cresol Fronteiras • Atualização Mensal
           </p>
         </footer>

@@ -152,18 +152,18 @@ export default function NoticiasPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
+          <div className="loading-spinner"></div>
+          <p className="mt-4 text-muted">Carregando notícias...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cresol-gray-light/30">
-      {/* Header simples com botão de voltar */}
-      <header className="bg-white border-b border-cresol-gray-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header padronizado */}
+      <header className="bg-white border-b" style={{ borderColor: 'var(--color-gray-light)' }}>
+        <div className="container py-4 flex items-center justify-between">
           <div className="flex items-center">
             <Link href="/home" className="flex items-center">
               <div className="relative h-10 w-24 mr-3">
@@ -175,15 +175,15 @@ export default function NoticiasPage() {
                   style={{ objectFit: 'contain' }}
                 />
               </div>
-              <h1 className="text-xl font-semibold text-cresol-gray">Portal Cresol</h1>
+              <h1 className="text-xl font-medium text-title">Portal Cresol</h1>
             </Link>
           </div>
           
           <Link 
             href="/home" 
-            className="inline-flex items-center text-sm text-cresol-gray hover:text-primary"
+            className="inline-flex items-center text-sm text-muted hover:text-primary transition-colors"
           >
-            <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Voltar para Início
@@ -192,10 +192,10 @@ export default function NoticiasPage() {
       </header>
 
       {/* Conteúdo principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Notícias</h1>
-          <p className="text-cresol-gray">Acompanhe as últimas atualizações e comunicados da Cresol.</p>
+          <h1 className="heading-1 mb-2">Notícias</h1>
+          <p className="body-text text-muted">Acompanhe as últimas atualizações e comunicados da Cresol.</p>
         </div>
 
         {/* Filtro por categoria */}
@@ -204,8 +204,8 @@ export default function NoticiasPage() {
             onClick={() => setSelectedCategory('all')}
             className={`px-3 py-1 text-sm rounded-full transition-colors ${
               selectedCategory === 'all' 
-                ? 'bg-primary text-white' 
-                : 'bg-white text-cresol-gray border border-cresol-gray-light hover:bg-primary/10'
+                ? 'btn-primary' 
+                : 'bg-white text-muted border border-gray-300 hover:bg-gray-50'
             }`}
           >
             Todas
@@ -216,8 +216,8 @@ export default function NoticiasPage() {
               onClick={() => setSelectedCategory(category)}
               className={`px-3 py-1 text-sm rounded-full transition-colors ${
                 selectedCategory === category 
-                  ? 'bg-primary text-white' 
-                  : 'bg-white text-cresol-gray border border-cresol-gray-light hover:bg-primary/10'
+                  ? 'btn-primary' 
+                  : 'bg-white text-muted border border-gray-300 hover:bg-gray-50'
               }`}
             >
               {category}
@@ -225,22 +225,29 @@ export default function NoticiasPage() {
           ))}
         </div>
 
-        {/* Lista de notícias */}
+        {/* Lista de notícias vazia */}
         {filteredNews.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-8 text-center">
-            <p className="text-cresol-gray">Nenhuma notícia encontrada nesta categoria.</p>
+          <div className="card text-center py-12">
+            <h3 className="heading-3 mb-2">Nenhuma notícia encontrada</h3>
+            <p className="body-text text-muted">
+              {selectedCategory === 'all' 
+                ? 'Não há notícias publicadas no momento.' 
+                : `Não há notícias na categoria "${selectedCategory}".`
+              }
+            </p>
           </div>
         ) : (
-          <div className="space-y-6 max-w-5xl mx-auto">
+          <div className="space-y-6">
             {filteredNews.map((item) => (
               <Link 
                 key={item.id} 
                 href={`/noticias/${item.id}`}
-                className="block bg-white rounded-lg shadow-sm border border-cresol-gray-light overflow-hidden hover:shadow-md transition-shadow"
+                className="card hover:shadow-md transition-all duration-200 hover:-translate-y-1 block"
               >
                 <div className="flex flex-col md:flex-row">
+                  {/* Imagem */}
                   {item.image_url && (
-                    <div className="md:w-1/3 h-56 md:h-auto relative">
+                    <div className="relative w-full md:w-1/3 h-48 md:h-auto min-h-[200px] bg-gray-100 rounded-lg overflow-hidden">
                       <Image
                         src={item.image_url}
                         alt={item.title}
@@ -250,22 +257,24 @@ export default function NoticiasPage() {
                       />
                     </div>
                   )}
-                  <div className="p-6 md:w-2/3">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                  
+                  {/* Conteúdo */}
+                  <div className={`p-6 ${item.image_url ? 'md:w-2/3' : 'w-full'}`}>
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="badge-success">
                         {item.category}
                       </span>
-                      <span className="text-xs text-cresol-gray">
+                      <span className="text-xs text-muted">
                         {formatDate(item.created_at)}
                       </span>
                     </div>
-                    <h2 className="text-xl font-semibold text-cresol-gray mb-2">{item.title}</h2>
-                    <p className="text-cresol-gray mb-4">{item.summary}</p>
+                    <h2 className="heading-3 mb-3">{item.title}</h2>
+                    <p className="body-text text-muted mb-4 line-clamp-3">{item.summary}</p>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-cresol-gray">
+                      <span className="text-xs text-muted">
                         Por: {item.author}
                       </span>
-                      <span className="text-primary text-sm font-medium">
+                      <span className="text-primary font-medium text-sm">
                         Leia mais →
                       </span>
                     </div>

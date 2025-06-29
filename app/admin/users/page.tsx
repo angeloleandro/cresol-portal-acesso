@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -109,7 +109,45 @@ export default function UsersManagement() {
     return false;
   };
 
-  const fetchUsers = async () => {
+  const fetchUserSectors = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await getSupabaseClient()
+        .from('sector_admins')
+        .select('sector_id')
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      
+      const sectorIds = data?.map(item => item.sector_id) || [];
+      setUserSectors(prev => ({
+        ...prev,
+        [userId]: sectorIds
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar setores do usuário:', error);
+    }
+  }, []);
+
+  const fetchUserSubsectors = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await getSupabaseClient()
+        .from('subsector_admins')
+        .select('subsector_id')
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      
+      const subsectorIds = data?.map(item => item.subsector_id) || [];
+      setUserSubsectors(prev => ({
+        ...prev,
+        [userId]: subsectorIds
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar sub-setores do usuário:', error);
+    }
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
     try {
       // Só executar no lado do cliente
       if (typeof window === 'undefined') return;
@@ -169,7 +207,7 @@ export default function UsersManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router, handleAuthError, fetchUserSectors, fetchUserSubsectors]);
 
   const fetchWorkLocations = async () => {
     try {
@@ -228,44 +266,6 @@ export default function UsersManagement() {
       if (process.env.NODE_ENV === 'development') {
         console.error('Erro ao buscar sub-setores:', errorMessage);
       }
-    }
-  };
-
-  const fetchUserSectors = async (userId: string) => {
-    try {
-      const { data, error } = await getSupabaseClient()
-        .from('sector_admins')
-        .select('sector_id')
-        .eq('user_id', userId);
-      
-      if (error) throw error;
-      
-      const sectorIds = data?.map(item => item.sector_id) || [];
-      setUserSectors(prev => ({
-        ...prev,
-        [userId]: sectorIds
-      }));
-    } catch (error) {
-      console.error('Erro ao buscar setores do usuário:', error);
-    }
-  };
-
-  const fetchUserSubsectors = async (userId: string) => {
-    try {
-      const { data, error } = await getSupabaseClient()
-        .from('subsector_admins')
-        .select('subsector_id')
-        .eq('user_id', userId);
-      
-      if (error) throw error;
-      
-      const subsectorIds = data?.map(item => item.subsector_id) || [];
-      setUserSubsectors(prev => ({
-        ...prev,
-        [userId]: subsectorIds
-      }));
-    } catch (error) {
-      console.error('Erro ao buscar sub-setores do usuário:', error);
     }
   };
 

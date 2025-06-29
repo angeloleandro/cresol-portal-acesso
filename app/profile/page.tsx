@@ -372,13 +372,10 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto" />
-            <p className="mt-4 text-gray-600">Carregando perfil...</p>
-          </div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="loading-spinner"></div>
+          <p className="mt-4 text-muted">Carregando perfil...</p>
         </div>
       </div>
     );
@@ -388,13 +385,13 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container py-8">
         {/* Breadcrumbs */}
         <Breadcrumbs className="mb-6" />
         
         {/* Header do Perfil */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
-          <div className="h-32 bg-gradient-to-r from-primary to-primary-dark"></div>
+        <div className="card mb-6 overflow-hidden">
+          <div className="h-32 bg-gradient-to-r from-primary to-primary"></div>
           <div className="relative px-6 pb-6">
             {/* Avatar */}
             <div className="absolute -top-16 left-6">
@@ -420,18 +417,18 @@ export default function ProfilePage() {
             <div className="ml-40 pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{profile?.full_name || 'Nome não informado'}</h1>
-                  <p className="text-gray-600">{profile?.position || 'Cargo não informado'}</p>
-                  <p className="text-sm text-gray-500">
+                  <h1 className="heading-1">{profile?.full_name || 'Nome não informado'}</h1>
+                  <p className="body-text text-muted">{profile?.position || 'Cargo não informado'}</p>
+                  <p className="body-text-small text-muted">
                     {workLocations.find(loc => loc.id === profile?.work_location_id)?.name || 'Local não informado'}
                   </p>
                 </div>
                 <div className="text-right">
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                    profile?.role === 'admin' ? 'bg-red-100 text-red-800' :
-                    profile?.role === 'sector_admin' ? 'bg-blue-100 text-blue-800' :
-                    profile?.role === 'subsector_admin' ? 'bg-purple-100 text-purple-800' :
-                    'bg-gray-100 text-gray-800'
+                    profile?.role === 'admin' ? 'badge-error' :
+                    profile?.role === 'sector_admin' ? 'badge-info' :
+                    profile?.role === 'subsector_admin' ? 'badge-warning' :
+                    'badge-success'
                   }`}>
                     {profile?.role === 'admin' && 'Administrador'}
                     {profile?.role === 'sector_admin' && 'Admin. de Setor'}
@@ -439,7 +436,7 @@ export default function ProfilePage() {
                     {profile?.role === 'user' && 'Usuário'}
                   </span>
                   {profile?.created_at && (
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="badge-text text-muted mt-2">
                       Membro desde {formatDate(profile.created_at)}
                     </p>
                   )}
@@ -451,7 +448,7 @@ export default function ProfilePage() {
 
         {/* Messages */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
+          <div className="alert-error mb-6">
             {error}
           </div>
         )}
@@ -463,8 +460,8 @@ export default function ProfilePage() {
         )}
 
         {/* Tabs de Navegação */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="border-b border-gray-200">
+        <div className="card mb-6">
+          <div className="border-b" style={{ borderColor: 'var(--color-gray-light)' }}>
             <nav className="-mb-px flex space-x-8 px-6">
               {[
                 { id: 'profile', label: 'Informações Pessoais', icon: 'user' },
@@ -475,10 +472,10 @@ export default function ProfilePage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
+                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors ${
                     activeTab === tab.id
                       ? 'border-primary text-primary'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      : 'border-transparent text-muted hover:text-title hover:border-gray-300'
                   }`}
                 >
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -528,11 +525,11 @@ export default function ProfilePage() {
                   </div>
                   
                   <div className="flex-grow">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="form-label">
                       Foto de Perfil
                     </label>
                     <div className="flex items-center space-x-3">
-                      <label className="cursor-pointer bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
+                      <label className="cursor-pointer bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-muted hover:bg-gray-50 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
                         {isUploading ? 'Carregando...' : 'Escolher arquivo'}
                         <input
                           type="file"
@@ -556,7 +553,7 @@ export default function ProfilePage() {
                         </button>
                       )}
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 badge-text text-muted">
                       Formatos aceitos: JPG, PNG. Máximo: 2MB.
                     </p>
                   </div>
@@ -565,7 +562,7 @@ export default function ProfilePage() {
                 {/* Campos do Formulário */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="email" className="form-label">
                       E-mail
                     </label>
                     <input
@@ -573,15 +570,15 @@ export default function ProfilePage() {
                       id="email"
                       value={profile?.email || ''}
                       disabled
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-500"
+                      className="input bg-gray-50 text-muted cursor-not-allowed"
                     />
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 badge-text text-muted">
                       O e-mail não pode ser alterado.
                     </p>
                   </div>
 
                   <div>
-                    <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="fullName" className="form-label">
                       Nome Completo *
                     </label>
                     <input
@@ -590,12 +587,12 @@ export default function ProfilePage() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="input bg-gray-50 text-muted"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="position" className="form-label">
                       Cargo
                     </label>
                     <input
@@ -603,12 +600,12 @@ export default function ProfilePage() {
                       id="position"
                       value={position}
                       onChange={(e) => setPosition(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="input bg-gray-50 text-muted"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="phone" className="form-label">
                       Telefone
                     </label>
                     <input
@@ -616,20 +613,20 @@ export default function ProfilePage() {
                       id="phone"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="input bg-gray-50 text-muted"
                       placeholder="(00) 00000-0000"
                     />
                   </div>
 
                   <div className="md:col-span-2">
-                    <label htmlFor="workLocation" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="workLocation" className="form-label">
                       Local de Trabalho
                     </label>
                     <select
                       id="workLocation"
                       value={workLocationId}
                       onChange={(e) => setWorkLocationId(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="input bg-gray-50 text-muted"
                     >
                       <option value="">Selecione um local</option>
                       {workLocations.map((location) => (
@@ -668,7 +665,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="bio" className="form-label">
                       Biografia
                     </label>
                     <textarea
@@ -676,13 +673,13 @@ export default function ProfilePage() {
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="input bg-gray-50 text-muted"
                       placeholder="Conte um pouco sobre você..."
                     />
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="form-label">
                       Tipo de Conta
                     </label>
                     <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-600">
@@ -691,7 +688,7 @@ export default function ProfilePage() {
                       {profile?.role === 'subsector_admin' && 'Administrador de Sub-setor'}
                       {profile?.role === 'user' && 'Usuário'}
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 badge-text text-muted">
                       O tipo de conta só pode ser alterado por um administrador.
                     </p>
                   </div>

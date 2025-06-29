@@ -414,7 +414,7 @@ export default function GlobalSearch({
                     onClick={openAdvancedSearch}
                     className="w-full text-left px-2 py-1.5 text-sm text-primary hover:bg-primary/5 rounded transition-colors"
                   >
-                    Ver todos os resultados para "{query}"
+                    Ver todos os resultados para &quot;{query}&quot;
                   </button>
                 </div>
               )}

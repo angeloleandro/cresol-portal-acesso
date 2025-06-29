@@ -416,7 +416,7 @@ export default function SectorSystemsManagement() {
         {systems.length === 0 ? (
           <div className="bg-white p-8 rounded shadow text-center">
             <p className="text-gray-500">Nenhum sistema cadastrado para este setor.</p>
-            <p className="text-gray-500 mt-2">Clique em "Adicionar Sistema" para começar.</p>
+            <p className="text-gray-500 mt-2">Clique em &quot;Adicionar Sistema&quot; para começar.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

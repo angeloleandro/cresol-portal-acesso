@@ -51,47 +51,84 @@ export default function GalleryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cresol-gray-light/30">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <section className="bg-white rounded-lg shadow-sm p-5 mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Galeria de Imagens</h2>
-          </div>
+      <main className="container py-8">
+        <div className="mb-8">
+          <h1 className="heading-1 mb-2">Galeria de Imagens</h1>
+          <p className="body-text text-muted">Explore nossa coleção de fotos e momentos especiais da Cresol.</p>
+        </div>
+
+        <div className="card">
           {loading ? (
-            <div className="text-center text-cresol-gray py-12">Carregando imagens...</div>
+            <div className="text-center py-12">
+              <div className="loading-spinner mx-auto"></div>
+              <p className="mt-4 text-muted">Carregando imagens...</p>
+            </div>
           ) : images.length === 0 ? (
-            <div className="text-center text-cresol-gray py-12">Nenhuma imagem encontrada.</div>
+            <div className="text-center py-12">
+              <svg className="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <h3 className="heading-3 mt-4 mb-2">Nenhuma imagem encontrada</h3>
+              <p className="body-text text-muted">A galeria ainda não possui imagens disponíveis.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {images.map((img) => (
-                <div key={img.id} className="bg-white rounded-lg shadow cursor-pointer hover:shadow-lg transition overflow-hidden" onClick={() => handleOpenModal(img)}>
-                  <div className="relative w-full aspect-[4/3] bg-cresol-gray-light">
-                    <Image src={img.image_url} alt={img.title || "Imagem da galeria"} fill className="object-cover" />
+                <div 
+                  key={img.id} 
+                  className="bg-white rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 hover:-translate-y-1 overflow-hidden border border-gray-200" 
+                  onClick={() => handleOpenModal(img)}
+                >
+                  <div className="relative w-full aspect-[4/3] bg-gray-100">
+                    <Image 
+                      src={img.image_url} 
+                      alt={img.title || "Imagem da galeria"} 
+                      fill 
+                      className="object-cover" 
+                    />
                   </div>
-                  {img.title && <div className="p-2 text-sm text-cresol-gray text-center truncate">{img.title}</div>}
+                  {img.title && (
+                    <div className="p-3">
+                      <p className="body-text-small text-center truncate">{img.title}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
-        </section>
+        </div>
+
+        {/* Modal padronizado */}
         {modalOpen && selectedImage && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4 relative">
-              <button
-                className="absolute top-6 right-6 bg-white border border-cresol-gray-light shadow-lg rounded-full w-14 h-14 flex items-center justify-center z-20 transition hover:bg-primary/10 group"
-                onClick={handleCloseModal}
-                aria-label="Fechar"
-                tabIndex={0}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-cresol-gray group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M6 18L18 6" />
-                </svg>
-              </button>
-              <div className="aspect-[4/3] w-full rounded-t-lg overflow-hidden bg-black flex items-center justify-center">
-                <Image src={selectedImage.image_url} alt={selectedImage.title || "Imagem da galeria"} fill className="object-contain" />
+            <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+              {/* Cabeçalho do modal */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 className="heading-4">
+                  {selectedImage.title || 'Imagem da galeria'}
+                </h3>
+                <button
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  onClick={handleCloseModal}
+                  aria-label="Fechar"
+                >
+                  <svg className="w-6 h-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              {selectedImage.title && <div className="p-4 text-center text-lg font-semibold text-cresol-gray">{selectedImage.title}</div>}
+              
+              {/* Conteúdo do modal */}
+              <div className="relative max-h-[70vh] bg-black flex items-center justify-center">
+                <Image 
+                  src={selectedImage.image_url} 
+                  alt={selectedImage.title || "Imagem da galeria"} 
+                  fill
+                  className="object-contain" 
+                />
+              </div>
             </div>
           </div>
         )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
 interface FavoriteItem {
@@ -294,7 +295,7 @@ export function FavoriteButton({
   showLabel = false, 
   size = 'md' 
 }: FavoriteButtonProps) {
-  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
+  const { addToFavorites, removeFromFavorites, isFavorite, favorites } = useFavorites();
   const [isLoading, setIsLoading] = useState(false);
   
   const favorite = isFavorite(item.url);
@@ -307,7 +308,7 @@ export function FavoriteButton({
     try {
       if (favorite) {
         // Encontrar o favorito para remover
-        const favToRemove = useFavorites().favorites.find(fav => fav.url === item.url);
+        const favToRemove = favorites.find(fav => fav.url === item.url);
         if (favToRemove) {
           await removeFromFavorites(favToRemove.id);
         }
@@ -451,9 +452,11 @@ export function FavoritesList({
           {/* Ícone ou thumbnail */}
           <div className="flex-shrink-0">
             {favorite.thumbnail ? (
-              <img 
+              <Image 
                 src={favorite.thumbnail} 
                 alt={favorite.title}
+                width={compact ? 32 : 40}
+                height={compact ? 32 : 40}
                 className={`${compact ? 'h-8 w-8' : 'h-10 w-10'} object-cover rounded`}
               />
             ) : favorite.icon ? (

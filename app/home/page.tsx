@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
@@ -35,11 +35,7 @@ export default function Home() {
     pendingApprovals: 2
   });
 
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-    const checkUser = async () => {
+  const checkUser = useCallback(async () => {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
@@ -63,7 +59,11 @@ export default function Home() {
       console.error('Erro ao verificar usuário:', error);
       router.replace('/login');
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkUser();
+  }, [checkUser]);
 
   if (loading) {
     return <LoadingSpinner fullScreen message="Carregando página inicial..." />;
@@ -80,62 +80,62 @@ export default function Home() {
         </div>
           </div>
           
-      {/* Status do Sistema + Busca Global - Profissional */}
+      {/* Status do Sistema + Busca Global - Padronizado */}
       <div className="py-6 bg-white border-y border-gray-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
             
-            {/* Status do Sistema - Design Profissional */}
+            {/* Status do Sistema - Seguindo Design System */}
             <div className="flex-1">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center lg:text-left">
+              <h2 className="heading-4 mb-4 text-center lg:text-left">
                 Status do Sistema
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Online */}
-                <div className="text-center p-4 bg-gray-50/70 border border-gray-200/80 rounded-xl transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg">
+                <div className="card-status">
                   <div className="flex items-center justify-center mb-2">
-                    <Icon name="check" className="w-5 h-5 text-gray-600" />
+                    <Icon name="check" className="w-5 h-5 text-muted" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">Online</div>
-                  <div className="text-sm font-medium text-gray-500">Sistemas</div>
+                  <div className="text-2xl font-bold text-body">Online</div>
+                  <div className="body-text-small">Sistemas</div>
                 </div>
 
                 {/* Usuários Ativos */}
-                <div className="text-center p-4 bg-gray-50/70 border border-gray-200/80 rounded-xl transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg">
+                <div className="card-status">
                   <div className="flex items-center justify-center mb-2">
-                    <Icon name="user-group" className="w-5 h-5 text-gray-600" />
+                    <Icon name="user-group" className="w-5 h-5 text-muted" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.activeUsers}</div>
-                  <div className="text-sm font-medium text-gray-500">Usuários</div>
+                  <div className="text-2xl font-bold text-body">{stats.activeUsers}</div>
+                  <div className="body-text-small">Usuários</div>
                 </div>
 
                 {/* Notificações */}
-                <div className="text-center p-4 bg-gray-50/70 border border-gray-200/80 rounded-xl transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg">
+                <div className="card-status">
                   <div className="flex items-center justify-center mb-2">
-                    <Icon name="bell" className="w-5 h-5 text-gray-600" />
+                    <Icon name="bell" className="w-5 h-5 text-muted" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.unreadNotifications}</div>
-                  <div className="text-sm font-medium text-gray-500">Notificações</div>
+                  <div className="text-2xl font-bold text-body">{stats.unreadNotifications}</div>
+                  <div className="body-text-small">Notificações</div>
                 </div>
 
                 {/* Pendências */}
-                <div className="text-center p-4 bg-gray-50/70 border border-gray-200/80 rounded-xl transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg">
+                <div className="card-status">
                   <div className="flex items-center justify-center mb-2">
-                    <Icon name="clock" className="w-5 h-5 text-gray-600" />
+                    <Icon name="clock" className="w-5 h-5 text-muted" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.pendingApprovals}</div>
-                  <div className="text-sm font-medium text-gray-500">Pendências</div>
+                  <div className="text-2xl font-bold text-body">{stats.pendingApprovals}</div>
+                  <div className="body-text-small">Pendências</div>
                 </div>
               </div>
             </div>
 
-            {/* Busca Global - Design Harmonioso */}
+            {/* Busca Global - Padronizada */}
             <div className="flex-shrink-0 w-full lg:w-80">
               <div className="text-center lg:text-right mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">
+                <h2 className="heading-4">
                   Portal Cresol
                 </h2>
-                <p className="text-sm text-gray-500">
+                <p className="body-text-small">
                   Acesso centralizado
                 </p>
               </div>

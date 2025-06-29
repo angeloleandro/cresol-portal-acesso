@@ -53,17 +53,28 @@ export default function VideosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cresol-gray-light/30">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <section className="bg-white rounded-lg shadow-sm p-5 mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-primary">Galeria de Vídeos</h2>
-          </div>
+      <main className="container py-8">
+        <div className="mb-8">
+          <h1 className="heading-1 mb-2">Galeria de Vídeos</h1>
+          <p className="body-text text-muted">Assista aos vídeos institucionais e de treinamento da Cresol.</p>
+        </div>
+
+        <div className="card">
           {loading ? (
-            <div className="text-center text-cresol-gray py-12">Carregando vídeos...</div>
+            <div className="text-center py-12">
+              <div className="loading-spinner mx-auto"></div>
+              <p className="mt-4 text-muted">Carregando vídeos...</p>
+            </div>
           ) : videos.length === 0 ? (
-            <div className="text-center text-cresol-gray py-12">Nenhum vídeo encontrado.</div>
+            <div className="text-center py-12">
+              <svg className="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <h3 className="heading-3 mt-4 mb-2">Nenhum vídeo encontrado</h3>
+              <p className="body-text text-muted">A galeria de vídeos ainda não possui conteúdo disponível.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {videos.map((video) => (
@@ -73,21 +84,28 @@ export default function VideosPage() {
               ))}
             </div>
           )}
-        </section>
+        </div>
+
+        {/* Modal padronizado */}
         {modalOpen && selectedVideo && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4 relative">
-              <button
-                className="absolute top-6 right-6 bg-white border border-cresol-gray-light shadow-lg rounded-full w-14 h-14 flex items-center justify-center z-20 transition hover:bg-primary/10 group"
-                onClick={handleCloseModal}
-                aria-label="Fechar"
-                tabIndex={0}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-cresol-gray group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M6 18L18 6" />
-                </svg>
-              </button>
-              <div className="aspect-video w-full rounded-t-lg overflow-hidden bg-black">
+            <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+              {/* Cabeçalho do modal */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 className="heading-4">{selectedVideo.title}</h3>
+                <button
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  onClick={handleCloseModal}
+                  aria-label="Fechar"
+                >
+                  <svg className="w-6 h-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Conteúdo do modal */}
+              <div className="aspect-video w-full bg-black">
                 <iframe
                   src={selectedVideo.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
                   title={selectedVideo.title}
@@ -95,9 +113,6 @@ export default function VideosPage() {
                   allowFullScreen
                   className="w-full h-full min-h-[360px]"
                 />
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-cresol-gray mb-2">{selectedVideo.title}</h3>
               </div>
             </div>
           </div>
@@ -109,21 +124,42 @@ export default function VideosPage() {
   );
 }
 
-// Card de vídeo reutilizável
+// Card de vídeo padronizado
 function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: DashboardVideo) => void }) {
   const maxLen = 50;
   const shortTitle = video.title.length > maxLen ? video.title.slice(0, maxLen) + '...' : video.title;
+  
   return (
-    <div className="bg-white rounded-lg shadow flex flex-col cursor-pointer hover:shadow-lg transition" onClick={() => onClick(video)}>
-      <div className="relative w-full aspect-video bg-cresol-gray-light rounded-t-lg overflow-hidden">
+    <div className="card cursor-pointer hover:shadow-md transition-all duration-200 hover:-translate-y-1" onClick={() => onClick(video)}>
+      <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden mb-3">
         {video.thumbnail_url ? (
-          <Image src={video.thumbnail_url} alt={video.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px" className="object-cover" />
+          <Image 
+            src={video.thumbnail_url} 
+            alt={video.title} 
+            fill 
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px" 
+            className="object-cover" 
+          />
         ) : (
-          <div className="flex items-center justify-center h-full text-cresol-gray">Sem thumbnail</div>
+          <div className="flex items-center justify-center h-full">
+            <svg className="w-12 h-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
         )}
+        
+        {/* Ícone de play overlay */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
+          <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-primary ml-1" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </div>
+        </div>
       </div>
-      <div className="p-4 flex-1 flex flex-col">
-        <h3 className="text-base font-semibold text-cresol-gray mb-2 line-clamp-2" title={video.title}>{shortTitle}</h3>
+      
+      <div className="p-1">
+        <h3 className="heading-4 line-clamp-2" title={video.title}>{shortTitle}</h3>
       </div>
     </div>
   );
