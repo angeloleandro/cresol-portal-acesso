@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
-import { LuBuilding2, LuPlus, LuPencil, LuTrash2, LuUsers, LuBuilding, LuFolder, LuFolderPlus, LuSettings, LuExternalLink } from 'react-icons/lu';
+import { Icon } from '../../components/icons';
 
 interface Sector {
   id: string;
@@ -320,7 +320,7 @@ export default function SectorsManagement() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold text-primary flex items-center">
-                <LuBuilding2 className="mr-3 h-8 w-8" />
+                <Icon name="building-2" className="mr-3 h-8 w-8" />
                 Gerenciamento de Setores
               </h2>
               <p className="text-cresol-gray mt-2">
@@ -333,14 +333,14 @@ export default function SectorsManagement() {
                 onClick={() => setShowSectorModal(true)}
                 className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
               >
-                <LuPlus className="h-4 w-4" />
+                <Icon name="plus" className="h-4 w-4" />
                 Novo Setor
               </button>
               <button
                 onClick={() => setShowSubsectorModal(true)}
                 className="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary-dark transition-colors flex items-center gap-2"
               >
-                <LuFolderPlus className="h-4 w-4" />
+                <Icon name="folder-plus" className="h-4 w-4" />
                 Novo Sub-setor
               </button>
             </div>
@@ -359,7 +359,7 @@ export default function SectorsManagement() {
                     : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray'
                 }`}
               >
-                <LuBuilding className="inline mr-2 h-4 w-4" />
+                <Icon name="building-1" className="inline mr-2 h-4 w-4" />
                 Setores ({sectors.length})
               </button>
               <button
@@ -370,7 +370,7 @@ export default function SectorsManagement() {
                     : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray'
                 }`}
               >
-                <LuFolder className="inline mr-2 h-4 w-4" />
+                <Icon name="folder" className="inline mr-2 h-4 w-4" />
                 Sub-setores ({subsectors.length})
               </button>
             </nav>
@@ -405,21 +405,21 @@ export default function SectorsManagement() {
                           className="p-2 text-cresol-gray hover:text-secondary hover:bg-secondary/10 rounded-lg transition-colors"
                           title="Gerenciar conteúdo do setor"
                         >
-                          <LuSettings className="h-4 w-4" />
+                          <Icon name="settings" className="h-4 w-4" />
                         </Link>
                         <button
                           onClick={() => openEditSector(sector)}
                           className="p-2 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                           title="Editar setor"
                         >
-                          <LuPencil className="h-4 w-4" />
+                          <Icon name="pencil" className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteSector(sector)}
                           className="p-2 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Excluir setor"
                         >
-                          <LuTrash2 className="h-4 w-4" />
+                          <Icon name="trash" className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
@@ -504,21 +504,21 @@ export default function SectorsManagement() {
                         className="p-2 text-cresol-gray hover:text-secondary hover:bg-secondary/10 rounded-lg transition-colors"
                         title="Gerenciar sub-setor"
                       >
-                        <LuSettings className="h-4 w-4" />
+                        <Icon name="settings" className="h-4 w-4" />
                       </Link>
                       <button
                         onClick={() => openEditSubsector(subsector)}
                         className="p-2 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                         title="Editar sub-setor"
                       >
-                        <LuPencil className="h-4 w-4" />
+                        <Icon name="pencil" className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteSubsector(subsector)}
                         className="p-2 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Excluir sub-setor"
                       >
-                        <LuTrash2 className="h-4 w-4" />
+                        <Icon name="trash" className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -541,7 +541,7 @@ export default function SectorsManagement() {
                           href={`/subsetores/${subsector.id}/equipe`}
                           className="flex-1 text-center px-3 py-2 bg-primary/10 text-primary text-xs font-medium rounded-lg hover:bg-primary/20 transition-colors flex items-center justify-center gap-1"
                         >
-                          <LuUsers className="h-3 w-3" />
+                          <Icon name="user-group" className="h-3 w-3" />
                           Equipe
                         </Link>
                       </div>
@@ -556,7 +556,7 @@ export default function SectorsManagement() {
         {/* Empty States */}
         {activeTab === 'sectors' && sectors.length === 0 && (
           <div className="text-center py-12">
-            <LuBuilding className="mx-auto h-12 w-12 text-cresol-gray" />
+            <Icon name="building-1" className="mx-auto h-12 w-12 text-cresol-gray" />
             <h3 className="mt-4 text-lg font-medium text-cresol-gray-dark">Nenhum setor cadastrado</h3>
             <p className="mt-2 text-cresol-gray">Comece criando o primeiro setor da organização.</p>
             <button
@@ -570,7 +570,7 @@ export default function SectorsManagement() {
 
         {activeTab === 'subsectors' && subsectors.length === 0 && (
           <div className="text-center py-12">
-            <LuFolder className="mx-auto h-12 w-12 text-cresol-gray" />
+            <Icon name="folder" className="mx-auto h-12 w-12 text-cresol-gray" />
             <h3 className="mt-4 text-lg font-medium text-cresol-gray-dark">Nenhum sub-setor cadastrado</h3>
             <p className="mt-2 text-cresol-gray">
               {sectors.length === 0 

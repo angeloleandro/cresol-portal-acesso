@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
-import { LuUsers, LuPlus, LuX, LuPencil, LuMapPin, LuMail, LuBuilding2, LuArrowLeft, LuUserPlus, LuSearch } from 'react-icons/lu';
+import { Icon } from '../../../components/icons';
 
 interface User {
   id: string;
@@ -310,7 +310,7 @@ export default function SubsectorTeamPage() {
                 onClick={() => router.back()}
                 className="mr-4 p-2 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
               >
-                <LuArrowLeft className="h-5 w-5" />
+                <Icon name="arrow-left" className="h-5 w-5" />
               </button>
               <div className="relative h-10 w-24 mr-4">
                 <Image 
@@ -336,7 +336,7 @@ export default function SubsectorTeamPage() {
                 onClick={() => setShowAddModal(true)}
                 className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
               >
-                <LuUserPlus className="h-4 w-4" />
+                <Icon name="user-add" className="h-4 w-4" />
                 Adicionar Membro
               </button>
             )}
@@ -350,7 +350,7 @@ export default function SubsectorTeamPage() {
         {subsector.description && (
           <div className="bg-white rounded-xl shadow-sm border border-cresol-gray-light p-6 mb-8">
             <div className="flex items-center mb-3">
-              <LuBuilding2 className="h-5 w-5 text-secondary mr-2" />
+              <Icon name="building-2" className="h-5 w-5 text-secondary mr-2" />
               <h2 className="text-lg font-semibold text-cresol-gray-dark">Sobre o Sub-setor</h2>
             </div>
             <p className="text-cresol-gray">{subsector.description}</p>
@@ -362,7 +362,7 @@ export default function SubsectorTeamPage() {
           <div className="p-6 border-b border-cresol-gray-light">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <LuUsers className="h-6 w-6 text-primary mr-3" />
+                <Icon name="user-group" className="h-6 w-6 text-primary mr-3" />
                 <div>
                   <h2 className="text-xl font-semibold text-cresol-gray-dark">
                     Equipe ({teamMembers.length} membros)
@@ -378,7 +378,7 @@ export default function SubsectorTeamPage() {
           <div className="p-6">
             {teamMembers.length === 0 ? (
               <div className="text-center py-12">
-                <LuUsers className="mx-auto h-12 w-12 text-cresol-gray mb-4" />
+                <Icon name="user-group" className="mx-auto h-12 w-12 text-cresol-gray mb-4" />
                 <h3 className="text-lg font-medium text-cresol-gray-dark mb-2">
                   Nenhum membro na equipe
                 </h3>
@@ -413,7 +413,7 @@ export default function SubsectorTeamPage() {
                             />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-                              <LuUsers className="h-6 w-6" />
+                              <Icon name="user-group" className="h-6 w-6" />
                             </div>
                           )}
                         </div>
@@ -434,14 +434,14 @@ export default function SubsectorTeamPage() {
                             className="p-1 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded transition-colors"
                             title="Editar cargo"
                           >
-                            <LuPencil className="h-4 w-4" />
+                            <Icon name="pencil" className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleRemoveMember(member.id)}
                             className="p-1 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                             title="Remover da equipe"
                           >
-                            <LuX className="h-4 w-4" />
+                            <Icon name="close" className="h-4 w-4" />
                           </button>
                         </div>
                       )}
@@ -449,12 +449,12 @@ export default function SubsectorTeamPage() {
                     
                     <div className="space-y-2 text-sm text-cresol-gray">
                       <div className="flex items-center">
-                        <LuMail className="h-4 w-4 mr-2" />
+                        <Icon name="mail" className="h-4 w-4 mr-2" />
                         <span>{member.profiles.email}</span>
                       </div>
                       {member.profiles.work_locations?.name && (
                         <div className="flex items-center">
-                          <LuMapPin className="h-4 w-4 mr-2" />
+                          <Icon name="map" className="h-4 w-4 mr-2" />
                           <span>{member.profiles.work_locations.name}</span>
                         </div>
                       )}
@@ -482,7 +482,7 @@ export default function SubsectorTeamPage() {
                   Buscar Usuário
                 </label>
                 <div className="relative">
-                  <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cresol-gray h-4 w-4" />
+                  <Icon name="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cresol-gray h-4 w-4" />
                   <input
                     type="text"
                     value={searchTerm}
@@ -523,7 +523,7 @@ export default function SubsectorTeamPage() {
                               />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-                                <LuUsers className="h-4 w-4" />
+                                <Icon name="user-group" className="h-4 w-4" />
                               </div>
                             )}
                           </div>

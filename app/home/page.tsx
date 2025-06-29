@@ -15,7 +15,7 @@ import SystemLinks from '../components/SystemLinks';
 import ParecerSolicitacao from '../components/ParecerSolicitacao';
 import { handleComponentError, devLog } from '@/lib/error-handler';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import { Users, Bell, Clock, CircleCheckBig } from 'lucide-react';
+import { Icon } from '../components/icons';
 
 interface QuickStats {
   activeUsers: number;
@@ -94,7 +94,7 @@ export default function Home() {
                 {/* Online */}
                 <div className="text-center p-4 bg-gray-50/70 border border-gray-200/80 rounded-xl transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg">
                   <div className="flex items-center justify-center mb-2">
-                    <CircleCheckBig className="w-5 h-5 text-gray-600" />
+                    <Icon name="check" className="w-5 h-5 text-gray-600" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900">Online</div>
                   <div className="text-sm font-medium text-gray-500">Sistemas</div>
@@ -103,7 +103,7 @@ export default function Home() {
                 {/* Usuários Ativos */}
                 <div className="text-center p-4 bg-gray-50/70 border border-gray-200/80 rounded-xl transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg">
                   <div className="flex items-center justify-center mb-2">
-                    <Users className="w-5 h-5 text-gray-600" />
+                    <Icon name="user-group" className="w-5 h-5 text-gray-600" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900">{stats.activeUsers}</div>
                   <div className="text-sm font-medium text-gray-500">Usuários</div>
@@ -112,7 +112,7 @@ export default function Home() {
                 {/* Notificações */}
                 <div className="text-center p-4 bg-gray-50/70 border border-gray-200/80 rounded-xl transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg">
                   <div className="flex items-center justify-center mb-2">
-                    <Bell className="w-5 h-5 text-gray-600" />
+                    <Icon name="bell" className="w-5 h-5 text-gray-600" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900">{stats.unreadNotifications}</div>
                   <div className="text-sm font-medium text-gray-500">Notificações</div>
@@ -121,7 +121,7 @@ export default function Home() {
                 {/* Pendências */}
                 <div className="text-center p-4 bg-gray-50/70 border border-gray-200/80 rounded-xl transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg">
                   <div className="flex items-center justify-center mb-2">
-                    <Clock className="w-5 h-5 text-gray-600" />
+                    <Icon name="clock" className="w-5 h-5 text-gray-600" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900">{stats.pendingApprovals}</div>
                   <div className="text-sm font-medium text-gray-500">Pendências</div>

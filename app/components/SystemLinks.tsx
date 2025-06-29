@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { handleComponentError, devLog } from '@/lib/error-handler';
 import LoadingSpinner from './ui/LoadingSpinner';
 import ErrorMessage from './ui/ErrorMessage';
-import { Monitor, ExternalLink } from 'lucide-react';
+import { Icon } from './icons';
 
 interface SystemLink {
   id: string;
@@ -109,7 +109,7 @@ export default function SystemLinks() {
                 aria-label={`Acessar ${link.name} em uma nova aba`}
               >
                 <div className="flex flex-col items-center space-y-2">
-                  <Monitor className="w-6 h-6 text-gray-600 group-hover:text-orange-600 transition-colors" />
+                  <Icon name="monitor" className="w-6 h-6 text-gray-600 group-hover:text-orange-600 transition-colors" />
                   <span className="text-xs font-medium text-gray-700 group-hover:text-orange-700 transition-colors leading-tight">
                     {link.name}
                   </span>

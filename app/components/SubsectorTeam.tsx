@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { LuUsers, LuExternalLink } from 'react-icons/lu';
+import { Icon } from './icons';
 
 interface TeamMember {
   id: string;
@@ -78,7 +78,7 @@ export default function SubsectorTeam({
     <div className="bg-white rounded-lg border border-cresol-gray-light p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center">
-          <LuUsers className="h-5 w-5 text-primary mr-2" />
+          <Icon name="user-group" className="h-5 w-5 text-primary mr-2" />
           <h3 className="font-semibold text-cresol-gray-dark">
             Equipe
           </h3>
@@ -89,7 +89,7 @@ export default function SubsectorTeam({
             className="text-primary hover:text-primary-dark text-sm flex items-center gap-1"
           >
             Ver completa
-            <LuExternalLink className="h-3 w-3" />
+            <Icon name="external-link" className="h-3 w-3" />
           </Link>
         )}
       </div>
@@ -112,7 +112,7 @@ export default function SubsectorTeam({
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-                    <LuUsers className="h-4 w-4" />
+                    <Icon name="user-group" className="h-4 w-4" />
                   </div>
                 )}
               </div>

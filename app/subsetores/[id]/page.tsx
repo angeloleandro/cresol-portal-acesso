@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../../components/Navbar';
 import SubsectorTeam from '../../components/SubsectorTeam';
-import { LuBuilding2, LuUsers, LuMapPin, LuClock, LuTriangleAlert } from 'react-icons/lu';
+import { Icon } from '../../components/icons';
 
 interface Subsector {
   id: string;
@@ -171,7 +171,7 @@ export default function SubsectorDetailsPage() {
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center max-w-md mx-auto px-4">
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-              <LuTriangleAlert className="h-12 w-12 text-red-500 mx-auto mb-4" aria-hidden="true" />
+              <Icon name="triangle-alert" className="h-12 w-12 text-red-500 mx-auto mb-4" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-red-800 mb-2">
                 Erro ao Carregar Sub-setor
               </h2>
@@ -206,7 +206,7 @@ export default function SubsectorDetailsPage() {
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center max-w-md mx-auto px-4">
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-              <LuTriangleAlert className="h-12 w-12 text-yellow-500 mx-auto mb-4" aria-hidden="true" />
+              <Icon name="triangle-alert" className="h-12 w-12 text-yellow-500 mx-auto mb-4" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-yellow-800 mb-2">
                 Sub-setor Não Encontrado
               </h2>
@@ -258,7 +258,7 @@ export default function SubsectorDetailsPage() {
           {subsector.description && (
             <div className="bg-primary/5 rounded-lg p-4" role="region" aria-labelledby="subsector-description">
               <div className="flex items-start">
-                <LuBuilding2 className="h-5 w-5 text-primary mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <Icon name="building-2" className="h-5 w-5 text-primary mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <p className="text-cresol-gray" id="subsector-description">
                   {subsector.description}
                 </p>
@@ -311,7 +311,7 @@ export default function SubsectorDetailsPage() {
                           {article.summary}
                         </p>
                         <div className="flex items-center text-xs text-cresol-gray">
-                          <LuClock className="h-3 w-3 mr-1" aria-hidden="true" />
+                          <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
                           <time dateTime={article.created_at}>
                             {new Date(article.created_at).toLocaleDateString('pt-BR')}
                           </time>
@@ -360,7 +360,7 @@ export default function SubsectorDetailsPage() {
                         </p>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-cresol-gray">
                           <div className="flex items-center">
-                            <LuClock className="h-3 w-3 mr-1" aria-hidden="true" />
+                            <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
                             <time dateTime={event.start_date}>
                               {new Date(event.start_date).toLocaleDateString('pt-BR', {
                                 day: '2-digit',
@@ -373,7 +373,7 @@ export default function SubsectorDetailsPage() {
                           </div>
                           {event.location && (
                             <div className="flex items-center">
-                              <LuMapPin className="h-3 w-3 mr-1" aria-hidden="true" />
+                              <Icon name="map" className="h-3 w-3 mr-1" aria-hidden="true" />
                               <span aria-label={`Local: ${event.location}`}>
                                 {event.location}
                               </span>

@@ -4,17 +4,7 @@ import { useEffect, useState } from 'react';
 import { handleComponentError, devLog } from '@/lib/error-handler';
 import LoadingSpinner from './ui/LoadingSpinner';
 import ErrorMessage from './ui/ErrorMessage';
-import { 
-  Users, 
-  Building, 
-  Landmark, 
-  CircleDollarSign, 
-  TrendingUp, 
-  PiggyBank, 
-  Handshake, 
-  Tractor, 
-  Briefcase 
-} from 'lucide-react';
+import { Icon } from './icons';
 
 interface EconomicIndicator {
   id: string;
@@ -28,15 +18,15 @@ interface EconomicIndicator {
 }
 
 const iconMap: Record<string, JSX.Element> = {
-  users: <Users className="h-4 w-4" />,
-  building: <Building className="h-4 w-4" />,
-  bank: <Landmark className="h-4 w-4" />,
-  money: <CircleDollarSign className="h-4 w-4" />,
-  treasure: <TrendingUp className="h-4 w-4" />,
-  'piggy-bank': <PiggyBank className="h-4 w-4" />,
-  handshake: <Handshake className="h-4 w-4" />,
-  tractor: <Tractor className="h-4 w-4" />,
-  briefcase: <Briefcase className="h-4 w-4" />,
+  users: <Icon name="user-group" className="h-4 w-4" />,
+  building: <Icon name="building-1" className="h-4 w-4" />,
+  bank: <Icon name="building-2" className="h-4 w-4" />,
+  money: <Icon name="suitcase" className="h-4 w-4" />,
+  treasure: <Icon name="chart-bar-vertical" className="h-4 w-4" />,
+  'piggy-bank': <Icon name="suitcase" className="h-4 w-4" />,
+  handshake: <Icon name="user-check" className="h-4 w-4" />,
+  tractor: <Icon name="building-1" className="h-4 w-4" />,
+  briefcase: <Icon name="suitcase" className="h-4 w-4" />,
 };
 
 export default function EconomicIndicators() {
