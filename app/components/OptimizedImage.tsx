@@ -43,22 +43,37 @@ export default function OptimizedImage({
   const [imageSrc, setImageSrc] = useState(src);
 
   // WORKAROUND: Forçar unoptimized para imagens do Supabase na Vercel para evitar erro 402
-  const isVercel = process.env.VERCEL === '1';
+  const isVercel = process.env.VERCEL_ENV !== undefined || process.env.VERCEL === '1';
   const isSupabaseImage = imageSrc?.includes('supabase.co');
   const shouldForceUnoptimized = isVercel && isSupabaseImage;
 
+  // Log de debug para entender o comportamento
+  if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV !== undefined) {
+    console.log('OptimizedImage Config:', {
+      src: imageSrc?.substring(0, 50) + '...',
+      alt,
+      isVercel,
+      isSupabaseImage,
+      shouldForceUnoptimized,
+      vercelEnv: process.env.VERCEL_ENV,
+      nodeEnv: process.env.NODE_ENV
+    });
+  }
+
   const handleImageError = () => {
     // Log detalhado para debug na Vercel
-    if (process.env.NODE_ENV === 'development' || process.env.VERCEL === '1') {
+    if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV !== undefined) {
       console.error('OptimizedImage Error:', {
         src: imageSrc,
         originalSrc: src,
         alt,
         isValidUrl: isValidUrl(imageSrc),
         environment: process.env.NODE_ENV,
-        isVercel: process.env.VERCEL === '1',
+        vercelEnv: process.env.VERCEL_ENV,
+        isVercel: process.env.VERCEL_ENV !== undefined || process.env.VERCEL === '1',
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-        shouldForceUnoptimized
+        shouldForceUnoptimized,
+        isSupabaseImage
       });
     }
     
