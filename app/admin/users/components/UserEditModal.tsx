@@ -9,6 +9,7 @@ interface UserProfile {
   full_name: string;
   email: string;
   position?: string;
+  position_id?: string;
   work_location_id?: string;
   role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
   created_at?: string;
@@ -18,6 +19,13 @@ interface UserProfile {
 interface WorkLocation {
   id: string;
   name: string;
+}
+
+interface Position {
+  id: string;
+  name: string;
+  description?: string;
+  department?: string;
 }
 
 interface Sector {
@@ -34,6 +42,7 @@ interface Subsector {
 interface UserEditModalProps {
   user: UserProfile;
   workLocations: WorkLocation[];
+  positions: Position[];
   sectors: Sector[];
   subsectors: Subsector[];
   userSectors: string[];
@@ -47,6 +56,7 @@ interface UserEditModalProps {
 export default function UserEditModal({
   user,
   workLocations,
+  positions,
   sectors,
   subsectors,
   userSectors,
@@ -58,7 +68,7 @@ export default function UserEditModal({
 }: UserEditModalProps) {
   const [fullName, setFullName] = useState(user.full_name);
   const [email, setEmail] = useState(user.email);
-  const [position, setPosition] = useState(user.position || '');
+  const [positionId, setPositionId] = useState(user.position_id || '');
   const [workLocationId, setWorkLocationId] = useState(user.work_location_id || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -180,8 +190,8 @@ export default function UserEditModal({
       const updateData: Record<string, unknown> = {
         full_name: fullName,
         email: email,
-        position: position,
-        work_location_id: workLocationId,
+        position_id: positionId || null,
+        work_location_id: workLocationId || null,
       };
 
       if (avatarFile) {
@@ -375,13 +385,20 @@ export default function UserEditModal({
               <label htmlFor={`position-${user.id}`} className="form-label">
                 Cargo
               </label>
-              <input
+              <select
                 id={`position-${user.id}`}
-                type="text"
                 className="input"
-                value={position}
-                onChange={e => setPosition(e.target.value)}
-              />
+                value={positionId}
+                onChange={e => setPositionId(e.target.value)}
+              >
+                <option value="">Selecione um cargo</option>
+                {positions.map(position => (
+                  <option key={position.id} value={position.id}>
+                    {position.name}
+                    {position.department && ` - ${position.department}`}
+                  </option>
+                ))}
+              </select>
             </div>
             
             <div>

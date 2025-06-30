@@ -7,13 +7,13 @@ export async function POST(request: NextRequest) {
   const requestCookies = cookies();
   
   try {
-    const { email, fullName, position, workLocationId, role, avatarUrl, adminToken } = await request.json();
+    const { email, fullName, positionId, workLocationId, role, avatarUrl, adminToken } = await request.json();
 
     // Log para depuração
     console.log('API /api/admin/create-user chamada com:', { 
       email, 
       fullName, 
-      position, 
+      positionId, 
       workLocationId, 
       role, 
       avatarUrl,
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
       .from('profiles')
       .update({
         full_name: fullName,
-        position: position || null,
+        position_id: positionId || null,
         work_location_id: workLocationId || null,
         role: role || 'user',
         avatar_url: avatarUrl || null,

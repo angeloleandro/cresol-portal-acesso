@@ -11,6 +11,7 @@ interface UserProfile {
   full_name: string;
   email: string;
   position?: string;
+  position_id?: string;
   work_location_id?: string;
   role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
   created_at?: string;
@@ -20,6 +21,13 @@ interface UserProfile {
 interface WorkLocation {
   id: string;
   name: string;
+}
+
+interface Position {
+  id: string;
+  name: string;
+  description?: string;
+  department?: string;
 }
 
 interface Sector {
@@ -38,6 +46,7 @@ interface Subsector {
 interface UserListProps {
   users: UserProfile[];
   workLocations: WorkLocation[];
+  positions: Position[];
   sectors: Sector[];
   subsectors: Subsector[];
   userSectors: Record<string, string[]>;
@@ -51,6 +60,7 @@ interface UserListProps {
 export default function UserList({
   users,
   workLocations,
+  positions,
   sectors,
   subsectors,
   userSectors,
@@ -126,11 +136,15 @@ export default function UserList({
                   <p className="text-xs text-cresol-gray truncate">
                     {user.email}
                   </p>
-                  {user.position && (
-                    <p className="text-xs text-cresol-gray-dark truncate">
-                      {user.position}
-                    </p>
-                  )}
+                  {user.position_id && (() => {
+                    const userPosition = positions.find(pos => pos.id === user.position_id);
+                    return userPosition && (
+                      <p className="text-xs text-cresol-gray-dark truncate">
+                        {userPosition.name}
+                        {userPosition.department && ` - ${userPosition.department}`}
+                      </p>
+                    );
+                  })()}
                 </div>
               </div>
               
@@ -188,6 +202,7 @@ export default function UserList({
         <UserEditModal
           user={users.find(u => u.id === editingUserId)!}
           workLocations={workLocations}
+          positions={positions}
           sectors={sectors}
           subsectors={subsectors}
           userSectors={userSectors[editingUserId] || []}

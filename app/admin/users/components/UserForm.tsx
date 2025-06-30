@@ -9,17 +9,25 @@ interface WorkLocation {
   name: string;
 }
 
+interface Position {
+  id: string;
+  name: string;
+  description?: string;
+  department?: string;
+}
+
 interface UserFormProps {
   workLocations: WorkLocation[];
+  positions: Position[];
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export default function UserForm({ workLocations, onSuccess, onCancel }: UserFormProps) {
+export default function UserForm({ workLocations, positions, onSuccess, onCancel }: UserFormProps) {
   const [formLoading, setFormLoading] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserName, setNewUserName] = useState('');
-  const [newUserPosition, setNewUserPosition] = useState('');
+  const [newUserPositionId, setNewUserPositionId] = useState('');
   const [newUserWorkLocationId, setNewUserWorkLocationId] = useState('');
   const [newUserRole, setNewUserRole] = useState<'user' | 'sector_admin' | 'subsector_admin' | 'admin'>('user');
   const [formError, setFormError] = useState<string | null>(null);
@@ -128,7 +136,7 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
         body: JSON.stringify({
           email: newUserEmail,
           fullName: newUserName,
-          position: newUserPosition,
+          positionId: newUserPositionId || null,
           workLocationId: newUserWorkLocationId || null,
           role: newUserRole,
           avatarUrl: avatarUrl,
@@ -146,7 +154,7 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
       
       setNewUserEmail('');
       setNewUserName('');
-      setNewUserPosition('');
+      setNewUserPositionId('');
       setNewUserWorkLocationId('');
       setNewUserRole('user');
       setNewUserAvatarFile(null);
@@ -275,15 +283,20 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
             <label htmlFor="newUserPosition" className="form-label">
               Cargo
             </label>
-            <input
+            <select
               id="newUserPosition"
-              type="text"
-              value={newUserPosition}
-              onChange={(e) => setNewUserPosition(e.target.value)}
-              required
+              value={newUserPositionId}
+              onChange={(e) => setNewUserPositionId(e.target.value)}
               className="input"
-              placeholder="Cargo"
-            />
+            >
+              <option value="">Selecione um cargo</option>
+              {positions.map((position) => (
+                <option key={position.id} value={position.id}>
+                  {position.name}
+                  {position.department && ` - ${position.department}`}
+                </option>
+              ))}
+            </select>
           </div>
           
           <div>

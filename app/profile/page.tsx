@@ -14,6 +14,7 @@ interface Profile {
   full_name: string;
   email: string;
   position?: string;
+  position_id?: string;
   work_location_id?: string;
   role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
   avatar_url?: string;
@@ -30,6 +31,13 @@ interface WorkLocation {
   phone?: string;
 }
 
+interface Position {
+  id: string;
+  name: string;
+  description?: string;
+  department?: string;
+}
+
 interface ActivityLog {
   id: string;
   action: string;
@@ -43,6 +51,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +60,7 @@ export default function ProfilePage() {
   
   // Campos editáveis
   const [fullName, setFullName] = useState('');
-  const [position, setPosition] = useState('');
+  const [positionId, setPositionId] = useState('');
   const [workLocationId, setWorkLocationId] = useState('');
   const [phone, setPhone] = useState('');
   const [bio, setBio] = useState('');
@@ -98,6 +107,7 @@ export default function ProfilePage() {
         await Promise.all([
           fetchProfile(data.user.id),
           fetchWorkLocations(),
+          fetchPositions(),
           fetchActivityLogs(data.user.id)
         ]);
       } catch (error) {
@@ -124,7 +134,7 @@ export default function ProfilePage() {
       if (data) {
         setProfile(data);
         setFullName(data.full_name || '');
-        setPosition(data.position || '');
+        setPositionId(data.position_id || '');
         setWorkLocationId(data.work_location_id || '');
         setPhone(data.phone || '');
         setBio(data.bio || '');
@@ -153,6 +163,25 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error('Erro ao buscar locais de trabalho:', error);
+    }
+  };
+
+  const fetchPositions = async () => {
+    try {
+      const { data, error } = await getSupabaseClient()
+        .from('positions')
+        .select('id, name, description, department')
+        .order('name');
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        setPositions(data);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar cargos:', error);
     }
   };
 
@@ -264,7 +293,7 @@ export default function ProfilePage() {
       
       const updateData: Record<string, unknown> = {
         full_name: fullName,
-        position,
+        position_id: positionId || null,
         phone,
         bio,
         work_location_id: workLocationId || null,
@@ -595,13 +624,42 @@ export default function ProfilePage() {
                     <label htmlFor="position" className="form-label">
                       Cargo
                     </label>
-                    <input
-                      type="text"
+                    <select
                       id="position"
-                      value={position}
-                      onChange={(e) => setPosition(e.target.value)}
+                      value={positionId}
+                      onChange={(e) => setPositionId(e.target.value)}
                       className="input bg-gray-50 text-muted"
-                    />
+                    >
+                      <option value="">Selecione um cargo</option>
+                      {positions.map((position) => (
+                        <option key={position.id} value={position.id}>
+                          {position.name}
+                          {position.department && ` - ${position.department}`}
+                        </option>
+                      ))}
+                    </select>
+                    
+                    {positionId && (() => {
+                      const selectedPosition = positions.find(pos => pos.id === positionId);
+                      return selectedPosition && selectedPosition.description && (
+                        <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                          <div className="font-medium">{selectedPosition.name}</div>
+                          {selectedPosition.department && (
+                            <div className="flex items-center mt-1">
+                              <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
+                              <span>{selectedPosition.department}</span>
+                            </div>
+                          )}
+                          {selectedPosition.description && (
+                            <div className="mt-1 text-gray-600">
+                              {selectedPosition.description}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   <div>

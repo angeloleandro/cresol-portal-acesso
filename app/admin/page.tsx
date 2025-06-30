@@ -58,6 +58,14 @@ const ADMIN_CARDS: DashboardCard[] = [
     bgColor: 'card-standard',
   },
   {
+    title: 'Cargos',
+    description: 'Gerenciar cargos disponíveis para os usuários',
+    icon: <Icon name="suitcase" className="h-5 w-5" />,
+    link: '/admin/positions',
+    color: 'text-primary',
+    bgColor: 'card-standard',
+  },
+  {
     title: 'Banners',
     description: 'Gerencie os banners iniciais do portal',
     icon: <Icon name="image" className="h-5 w-5" />,

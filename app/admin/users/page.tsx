@@ -15,6 +15,7 @@ interface ProfileUser {
   full_name: string;
   email: string;
   position?: string;
+  position_id?: string;
   work_location_id?: string;
   role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
   created_at: string;
@@ -24,6 +25,13 @@ interface ProfileUser {
 interface WorkLocation {
   id: string;
   name: string;
+}
+
+interface Position {
+  id: string;
+  name: string;
+  description?: string;
+  department?: string;
 }
 
 interface Sector {
@@ -42,6 +50,7 @@ export default function UsersManagement() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [users, setUsers] = useState<ProfileUser[]>([]);
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [subsectors, setSubsectors] = useState<Subsector[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,7 +132,7 @@ export default function UsersManagement() {
       // Query específica com campos necessários (removendo created_at que não existe)
       const { data, error } = await getSupabaseClient()
         .from('profiles')
-        .select('id, full_name, email, position, work_location_id, role, avatar_url')
+        .select('id, full_name, email, position, position_id, work_location_id, role, avatar_url')
         .order('full_name');
       
       if (error) {
@@ -143,6 +152,7 @@ export default function UsersManagement() {
           full_name: profile.full_name,
           email: profile.email,
           position: profile.position,
+          position_id: profile.position_id,
           work_location_id: profile.work_location_id,
           role: profile.role,
           avatar_url: profile.avatar_url,
@@ -197,6 +207,7 @@ export default function UsersManagement() {
         await Promise.all([
           fetchUsers(),
           fetchWorkLocations(),
+          fetchPositions(),
           fetchSectors(),
           fetchSubsectors()
         ]);
@@ -223,6 +234,24 @@ export default function UsersManagement() {
       // Apenas log em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
         console.error('Erro ao buscar locais de trabalho:', errorMessage);
+      }
+    }
+  };
+
+  const fetchPositions = async () => {
+    try {
+      const { data, error } = await getSupabaseClient()
+        .from('positions')
+        .select('id, name, description, department')
+        .order('name');
+      
+      if (error) throw error;
+      if (data) setPositions(data);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      // Apenas log em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao buscar posições:', errorMessage);
       }
     }
   };
@@ -320,6 +349,7 @@ export default function UsersManagement() {
         {showForm && (
           <UserForm 
             workLocations={workLocations}
+            positions={positions}
             onSuccess={() => {
               setShowForm(false);
               fetchUsers();
@@ -343,6 +373,7 @@ export default function UsersManagement() {
         <UserList
           users={filteredUsers}
           workLocations={workLocations}
+          positions={positions}
           sectors={sectors}
           subsectors={subsectors}
           userSectors={userSectors}
