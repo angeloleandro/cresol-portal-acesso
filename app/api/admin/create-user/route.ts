@@ -199,6 +199,60 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
+    // 6. Adicionar usuário aos grupos automáticos baseados no cargo e local
+    try {
+      const groupsToAdd: string[] = [];
+
+      // Buscar grupo automático do cargo
+      if (positionId) {
+        const { data: positionGroup } = await supabaseAdmin
+          .from('notification_groups')
+          .select('id')
+          .eq('position_id', positionId)
+          .eq('is_active', true)
+          .single();
+
+        if (positionGroup) {
+          groupsToAdd.push(positionGroup.id);
+        }
+      }
+
+      // Buscar grupo automático do local
+      if (workLocationId) {
+        const { data: locationGroup } = await supabaseAdmin
+          .from('notification_groups')
+          .select('id')
+          .eq('work_location_id', workLocationId)
+          .eq('is_active', true)
+          .single();
+
+        if (locationGroup) {
+          groupsToAdd.push(locationGroup.id);
+        }
+      }
+
+      // Adicionar usuário aos grupos encontrados
+      if (groupsToAdd.length > 0) {
+        const memberData = groupsToAdd.map(groupId => ({
+          group_id: groupId,
+          user_id: userId,
+          added_by: adminUserId || userId
+        }));
+
+        const { error: membersError } = await supabaseAdmin
+          .from('notification_group_members')
+          .insert(memberData);
+
+        if (membersError) {
+          console.error('Erro ao adicionar usuário aos grupos automáticos:', membersError);
+          // Não retornar erro, apenas logar
+        }
+      }
+    } catch (groupError) {
+      console.error('Erro ao processar grupos automáticos:', groupError);
+      // Não retornar erro, apenas logar
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Usuário criado com sucesso',

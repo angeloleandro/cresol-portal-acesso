@@ -178,6 +178,7 @@ export default function SectorDashboard() {
 
   // Estados para grupos
   const [groups, setGroups] = useState<any[]>([]);
+  const [automaticGroups, setAutomaticGroups] = useState<any[]>([]);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [currentGroup, setCurrentGroup] = useState({
     name: '',
@@ -268,7 +269,15 @@ export default function SectorDashboard() {
       const result = await response.json();
       
       if (result.groups) {
-        setGroups(result.groups.filter((group: any) => group.sector_id === sectorId));
+        // Filtrar grupos do setor específico
+        const sectorGroups = result.groups.filter((group: any) => group.sector_id === sectorId);
+        setGroups(sectorGroups);
+        
+        // Filtrar grupos automáticos (cargo/local)
+        const autoGroups = result.groups.filter((group: any) => 
+          group.type === 'position' || group.type === 'work_location'
+        );
+        setAutomaticGroups(autoGroups);
       }
     } catch (error) {
       console.error('Erro ao buscar grupos:', error);
@@ -1345,7 +1354,7 @@ export default function SectorDashboard() {
               </button>
             </div>
 
-            {groups.length === 0 ? (
+            {groups.length === 0 && automaticGroups.length === 0 ? (
               <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1356,23 +1365,81 @@ export default function SectorDashboard() {
                 <p className="text-gray-500">Crie o primeiro grupo de notificação para este setor.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {groups.map((group) => (
-                  <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-md transition-all">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                        </svg>
-                      </div>
-                    </div>
-                    <h3 className="font-semibold text-gray-900 mb-2">{group.name}</h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{group.description}</p>
-                    <div className="text-xs text-gray-500">
-                      Criado em {formatDate(group.created_at)}
+              <div className="space-y-6">
+                {/* Grupos do Setor */}
+                {groups.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Grupos do Setor</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {groups.map((group) => (
+                        <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-md transition-all">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                              <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                              </svg>
+                            </div>
+                          </div>
+                          <h4 className="font-semibold text-gray-900 mb-2">{group.name}</h4>
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{group.description}</p>
+                          <div className="text-xs text-gray-500">
+                            Criado em {formatDate(group.created_at)}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
+                )}
+                
+                {/* Grupos Automáticos */}
+                {automaticGroups.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Grupos Automáticos</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {automaticGroups.map((group) => (
+                        <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-md transition-all relative">
+                          <div className="absolute top-2 right-2">
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              group.type === 'position' 
+                                ? 'bg-blue-100 text-blue-700' 
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {group.type === 'position' ? 'Cargo' : 'Local'}
+                            </span>
+                          </div>
+                          <div className="flex items-start justify-between mb-4">
+                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                              group.type === 'position' 
+                                ? 'bg-blue-50'
+                                : 'bg-green-50'
+                            }`}>
+                              {group.type === 'position' ? (
+                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                              ) : (
+                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                          <h4 className="font-semibold text-gray-900 mb-2">{group.name}</h4>
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{group.description}</p>
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs text-gray-500">
+                              {group.member_count} membros
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              Automático
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1772,6 +1839,61 @@ export default function SectorDashboard() {
                   placeholder="Descrição opcional do grupo"
                 />
               </div>
+              {/* Seção de grupos automáticos */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Incluir Grupos Automáticos
+                </label>
+                <div className="border border-gray-300 rounded-lg p-3 max-h-32 overflow-y-auto mb-4">
+                  {automaticGroups.length > 0 ? (
+                    automaticGroups.map((group) => {
+                      const isGroupSelected = group.members && group.members.some((memberId: string) => 
+                        currentGroup.members.includes(memberId)
+                      );
+                      
+                      return (
+                        <label key={group.id} className="flex items-center py-1">
+                          <input
+                            type="checkbox"
+                            checked={isGroupSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                // Adicionar todos os membros do grupo automático
+                                const allMembers = [...currentGroup.members, ...(group.members || [])];
+                                const uniqueMembers = allMembers.filter((value, index, self) => self.indexOf(value) === index);
+                                setCurrentGroup({
+                                  ...currentGroup,
+                                  members: uniqueMembers
+                                });
+                              } else {
+                                // Remover todos os membros do grupo automático
+                                const membersToRemove = group.members || [];
+                                setCurrentGroup({
+                                  ...currentGroup,
+                                  members: currentGroup.members.filter((id: string) => !membersToRemove.includes(id))
+                                });
+                              }
+                            }}
+                            className="mr-2"
+                          />
+                          <div className="flex-1">
+                            <span className="text-sm font-medium">{group.name}</span>
+                            <div className="text-xs text-gray-500">
+                              {group.type === 'position' ? '👤 Grupo de Cargo' : '🏢 Grupo de Local'}
+                              {group.member_count && ` • ${group.member_count} membros`}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })
+                  ) : (
+                    <div className="text-sm text-gray-500 text-center py-4">
+                      Nenhum grupo automático encontrado
+                    </div>
+                  )}
+                </div>
+              </div>
+              
               {/* Filtros de usuários */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
@@ -1938,6 +2060,7 @@ export default function SectorDashboard() {
                   Enviar para Grupos
                 </label>
                 <div className="border border-gray-300 rounded-lg p-3 max-h-32 overflow-y-auto">
+                  {/* Grupos do Setor */}
                   {groups.map((group) => (
                     <label key={group.id} className="flex items-center py-1">
                       <input
@@ -1958,9 +2081,53 @@ export default function SectorDashboard() {
                         }}
                         className="mr-2"
                       />
-                      <span className="text-sm">{group.name}</span>
+                      <div className="flex-1">
+                        <span className="text-sm font-medium">{group.name}</span>
+                        <div className="text-xs text-gray-500">Grupo do Setor</div>
+                      </div>
                     </label>
                   ))}
+                  
+                  {/* Separador se houver grupos de ambos os tipos */}
+                  {groups.length > 0 && automaticGroups.length > 0 && (
+                    <div className="border-t border-gray-200 my-2"></div>
+                  )}
+                  
+                  {/* Grupos Automáticos */}
+                  {automaticGroups.map((group) => (
+                    <label key={group.id} className="flex items-center py-1">
+                      <input
+                        type="checkbox"
+                        checked={currentMessage.groups.includes(group.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCurrentMessage({
+                              ...currentMessage,
+                              groups: [...currentMessage.groups, group.id]
+                            });
+                          } else {
+                            setCurrentMessage({
+                              ...currentMessage,
+                              groups: currentMessage.groups.filter(id => id !== group.id)
+                            });
+                          }
+                        }}
+                        className="mr-2"
+                      />
+                      <div className="flex-1">
+                        <span className="text-sm font-medium">{group.name}</span>
+                        <div className="text-xs text-gray-500">
+                          {group.type === 'position' ? '👤 Grupo de Cargo' : '🏢 Grupo de Local'}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                  
+                  {groups.length === 0 && automaticGroups.length === 0 && (
+                    <div className="text-sm text-gray-500 text-center py-4">
+                      Nenhum grupo disponível
+                    </div>
+                  )}
                 </div>
               </div>
               <div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import { useRouter } from 'next/navigation';
+import { Icon } from '@/app/components/icons/Icon';
 
 interface Position {
   id: string;
@@ -27,6 +28,9 @@ export default function PositionsAdmin() {
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newDepartment, setNewDepartment] = useState('');
+  const [createGroup, setCreateGroup] = useState(false);
+  const [hasGroup, setHasGroup] = useState(false);
+  const [groupAction, setGroupAction] = useState<'keep' | 'create' | 'remove'>('keep');
   const [editing, setEditing] = useState<Position | null>(null);
 
   useEffect(() => {
@@ -85,22 +89,121 @@ export default function PositionsAdmin() {
           })
           .eq('id', editing.id);
         if (error) throw error;
-        setFormSuccess('Cargo atualizado com sucesso!');
+        
+        // Gerenciar grupo baseado na ação selecionada
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            if (groupAction === 'create' && !hasGroup) {
+              // Criar novo grupo
+              const groupData = {
+                name: `Cargo: ${newName}`,
+                description: `Grupo automático para colaboradores do cargo ${newName}${newDepartment ? ` - ${newDepartment}` : ''}`,
+                type: 'position',
+                is_active: true,
+                created_by: user.id,
+                position_id: editing.id
+              };
+              
+              const { error: groupError } = await supabase
+                .from('notification_groups')
+                .insert(groupData);
+                
+              if (groupError) {
+                console.error('Erro ao criar grupo:', groupError);
+                setFormSuccess('Cargo atualizado com sucesso! (Erro ao criar grupo)');
+              } else {
+                setFormSuccess('Cargo atualizado e grupo criado com sucesso!');
+              }
+            } else if (groupAction === 'remove' && hasGroup) {
+              // Remover grupo existente
+              const { error: removeError } = await supabase
+                .from('notification_groups')
+                .update({ is_active: false })
+                .eq('position_id', editing.id)
+                .eq('is_active', true);
+                
+              if (removeError) {
+                console.error('Erro ao remover grupo:', removeError);
+                setFormSuccess('Cargo atualizado com sucesso! (Erro ao remover grupo)');
+              } else {
+                setFormSuccess('Cargo atualizado e grupo removido com sucesso!');
+              }
+            } else if (groupAction === 'keep' && hasGroup) {
+              // Atualizar nome do grupo existente se necessário
+              const { error: updateGroupError } = await supabase
+                .from('notification_groups')
+                .update({
+                  name: `Cargo: ${newName}`,
+                  description: `Grupo automático para colaboradores do cargo ${newName}${newDepartment ? ` - ${newDepartment}` : ''}`
+                })
+                .eq('position_id', editing.id)
+                .eq('is_active', true);
+                
+              if (updateGroupError) {
+                console.error('Erro ao atualizar grupo:', updateGroupError);
+              }
+              setFormSuccess('Cargo atualizado com sucesso!');
+            } else {
+              setFormSuccess('Cargo atualizado com sucesso!');
+            }
+          }
+        } catch (groupError) {
+          console.error('Erro ao gerenciar grupo:', groupError);
+          setFormSuccess('Cargo atualizado com sucesso! (Erro ao gerenciar grupo)');
+        }
       } else {
         // Criar
-        const { error } = await supabase
+        const { data: newPosition, error } = await supabase
           .from('positions')
           .insert({ 
             name: newName,
             description: newDescription || null,
             department: newDepartment || null
-          });
+          })
+          .select()
+          .single();
         if (error) throw error;
-        setFormSuccess('Cargo cadastrado com sucesso!');
+        
+        // Criar grupo se solicitado
+        if (createGroup && newPosition) {
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              const groupData = {
+                name: `Cargo: ${newName}`,
+                description: `Grupo automático para colaboradores do cargo ${newName}${newDepartment ? ` - ${newDepartment}` : ''}`,
+                type: 'position',
+                is_active: true,
+                created_by: user.id,
+                position_id: newPosition.id
+              };
+
+              const { error: groupError } = await supabase
+                .from('notification_groups')
+                .insert(groupData);
+
+              if (groupError) {
+                console.error('Erro ao criar grupo:', groupError);
+                setFormSuccess('Cargo cadastrado com sucesso! (Erro ao criar grupo automático)');
+              } else {
+                setFormSuccess('Cargo e grupo cadastrados com sucesso!');
+              }
+            }
+          } catch (groupError) {
+            console.error('Erro ao criar grupo:', groupError);
+            setFormSuccess('Cargo cadastrado com sucesso! (Erro ao criar grupo automático)');
+          }
+        } else {
+          setFormSuccess('Cargo cadastrado com sucesso!');
+        }
       }
       setNewName('');
       setNewDescription('');
       setNewDepartment('');
+      setCreateGroup(false);
+      setHasGroup(false);
+      setGroupAction('keep');
       setEditing(null);
       fetchPositions();
     } catch (error: any) {
@@ -110,11 +213,28 @@ export default function PositionsAdmin() {
     }
   };
 
-  const handleEdit = (position: Position) => {
+  const checkExistingGroup = async (positionId: string) => {
+    const { data: existingGroup } = await supabase
+      .from('notification_groups')
+      .select('id')
+      .eq('position_id', positionId)
+      .eq('is_active', true)
+      .single();
+    
+    return !!existingGroup;
+  };
+
+  const handleEdit = async (position: Position) => {
     setEditing(position);
     setNewName(position.name);
     setNewDescription(position.description || '');
     setNewDepartment(position.department || '');
+    
+    // Verificar se já existe grupo para este cargo
+    const groupExists = await checkExistingGroup(position.id);
+    setHasGroup(groupExists);
+    setGroupAction('keep');
+    
     setShowForm(true);
   };
 
@@ -165,6 +285,9 @@ export default function PositionsAdmin() {
               setNewName(''); 
               setNewDescription(''); 
               setNewDepartment(''); 
+              setCreateGroup(false);
+              setHasGroup(false);
+              setGroupAction('keep');
             }}
             className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors"
           >
@@ -224,6 +347,98 @@ export default function PositionsAdmin() {
                     placeholder="Breve descrição das responsabilidades do cargo..."
                   />
                 </div>
+
+                {!editing ? (
+                  <div className="md:col-span-2">
+                    <div className="flex items-center">
+                      <input
+                        id="createGroup"
+                        type="checkbox"
+                        checked={createGroup}
+                        onChange={(e) => setCreateGroup(e.target.checked)}
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      />
+                      <label htmlFor="createGroup" className="ml-2 block text-sm text-cresol-gray">
+                        Criar grupo automático para este cargo
+                      </label>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Um grupo de notificações será criado automaticamente. Todos os usuários que receberam este cargo serão adicionados ao grupo.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-cresol-gray mb-2">
+                      Gerenciamento de Grupo
+                    </label>
+                    
+                    {hasGroup ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="groupAction"
+                              value="keep"
+                              checked={groupAction === 'keep'}
+                              onChange={(e) => setGroupAction(e.target.value as 'keep' | 'create' | 'remove')}
+                              className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-cresol-gray">Manter grupo existente</span>
+                          </label>
+                          
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="groupAction"
+                              value="remove"
+                              checked={groupAction === 'remove'}
+                              onChange={(e) => setGroupAction(e.target.value as 'keep' | 'create' | 'remove')}
+                              className="h-4 w-4 text-red-500 focus:ring-red-500 border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-red-600">Remover grupo</span>
+                          </label>
+                        </div>
+                        
+                        <p className="text-xs text-gray-500">
+                          Este cargo já possui um grupo automático. Escolha se deseja manter ou remover.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="groupAction"
+                              value="keep"
+                              checked={groupAction === 'keep'}
+                              onChange={(e) => setGroupAction(e.target.value as 'keep' | 'create' | 'remove')}
+                              className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-cresol-gray">Não criar grupo</span>
+                          </label>
+                          
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="groupAction"
+                              value="create"
+                              checked={groupAction === 'create'}
+                              onChange={(e) => setGroupAction(e.target.value as 'keep' | 'create' | 'remove')}
+                              className="h-4 w-4 text-green-500 focus:ring-green-500 border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-green-600">Criar grupo automático</span>
+                          </label>
+                        </div>
+                        
+                        <p className="text-xs text-gray-500">
+                          Este cargo não possui grupo automático. Escolha se deseja criar um.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div className="flex justify-end pt-4">
@@ -294,9 +509,7 @@ export default function PositionsAdmin() {
                   <tr>
                     <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
                       <div className="flex flex-col items-center">
-                        <svg className="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0H8m8 0v2a2 2 0 01-2 2H10a2 2 0 01-2-2V6m8 0H8m0 0v2a2 2 0 002 2h4a2 2 0 002-2V6m-8 0H8" />
-                        </svg>
+                        <Icon name="suitcase" className="w-12 h-12 text-gray-300 mb-4" />
                         <p className="text-lg font-medium text-gray-400 mb-2">Nenhum cargo cadastrado</p>
                         <p className="text-sm text-gray-400">Clique em &quot;Adicionar Cargo&quot; para começar</p>
                       </div>

@@ -215,6 +215,79 @@ export default function UserEditModal({
       if (updateError) {
         throw new Error(`Erro ao atualizar usuário: ${updateError.message}`);
       }
+
+      // Atualizar grupos automáticos baseados no cargo e local
+      try {
+        // 1. Buscar grupos automáticos para remoção
+        const { data: automaticGroups } = await supabase
+          .from('notification_groups')
+          .select('id')
+          .or(`position_id.is.not.null,work_location_id.is.not.null`)
+          .eq('is_active', true);
+
+        if (automaticGroups && automaticGroups.length > 0) {
+          const groupIds = automaticGroups.map(group => group.id);
+          const { error: removeOldGroupsError } = await supabase
+            .from('notification_group_members')
+            .delete()
+            .in('group_id', groupIds)
+            .eq('user_id', user.id);
+
+          if (removeOldGroupsError) {
+            console.error('Erro ao remover usuário de grupos antigos:', removeOldGroupsError);
+          }
+        }
+
+        // 2. Adicionar usuário aos novos grupos automáticos
+        const groupsToAdd: string[] = [];
+
+        // Buscar grupo automático do cargo
+        if (positionId) {
+          const { data: positionGroup } = await supabase
+            .from('notification_groups')
+            .select('id')
+            .eq('position_id', positionId)
+            .eq('is_active', true)
+            .single();
+
+          if (positionGroup) {
+            groupsToAdd.push(positionGroup.id);
+          }
+        }
+
+        // Buscar grupo automático do local
+        if (workLocationId) {
+          const { data: locationGroup } = await supabase
+            .from('notification_groups')
+            .select('id')
+            .eq('work_location_id', workLocationId)
+            .eq('is_active', true)
+            .single();
+
+          if (locationGroup) {
+            groupsToAdd.push(locationGroup.id);
+          }
+        }
+
+        // Adicionar usuário aos grupos encontrados
+        if (groupsToAdd.length > 0) {
+          const memberData = groupsToAdd.map(groupId => ({
+            group_id: groupId,
+            user_id: user.id,
+            added_by: user.id // Usar o próprio usuário como added_by
+          }));
+
+          const { error: membersError } = await supabase
+            .from('notification_group_members')
+            .insert(memberData);
+
+          if (membersError) {
+            console.error('Erro ao adicionar usuário aos grupos automáticos:', membersError);
+          }
+        }
+      } catch (groupError) {
+        console.error('Erro ao processar grupos automáticos:', groupError);
+      }
       
       // Atualizar setores ou sub-setores administrados pelo usuário
       if (user.role === 'sector_admin') {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 
 interface Sector {
   id: string;
@@ -50,53 +50,84 @@ export default function RoleModal({
 
   const handleSave = async () => {
     try {
-      const { error: roleError } = await supabase
+      console.log('Iniciando atualização de role...');
+      console.log('User ID:', userId);
+      console.log('Nova role:', selectedRole);
+      console.log('Setores selecionados:', selectedSectors);
+      console.log('Sub-setores selecionados:', selectedSubsectors);
+
+      // Atualizar role no perfil
+      const { data: roleData, error: roleError } = await getSupabaseClient()
         .from('profiles')
         .update({ role: selectedRole })
-        .eq('id', userId);
+        .eq('id', userId)
+        .select();
 
-      if (roleError) throw roleError;
+      console.log('Resultado da atualização de role:', { data: roleData, error: roleError });
+
+      if (roleError) {
+        console.error('Erro ao atualizar role:', roleError);
+        throw roleError;
+      }
       
-      await supabase.from('sector_admins').delete().eq('user_id', userId);
-      await supabase.from('subsector_admins').delete().eq('user_id', userId);
+      // Limpar associações existentes
+      console.log('Removendo associações anteriores...');
+      const { error: deleteSectorError } = await getSupabaseClient().from('sector_admins').delete().eq('user_id', userId);
+      const { error: deleteSubsectorError } = await getSupabaseClient().from('subsector_admins').delete().eq('user_id', userId);
       
+      if (deleteSectorError) {
+        console.error('Erro ao deletar associações de setor:', deleteSectorError);
+      }
+      if (deleteSubsectorError) {
+        console.error('Erro ao deletar associações de sub-setor:', deleteSubsectorError);
+      }
+      
+      // Adicionar novas associações
       if (selectedRole === 'sector_admin' && selectedSectors.length > 0) {
+        console.log('Inserindo associações de setor...');
         const sectorInserts = selectedSectors.map(sectorId => ({
           user_id: userId,
           sector_id: sectorId
         }));
         
-        const { error: sectorError } = await supabase
+        const { data: sectorData, error: sectorError } = await getSupabaseClient()
           .from('sector_admins')
-          .insert(sectorInserts);
+          .insert(sectorInserts)
+          .select();
           
+        console.log('Resultado da inserção de setores:', { data: sectorData, error: sectorError });
         if (sectorError) throw sectorError;
       } else if (selectedRole === 'subsector_admin' && selectedSubsectors.length > 0) {
+        console.log('Inserindo associações de sub-setor...');
         const subsectorInserts = selectedSubsectors.map(subsectorId => ({
           user_id: userId,
           subsector_id: subsectorId
         }));
         
-        const { error: subsectorError } = await supabase
+        const { data: subsectorData, error: subsectorError } = await getSupabaseClient()
           .from('subsector_admins')
-          .insert(subsectorInserts);
+          .insert(subsectorInserts)
+          .select();
           
+        console.log('Resultado da inserção de sub-setores:', { data: subsectorData, error: subsectorError });
         if (subsectorError) throw subsectorError;
       }
       
+      console.log('Role atualizado com sucesso!');
       alert('Role atualizado com sucesso!');
       onSuccess();
       
     } catch (error) {
-      console.error('Erro ao salvar alterações de role:', error);
-      alert('Erro ao salvar alterações. Tente novamente.');
+      console.error('Erro detalhado ao salvar alterações de role:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      alert(`Erro ao salvar alterações: ${errorMessage}`);
     }
   };
 
   const fetchSubsectors = async (sectorId?: string) => {
     try {
       setLoadingSubsectors(true);
-      let query = supabase
+      let query = getSupabaseClient()
         .from('subsectors')
         .select('id, name, sector_id')
         .order('name');

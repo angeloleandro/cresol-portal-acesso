@@ -27,6 +27,9 @@ export default function WorkLocationsAdmin() {
   const [newName, setNewName] = useState('');
   const [newAddress, setNewAddress] = useState('');
   const [newPhone, setNewPhone] = useState('');
+  const [createGroup, setCreateGroup] = useState(false);
+  const [hasGroup, setHasGroup] = useState(false);
+  const [groupAction, setGroupAction] = useState<'keep' | 'create' | 'remove'>('keep');
   const [editing, setEditing] = useState<WorkLocation | null>(null);
 
   useEffect(() => {
@@ -85,22 +88,121 @@ export default function WorkLocationsAdmin() {
           })
           .eq('id', editing.id);
         if (error) throw error;
-        setFormSuccess('Local atualizado com sucesso!');
+        
+        // Gerenciar grupo baseado na ação selecionada
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            if (groupAction === 'create' && !hasGroup) {
+              // Criar novo grupo
+              const groupData = {
+                name: `Local: ${newName}`,
+                description: `Grupo automático para colaboradores do local ${newName}${newAddress ? ` - ${newAddress}` : ''}`,
+                type: 'work_location',
+                is_active: true,
+                created_by: user.id,
+                work_location_id: editing.id
+              };
+              
+              const { error: groupError } = await supabase
+                .from('notification_groups')
+                .insert(groupData);
+                
+              if (groupError) {
+                console.error('Erro ao criar grupo:', groupError);
+                setFormSuccess('Local atualizado com sucesso! (Erro ao criar grupo)');
+              } else {
+                setFormSuccess('Local atualizado e grupo criado com sucesso!');
+              }
+            } else if (groupAction === 'remove' && hasGroup) {
+              // Remover grupo existente
+              const { error: removeError } = await supabase
+                .from('notification_groups')
+                .update({ is_active: false })
+                .eq('work_location_id', editing.id)
+                .eq('is_active', true);
+                
+              if (removeError) {
+                console.error('Erro ao remover grupo:', removeError);
+                setFormSuccess('Local atualizado com sucesso! (Erro ao remover grupo)');
+              } else {
+                setFormSuccess('Local atualizado e grupo removido com sucesso!');
+              }
+            } else if (groupAction === 'keep' && hasGroup) {
+              // Atualizar nome do grupo existente se necessário
+              const { error: updateGroupError } = await supabase
+                .from('notification_groups')
+                .update({
+                  name: `Local: ${newName}`,
+                  description: `Grupo automático para colaboradores do local ${newName}${newAddress ? ` - ${newAddress}` : ''}`
+                })
+                .eq('work_location_id', editing.id)
+                .eq('is_active', true);
+                
+              if (updateGroupError) {
+                console.error('Erro ao atualizar grupo:', updateGroupError);
+              }
+              setFormSuccess('Local atualizado com sucesso!');
+            } else {
+              setFormSuccess('Local atualizado com sucesso!');
+            }
+          }
+        } catch (groupError) {
+          console.error('Erro ao gerenciar grupo:', groupError);
+          setFormSuccess('Local atualizado com sucesso! (Erro ao gerenciar grupo)');
+        }
       } else {
         // Criar
-        const { error } = await supabase
+        const { data: newLocation, error } = await supabase
           .from('work_locations')
           .insert({ 
             name: newName,
             address: newAddress || null,
             phone: newPhone || null
-          });
+          })
+          .select()
+          .single();
         if (error) throw error;
-        setFormSuccess('Local cadastrado com sucesso!');
+        
+        // Criar grupo se solicitado
+        if (createGroup && newLocation) {
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              const groupData = {
+                name: `Local: ${newName}`,
+                description: `Grupo automático para colaboradores do local ${newName}${newAddress ? ` - ${newAddress}` : ''}`,
+                type: 'work_location',
+                is_active: true,
+                created_by: user.id,
+                work_location_id: newLocation.id
+              };
+
+              const { error: groupError } = await supabase
+                .from('notification_groups')
+                .insert(groupData);
+
+              if (groupError) {
+                console.error('Erro ao criar grupo:', groupError);
+                setFormSuccess('Local cadastrado com sucesso! (Erro ao criar grupo automático)');
+              } else {
+                setFormSuccess('Local e grupo cadastrados com sucesso!');
+              }
+            }
+          } catch (groupError) {
+            console.error('Erro ao criar grupo:', groupError);
+            setFormSuccess('Local cadastrado com sucesso! (Erro ao criar grupo automático)');
+          }
+        } else {
+          setFormSuccess('Local cadastrado com sucesso!');
+        }
       }
       setNewName('');
       setNewAddress('');
       setNewPhone('');
+      setCreateGroup(false);
+      setHasGroup(false);
+      setGroupAction('keep');
       setEditing(null);
       fetchWorkLocations();
     } catch (error: any) {
@@ -110,11 +212,28 @@ export default function WorkLocationsAdmin() {
     }
   };
 
-  const handleEdit = (loc: WorkLocation) => {
+  const checkExistingGroup = async (workLocationId: string) => {
+    const { data: existingGroup } = await supabase
+      .from('notification_groups')
+      .select('id')
+      .eq('work_location_id', workLocationId)
+      .eq('is_active', true)
+      .single();
+    
+    return !!existingGroup;
+  };
+
+  const handleEdit = async (loc: WorkLocation) => {
     setEditing(loc);
     setNewName(loc.name);
     setNewAddress(loc.address || '');
     setNewPhone(loc.phone || '');
+    
+    // Verificar se já existe grupo para este local
+    const groupExists = await checkExistingGroup(loc.id);
+    setHasGroup(groupExists);
+    setGroupAction('keep');
+    
     setShowForm(true);
   };
 
@@ -165,6 +284,9 @@ export default function WorkLocationsAdmin() {
               setNewName(''); 
               setNewAddress(''); 
               setNewPhone(''); 
+              setCreateGroup(false);
+              setHasGroup(false);
+              setGroupAction('keep');
             }}
             className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors"
           >
@@ -224,6 +346,98 @@ export default function WorkLocationsAdmin() {
                     placeholder="(xx) xxxx-xxxx"
                   />
                 </div>
+
+                {!editing ? (
+                  <div className="md:col-span-2">
+                    <div className="flex items-center">
+                      <input
+                        id="createGroup"
+                        type="checkbox"
+                        checked={createGroup}
+                        onChange={(e) => setCreateGroup(e.target.checked)}
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      />
+                      <label htmlFor="createGroup" className="ml-2 block text-sm text-cresol-gray">
+                        Criar grupo automático para este local
+                      </label>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Um grupo de notificações será criado automaticamente. Todos os usuários que receberam este local serão adicionados ao grupo.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-cresol-gray mb-2">
+                      Gerenciamento de Grupo
+                    </label>
+                    
+                    {hasGroup ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="groupAction"
+                              value="keep"
+                              checked={groupAction === 'keep'}
+                              onChange={(e) => setGroupAction(e.target.value as 'keep' | 'create' | 'remove')}
+                              className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-cresol-gray">Manter grupo existente</span>
+                          </label>
+                          
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="groupAction"
+                              value="remove"
+                              checked={groupAction === 'remove'}
+                              onChange={(e) => setGroupAction(e.target.value as 'keep' | 'create' | 'remove')}
+                              className="h-4 w-4 text-red-500 focus:ring-red-500 border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-red-600">Remover grupo</span>
+                          </label>
+                        </div>
+                        
+                        <p className="text-xs text-gray-500">
+                          Este local já possui um grupo automático. Escolha se deseja manter ou remover.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="groupAction"
+                              value="keep"
+                              checked={groupAction === 'keep'}
+                              onChange={(e) => setGroupAction(e.target.value as 'keep' | 'create' | 'remove')}
+                              className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-cresol-gray">Não criar grupo</span>
+                          </label>
+                          
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="groupAction"
+                              value="create"
+                              checked={groupAction === 'create'}
+                              onChange={(e) => setGroupAction(e.target.value as 'keep' | 'create' | 'remove')}
+                              className="h-4 w-4 text-green-500 focus:ring-green-500 border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-green-600">Criar grupo automático</span>
+                          </label>
+                        </div>
+                        
+                        <p className="text-xs text-gray-500">
+                          Este local não possui grupo automático. Escolha se deseja criar um.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div className="flex justify-end pt-4">
