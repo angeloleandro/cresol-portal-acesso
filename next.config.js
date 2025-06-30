@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    // Configuração de padrões remotos (recomendado pela Vercel)
     remotePatterns: [
       {
         protocol: 'https',
@@ -13,12 +14,31 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'img.youtube.com',
       },
     ],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // Tamanhos otimizados para dispositivos comuns
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Formatos suportados (WebP e AVIF automáticos na Vercel)
+    formats: ['image/webp'],
+    // Cache TTL otimizado (31 dias conforme recomendação Vercel)
+    minimumCacheTTL: 2678400, // 31 dias
+    // Qualidades permitidas para otimização
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Manter otimização ativa (recomendado)
+    unoptimized: false,
   },
+  // Configurações de performance
+  swcMinify: true,
+  // Configurações experimentais removidas (não necessárias)
 };
 
 module.exports = nextConfig;

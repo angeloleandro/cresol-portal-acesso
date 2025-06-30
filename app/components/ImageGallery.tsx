@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import OptimizedImage from "./OptimizedImage";
+import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
 
 interface GalleryImage {
   id: string;
@@ -24,12 +25,29 @@ export default function ImageGallery({ limit = 6 }: ImageGalleryProps) {
 
   useEffect(() => {
     const fetchImages = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("gallery_images")
         .select("*")
         .eq("is_active", true)
         .order("order_index", { ascending: true });
-      setImages(data || []);
+      
+      if (error) {
+        console.error('Erro ao buscar imagens da galeria:', error);
+      }
+      
+      const processedImages = (data || []).map(img => ({
+        ...img,
+        image_url: processSupabaseImageUrl(img.image_url) || img.image_url
+      }));
+      
+      // Debug das URLs em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        processedImages.forEach(img => 
+          debugImageUrl(img.image_url, `Gallery Image: ${img.title}`)
+        );
+      }
+      
+      setImages(processedImages);
       setLoading(false);
     };
     fetchImages();
@@ -74,7 +92,15 @@ export default function ImageGallery({ limit = 6 }: ImageGalleryProps) {
           return (
             <div key={img.id} className="bg-gray-50 rounded-lg border border-gray-100 cursor-pointer hover:shadow-md hover:border-gray-200 transition-all duration-200 overflow-hidden group" onClick={() => handleOpenModal(img)}>
               <div className="relative w-full aspect-[4/3] bg-gray-100">
-                <Image src={img.image_url} alt={img.title || "Imagem da galeria"} fill className="object-cover group-hover:scale-105 transition-transform duration-200" />
+                <OptimizedImage 
+                  src={img.image_url} 
+                  alt={img.title || "Imagem da galeria"} 
+                  fill 
+                  className="object-cover group-hover:scale-105 transition-transform duration-200"
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                  quality={80}
+                  fallbackText="Imagem indisponível"
+                />
                 {img.title && (
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent p-3">
                     <p className="text-white text-sm font-medium truncate" title={img.title}>
@@ -106,7 +132,16 @@ export default function ImageGallery({ limit = 6 }: ImageGalleryProps) {
               </svg>
             </button>
             <div className="aspect-[4/3] w-full rounded-t-lg overflow-hidden bg-black flex items-center justify-center">
-              <Image src={selectedImage.image_url} alt={selectedImage.title || "Imagem da galeria"} fill className="object-contain" />
+              <OptimizedImage 
+                src={selectedImage.image_url} 
+                alt={selectedImage.title || "Imagem da galeria"} 
+                fill 
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 90vw"
+                quality={90}
+                priority
+                fallbackText="Imagem indisponível"
+              />
             </div>
             {selectedImage.title && <div className="p-4 text-center text-lg font-semibold text-cresol-gray">{selectedImage.title}</div>}
           </div>

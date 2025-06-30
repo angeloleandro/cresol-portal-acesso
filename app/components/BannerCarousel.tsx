@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import OptimizedImage from "./OptimizedImage";
+import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
 
 interface Banner {
   id: string;
@@ -20,12 +21,29 @@ export default function BannerCarousel() {
 
   useEffect(() => {
     const fetchBanners = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("banners")
         .select("*")
         .eq("is_active", true)
         .order("order_index", { ascending: true });
-      setBanners(data || []);
+      
+      if (error) {
+        console.error('Erro ao buscar banners:', error);
+      }
+      
+      const processedBanners = (data || []).map(banner => ({
+        ...banner,
+        image_url: processSupabaseImageUrl(banner.image_url) || banner.image_url
+      }));
+      
+      // Debug das URLs em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        processedBanners.forEach(banner => 
+          debugImageUrl(banner.image_url, `Banner: ${banner.title}`)
+        );
+      }
+      
+      setBanners(processedBanners);
     };
     fetchBanners();
   }, []);
@@ -55,10 +73,28 @@ export default function BannerCarousel() {
         >
           {banner.link ? (
             <a href={banner.link} target="_blank" rel="noopener noreferrer">
-              <Image src={banner.image_url} alt={banner.title || "Banner"} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px" className="object-cover w-full h-full rounded-lg" priority={idx === current} />
+              <OptimizedImage 
+                src={banner.image_url} 
+                alt={banner.title || "Banner"} 
+                fill 
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px" 
+                className="object-cover w-full h-full rounded-lg" 
+                priority={idx === current}
+                quality={85}
+                fallbackText="Banner indisponível"
+              />
             </a>
           ) : (
-            <Image src={banner.image_url} alt={banner.title || "Banner"} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px" className="object-cover w-full h-full rounded-lg" priority={idx === current} />
+            <OptimizedImage 
+              src={banner.image_url} 
+              alt={banner.title || "Banner"} 
+              fill 
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px" 
+              className="object-cover w-full h-full rounded-lg" 
+              priority={idx === current}
+              quality={85}
+              fallbackText="Banner indisponível"
+            />
           )}
           {banner.title && (
             <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white px-6 py-3 text-lg font-semibold">
