@@ -50,17 +50,20 @@ export default function SystemLinks() {
 
   if (loading) {
     return (
-      <div className="py-4">
-        <LoadingSpinner message="Carregando links..." />
+      <div className="py-2">
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <span className="body-text-small text-muted">Carregando sistemas...</span>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="py-4">
+      <div className="py-2">
         <ErrorMessage
-          title="Erro ao Carregar Links"
+          title="Erro ao Carregar Sistemas"
           message={error}
           type="error"
           showRetry
@@ -71,61 +74,47 @@ export default function SystemLinks() {
   }
 
   if (!links.length) {
-    return null;
+    return (
+      <div className="py-2">
+        <p className="body-text-small text-muted">Nenhum sistema disponível</p>
+      </div>
+    );
   }
 
   return (
-    <section 
-      className="py-8 px-4 sm:px-6 lg:px-8 bg-white"
-      aria-labelledby="system-links-heading"
-    >
-      <div className="max-w-7xl mx-auto">
-        {/* Header Profissional */}
-        <div className="text-center mb-8">
-          <h2 
-            id="system-links-heading"
-            className="text-2xl font-bold text-gray-800 mb-2"
-          >
-            Sistemas e Apps
-          </h2>
-          <div className="w-20 h-1 bg-orange-500 mx-auto rounded-full"></div>
-        </div>
-
-        {/* Grid de Links - Design Profissional */}
-        <div 
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-4"
-          role="list"
-          aria-label="Lista de sistemas e aplicações"
-        >
-          {links.map((link, index) => (
-            <article
-              key={link.id}
-              role="listitem"
-              className="group"
-            >
-              <button
-                onClick={() => window.open(link.url, '_blank', 'noopener,noreferrer')}
-                className="w-full bg-gray-50/70 border border-gray-200/80 rounded-xl p-4 text-center transition-all duration-200 ease-in-out hover:transform hover:-translate-y-1 hover:shadow-lg hover:border-orange-300 hover:bg-orange-50"
-                aria-label={`Acessar ${link.name} em uma nova aba`}
-              >
-                <div className="flex flex-col items-center space-y-2">
-                  <Icon name="monitor" className="w-6 h-6 text-gray-600 group-hover:text-orange-600 transition-colors" />
-                  <span className="text-xs font-medium text-gray-700 group-hover:text-orange-700 transition-colors leading-tight">
-                    {link.name}
-                  </span>
-                </div>
-              </button>
-            </article>
-          ))}
-        </div>
-
-        {/* Nota informativa */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
-            Clique nos sistemas acima para acessá-los em uma nova aba
-          </p>
-        </div>
+    <div className="w-full">
+      {/* Header compacto */}
+      <div className="flex items-center mb-3">
+        <h3 className="heading-4 text-title mr-2">Sistemas e Apps</h3>
+        <div className="h-px bg-primary flex-1"></div>
       </div>
-    </section>
+
+      {/* Lista de links em colunas organizadas */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-3">
+        {links.map((link) => (
+          <a
+            key={link.id}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-primary hover:text-primary-dark hover:underline transition-colors duration-200 font-medium truncate"
+            title={link.description || `Acessar ${link.name}`}
+          >
+            {link.name}
+          </a>
+        ))}
+      </div>
+
+      {/* Link para ver todos - opcional */}
+      <div className="mt-3 pt-2 border-t border-gray-200">
+        <a 
+          href="/sistemas" 
+          className="inline-flex items-center text-xs text-muted hover:text-primary transition-colors"
+        >
+          <Icon name="external-link" className="w-3 h-3 mr-1" />
+          Ver todos os sistemas
+        </a>
+      </div>
+    </div>
   );
-} 
+}

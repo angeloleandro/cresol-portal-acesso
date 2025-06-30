@@ -175,27 +175,7 @@ export default function SubsectorManagePage() {
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [userLocationFilter, setUserLocationFilter] = useState('all');
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-
-      await fetchProfile(data.user.id);
-    };
-
-    checkUser();
-  }, [router]);
-
-  useEffect(() => {
-    if (profile && subsectorId) {
-      fetchSubsectorData();
-    }
-  }, [profile, subsectorId]);
-
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -218,9 +198,81 @@ export default function SubsectorManagePage() {
       console.error('Erro ao buscar perfil:', error);
       setError('Erro ao carregar perfil do usuário');
     }
-  };
+  }, [router]);
 
-  const fetchSubsectorData = async () => {
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) {
+        router.replace('/login');
+        return;
+      }
+
+      await fetchProfile(data.user.id);
+    };
+
+    checkUser();
+  }, [router, fetchProfile]);
+
+  const fetchEvents = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subsector_events')
+        .select('id, title, description, start_date, is_published, is_featured')
+        .eq('subsector_id', subsectorId)
+        .order('start_date', { ascending: false });
+
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar eventos:', error);
+    }
+  }, [subsectorId]);
+
+  const fetchNews = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subsector_news')
+        .select('id, title, summary, is_published, is_featured, created_at')
+        .eq('subsector_id', subsectorId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setNews(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar notícias:', error);
+    }
+  }, [subsectorId]);
+
+  const fetchSystems = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('systems')
+        .select('id, name, description, url, icon')
+        .eq('subsector_id', subsectorId)
+        .order('name');
+
+      if (error) throw error;
+      setSystems(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar sistemas:', error);
+    }
+  }, [subsectorId]);
+
+  const fetchGroups = useCallback(async () => {
+    try {
+      const response = await fetch('/api/notifications/groups');
+      const result = await response.json();
+      
+      if (result.groups) {
+        setGroups(result.groups.filter((group: any) => group.subsector_id === subsectorId));
+      }
+    } catch (error) {
+      console.error('Erro ao buscar grupos:', error);
+    }
+  }, [subsectorId]);
+
+  const fetchSubsectorData = useCallback(async () => {
     try {
       // Buscar dados do sub-setor
       const { data: subsectorData, error: subsectorError } = await supabase
@@ -270,65 +322,13 @@ export default function SubsectorManagePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [subsectorId, fetchEvents, fetchNews, fetchSystems, fetchGroups]);
 
-  const fetchEvents = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('subsector_events')
-        .select('id, title, description, start_date, is_published, is_featured')
-        .eq('subsector_id', subsectorId)
-        .order('start_date', { ascending: false });
-
-      if (error) throw error;
-      setEvents(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar eventos:', error);
+  useEffect(() => {
+    if (profile && subsectorId) {
+      fetchSubsectorData();
     }
-  };
-
-  const fetchNews = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('subsector_news')
-        .select('id, title, summary, is_published, is_featured, created_at')
-        .eq('subsector_id', subsectorId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setNews(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar notícias:', error);
-    }
-  };
-
-  const fetchSystems = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('systems')
-        .select('id, name, description, url, icon')
-        .eq('subsector_id', subsectorId)
-        .order('name');
-
-      if (error) throw error;
-      setSystems(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar sistemas:', error);
-    }
-  };
-
-  const fetchGroups = async () => {
-    try {
-      const response = await fetch('/api/notifications/groups');
-      const result = await response.json();
-      
-      if (result.groups) {
-        setGroups(result.groups.filter((group: any) => group.subsector_id === subsectorId));
-      }
-    } catch (error) {
-      console.error('Erro ao buscar grupos:', error);
-    }
-  };
+  }, [profile, subsectorId, fetchSubsectorData]);
 
   const fetchUsers = async () => {
     try {

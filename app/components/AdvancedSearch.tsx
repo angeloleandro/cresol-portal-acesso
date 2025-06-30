@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -92,74 +92,7 @@ export default function AdvancedSearch({
     }
   }, [isOpen, initialQuery]);
 
-  useEffect(() => {
-    if (query.trim()) {
-      const debounceTimer = setTimeout(() => {
-        performSearch();
-      }, 300);
-      return () => clearTimeout(debounceTimer);
-    } else {
-      setResults([]);
-      setTotalResults(0);
-    }
-  }, [query, selectedFilter, currentPage]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isOpen) return;
-      
-      switch (event.key) {
-        case 'Escape':
-          onClose();
-          break;
-        case 'ArrowDown':
-          event.preventDefault();
-          setSelectedResultIndex(prev => 
-            prev < results.length - 1 ? prev + 1 : prev
-          );
-          break;
-        case 'ArrowUp':
-          event.preventDefault();
-          setSelectedResultIndex(prev => prev > 0 ? prev - 1 : -1);
-          break;
-        case 'Enter':
-          event.preventDefault();
-          if (selectedResultIndex >= 0 && results[selectedResultIndex]) {
-            handleResultClick(results[selectedResultIndex]);
-          }
-          break;
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-        document.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-  }, [isOpen, onClose, results, selectedResultIndex]);
-
-  const loadSearchHistory = () => {
-    try {
-      const stored = localStorage.getItem('search_history');
-      if (stored) {
-        const history = JSON.parse(stored);
-        setSearchHistory(Array.isArray(history) ? history.slice(0, 10) : []);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar histórico de busca:', error);
-    }
-  };
-
-  const saveToHistory = (searchQuery: string, filterUsed: SearchFilter, resultCount: number) => {
+  const saveToHistory = useCallback((searchQuery: string, filterUsed: SearchFilter, resultCount: number) => {
     try {
       const newEntry: SearchHistory = {
         id: Date.now().toString(),
@@ -175,32 +108,9 @@ export default function AdvancedSearch({
     } catch (error) {
       console.error('Erro ao salvar no histórico:', error);
     }
-  };
+  }, [searchHistory]);
 
-  const loadFilterOptions = async () => {
-    try {
-      // Carregar setores
-      const { data: sectorsData } = await supabase
-        .from('sectors')
-        .select('id, name')
-        .order('name');
-      setSectors(sectorsData || []);
-
-      // Carregar localizações
-      const { data: locationsData } = await supabase
-        .from('work_locations')
-        .select('id, name')
-        .order('name');
-      setLocations(locationsData || []);
-
-      // Tags populares (mockup - implementar com dados reais)
-      setPopularTags(['treinamento', 'cooperativismo', 'sustentabilidade', 'tecnologia', 'inovação']);
-    } catch (error) {
-      console.error('Erro ao carregar opções de filtro:', error);
-    }
-  };
-
-  const performSearch = async () => {
+  const performSearch = useCallback(async () => {
     if (!query.trim()) return;
 
     setLoading(true);
@@ -300,47 +210,125 @@ export default function AdvancedSearch({
             type: 'sector' as const,
             description: sector.description,
             url: `/setores/${sector.id}`,
-            score: calculateRelevanceScore(sector.name, sector.description, query)
+            score: calculateRelevanceScore(sector.name, sector.description, query),
+            metadata: {}
           })));
         }
         totalCount += count || 0;
       }
 
-      // Aplicar filtros adicionais
-      let filteredResults = searchResults;
-
-      // Filtro por data
-      if (selectedFilter.dateRange.start || selectedFilter.dateRange.end) {
-        filteredResults = filteredResults.filter(result => {
-          const date = result.metadata?.created_at || result.metadata?.start_date;
-          if (!date) return true;
-          
-          const resultDate = new Date(date);
-          const startDate = selectedFilter.dateRange.start ? new Date(selectedFilter.dateRange.start) : null;
-          const endDate = selectedFilter.dateRange.end ? new Date(selectedFilter.dateRange.end) : null;
-          
-          if (startDate && resultDate < startDate) return false;
-          if (endDate && resultDate > endDate) return false;
-          return true;
-        });
-      }
-
       // Ordenar por relevância
-      filteredResults.sort((a, b) => b.score - a.score);
+      searchResults.sort((a, b) => b.score - a.score);
 
-      setResults(filteredResults);
+      setResults(searchResults);
       setTotalResults(totalCount);
       setSelectedResultIndex(-1);
 
       // Salvar no histórico
       if (query.trim()) {
-        saveToHistory(query, selectedFilter, filteredResults.length);
+        saveToHistory(query.trim(), selectedFilter, totalCount);
       }
-
     } catch (error) {
       console.error('Erro na busca:', error);
     } finally {
       setLoading(false);
+    }
+  }, [query, selectedFilter, currentPage, saveToHistory]);
+
+  const handleResultClick = useCallback((result: SearchResult) => {
+    if (onResultClick) {
+      onResultClick(result);
+    }
+    onClose();
+  }, [onResultClick, onClose]);
+
+  useEffect(() => {
+    if (query.trim()) {
+      const debounceTimer = setTimeout(() => {
+        performSearch();
+      }, 300);
+      return () => clearTimeout(debounceTimer);
+    } else {
+      setResults([]);
+      setTotalResults(0);
+    }
+  }, [query, selectedFilter, currentPage, performSearch]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isOpen) return;
+      
+      switch (event.key) {
+        case 'Escape':
+          onClose();
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          setSelectedResultIndex(prev => 
+            prev < results.length - 1 ? prev + 1 : prev
+          );
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          setSelectedResultIndex(prev => prev > 0 ? prev - 1 : -1);
+          break;
+        case 'Enter':
+          event.preventDefault();
+          if (selectedResultIndex >= 0 && results[selectedResultIndex]) {
+            handleResultClick(results[selectedResultIndex]);
+          }
+          break;
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [isOpen, onClose, results, selectedResultIndex, handleResultClick]);
+
+  const loadSearchHistory = () => {
+    try {
+      const stored = localStorage.getItem('search_history');
+      if (stored) {
+        const history = JSON.parse(stored);
+        setSearchHistory(Array.isArray(history) ? history.slice(0, 10) : []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar histórico de busca:', error);
+    }
+  };
+
+  const loadFilterOptions = async () => {
+    try {
+      // Carregar setores
+      const { data: sectorsData } = await supabase
+        .from('sectors')
+        .select('id, name')
+        .order('name');
+      setSectors(sectorsData || []);
+
+      // Carregar localizações
+      const { data: locationsData } = await supabase
+        .from('work_locations')
+        .select('id, name')
+        .order('name');
+      setLocations(locationsData || []);
+
+      // Tags populares (mockup - implementar com dados reais)
+      setPopularTags(['treinamento', 'cooperativismo', 'sustentabilidade', 'tecnologia', 'inovação']);
+    } catch (error) {
+      console.error('Erro ao carregar opções de filtro:', error);
     }
   };
 
@@ -372,20 +360,6 @@ export default function AdvancedSearch({
     });
     
     return score;
-  };
-
-  const handleResultClick = (result: SearchResult) => {
-    if (onResultClick) {
-      onResultClick(result);
-    } else {
-      // Navegação padrão
-      if (result.url.startsWith('http')) {
-        window.open(result.url, '_blank');
-      } else {
-        window.location.href = result.url;
-      }
-    }
-    onClose();
   };
 
   const getTypeIcon = (type: SearchResult['type']) => {

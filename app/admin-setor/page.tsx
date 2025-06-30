@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -31,6 +31,53 @@ export default function AdminSetorDashboard() {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [managedSectors, setManagedSectors] = useState<Sector[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Buscar os setores que o administrador gerencia
+  const fetchManagedSectors = useCallback(async (userId: string) => {
+    try {
+      // Para admins normais, trazer todos os setores
+      if (user?.role === 'admin') {
+        const { data: allSectors, error: sectorsError } = await supabase
+          .from('sectors')
+          .select('*')
+          .order('name', { ascending: true });
+          
+        if (sectorsError) throw sectorsError;
+        setManagedSectors(allSectors || []);
+        return;
+      }
+      
+      // Para admins de setor, buscar os setores que ele gerencia
+      const { data: sectorAdmins, error: adminError } = await supabase
+        .from('sector_admins')
+        .select('sector_id')
+        .eq('user_id', userId);
+      
+      if (adminError) throw adminError;
+      
+      if (!sectorAdmins || sectorAdmins.length === 0) {
+        // Se não administra nenhum setor, mostrar lista vazia
+        setManagedSectors([]);
+        return;
+      }
+      
+      // Extrair os IDs dos setores
+      const sectorIds = sectorAdmins.map(admin => admin.sector_id);
+      
+      // Buscar detalhes dos setores
+      const { data: sectors, error: sectorsError } = await supabase
+        .from('sectors')
+        .select('*')
+        .in('id', sectorIds)
+        .order('name', { ascending: true });
+      
+      if (sectorsError) throw sectorsError;
+      
+      setManagedSectors(sectors || []);
+    } catch (error) {
+      console.error('Erro ao buscar setores:', error);
+    }
+  }, [user?.role]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -75,54 +122,7 @@ export default function AdminSetorDashboard() {
     };
 
     checkUser();
-  }, [router]);
-
-  // Buscar os setores que o administrador gerencia
-  const fetchManagedSectors = async (userId: string) => {
-    try {
-      // Para admins normais, trazer todos os setores
-      if (user?.role === 'admin') {
-        const { data: allSectors, error: sectorsError } = await supabase
-          .from('sectors')
-          .select('*')
-          .order('name', { ascending: true });
-          
-        if (sectorsError) throw sectorsError;
-        setManagedSectors(allSectors || []);
-        return;
-      }
-      
-      // Para admins de setor, buscar os setores que ele gerencia
-      const { data: sectorAdmins, error: adminError } = await supabase
-        .from('sector_admins')
-        .select('sector_id')
-        .eq('user_id', userId);
-      
-      if (adminError) throw adminError;
-      
-      if (!sectorAdmins || sectorAdmins.length === 0) {
-        // Se não administra nenhum setor, mostrar lista vazia
-        setManagedSectors([]);
-        return;
-      }
-      
-      // Extrair os IDs dos setores
-      const sectorIds = sectorAdmins.map(admin => admin.sector_id);
-      
-      // Buscar detalhes dos setores
-      const { data: sectors, error: sectorsError } = await supabase
-        .from('sectors')
-        .select('*')
-        .in('id', sectorIds)
-        .order('name', { ascending: true });
-      
-      if (sectorsError) throw sectorsError;
-      
-      setManagedSectors(sectors || []);
-    } catch (error) {
-      console.error('Erro ao buscar setores:', error);
-    }
-  };
+  }, [router, fetchManagedSectors]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

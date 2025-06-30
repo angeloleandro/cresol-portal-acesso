@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -57,32 +57,7 @@ export default function SubsectorDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<ErrorState>({ hasError: false, message: '' });
 
-  useEffect(() => {
-    if (subsectorId) {
-      fetchSubsectorData();
-    }
-  }, [subsectorId]);
-
-  const fetchSubsectorData = async () => {
-    try {
-      setError({ hasError: false, message: '' });
-      await Promise.all([
-        fetchSubsector(),
-        fetchNews(),
-        fetchEvents()
-      ]);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao carregar dados';
-      setError({ 
-        hasError: true, 
-        message: `Erro ao carregar dados do sub-setor: ${errorMessage}` 
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchSubsector = async () => {
+  const fetchSubsector = useCallback(async () => {
     const { data, error } = await supabase
       .from('subsectors')
       .select(`
@@ -108,9 +83,9 @@ export default function SubsectorDetailsPage() {
     }
     
     setSubsector(data);
-  };
+  }, [subsectorId]);
 
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async () => {
     const { data, error } = await supabase
       .from('subsector_news')
       .select('id, title, summary, created_at')
@@ -124,9 +99,9 @@ export default function SubsectorDetailsPage() {
     }
     
     setNews(data || []);
-  };
+  }, [subsectorId]);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     const { data, error } = await supabase
       .from('subsector_events')
       .select('id, title, description, location, start_date, end_date')
@@ -141,6 +116,55 @@ export default function SubsectorDetailsPage() {
     }
     
     setEvents(data || []);
+  }, [subsectorId]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!subsectorId) return;
+      
+      try {
+        setError({ hasError: false, message: '' });
+        await Promise.all([
+          fetchSubsector(),
+          fetchNews(),
+          fetchEvents()
+        ]);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao carregar dados';
+        setError({ 
+          hasError: true, 
+          message: `Erro ao carregar dados do sub-setor: ${errorMessage}` 
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [subsectorId, fetchSubsector, fetchNews, fetchEvents]);
+
+  const reloadData = () => {
+    setLoading(true);
+    setError({ hasError: false, message: '' });
+    // Recriar a mesma lógica do useEffect
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          fetchSubsector(),
+          fetchNews(),
+          fetchEvents()
+        ]);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao carregar dados';
+        setError({ 
+          hasError: true, 
+          message: `Erro ao carregar dados do sub-setor: ${errorMessage}` 
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   };
 
   const getSectorName = (sectors: Subsector['sectors']) => {
@@ -178,7 +202,7 @@ export default function SubsectorDetailsPage() {
               <p className="text-red-700 mb-4">{error.message}</p>
               <div className="space-y-2">
                 <button
-                  onClick={fetchSubsectorData}
+                  onClick={reloadData}
                   className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
                   aria-label="Tentar carregar novamente"
                 >
@@ -427,4 +451,4 @@ export default function SubsectorDetailsPage() {
       </main>
     </div>
   );
-} 
+}

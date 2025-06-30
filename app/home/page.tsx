@@ -13,6 +13,7 @@ import Footer from '../components/Footer';
 import GlobalSearch from '../components/GlobalSearch';
 import SystemLinks from '../components/SystemLinks';
 import ParecerSolicitacao from '../components/ParecerSolicitacao';
+import NotificationsAndMessages from '../components/NotificationsAndMessages';
 import { handleComponentError, devLog } from '@/lib/error-handler';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { Icon } from '../components/icons';
@@ -80,95 +81,42 @@ export default function Home() {
         </div>
           </div>
           
-      {/* Status do Sistema + Busca Global - Padronizado */}
+      {/* Sistemas - Compacto */}
       <div className="py-6 bg-white border-y border-gray-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
-            
-            {/* Status do Sistema - Seguindo Design System */}
-            <div className="flex-1">
-              <h2 className="heading-4 mb-4 text-center lg:text-left">
-                Status do Sistema
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Online */}
-                <div className="card-status">
-                  <div className="flex items-center justify-center mb-2">
-                    <Icon name="check" className="w-5 h-5 text-muted" />
-                  </div>
-                  <div className="text-2xl font-bold text-body">Online</div>
-                  <div className="body-text-small">Sistemas</div>
-                </div>
-
-                {/* Usuários Ativos */}
-                <div className="card-status">
-                  <div className="flex items-center justify-center mb-2">
-                    <Icon name="user-group" className="w-5 h-5 text-muted" />
-                  </div>
-                  <div className="text-2xl font-bold text-body">{stats.activeUsers}</div>
-                  <div className="body-text-small">Usuários</div>
-                </div>
-
-                {/* Notificações */}
-                <div className="card-status">
-                  <div className="flex items-center justify-center mb-2">
-                    <Icon name="bell" className="w-5 h-5 text-muted" />
-                  </div>
-                  <div className="text-2xl font-bold text-body">{stats.unreadNotifications}</div>
-                  <div className="body-text-small">Notificações</div>
-                </div>
-
-                {/* Pendências */}
-                <div className="card-status">
-                  <div className="flex items-center justify-center mb-2">
-                    <Icon name="clock" className="w-5 h-5 text-muted" />
-                  </div>
-                  <div className="text-2xl font-bold text-body">{stats.pendingApprovals}</div>
-                  <div className="body-text-small">Pendências</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Busca Global - Padronizada */}
-            <div className="flex-shrink-0 w-full lg:w-80">
-              <div className="text-center lg:text-right mb-4">
-                <h2 className="heading-4">
-                  Portal Cresol
-                </h2>
-                <p className="body-text-small">
-                  Acesso centralizado
-                </p>
-              </div>
-              <GlobalSearch compact />
-            </div>
+          <div className="text-center lg:text-left mb-4">
+            <h2 className="heading-3 text-title">Hub Cresol Fronteiras PR/SC/SP/ES</h2>
+            <p className="body-text-small text-muted">Acesso centralizado aos sistemas</p>
           </div>
-        </div>
-      </div>
-
-      {/* Seção de Sistemas e Links - Compacta */}
-      <div className="py-6 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SystemLinks />
         </div>
       </div>
 
-      {/* Seções de Conteúdo - Compactas */}
+      {/* Seções de Conteúdo - Layout 2/3 + 1/3 */}
       <div className="py-8 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <NoticiasDestaque />
-            <EventosDestaque />
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Primeira Coluna - 2/3 do espaço (Notícias, Vídeos, Galeria, Indicadores) */}
+            <div className="lg:col-span-2 space-y-6">
+              <NoticiasDestaque />
+              <VideoGallery />
+              <ImageGallery />
+              <ParecerSolicitacao />
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <VideoGallery />
-            <ImageGallery />
+            {/* Segunda Coluna - 1/3 do espaço (Busca + Eventos + Notificações) */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="card">
+                <h3 className="heading-4 text-title mb-4">Busca Global</h3>
+                <GlobalSearch compact />
+              </div>
+              <EventosDestaque />
+              <NotificationsAndMessages />
+            </div>
           </div>
         </div>
       </div>
       
-      {/* Parecer da Solicitação - Abaixo da Galeria */}
-      <ParecerSolicitacao />
 
       <Footer />
     </div>

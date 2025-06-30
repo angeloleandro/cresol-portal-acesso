@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import AdvancedSearch from './AdvancedSearch';
@@ -42,99 +42,7 @@ export default function GlobalSearch({
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Carregar buscas recentes do localStorage
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('recent_searches');
-      if (stored) {
-        const recent = JSON.parse(stored);
-        setRecentSearches(Array.isArray(recent) ? recent.slice(0, 5) : []);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar buscas recentes:', error);
-    }
-  }, []);
-
-  // Focus automático
-  useEffect(() => {
-    if (autoFocus && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [autoFocus]);
-
-  // Busca com debounce
-  useEffect(() => {
-    if (query.length >= 2) {
-      const debounceTimer = setTimeout(() => {
-        performQuickSearch();
-      }, 300);
-      return () => clearTimeout(debounceTimer);
-    } else {
-      setQuickResults([]);
-      setShowResults(false);
-    }
-  }, [query]);
-
-  // Controle de teclado
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Atalho Ctrl+K ou Cmd+K para focar na busca
-      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-        event.preventDefault();
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-        return;
-      }
-
-      if (!showResults) return;
-
-      switch (event.key) {
-        case 'ArrowDown':
-          event.preventDefault();
-          setSelectedIndex(prev => 
-            prev < quickResults.length - 1 ? prev + 1 : prev
-          );
-          break;
-        case 'ArrowUp':
-          event.preventDefault();
-          setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
-          break;
-        case 'Enter':
-          event.preventDefault();
-          if (selectedIndex >= 0 && quickResults[selectedIndex]) {
-            handleResultClick(quickResults[selectedIndex]);
-          } else if (query.trim()) {
-            openAdvancedSearch();
-          }
-          break;
-        case 'Escape':
-          setShowResults(false);
-          setSelectedIndex(-1);
-          if (inputRef.current) {
-            inputRef.current.blur();
-          }
-          break;
-      }
-    };
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-        setSelectedIndex(-1);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showResults, quickResults, selectedIndex, query]);
-
-  const performQuickSearch = async () => {
+  const performQuickSearch = useCallback(async () => {
     setLoading(true);
     try {
       const results: QuickResult[] = [];
@@ -220,9 +128,9 @@ export default function GlobalSearch({
     } finally {
       setLoading(false);
     }
-  };
+  }, [query]);
 
-  const saveRecentSearch = (searchQuery: string) => {
+  const saveRecentSearch = useCallback((searchQuery: string) => {
     try {
       const cleaned = searchQuery.trim();
       if (!cleaned) return;
@@ -233,9 +141,9 @@ export default function GlobalSearch({
     } catch (error) {
       console.error('Erro ao salvar busca recente:', error);
     }
-  };
+  }, [recentSearches]);
 
-  const handleResultClick = (result: QuickResult) => {
+  const handleResultClick = useCallback((result: QuickResult) => {
     saveRecentSearch(query);
     setShowResults(false);
     setQuery('');
@@ -246,13 +154,105 @@ export default function GlobalSearch({
     } else {
       window.location.href = result.url;
     }
-  };
+  }, [query, saveRecentSearch]);
 
-  const openAdvancedSearch = () => {
+  const openAdvancedSearch = useCallback(() => {
     saveRecentSearch(query);
     setShowAdvanced(true);
     setShowResults(false);
-  };
+  }, [query, saveRecentSearch]);
+
+  // Carregar buscas recentes do localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('recent_searches');
+      if (stored) {
+        const recent = JSON.parse(stored);
+        setRecentSearches(Array.isArray(recent) ? recent.slice(0, 5) : []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar buscas recentes:', error);
+    }
+  }, []);
+
+  // Focus automático
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus]);
+
+  // Busca com debounce
+  useEffect(() => {
+    if (query.length >= 2) {
+      const debounceTimer = setTimeout(() => {
+        performQuickSearch();
+      }, 300);
+      return () => clearTimeout(debounceTimer);
+    } else {
+      setQuickResults([]);
+      setShowResults(false);
+    }
+  }, [query, performQuickSearch]);
+
+  // Controle de teclado
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Atalho Ctrl+K ou Cmd+K para focar na busca
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+        return;
+      }
+
+      if (!showResults) return;
+
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          setSelectedIndex(prev => 
+            prev < quickResults.length - 1 ? prev + 1 : prev
+          );
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
+          break;
+        case 'Enter':
+          event.preventDefault();
+          if (selectedIndex >= 0 && quickResults[selectedIndex]) {
+            handleResultClick(quickResults[selectedIndex]);
+          } else if (query.trim()) {
+            openAdvancedSearch();
+          }
+          break;
+        case 'Escape':
+          setShowResults(false);
+          setSelectedIndex(-1);
+          if (inputRef.current) {
+            inputRef.current.blur();
+          }
+          break;
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+        setSelectedIndex(-1);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showResults, quickResults, selectedIndex, query, handleResultClick, openAdvancedSearch]);
 
   const handleInputFocus = () => {
     if (query.length >= 2) {

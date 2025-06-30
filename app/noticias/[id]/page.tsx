@@ -27,75 +27,6 @@ export default function NoticiaDetalhePage() {
   const [loading, setLoading] = useState(true);
   const [relatedNews, setRelatedNews] = useState<NewsItem[]>([]);
 
-  // Dados de exemplo (remover quando implementar a busca no Supabase)
-  const sampleNews = [
-    {
-      id: '1',
-      title: 'Resultados financeiros do 3º trimestre superaram expectativas',
-      summary: 'Os resultados financeiros do terceiro trimestre de 2025 superaram todas as expectativas, com crescimento de 15% nas operações de crédito.',
-      content: `<p>A Cresol anuncia com satisfação que os resultados financeiros do terceiro trimestre de 2025 superaram significativamente as expectativas projetadas, com um crescimento notável de 15% nas operações de crédito em comparação ao mesmo período do ano anterior.</p>
-      
-      <p>Entre os destaques do período estão:</p>
-      
-      <ul>
-        <li>Aumento de 22% na captação de novos associados</li>
-        <li>Crescimento de 18% na carteira de crédito rural</li>
-        <li>Expansão de 12% nos depósitos totais</li>
-        <li>Redução de 5% na inadimplência</li>
-      </ul>
-      
-      <p>"Estes resultados refletem a confiança de nossos associados e a eficácia de nossa estratégia de crescimento sustentável", afirmou o diretor financeiro em comunicado oficial.</p>
-      
-      <p>A cooperativa também destaca que os investimentos em tecnologia e capacitação das equipes contribuíram significativamente para a melhoria nos indicadores operacionais e na qualidade do atendimento.</p>
-      
-      <p>Para o próximo trimestre, a expectativa é de manutenção da trajetória de crescimento, com foco especial no fortalecimento das iniciativas de sustentabilidade e apoio ao desenvolvimento regional.</p>`,
-      image_url: '/images/news/financial-results.jpg',
-      created_at: '2025-05-12T10:30:00Z',
-      category: 'Financeiro',
-      author: 'Departamento Financeiro'
-    },
-    {
-      id: '2',
-      title: 'Nova campanha de captação de associados',
-      summary: 'A Cresol lança hoje sua nova campanha de captação de associados com condições especiais para novos cooperados.',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl eget nisl. Nullam euismod, nisl eget aliquam ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl eget nisl.',
-      image_url: '/images/news/campaign.jpg',
-      created_at: '2025-05-10T14:15:00Z',
-      category: 'Marketing',
-      author: 'Equipe de Marketing'
-    },
-    {
-      id: '3',
-      title: 'Treinamento sobre sustentabilidade para colaboradores',
-      summary: 'Participe do novo treinamento sobre práticas sustentáveis e ESG que será realizado no próximo mês.',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl eget nisl. Nullam euismod, nisl eget aliquam ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl eget nisl.',
-      image_url: '/images/news/sustainability.jpg',
-      created_at: '2025-05-08T09:45:00Z',
-      category: 'Treinamento',
-      author: 'Recursos Humanos'
-    },
-    {
-      id: '4',
-      title: 'Novo sistema de gestão de atendimento será implantado',
-      summary: 'Com o objetivo de melhorar a experiência dos associados, um novo sistema de gestão de atendimento será implantado em todas as agências.',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl eget nisl. Nullam euismod, nisl eget aliquam ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl eget nisl.',
-      image_url: '/images/news/system.jpg',
-      created_at: '2025-05-05T08:00:00Z',
-      category: 'Tecnologia',
-      author: 'Departamento de TI'
-    },
-    {
-      id: '5',
-      title: 'Assembleia Geral aprova distribuição de sobras',
-      summary: 'Em reunião realizada na última semana, a Assembleia Geral aprovou a distribuição de sobras operacionais referentes ao exercício de 2024.',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl eget nisl. Nullam euismod, nisl eget aliquam ultricies, nisl nisl aliquam nisl, eget aliquam nisl nisl eget nisl.',
-      image_url: '/images/news/assembly.jpg',
-      created_at: '2025-05-01T16:45:00Z',
-      category: 'Institucional',
-      author: 'Conselho Administrativo'
-    },
-  ];
-
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
@@ -116,19 +47,8 @@ export default function NoticiaDetalhePage() {
           
         if (error) {
           console.error('Erro ao buscar notícia:', error);
-          // Tenta encontrar nos dados de exemplo
-          const foundNews = sampleNews.find(item => item.id === id);
-          if (!foundNews) {
-            router.push('/noticias');
-            return;
-          }
-          setNews(foundNews);
-
-          // Notícias relacionadas dos exemplos
-          const related = sampleNews
-            .filter(item => item.category === foundNews.category && item.id !== id)
-            .slice(0, 3);
-          setRelatedNews(related);
+          router.push('/noticias');
+          return;
         } else {
           // Adicionar campos necessários
           const formattedNews = {
@@ -149,11 +69,8 @@ export default function NoticiaDetalhePage() {
             .limit(3);
             
           if (relatedError || !relatedData || relatedData.length === 0) {
-            // Usar exemplos se não encontrar relacionadas
-            const related = sampleNews
-              .filter(item => item.id !== id)
-              .slice(0, 3);
-            setRelatedNews(related);
+            // Não há notícias relacionadas disponíveis
+            setRelatedNews([]);
           } else {
             // Formatar notícias relacionadas
             const formattedRelated = relatedData.map(item => ({

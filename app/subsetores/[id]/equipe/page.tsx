@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
@@ -58,7 +58,42 @@ export default function SubsectorTeamPage() {
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [memberPosition, setMemberPosition] = useState('');
+  const [memberDescription, setMemberDescription] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const fetchSubsector = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('subsectors')
+      .select(`
+        id,
+        name,
+        description,
+        sectors!inner(name)
+      `)
+      .eq('id', subsectorId)
+      .single();
+
+    if (error) {
+      console.error('Erro ao buscar sub-setor:', error);
+    } else {
+      setSubsector(data);
+    }
+  }, [subsectorId]);
+
+  const fetchTeamMembers = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/admin/subsector-team?subsector_id=${subsectorId}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setTeamMembers(data.teamMembers || []);
+      } else {
+        console.error('Erro ao buscar equipe:', data.error);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar equipe:', error);
+    }
+  }, [subsectorId]);
 
   useEffect(() => {
     const checkUserAndFetchData = async () => {
@@ -112,41 +147,7 @@ export default function SubsectorTeamPage() {
     if (subsectorId) {
       checkUserAndFetchData();
     }
-  }, [subsectorId, router]);
-
-  const fetchSubsector = async () => {
-    const { data, error } = await supabase
-      .from('subsectors')
-      .select(`
-        id,
-        name,
-        description,
-        sectors!inner(name)
-      `)
-      .eq('id', subsectorId)
-      .single();
-
-    if (error) {
-      console.error('Erro ao buscar sub-setor:', error);
-    } else {
-      setSubsector(data);
-    }
-  };
-
-  const fetchTeamMembers = async () => {
-    try {
-      const response = await fetch(`/api/admin/subsector-team?subsector_id=${subsectorId}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        setTeamMembers(data.teamMembers || []);
-      } else {
-        console.error('Erro ao buscar equipe:', data.error);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar equipe:', error);
-    }
-  };
+  }, [subsectorId, router, fetchSubsector, fetchTeamMembers]);
 
   const fetchAllUsers = async () => {
     const { data, error } = await supabase
@@ -631,4 +632,4 @@ export default function SubsectorTeamPage() {
       )}
     </div>
   );
-} 
+}

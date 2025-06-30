@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -106,11 +106,22 @@ export default function Navbar() {
     };
   }, []);
 
+  const fetchSectors = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sectors')
+      .select('id, name, description')
+      .order('name', { ascending: true });
+    
+    if (!error && !isSectorAdmin) { // Se não for admin de setor, carrega todos os setores 
+      setSectors(data || []);
+    }
+  }, [isSectorAdmin]);
+
   useEffect(() => {
     // Buscar usuário e setores na inicialização do componente
     checkUser();
     fetchSectors();
-  }, []);
+  }, [fetchSectors]);
 
   const checkUser = async () => {
     const { data } = await supabase.auth.getUser();
@@ -150,17 +161,6 @@ export default function Navbar() {
           }
         }
       }
-    }
-  };
-
-  const fetchSectors = async () => {
-    const { data, error } = await supabase
-      .from('sectors')
-      .select('id, name, description')
-      .order('name', { ascending: true });
-    
-    if (!error && !isSectorAdmin) { // Se não for admin de setor, carrega todos os setores 
-      setSectors(data || []);
     }
   };
 

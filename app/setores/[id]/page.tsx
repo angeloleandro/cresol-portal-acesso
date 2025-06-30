@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -62,6 +62,69 @@ export default function SetorDetalhesPage() {
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [activeTab, setActiveTab] = useState('news');
 
+  const fetchSector = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sectors')
+      .select('*')
+      .eq('id', sectorId)
+      .single();
+    
+    if (error) {
+      console.error('Erro ao buscar setor:', error);
+      router.replace('/setores');
+      return;
+    }
+    
+    setSector(data);
+  }, [sectorId, router]);
+
+  const fetchSubsectors = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('subsectors')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('name');
+    
+    if (error) {
+      console.error('Erro ao buscar sub-setores:', error);
+      return;
+    }
+    
+    setSubsectors(data || []);
+  }, [sectorId]);
+
+  const fetchNews = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sector_news')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .eq('is_published', true)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Erro ao buscar notícias:', error);
+      return;
+    }
+    
+    setNews(data || []);
+  }, [sectorId]);
+
+  const fetchEvents = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sector_events')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .eq('is_published', true)
+      .order('start_date', { ascending: true });
+    
+    if (error) {
+      console.error('Erro ao buscar eventos:', error);
+      return;
+    }
+    
+    setEvents(data || []);
+  }, [sectorId]);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -84,70 +147,7 @@ export default function SetorDetalhesPage() {
     };
 
     checkUser();
-  }, [sectorId, router]);
-
-  const fetchSector = async () => {
-    const { data, error } = await supabase
-      .from('sectors')
-      .select('*')
-      .eq('id', sectorId)
-      .single();
-    
-    if (error) {
-      console.error('Erro ao buscar setor:', error);
-      router.replace('/setores');
-      return;
-    }
-    
-    setSector(data);
-  };
-
-  const fetchSubsectors = async () => {
-    const { data, error } = await supabase
-      .from('subsectors')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .order('name');
-    
-    if (error) {
-      console.error('Erro ao buscar sub-setores:', error);
-      return;
-    }
-    
-    setSubsectors(data || []);
-  };
-
-  const fetchNews = async () => {
-    const { data, error } = await supabase
-      .from('sector_news')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .eq('is_published', true)
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('Erro ao buscar notícias:', error);
-      return;
-    }
-    
-    setNews(data || []);
-  };
-
-  const fetchEvents = async () => {
-    const { data, error } = await supabase
-      .from('sector_events')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .eq('is_published', true)
-      .order('start_date', { ascending: true });
-    
-    if (error) {
-      console.error('Erro ao buscar eventos:', error);
-      return;
-    }
-    
-    setEvents(data || []);
-  };
+  }, [sectorId, router, fetchSector, fetchSubsectors, fetchNews, fetchEvents]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);

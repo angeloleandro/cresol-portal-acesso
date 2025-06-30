@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -70,6 +70,51 @@ export default function SectorContentManagement() {
     is_published: true
   });
 
+  const fetchSector = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sectors')
+      .select('*')
+      .eq('id', sectorId)
+      .single();
+    
+    if (error) {
+      console.error('Erro ao buscar setor:', error);
+      return;
+    }
+    
+    setSector(data);
+  }, [sectorId]);
+
+  const fetchNews = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sector_news')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Erro ao buscar notícias:', error);
+      return;
+    }
+    
+    setNews(data || []);
+  }, [sectorId]);
+
+  const fetchEvents = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sector_events')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('event_date', { ascending: true });
+    
+    if (error) {
+      console.error('Erro ao buscar eventos:', error);
+      return;
+    }
+    
+    setEvents(data || []);
+  }, [sectorId]);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -121,52 +166,7 @@ export default function SectorContentManagement() {
     };
 
     checkUser();
-  }, [sectorId, router]);
-
-  const fetchSector = async () => {
-    const { data, error } = await supabase
-      .from('sectors')
-      .select('*')
-      .eq('id', sectorId)
-      .single();
-    
-    if (error) {
-      console.error('Erro ao buscar setor:', error);
-      return;
-    }
-    
-    setSector(data);
-  };
-
-  const fetchNews = async () => {
-    const { data, error } = await supabase
-      .from('sector_news')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('Erro ao buscar notícias:', error);
-      return;
-    }
-    
-    setNews(data || []);
-  };
-
-  const fetchEvents = async () => {
-    const { data, error } = await supabase
-      .from('sector_events')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .order('event_date', { ascending: true });
-    
-    if (error) {
-      console.error('Erro ao buscar eventos:', error);
-      return;
-    }
-    
-    setEvents(data || []);
-  };
+  }, [sectorId, router, fetchEvents, fetchNews, fetchSector]);
 
   const handleNewsImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {

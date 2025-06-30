@@ -54,12 +54,12 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">{title}</h2>
-        <p className="mb-4" dangerouslySetInnerHTML={{ __html: message }}></p>
+      <div className="card w-full max-w-md">
+        <h2 className="heading-4 mb-4">{title}</h2>
+        <p className="body-text mb-4" dangerouslySetInnerHTML={{ __html: message }}></p>
         {requiresConfirmationInput && (
           <div className="mb-4">
-            <label htmlFor="confirmation-input" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="confirmation-input" className="form-label">
               {confirmationLabel}
             </label>
             <input
@@ -67,7 +67,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="input"
               placeholder={confirmationText}
             />
           </div>
@@ -76,14 +76,28 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 disabled:opacity-50"
+            className="btn-outline disabled:opacity-50"
           >
             {cancelButtonText}
           </button>
           <button
             onClick={handleConfirm}
             disabled={isLoading || (requiresConfirmationInput && !isConfirmed)}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed"
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors duration-200 min-h-[44px] inline-flex items-center justify-center font-medium"
+            style={{
+              backgroundColor: 'var(--color-error-text)',
+              borderRadius: 'var(--border-radius-medium)'
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading && (!requiresConfirmationInput || isConfirmed)) {
+                e.currentTarget.style.backgroundColor = '#B91C1C';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isLoading && (!requiresConfirmationInput || isConfirmed)) {
+                e.currentTarget.style.backgroundColor = 'var(--color-error-text)';
+              }
+            }}
           >
             {isLoading ? 'Excluindo...' : confirmButtonText}
           </button>

@@ -1,9 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface Notification {
   id: string;
@@ -34,30 +32,36 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
   const [showActions, setShowActions] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchNotifications();
-    }
-  }, [isOpen, userId]);
+  // (Removido: declaração duplicada de fetchNotifications)
 
-  useEffect(() => {
-    applyFilters();
+  const applyFilters = useCallback(() => {
+    let filtered = [...notifications];
+
+    // Filtrar por status de leitura
+    if (filter === 'unread') {
+      filtered = filtered.filter(notif => !notif.read);
+    } else if (filter === 'read') {
+      filtered = filtered.filter(notif => notif.read);
+    }
+
+    // Filtrar por tipo
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(notif => notif.type === typeFilter);
+    }
+
+    // Ordenar por prioridade e data
+    filtered.sort((a, b) => {
+      const priorityOrder = { urgent: 4, high: 3, normal: 2, low: 1 };
+      const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+      if (priorityDiff !== 0) return priorityDiff;
+      
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    setFilteredNotifications(filtered);
   }, [notifications, filter, typeFilter]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isOpen, onClose]);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -128,34 +132,30 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
-  const applyFilters = () => {
-    let filtered = [...notifications];
-
-    // Filtrar por status de leitura
-    if (filter === 'unread') {
-      filtered = filtered.filter(notif => !notif.read);
-    } else if (filter === 'read') {
-      filtered = filtered.filter(notif => notif.read);
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications();
     }
+  }, [isOpen, userId, fetchNotifications]);
 
-    // Filtrar por tipo
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(notif => notif.type === typeFilter);
+  useEffect(() => {
+    applyFilters();
+  }, [notifications, filter, typeFilter, applyFilters]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-
-    // Ordenar por prioridade e data
-    filtered.sort((a, b) => {
-      const priorityOrder = { urgent: 4, high: 3, normal: 2, low: 1 };
-      const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
-      if (priorityDiff !== 0) return priorityDiff;
-      
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
-
-    setFilteredNotifications(filtered);
-  };
+  }, [isOpen, onClose]);
 
   const markAsRead = async (notificationId: string) => {
     try {

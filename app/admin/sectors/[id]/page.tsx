@@ -203,6 +203,114 @@ export default function SectorDashboard() {
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [userLocationFilter, setUserLocationFilter] = useState('all');
 
+  const fetchSector = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sectors')
+      .select('*')
+      .eq('id', sectorId)
+      .single();
+    
+    if (error) {
+      console.error('Erro ao buscar setor:', error);
+      return;
+    }
+    
+    setSector(data);
+  }, [sectorId]);
+
+  const fetchSubsectors = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('subsectors')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('name');
+    
+    if (error) {
+      console.error('Erro ao buscar subsetores:', error);
+    } else {
+      setSubsectors(data || []);
+    }
+  }, [sectorId]);
+
+  const fetchNews = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sector_news')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Erro ao buscar notícias:', error);
+      return;
+    }
+    
+    setNews(data || []);
+  }, [sectorId]);
+
+  const fetchEvents = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sector_events')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('start_date', { ascending: false });
+    
+    if (error) {
+      console.error('Erro ao buscar eventos:', error);
+      return;
+    }
+    
+    setEvents(data || []);
+  }, [sectorId]);
+
+  const fetchGroups = useCallback(async () => {
+    try {
+      const response = await fetch('/api/notifications/groups');
+      const result = await response.json();
+      
+      if (result.groups) {
+        setGroups(result.groups.filter((group: any) => group.sector_id === sectorId));
+      }
+    } catch (error) {
+      console.error('Erro ao buscar grupos:', error);
+    }
+  }, [sectorId]);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, work_location_id')
+        .order('full_name');
+        
+      if (error) {
+        console.error('Erro ao buscar usuários:', error);
+        return;
+      }
+      
+      setAllUsers(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error);
+    }
+  }, []);
+
+  const fetchWorkLocations = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('work_locations')
+        .select('id, name')
+        .order('name');
+
+      if (error) {
+        console.error('Erro ao buscar locais de trabalho:', error);
+        return;
+      }
+
+      setWorkLocations(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar locais de trabalho:', error);
+    }
+  }, []);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -256,115 +364,8 @@ export default function SectorDashboard() {
     };
 
     checkUser();
-  }, [sectorId, router]);
+  }, [sectorId, router, fetchSector, fetchSubsectors, fetchNews, fetchEvents, fetchGroups, fetchUsers, fetchWorkLocations]);
 
-  const fetchSector = async () => {
-    const { data, error } = await supabase
-      .from('sectors')
-      .select('*')
-      .eq('id', sectorId)
-      .single();
-    
-    if (error) {
-      console.error('Erro ao buscar setor:', error);
-      return;
-    }
-    
-    setSector(data);
-  };
-
-  const fetchSubsectors = async () => {
-    const { data, error } = await supabase
-      .from('subsectors')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .order('name');
-    
-    if (error) {
-      console.error('Erro ao buscar subsetores:', error);
-    } else {
-      setSubsectors(data || []);
-    }
-  };
-
-  const fetchNews = async () => {
-    const { data, error } = await supabase
-      .from('sector_news')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('Erro ao buscar notícias:', error);
-      return;
-    }
-    
-    setNews(data || []);
-  };
-
-  const fetchEvents = async () => {
-    const { data, error } = await supabase
-      .from('sector_events')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .order('start_date', { ascending: false });
-    
-    if (error) {
-      console.error('Erro ao buscar eventos:', error);
-      return;
-    }
-    
-    setEvents(data || []);
-  };
-
-  const fetchGroups = async () => {
-    try {
-      const response = await fetch('/api/notifications/groups');
-      const result = await response.json();
-      
-      if (result.groups) {
-        setGroups(result.groups.filter((group: any) => group.sector_id === sectorId));
-      }
-    } catch (error) {
-      console.error('Erro ao buscar grupos:', error);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, work_location_id')
-        .order('full_name');
-        
-      if (error) {
-        console.error('Erro ao buscar usuários:', error);
-        return;
-      }
-      
-      setAllUsers(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
-    }
-  };
-
-  const fetchWorkLocations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('work_locations')
-        .select('id, name')
-        .order('name');
-
-      if (error) {
-        console.error('Erro ao buscar locais de trabalho:', error);
-        return;
-      }
-
-      setWorkLocations(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar locais de trabalho:', error);
-    }
-  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
@@ -57,11 +57,7 @@ export default function EconomicIndicatorsAdmin() {
     issue_date: ''
   });
 
-  useEffect(() => {
-    checkUserAndFetchData();
-  }, []);
-
-  const checkUserAndFetchData = async () => {
+  const checkUserAndFetchData = useCallback(async () => {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
@@ -91,7 +87,11 @@ export default function EconomicIndicatorsAdmin() {
       setError(errorMessage);
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkUserAndFetchData();
+  }, [checkUserAndFetchData]);
 
   const fetchIndicators = async () => {
     try {

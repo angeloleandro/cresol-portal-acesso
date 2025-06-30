@@ -30,62 +30,6 @@ export default function EventoDetalhePage() {
   const [loading, setLoading] = useState(true);
   const [relatedEvents, setRelatedEvents] = useState<EventItem[]>([]);
 
-  // Dados de exemplo (remover quando implementar a busca no Supabase)
-  const sampleEvents = [
-    {
-      id: '1',
-      title: 'Treinamento de Atendimento ao Associado',
-      description: 'Treinamento para aprimorar as habilidades de atendimento e relacionamento com os associados. Durante o treinamento, serão abordados temas como comunicação eficaz, resolução de conflitos, conhecimento dos produtos e serviços, além de técnicas para identificar as necessidades dos associados e oferecer as melhores soluções financeiras. O evento é direcionado a todos os colaboradores que atuam no atendimento direto aos associados nas agências.',
-      location: 'Auditório Principal',
-      start_date: '2025-06-15T13:00:00Z',
-      end_date: '2025-06-15T17:00:00Z',
-      is_featured: true,
-      is_published: true,
-      created_at: '2025-05-20T09:30:00Z',
-      sector_id: '1',
-      sector_name: 'Recursos Humanos'
-    },
-    {
-      id: '2',
-      title: 'Workshop de Crédito Rural',
-      description: 'Workshop sobre as novas linhas de crédito rural disponíveis e como orientar os associados. Serão apresentadas as características principais de cada linha, documentação necessária, prazos e condições especiais. O evento contará com a participação de especialistas da área agrícola que discutirão casos práticos de análise de crédito rural.',
-      location: 'Sala de Treinamento 2',
-      start_date: '2025-06-20T09:00:00Z',
-      end_date: '2025-06-20T12:00:00Z',
-      is_featured: true,
-      is_published: true,
-      created_at: '2025-05-19T14:15:00Z',
-      sector_id: '2',
-      sector_name: 'Crédito Rural'
-    },
-    {
-      id: '3',
-      title: 'Encontro de Líderes Regionais',
-      description: 'Encontro para discutir estratégias de expansão e alinhamento de objetivos para o próximo semestre. O evento reunirá líderes de todas as regiões para compartilhar resultados, desafios e oportunidades identificadas em cada localidade. Haverá também workshops sobre liderança e gestão de equipes.',
-      location: 'Centro de Convenções',
-      start_date: '2025-07-05T08:30:00Z',
-      end_date: '2025-07-05T18:00:00Z',
-      is_featured: true,
-      is_published: true,
-      created_at: '2025-05-15T11:45:00Z',
-      sector_id: '3',
-      sector_name: 'Diretoria'
-    },
-    {
-      id: '4',
-      title: 'Palestra sobre Investimentos',
-      description: 'Palestra sobre os produtos de investimento da Cresol e estratégias para orientar os associados. Serão apresentadas análises de mercado, comparativos de rentabilidade e perfis de investidores. Ao final, haverá um momento para esclarecimento de dúvidas e networking entre os participantes.',
-      location: 'Auditório Principal',
-      start_date: '2025-06-25T15:00:00Z',
-      end_date: '2025-06-25T17:00:00Z',
-      is_featured: false,
-      is_published: true,
-      created_at: '2025-05-12T10:00:00Z',
-      sector_id: '4',
-      sector_name: 'Investimentos'
-    },
-  ];
-
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
@@ -106,19 +50,8 @@ export default function EventoDetalhePage() {
           
         if (error) {
           console.error('Erro ao buscar evento:', error);
-          // Tenta encontrar nos dados de exemplo
-          const foundEvent = sampleEvents.find(item => item.id === id);
-          if (!foundEvent) {
-            router.push('/eventos');
-            return;
-          }
-          setEvent(foundEvent);
-
-          // Eventos relacionados dos exemplos (mesmo setor ou mesma categoria)
-          const related = sampleEvents
-            .filter(item => item.sector_id === foundEvent.sector_id && item.id !== id)
-            .slice(0, 3);
-          setRelatedEvents(related);
+          router.push('/eventos');
+          return;
         } else {
           // Adicionar campos necessários
           const formattedEvent = {
@@ -138,11 +71,8 @@ export default function EventoDetalhePage() {
             .limit(3);
             
           if (relatedError || !relatedData || relatedData.length === 0) {
-            // Usar exemplos se não encontrar relacionados
-            const related = sampleEvents
-              .filter(item => item.id !== id)
-              .slice(0, 3);
-            setRelatedEvents(related);
+            // Não há eventos relacionados disponíveis
+            setRelatedEvents([]);
           } else {
             // Formatar eventos relacionados
             const formattedRelated = relatedData.map(item => ({

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
@@ -37,38 +37,7 @@ export default function AccessRequests() {
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
   const [editData, setEditData] = useState<Record<string, EditableAccessData>>({});
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setUser(userData.user);
-
-      // Verificar se o usuário é admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
-      if (profile?.role === 'admin') {
-        setIsAdmin(true);
-        fetchRequests();
-        fetchWorkLocations();
-      } else {
-        // Redirecionar usuários não-admin para o dashboard
-        router.replace('/dashboard');
-      }
-    };
-
-    checkUser();
-  }, [router]);
-
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
     
     let query = supabase
@@ -100,7 +69,7 @@ export default function AccessRequests() {
     }
     
     setLoading(false);
-  };
+  }, [statusFilter]);
 
   const fetchWorkLocations = async () => {
     const { data, error } = await supabase
@@ -111,10 +80,41 @@ export default function AccessRequests() {
   };
 
   useEffect(() => {
+    const checkUser = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      
+      if (!userData.user) {
+        router.replace('/login');
+        return;
+      }
+
+      setUser(userData.user);
+
+      // Verificar se o usuário é admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userData.user.id)
+        .single();
+
+      if (profile?.role === 'admin') {
+        setIsAdmin(true);
+        fetchRequests();
+        fetchWorkLocations();
+      } else {
+        // Redirecionar usuários não-admin para o dashboard
+        router.replace('/dashboard');
+      }
+    };
+
+    checkUser();
+  }, [router, fetchRequests]);
+
+  useEffect(() => {
     if (isAdmin) {
       fetchRequests();
     }
-  }, [statusFilter, isAdmin]);
+  }, [statusFilter, isAdmin, fetchRequests]);
 
   const handleEditChange = (id: string, field: string, value: string) => {
     setEditData(prev => ({

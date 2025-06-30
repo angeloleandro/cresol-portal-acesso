@@ -22,96 +22,96 @@ const ADMIN_CARDS: DashboardCard[] = [
     description: 'Aprovar ou rejeitar solicitações de acesso ao portal',
     icon: <Icon name="user-add" className="h-5 w-5" />,
     link: '/admin/access-requests',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Usuários',
     description: 'Gerenciar usuários e suas permissões',
     icon: <Icon name="user-group" className="h-5 w-5" />,
     link: '/admin/users',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Setores & Sub-setores',
     description: 'Gerenciar estrutura organizacional e hierarquia',
     icon: <Icon name="building-1" className="h-5 w-5" />,
     link: '/admin/sectors',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Sistemas',
     description: 'Configurar sistemas e aplicações disponíveis',
     icon: <Icon name="settings" className="h-5 w-5" />,
     link: '/admin/systems',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Locais de Trabalho',
     description: 'Gerenciar locais de atuação disponíveis',
     icon: <Icon name="map" className="h-5 w-5" />,
     link: '/admin/work-locations',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Banners',
     description: 'Gerencie os banners iniciais do portal',
     icon: <Icon name="image" className="h-5 w-5" />,
     link: '/admin/banners',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Vídeos',
     description: 'Gerencie os vídeos exibidos no dashboard',
     icon: <Icon name="monitor-play" className="h-5 w-5" />,
     link: '/admin/videos',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Galeria de Imagens',
     description: 'Gerencie as imagens exibidas na galeria do portal',
     icon: <Icon name="image" className="h-5 w-5" />,
     link: '/admin/gallery',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Notificações',
     description: 'Gerenciar notificações e comunicações do sistema',
     icon: <Icon name="bell" className="h-5 w-5" />,
     link: '/admin/notifications',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Analytics',
     description: 'Visualizar métricas e relatórios do sistema',
     icon: <Icon name="chart-bar-vertical" className="h-5 w-5" />,
     link: '/admin/analytics',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Indicadores Econômicos',
     description: 'Gerenciar indicadores econômicos da página inicial',
     icon: <Icon name="work-economi-indicator" className="h-5 w-5" />,
     link: '/admin/economic-indicators',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
   {
     title: 'Links de Sistemas',
     description: 'Gerenciar links de acesso aos sistemas externos',
     icon: <Icon name="link" className="h-5 w-5" />,
     link: '/admin/system-links',
-    color: 'text-orange-500',
-    bgColor: 'bg-white border-gray-100',
+    color: 'text-primary',
+    bgColor: 'card-standard',
   },
 ];
 
@@ -197,7 +197,7 @@ export default function AdminDashboard() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
+          <p className="mt-4 body-text text-muted">Carregando...</p>
         </div>
       </div>
     );
@@ -213,58 +213,58 @@ export default function AdminDashboard() {
         {/* Header com estatísticas */}
         <div className="mb-6">
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+            <h1 className="heading-1 text-title mb-2">
               Painel Administrativo
             </h1>
-            <p className="text-gray-600">Gerencie usuários, setores e sistemas do portal de acesso Cresol.</p>
+            <p className="body-text text-muted">Gerencie usuários, setores e sistemas do portal de acesso Cresol.</p>
           </div>
 
           {/* Estatísticas */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+            <div className="card-status">
               <div className="flex items-center">
                 <div className="p-2 rounded-lg bg-gray-100 mr-3">
                   <Icon name="user-group" className="h-5 w-5 text-gray-600" />
                 </div>
                 <div>
-                  <div className="text-xl font-semibold text-gray-900">{stats.totalUsers}</div>
-                  <div className="text-sm text-gray-500">Usuários</div>
+                  <div className="text-xl font-semibold text-title">{stats.totalUsers}</div>
+                  <div className="body-text-small text-muted">Usuários</div>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+            <div className="card-status">
               <div className="flex items-center">
                 <div className="p-2 rounded-lg bg-gray-100 mr-3">
                   <Icon name="user-add" className="h-5 w-5 text-gray-600" />
                 </div>
                 <div>
-                  <div className="text-xl font-semibold text-gray-900">{stats.pendingRequests}</div>
-                  <div className="text-sm text-gray-500">Pendentes</div>
+                  <div className="text-xl font-semibold text-title">{stats.pendingRequests}</div>
+                  <div className="body-text-small text-muted">Pendentes</div>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+            <div className="card-status">
               <div className="flex items-center">
                 <div className="p-2 rounded-lg bg-gray-100 mr-3">
                   <Icon name="building-1" className="h-5 w-5 text-gray-600" />
                 </div>
                 <div>
-                  <div className="text-xl font-semibold text-gray-900">{stats.totalSectors}</div>
-                  <div className="text-sm text-gray-500">Setores</div>
+                  <div className="text-xl font-semibold text-title">{stats.totalSectors}</div>
+                  <div className="body-text-small text-muted">Setores</div>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+            <div className="card-status">
               <div className="flex items-center">
                 <div className="p-2 rounded-lg bg-gray-100 mr-3">
                   <Icon name="building-1" className="h-5 w-5 text-gray-600" />
                 </div>
                 <div>
-                  <div className="text-xl font-semibold text-gray-900">{stats.totalSubsectors}</div>
-                  <div className="text-sm text-gray-500">Subsetores</div>
+                  <div className="text-xl font-semibold text-title">{stats.totalSubsectors}</div>
+                  <div className="body-text-small text-muted">Subsetores</div>
                 </div>
               </div>
             </div>
@@ -272,31 +272,31 @@ export default function AdminDashboard() {
         </div>
         {/* Módulos Administrativos */}
         <div>
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Módulos Administrativos</h2>
+          <h2 className="heading-4 text-title mb-4">Módulos Administrativos</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {ADMIN_CARDS.map((card) => (
               <Link 
                 key={card.title}
                 href={card.link}
-                className={`${card.bgColor} rounded-lg shadow-sm p-5 flex items-start hover:shadow-md transition-all group`}
+                className="card p-5 flex items-start hover:shadow-md transition-all group"
               >
-                <div className="p-2.5 rounded-lg bg-orange-50 mr-4 flex-shrink-0">
+                <div className="p-2.5 rounded-lg bg-primary/10 mr-4 flex-shrink-0">
                   <div className={card.color}>
                     {card.icon}
                   </div>
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">
+                  <h3 className="heading-4 text-title mb-1 group-hover:text-primary transition-colors">
                     {card.title}
                   </h3>
                   
-                  <p className="text-sm text-gray-500 leading-snug">
+                  <p className="body-text-small text-muted leading-snug">
                     {card.description}
                   </p>
                 </div>
                 
-                <Icon name="arrow-left" className="h-4 w-4 text-gray-400 group-hover:text-orange-500 flex-shrink-0 mt-1 rotate-180" />
+                <Icon name="arrow-left" className="h-4 w-4 text-muted group-hover:text-primary flex-shrink-0 mt-1 rotate-180" />
               </Link>
             ))}
           </div>

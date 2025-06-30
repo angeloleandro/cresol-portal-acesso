@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -35,6 +35,39 @@ export default function SistemasPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
+  const applyFilters = useCallback(() => {
+    let filtered = [...systems];
+
+    // Filtrar por setor
+    if (sectorFilter !== 'all') {
+      filtered = filtered.filter(system => system.sector_id === sectorFilter);
+    }
+
+    // Filtrar por termo de busca
+    if (searchTerm.trim() !== '') {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        system => 
+          system.name.toLowerCase().includes(term) ||
+          system.description.toLowerCase().includes(term) ||
+          (system.sector_name && system.sector_name.toLowerCase().includes(term))
+      );
+    }
+
+    // Ordenar: favoritos primeiro, depois por nome
+    filtered.sort((a, b) => {
+      const aIsFavorite = favorites.has(a.id);
+      const bIsFavorite = favorites.has(b.id);
+      
+      if (aIsFavorite && !bIsFavorite) return -1;
+      if (!aIsFavorite && bIsFavorite) return 1;
+      
+      return a.name.localeCompare(b.name);
+    });
+
+    setFilteredSystems(filtered);
+  }, [systems, sectorFilter, searchTerm, favorites]);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
@@ -58,7 +91,7 @@ export default function SistemasPage() {
 
   useEffect(() => {
     applyFilters();
-  }, [systems, searchTerm, sectorFilter]);
+  }, [applyFilters]);
 
   const fetchUserSystems = async (userId: string) => {
     try {
@@ -161,39 +194,6 @@ export default function SistemasPage() {
     } catch (error) {
       console.error('Erro ao salvar favoritos:', error);
     }
-  };
-
-  const applyFilters = () => {
-    let filtered = [...systems];
-
-    // Filtrar por setor
-    if (sectorFilter !== 'all') {
-      filtered = filtered.filter(system => system.sector_id === sectorFilter);
-    }
-
-    // Filtrar por termo de busca
-    if (searchTerm.trim() !== '') {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        system => 
-          system.name.toLowerCase().includes(term) ||
-          system.description.toLowerCase().includes(term) ||
-          (system.sector_name && system.sector_name.toLowerCase().includes(term))
-      );
-    }
-
-    // Ordenar: favoritos primeiro, depois por nome
-    filtered.sort((a, b) => {
-      const aIsFavorite = favorites.has(a.id);
-      const bIsFavorite = favorites.has(b.id);
-      
-      if (aIsFavorite && !bIsFavorite) return -1;
-      if (!aIsFavorite && bIsFavorite) return 1;
-      
-      return a.name.localeCompare(b.name);
-    });
-
-    setFilteredSystems(filtered);
   };
 
   if (loading) {
@@ -417,4 +417,4 @@ export default function SistemasPage() {
       <Footer />
     </div>
   );
-} 
+}

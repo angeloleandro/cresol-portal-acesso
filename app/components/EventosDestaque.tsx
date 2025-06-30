@@ -25,50 +25,6 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
   const [featuredEvents, setFeaturedEvents] = useState<EventItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Dados de exemplo (remover quando implementar a busca no Supabase)
-  const sampleEvents = [
-    {
-      id: '1',
-      title: 'Treinamento de Atendimento ao Associado',
-      description: 'Treinamento para aprimorar as habilidades de atendimento e relacionamento com os associados.',
-      location: 'Auditório Principal',
-      start_date: '2025-06-15T13:00:00Z',
-      end_date: '2025-06-15T17:00:00Z',
-      is_featured: true,
-      created_at: '2025-05-20T09:30:00Z',
-    },
-    {
-      id: '2',
-      title: 'Workshop de Crédito Rural',
-      description: 'Workshop sobre as novas linhas de crédito rural disponíveis e como orientar os associados.',
-      location: 'Sala de Treinamento 2',
-      start_date: '2025-06-20T09:00:00Z',
-      end_date: '2025-06-20T12:00:00Z',
-      is_featured: true,
-      created_at: '2025-05-19T14:15:00Z',
-    },
-    {
-      id: '3',
-      title: 'Encontro de Líderes Regionais',
-      description: 'Encontro para discutir estratégias de expansão e alinhamento de objetivos para o próximo semestre.',
-      location: 'Centro de Convenções',
-      start_date: '2025-07-05T08:30:00Z',
-      end_date: '2025-07-05T18:00:00Z',
-      is_featured: true,
-      created_at: '2025-05-15T11:45:00Z',
-    },
-    {
-      id: '4',
-      title: 'Palestra sobre Investimentos',
-      description: 'Palestra sobre os produtos de investimento da Cresol e estratégias para orientar os associados.',
-      location: 'Auditório Principal',
-      start_date: '2025-06-25T15:00:00Z',
-      end_date: '2025-06-25T17:00:00Z',
-      is_featured: false,
-      created_at: '2025-05-12T10:00:00Z',
-    },
-  ];
-
   useEffect(() => {
     const fetchEvents = async () => {
       setIsLoading(true);
@@ -122,16 +78,15 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
         
         console.log(`Total de eventos encontrados: ${eventsData?.length || 0}`);
         
-        // Se tiver dados, use-os, caso contrário caia para os dados de exemplo
+        // Se tiver dados, use-os
         if (eventsData && eventsData.length > 0) {
           setFeaturedEvents(eventsData);
         } else {
-          setFeaturedEvents(sampleEvents.slice(0, limit));
+          setFeaturedEvents([]);
         }
       } catch (error) {
         console.error('Erro ao buscar eventos:', error);
-        // Em caso de erro, use os dados de exemplo
-        setFeaturedEvents(sampleEvents.slice(0, limit));
+        setFeaturedEvents([]);
       } finally {
         setIsLoading(false);
       }
@@ -168,7 +123,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
+      <div className="card animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
         <div className="h-64 bg-gray-200 rounded mb-4"></div>
       </div>
@@ -181,7 +136,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
       <>
         {featuredEvents.length === 0 ? (
           <div className="p-4 text-center">
-            <p className="text-cresol-gray">Nenhum evento programado disponível</p>
+            <p className="body-text text-muted">Nenhum evento programado disponível</p>
           </div>
         ) : (
           <div>
@@ -193,7 +148,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
               >
                 <div className="flex flex-col">
                   <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-medium text-cresol-gray">{event.title}</h3>
+                    <h3 className="body-text-bold text-title">{event.title}</h3>
                     {event.is_featured && (
                       <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                         Destaque
@@ -201,14 +156,14 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
                     )}
                   </div>
                   
-                  <div className="flex items-center text-xs text-cresol-gray mb-1">
+                  <div className="flex items-center text-xs text-muted mb-1">
                     <svg className="h-3 w-3 mr-1 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span>{formatEventPeriod(event.start_date, event.end_date)}</span>
                   </div>
                   
-                  <div className="flex items-center text-xs text-cresol-gray">
+                  <div className="flex items-center text-xs text-muted">
                     <svg className="h-3 w-3 mr-1 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -226,13 +181,12 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
 
   // Versão normal (não compacta)
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+    <div className="card">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-medium component-title">Próximos Eventos</h2>
+        <h2 className="heading-3 text-title">Próximos Eventos</h2>
         <Link 
           href="/eventos" 
-          className="text-sm font-medium transition-colors flex items-center hover:shadow-sm px-3 py-1.5 rounded-md"
-          style={{ color: '#F38332' }}
+          className="text-sm font-medium transition-colors flex items-center hover:shadow-sm px-3 py-1.5 rounded-md text-primary"
         >
           Ver todos
           <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -243,7 +197,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
       
       {featuredEvents.length === 0 ? (
         <div className="p-8 text-center">
-          <p className="text-gray-500">Nenhum evento programado disponível</p>
+          <p className="body-text text-muted">Nenhum evento programado disponível</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -255,7 +209,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
             >
               <div className="flex flex-col">
                 <div className="flex justify-between items-start mb-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white" style={{ backgroundColor: '#F38332' }}>
+                  <span className="badge-text text-white" style={{ backgroundColor: 'var(--color-primary)', padding: '0.25rem 0.625rem', borderRadius: 'var(--border-radius-full)' }}>
                     Evento
                   </span>
                   {event.is_featured && (
@@ -265,18 +219,18 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
                   )}
                 </div>
                 
-                <h3 className="text-lg font-medium text-gray-900 mb-2 leading-tight">{event.title}</h3>
+                <h3 className="heading-4 text-title mb-2 leading-tight">{event.title}</h3>
                 
-                <div className="text-sm text-gray-600 mb-3">
+                <div className="body-text-small text-body mb-3">
                   <div className="flex items-center mb-1">
-                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ color: '#F38332' }}>
+                    <svg className="h-4 w-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span>{formatEventPeriod(event.start_date, event.end_date)}</span>
                   </div>
                   
                   <div className="flex items-center">
-                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ color: '#F38332' }}>
+                    <svg className="h-4 w-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -284,9 +238,9 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
                   </div>
                 </div>
                 
-                <p className="text-gray-600 mb-4 line-clamp-2 text-sm leading-relaxed">{event.description}</p>
+                <p className="body-text-small text-body mb-4 line-clamp-2 leading-relaxed">{event.description}</p>
                 
-                <div className="text-sm font-medium mt-auto" style={{ color: '#F38332' }}>
+                <div className="text-sm font-medium mt-auto text-primary">
                   Ver detalhes →
                 </div>
               </div>

@@ -24,15 +24,15 @@ export default function ParecerSolicitacao() {
   ];
 
   return (
-    <section className="flex items-center justify-center min-h-[60vh] p-4 bg-gray-50">
+    <div className="card">
       {/* Container principal do relatório financeiro - Padronizado */}
-      <div className="w-full max-w-5xl card-standard">
+      <div className="w-full">
         
         {/* Seção do Cabeçalho - Usando tipografia padronizada */}
-        <header className="text-center mb-10">
-          <h1 className="heading-2 md:heading-1">
-            Parecer da Solicitação
-          </h1>
+        <header className="text-center mb-6">
+          <h2 className="heading-3">
+            Indicadores Econômicos Cresol Fronteiras
+          </h2>
           <p className="body-text-small mt-2">
             <span className="badge-warning">
               Dados Referentes a 05/2025
@@ -83,8 +83,7 @@ export default function ParecerSolicitacao() {
             Dados oficiais • Cresol Fronteiras • Atualização Mensal
           </p>
         </footer>
-
       </div>
-    </section>
+    </div>
   );
-} 
+}

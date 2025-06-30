@@ -9,11 +9,8 @@ export async function middleware(request: NextRequest) {
     // Atualizar a sessão Supabase (refresh tokens se necessário)
     const { supabase, response } = updateSession(request);
     
-    // Verificar a sessão do usuário de forma mais robusta
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    
-    const session = sessionData?.session;
-    const user = session?.user;
+    // Verificar o usuário de forma segura
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     // Verificar se a solicitação é para uma rota de administração
     const isSectorAdminRoute = request.nextUrl.pathname.startsWith('/admin-setor');

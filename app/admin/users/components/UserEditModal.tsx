@@ -142,7 +142,7 @@ export default function UserEditModal({
       const adminToken = session?.access_token;
       
       if (!adminToken) {
-        throw new Error('Sessão de administrador inválida. Faça login novamente.');
+        throw new Error('Token de administrador inválido. Faça login novamente.');
       }
       
       const newPassword = Math.random().toString(36).slice(-10);
@@ -281,8 +281,8 @@ export default function UserEditModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4 relative max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-primary">Editar Usuário</h3>
+        <div className="flex items-center justify-between p-6 border-b border-cresol-gray-light">
+          <h3 className="heading-4 text-primary">Editar Usuário</h3>
           <button
             type="button"
             className="text-cresol-gray hover:text-cresol-gray-dark"
@@ -296,7 +296,7 @@ export default function UserEditModal({
         
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           <div className="mb-6 flex justify-center">
-            <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border border-cresol-gray-light">
+            <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-50 border border-cresol-gray-light">
               {(avatarPreview || user.avatar_url) ? (
                 <Image
                   src={avatarPreview || user.avatar_url || ''}
@@ -316,7 +316,7 @@ export default function UserEditModal({
           </div>
           
           <div className="mb-4 flex justify-center">
-            <label className="cursor-pointer bg-white border border-cresol-gray-light px-3 py-2 rounded-md text-sm text-cresol-gray hover:bg-gray-50 transition-colors" htmlFor={`avatarUpload-${user.id}`}>
+            <label className="btn-outline text-sm" htmlFor={`avatarUpload-${user.id}`}>
               {isUploading ? 'Carregando...' : 'Alterar foto'}
               <input
                 type="file"
@@ -331,7 +331,8 @@ export default function UserEditModal({
             {avatarPreview && (
               <button
                 type="button"
-                className="ml-2 text-sm text-red-500 hover:text-red-700"
+                className="ml-2 text-sm hover:underline"
+                style={{ color: 'var(--color-error-text)' }}
                 onClick={() => {
                   URL.revokeObjectURL(avatarPreview);
                   setAvatarPreview(null);
@@ -345,51 +346,51 @@ export default function UserEditModal({
           
           <div className="space-y-4">
             <div>
-              <label htmlFor={`name-${user.id}`} className="block text-sm font-medium text-cresol-gray mb-1">
+              <label htmlFor={`name-${user.id}`} className="form-label">
                 Nome Completo
               </label>
               <input
                 id={`name-${user.id}`}
                 type="text"
-                className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="input"
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
               />
             </div>
             
             <div>
-              <label htmlFor={`email-${user.id}`} className="block text-sm font-medium text-cresol-gray mb-1">
+              <label htmlFor={`email-${user.id}`} className="form-label">
                 E-mail
               </label>
               <input
                 id={`email-${user.id}`}
                 type="email"
-                className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="input"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
               />
             </div>
             
             <div>
-              <label htmlFor={`position-${user.id}`} className="block text-sm font-medium text-cresol-gray mb-1">
+              <label htmlFor={`position-${user.id}`} className="form-label">
                 Cargo
               </label>
               <input
                 id={`position-${user.id}`}
                 type="text"
-                className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="input"
                 value={position}
                 onChange={e => setPosition(e.target.value)}
               />
             </div>
             
             <div>
-              <label htmlFor={`location-${user.id}`} className="block text-sm font-medium text-cresol-gray mb-1">
+              <label htmlFor={`location-${user.id}`} className="form-label">
                 Local de Atuação
               </label>
               <select
                 id={`location-${user.id}`}
-                className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="input"
                 value={workLocationId}
                 onChange={e => setWorkLocationId(e.target.value)}
               >
@@ -406,7 +407,7 @@ export default function UserEditModal({
                   Setores administrados
                 </label>
                 
-                <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md p-3">
+                <div className="max-h-40 overflow-y-auto border border-cresol-gray-light rounded-md p-3">
                   {sectors.length === 0 ? (
                     <p className="text-sm text-cresol-gray">Nenhum setor disponível</p>
                   ) : (
@@ -422,7 +423,7 @@ export default function UserEditModal({
                           />
                           <label 
                             htmlFor={`sector-${user.id}-${sector.id}`}
-                            className="ml-2 text-sm text-cresol-gray"
+                            className="ml-2 body-text-small text-body"
                           >
                             {sector.name}
                           </label>
@@ -460,7 +461,7 @@ export default function UserEditModal({
                   </select>
                 </div>
                 
-                <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md p-3">
+                <div className="max-h-40 overflow-y-auto border border-cresol-gray-light rounded-md p-3">
                   {subsectors.length === 0 ? (
                     <p className="text-sm text-cresol-gray">
                       {selectedSectorForSubsectors 
@@ -488,7 +489,7 @@ export default function UserEditModal({
                               />
                               <label 
                                 htmlFor={`subsector-${user.id}-${subsector.id}`}
-                                className="ml-2 text-sm text-cresol-gray"
+                                className="ml-2 body-text-small text-body"
                               >
                                 {subsector.name}
                                 {sector && (
@@ -545,18 +546,18 @@ export default function UserEditModal({
           </div>
         </div>
         
-        <div className="border-t border-gray-200 p-6 bg-gray-50">
+        <div className="border-t border-cresol-gray-light p-6 bg-gray-50">
           <div className="flex justify-end space-x-3">
             <button
               type="button"
-              className="px-4 py-2 border border-cresol-gray-light rounded-md text-cresol-gray hover:bg-gray-50"
+              className="btn-outline"
               onClick={onClose}
             >
               Cancelar
             </button>
             <button
               type="button"
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+              className="btn-primary"
               onClick={handleSave}
             >
               Salvar

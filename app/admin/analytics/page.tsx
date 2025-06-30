@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
@@ -49,17 +49,7 @@ export default function AnalyticsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
   const [activeChart, setActiveChart] = useState<'users' | 'systems' | 'activity'>('users');
 
-  useEffect(() => {
-    checkUserAuth();
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      fetchAnalyticsData();
-    }
-  }, [user, selectedPeriod]);
-
-  const checkUserAuth = async () => {
+  const checkUserAuth = useCallback(async () => {
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
       
@@ -87,9 +77,9 @@ export default function AnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
-  const fetchAnalyticsData = async () => {
+  const fetchAnalyticsData = useCallback(async () => {
     try {
       // Calcular data inicial baseada no período selecionado
       const now = new Date();
@@ -195,7 +185,17 @@ export default function AnalyticsPage() {
     } catch (error) {
       console.error('Erro ao buscar dados de analytics:', error);
     }
-  };
+  }, [selectedPeriod]);
+
+  useEffect(() => {
+    checkUserAuth();
+  }, [checkUserAuth]);
+
+  useEffect(() => {
+    if (user) {
+      fetchAnalyticsData();
+    }
+  }, [user, selectedPeriod, fetchAnalyticsData]);
 
   const getChartData = (): ChartData => {
     if (!analytics) return { labels: [], values: [], colors: [] };

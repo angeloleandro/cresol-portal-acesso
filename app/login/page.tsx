@@ -16,13 +16,13 @@ import { supabase } from '@/lib/supabase';export default function Login() {
   
   // Verificar se o usuário já está autenticado ao carregar a página
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
         router.push('/home');
       }
     };
-    checkSession();
+    checkUser();
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -72,14 +72,14 @@ import { supabase } from '@/lib/supabase';export default function Login() {
               style={{ objectFit: 'contain' }}
             />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Login</h1>
-          <p className="text-gray-600 text-sm mt-1">
+          <h1 className="heading-2 text-title">Login</h1>
+          <p className="body-text-small text-muted mt-1">
             Entre com suas credenciais
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">
+          <div className="alert-error body-text-small">
             {error}
           </div>
         )}
@@ -131,7 +131,7 @@ import { supabase } from '@/lib/supabase';export default function Login() {
         </form>
         
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="body-text-small text-muted">
             Não tem uma conta?{' '}
             <Link href="/signup" className="text-primary hover:underline">
               Solicitar acesso

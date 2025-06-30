@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -50,6 +50,45 @@ export default function SectorSystemsManagement() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  const fetchSector = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sectors')
+      .select('*')
+      .eq('id', sectorId)
+      .single();
+    
+    if (error) {
+      console.error('Erro ao buscar setor:', error);
+    } else {
+      setSector(data);
+    }
+  }, [sectorId]);
+
+  const fetchSystems = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('systems')
+      .select(`
+        *,
+        sector:sectors(name)
+      `)
+      .eq('sector_id', sectorId)
+      .order('name', { ascending: true });
+    
+    if (error) {
+      console.error('Erro ao buscar sistemas:', error);
+    } else {
+      // O Supabase retorna 'sector' como um array, precisamos transformar para objeto
+      const formattedData = (data || []).map(system => ({
+        ...system,
+        sector: system.sector && Array.isArray(system.sector) && system.sector.length > 0
+          ? { name: String(system.sector[0].name || '') }
+          : { name: '' }
+      }));
+      
+      setSystems(formattedData);
+    }
+  }, [sectorId]);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -95,46 +134,8 @@ export default function SectorSystemsManagement() {
     };
 
     checkUser();
-  }, [router, sectorId]);
+  }, [router, sectorId, fetchSector, fetchSystems]);
 
-  const fetchSector = async () => {
-    const { data, error } = await supabase
-      .from('sectors')
-      .select('*')
-      .eq('id', sectorId)
-      .single();
-    
-    if (error) {
-      console.error('Erro ao buscar setor:', error);
-    } else {
-      setSector(data);
-    }
-  };
-
-  const fetchSystems = async () => {
-    const { data, error } = await supabase
-      .from('systems')
-      .select(`
-        *,
-        sector:sectors(name)
-      `)
-      .eq('sector_id', sectorId)
-      .order('name', { ascending: true });
-    
-    if (error) {
-      console.error('Erro ao buscar sistemas:', error);
-    } else {
-      // O Supabase retorna 'sector' como um array, precisamos transformar para objeto
-      const formattedData = (data || []).map(system => ({
-        ...system,
-        sector: system.sector && Array.isArray(system.sector) && system.sector.length > 0
-          ? { name: String(system.sector[0].name || '') }
-          : { name: '' }
-      }));
-      
-      setSystems(formattedData);
-    }
-  };
 
   const handleAddSystem = async (e: React.FormEvent) => {
     e.preventDefault();

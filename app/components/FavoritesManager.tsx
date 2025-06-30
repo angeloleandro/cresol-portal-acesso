@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
@@ -39,15 +39,22 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (userId) {
-      loadFavorites();
-    } else {
-      loadLocalFavorites();
+  const loadLocalFavorites = () => {
+    try {
+      const stored = localStorage.getItem('cresol_favorites');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setFavorites(Array.isArray(parsed) ? parsed : []);
+      } else {
+        setFavorites([]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar favoritos do localStorage:', error);
+      setFavorites([]);
     }
-  }, [userId]);
+  };
 
-  const loadFavorites = async () => {
+  const loadFavorites = useCallback(async () => {
     setLoading(true);
     try {
       if (userId) {
@@ -73,21 +80,15 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
-  const loadLocalFavorites = () => {
-    try {
-      const stored = localStorage.getItem('cresol_favorites');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setFavorites(Array.isArray(parsed) ? parsed : []);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar favoritos locais:', error);
-      setFavorites([]);
+  useEffect(() => {
+    if (userId) {
+      loadFavorites();
+    } else {
+      loadLocalFavorites();
     }
-    setLoading(false);
-  };
+  }, [userId, loadFavorites]);
 
   const saveToLocal = (newFavorites: FavoriteItem[]) => {
     try {

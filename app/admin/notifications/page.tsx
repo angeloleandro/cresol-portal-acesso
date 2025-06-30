@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
@@ -63,19 +63,7 @@ export default function NotificationsAdmin() {
   const [sectors, setSectors] = useState<any[]>([]);
   const [subsectors, setSubsectors] = useState<any[]>([]);
 
-  useEffect(() => {
-    checkUserAuth();
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      fetchGroups();
-      fetchUsers();
-      fetchSectors();
-    }
-  }, [user]);
-
-  const checkUserAuth = async () => {
+  const checkUserAuth = useCallback(async () => {
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
       
@@ -103,7 +91,19 @@ export default function NotificationsAdmin() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkUserAuth();
+  }, [checkUserAuth]);
+
+  useEffect(() => {
+    if (user) {
+      fetchGroups();
+      fetchUsers();
+      fetchSectors();
+    }
+  }, [user]);
 
   const fetchGroups = async () => {
     try {

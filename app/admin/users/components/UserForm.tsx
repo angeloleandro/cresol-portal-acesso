@@ -115,7 +115,7 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
       const adminToken = session?.access_token;
 
       if (!adminToken) {
-        setFormError('Sessão de administrador inválida. Faça login novamente.');
+        setFormError('Token de administrador inválido. Faça login novamente.');
         setFormLoading(false);
         return;
       }
@@ -166,17 +166,17 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-6 mb-6">
-      <h3 className="text-lg font-semibold text-primary mb-4">Cadastrar Novo Usuário</h3>
+    <div className="card mb-6">
+      <h3 className="heading-4 text-primary mb-4">Cadastrar Novo Usuário</h3>
       
       {formError && (
-        <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">
+        <div className="alert-error body-text-small">
           {formError}
         </div>
       )}
 
       {formSuccess && (
-        <div className="bg-green-50 text-green-600 p-3 rounded mb-4 text-sm">
+        <div className="alert-success body-text-small">
           {formSuccess}
         </div>
       )}
@@ -184,7 +184,7 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
       <form onSubmit={handleCreateUser} className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start gap-6 mb-4">
           <div className="flex-shrink-0">
-            <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border border-cresol-gray-light">
+            <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-50 border border-cresol-gray-light">
               {newUserAvatarPreview ? (
                 <Image
                   src={newUserAvatarPreview}
@@ -204,11 +204,11 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
           </div>
           
           <div className="flex-grow">
-            <label className="block text-sm font-medium text-cresol-gray mb-2" htmlFor="newUserAvatar">
+            <label className="form-label" htmlFor="newUserAvatar">
               Foto de Perfil
             </label>
             <div className="flex items-center">
-              <label className="cursor-pointer bg-white border border-cresol-gray-light px-3 py-2 rounded-md text-sm text-cresol-gray hover:bg-gray-50 transition-colors" htmlFor="newUserAvatar">
+              <label className="btn-outline text-sm" htmlFor="newUserAvatar">
                 {isUploading ? 'Carregando...' : 'Escolher arquivo'}
                 <input
                   type="file"
@@ -222,7 +222,8 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
               {newUserAvatarPreview && (
                 <button
                   type="button"
-                  className="ml-2 text-sm text-red-500 hover:text-red-700"
+                  className="ml-2 text-sm hover:underline"
+                  style={{ color: 'var(--color-error-text)' }}
                   onClick={() => {
                     URL.revokeObjectURL(newUserAvatarPreview);
                     setNewUserAvatarPreview(null);
@@ -233,7 +234,7 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
                 </button>
               )}
             </div>
-            <p className="mt-1 text-xs text-cresol-gray">
+            <p className="mt-1 text-xs text-muted">
               Recomendado: JPG, PNG. Máximo 2MB.
             </p>
           </div>
@@ -241,7 +242,7 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="newUserName" className="block text-sm font-medium text-cresol-gray mb-1">
+            <label htmlFor="newUserName" className="form-label">
               Nome Completo
             </label>
             <input
@@ -250,13 +251,13 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
               value={newUserName}
               onChange={(e) => setNewUserName(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="input"
               placeholder="Nome completo do usuário"
             />
           </div>
           
           <div>
-            <label htmlFor="newUserEmail" className="block text-sm font-medium text-cresol-gray mb-1">
+            <label htmlFor="newUserEmail" className="form-label">
               E-mail Corporativo
             </label>
             <input
@@ -265,13 +266,13 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
               value={newUserEmail}
               onChange={(e) => setNewUserEmail(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="input"
               placeholder="email@cresol.com.br"
             />
           </div>
           
           <div>
-            <label htmlFor="newUserPosition" className="block text-sm font-medium text-cresol-gray mb-1">
+            <label htmlFor="newUserPosition" className="form-label">
               Cargo
             </label>
             <input
@@ -280,13 +281,13 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
               value={newUserPosition}
               onChange={(e) => setNewUserPosition(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="input"
               placeholder="Cargo"
             />
           </div>
           
           <div>
-            <label htmlFor="newUserWorkLocation" className="block text-sm font-medium text-cresol-gray mb-1">
+            <label htmlFor="newUserWorkLocation" className="form-label">
               Local de Atuação
             </label>
             <select
@@ -294,7 +295,7 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
               value={newUserWorkLocationId}
               onChange={(e) => setNewUserWorkLocationId(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="input"
             >
               <option value="">Selecione o local</option>
               {workLocations.map(loc => (
@@ -304,7 +305,7 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
           </div>
           
           <div className="md:col-span-2">
-            <label htmlFor="newUserRole" className="block text-sm font-medium text-cresol-gray mb-1">
+            <label htmlFor="newUserRole" className="form-label">
               Papel no Sistema
             </label>
             <select
@@ -312,7 +313,7 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
               value={newUserRole}
               onChange={(e) => setNewUserRole(e.target.value as 'user' | 'sector_admin' | 'subsector_admin' | 'admin')}
               required
-              className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="input"
             >
               <option value="user">Usuário</option>
               <option value="sector_admin">Administrador de Setor</option>
@@ -326,13 +327,13 @@ export default function UserForm({ workLocations, onSuccess, onCancel }: UserFor
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-cresol-gray-light rounded-md text-cresol-gray hover:bg-gray-50"
+            className="btn-outline"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors"
+            className="btn-primary"
             disabled={formLoading}
           >
             {formLoading ? 'Cadastrando...' : 'Cadastrar Usuário'}

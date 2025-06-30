@@ -61,53 +61,14 @@ export default function UsersManagement() {
   const [userSectors, setUserSectors] = useState<Record<string, string[]>>({});
   const [userSubsectors, setUserSubsectors] = useState<Record<string, string[]>>({});
 
-  useEffect(() => {
-    // Só executar no lado do cliente
-    if (typeof window === 'undefined') return;
-    
-    const checkUser = async () => {
-      try {
-        const { data } = await getSupabaseClient().auth.getUser();
-        if (!data.user) {
-          router.replace('/login');
-          return;
-        }
-        
-        const { data: profile } = await getSupabaseClient()
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .single();
-        
-        if (!profile || profile.role !== 'admin') {
-          router.replace('/home');
-          return;
-        }
-        
-        setUser(data.user);
-        await Promise.all([
-          fetchUsers(),
-          fetchWorkLocations(),
-          fetchSectors(),
-          fetchSubsectors()
-        ]);
-      } catch (error) {
-        console.error('Erro ao verificar usuário:', error);
-        router.replace('/login');
-      }
-    };
-
-    checkUser();
-  }, [router]);
-
-  const handleAuthError = (error: string) => {
+  const handleAuthError = useCallback((error: string) => {
     if (error.includes('JWT') || error.includes('token') || error.includes('unauthorized')) {
       alert('Sua sessão expirou. Redirecionando para o login...');
       router.replace('/login');
       return true;
     }
     return false;
-  };
+  }, [router]);
 
   const fetchUserSectors = useCallback(async (userId: string) => {
     try {
@@ -152,9 +113,9 @@ export default function UsersManagement() {
       // Só executar no lado do cliente
       if (typeof window === 'undefined') return;
       
-      // Primeiro verificar se há uma sessão válida
-      const { data: { session } } = await getSupabaseClient().auth.getSession();
-      if (!session) {
+      // Primeiro verificar se há um usuário válido
+      const { data: { user }, error: authError } = await getSupabaseClient().auth.getUser();
+      if (!user || authError) {
         router.replace('/login');
         return;
       }
@@ -208,6 +169,45 @@ export default function UsersManagement() {
       setLoading(false);
     }
   }, [router, handleAuthError, fetchUserSectors, fetchUserSubsectors]);
+
+  useEffect(() => {
+    // Só executar no lado do cliente
+    if (typeof window === 'undefined') return;
+    
+    const checkUser = async () => {
+      try {
+        const { data } = await getSupabaseClient().auth.getUser();
+        if (!data.user) {
+          router.replace('/login');
+          return;
+        }
+        
+        const { data: profile } = await getSupabaseClient()
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+        
+        if (!profile || profile.role !== 'admin') {
+          router.replace('/home');
+          return;
+        }
+        
+        setUser(data.user);
+        await Promise.all([
+          fetchUsers(),
+          fetchWorkLocations(),
+          fetchSectors(),
+          fetchSubsectors()
+        ]);
+      } catch (error) {
+        console.error('Erro ao verificar usuário:', error);
+        router.replace('/login');
+      }
+    };
+
+    checkUser();
+  }, [router, fetchUsers]);
 
   const fetchWorkLocations = async () => {
     try {

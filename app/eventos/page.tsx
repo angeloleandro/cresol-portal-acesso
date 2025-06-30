@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -40,6 +40,36 @@ export default function EventosPage() {
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
   const [sectors, setSectors] = useState<any[]>([]);
 
+  const fetchEvents = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      // Buscar eventos do Supabase
+      const { data, error } = await supabase
+        .from('sector_events')
+        .select('*, sectors(name)')
+        .eq('is_published', true)
+        .order('start_date', { ascending: true });
+
+      if (error) {
+        console.error('Erro ao buscar eventos:', error);
+        setEvents([]);
+      } else {
+        // Formatar dados do Supabase
+        const formattedEvents = (data || []).map((event: any) => ({
+          ...event,
+          sector_name: event.sectors?.name
+        }));
+        setEvents(formattedEvents);
+      }
+    } catch (error) {
+      console.error('Erro geral:', error);
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     // Definir o modo de visualização com base no parâmetro da URL
     const viewParam = searchParams.get('view');
@@ -64,75 +94,6 @@ export default function EventosPage() {
     window.history.pushState({}, '', newUrl);
   };
 
-  // Dados de exemplo (remover quando implementar a busca no Supabase)
-  const sampleEvents = [
-    {
-      id: '1',
-      title: 'Treinamento de Atendimento ao Associado',
-      description: 'Treinamento para aprimorar as habilidades de atendimento e relacionamento com os associados.',
-      location: 'Auditório Principal',
-      start_date: '2025-06-15T13:00:00Z',
-      end_date: '2025-06-15T17:00:00Z',
-      is_featured: true,
-      is_published: true,
-      created_at: '2025-05-20T09:30:00Z',
-      sector_id: '1',
-      sector_name: 'Recursos Humanos'
-    },
-    {
-      id: '2',
-      title: 'Workshop de Crédito Rural',
-      description: 'Workshop sobre as novas linhas de crédito rural disponíveis e como orientar os associados.',
-      location: 'Sala de Treinamento 2',
-      start_date: '2025-06-20T09:00:00Z',
-      end_date: '2025-06-20T12:00:00Z',
-      is_featured: true,
-      is_published: true,
-      created_at: '2025-05-19T14:15:00Z',
-      sector_id: '2',
-      sector_name: 'Crédito Rural'
-    },
-    {
-      id: '3',
-      title: 'Encontro de Líderes Regionais',
-      description: 'Encontro para discutir estratégias de expansão e alinhamento de objetivos para o próximo semestre.',
-      location: 'Centro de Convenções',
-      start_date: '2025-07-05T08:30:00Z',
-      end_date: '2025-07-05T18:00:00Z',
-      is_featured: true,
-      is_published: true,
-      created_at: '2025-05-15T11:45:00Z',
-      sector_id: '3',
-      sector_name: 'Diretoria'
-    },
-    {
-      id: '4',
-      title: 'Palestra sobre Investimentos',
-      description: 'Palestra sobre os produtos de investimento da Cresol e estratégias para orientar os associados.',
-      location: 'Auditório Principal',
-      start_date: '2025-06-25T15:00:00Z',
-      end_date: '2025-06-25T17:00:00Z',
-      is_featured: false,
-      is_published: true,
-      created_at: '2025-05-12T10:00:00Z',
-      sector_id: '4',
-      sector_name: 'Investimentos'
-    },
-    {
-      id: '5',
-      title: 'Seminário de Sustentabilidade',
-      description: 'Seminário sobre práticas sustentáveis e iniciativas ESG da Cresol.',
-      location: 'Centro de Eventos',
-      start_date: '2025-04-10T09:00:00Z',
-      end_date: '2025-04-10T18:00:00Z',
-      is_featured: false,
-      is_published: true,
-      created_at: '2025-03-15T11:00:00Z',
-      sector_id: '5',
-      sector_name: 'Sustentabilidade'
-    },
-  ];
-
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
@@ -145,53 +106,7 @@ export default function EventosPage() {
     };
 
     checkUser();
-  }, [router]);
-
-  useEffect(() => {
-    // Aplicar filtros sempre que algum filtro mudar
-    applyFilters();
-  }, [events, searchTerm, filterType, sectorFilter, sortBy, sortOrder, showFeaturedOnly]);
-
-  useEffect(() => {
-    fetchSectors();
-  }, []);
-
-  const fetchEvents = async () => {
-    setLoading(true);
-
-    try {
-      // Buscar eventos do Supabase
-      const { data, error } = await supabase
-        .from('sector_events')
-        .select('*, sectors(name)')
-        .eq('is_published', true)
-        .order('start_date', { ascending: true });
-
-      if (error) {
-        console.error('Erro ao buscar eventos:', error);
-        // Usar dados de exemplo em caso de erro
-        const formattedEvents = sampleEvents.map(event => ({
-          ...event
-        }));
-        setEvents(formattedEvents);
-      } else if (data && data.length > 0) {
-        // Formatar dados do Supabase
-        const formattedEvents = data.map(event => ({
-          ...event,
-          sector_name: event.sectors?.name
-        }));
-        setEvents(formattedEvents);
-      } else {
-        // Usar dados de exemplo se não houver dados no Supabase
-        setEvents(sampleEvents);
-      }
-    } catch (error) {
-      console.error('Erro geral:', error);
-      setEvents(sampleEvents);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [router, fetchEvents]);
 
   const fetchSectors = async () => {
     try {
@@ -212,7 +127,7 @@ export default function EventosPage() {
   };
 
   // Filtrar e ordenar eventos com base nos critérios
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     const now = new Date();
     let filtered = [...events];
 
@@ -265,7 +180,16 @@ export default function EventosPage() {
     });
 
     setFilteredEvents(filtered);
-  };
+  }, [events, searchTerm, filterType, sectorFilter, sortBy, sortOrder, showFeaturedOnly]);
+
+  useEffect(() => {
+    // Aplicar filtros sempre que algum filtro mudar
+    applyFilters();
+  }, [events, searchTerm, filterType, sectorFilter, sortBy, sortOrder, showFeaturedOnly, applyFilters]);
+
+  useEffect(() => {
+    fetchSectors();
+  }, []);
 
   // Formatador de data
   const formatDate = (dateString: string) => {

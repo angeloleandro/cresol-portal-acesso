@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -53,6 +53,36 @@ export default function SectorSystemsManagement() {
     '/icons/app-5.svg'
   ];
 
+  const fetchSector = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sectors')
+      .select('id, name, description')
+      .eq('id', sectorId)
+      .single();
+    
+    if (error) {
+      console.error('Erro ao buscar setor:', error);
+      return;
+    }
+    
+    setSector(data);
+  }, [sectorId]);
+
+  const fetchSystems = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('systems')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('name', { ascending: true });
+    
+    if (error) {
+      console.error('Erro ao buscar sistemas:', error);
+      return;
+    }
+    
+    setSystems(data || []);
+  }, [sectorId]);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -103,37 +133,7 @@ export default function SectorSystemsManagement() {
     };
 
     checkUser();
-  }, [sectorId, router]);
-
-  const fetchSector = async () => {
-    const { data, error } = await supabase
-      .from('sectors')
-      .select('id, name, description')
-      .eq('id', sectorId)
-      .single();
-    
-    if (error) {
-      console.error('Erro ao buscar setor:', error);
-      return;
-    }
-    
-    setSector(data);
-  };
-
-  const fetchSystems = async () => {
-    const { data, error } = await supabase
-      .from('systems')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .order('name', { ascending: true });
-    
-    if (error) {
-      console.error('Erro ao buscar sistemas:', error);
-      return;
-    }
-    
-    setSystems(data || []);
-  };
+  }, [sectorId, router, fetchSector, fetchSystems]);
 
   const handleSystemSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -299,178 +299,156 @@ export default function SectorSystemsManagement() {
             Voltar para o Painel
           </Link>
           
-          <h2 className="text-2xl font-bold text-primary">Gerenciar Sistemas do Setor</h2>
-          <p className="text-cresol-gray mt-1">Setor: {sector.name}</p>
+          <h2 className="text-2xl font-bold text-primary">{sector.name}</h2>
+          <p className="text-cresol-gray">Gerenciar sistemas do setor</p>
         </div>
-        
-        <div className="mb-6">
-          <div className="flex justify-between items-center">
-            <p className="text-gray-600">
-              Adicione e gerencie os sistemas/aplicativos que serão exibidos para os usuários deste setor.
-            </p>
-            <button
-              onClick={() => {
-                setSystemForm({ id: '', name: '', description: '', url: '', icon: '/icons/default-app.svg' });
-                setShowSystemForm(true);
-              }}
-              className="bg-primary text-white px-3 py-2 rounded hover:bg-primary-dark text-sm"
-            >
-              Adicionar Sistema
-            </button>
+
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">Sistemas</h3>
+            <p className="text-sm text-gray-600">Gerencie os sistemas associados a este setor</p>
           </div>
+          <button
+            onClick={() => setShowSystemForm(true)}
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark"
+          >
+            Adicionar Sistema
+          </button>
         </div>
-        
-        {showSystemForm && (
-          <div className="bg-white p-6 rounded shadow mb-6">
-            <h3 className="text-lg font-medium mb-4">
-              {systemForm.id ? 'Editar Sistema' : 'Novo Sistema'}
-            </h3>
-            <form onSubmit={handleSystemSubmit}>
-              <div className="mb-4">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome do Sistema
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={systemForm.name}
-                  onChange={(e) => setSystemForm({...systemForm, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded"
-                  required
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrição
-                </label>
-                <textarea
-                  id="description"
-                  value={systemForm.description}
-                  onChange={(e) => setSystemForm({...systemForm, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded h-24"
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
-                  URL do Sistema
-                </label>
-                <input
-                  type="url"
-                  id="url"
-                  value={systemForm.url}
-                  onChange={(e) => setSystemForm({...systemForm, url: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded"
-                  placeholder="https://example.com"
-                  required
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ícone
-                </label>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
-                  {availableIcons.map((icon) => (
-                    <div 
-                      key={icon}
-                      onClick={() => setSystemForm({...systemForm, icon})}
-                      className={`
-                        cursor-pointer p-2 rounded border
-                        ${systemForm.icon === icon ? 'border-primary bg-primary/10' : 'border-gray-200 hover:border-gray-400'}
-                      `}
-                    >
-                      <div className="relative h-16 w-full">
-                        <Image
-                          src={icon}
-                          alt="Ícone"
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                    </div>
-                  ))}
+
+        {/* Lista de sistemas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {systems.map((system) => (
+            <div key={system.id} className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+              <div className="flex items-center mb-4">
+                <div className="h-12 w-12 mr-4">
+                  <Image 
+                    src={system.icon} 
+                    alt={system.name}
+                    width={48}
+                    height={48}
+                    className="rounded-lg"
+                  />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800">{system.name}</h4>
+                  <p className="text-sm text-gray-600">{system.description}</p>
                 </div>
               </div>
               
-              <div className="flex justify-end space-x-3 mt-6">
+              <div className="flex space-x-2">
                 <button
-                  type="button"
-                  onClick={() => setShowSystemForm(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
+                  onClick={() => editSystem(system)}
+                  className="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded text-sm hover:bg-blue-100"
                 >
-                  Cancelar
+                  Editar
                 </button>
                 <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+                  onClick={() => deleteSystem(system.id)}
+                  className="flex-1 bg-red-50 text-red-600 px-3 py-2 rounded text-sm hover:bg-red-100"
                 >
-                  Salvar
+                  Excluir
                 </button>
               </div>
-            </form>
+            </div>
+          ))}
+        </div>
+
+        {systems.length === 0 && (
+          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+            <p className="text-gray-600">Nenhum sistema cadastrado para este setor.</p>
           </div>
         )}
-        
-        {systems.length === 0 ? (
-          <div className="bg-white p-8 rounded shadow text-center">
-            <p className="text-gray-500">Nenhum sistema cadastrado para este setor.</p>
-            <p className="text-gray-500 mt-2">Clique em &quot;Adicionar Sistema&quot; para começar.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {systems.map((system) => (
-              <div key={system.id} className="bg-white p-6 rounded shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <div className="relative h-12 w-12 mr-3">
-                      <Image
-                        src={system.icon || '/icons/default-app.svg'}
-                        alt={system.name}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <h3 className="text-lg font-medium">{system.name}</h3>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => editSystem(system)}
-                      className="text-primary hover:text-primary-dark"
-                    >
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => deleteSystem(system.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+
+        {/* Modal do formulário de sistema */}
+        {showSystemForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">
+                {systemForm.id ? 'Editar Sistema' : 'Adicionar Sistema'}
+              </h3>
+              
+              <form onSubmit={handleSystemSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nome
+                  </label>
+                  <input
+                    type="text"
+                    value={systemForm.name}
+                    onChange={(e) => setSystemForm({ ...systemForm, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descrição
+                  </label>
+                  <textarea
+                    value={systemForm.description}
+                    onChange={(e) => setSystemForm({ ...systemForm, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    rows={3}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    URL
+                  </label>
+                  <input
+                    type="url"
+                    value={systemForm.url}
+                    onChange={(e) => setSystemForm({ ...systemForm, url: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Ícone
+                  </label>
+                  <div className="grid grid-cols-6 gap-2">
+                    {availableIcons.map((icon) => (
+                      <button
+                        key={icon}
+                        type="button"
+                        onClick={() => setSystemForm({ ...systemForm, icon })}
+                        className={`p-2 border rounded ${
+                          systemForm.icon === icon 
+                            ? 'border-primary bg-primary bg-opacity-10' 
+                            : 'border-gray-300'
+                        }`}
+                      >
+                        <Image src={icon} alt="Ícone" width={24} height={24} />
+                      </button>
+                    ))}
                   </div>
                 </div>
                 
-                <p className="text-gray-600 mb-3">{system.description}</p>
-                
-                <div className="flex justify-between items-center mt-4 text-sm">
-                  <a 
-                    href={system.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSystemForm(false);
+                      setSystemForm({ id: '', name: '', description: '', url: '', icon: '/icons/default-app.svg' });
+                    }}
+                    className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
                   >
-                    Abrir sistema →
-                  </a>
-                  <span className="text-gray-500">
-                    Adicionado em: {new Date(system.created_at).toLocaleDateString('pt-BR')}
-                  </span>
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
+                  >
+                    {systemForm.id ? 'Atualizar' : 'Adicionar'}
+                  </button>
                 </div>
-              </div>
-            ))}
+              </form>
+            </div>
           </div>
         )}
       </main>

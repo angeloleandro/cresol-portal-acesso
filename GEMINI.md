@@ -1,5 +1,5 @@
 # Gemini Documentation
-
+USE SEMPRE O MODELO gemini-2.5-pro, nunca deve trocar o modelo.
 This document provides a brief overview of the project, its structure, and conventions to be used by the Gemini assistant.
 
 ## Project Overview
@@ -41,3 +41,5 @@ The project follows the standard Next.js `app` directory structure.
 - **Authentication:** Use the Supabase client from `lib/supabase.ts` for all interactions with the database and authentication.
 - **API Routes:** All backend logic should be placed in API routes within the `app/api` directory.
 - **Linting:** Before committing any changes, run `npm run lint` to ensure code quality.
+
+USE SEMPRE O MODELO gemini-2.5-pro

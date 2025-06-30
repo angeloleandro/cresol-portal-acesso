@@ -57,10 +57,10 @@ export default function ImageGallery({ limit = 6 }: ImageGalleryProps) {
 
   const showImages = images.slice(0, limit);
   return (
-    <section className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+    <section className="card">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-medium component-title">Galeria de Imagens</h2>
-        <a href="/galeria" className="text-sm font-medium transition-colors flex items-center hover:shadow-sm px-3 py-1.5 rounded-md" style={{ color: '#F38332' }}>
+        <h2 className="heading-3 text-title">Galeria de Imagens</h2>
+        <a href="/galeria" className="text-sm font-medium transition-colors flex items-center hover:shadow-sm px-3 py-1.5 rounded-md text-primary">
           Ver todas
           <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

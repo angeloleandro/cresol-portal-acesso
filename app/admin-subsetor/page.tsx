@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
@@ -38,51 +38,7 @@ export default function AdminSubsectorPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setUser(data.user);
-      await fetchProfile(data.user.id);
-    };
-
-    checkUser();
-  }, [router]);
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, role, full_name, email')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        setProfile(data);
-        
-        // Verificar se o usuário tem permissão para acessar esta página
-        if (data.role !== 'subsector_admin' && data.role !== 'admin' && data.role !== 'sector_admin') {
-          router.replace('/home');
-          return;
-        }
-
-        await fetchUserSubsectors(userId);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar perfil:', error);
-      setError('Erro ao carregar perfil do usuário');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchUserSubsectors = async (userId: string) => {
+  const fetchUserSubsectors = useCallback(async (userId: string) => {
     try {
       // Usar a função RPC para obter sub-setores do usuário
       const { data, error } = await supabase.rpc('get_user_subsectors', {
@@ -110,7 +66,51 @@ export default function AdminSubsectorPage() {
       console.error('Erro ao buscar sub-setores:', error);
       setError('Erro ao carregar sub-setores');
     }
-  };
+  }, []);
+
+  const fetchProfile = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, role, full_name, email')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setProfile(data);
+        
+        // Verificar se o usuário tem permissão para acessar esta página
+        if (data.role !== 'subsector_admin' && data.role !== 'admin' && data.role !== 'sector_admin') {
+          router.replace('/home');
+          return;
+        }
+
+        await fetchUserSubsectors(userId);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar perfil:', error);
+      setError('Erro ao carregar perfil do usuário');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchUserSubsectors, router]);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) {
+        router.replace('/login');
+        return;
+      }
+
+      setUser(data.user);
+      await fetchProfile(data.user.id);
+    };
+
+    checkUser();
+  }, [router, fetchProfile]);
 
   const fetchSubsectorStats = async (subsectorId: string) => {
     try {

@@ -185,7 +185,7 @@ export default function Dashboard() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="loading-spinner"></div>
-          <p className="mt-4 text-muted">Carregando dashboard...</p>
+          <p className="mt-4 body-text text-muted">Carregando dashboard...</p>
         </div>
       </div>
     );
@@ -204,7 +204,7 @@ export default function Dashboard() {
           <h1 className="heading-1 mb-2">
             {getCurrentGreeting()}, {profile?.full_name || user?.user_metadata?.full_name || 'Colaborador'}!
           </h1>
-          <p className="body-text text-muted">
+          <p className="body-text-small text-muted">
             {profile?.position && `${profile.position} • `}
             {profile?.work_locations?.name || 'Portal Cresol'}
           </p>
@@ -278,8 +278,8 @@ export default function Dashboard() {
                 href={action.href}
                 className="card text-white hover:shadow-md transition-all duration-200 hover:-translate-y-1"
                 style={{ backgroundColor: action.color.includes('bg-purple') ? 'var(--color-secondary)' : 
-                         action.color.includes('bg-blue') ? '#2563EB' :
-                         action.color.includes('bg-green') ? '#15803D' :
+                         action.color.includes('bg-blue') ? 'var(--color-info-text)' :
+                         action.color.includes('bg-green') ? 'var(--color-success-text)' :
                          '#EC4899' }}
               >
                 <div className="flex items-center justify-between mb-3">
