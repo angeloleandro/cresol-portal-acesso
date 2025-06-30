@@ -43,19 +43,47 @@ export default function OptimizedImage({
   const [imageSrc, setImageSrc] = useState(src);
 
   const handleImageError = () => {
+    // Log detalhado para debug na Vercel
+    if (process.env.NODE_ENV === 'development' || process.env.VERCEL === '1') {
+      console.error('OptimizedImage Error:', {
+        src: imageSrc,
+        originalSrc: src,
+        alt,
+        isValidUrl: isValidUrl(imageSrc),
+        environment: process.env.NODE_ENV,
+        isVercel: process.env.VERCEL === '1',
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
+      });
+    }
+    
     setImageError(true);
-    if (fallbackSrc) {
+    if (fallbackSrc && fallbackSrc !== imageSrc) {
       setImageSrc(fallbackSrc);
     } else {
       onError?.();
     }
   };
 
-  // Verificar se a URL é válida
+  // Verificar se a URL é válida e se está no formato correto para a Vercel
   const isValidUrl = (url: string) => {
     try {
-      new URL(url);
-      return true;
+      const parsedUrl = new URL(url);
+      
+      // Para Vercel, verificar se é HTTPS e se o domínio está permitido
+      if (parsedUrl.protocol !== 'https:') {
+        console.warn('OptimizedImage: URL deve usar HTTPS para Vercel Image Optimization', url);
+        return false;
+      }
+      
+      // Verificar se é um domínio Supabase permitido
+      if (parsedUrl.hostname.includes('supabase.co')) {
+        return true;
+      }
+      
+      // Outros domínios permitidos
+      const allowedDomains = ['img.youtube.com', 'cresol.com.br'];
+      return allowedDomains.some(domain => parsedUrl.hostname.includes(domain));
+      
     } catch {
       return false;
     }
