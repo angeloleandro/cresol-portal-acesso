@@ -42,6 +42,11 @@ export default function OptimizedImage({
   const [imageError, setImageError] = useState(false);
   const [imageSrc, setImageSrc] = useState(src);
 
+  // WORKAROUND: Forçar unoptimized para imagens do Supabase na Vercel para evitar erro 402
+  const isVercel = process.env.VERCEL === '1';
+  const isSupabaseImage = imageSrc?.includes('supabase.co');
+  const shouldForceUnoptimized = isVercel && isSupabaseImage;
+
   const handleImageError = () => {
     // Log detalhado para debug na Vercel
     if (process.env.NODE_ENV === 'development' || process.env.VERCEL === '1') {
@@ -52,7 +57,8 @@ export default function OptimizedImage({
         isValidUrl: isValidUrl(imageSrc),
         environment: process.env.NODE_ENV,
         isVercel: process.env.VERCEL === '1',
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        shouldForceUnoptimized
       });
     }
     
@@ -128,7 +134,7 @@ export default function OptimizedImage({
     quality,
     placeholder,
     blurDataURL,
-    unoptimized,
+    unoptimized: shouldForceUnoptimized || unoptimized, // Forçar unoptimized na Vercel para Supabase
     ...props
   };
 

@@ -13,7 +13,7 @@ export async function GET() {
 
     // Teste 1: Conexão básica com Supabase
     try {
-      const { data, error } = await supabase.from('banners').select('count(*)').limit(1);
+      const { data, error } = await supabase.from('banners').select('id').limit(1);
       if (error) {
         tests.errors.push(`Conexão Supabase: ${error.message}`);
       } else {
@@ -23,37 +23,47 @@ export async function GET() {
       tests.errors.push(`Erro de conexão: ${err}`);
     }
 
-    // Teste 2: Verificar se bucket images existe
+    // Teste 2: Verificar se bucket images existe e listar arquivos
     try {
-      const { data: buckets, error } = await supabase.storage.listBuckets();
-      if (error) {
-        tests.errors.push(`Lista buckets: ${error.message}`);
-      } else {
-        const imagesBucket = buckets?.find(bucket => bucket.name === 'images');
-        if (imagesBucket) {
-          tests.bucketExists = true;
+      // Tentar listar arquivos diretamente no bucket images
+      const { data: files, error: filesError } = await supabase.storage
+        .from('images')
+        .list('', { limit: 1 });
+        
+      if (filesError) {
+        tests.errors.push(`Storage images: ${filesError.message}`);
+        
+        // Tentar bucket banners como alternativa
+        const { data: bannerFiles, error: bannerError } = await supabase.storage
+          .from('banners')
+          .list('', { limit: 1 });
           
-          // Teste 3: Listar arquivos no bucket
-          const { data: files, error: filesError } = await supabase.storage
-            .from('images')
-            .list('', { limit: 1 });
-            
-          if (filesError) {
-            tests.errors.push(`Lista arquivos: ${filesError.message}`);
-          } else {
-            tests.storageAccess = true;
-            
-            if (files && files.length > 0) {
-              // Teste 4: Gerar URL pública de um arquivo
-              const { data } = supabase.storage
-                .from('images')
-                .getPublicUrl(files[0].name);
-                
-              tests.imageUrlTest = data.publicUrl;
-            }
-          }
+        if (bannerError) {
+          tests.errors.push(`Storage banners: ${bannerError.message}`);
         } else {
-          tests.errors.push('Bucket "images" não encontrado');
+          tests.bucketExists = true;
+          tests.storageAccess = true;
+          
+          if (bannerFiles && bannerFiles.length > 0) {
+            // Gerar URL pública de um arquivo do bucket banners
+            const { data } = supabase.storage
+              .from('banners')
+              .getPublicUrl(bannerFiles[0].name);
+              
+            tests.imageUrlTest = data.publicUrl;
+          }
+        }
+      } else {
+        tests.bucketExists = true;
+        tests.storageAccess = true;
+        
+        if (files && files.length > 0) {
+          // Gerar URL pública de um arquivo do bucket images
+          const { data } = supabase.storage
+            .from('images')
+            .getPublicUrl(files[0].name);
+            
+          tests.imageUrlTest = data.publicUrl;
         }
       }
     } catch (err) {
