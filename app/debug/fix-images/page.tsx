@@ -184,11 +184,12 @@ export default function FixImageTestPage() {
         </div>
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
-          <h3 className="font-medium text-yellow-800 mb-2">📋 Análise Esperada</h3>            <div className="text-sm text-yellow-700 space-y-1">
-              <div>• Se apenas &quot;Não Otimizada&quot; funcionar → Problema na Vercel Image Optimization</div>
-              <div>• Se ambas falharem → Problema nas Environment Variables</div>
-              <div>• Se ambas funcionarem → Problema foi corrigido</div>
-            </div>
+          <h3 className="font-medium text-yellow-800 mb-2">📋 Análise Esperada</h3>
+          <div className="text-sm text-yellow-700 space-y-1">
+            <div>• Se apenas &quot;Não Otimizada&quot; funcionar → Problema na Vercel Image Optimization</div>
+            <div>• Se ambas falharem → Problema nas Environment Variables</div>
+            <div>• Se ambas funcionarem → Problema foi corrigido</div>
+          </div>
         </div>
       </div>
     </div>
