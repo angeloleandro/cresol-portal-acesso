@@ -364,17 +364,39 @@ export default function SubsectorTeamPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <div className="mb-6">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', href: '/home', icon: 'house' },
-              { label: 'Setores', href: '/setores' },
-              { label: Array.isArray(subsector?.sectors) ? subsector.sectors[0]?.name || 'Setor' : subsector?.sectors?.name || 'Setor', href: `/setores/${Array.isArray(subsector?.sectors) ? subsector.sectors[0]?.id : subsector?.sectors?.id}` },
-              { label: subsector?.name || 'Sub-setor', href: `/subsetores/${subsectorId}` },
-              { label: 'Equipe' }
-            ]} 
-          />
+        {/* Navigation */}
+        <div className="flex items-center mb-6">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors mr-4"
+            title="Voltar"
+          >
+            <svg
+              className="w-5 h-5 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          
+          <div className="flex-1">
+            <Breadcrumb 
+              items={[
+                { label: 'Home', href: '/home', icon: 'house' },
+                { label: 'Setores', href: '/setores' },
+                { label: Array.isArray(subsector?.sectors) ? subsector.sectors[0]?.name || 'Setor' : subsector?.sectors?.name || 'Setor', href: `/setores/${Array.isArray(subsector?.sectors) ? subsector.sectors[0]?.id : subsector?.sectors?.id}` },
+                { label: subsector?.name || 'Sub-setor', href: `/subsetores/${subsectorId}` },
+                { label: 'Equipe' }
+              ]} 
+            />
+          </div>
         </div>
 
         {/* Descrição do Sub-setor */}

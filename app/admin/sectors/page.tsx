@@ -340,8 +340,7 @@ export default function SectorsManagement() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold text-primary flex items-center">
-                  <Icon name="building-2" className="mr-3 h-8 w-8" />
+                <h2 className="text-3xl font-bold text-primary">
                   Gerenciamento de Setores
                 </h2>
                 <p className="text-cresol-gray mt-2">
