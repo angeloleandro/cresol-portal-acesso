@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 
 interface EventItem {
@@ -152,12 +152,12 @@ export default function EventoDetalhePage() {
           <div className="flex items-center">
                           <Link href="/home" className="flex items-center">
               <div className="relative h-10 w-24 mr-3">
-                <Image 
+                <OptimizedImage 
                   src="/logo-cresol.png" 
                   alt="Logo Cresol" 
                   fill
                   sizes="(max-width: 768px) 100vw, 96px"
-                  style={{ objectFit: 'contain' }}
+                  className="object-contain"
                 />
               </div>
               <h1 className="text-xl font-semibold text-cresol-gray">Portal Cresol</h1>

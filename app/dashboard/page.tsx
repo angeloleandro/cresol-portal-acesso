@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -315,7 +315,7 @@ export default function Dashboard() {
                   <div className="flex items-center mb-3">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                       {system.icon ? (
-                        <Image 
+                        <OptimizedImage 
                           src={system.icon} 
                           alt={system.name}
                           width={24}

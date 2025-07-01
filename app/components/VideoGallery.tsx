@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Fragment, useRef, useCallback } from "react";
-import Image from "next/image";
+import OptimizedImage from "./OptimizedImage";
 import { supabase } from "@/lib/supabase";
 
 interface DashboardVideo {
@@ -154,7 +154,15 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
     <div className="bg-gray-50 rounded-lg border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-200 flex flex-col group h-full">
       <div className="relative w-full aspect-video bg-gray-100 rounded-t-lg overflow-hidden">
         {video.thumbnail_url ? (
-          <Image src={video.thumbnail_url} alt={video.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px" className="object-cover group-hover:scale-105 transition-transform duration-200" />
+          <OptimizedImage 
+            src={video.thumbnail_url} 
+            alt={video.title} 
+            fill 
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px" 
+            className="object-cover group-hover:scale-105 transition-transform duration-200"
+            quality={80}
+            fallbackText="Thumbnail"
+          />
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500">
             <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">

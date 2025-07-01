@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -437,11 +437,11 @@ export default function SectorContentManagement() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <div className="relative h-10 w-24 mr-4">
-              <Image 
+              <OptimizedImage 
                 src="/logo-cresol.png" 
                 alt="Logo Cresol" 
                 fill
-                style={{ objectFit: 'contain' }}
+                className="object-contain"
               />
             </div>
             <h1 className="text-xl font-semibold text-gray-800">Painel Admin Setorial</h1>
@@ -570,7 +570,7 @@ export default function SectorContentManagement() {
                       <div className="flex items-center">
                         {newsImagePreview && (
                           <div className="relative h-24 w-24 mr-4 border border-gray-300">
-                            <Image
+                            <OptimizedImage
                               src={newsImagePreview}
                               alt="Preview"
                               fill
@@ -649,7 +649,7 @@ export default function SectorContentManagement() {
                       {item.image_url && (
                         <div className="sm:w-1/4 mb-3 sm:mb-0 sm:mr-4">
                           <div className="relative h-40 w-full sm:h-full">
-                            <Image
+                            <OptimizedImage
                               src={item.image_url}
                               alt={item.title}
                               fill

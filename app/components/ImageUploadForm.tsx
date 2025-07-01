@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import OptimizedImage from "./OptimizedImage";
 import Cropper from "react-easy-crop";
 import { supabase } from "@/lib/supabase";
 import { getCroppedImg } from "./getCroppedImg";
@@ -183,11 +183,14 @@ export default function ImageUploadForm({ initialData, onSave, onCancel }: Image
         
         {imageUrl && !isCropping && (
           <div className="mt-2 relative w-full h-40">
-            <Image 
+            <OptimizedImage 
               src={imageUrl} 
               alt="Preview" 
               fill 
-              className="object-contain rounded border" 
+              className="object-contain rounded border"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              quality={80}
+              fallbackText="Preview"
             />
           </div>
         )}

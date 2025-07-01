@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Footer from '../components/Footer';
 
@@ -108,12 +108,12 @@ export default function NoticiasPage() {
           <div className="flex items-center">
             <Link href="/home" className="flex items-center">
               <div className="relative h-10 w-24 mr-3">
-                <Image 
+                <OptimizedImage 
                   src="/logo-cresol.png" 
                   alt="Logo Cresol" 
                   fill
                   sizes="(max-width: 768px) 100vw, 96px"
-                  style={{ objectFit: 'contain' }}
+                  className="object-contain"
                 />
               </div>
               <h1 className="text-xl font-medium text-title">Portal Cresol</h1>
@@ -189,12 +189,12 @@ export default function NoticiasPage() {
                   {/* Imagem */}
                   {item.image_url && (
                     <div className="relative w-full md:w-1/3 h-48 md:h-auto min-h-[200px] bg-gray-100 rounded-lg overflow-hidden">
-                      <Image
+                      <OptimizedImage
                         src={item.image_url}
                         alt={item.title}
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"
-                        style={{ objectFit: 'cover' }}
+                        className="object-cover"
                       />
                     </div>
                   )}

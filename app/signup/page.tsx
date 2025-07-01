@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export default function Signup() {
@@ -134,13 +134,13 @@ export default function Signup() {
       <div className="card max-w-md w-full">
         <div className="flex flex-col items-center mb-6">
           <div className="relative w-40 h-20 mb-4">
-            <Image 
+            <OptimizedImage 
               src="/logo-cresol.png" 
               alt="Logo Cresol" 
               fill
               priority
               sizes="(max-width: 768px) 100vw, 160px"
-              style={{ objectFit: 'contain' }}
+              className="object-contain"
             />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Solicitar Acesso</h1>

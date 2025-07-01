@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, ChangeEvent, FormEvent } from "react";
-import Image from "next/image";
+import OptimizedImage from "./OptimizedImage";
 import Cropper from "react-easy-crop";
 import { supabase } from "@/lib/supabase";
 import { getCroppedImg } from "./getCroppedImg";
@@ -196,18 +196,29 @@ export default function VideoUploadForm({ initialData, onSave, onCancel }: Video
             )}
             {thumbnailPreview && !isCropping && (
               <div className="mt-2 relative w-full h-32">
-                <Image src={thumbnailPreview} alt="Preview" fill className="object-contain rounded border" />
+                <OptimizedImage 
+                  src={thumbnailPreview} 
+                  alt="Preview" 
+                  fill 
+                  className="object-contain rounded border"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  quality={80}
+                  fallbackText="Preview"
+                />
               </div>
             )}
           </>
         )}
         {!useCustomThumb && videoUrl && getYoutubeThumbnail(videoUrl) && (
           <div className="mt-2 relative w-full h-32">
-            <Image 
+            <OptimizedImage 
               src={getYoutubeThumbnail(videoUrl)!} 
               alt="Thumbnail automática" 
               fill
               className="object-contain rounded border"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              quality={80}
+              fallbackText="Thumbnail YouTube"
             />
           </div>
         )}

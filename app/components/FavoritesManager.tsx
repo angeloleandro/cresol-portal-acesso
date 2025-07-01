@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
-import Image from 'next/image';
+import OptimizedImage from './OptimizedImage';
 import { supabase } from '@/lib/supabase';
 
 interface FavoriteItem {
@@ -453,7 +453,7 @@ export function FavoritesList({
           {/* Ícone ou thumbnail */}
           <div className="flex-shrink-0">
             {favorite.thumbnail ? (
-              <Image 
+              <OptimizedImage 
                 src={favorite.thumbnail} 
                 alt={favorite.title}
                 width={compact ? 32 : 40}

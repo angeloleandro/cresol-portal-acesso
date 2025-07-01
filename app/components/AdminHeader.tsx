@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from './OptimizedImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -23,12 +23,12 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
         <div className="flex items-center">
           <Link href="/admin" className="flex items-center">
             <div className="relative h-8 w-20 mr-3">
-              <Image 
+              <OptimizedImage 
                 src="/logo-cresol.png" 
                 alt="Logo Cresol" 
                 fill
                 sizes="(max-width: 768px) 100vw, 80px"
-                style={{ objectFit: 'contain' }}
+                className="object-contain"
               />
             </div>
             <div className="h-5 w-px bg-gray-300 mx-3 hidden md:block"></div>

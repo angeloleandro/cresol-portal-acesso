@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 
 interface NewsItem {
@@ -142,12 +142,12 @@ export default function NoticiaDetalhePage() {
           <div className="flex items-center">
                           <Link href="/home" className="flex items-center">
               <div className="relative h-10 w-24 mr-3">
-                <Image 
+                <OptimizedImage 
                   src="/logo-cresol.png" 
                   alt="Logo Cresol" 
                   fill
                   sizes="(max-width: 768px) 100vw, 96px"
-                  style={{ objectFit: 'contain' }}
+                  className="object-contain"
                 />
               </div>
               <h1 className="text-xl font-semibold text-cresol-gray">Portal Cresol</h1>
@@ -187,13 +187,12 @@ export default function NoticiaDetalhePage() {
         {news.image_url && (
           <div className="mb-8 rounded-lg overflow-hidden max-w-3xl mx-auto">
             <div className="relative w-full h-96">
-              <Image
+              <OptimizedImage
                 src={news.image_url}
                 alt={news.title}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                style={{ objectFit: 'cover' }}
-                className="rounded-lg"
+                className="rounded-lg object-cover"
               />
             </div>
           </div>
@@ -220,12 +219,12 @@ export default function NoticiaDetalhePage() {
                 >
                   {item.image_url && (
                     <div className="relative h-40 w-full bg-cresol-gray-light">
-                      <Image
+                      <OptimizedImage
                         src={item.image_url}
                         alt={item.title}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        style={{ objectFit: 'cover' }}
+                        className="object-cover"
                       />
                     </div>
                   )}

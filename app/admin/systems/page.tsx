@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
@@ -237,11 +237,11 @@ export default function SystemsManagement() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
             <div className="flex items-center">
               <div className="relative h-10 w-24 mr-4">
-                <Image 
+                <OptimizedImage 
                   src="/logo-cresol.png" 
                   alt="Logo Cresol" 
                   fill
-                  style={{ objectFit: 'contain' }}
+                  className="object-contain"
                 />
               </div>
               <h1 className="text-xl font-semibold text-gray-800">Painel Administrativo</h1>
@@ -311,7 +311,7 @@ export default function SystemsManagement() {
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center">
                       <div className="relative h-10 w-10 mr-3">
-                        <Image 
+                        <OptimizedImage 
                           src={system.icon || '/icons/default-app.svg'} 
                           alt={system.name}
                           width={40}

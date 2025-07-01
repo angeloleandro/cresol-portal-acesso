@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../../components/Navbar';
@@ -256,12 +256,11 @@ export default function SetorDetalhesPage() {
                   >
                     {item.image_url && (
                       <div className="relative w-full h-64">
-                        <Image
+                        <OptimizedImage
                           src={item.image_url}
                           alt={item.title}
                           fill
-                          style={{ objectFit: 'cover' }}
-                          className="border-b border-cresol-gray-light"
+                          className="border-b border-cresol-gray-light object-cover"
                         />
                       </div>
                     )}

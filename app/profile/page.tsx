@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '../components/OptimizedImage';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import Navbar from '../components/Navbar';
@@ -426,11 +426,15 @@ export default function ProfilePage() {
             <div className="absolute -top-16 left-6">
               <div className="relative h-32 w-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100">
                 {(avatarPreview || avatarUrl) ? (
-                  <Image
+                  <OptimizedImage
                     src={avatarPreview || avatarUrl || ''}
                     alt="Avatar do usuário"
                     fill
                     className="object-cover"
+                    sizes="128px"
+                    quality={85}
+                    priority
+                    fallbackText="Avatar"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
@@ -537,11 +541,14 @@ export default function ProfilePage() {
                   <div className="flex-shrink-0">
                     <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200">
                       {(avatarPreview || avatarUrl) ? (
-                        <Image
+                        <OptimizedImage
                           src={avatarPreview || avatarUrl || ''}
                           alt="Avatar do usuário"
                           fill
                           className="object-cover"
+                          sizes="96px"
+                          quality={80}
+                          fallbackText="Avatar"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">

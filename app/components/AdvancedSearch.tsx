@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Image from 'next/image';
+import OptimizedImage from './OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
@@ -719,7 +719,7 @@ export default function AdvancedSearch({
                       {/* Thumbnail ou ícone */}
                       <div className="flex-shrink-0">
                         {result.thumbnail ? (
-                          <Image 
+                          <OptimizedImage 
                             src={result.thumbnail} 
                             alt={result.title}
                             width={48}

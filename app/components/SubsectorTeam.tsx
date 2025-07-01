@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import OptimizedImage from './OptimizedImage';
 import Link from 'next/link';
 import { Icon } from './icons';
 
@@ -104,7 +104,7 @@ export default function SubsectorTeam({
             <div key={member.id} className="flex items-center">
               <div className="relative h-8 w-8 rounded-full overflow-hidden bg-cresol-gray-light mr-3 flex-shrink-0">
                 {member.profiles.avatar_url ? (
-                  <Image
+                  <OptimizedImage
                     src={member.profiles.avatar_url}
                     alt={member.profiles.full_name}
                     fill

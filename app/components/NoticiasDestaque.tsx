@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import Image from 'next/image';
+import OptimizedImage from './OptimizedImage';
 
 interface NewsItem {
   id: string;
@@ -168,13 +168,12 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
                   <div className="flex flex-col md:flex-row">
                     {news.image_url ? (
                       <div className="md:w-1/3 h-56 md:h-auto relative overflow-hidden">
-                        <Image
+                        <OptimizedImage
                           src={news.image_url}
                           alt={news.title}
                           fill
                           sizes="(max-width: 768px) 100vw, 33vw"
-                          style={{ objectFit: 'cover', objectPosition: 'center center' }}
-                          className="h-full w-full"
+                          className="h-full w-full object-cover object-center"
                         />
                       </div>
                     ) : (

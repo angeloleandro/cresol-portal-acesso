@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, ChangeEvent, FormEvent } from "react";
-import Image from "next/image";
+import OptimizedImage from "./OptimizedImage";
 import { supabase } from "@/lib/supabase";
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from './getCroppedImg';
@@ -162,7 +162,15 @@ export default function BannerUploadForm({ initialData, onSave, onCancel }: Bann
         )}
         {imagePreview && !isCropping && (
           <div className="mt-2 relative w-full h-40">
-            <Image src={imagePreview} alt="Preview" fill className="object-contain rounded border" />
+            <OptimizedImage 
+              src={imagePreview} 
+              alt="Preview" 
+              fill 
+              className="object-contain rounded border"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              quality={80}
+              fallbackText="Preview"
+            />
           </div>
         )}
       </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -343,7 +343,7 @@ export default function SistemasPage() {
                   <div className={`${viewMode === 'list' ? 'mr-4' : 'mb-4'} flex-shrink-0`}>
                     <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                       {system.icon ? (
-                        <Image
+                        <OptimizedImage
                           src={system.icon}
                           alt={`Ícone ${system.name}`}
                           width={24}
