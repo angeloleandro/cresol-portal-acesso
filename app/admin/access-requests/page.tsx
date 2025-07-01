@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
+import Breadcrumb from '@/app/components/Breadcrumb';
 
 interface AccessRequest {
   id: string;
@@ -286,6 +287,16 @@ export default function AccessRequests() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Solicitações de Acesso' }
+            ]} 
+          />
+        </div>
         <div className="mb-6 border-b border-cresol-gray-light pb-4 flex flex-col md:flex-row md:justify-between md:items-end">
           <div>
             <h2 className="text-2xl font-bold text-primary mb-2">Solicitações de Acesso</h2>

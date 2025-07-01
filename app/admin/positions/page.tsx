@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
+import Breadcrumb from '@/app/components/Breadcrumb';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/app/components/icons/Icon';
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 
 interface Position {
   id: string;
@@ -32,6 +34,9 @@ export default function PositionsAdmin() {
   const [hasGroup, setHasGroup] = useState(false);
   const [groupAction, setGroupAction] = useState<'keep' | 'create' | 'remove'>('keep');
   const [editing, setEditing] = useState<Position | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [positionToDelete, setPositionToDelete] = useState<Position | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -238,24 +243,40 @@ export default function PositionsAdmin() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Tem certeza que deseja excluir este cargo?')) return;
+  const handleDeleteClick = (position: Position) => {
+    setPositionToDelete(position);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!positionToDelete) return;
+    
     setFormError(null);
     setFormSuccess(null);
-    setFormLoading(true);
+    setIsDeleting(true);
+    
     try {
       const { error } = await supabase
         .from('positions')
         .delete()
-        .eq('id', id);
+        .eq('id', positionToDelete.id);
+      
       if (error) throw error;
+      
       setFormSuccess('Cargo excluído com sucesso!');
       fetchPositions();
+      setShowDeleteModal(false);
+      setPositionToDelete(null);
     } catch (error: any) {
       setFormError('Erro ao excluir cargo: ' + error.message);
     } finally {
-      setFormLoading(false);
+      setIsDeleting(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setPositionToDelete(null);
   };
 
   if (loading) {
@@ -273,6 +294,16 @@ export default function PositionsAdmin() {
     <div className="min-h-screen bg-gray-50">
       <AdminHeader user={user} />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Cargos' }
+            ]} 
+          />
+        </div>
         <div className="mb-6 border-b border-cresol-gray-light pb-4 flex flex-col md:flex-row md:justify-between md:items-end">
           <div>
             <h2 className="text-2xl font-bold text-primary mb-2">Cargos</h2>
@@ -496,7 +527,7 @@ export default function PositionsAdmin() {
                         Editar
                       </button>
                       <button
-                        onClick={() => handleDelete(position.id)}
+                        onClick={() => handleDeleteClick(position)}
                         className="text-red-600 hover:text-red-800 transition-colors"
                       >
                         Excluir
@@ -521,6 +552,17 @@ export default function PositionsAdmin() {
           </div>
         </div>
       </main>
+      
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir o cargo <strong>"${positionToDelete?.name}"</strong>?<br><br>Esta ação não pode ser desfeita e pode afetar usuários que possuem este cargo.`}
+        isLoading={isDeleting}
+        confirmButtonText="Excluir Cargo"
+        cancelButtonText="Cancelar"
+      />
     </div>
   );
 }

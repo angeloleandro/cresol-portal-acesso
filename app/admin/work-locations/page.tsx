@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
+import Breadcrumb from '@/app/components/Breadcrumb';
 import { useRouter } from 'next/navigation';
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 
 interface WorkLocation {
   id: string;
@@ -31,6 +33,9 @@ export default function WorkLocationsAdmin() {
   const [hasGroup, setHasGroup] = useState(false);
   const [groupAction, setGroupAction] = useState<'keep' | 'create' | 'remove'>('keep');
   const [editing, setEditing] = useState<WorkLocation | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [locationToDelete, setLocationToDelete] = useState<WorkLocation | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -237,24 +242,40 @@ export default function WorkLocationsAdmin() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Tem certeza que deseja excluir este local?')) return;
+  const handleDeleteClick = (location: WorkLocation) => {
+    setLocationToDelete(location);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!locationToDelete) return;
+    
     setFormError(null);
     setFormSuccess(null);
-    setFormLoading(true);
+    setIsDeleting(true);
+    
     try {
       const { error } = await supabase
         .from('work_locations')
         .delete()
-        .eq('id', id);
+        .eq('id', locationToDelete.id);
+      
       if (error) throw error;
+      
       setFormSuccess('Local excluído com sucesso!');
       fetchWorkLocations();
+      setShowDeleteModal(false);
+      setLocationToDelete(null);
     } catch (error: any) {
       setFormError('Erro ao excluir local: ' + error.message);
     } finally {
-      setFormLoading(false);
+      setIsDeleting(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setLocationToDelete(null);
   };
 
   if (loading) {
@@ -272,6 +293,16 @@ export default function WorkLocationsAdmin() {
     <div className="min-h-screen bg-gray-50">
       <AdminHeader user={user} />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Locais de Trabalho' }
+            ]} 
+          />
+        </div>
         <div className="mb-6 border-b border-cresol-gray-light pb-4 flex flex-col md:flex-row md:justify-between md:items-end">
           <div>
             <h2 className="text-2xl font-bold text-primary mb-2">Locais de Atuação</h2>
@@ -498,7 +529,7 @@ export default function WorkLocationsAdmin() {
                         Editar
                       </button>
                       <button
-                        onClick={() => handleDelete(loc.id)}
+                        onClick={() => handleDeleteClick(loc)}
                         className="text-red-600 hover:text-red-800 transition-colors"
                       >
                         Excluir
@@ -525,6 +556,17 @@ export default function WorkLocationsAdmin() {
           </div>
         </div>
       </main>
+      
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir o local <strong>"${locationToDelete?.name}"</strong>?<br><br>Esta ação não pode ser desfeita e pode afetar usuários que possuem este local de atuação.`}
+        isLoading={isDeleting}
+        confirmButtonText="Excluir Local"
+        cancelButtonText="Cancelar"
+      />
     </div>
   );
 }

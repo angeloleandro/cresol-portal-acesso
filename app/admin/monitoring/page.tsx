@@ -3,9 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import Navbar from '../../components/Navbar';
-import Breadcrumbs from '../../components/Breadcrumbs';
-import Footer from '../../components/Footer';
+import AdminHeader from '@/app/components/AdminHeader';
+import Breadcrumb from '@/app/components/Breadcrumb';
 import { Icon } from '../../components/icons/Icon';
 
 interface UserActivity {
@@ -131,10 +130,19 @@ export default function MonitoringPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <AdminHeader user={user} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <Breadcrumbs />
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Monitoramento' }
+            ]} 
+          />
+        </div>
         
         {/* Header */}
         <div className="mb-6">
@@ -221,8 +229,6 @@ export default function MonitoringPage() {
           </div>
         </div>
       </div>
-      
-      <Footer />
     </div>
   );
 } 

@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import OptimizedImage from '@/app/components/OptimizedImage';
+import Breadcrumb from '@/app/components/Breadcrumb';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import { Icon } from '@/app/components/icons/Icon';
 
 interface System {
   id: string;
@@ -269,6 +271,16 @@ export default function SystemsManagement() {
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Breadcrumb */}
+          <div className="mb-6">
+            <Breadcrumb 
+              items={[
+                { label: 'Home', href: '/home', icon: 'house' },
+                { label: 'Administração', href: '/admin' },
+                { label: 'Sistemas' }
+              ]} 
+            />
+          </div>
           <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
             <div className="mb-4 md:mb-0">
               <h2 className="text-2xl font-bold text-gray-800 mb-2">Gerenciamento de Sistemas</h2>
@@ -328,17 +340,13 @@ export default function SystemsManagement() {
                         }}
                         className="text-gray-500 hover:text-primary"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                        <Icon name="pencil" className="h-5 w-5" />
                       </button>
                       <button 
                         onClick={() => openDeleteModal(system)}
                         className="text-gray-500 hover:text-red-600"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <Icon name="trash" className="h-5 w-5" />
                       </button>
                     </div>
                   </div>

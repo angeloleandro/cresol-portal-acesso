@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import OptimizedImage from "@/app/components/OptimizedImage";
 import AdminHeader from "@/app/components/AdminHeader";
+import Breadcrumb from '@/app/components/Breadcrumb';
 import { supabase } from "@/lib/supabase";
 import VideoUploadForm from '@/app/components/VideoUploadForm';
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 
 interface DashboardVideo {
   id: string;
@@ -25,6 +27,9 @@ export default function AdminVideos() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editVideo, setEditVideo] = useState<DashboardVideo | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [videoToDelete, setVideoToDelete] = useState<DashboardVideo | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -65,6 +70,42 @@ export default function AdminVideos() {
     setLoading(false);
   };
 
+  const handleDeleteClick = (video: DashboardVideo) => {
+    setVideoToDelete(video);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!videoToDelete) return;
+    
+    setIsDeleting(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/admin/videos?id=${videoToDelete.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao excluir vídeo');
+      }
+      
+      await fetchVideos();
+      setShowDeleteModal(false);
+      setVideoToDelete(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setVideoToDelete(null);
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -80,6 +121,16 @@ export default function AdminVideos() {
     <div className="min-h-screen bg-cresol-gray-light/30">
       <AdminHeader user={user} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Vídeos' }
+            ]} 
+          />
+        </div>
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-primary mb-2">Gerenciar Vídeos</h2>
@@ -110,7 +161,7 @@ export default function AdminVideos() {
                 <a href={video.video_url} className="text-primary text-sm underline break-all" target="_blank" rel="noopener noreferrer">{video.video_url}</a>
                 <div className="mt-auto flex gap-2 pt-4">
                   <button className="text-primary hover:underline" onClick={() => setEditVideo(video)}>Editar</button>
-                  <button className="text-red-500 hover:underline" onClick={() => alert('Funcionalidade de remover em desenvolvimento.')}>Remover</button>
+                  <button className="text-red-500 hover:underline" onClick={() => handleDeleteClick(video)}>Remover</button>
                 </div>
               </div>
             </div>
@@ -137,6 +188,17 @@ export default function AdminVideos() {
           />
         )}
       </main>
+      
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir o vídeo <strong>"${videoToDelete?.title}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá o vídeo permanentemente do dashboard.`}
+        isLoading={isDeleting}
+        confirmButtonText="Excluir Vídeo"
+        cancelButtonText="Cancelar"
+      />
     </div>
   );
 } 

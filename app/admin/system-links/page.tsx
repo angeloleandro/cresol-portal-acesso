@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
+import Breadcrumb from '@/app/components/Breadcrumb';
 import { handleComponentError, devLog } from '@/lib/error-handler';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
@@ -236,6 +237,16 @@ export default function SystemLinksAdmin() {
         <AdminHeader user={user} />
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Breadcrumb */}
+          <div className="mb-6">
+            <Breadcrumb 
+              items={[
+                { label: 'Home', href: '/home', icon: 'house' },
+                { label: 'Administração', href: '/admin' },
+                { label: 'Links de Sistemas' }
+              ]} 
+            />
+          </div>
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Links de Sistemas</h1>
             <p className="mt-2 text-sm text-gray-600">

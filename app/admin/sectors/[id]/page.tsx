@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import OptimizedImage from '@/app/components/OptimizedImage';
+import Breadcrumb from '@/app/components/Breadcrumb';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Cropper from 'react-easy-crop';
@@ -1117,6 +1118,17 @@ export default function SectorDashboard() {
 
       {/* Conteúdo Principal */}
       <main className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Setores', href: '/admin/sectors' },
+              { label: sector?.name || 'Setor' }
+            ]} 
+          />
+        </div>
         
         {/* Aba de Notícias */}
         {activeTab === 'news' && (
