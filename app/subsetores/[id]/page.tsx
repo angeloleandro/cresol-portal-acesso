@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import Navbar from '../../components/Navbar';
 import SubsectorTeam from '../../components/SubsectorTeam';
 import { Icon } from '../../components/icons';
+import Breadcrumb from '../../components/Breadcrumb';
 
 interface Subsector {
   id: string;
@@ -294,6 +295,18 @@ export default function SubsectorDetailsPage() {
 
       {/* Conteúdo Principal */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Setores', href: '/setores' },
+              { label: getSectorName(subsector.sectors), href: `/setores/${Array.isArray(subsector.sectors) ? subsector.sectors[0]?.id : subsector.sectors?.id}` },
+              { label: subsector.name }
+            ]} 
+          />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Coluna Principal */}

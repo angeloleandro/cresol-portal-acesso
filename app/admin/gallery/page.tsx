@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import OptimizedImage from "@/app/components/OptimizedImage";
 import { supabase } from "@/lib/supabase";
 import AdminHeader from "@/app/components/AdminHeader";
+import Breadcrumb from "@/app/components/Breadcrumb";
 import ImageUploadForm from "@/app/components/ImageUploadForm";
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 // (Você pode criar um ImageUploadForm.tsx depois, por enquanto use um placeholder)
 
 interface GalleryImage {
@@ -25,6 +27,9 @@ export default function AdminGallery() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editImage, setEditImage] = useState<GalleryImage | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState<GalleryImage | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -64,6 +69,42 @@ export default function AdminGallery() {
     setLoading(false);
   };
 
+  const handleDeleteClick = (image: GalleryImage) => {
+    setImageToDelete(image);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!imageToDelete) return;
+    
+    setIsDeleting(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/admin/gallery?id=${imageToDelete.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao excluir imagem');
+      }
+      
+      await fetchImages();
+      setShowDeleteModal(false);
+      setImageToDelete(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setImageToDelete(null);
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -79,6 +120,17 @@ export default function AdminGallery() {
     <div className="min-h-screen bg-cresol-gray-light/30">
       <AdminHeader user={user} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Galeria' }
+            ]} 
+          />
+        </div>
+
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-primary mb-2">Gerenciar Galeria de Imagens</h2>
@@ -125,7 +177,7 @@ export default function AdminGallery() {
                 <h3 className="text-lg font-semibold text-cresol-gray mb-1">{img.title || "(Sem título)"}</h3>
                 <div className="mt-auto flex gap-2 pt-4">
                   <button className="text-primary hover:underline" onClick={() => setEditImage(img)}>Editar</button>
-                  <button className="text-red-500 hover:underline" onClick={() => alert('Funcionalidade de remover em desenvolvimento.')}>Remover</button>
+                  <button className="text-red-500 hover:underline" onClick={() => handleDeleteClick(img)}>Remover</button>
                 </div>
               </div>
             </div>
@@ -135,6 +187,17 @@ export default function AdminGallery() {
           <div className="text-cresol-gray text-center mt-12">Nenhuma imagem cadastrada ainda.</div>
         )}
       </main>
+      
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir a imagem <strong>"${imageToDelete?.title || '(Sem título)'}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá a imagem permanentemente da galeria.`}
+        isLoading={isDeleting}
+        confirmButtonText="Excluir Imagem"
+        cancelButtonText="Cancelar"
+      />
     </div>
   );
 } 

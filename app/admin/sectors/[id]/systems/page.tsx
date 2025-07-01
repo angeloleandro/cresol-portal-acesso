@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import type { User } from '@supabase/supabase-js';
 
 interface System {
@@ -49,6 +50,9 @@ export default function SectorSystemsManagement() {
   const [editingSystem, setEditingSystem] = useState<System | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [systemToDelete, setSystemToDelete] = useState<System | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchSector = useCallback(async () => {
     const { data, error } = await supabase
@@ -185,21 +189,35 @@ export default function SectorSystemsManagement() {
     }
   };
 
-  const handleDeleteSystem = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este sistema? Esta ação não pode ser desfeita.')) {
-      return;
-    }
+  const handleDeleteClick = (system: System) => {
+    setSystemToDelete(system);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!systemToDelete) return;
+    
+    setIsDeleting(true);
     
     try {
       await supabase
         .from('systems')
         .delete()
-        .eq('id', id);
+        .eq('id', systemToDelete.id);
       
       fetchSystems();
+      setShowDeleteModal(false);
+      setSystemToDelete(null);
     } catch (error) {
       console.error('Erro ao excluir sistema:', error);
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setSystemToDelete(null);
   };
 
   const handleLogout = async () => {
@@ -327,7 +345,7 @@ export default function SectorSystemsManagement() {
                     </button>
                     <button 
                       type="button"
-                      onClick={() => handleDeleteSystem(system.id)}
+                      onClick={() => handleDeleteClick(system)}
                       className="text-gray-500 hover:text-red-600"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -543,6 +561,17 @@ export default function SectorSystemsManagement() {
           </div>
         </div>
       )}
+      
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir o sistema <strong>"${systemToDelete?.name}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá o sistema permanentemente do setor.`}
+        isLoading={isDeleting}
+        confirmButtonText="Excluir Sistema"
+        cancelButtonText="Cancelar"
+      />
     </div>
   );
 } 

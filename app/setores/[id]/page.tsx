@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../../components/Navbar';
 import SubsectorTeam from '../../components/SubsectorTeam';
+import Breadcrumb from '../../components/Breadcrumb';
 
 interface Sector {
   id: string;
@@ -189,17 +190,18 @@ export default function SetorDetalhesPage() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <Link 
-            href="/setores" 
-            className="inline-flex items-center text-sm text-cresol-gray hover:text-primary mb-4"
-          >
-            <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Voltar para Setores
-          </Link>
-          
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Setores', href: '/setores' },
+              { label: sector.name }
+            ]} 
+          />
+        </div>
+
+        <div className="mb-8">          
           <h1 className="text-3xl font-bold text-primary mb-2">{sector.name}</h1>
           <p className="text-cresol-gray mb-6">{sector.description || 'Sem descrição'}</p>
           

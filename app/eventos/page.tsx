@@ -9,6 +9,7 @@ import EventCalendar from '../components/EventCalendar';
 import Navbar from '../components/Navbar';
 import Breadcrumbs from '../components/Breadcrumbs';
 import Footer from '../components/Footer';
+import { Icon } from '../components/icons/Icon';
 
 interface EventItem {
   id: string;
@@ -219,11 +220,15 @@ export default function EventosPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-cresol-gray">Carregando eventos...</p>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="loading-spinner mx-auto mb-4"></div>
+            <p className="body-text text-muted">Carregando eventos...</p>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -232,25 +237,21 @@ export default function EventosPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
         <Breadcrumbs className="mb-6" />
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-cresol-gray mb-4">Eventos</h1>
-          
+        <div className="card">
           {/* Alternar entre Lista e Calendário */}
-          <div className="flex border-b border-cresol-gray-light mb-6">
+          <div className="flex border-b border-gray-200 mb-6">
             <button
               onClick={() => changeViewMode('list')}
               className={`px-4 py-2 font-medium text-sm border-b-2 ${
                 viewMode === 'list' 
                   ? 'border-primary text-primary' 
-                  : 'border-transparent text-cresol-gray hover:text-primary hover:border-primary/30'
+                  : 'border-transparent text-muted hover:text-primary hover:border-primary/30'
               }`}
             >
               <div className="flex items-center">
-                <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                </svg>
+                <Icon name="list" className="h-5 w-5 mr-2" />
                 Lista
               </div>
             </button>
@@ -259,13 +260,11 @@ export default function EventosPage() {
               className={`px-4 py-2 font-medium text-sm border-b-2 ${
                 viewMode === 'calendar' 
                   ? 'border-primary text-primary' 
-                  : 'border-transparent text-cresol-gray hover:text-primary hover:border-primary/30'
+                  : 'border-transparent text-muted hover:text-primary hover:border-primary/30'
               }`}
             >
               <div className="flex items-center">
-                <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <Icon name="calendar" className="h-5 w-5 mr-2" />
                 Calendário
               </div>
             </button>
@@ -279,20 +278,18 @@ export default function EventosPage() {
                   {/* Busca */}
                   <div className="flex-1 max-w-md">
                     <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Icon name="search" className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Buscar eventos..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="input w-full pl-10"
+                      />
                     </div>
-                    <input
-                      type="text"
-                      placeholder="Buscar eventos..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
                   </div>
-                </div>
                 
                   {/* Filtro por Período */}
                   <div className="flex border border-gray-300 rounded-md overflow-hidden">
@@ -320,7 +317,7 @@ export default function EventosPage() {
                   <select
                     value={sectorFilter}
                     onChange={(e) => setSectorFilter(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="input"
                   >
                     <option value="all">Todos os setores</option>
                     {sectors.map((sector) => (
@@ -335,7 +332,7 @@ export default function EventosPage() {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as any)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="input"
                     >
                       <option value="date">Data</option>
                       <option value="title">Título</option>
@@ -347,9 +344,7 @@ export default function EventosPage() {
                       className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                       title={`Ordenar ${sortOrder === 'asc' ? 'decrescente' : 'crescente'}`}
                     >
-                      <svg className={`h-4 w-4 text-gray-600 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                      </svg>
+                      <Icon name="sort" className={`h-4 w-4 text-gray-600 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} />
                     </button>
                   </div>
                 </div>
@@ -367,7 +362,7 @@ export default function EventosPage() {
                       <span className="ml-2 text-sm text-gray-700">Apenas eventos em destaque</span>
                     </label>
                     
-                    <div className="text-sm text-gray-600">
+                    <div className="body-text-small text-muted">
                       {filteredEvents.length} evento{filteredEvents.length !== 1 ? 's' : ''} encontrado{filteredEvents.length !== 1 ? 's' : ''}
                     </div>
                   </div>
@@ -409,7 +404,7 @@ export default function EventosPage() {
                           link.download = `eventos_${new Date().toISOString().split('T')[0]}.csv`;
                           link.click();
                         }}
-                        className="px-3 py-1 text-sm text-white bg-primary hover:bg-primary-dark rounded-md border"
+                        className="btn-primary text-sm"
                       >
                         Exportar CSV
                       </button>
@@ -420,130 +415,73 @@ export default function EventosPage() {
 
               {/* Lista de eventos */}
               {filteredEvents.length === 0 ? (
-                <div className="bg-white shadow-sm rounded-lg p-6 text-center mt-6">
-                  <svg className="h-12 w-12 mx-auto text-cresol-gray opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <p className="mt-4 text-cresol-gray">Nenhum evento encontrado para os critérios selecionados.</p>
+                <div className="card text-center py-12">
+                  <div className="max-w-md mx-auto">
+                    <Icon name="calendar" className="mx-auto h-16 w-16 text-muted mb-4" />
+                    <h3 className="heading-3 text-title mb-2">Nenhum evento encontrado</h3>
+                    <p className="body-text text-muted">Nenhum evento encontrado para os critérios selecionados.</p>
+                  </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                <div className="grid-responsive mt-6">
                   {filteredEvents.map((event) => (
                     <div 
                       key={event.id} 
-                      className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                      className="card group"
                     >
                       <div className="p-6">
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex space-x-2">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                            Evento
-                          </span>
+                            <span className="badge-success">
+                              {event.sector_name || 'Sem setor'}
+                            </span>
                             {event.is_featured && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                ⭐ Destaque
+                              <span className="badge-warning">
+                                Em destaque
                               </span>
                             )}
                           </div>
-                          {event.sector_name && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              {event.sector_name}
-                            </span>
-                          )}
+                          
+                          <Link
+                            href={`/eventos/${event.id}`}
+                            className="text-primary hover:text-primary-dark transition-colors"
+                          >
+                            <Icon name="external-link" className="h-4 w-4" />
+                          </Link>
                         </div>
                         
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3 hover:text-primary cursor-pointer">
-                          <Link href={`/eventos/${event.id}`}>
-                            {event.title}
-                          </Link>
-                        </h3>
+                        <h3 className="heading-4 text-title mb-2 line-clamp-2">{event.title}</h3>
                         
-                        <div className="text-sm text-gray-600 mb-3 space-y-2">
-                          <div className="flex items-center">
-                            <svg className="h-4 w-4 mr-2 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                        <div className="space-y-1 mb-3">
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Icon name="clock" className="h-4 w-4 mr-2 text-primary flex-shrink-0" />
                             <span>{formatEventPeriod(event.start_date, event.end_date)}</span>
                           </div>
                           
-                          <div className="flex items-center">
-                            <svg className="h-4 w-4 mr-2 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span>{event.location}</span>
-                          </div>
+                          {event.location && (
+                            <div className="flex items-center text-sm text-gray-600">
+                              <Icon name="map" className="h-4 w-4 mr-2 text-primary flex-shrink-0" />
+                              <span className="truncate">{event.location}</span>
+                            </div>
+                          )}
                         </div>
                         
-                        <p className="text-gray-600 mb-4 text-sm line-clamp-2 leading-relaxed">{event.description}</p>
+                        <p className="body-text-small text-muted line-clamp-3 mb-4">
+                          {event.description}
+                        </p>
                         
-                        {/* Ações do evento */}
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                          <Link 
-                            href={`/eventos/${event.id}`}
-                            className="text-primary text-sm font-medium hover:text-primary-dark transition-colors"
-                          >
-                          Ver detalhes →
-                          </Link>
-                          
-                          <div className="flex items-center space-x-2">
-                            {/* Botão para adicionar ao calendário */}
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                const startDate = new Date(event.start_date);
-                                const endDate = event.end_date ? new Date(event.end_date) : new Date(startDate.getTime() + 60 * 60 * 1000);
-                                
-                                const formatCalendarDate = (date: Date) => {
-                                  return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-                                };
-
-                                const details = encodeURIComponent(event.description);
-                                const location = encodeURIComponent(event.location);
-                                const title = encodeURIComponent(event.title);
-                                
-                                const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formatCalendarDate(startDate)}/${formatCalendarDate(endDate)}&details=${details}&location=${location}`;
-                                
-                                window.open(googleCalendarUrl, '_blank');
-                              }}
-                              className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-md transition-colors"
-                              title="Adicionar ao Google Calendar"
-                            >
-                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                            </button>
-                            
-                            {/* Botão de compartilhar */}
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (navigator.share) {
-                                  navigator.share({
-                                    title: event.title,
-                                    text: event.description,
-                                    url: `${window.location.origin}/eventos/${event.id}`
-                                  });
-                                } else {
-                                  // Fallback para copiar URL
-                                  navigator.clipboard.writeText(`${window.location.origin}/eventos/${event.id}`);
-                                  // Feedback visual (opcional)
-                                  const button = e.currentTarget;
-                                  const originalText = button.title;
-                                  button.title = 'Link copiado!';
-                                  setTimeout(() => {
-                                    button.title = originalText;
-                                  }, 2000);
-                                }
-                              }}
-                              className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-md transition-colors"
-                              title="Compartilhar evento"
-                            >
-                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                              </svg>
-                            </button>
+                        <div className="flex justify-between items-center">
+                          <div className="text-xs text-gray-500">
+                            {new Date(event.start_date) > new Date() ? 'Próximo evento' : 'Evento passado'}
                           </div>
+                          
+                          <Link
+                            href={`/eventos/${event.id}`}
+                            className="btn-primary text-sm inline-flex items-center gap-2"
+                          >
+                            Ver detalhes
+                            <Icon name="arrow-left" className="h-4 w-4 rotate-180" />
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -554,12 +492,11 @@ export default function EventosPage() {
           )}
 
           {viewMode === 'calendar' && (
-            <div className="mt-6">
-              <EventCalendar />
-            </div>
+            <EventCalendar />
           )}
         </div>
       </main>
+      
       <Footer />
     </div>
   );

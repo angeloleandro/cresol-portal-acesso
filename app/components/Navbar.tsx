@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import GlobalSearch from './GlobalSearch';
@@ -12,6 +11,15 @@ interface Sector {
   id: string;
   name: string;
   description?: string;
+}
+
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  created_at: string;
+  read: boolean;
+  type: 'info' | 'success' | 'warning' | 'error';
 }
 
 export default function Navbar() {
@@ -27,10 +35,42 @@ export default function Navbar() {
   const [isAdminSectorDropdownOpen, setIsAdminSectorDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const adminSectorDropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isMobileSectorsOpen, setIsMobileSectorsOpen] = useState(false);
   const userMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Buscar notificações reais do Supabase
+  const fetchNotifications = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (!error && data) {
+        setNotifications(data);
+        setUnreadCount(data.filter(n => !n.read).length);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar notificações:', error);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+    }
+  }, [user, fetchNotifications]);
 
   // Função para abrir o dropdown com um pequeno delay para evitar fechamentos acidentais
   const handleOpenDropdown = () => {
@@ -89,6 +129,59 @@ export default function Navbar() {
     userMenuTimeoutRef.current = setTimeout(() => {
       setIsUserMenuOpen(false);
     }, 300); // 300ms de delay
+  };
+
+  // Função para marcar notificação como lida
+  const markAsRead = async (notificationId: string) => {
+    try {
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', notificationId);
+
+      setNotifications(prev => 
+        prev.map(n => 
+          n.id === notificationId ? { ...n, read: true } : n
+        )
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Erro ao marcar notificação como lida:', error);
+    }
+  };
+
+  // Função para marcar todas como lidas
+  const markAllAsRead = async () => {
+    if (!user) return;
+
+    try {
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Erro ao marcar todas as notificações como lidas:', error);
+    }
+  };
+
+  // Função para formatar data relativa
+  const formatRelativeTime = (date: string) => {
+    const now = new Date();
+    const notificationDate = new Date(date);
+    const diffInMinutes = Math.floor((now.getTime() - notificationDate.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Agora';
+    if (diffInMinutes < 60) return `${diffInMinutes}m atrás`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h atrás`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays}d atrás`;
   };
 
   useEffect(() => {
@@ -224,16 +317,7 @@ export default function Navbar() {
                 }`}
               >
                 <span>Setores</span>
-                <svg 
-                  className={`ml-1 h-4 w-4 transition-transform ${isSectorsDropdownOpen ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24" 
-                  xmlns="http://www.w3.org/2000/svg"
-                  strokeWidth={1.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
+                <Icon name="arrow-down" className={`ml-1 h-4 w-4 transition-transform ${isSectorsDropdownOpen ? 'rotate-180' : ''}`} />
               </Link>
               
               {/* Dropdown menu */}
@@ -281,16 +365,7 @@ export default function Navbar() {
                 type="button"
               >
                 <span>Galeria</span>
-                <svg 
-                  className={`ml-1 h-4 w-4 transition-transform ${isGalleryDropdownOpen ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24" 
-                  xmlns="http://www.w3.org/2000/svg"
-                  strokeWidth={1.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
+                <Icon name="arrow-down" className={`ml-1 h-4 w-4 transition-transform ${isGalleryDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {isGalleryDropdownOpen && (
                 <div 
@@ -328,12 +403,12 @@ export default function Navbar() {
             </Link>
           </nav>
           
-          <div className="flex items-center border-l border-white/30 pl-4">
+          <div className="flex items-center border-l border-white/30 pl-4 space-x-3">
             {/* Opção de Admin ou Admin Setor */}
             {isAdmin && (
               <Link
                 href="/admin"
-                className="text-sm text-white/80 mr-4 hover:text-white"
+                className="text-sm text-white/80 hover:text-white"
               >
                 Painel Admin
               </Link>
@@ -341,7 +416,7 @@ export default function Navbar() {
             
             {isSectorAdmin && (
               <div 
-                className="relative mr-4"
+                className="relative"
                 onMouseEnter={handleOpenAdminSectorDropdown}
                 onMouseLeave={handleCloseAdminSectorDropdown}
               >
@@ -350,16 +425,7 @@ export default function Navbar() {
                   className="text-sm text-white/80 hover:text-white flex items-center"
                 >
                   <span>Painel Admin Setor</span>
-                  <svg 
-                    className={`ml-1 h-4 w-4 transition-transform ${isAdminSectorDropdownOpen ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24" 
-                    xmlns="http://www.w3.org/2000/svg"
-                    strokeWidth={1.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                  </svg>
+                  <Icon name="arrow-down" className={`ml-1 h-4 w-4 transition-transform ${isAdminSectorDropdownOpen ? 'rotate-180' : ''}`} />
                 </Link>
                 
                 {/* Admin Setor Dropdown menu */}
@@ -398,9 +464,42 @@ export default function Navbar() {
               </div>
             )}
             
-            {/* Busca Global */}
+            {/* Busca Minimalista */}
             {user && (
-              <GlobalSearch compact />
+              <div className="relative">
+                <button 
+                  type="button"
+                  onClick={() => setIsSearchOpen(!isSearchOpen)}
+                  className="text-white/80 hover:text-white transition-colors p-1.5 rounded-md hover:bg-white/10"
+                  title="Buscar"
+                >
+                  <Icon name="search" className="h-5 w-5" />
+                </button>
+                
+                {/* Modal/Dropdown de busca */}
+                {isSearchOpen && (
+                  <>
+                    {/* Overlay para fechar */}
+                    <div 
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsSearchOpen(false)}
+                    />
+                    
+                    {/* Dropdown de busca */}
+                    <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                      <div className="p-4">
+                        <h3 className="text-sm font-medium text-gray-900 mb-3">Buscar no Portal</h3>
+                        <GlobalSearch 
+                          className="w-full"
+                          placeholder="Buscar sistemas, eventos, notícias..."
+                          showAdvancedButton={true}
+                          autoFocus={true}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             )}
             
             {/* Notificações */}
@@ -408,15 +507,108 @@ export default function Navbar() {
               <div className="relative">
                 <button 
                   type="button"
-                  className="text-white/80 hover:text-white transition-colors relative"
+                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                  className="text-white/80 hover:text-white transition-colors relative p-1.5 rounded-md hover:bg-white/10"
                   title="Notificações"
                 >
-                  <Icon name="bell" className="h-6 w-6" />
+                  <Icon name="bell" className="h-5 w-5" />
                   {/* Badge de notificações não lidas */}
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    3
-                  </span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </button>
+                
+                {/* Dropdown de notificações */}
+                {isNotificationsOpen && (
+                  <>
+                    {/* Overlay para fechar */}
+                    <div 
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsNotificationsOpen(false)}
+                    />
+                    
+                    {/* Dropdown de notificações */}
+                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-hidden">
+                      {/* Header */}
+                      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-gray-900">Notificações</h3>
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={markAllAsRead}
+                            className="text-xs text-primary hover:text-primary-dark"
+                          >
+                            Marcar todas como lidas
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Lista de notificações */}
+                      <div className="max-h-80 overflow-y-auto">
+                        {notifications.length > 0 ? (
+                          notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer ${
+                                !notification.read ? 'bg-blue-50/50' : ''
+                              }`}
+                              onClick={() => markAsRead(notification.id)}
+                            >
+                              <div className="flex items-start space-x-3">
+                                {/* Ícone do tipo */}
+                                <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${
+                                  notification.type === 'info' ? 'bg-blue-500' :
+                                  notification.type === 'success' ? 'bg-green-500' :
+                                  notification.type === 'warning' ? 'bg-yellow-500' :
+                                  'bg-red-500'
+                                }`} />
+                                
+                                {/* Conteúdo */}
+                                <div className="flex-1 min-w-0">
+                                  <p className={`text-sm font-medium text-gray-900 ${
+                                    !notification.read ? 'font-semibold' : ''
+                                  }`}>
+                                    {notification.title}
+                                  </p>
+                                  <p className="text-xs text-gray-600 mt-1">
+                                    {notification.message}
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {formatRelativeTime(notification.created_at)}
+                                  </p>
+                                </div>
+                                
+                                {/* Indicador de não lida */}
+                                {!notification.read && (
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-6 text-center text-gray-500">
+                            <Icon name="bell" className="h-8 w-8 mx-auto text-gray-300 mb-2" />
+                            <p className="text-sm">Nenhuma notificação</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Footer */}
+                      {notifications.length > 0 && (
+                        <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
+                          <Link
+                            href="/notifications"
+                            className="text-xs text-primary hover:text-primary-dark text-center block"
+                            onClick={() => setIsNotificationsOpen(false)}
+                          >
+                            Ver todas as notificações
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             )}
             
@@ -486,12 +678,7 @@ export default function Navbar() {
             className="text-white/80 hover:text-white"
             type="button"
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" strokeWidth={1.5}>
-              {isMobileMenuOpen 
-                ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                : <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              }
-            </svg>
+            <Icon name={isMobileMenuOpen ? "close" : "menu"} className="h-6 w-6" />
           </button>
         </div>
       </div>
@@ -523,16 +710,10 @@ export default function Navbar() {
                 Setores
               </Link>
               {sectors.length > 0 && (
-                <svg 
-                  className={`h-4 w-4 transition-transform text-white/80 ${isMobileSectorsOpen ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24" 
-                  xmlns="http://www.w3.org/2000/svg"
-                  strokeWidth={1.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
+                <Icon 
+                  name="arrow-down" 
+                  className={`h-4 w-4 transition-transform text-white/80 ${isMobileSectorsOpen ? 'rotate-180' : ''}`}
+                />
               )}
             </div>
             

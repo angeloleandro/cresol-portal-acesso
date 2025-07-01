@@ -7,6 +7,7 @@ import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Breadcrumb from '../components/Breadcrumb';
 
 interface System {
   id: string;
@@ -198,11 +199,15 @@ export default function SistemasPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="loading-spinner"></div>
-          <p className="mt-4 text-muted">Carregando sistemas...</p>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="loading-spinner mx-auto mb-4"></div>
+            <p className="body-text text-muted">Carregando sistemas...</p>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -211,30 +216,40 @@ export default function SistemasPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="container py-8">
+      <main className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Sistemas' }
+            ]} 
+          />
+        </div>
+
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="heading-1">Sistemas e Aplicações</h1>
-              <p className="body-text text-muted mt-2">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+            <div className="flex-1">
+              <h1 className="heading-1 text-title mb-2">Sistemas e Aplicações</h1>
+              <p className="body-text text-muted">
                 Acesse todos os sistemas disponíveis para sua função
               </p>
             </div>
             
             {/* Contador de sistemas */}
-            <div className="card-status">
-              <div className="text-sm text-muted">Total de sistemas</div>
+            <div className="card-status min-w-[160px]">
+              <div className="body-text-small text-muted">Total de sistemas</div>
               <div className="text-2xl font-bold text-primary">{filteredSystems.length}</div>
             </div>
           </div>
 
           {/* Filtros e Busca */}
           <div className="card">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               {/* Busca */}
               <div className="md:col-span-2">
-                <label htmlFor="search" className="form-label">
+                <label htmlFor="search" className="form-label block mb-2">
                   Buscar sistemas
                 </label>
                 <div className="relative">
@@ -242,7 +257,7 @@ export default function SistemasPage() {
                     id="search"
                     type="text"
                     placeholder="Digite o nome do sistema ou descrição..."
-                    className="input pl-10"
+                    className="input w-full pl-10"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -256,12 +271,12 @@ export default function SistemasPage() {
 
               {/* Filtro por setor */}
               <div>
-                <label htmlFor="sector-filter" className="form-label">
+                <label htmlFor="sector-filter" className="form-label block mb-2">
                   Filtrar por setor
                 </label>
                 <select
                   id="sector-filter"
-                  className="input"
+                  className="input w-full"
                   value={sectorFilter}
                   onChange={(e) => setSectorFilter(e.target.value)}
                 >
@@ -276,38 +291,40 @@ export default function SistemasPage() {
             </div>
 
             {/* Controles de visualização */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted">Visualização:</span>
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'grid' 
-                      ? 'bg-primary text-white' 
-                      : 'bg-gray-100 text-muted hover:bg-gray-200'
-                  }`}
-                  title="Visualização em grade"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'list' 
-                      ? 'bg-primary text-white' 
-                      : 'bg-gray-100 text-muted hover:bg-gray-200'
-                  }`}
-                  title="Visualização em lista"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                </button>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="body-text-small text-muted">Visualização:</span>
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-md transition-all duration-200 ${
+                      viewMode === 'grid' 
+                        ? 'bg-primary text-white shadow-sm' 
+                        : 'text-muted hover:text-gray-700 hover:bg-gray-50'
+                    }`}
+                    title="Visualização em grade"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-md transition-all duration-200 ${
+                      viewMode === 'list' 
+                        ? 'bg-primary text-white shadow-sm' 
+                        : 'text-muted hover:text-gray-700 hover:bg-gray-50'
+                    }`}
+                    title="Visualização em lista"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
-              <div className="text-sm text-muted">
+              <div className="body-text-small text-muted">
                 {filteredSystems.length} sistema{filteredSystems.length !== 1 ? 's' : ''} encontrado{filteredSystems.length !== 1 ? 's' : ''}
               </div>
             </div>
@@ -317,11 +334,11 @@ export default function SistemasPage() {
         {/* Lista de sistemas */}
         {filteredSystems.length === 0 ? (
           <div className="card text-center py-12">
-            <div className="text-center">
-              <svg className="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <div className="max-w-md mx-auto">
+              <svg className="mx-auto h-16 w-16 text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <h3 className="heading-3 mt-4 mb-2">Nenhum sistema encontrado</h3>
+              <h3 className="heading-3 text-title mb-2">Nenhum sistema encontrado</h3>
               <p className="body-text text-muted">
                 {searchTerm || sectorFilter !== 'all' 
                   ? 'Tente ajustar os filtros para encontrar os sistemas desejados.'
@@ -337,11 +354,11 @@ export default function SistemasPage() {
               : 'space-y-4'
           }>
             {filteredSystems.map((system) => (
-              <div key={system.id} className="card hover:shadow-md transition-all duration-200 hover:-translate-y-1">
-                <div className={`${viewMode === 'list' ? 'flex items-center' : ''}`}>
+              <div key={system.id} className="card group">
+                <div className={`${viewMode === 'list' ? 'flex items-start gap-4' : ''}`}>
                   {/* Ícone do sistema */}
-                  <div className={`${viewMode === 'list' ? 'mr-4' : 'mb-4'} flex-shrink-0`}>
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <div className={`${viewMode === 'list' ? 'flex-shrink-0' : 'mb-4'}`}>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center transition-all duration-200 group-hover:bg-primary/20">
                       {system.icon ? (
                         <OptimizedImage
                           src={system.icon}
@@ -352,22 +369,24 @@ export default function SistemasPage() {
                         />
                       ) : (
                         <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                       )}
                     </div>
                   </div>
 
                   {/* Conteúdo */}
-                  <div className={`${viewMode === 'list' ? 'flex-1' : ''}`}>
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="heading-4">{system.name}</h3>
+                  <div className={`${viewMode === 'list' ? 'flex-1 min-w-0' : ''}`}>
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="heading-4 text-title group-hover:text-primary transition-colors duration-200 truncate">
+                        {system.name}
+                      </h3>
                       <button
                         onClick={() => toggleFavorite(system.id)}
-                        className={`p-1 rounded transition-colors ${
+                        className={`flex-shrink-0 p-1 rounded-md transition-all duration-200 ${
                           favorites.has(system.id)
-                            ? 'text-yellow-500 hover:text-yellow-600'
-                            : 'text-gray-400 hover:text-yellow-500'
+                            ? 'text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50'
+                            : 'text-gray-400 hover:text-yellow-500 hover:bg-gray-50'
                         }`}
                         title={favorites.has(system.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                       >
@@ -378,9 +397,11 @@ export default function SistemasPage() {
                     </div>
                     
                     {system.sector_name && (
-                      <span className="badge-success mb-3">
-                        {system.sector_name}
-                      </span>
+                      <div className="mb-3">
+                        <span className="badge-success">
+                          {system.sector_name}
+                        </span>
+                      </div>
                     )}
                     
                     <p className="body-text-small text-muted mb-4 line-clamp-2">
@@ -392,10 +413,10 @@ export default function SistemasPage() {
                         href={system.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn-primary text-sm"
+                        className="btn-primary inline-flex items-center gap-2 text-sm"
                       >
                         Acessar Sistema
-                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                       </Link>

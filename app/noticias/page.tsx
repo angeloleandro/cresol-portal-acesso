@@ -6,6 +6,7 @@ import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Footer from '../components/Footer';
+import Breadcrumb from '../components/Breadcrumb';
 
 interface NewsItem {
   id: string;
@@ -134,6 +135,16 @@ export default function NoticiasPage() {
 
       {/* Conteúdo principal */}
       <main className="container py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Notícias' }
+            ]} 
+          />
+        </div>
+
         <div className="mb-8">
           <h1 className="heading-1 mb-2">Notícias</h1>
           <p className="body-text text-muted">Acompanhe as últimas atualizações e comunicados da Cresol.</p>

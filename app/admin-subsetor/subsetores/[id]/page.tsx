@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import Cropper from 'react-easy-crop';
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { supabase } from '@/lib/supabase';
 
 interface Profile {
@@ -132,6 +133,11 @@ export default function SubsectorManagePage() {
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteEventConfirmOpen, setIsDeleteEventConfirmOpen] = useState(false);
+  const [isDeleteNewsConfirmOpen, setIsDeleteNewsConfirmOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<SubsectorEvent | null>(null);
+  const [newsToDelete, setNewsToDelete] = useState<SubsectorNews | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Estados para dados dos modais
   const [currentEvent, setCurrentEvent] = useState<Partial<SubsectorEvent>>({});
@@ -457,24 +463,37 @@ export default function SubsectorManagePage() {
     }
   };
 
-  const handleDeleteEvent = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este evento?')) {
-      return;
-    }
+  const handleDeleteEventClick = (event: SubsectorEvent) => {
+    setEventToDelete(event);
+    setIsDeleteEventConfirmOpen(true);
+  };
 
+  const handleDeleteEventConfirm = async () => {
+    if (!eventToDelete) return;
+
+    setIsDeleting(true);
     try {
       const { error } = await supabase
         .from('subsector_events')
         .delete()
-        .eq('id', id);
+        .eq('id', eventToDelete.id);
 
       if (error) throw error;
 
       await fetchEvents();
+      setIsDeleteEventConfirmOpen(false);
+      setEventToDelete(null);
     } catch (error) {
       console.error('Erro ao excluir evento:', error);
       alert('Erro ao excluir evento. Tente novamente.');
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleDeleteEventCancel = () => {
+    setIsDeleteEventConfirmOpen(false);
+    setEventToDelete(null);
   };
 
   // Funções para modais de notícias
@@ -537,24 +556,37 @@ export default function SubsectorManagePage() {
     }
   };
 
-  const handleDeleteNews = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta notícia?')) {
-      return;
-    }
+  const handleDeleteNewsClick = (newsItem: SubsectorNews) => {
+    setNewsToDelete(newsItem);
+    setIsDeleteNewsConfirmOpen(true);
+  };
 
+  const handleDeleteNewsConfirm = async () => {
+    if (!newsToDelete) return;
+
+    setIsDeleting(true);
     try {
       const { error } = await supabase
         .from('subsector_news')
         .delete()
-        .eq('id', id);
+        .eq('id', newsToDelete.id);
 
       if (error) throw error;
 
       await fetchNews();
+      setIsDeleteNewsConfirmOpen(false);
+      setNewsToDelete(null);
     } catch (error) {
       console.error('Erro ao excluir notícia:', error);
       alert('Erro ao excluir notícia. Tente novamente.');
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleDeleteNewsCancel = () => {
+    setIsDeleteNewsConfirmOpen(false);
+    setNewsToDelete(null);
   };
 
   // Funções para grupos
@@ -860,7 +892,7 @@ export default function SubsectorManagePage() {
                             </svg>
                           </button>
                           <button 
-                            onClick={() => handleDeleteEvent(event.id)}
+                            onClick={() => handleDeleteEventClick(event)}
                             className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -935,7 +967,7 @@ export default function SubsectorManagePage() {
                             </svg>
                           </button>
                           <button 
-                            onClick={() => handleDeleteNews(item.id)}
+                            onClick={() => handleDeleteNewsClick(item)}
                             className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1541,6 +1573,30 @@ export default function SubsectorManagePage() {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmação para excluir evento */}
+      <ConfirmationModal
+        isOpen={isDeleteEventConfirmOpen}
+        onClose={handleDeleteEventCancel}
+        onConfirm={handleDeleteEventConfirm}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir o evento <strong>"${eventToDelete?.title}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá o evento permanentemente.`}
+        isLoading={isDeleting}
+        confirmButtonText="Excluir Evento"
+        cancelButtonText="Cancelar"
+      />
+
+      {/* Modal de confirmação para excluir notícia */}
+      <ConfirmationModal
+        isOpen={isDeleteNewsConfirmOpen}
+        onClose={handleDeleteNewsCancel}
+        onConfirm={handleDeleteNewsConfirm}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir a notícia <strong>"${newsToDelete?.title}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá a notícia permanentemente.`}
+        isLoading={isDeleting}
+        confirmButtonText="Excluir Notícia"
+        cancelButtonText="Cancelar"
+      />
     </div>
   );
 } 

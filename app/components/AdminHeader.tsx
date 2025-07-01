@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import OptimizedImage from './OptimizedImage';
+import CresolLogo from './CresolLogo';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -22,14 +22,8 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         <div className="flex items-center">
           <Link href="/admin" className="flex items-center">
-            <div className="relative h-8 w-20 mr-3">
-              <OptimizedImage 
-                src="/logo-cresol.png" 
-                alt="Logo Cresol" 
-                fill
-                sizes="(max-width: 768px) 100vw, 80px"
-                className="object-contain"
-              />
+            <div className="mr-3">
+              <CresolLogo width={80} height={32} />
             </div>
             <div className="h-5 w-px bg-gray-300 mx-3 hidden md:block"></div>
             <span className="text-lg font-medium text-gray-900 hidden md:block">Admin</span>

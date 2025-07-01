@@ -2,9 +2,11 @@
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import Breadcrumb from "../components/Breadcrumb";
 import { useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 import OptimizedImage from "../components/OptimizedImage";
+import { Icon } from "../components/icons/Icon";
 
 interface DashboardVideo {
   id: string;
@@ -56,8 +58,18 @@ export default function VideosPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="container py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Vídeos' }
+            ]} 
+          />
+        </div>
+
         <div className="mb-8">
-          <h1 className="heading-1 mb-2">Galeria de Vídeos</h1>
+          <h1 className="heading-1 text-title mb-2">Galeria de Vídeos</h1>
           <p className="body-text text-muted">Assista aos vídeos institucionais e de treinamento da Cresol.</p>
         </div>
 
@@ -65,18 +77,16 @@ export default function VideosPage() {
           {loading ? (
             <div className="text-center py-12">
               <div className="loading-spinner mx-auto"></div>
-              <p className="mt-4 text-muted">Carregando vídeos...</p>
+              <p className="mt-4 body-text text-muted">Carregando vídeos...</p>
             </div>
           ) : videos.length === 0 ? (
             <div className="text-center py-12">
-              <svg className="mx-auto h-12 w-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              <h3 className="heading-3 mt-4 mb-2">Nenhum vídeo encontrado</h3>
+              <Icon name="video" className="mx-auto h-16 w-16 text-muted mb-4" />
+              <h3 className="heading-3 text-title mb-2">Nenhum vídeo encontrado</h3>
               <p className="body-text text-muted">A galeria de vídeos ainda não possui conteúdo disponível.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid-responsive">
               {videos.map((video) => (
                 <div key={video.id} className="w-full">
                   <VideoCard video={video} onClick={handleOpenModal} />
@@ -92,15 +102,13 @@ export default function VideosPage() {
             <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
               {/* Cabeçalho do modal */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <h3 className="heading-4">{selectedVideo.title}</h3>
+                <h3 className="heading-4 text-title">{selectedVideo.title}</h3>
                 <button
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                   onClick={handleCloseModal}
                   aria-label="Fechar"
                 >
-                  <svg className="w-6 h-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <Icon name="close" className="h-6 w-6 text-muted" />
                 </button>
               </div>
               
@@ -130,7 +138,7 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
   const shortTitle = video.title.length > maxLen ? video.title.slice(0, maxLen) + '...' : video.title;
   
   return (
-    <div className="card cursor-pointer hover:shadow-md transition-all duration-200 hover:-translate-y-1" onClick={() => onClick(video)}>
+    <div className="card cursor-pointer hover:shadow-md transition-all duration-200 hover:-translate-y-1 group" onClick={() => onClick(video)}>
       <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden mb-3">
         {video.thumbnail_url ? (
           <OptimizedImage 
@@ -144,24 +152,20 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
           />
         ) : (
           <div className="flex items-center justify-center h-full">
-            <svg className="w-12 h-12 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
+            <Icon name="video" className="h-16 w-16 text-muted" />
           </div>
         )}
         
         {/* Ícone de play overlay */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-primary ml-1" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
+            <Icon name="play" className="h-8 w-8 text-primary ml-1" />
           </div>
         </div>
       </div>
       
       <div className="p-1">
-        <h3 className="heading-4 line-clamp-2" title={video.title}>{shortTitle}</h3>
+        <h3 className="heading-4 text-title line-clamp-2" title={video.title}>{shortTitle}</h3>
       </div>
     </div>
   );

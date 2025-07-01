@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
+import Breadcrumb from '@/app/components/Breadcrumb';
 import { Icon } from '../../components/icons';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 
@@ -324,6 +325,17 @@ export default function SectorsManagement() {
         <AdminHeader user={user} />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Breadcrumb */}
+          <div className="mb-6">
+            <Breadcrumb 
+              items={[
+                { label: 'Home', href: '/home', icon: 'house' },
+                { label: 'Administração', href: '/admin' },
+                { label: 'Setores' }
+              ]} 
+            />
+          </div>
+
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">

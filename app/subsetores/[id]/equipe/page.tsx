@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import { Icon } from '../../../components/icons';
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import Breadcrumb from '../../../components/Breadcrumb';
 
 interface User {
   id: string;
@@ -37,7 +39,7 @@ interface Subsector {
   id: string;
   name: string;
   description?: string;
-  sectors: { name: string } | { name: string }[];
+  sectors: { id: string; name: string } | { id: string; name: string }[];
 }
 
 export default function SubsectorTeamPage() {
@@ -60,6 +62,9 @@ export default function SubsectorTeamPage() {
   const [memberPosition, setMemberPosition] = useState('');
   const [memberDescription, setMemberDescription] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<TeamMember | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchSubsector = useCallback(async () => {
     const { data, error } = await supabase
@@ -68,7 +73,7 @@ export default function SubsectorTeamPage() {
         id,
         name,
         description,
-        sectors!inner(name)
+        sectors!inner(id, name)
       `)
       .eq('id', subsectorId)
       .single();
@@ -234,28 +239,40 @@ export default function SubsectorTeamPage() {
     }
   };
 
-  const handleRemoveMember = async (memberId: string) => {
-    if (!confirm('Tem certeza que deseja remover este membro da equipe?')) {
-      return;
-    }
+  const handleRemoveMemberClick = (member: TeamMember) => {
+    setMemberToDelete(member);
+    setShowDeleteModal(true);
+  };
 
+  const handleRemoveMemberConfirm = async () => {
+    if (!memberToDelete) return;
+
+    setIsDeleting(true);
     try {
-      const response = await fetch(`/api/admin/subsector-team?member_id=${memberId}`, {
+      const response = await fetch(`/api/admin/subsector-team?member_id=${memberToDelete.id}`, {
         method: 'DELETE'
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        alert('Membro removido com sucesso!');
         fetchTeamMembers();
+        setShowDeleteModal(false);
+        setMemberToDelete(null);
       } else {
         alert(data.error || 'Erro ao remover membro');
       }
     } catch (error) {
       console.error('Erro ao remover membro:', error);
       alert('Erro ao remover membro');
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleRemoveMemberCancel = () => {
+    setShowDeleteModal(false);
+    setMemberToDelete(null);
   };
 
   const openEditModal = (member: TeamMember) => {
@@ -347,6 +364,19 @@ export default function SubsectorTeamPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Setores', href: '/setores' },
+              { label: Array.isArray(subsector?.sectors) ? subsector.sectors[0]?.name || 'Setor' : subsector?.sectors?.name || 'Setor', href: `/setores/${Array.isArray(subsector?.sectors) ? subsector.sectors[0]?.id : subsector?.sectors?.id}` },
+              { label: subsector?.name || 'Sub-setor', href: `/subsetores/${subsectorId}` },
+              { label: 'Equipe' }
+            ]} 
+          />
+        </div>
+
         {/* Descrição do Sub-setor */}
         {subsector.description && (
           <div className="bg-white rounded-xl shadow-sm border border-cresol-gray-light p-6 mb-8">
@@ -438,7 +468,7 @@ export default function SubsectorTeamPage() {
                             <Icon name="pencil" className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleRemoveMember(member.id)}
+                            onClick={() => handleRemoveMemberClick(member)}
                             className="p-1 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                             title="Remover da equipe"
                           >
@@ -630,6 +660,18 @@ export default function SubsectorTeamPage() {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmação para remover membro */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleRemoveMemberCancel}
+        onConfirm={handleRemoveMemberConfirm}
+        title="Confirmar Remoção"
+        message={`Tem certeza que deseja remover <strong>${memberToDelete?.profiles?.full_name}</strong> da equipe?<br><br>Esta ação não pode ser desfeita e o membro será removido permanentemente da equipe do subsetor.`}
+        isLoading={isDeleting}
+        confirmButtonText="Remover Membro"
+        cancelButtonText="Cancelar"
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
+import Breadcrumb from '../components/Breadcrumb';
 
 interface Sector {
   id: string;
@@ -66,6 +67,16 @@ export default function SetoresPage() {
 
       {/* Conteúdo principal */}
       <main className="container py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Setores' }
+            ]} 
+          />
+        </div>
+
         <div className="mb-8">
           <h1 className="heading-1 mb-2">Setores</h1>
           <p className="body-text text-muted">Conheça os setores da Cresol e acesse informações específicas de cada área.</p>

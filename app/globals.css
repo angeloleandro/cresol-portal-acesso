@@ -70,6 +70,67 @@ body {
   @apply antialiased bg-gray-50 text-gray-800;
 }
 
+/* Layout - Sistema de Container Responsivo */
+.container {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin: 0 auto;
+}
+
+/* Tablet - 768px */
+@media (min-width: 48rem) {
+  .container {
+    max-width: 48rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* Desktop - 1024px */
+@media (min-width: 64rem) {
+  .container {
+    max-width: 64rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Large Desktop - 1280px */
+@media (min-width: 80rem) {
+  .container {
+    max-width: 80rem;
+  }
+}
+
+/* Classes Utilitárias de Layout */
+.flex-center { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.grid-responsive { 
+  display: grid; 
+  gap: 1.5rem; 
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+}
+
+/* Estados de Carregamento */
+.loading-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--color-gray-light);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Botões Padronizados - Design System */
 .btn-primary {
   background-color: var(--color-primary);

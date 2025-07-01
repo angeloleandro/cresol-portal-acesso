@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
+import Breadcrumb from '../../components/Breadcrumb';
 
 interface NewsItem {
   id: string;
@@ -168,6 +169,17 @@ export default function NoticiaDetalhePage() {
 
       {/* Conteúdo principal */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Notícias', href: '/noticias' },
+              { label: news.title }
+            ]} 
+          />
+        </div>
+
         {/* Cabeçalho da notícia */}
         <div className="mb-6">
           <div className="flex items-center space-x-2 mb-3">

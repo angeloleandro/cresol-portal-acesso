@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
+import Breadcrumb from '@/app/components/Breadcrumb';
 
 interface NotificationGroup {
   id: string;
@@ -272,6 +273,17 @@ export default function NotificationsAdmin() {
       <AdminHeader user={user} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Notificações' }
+            ]} 
+          />
+        </div>
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Gerenciar Notificações</h1>
           <p className="mt-2 text-gray-600">Envie mensagens e gerencie grupos de notificação</p>

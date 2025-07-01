@@ -37,8 +37,17 @@ import { SettingsIcon } from './SettingsIcon';
 import { CloseIcon } from './CloseIcon';
 import { MailIcon } from './MailIcon';
 import { SearchIcon } from './SearchIcon';
-// Adicione outros ícones aqui
-// import { OutroIcone } from './OutroIcone';
+// Novos ícones padronizados
+import { CalendarIcon } from './CalendarIcon';
+import { ListIcon } from './ListIcon';
+import { VideoIcon } from './VideoIcon';
+import { StarIcon } from './StarIcon';
+import { ArrowDownIcon } from './ArrowDownIcon';
+import { MenuIcon } from './MenuIcon';
+import { PlayIcon } from './PlayIcon';
+import { SortIcon } from './SortIcon';
+import { GridIcon } from './GridIcon';
+import { HouseIcon } from './HouseIcon';
 
 export type IconName =
   | 'arrow-left'
@@ -78,7 +87,18 @@ export type IconName =
   | 'settings'
   | 'close'
   | 'mail'
-  | 'search'; // Adicione outros nomes de ícones aqui
+  | 'search'
+  // Novos ícones
+  | 'calendar'
+  | 'list'
+  | 'video'
+  | 'star'
+  | 'arrow-down'
+  | 'menu'
+  | 'play'
+  | 'sort'
+  | 'grid'
+  | 'house';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   name: IconName;
@@ -123,8 +143,17 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   'close': CloseIcon,
   'mail': MailIcon,
   'search': SearchIcon,
-  // Adicione outros ícones aqui
-  // 'outro-icone': OutroIcone,
+  // Novos ícones
+  'calendar': CalendarIcon,
+  'list': ListIcon,
+  'video': VideoIcon,
+  'star': StarIcon,
+  'arrow-down': ArrowDownIcon,
+  'menu': MenuIcon,
+  'play': PlayIcon,
+  'sort': SortIcon,
+  'grid': GridIcon,
+  'house': HouseIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, ...props }) => {

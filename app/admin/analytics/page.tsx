@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
-import Breadcrumbs from '@/app/components/Breadcrumbs';
+import Breadcrumb from '@/app/components/Breadcrumb';
 import { Icon } from '@/app/components/icons/Icon';
 
 interface AnalyticsData {
@@ -269,7 +269,16 @@ export default function AnalyticsPage() {
       <AdminHeader user={user} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Breadcrumbs className="mb-6" />
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Analytics' }
+            ]} 
+          />
+        </div>
         
         {/* Header */}
         <div className="mb-8">
