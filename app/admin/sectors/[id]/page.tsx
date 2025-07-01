@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Cropper from 'react-easy-crop';
@@ -771,11 +771,11 @@ export default function SectorDashboard() {
       return (
         <div className="mt-2 relative">
           <div className="relative h-40 w-full md:w-64 border rounded-md overflow-hidden">
-            <Image 
+            <OptimizedImage 
               src={imagePreview} 
               alt="Preview da imagem" 
               fill
-              style={{ objectFit: 'cover' }}
+              className="object-cover"
             />
           </div>
           <button

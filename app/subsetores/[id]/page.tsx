@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../../components/Navbar';
@@ -260,12 +260,12 @@ export default function SubsectorDetailsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center mb-4">
             <div className="relative h-12 w-28 mr-4">
-              <Image 
+              <OptimizedImage 
                 src="/logo-cresol.png" 
                 alt="Logo Cresol" 
                 fill
                 sizes="(max-width: 768px) 100vw, 112px"
-                style={{ objectFit: 'contain' }}
+                className="object-contain"
                 priority
               />
             </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
@@ -238,11 +238,11 @@ export default function SectorSystemsManagement() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <div className="relative h-10 w-24 mr-4">
-              <Image 
+              <OptimizedImage 
                 src="/logo-cresol.png" 
                 alt="Logo Cresol" 
                 fill
-                style={{ objectFit: 'contain' }}
+                className="object-contain"
               />
             </div>
             <h1 className="text-xl font-semibold text-gray-800">Painel Administrativo</h1>
@@ -302,12 +302,11 @@ export default function SectorSystemsManagement() {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center">
                     <div className="w-10 h-10 mr-3 relative">
-                      <Image 
+                      <OptimizedImage 
                         src={system.icon || '/icons/default-app.svg'} 
                         alt={system.name} 
                         fill
-                        style={{ objectFit: 'contain' }}
-                        className="rounded"
+                        className="rounded object-contain"
                       />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-800">{system.name}</h3>
@@ -424,7 +423,7 @@ export default function SectorSystemsManagement() {
                       `}
                     >
                       <div className="relative w-8 h-8">
-                        <Image src={icon} alt="Ícone" fill style={{ objectFit: 'contain' }} />
+                        <OptimizedImage src={icon} alt="Ícone" fill className="object-contain" />
                       </div>
                     </button>
                   ))}
@@ -518,7 +517,7 @@ export default function SectorSystemsManagement() {
                       `}
                     >
                       <div className="relative w-8 h-8">
-                        <Image src={icon} alt="Ícone" fill style={{ objectFit: 'contain' }} />
+                        <OptimizedImage src={icon} alt="Ícone" fill className="object-contain" />
                       </div>
                     </button>
                   ))}

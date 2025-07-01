@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -176,12 +176,12 @@ export default function AdminSubsectorPage() {
               type="button"
             >
               <div className="relative h-10 w-24 mr-3">
-                <Image 
+                <OptimizedImage 
                   src="/logo-cresol.png" 
                   alt="Logo Cresol" 
                   fill
                   sizes="(max-width: 768px) 100vw, 96px"
-                  style={{ objectFit: 'contain' }}
+                  className="object-contain"
                 />
               </div>
               <h1 className="text-xl font-semibold text-cresol-gray">Portal Cresol</h1>

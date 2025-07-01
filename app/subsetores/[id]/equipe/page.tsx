@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import { Icon } from '../../../components/icons';
 
@@ -314,12 +314,12 @@ export default function SubsectorTeamPage() {
                 <Icon name="arrow-left" className="h-5 w-5" />
               </button>
               <div className="relative h-10 w-24 mr-4">
-                <Image 
+                <OptimizedImage 
                   src="/logo-cresol.png" 
                   alt="Logo Cresol" 
                   fill
                   sizes="(max-width: 768px) 100vw, 96px"
-                  style={{ objectFit: 'contain' }}
+                  className="object-contain"
                 />
               </div>
               <div>
@@ -406,7 +406,7 @@ export default function SubsectorTeamPage() {
                       <div className="flex items-center">
                         <div className="relative h-12 w-12 rounded-full overflow-hidden bg-cresol-gray-light mr-3">
                           {member.profiles.avatar_url ? (
-                            <Image
+                            <OptimizedImage
                               src={member.profiles.avatar_url}
                               alt={member.profiles.full_name}
                               fill
@@ -516,7 +516,7 @@ export default function SubsectorTeamPage() {
                         <div className="flex items-center">
                           <div className="relative h-8 w-8 rounded-full overflow-hidden bg-cresol-gray-light mr-3">
                             {user.avatar_url ? (
-                              <Image
+                              <OptimizedImage
                                 src={user.avatar_url}
                                 alt={user.full_name}
                                 fill

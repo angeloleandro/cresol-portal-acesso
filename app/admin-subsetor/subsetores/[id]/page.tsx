@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import Cropper from 'react-easy-crop';
 import { supabase } from '@/lib/supabase';
@@ -984,7 +984,7 @@ export default function SubsectorManagePage() {
                       </h4>
                       <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                         {system.icon ? (
-                          <Image
+                          <OptimizedImage
                             src={system.icon}
                             alt={system.name}
                             width={24}

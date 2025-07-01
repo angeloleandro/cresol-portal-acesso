@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 
 interface Sector {
@@ -147,11 +147,11 @@ export default function AdminSetorDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <div className="relative h-10 w-24 mr-4">
-              <Image 
+              <OptimizedImage 
                 src="/logo-cresol.png" 
                 alt="Logo Cresol" 
                 fill
-                style={{ objectFit: 'contain' }}
+                className="object-contain"
               />
             </div>
             <h1 className="text-xl font-semibold text-gray-800">Painel Admin Setorial</h1>
