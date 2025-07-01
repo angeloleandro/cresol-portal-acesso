@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import OptimizedImage from "@/app/components/OptimizedImage";
 import { supabase } from "@/lib/supabase";
 import AdminHeader from "@/app/components/AdminHeader";
 import ImageUploadForm from "@/app/components/ImageUploadForm";
@@ -108,7 +108,15 @@ export default function AdminGallery() {
             <div key={img.id} className="bg-white rounded-lg shadow border border-cresol-gray-light overflow-hidden flex flex-col">
               <div className="relative w-full h-48 bg-cresol-gray-light">
                 {img.image_url ? (
-                  <Image src={img.image_url} alt={img.title || "Imagem da galeria"} fill className="object-cover" />
+                  <OptimizedImage 
+                    src={img.image_url} 
+                    alt={img.title || "Imagem da galeria"} 
+                    fill 
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    quality={80}
+                    fallbackText="Imagem indisponível"
+                  />
                 ) : (
                   <div className="flex items-center justify-center h-full text-cresol-gray">Sem imagem</div>
                 )}

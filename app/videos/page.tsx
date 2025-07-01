@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
-import Image from "next/image";
+import OptimizedImage from "../components/OptimizedImage";
 
 interface DashboardVideo {
   id: string;
@@ -133,12 +133,14 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
     <div className="card cursor-pointer hover:shadow-md transition-all duration-200 hover:-translate-y-1" onClick={() => onClick(video)}>
       <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden mb-3">
         {video.thumbnail_url ? (
-          <Image 
+          <OptimizedImage 
             src={video.thumbnail_url} 
             alt={video.title} 
             fill 
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px" 
-            className="object-cover" 
+            className="object-cover"
+            quality={80}
+            fallbackText="Thumbnail indisponível"
           />
         ) : (
           <div className="flex items-center justify-center h-full">

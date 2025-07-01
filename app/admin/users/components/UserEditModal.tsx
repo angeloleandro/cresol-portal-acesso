@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 
 interface UserProfile {
@@ -381,12 +381,14 @@ export default function UserEditModal({
           <div className="mb-6 flex justify-center">
             <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-50 border border-cresol-gray-light">
               {(avatarPreview || user.avatar_url) ? (
-                <Image
+                <OptimizedImage
                   src={avatarPreview || user.avatar_url || ''}
                   alt={`Avatar de ${user.full_name}`}
                   fill
                   sizes="96px"
                   className="object-cover"
+                  quality={80}
+                  fallbackText="Avatar"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import UserEditModal from './UserEditModal';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal'; // Importe o modal
@@ -116,11 +116,14 @@ export default function UserList({
               <div className="flex items-center space-x-3 mb-4">
                 <div className="relative h-12 w-12 rounded-full overflow-hidden bg-cresol-gray-light flex-shrink-0">
                   {user.avatar_url ? (
-                    <Image
+                    <OptimizedImage
                       src={user.avatar_url}
                       alt={user.full_name}
                       fill
                       className="object-cover"
+                      sizes="48px"
+                      quality={80}
+                      fallbackText="Avatar"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-cresol-gray-dark text-lg font-semibold">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import OptimizedImage from "@/app/components/OptimizedImage";
 import { supabase } from "@/lib/supabase";
 import AdminHeader from "@/app/components/AdminHeader";
 import BannerUploadForm from '@/app/components/BannerUploadForm';
@@ -110,7 +110,15 @@ export default function AdminBanners() {
             <div key={banner.id} className="bg-white rounded-lg shadow border border-cresol-gray-light overflow-hidden flex flex-col">
               <div className="relative w-full h-48 bg-cresol-gray-light">
                 {banner.image_url ? (
-                  <Image src={banner.image_url} alt={banner.title || "Banner"} fill className="object-cover" />
+                  <OptimizedImage 
+                    src={banner.image_url} 
+                    alt={banner.title || "Banner"} 
+                    fill 
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    quality={80}
+                    fallbackText="Banner indisponível"
+                  />
                 ) : (
                   <div className="flex items-center justify-center h-full text-cresol-gray">Sem imagem</div>
                 )}

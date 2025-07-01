@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 
 interface WorkLocation {
@@ -194,12 +194,14 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
           <div className="flex-shrink-0">
             <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-50 border border-cresol-gray-light">
               {newUserAvatarPreview ? (
-                <Image
+                <OptimizedImage
                   src={newUserAvatarPreview}
                   alt="Preview de avatar"
                   fill
                   sizes="96px"
                   className="object-cover"
+                  quality={80}
+                  fallbackText="Avatar"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">

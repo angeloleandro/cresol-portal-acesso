@@ -42,10 +42,11 @@ export default function OptimizedImage({
   const [imageError, setImageError] = useState(false);
   const [imageSrc, setImageSrc] = useState(src);
 
-  // WORKAROUND: Forçar unoptimized para imagens do Supabase na Vercel para evitar erro 402
+  // ESTRATÉGIA CONFIRMADA: Sempre forçar unoptimized para imagens do Supabase na Vercel
+  // Baseado no sucesso dos testes onde "Não Otimizada" funcionou perfeitamente
   const isVercel = process.env.VERCEL_ENV !== undefined || process.env.VERCEL === '1';
   const isSupabaseImage = imageSrc?.includes('supabase.co');
-  const shouldForceUnoptimized = isVercel && isSupabaseImage;
+  const shouldForceUnoptimized = isSupabaseImage; // Sempre desotimizar Supabase, não apenas na Vercel
 
   // Log de debug para entender o comportamento
   if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV !== undefined) {

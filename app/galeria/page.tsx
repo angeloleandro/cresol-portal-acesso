@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
-import Image from "next/image";
+import OptimizedImage from "../components/OptimizedImage";
 
 interface GalleryImage {
   id: string;
@@ -82,11 +82,14 @@ export default function GalleryPage() {
                   onClick={() => handleOpenModal(img)}
                 >
                   <div className="relative w-full aspect-[4/3] bg-gray-100">
-                    <Image 
+                    <OptimizedImage 
                       src={img.image_url} 
                       alt={img.title || "Imagem da galeria"} 
                       fill 
-                      className="object-cover" 
+                      className="object-cover"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                      quality={80}
+                      fallbackText="Imagem indisponível"
                     />
                   </div>
                   {img.title && (
@@ -122,11 +125,15 @@ export default function GalleryPage() {
               
               {/* Conteúdo do modal */}
               <div className="relative max-h-[70vh] bg-black flex items-center justify-center">
-                <Image 
+                <OptimizedImage 
                   src={selectedImage.image_url} 
                   alt={selectedImage.title || "Imagem da galeria"} 
                   fill
-                  className="object-contain" 
+                  className="object-contain"
+                  sizes="90vw"
+                  quality={90}
+                  priority
+                  fallbackText="Imagem indisponível"
                 />
               </div>
             </div>
