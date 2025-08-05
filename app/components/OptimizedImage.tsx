@@ -42,11 +42,12 @@ export default function OptimizedImage({
   const [imageError, setImageError] = useState(false);
   const [imageSrc, setImageSrc] = useState(src);
 
-  // ESTRATÉGIA CONFIRMADA: Sempre forçar unoptimized para imagens do Supabase na Vercel
-  // Baseado no sucesso dos testes onde "Não Otimizada" funcionou perfeitamente
+  // ESTRATÉGIA DEFINITIVA: Usar <img> tag para SVGs (recomendação oficial Vercel)
+  // Next.js Image Component não é adequado para SVGs, mesmo com unoptimized=true
   const isVercel = process.env.VERCEL_ENV !== undefined || process.env.VERCEL === '1';
   const isSupabaseImage = imageSrc?.includes('supabase.co');
-  const shouldForceUnoptimized = isSupabaseImage; // Sempre desotimizar Supabase, não apenas na Vercel
+  const isSvg = imageSrc?.toLowerCase().endsWith('.svg');
+  const shouldForceUnoptimized = isSupabaseImage; // Apenas Supabase precisa de unoptimized
 
   // Log de debug para entender o comportamento
   if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV !== undefined) {
@@ -55,7 +56,9 @@ export default function OptimizedImage({
       alt,
       isVercel,
       isSupabaseImage,
+      isSvg,
       shouldForceUnoptimized,
+      renderingStrategy: isSvg ? 'HTML_IMG_TAG' : 'NEXT_IMAGE',
       vercelEnv: process.env.VERCEL_ENV,
       nodeEnv: process.env.NODE_ENV
     });
@@ -86,14 +89,21 @@ export default function OptimizedImage({
     }
   };
 
-  // Verificar se a URL é válida e se está no formato correto para a Vercel
+  // Verificar se a URL é válida (URLs externas ou caminhos locais)
   const isValidUrl = (url: string) => {
+    // CORREÇÃO: Permitir caminhos relativos locais (pasta public/)
+    if (url.startsWith('/')) {
+      // Caminhos que começam com / são válidos (arquivos da pasta public)
+      return true;
+    }
+
+    // Para URLs externas, fazer validações mais rigorosas
     try {
       const parsedUrl = new URL(url);
       
       // Para Vercel, verificar se é HTTPS e se o domínio está permitido
       if (parsedUrl.protocol !== 'https:') {
-        console.warn('OptimizedImage: URL deve usar HTTPS para Vercel Image Optimization', url);
+        console.warn('OptimizedImage: URL externa deve usar HTTPS para Vercel Image Optimization', url);
         return false;
       }
       
@@ -102,11 +112,12 @@ export default function OptimizedImage({
         return true;
       }
       
-      // Outros domínios permitidos
+      // Outros domínios externos permitidos
       const allowedDomains = ['img.youtube.com', 'cresol.com.br'];
       return allowedDomains.some(domain => parsedUrl.hostname.includes(domain));
       
     } catch {
+      // Se não conseguiu parsear como URL, rejeitar
       return false;
     }
   };
@@ -140,6 +151,29 @@ export default function OptimizedImage({
     );
   }
 
+  // SOLUÇÃO HÍBRIDA: SVGs usam <img> tag, outros formatos usam next/image
+  if (isSvg) {
+    // Para SVGs, usar elemento HTML <img> nativo (recomendação oficial)
+    const imgProps = {
+      src: imageSrc,
+      alt,
+      className: `${className} ${fill ? 'absolute inset-0 w-full h-full object-contain' : ''}`,
+      onError: handleImageError,
+      style: fill ? { 
+        position: 'absolute' as const, 
+        inset: 0, 
+        width: '100%', 
+        height: '100%', 
+        objectFit: 'contain' as const 
+      } : { width, height },
+      ...props
+    };
+
+    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+    return <img {...imgProps} />;
+  }
+
+  // Para outros formatos (PNG, JPG, WebP), usar next/image
   const imageProps = {
     src: imageSrc,
     alt,
@@ -150,7 +184,7 @@ export default function OptimizedImage({
     quality,
     placeholder,
     blurDataURL,
-    unoptimized: shouldForceUnoptimized || unoptimized, // Forçar unoptimized na Vercel para Supabase
+    unoptimized: shouldForceUnoptimized || unoptimized, // Apenas para Supabase
     ...props
   };
 

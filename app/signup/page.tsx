@@ -132,13 +132,13 @@ export default function Signup() {
     <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
       <div className="card max-w-md w-full">
         <div className="flex flex-col items-center mb-6">
-          <div className="relative w-40 h-20 mb-4">
+          <div className="relative w-48 h-24 mb-4">
             <OptimizedImage 
-              src="/logo-cresol.png" 
+              src="/logo-horizontal-laranja.svg" 
               alt="Logo Cresol" 
               fill
               priority
-              sizes="(max-width: 768px) 100vw, 160px"
+              sizes="(max-width: 768px) 100vw, 192px"
               className="object-contain"
             />
           </div>

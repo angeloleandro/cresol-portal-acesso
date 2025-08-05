@@ -31,10 +31,11 @@ const nextConfig = {
     formats: ['image/webp'],
     // Cache TTL otimizado (31 dias conforme recomendação Vercel)
     minimumCacheTTL: 2678400, // 31 dias
-    // Qualidades permitidas para otimização
+    // Qualidades permitidas para otimização  
     dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // CORREÇÃO: Remover contentDispositionType e CSP restritivo para SVGs funcionarem
+    // contentDispositionType: 'attachment', // Causava download em vez de exibição
+    // contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;", // CSP muito restritivo
     // Manter otimização ativa (recomendado)
     unoptimized: false,
   },
