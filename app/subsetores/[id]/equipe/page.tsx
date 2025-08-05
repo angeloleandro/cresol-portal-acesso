@@ -51,6 +51,7 @@ export default function SubsectorTeamPage() {
   const [subsector, setSubsector] = useState<Subsector | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [positions, setPositions] = useState<{id: string, name: string, department?: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [canEdit, setCanEdit] = useState(false);
   
@@ -59,7 +60,7 @@ export default function SubsectorTeamPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [memberPosition, setMemberPosition] = useState('');
+  const [memberPositionId, setMemberPositionId] = useState('');
   const [memberDescription, setMemberDescription] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -143,7 +144,8 @@ export default function SubsectorTeamPage() {
       await Promise.all([
         fetchSubsector(),
         fetchTeamMembers(),
-        fetchAllUsers()
+        fetchAllUsers(),
+        fetchPositions()
       ]);
       
       setLoading(false);
@@ -175,6 +177,19 @@ export default function SubsectorTeamPage() {
     }
   };
 
+  const fetchPositions = async () => {
+    const { data, error } = await supabase
+      .from('positions')
+      .select('id, name, department')
+      .order('name');
+
+    if (error) {
+      console.error('Erro ao buscar cargos:', error);
+    } else {
+      setPositions(data || []);
+    }
+  };
+
   const handleAddMember = async () => {
     if (!selectedUserId || !subsectorId) {
       alert('Selecione um usuário');
@@ -182,13 +197,20 @@ export default function SubsectorTeamPage() {
     }
 
     try {
+      // Buscar o nome da position pelo ID se selecionado
+      let positionName = '';
+      if (memberPositionId) {
+        const selectedPosition = positions.find(pos => pos.id === memberPositionId);
+        positionName = selectedPosition ? selectedPosition.name : '';
+      }
+
       const response = await fetch('/api/admin/subsector-team', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: selectedUserId,
           subsector_id: subsectorId,
-          position: memberPosition
+          position: positionName
         })
       });
 
@@ -198,7 +220,7 @@ export default function SubsectorTeamPage() {
         alert('Membro adicionado com sucesso!');
         setShowAddModal(false);
         setSelectedUserId('');
-        setMemberPosition('');
+        setMemberPositionId('');
         fetchTeamMembers();
       } else {
         alert(data.error || 'Erro ao adicionar membro');
@@ -213,12 +235,19 @@ export default function SubsectorTeamPage() {
     if (!editingMember) return;
 
     try {
+      // Buscar o nome da position pelo ID se selecionado
+      let positionName = '';
+      if (memberPositionId) {
+        const selectedPosition = positions.find(pos => pos.id === memberPositionId);
+        positionName = selectedPosition ? selectedPosition.name : '';
+      }
+
       const response = await fetch('/api/admin/subsector-team', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           member_id: editingMember.id,
-          position: memberPosition
+          position: positionName
         })
       });
 
@@ -228,7 +257,7 @@ export default function SubsectorTeamPage() {
         alert('Cargo atualizado com sucesso!');
         setShowEditModal(false);
         setEditingMember(null);
-        setMemberPosition('');
+        setMemberPositionId('');
         fetchTeamMembers();
       } else {
         alert(data.error || 'Erro ao atualizar cargo');
@@ -277,7 +306,10 @@ export default function SubsectorTeamPage() {
 
   const openEditModal = (member: TeamMember) => {
     setEditingMember(member);
-    setMemberPosition(member.position || '');
+    // Encontrar o ID da position baseado no nome armazenado
+    const positionName = member.position || '';
+    const matchingPosition = positions.find(pos => pos.name === positionName);
+    setMemberPositionId(matchingPosition ? matchingPosition.id : '');
     setShowEditModal(true);
   };
 
@@ -596,13 +628,19 @@ export default function SubsectorTeamPage() {
                 <label className="block text-sm font-medium text-cresol-gray-dark mb-2">
                   Cargo na Equipe (opcional)
                 </label>
-                <input
-                  type="text"
-                  value={memberPosition}
-                  onChange={(e) => setMemberPosition(e.target.value)}
+                <select
+                  value={memberPositionId}
+                  onChange={(e) => setMemberPositionId(e.target.value)}
                   className="w-full px-3 py-2 border border-cresol-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  placeholder="Ex: Coordenador, Analista, Assistente..."
-                />
+                >
+                  <option value="">Selecione um cargo</option>
+                  {positions.map(position => (
+                    <option key={position.id} value={position.id}>
+                      {position.name}
+                      {position.department && ` - ${position.department}`}
+                    </option>
+                  ))}
+                </select>
               </div>
               
               <div className="flex gap-3">
@@ -611,7 +649,7 @@ export default function SubsectorTeamPage() {
                   onClick={() => {
                     setShowAddModal(false);
                     setSelectedUserId('');
-                    setMemberPosition('');
+                    setMemberPositionId('');
                     setSearchTerm('');
                   }}
                   className="flex-1 px-4 py-2 border border-cresol-gray-light text-cresol-gray hover:bg-cresol-gray-light/50 rounded-lg transition-colors"
@@ -650,13 +688,19 @@ export default function SubsectorTeamPage() {
                 <label className="block text-sm font-medium text-cresol-gray-dark mb-2">
                   Cargo na Equipe
                 </label>
-                <input
-                  type="text"
-                  value={memberPosition}
-                  onChange={(e) => setMemberPosition(e.target.value)}
+                <select
+                  value={memberPositionId}
+                  onChange={(e) => setMemberPositionId(e.target.value)}
                   className="w-full px-3 py-2 border border-cresol-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  placeholder="Ex: Coordenador, Analista, Assistente..."
-                />
+                >
+                  <option value="">Selecione um cargo</option>
+                  {positions.map(position => (
+                    <option key={position.id} value={position.id}>
+                      {position.name}
+                      {position.department && ` - ${position.department}`}
+                    </option>
+                  ))}
+                </select>
               </div>
               
               <div className="flex gap-3">
@@ -665,7 +709,7 @@ export default function SubsectorTeamPage() {
                   onClick={() => {
                     setShowEditModal(false);
                     setEditingMember(null);
-                    setMemberPosition('');
+                    setMemberPositionId('');
                   }}
                   className="flex-1 px-4 py-2 border border-cresol-gray-light text-cresol-gray hover:bg-cresol-gray-light/50 rounded-lg transition-colors"
                 >

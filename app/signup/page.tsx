@@ -11,9 +11,10 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [position, setPosition] = useState('');
+  const [positionId, setPositionId] = useState('');
   const [workLocationId, setWorkLocationId] = useState('');
   const [workLocations, setWorkLocations] = useState<{id: string, name: string}[]>([]);
+  const [positions, setPositions] = useState<{id: string, name: string, department?: string}[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,20 +23,29 @@ export default function Signup() {
     // Só executar no lado do cliente
     if (typeof window === 'undefined') return;
     
-    // Buscar locais de atuação do Supabase
-    const fetchWorkLocations = async () => {
+    // Buscar locais de atuação e cargos do Supabase
+    const fetchData = async () => {
       try {
         const supabase = getSupabaseClient();
-        const { data, error } = await supabase
+        
+        // Buscar locais de trabalho
+        const { data: workLocationsData, error: workLocationsError } = await supabase
           .from('work_locations')
           .select('id, name')
           .order('name');
-        if (!error && data) setWorkLocations(data);
+        if (!workLocationsError && workLocationsData) setWorkLocations(workLocationsData);
+
+        // Buscar cargos
+        const { data: positionsData, error: positionsError } = await supabase
+          .from('positions')
+          .select('id, name, department')
+          .order('name');
+        if (!positionsError && positionsData) setPositions(positionsData);
       } catch (error) {
-        console.error('Erro ao buscar locais de trabalho:', error);
+        console.error('Erro ao buscar dados:', error);
       }
     };
-    fetchWorkLocations();
+    fetchData();
   }, []);
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -101,7 +111,7 @@ export default function Signup() {
         .insert({
           email,
           full_name: fullName,
-          position,
+          position_id: positionId,
           work_location_id: workLocationId,
           password_hash: password,
           status: 'pending',
@@ -190,15 +200,21 @@ export default function Signup() {
             <label htmlFor="position" className="form-label">
               Cargo
             </label>
-            <input
+            <select
               id="position"
-              type="text"
-              value={position}
-              onChange={(e) => setPosition(e.target.value)}
+              value={positionId}
+              onChange={e => setPositionId(e.target.value)}
               required
               className="input"
-              placeholder="Seu cargo na Cresol"
-            />
+            >
+              <option value="">Selecione o cargo</option>
+              {positions.map(position => (
+                <option key={position.id} value={position.id}>
+                  {position.name}
+                  {position.department && ` - ${position.department}`}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label htmlFor="workLocation" className="form-label">
