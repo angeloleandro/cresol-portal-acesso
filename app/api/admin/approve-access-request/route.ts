@@ -1,12 +1,103 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { type SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { createAdminSupabaseClient } from '@/lib/auth';
+import { generateTemporaryPassword } from '@/lib/constants';
 
-// É crucial que a key de serviço esteja disponível como variável de ambiente
-// e NUNCA seja exposta no lado do cliente.
-// Ex: SUPABASE_SERVICE_ROLE_KEY no seu .env.local
-// const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+interface AccessRequestData {
+  email: string;
+  full_name: string;
+  position: string;
+  work_location_id: string;
+  status: string;
+  password_hash?: string;
+}
+
+// Helper function to fetch access request data with fallback for password_hash field
+async function fetchAccessRequestData(
+  supabaseClient: SupabaseClient, 
+  accessRequestId: string
+): Promise<{ data: AccessRequestData | null; error: any }> {
+  // Try to fetch with password_hash first
+  const resultWithPassword = await supabaseClient
+    .from('access_requests')
+    .select('email, full_name, position, work_location_id, status, password_hash')
+    .eq('id', accessRequestId)
+    .single();
+  
+  // If successful, return the result
+  if (!resultWithPassword.error) {
+    return { data: resultWithPassword.data as AccessRequestData, error: null };
+  }
+  
+  // If failed due to password_hash field not existing, try fallback
+  if (resultWithPassword.error && (
+    resultWithPassword.error.message?.includes('password_hash') || 
+    resultWithPassword.error.message?.includes('schema cache') ||
+    resultWithPassword.error.code === '42703'
+  )) {
+    const fallbackResult = await supabaseClient
+      .from('access_requests')
+      .select('email, full_name, position, work_location_id, status')
+      .eq('id', accessRequestId)
+      .single();
+    
+    return { 
+      data: fallbackResult.data as AccessRequestData, 
+      error: fallbackResult.error 
+    };
+  }
+  
+  // Return original error if it wasn't related to password_hash field
+  return { data: null, error: resultWithPassword.error };
+}
+
+// Helper function to update user password with retry mechanism
+async function updateUserPassword(
+  supabaseClient: SupabaseClient,
+  userId: string,
+  password: string,
+  context: string = 'UNKNOWN',
+  retryCount: number = 0
+): Promise<{ success: boolean; error?: any }> {
+  const maxRetries = 2;
+  
+  // Para novos usuários, aguardar propagação antes do primeiro retry
+  if (context === 'NEW_USER_CREATED' && retryCount > 0) {
+    const waitTime = retryCount * 1000; // 1s, 2s
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+  }
+  
+  const { data: updateResult, error } = await supabaseClient.auth.admin.updateUserById(
+    userId,
+    { password }
+  );
+  
+  if (error) {
+    console.error(`Password update failed (attempt ${retryCount + 1}):`, error.message);
+    
+    // Retry logic para casos específicos
+    if (retryCount < maxRetries && (
+      context === 'NEW_USER_CREATED' || 
+      error.message?.includes('not found') ||
+      error.message?.includes('invalid')
+    )) {
+      return updateUserPassword(supabaseClient, userId, password, context, retryCount + 1);
+    }
+    
+    return { success: false, error };
+  }
+  
+  // Verificação pós-update para confirmar se senha foi realmente definida
+  try {
+    await supabaseClient.auth.admin.getUserById(userId);
+  } catch (verifyErr) {
+    console.error('Post-update verification failed:', verifyErr);
+  }
+  return { success: true };
+}
+
 
 export async function POST(request: NextRequest) {
   const { accessRequestId, adminUserId, adminToken, editedUserData, targetStatus } = await request.json();
@@ -21,14 +112,7 @@ export async function POST(request: NextRequest) {
 
   let supabaseAdminClient: SupabaseClient;
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !serviceKey) {
-      throw new Error('Configuração do servidor incompleta.');
-    }
-    supabaseAdminClient = createClient(supabaseUrl, serviceKey, { 
-      auth: { persistSession: false } 
-    });
+    supabaseAdminClient = createAdminSupabaseClient();
   } catch (e) {
     return NextResponse.json({ error: 'Erro na configuração do servidor.' }, { status: 500 });
   }
@@ -50,8 +134,7 @@ export async function POST(request: NextRequest) {
       
       currentAdminId = user.id;
     } else if (adminUserId) {
-      // Método legado usando adminUserId
-      console.warn('Método legado: usando adminUserId sem token');
+      // Método legado usando adminUserId  
       currentAdminId = adminUserId;
     } else {
       return NextResponse.json({ error: 'Credenciais de administrador não fornecidas.' }, { status: 401 });
@@ -72,12 +155,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Apenas administradores podem processar solicitações de acesso.' }, { status: 403 });
     }
 
-    // 1. Obter dados da access_requests
-    const { data: requestData, error: requestError } = await supabaseAdminClient
-      .from('access_requests')
-      .select('email, full_name, position, work_location_id, status')
-      .eq('id', accessRequestId)
-      .single();
+    // 1. Obter dados da access_requests incluindo senha armazenada (se existir)
+    const { data: requestData, error: requestError } = await fetchAccessRequestData(
+      supabaseAdminClient, 
+      accessRequestId
+    );
 
     if (requestError) {
       return NextResponse.json({ error: 'Erro ao buscar solicitação de acesso.' }, { status: 500 });
@@ -105,18 +187,43 @@ export async function POST(request: NextRequest) {
       } else if (existingProfile) {
         // Já existe um perfil, usar este ID
         authUserId = existingProfile.id;
+        
+        const userPassword = requestData?.password_hash || generateTemporaryPassword();
+        
+        // Aprovando usuário existente
+        
+        const { success, error: passwordError } = await updateUserPassword(
+          supabaseAdminClient,
+          authUserId!, // TypeScript assertion - we know it's not null here
+          userPassword,
+          'EXISTING_PROFILE'
+        );
+        
+        if (!success) {
+          return NextResponse.json({ 
+            error: `Perfil existe mas falha ao atualizar senha: ${passwordError?.message || 'Erro desconhecido'}` 
+          }, { status: 500 });
+        }
+        
       } else {
         // Não existe perfil, tentar criar um novo usuário Auth
-        const tempPassword = Math.random().toString(36).slice(-10);
+        // Usar a senha inicial fornecida pelo usuário (se disponível) ou gerar senha aleatória
+        const userPassword = requestData?.password_hash || generateTemporaryPassword();
+        
+        // Criando novo usuário
+        
         try {
+          // CORREÇÃO CRÍTICA: usar createUser com senha diretamente em vez de updateUserById posterior
           const { data: newAuthUserResponse, error: createAuthUserError } = await supabaseAdminClient.auth.admin.createUser({
             email: userEmail,
-            password: tempPassword,
+            password: userPassword,  // DEFINIR SENHA DIRETAMENTE NA CRIAÇÃO
             email_confirm: true,
             user_metadata: { full_name: userFullName }
           });
-
+          
           if (createAuthUserError) {
+            console.error('Create user with direct password failed:', createAuthUserError.message);
+            
             // Se o erro for que o usuário já existe, tentar buscar o ID pelo auth
             if (createAuthUserError.message.toLowerCase().includes('user already registered')) {
               // Buscar usuário pelo email diretamente na tabela auth.users
@@ -145,12 +252,79 @@ export async function POST(request: NextRequest) {
               } else {
                 return NextResponse.json({ error: 'Usuário já existe, mas não foi possível recuperar seus dados' }, { status: 500 });
               }
+              
+              if (authUserId) {
+                const userPasswordForExisting = requestData?.password_hash || generateTemporaryPassword();
+                // Usuário já existe, atualizando senha
+                
+                const { success, error: passwordError } = await updateUserPassword(
+                  supabaseAdminClient,
+                  authUserId!, // TypeScript assertion - we know it's not null here
+                  userPasswordForExisting,
+                  'USER_ALREADY_EXISTS'
+                );
+                
+                if (!success) {
+                  return NextResponse.json({ 
+                    error: `Usuário existe mas falha ao atualizar senha: ${passwordError?.message || 'Erro desconhecido'}` 
+                  }, { status: 500 });
+                }
+                
+              }
             } else {
-              // Outro erro durante a criação do usuário
-              return NextResponse.json({ error: `Falha ao criar usuário no sistema de autenticação: ${createAuthUserError.message}` }, { status: 500 });
+              // FALLBACK HÍBRIDO: Se createUser com senha falhar por outro motivo, 
+              // tentar abordagem híbrida (createUser sem senha + updateUserById)
+              // Fallback: criar usuário sem senha e depois atualizar
+              
+              const { data: fallbackAuthResponse, error: fallbackCreateError } = await supabaseAdminClient.auth.admin.createUser({
+                email: userEmail,
+                email_confirm: true,
+                user_metadata: { full_name: userFullName }
+                // SEM password - será definido via updateUserById
+              });
+              
+              if (fallbackCreateError) {
+                return NextResponse.json({ 
+                  error: `Falha tanto na criação direta quanto no fallback: ${fallbackCreateError.message}` 
+                }, { status: 500 });
+              }
+              
+              if (fallbackAuthResponse?.user) {
+                authUserId = fallbackAuthResponse.user.id;
+                // Usuário criado sem senha
+                
+                // Agora definir senha via updateUserById com retry
+                const { success, error: passwordError } = await updateUserPassword(
+                  supabaseAdminClient,
+                  authUserId,
+                  userPassword,
+                  'NEW_USER_CREATED'
+                );
+                
+                if (!success) {
+                  return NextResponse.json({ 
+                    error: `FALLBACK - Usuário criado mas falha ao definir senha: ${passwordError?.message || 'Erro desconhecido'}` 
+                  }, { status: 500 });
+                }
+                
+                // Senha definida com sucesso
+              } else {
+                return NextResponse.json({ error: 'FALLBACK - Falha ao criar usuário sem senha' }, { status: 500 });
+              }
             }
           } else if (newAuthUserResponse?.user) {
             authUserId = newAuthUserResponse.user.id;
+            
+            // Usuário criado com sucesso e senha definida
+            
+            // SENHA JÁ FOI DEFINIDA NA CRIAÇÃO - não precisa de updateUserById
+            // Verificação opcional para confirmar que usuário foi criado corretamente
+            try {
+              await supabaseAdminClient.auth.admin.getUserById(authUserId);
+            } catch (verifyErr) {
+              console.error('Post-creation verification failed:', verifyErr);
+            }
+            
           } else {
             return NextResponse.json({ error: 'Falha ao criar usuário: resposta inválida do sistema de autenticação.' }, { status: 500 });
           }
@@ -173,7 +347,7 @@ export async function POST(request: NextRequest) {
       }
 
       const profileDataToUpsert = {
-        id: authUserId,
+        id: authUserId!,
         email: userEmail,
         full_name: userFullName,
         position: finalPosition,

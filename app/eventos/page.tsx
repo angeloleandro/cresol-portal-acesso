@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -25,7 +25,7 @@ interface EventItem {
   sector_name?: string;
 }
 
-export default function EventosPage() {
+function EventosPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [user, setUser] = useState<any>(null);
@@ -499,5 +499,24 @@ export default function EventosPage() {
       
       <Footer />
     </div>
+  );
+}
+
+export default function EventosPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="loading-spinner mx-auto mb-4"></div>
+            <p className="body-text text-muted">Carregando eventos...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    }>
+      <EventosPageContent />
+    </Suspense>
   );
 } 

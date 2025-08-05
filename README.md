@@ -1,269 +1,183 @@
-# Portal de Acesso Cresol
+# Supabase CLI
 
-Portal de acesso unificado para os sistemas de informação empresarial interna da Cresol.
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-## Tecnologias Utilizadas
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-- **[Next.js 14](https://nextjs.org/)** - Framework React com App Router
-- **[TypeScript](https://www.typescriptlang.org/)** - Superset JavaScript com tipagem estática
-- **[Tailwind CSS](https://tailwindcss.com/)** - Framework CSS utilitário com cores personalizadas Cresol
-- **[Supabase](https://supabase.com/)** - Backend completo (PostgreSQL + Auth + Storage + RLS)
-- **[React Easy Crop](https://github.com/ValentinH/react-easy-crop)** - Componente para recorte de imagens
-- **[date-fns](https://date-fns.org/)** - Biblioteca moderna para manipulação de datas
+This repository contains all the functionality for Supabase CLI.
 
-## Funcionalidades Principais
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
-### 🔐 Autenticação e Autorização
-- Sistema de login/logout com Supabase Auth
-- Controle de acesso baseado em roles (admin, sector_admin, user)
-- Middleware de proteção de rotas
-- Aprovação administrativa para novos usuários
+## Getting started
 
-### 👥 Gerenciamento de Usuários
-- Perfis de usuário com foto e informações pessoais
-- Painel administrativo para gestão de usuários
-- Atribuição e alteração de roles
-- Solicitações de acesso com workflow de aprovação
+### Install the CLI
 
-### 🏢 Gestão Organizacional
-- Hierarquia de setores e subsetores
-- Painéis administrativos específicos por setor
-- Gerenciamento de equipes por subsetor
-- Links centralizados para sistemas internos
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
 
-### 📊 Dashboard e Indicadores
-- Indicadores econômicos atualizáveis
-- Sistema de notificações em tempo real
-- Central de mensagens e comunicados
-- Analytics e monitoramento
-
-### 📸 Galeria e Mídia
-- Upload e gerenciamento de imagens
-- Galeria de vídeos
-- Sistema de banners rotativos
-- Recorte inteligente de imagens
-
-### 🔍 Busca e Navegação
-- Sistema de busca global avançada
-- Filtros e categorização
-- Navegação por breadcrumbs
-- Favoritos personalizáveis
-
-## Configuração do Ambiente de Desenvolvimento
-
-### Pré-requisitos
-
-- Node.js 18 ou superior
-- npm ou yarn
-
-### Instalação
-
-1. Clone o repositório
 ```bash
-git clone https://github.com/angeloleandro/cresol-portal-acesso.git
-cd cresol-portal-acesso
+npm i supabase --save-dev
 ```
 
-2. Instale as dependências
+To install the beta release channel:
+
 ```bash
-npm install
-# ou
-yarn install
+npm i supabase@beta --save-dev
 ```
 
-3. Inicie o servidor de desenvolvimento
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
+
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
+
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
+
+<details>
+  <summary><b>macOS</b></summary>
+
+  Available via [Homebrew](https://brew.sh). To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Windows</b></summary>
+
+  Available via [Scoop](https://scoop.sh). To install:
+
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
+
+  To upgrade:
+
+  ```powershell
+  scoop update supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Linux</b></summary>
+
+  Available via [Homebrew](https://brew.sh) and Linux packages.
+
+  #### via Homebrew
+
+  To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+
+  #### via Linux packages
+
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
+
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
+
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
+
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
+
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
+
 ```bash
-npm run dev
-# ou
-yarn dev
+supabase bootstrap
 ```
 
-4. Acesse o aplicativo em `http://localhost:4000`
+Or using npx:
 
-## Estrutura do Projeto
-
-```
-cresol-portal-acesso/
-├── app/                          # Next.js 14 App Router
-│   ├── admin/                    # Painel administrativo completo
-│   │   ├── users/               # Gerenciamento de usuários
-│   │   ├── sectors/             # Gestão de setores
-│   │   ├── system-links/        # Links de sistemas
-│   │   ├── notifications/       # Central de notificações
-│   │   ├── economic-indicators/ # Indicadores econômicos
-│   │   ├── banners/            # Gestão de banners
-│   │   ├── gallery/            # Galeria de imagens
-│   │   └── videos/             # Galeria de vídeos
-│   ├── admin-setor/             # Painel admin setorial
-│   ├── admin-subsetor/          # Painel admin subsetorial
-│   ├── api/                     # API Routes
-│   │   ├── admin/              # Endpoints administrativos
-│   │   ├── auth/               # Autenticação
-│   │   └── notifications/      # API de notificações
-│   ├── components/              # Componentes reutilizáveis
-│   │   ├── icons/              # Sistema de ícones SVG personalizado
-│   │   └── ui/                 # Componentes de interface
-│   ├── home/                    # Página principal
-│   ├── profile/                 # Perfil do usuário
-│   ├── setores/                 # Páginas de setores
-│   └── subsetores/              # Páginas de subsetores
-├── lib/                         # Utilitários e configurações
-│   ├── supabase/               # Configuração Supabase (client/server)
-│   ├── error-handler.ts        # Tratamento de erros
-│   └── auth.ts                 # Utilitários de autenticação
-├── public/                      # Arquivos estáticos
-├── middleware.ts                # Middleware de autenticação
-└── supabase/                    # Configurações do Supabase
+```bash
+npx supabase bootstrap
 ```
 
-## Variáveis de Ambiente
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
 
-Crie um arquivo `.env.local` na raiz do projeto:
+## Docs
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=sua_url_do_supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
-SUPABASE_SERVICE_ROLE_KEY=sua_chave_de_servico
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+
+## Breaking changes
+
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
 ```
-
-## Scripts Disponíveis
-
-- `npm run dev` - Inicia o servidor de desenvolvimento (porta 4000)
-- `npm run build` - Constrói a aplicação para produção
-- `npm run start` - Inicia o servidor de produção
-- `npm run lint` - Executa o ESLint para verificar qualidade do código
-
-## Deploy
-
-Este projeto está configurado para deploy na [Vercel](https://vercel.com/). As variáveis de ambiente devem ser configuradas no painel da Vercel.
-
-## Licença
-
-Proprietário - Cresol
-
-## Configuração do Supabase
-
-### Autenticação e Banco de Dados
-
-A aplicação utiliza o Supabase para autenticação de usuários e armazenamento de dados.
-
-### Configuração do Storage para Imagens
-
-O portal permite upload de imagens para notícias e eventos. Para configurar o storage:
-
-1. Acesse o painel do Supabase da sua aplicação
-2. Vá até a seção "Storage" no menu lateral
-3. Clique em "Criar novo bucket"
-4. Nomeie o bucket como "images" e marque como público
-5. Configurar políticas de acesso através do SQL Editor:
-
-```sql
--- Criar um bucket chamado 'images' para armazenar as imagens do portal
-INSERT INTO storage.buckets (id, name, public)
-VALUES (
-  'images',
-  'images',
-  true
-);
-
--- Configurar políticas de acesso para permitir que usuários autenticados façam upload de imagens
-CREATE POLICY "Usuários autenticados podem fazer upload" ON storage.objects
-  FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'images' AND (storage.foldername(name))[1] = 'sector-news');
-
--- Permitir que usuários autenticados atualizem seus próprios uploads
-CREATE POLICY "Usuários autenticados podem atualizar seus próprios uploads" ON storage.objects
-  FOR UPDATE TO authenticated
-  USING (bucket_id = 'images' AND owner = auth.uid() AND (storage.foldername(name))[1] = 'sector-news');
-
--- Permitir que usuários autenticados deletem seus próprios uploads
-CREATE POLICY "Usuários autenticados podem deletar seus próprios uploads" ON storage.objects
-  FOR DELETE TO authenticated
-  USING (bucket_id = 'images' AND owner = auth.uid() AND (storage.foldername(name))[1] = 'sector-news');
-
--- Permitir que qualquer pessoa visualize as imagens
-CREATE POLICY "Imagens públicas para visualização" ON storage.objects
-  FOR SELECT
-  USING (bucket_id = 'images');
-
--- Permitir upload de avatares
-CREATE POLICY "Usuários podem fazer upload de avatares" ON storage.objects
-  FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'images' AND (storage.foldername(name))[1] = 'avatars');
-
--- Permitir que usuários atualizem seus próprios avatares
-CREATE POLICY "Usuários podem atualizar seus próprios avatares" ON storage.objects
-  FOR UPDATE TO authenticated
-  USING (bucket_id = 'images' AND owner = auth.uid() AND (storage.foldername(name))[1] = 'avatars');
-
--- Permitir que usuários deletem seus próprios avatares
-CREATE POLICY "Usuários podem deletar seus próprios avatares" ON storage.objects
-  FOR DELETE TO authenticated
-  USING (bucket_id = 'images' AND owner = auth.uid() AND (storage.foldername(name))[1] = 'avatars');
-```
-
-### Arquivos de Configuração
-
-O repositório inclui vários arquivos de configuração e scripts de apoio:
-
-- `supabase-bucket-setup.js` - Configuração completa do Storage
-- `admin-setup.js` - Script para configuração inicial de administradores
-- `setup-notifications.js` - Configuração do sistema de notificações
-- `fix-notifications-rls.sql` - Políticas RLS para notificações
-- `sql-functions.sql` - Funções SQL personalizadas
-
-3. **Gerenciamento de Setores e Subsetores**
-   - Visualização hierárquica de setores da organização
-   - Gestão de subsetores com equipes específicas
-   - Painéis administrativos diferenciados por nível
-   - Sistema de links específicos por setor
-
-4. **Sistema de Notificações**
-   - Notificações em tempo real
-   - Segmentação por grupos de usuários
-   - Central de mensagens integrada
-   - Histórico de comunicados
-
-5. **Galeria Multimídia**
-   - Upload de imagens com recorte inteligente
-   - Galeria de vídeos organizável
-   - Sistema de banners rotativos para homepage
-   - Gerenciamento de mídia por categorias
-
-6. **Indicadores Econômicos**
-   - Dashboard com indicadores atualizáveis
-   - Interface administrativa para gestão dos dados
-   - Visualização responsiva e interativa
-
-7. **Busca e Navegação Avançada**
-   - Sistema de busca global com filtros
-   - Navegação por breadcrumbs
-   - Favoritos personalizáveis por usuário
-   - Interface responsiva e acessível
-
-## Arquitetura e Segurança
-
-### Autenticação e Autorização
-- **Middleware personalizado** para proteção de rotas
-- **Row Level Security (RLS)** no Supabase para controle granular de acesso
-- **Três níveis de usuário**: admin, sector_admin, user
-- **Validação de sessão** em tempo real
-
-### Banco de Dados
-- **PostgreSQL** via Supabase com políticas RLS
-- **Tabelas principais**: profiles, sectors, subsectors, notifications, system_links
-- **Storage integrado** para upload de arquivos
-- **Backup automático** e versionamento
-
-### Performance e UX
-- **App Router** do Next.js 14 para SSR otimizado
-- **Componentes reutilizáveis** com Tailwind CSS
-- **Loading states** e tratamento de erros
-- **Interface responsiva** mobile-first
-
-## Suporte e Manutenção
-
-Para suporte técnico ou dúvidas sobre o sistema:
-- Consulte a documentação em `CLAUDE.md` para desenvolvimento
-- Verifique os logs de erro no painel do Supabase
-- Utilize as ferramentas de desenvolvimento do Next.js

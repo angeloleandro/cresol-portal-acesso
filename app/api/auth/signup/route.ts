@@ -1,14 +1,14 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { type SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { createAdminSupabaseClient } from '@/lib/auth';
+import { validateCrescolEmail } from '@/lib/constants';
 
 export async function POST(request: NextRequest) {
   const { email, password, fullName, position, workLocationId } = await request.json();
 
-  // Log para depuração
-  console.log('API /api/auth/signup chamada com:', { email, fullName, position, workLocationId });
 
   if (!email || !fullName || !password) {
     return NextResponse.json({
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Validar domínio de e-mail da Cresol
-  if (!email.endsWith('@cresol.com.br')) {
+  if (!validateCrescolEmail(email)) {
     return NextResponse.json({
       error: 'Por favor, utilize um e-mail corporativo da Cresol.'
     }, { status: 400 });
@@ -25,17 +25,7 @@ export async function POST(request: NextRequest) {
 
   let supabaseAdminClient: SupabaseClient;
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    if (!supabaseUrl || !serviceKey) {
-      console.error('Variáveis de ambiente SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configuradas.');
-      throw new Error('Configuração do servidor incompleta.');
-    }
-    
-    supabaseAdminClient = createClient(supabaseUrl, serviceKey, { 
-      auth: { persistSession: false } 
-    });
+    supabaseAdminClient = createAdminSupabaseClient();
   } catch (e) {
     console.error('Falha ao inicializar Supabase Admin Client:', e);
     return NextResponse.json({ 
@@ -58,19 +48,53 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Criar um pedido de acesso para aprovação por administrador
-    const { data: accessRequestData, error: accessRequestError } = await supabaseAdminClient
+    // Primeiro tentar com password_hash, se falhar tentar sem (compatibilidade com migração)
+    let accessRequestData, accessRequestError;
+    
+    // Tentar inserir com password_hash (após migração aplicada)
+    const resultWithPassword = await supabaseAdminClient
       .from('access_requests')
       .insert({
         email: email,
         full_name: fullName,
         position: position || null,
         work_location_id: workLocationId || null,
+        password_hash: password,
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .select()
       .single();
+    
+    accessRequestData = resultWithPassword.data;
+    accessRequestError = resultWithPassword.error;
+    
+    // Se falhar devido ao campo password_hash não existir, tentar sem ele
+    if (accessRequestError && (
+      accessRequestError.message?.includes('password_hash') || 
+      accessRequestError.message?.includes('schema cache') ||
+      accessRequestError.code === '42703'
+    )) {
+      
+      const fallbackResult = await supabaseAdminClient
+        .from('access_requests')
+        .insert({
+          email: email,
+          full_name: fullName,
+          position: position || null,
+          work_location_id: workLocationId || null,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+      
+      accessRequestData = fallbackResult.data;
+      accessRequestError = fallbackResult.error;
+    } else if (!accessRequestError) {
+    }
 
     if (accessRequestError) {
       console.error('Erro ao criar solicitação de acesso:', accessRequestError);

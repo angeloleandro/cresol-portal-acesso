@@ -95,7 +95,7 @@ export default function Signup() {
         return;
       }
 
-      // Apenas criar a solicitação de acesso
+      // Criar a solicitação de acesso com senha inicial
       const { error: insertError } = await supabase
         .from('access_requests')
         .insert({
@@ -103,9 +103,8 @@ export default function Signup() {
           full_name: fullName,
           position,
           work_location_id: workLocationId,
+          password_hash: password,
           status: 'pending',
-          // Armazenar a senha temporariamente de forma segura (hash) ou
-          // definir um fluxo para o usuário criar uma senha após aprovação
         });
 
       if (insertError) {

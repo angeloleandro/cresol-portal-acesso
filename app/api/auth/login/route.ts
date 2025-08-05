@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error('Erro de autenticação:', error);
+      console.error('Login authentication failed:', error.message);
       
       // Mensagem de erro mais amigável
       let errorMessage = 'Falha na autenticação';
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
-
+    
     // Buscar informações adicionais do perfil
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
@@ -43,10 +43,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (profileError) {
-      console.error('Erro ao buscar perfil do usuário:', profileError);
+      console.error('Failed to fetch user profile:', profileError.message);
     }
 
-    return NextResponse.json({
+    const loginResult = {
       success: true,
       user: {
         id: data.user.id,
@@ -54,7 +54,9 @@ export async function POST(request: NextRequest) {
         role: profileData?.role || 'user',
         full_name: profileData?.full_name || data.user.user_metadata?.full_name || '',
       }
-    });
+    };
+
+    return NextResponse.json(loginResult);
   } catch (error: any) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
     return NextResponse.json({

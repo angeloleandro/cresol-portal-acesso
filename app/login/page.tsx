@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';export default function Login() {
+import { supabase } from '@/lib/supabase';
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirectedFrom') || '/home';
@@ -140,5 +142,32 @@ import { supabase } from '@/lib/supabase';export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
+        <div className="card max-w-md w-full">
+          <div className="flex flex-col items-center mb-6">
+            <div className="relative w-40 h-20 mb-4">
+              <OptimizedImage 
+                src="/logo-cresol.png" 
+                alt="Logo Cresol" 
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 160px"
+                className="object-contain"
+              />
+            </div>
+            <div className="loading-spinner mb-4"></div>
+            <p className="body-text-small text-muted">Carregando...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

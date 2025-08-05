@@ -1,5 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { ADMIN_EMAIL, KNOWN_ADMIN_ID } from './constants';
+
+// Create admin Supabase client with service role key
+export function createAdminSupabaseClient(): SupabaseClient {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error('Missing Supabase configuration');
+  }
+  
+  return createClient(supabaseUrl, serviceKey, { 
+    auth: { persistSession: false } 
+  });
+}
 
 // Verificar se o usuário é um administrador
 export async function isUserAdmin(userId: string) {
@@ -11,7 +26,7 @@ export async function isUserAdmin(userId: string) {
   }
   
   // Para depuração, verificar se o userId recebido corresponde ao esperado para o usuário admin
-  const adminEmail = 'comunicacao.fronteiras@cresol.com.br';
+  const adminEmail = ADMIN_EMAIL;
   
   try {
     // Usar a chave de serviço para contornar as políticas RLS
@@ -43,7 +58,7 @@ export async function isUserAdmin(userId: string) {
   } catch (error) {
     // Como último recurso, comparar diretamente com o userId conhecido do admin
     try {
-      const knownAdminId = "67552259-be23-4c9c-bd06-6d57a6c041eb"; // ID do usuário admin verificado no Supabase
+      const knownAdminId = KNOWN_ADMIN_ID; // ID do usuário admin verificado no Supabase
       const isKnownAdmin = userId === knownAdminId;
       return isKnownAdmin;
     } catch (e) {

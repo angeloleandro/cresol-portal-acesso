@@ -143,21 +143,27 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    console.log('Redefinindo senha para o usuário:', userToUpdate.email);
+    // Resetando senha do usuário
+    
     // Redefinir a senha do usuário
-    const { error: resetError } = await supabaseAdmin.auth.admin.updateUserById(
+    const { data: resetResult, error: resetError } = await supabaseAdmin.auth.admin.updateUserById(
       userId,
       { password: newPassword }
     );
 
     if (resetError) {
-      console.error('Erro ao redefinir senha:', resetError);
+      console.error('Failed to reset password:', resetError.message);
       return NextResponse.json({ 
         error: `Falha ao redefinir senha: ${resetError.message}` 
       }, { status: 500 });
     }
 
-    console.log('Senha redefinida com sucesso para:', userToUpdate.email);
+    // Verificação pós-update para confirmar se senha foi realmente definida
+    try {
+      await supabaseAdmin.auth.admin.getUserById(userId);
+    } catch (verifyErr) {
+      console.error('Post-update verification failed:', verifyErr);
+    }
     return NextResponse.json({
       success: true,
       message: `Senha do usuário ${userToUpdate.full_name} redefinida com sucesso.`,

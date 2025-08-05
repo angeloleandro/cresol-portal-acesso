@@ -215,6 +215,7 @@ export default function AccessRequests() {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include', // CORREÇÃO: Incluir cookies de autenticação
           body: JSON.stringify({
             accessRequestId: id,
             adminUserId: user?.id,
@@ -244,6 +245,7 @@ export default function AccessRequests() {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include', // CORREÇÃO: Incluir cookies de autenticação
           body: JSON.stringify({
             accessRequestId: id,
             adminUserId: user?.id,
