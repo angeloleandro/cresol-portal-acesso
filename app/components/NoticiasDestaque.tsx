@@ -118,7 +118,7 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
         <h2 className={`${compact ? 'heading-4' : 'heading-3'} text-title`}>Últimas Notícias</h2>
         <Link 
           href="/noticias" 
-          className="text-sm font-medium transition-colors flex items-center hover:shadow-sm px-3 py-1.5 rounded-md text-primary"
+          className="text-sm font-medium transition-colors flex items-center hover: px-3 py-1.5 rounded-md text-primary"
         >
           Ver todas
           <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -163,7 +163,7 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
                 <Link 
                   key={news.id} 
                   href={`/noticias/${news.id}`}
-                  className="block bg-gray-50 border border-gray-100 rounded-lg overflow-hidden hover:shadow-md hover:border-gray-200 transition-all duration-200"
+                  className="block bg-gray-50 border border-gray-100 rounded-lg overflow-hidden hover: hover:border-gray-200 transition-all duration-200"
                 >
                   <div className="flex flex-col md:flex-row">
                     {news.image_url ? (
@@ -210,7 +210,7 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
                 <Link 
                   key={news.id} 
                   href={`/noticias/${news.id}`}
-                  className="block bg-gray-50 border border-gray-100 rounded-lg p-4 hover:shadow-md hover:border-gray-200 transition-all duration-200"
+                  className="block bg-gray-50 border border-gray-100 rounded-lg p-4 hover: hover:border-gray-200 transition-all duration-200"
                 >
                   <div className="flex items-start space-x-4">
                     <div className="flex-1">

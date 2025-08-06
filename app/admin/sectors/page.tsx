@@ -405,7 +405,7 @@ export default function SectorsManagement() {
                 const admins = sectorAdmins.filter(admin => admin.sector_id === sector.id);
                 
                 return (
-                  <div key={sector.id} className="bg-white rounded-xl shadow-sm border border-cresol-gray-light hover:shadow-md transition-all">
+                  <div key={sector.id} className="bg-white rounded-xl border border-cresol-gray-light hover:border-primary/30 transition-all">
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
@@ -501,7 +501,7 @@ export default function SectorsManagement() {
           {activeTab === 'subsectors' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {subsectors.map(subsector => (
-                <div key={subsector.id} className="bg-white rounded-xl shadow-sm border border-cresol-gray-light hover:shadow-md transition-all">
+                <div key={subsector.id} className="bg-white rounded-xl border border-cresol-gray-light hover:border-primary/30 transition-all">
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">

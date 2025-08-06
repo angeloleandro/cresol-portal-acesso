@@ -281,7 +281,7 @@ export default function EconomicIndicatorsAdmin() {
           <div className="mb-6">
             <button
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
               <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -292,7 +292,7 @@ export default function EconomicIndicatorsAdmin() {
 
           {/* Formulário */}
           {showForm && (
-            <div className="bg-white shadow rounded-lg p-6 mb-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">
                 {editingIndicator ? 'Editar Indicador' : 'Novo Indicador'}
               </h2>
@@ -309,7 +309,7 @@ export default function EconomicIndicatorsAdmin() {
                       required
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       placeholder="Ex: Cooperados"
                     />
                   </div>
@@ -324,7 +324,7 @@ export default function EconomicIndicatorsAdmin() {
                       required
                       value={formData.value}
                       onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       placeholder="Ex: 36.7 mil"
                     />
                   </div>
@@ -338,7 +338,7 @@ export default function EconomicIndicatorsAdmin() {
                       required
                       value={formData.icon}
                       onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                     >
                       {AVAILABLE_ICONS.map((icon) => (
                         <option key={icon.value} value={icon.value}>
@@ -357,7 +357,7 @@ export default function EconomicIndicatorsAdmin() {
                       id="display_order"
                       value={formData.display_order}
                       onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       min="0"
                     />
                   </div>
@@ -371,7 +371,7 @@ export default function EconomicIndicatorsAdmin() {
                       id="issue_date"
                       value={formData.issue_date}
                       onChange={(e) => setFormData({ ...formData, issue_date: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       placeholder="MM/AAAA (ex: 05/2025)"
                       pattern="^(0[1-9]|1[0-2])\/[0-9]{4}$"
                       title="Formato: MM/AAAA (ex: 05/2025)"
@@ -388,7 +388,7 @@ export default function EconomicIndicatorsAdmin() {
                     rows={3}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                    className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                     placeholder="Descrição opcional do indicador"
                   />
                 </div>
@@ -410,14 +410,14 @@ export default function EconomicIndicatorsAdmin() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                    className="px-4 py-2 border border-gray-300 rounded-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={formLoading}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
+                    className="px-4 py-2 border border-transparent rounded-md  text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
                   >
                     {formLoading ? 'Salvando...' : (editingIndicator ? 'Atualizar' : 'Criar')}
                   </button>
@@ -427,7 +427,7 @@ export default function EconomicIndicatorsAdmin() {
           )}
 
           {/* Lista de Indicadores */}
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
+          <div className="bg-white border border-gray-200 overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
               {indicators.length === 0 ? (
                 <li className="px-6 py-8 text-center">

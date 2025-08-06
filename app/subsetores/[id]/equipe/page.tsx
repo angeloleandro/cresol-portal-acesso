@@ -433,7 +433,7 @@ export default function SubsectorTeamPage() {
 
         {/* Descrição do Sub-setor */}
         {subsector.description && (
-          <div className="bg-white rounded-xl shadow-sm border border-cresol-gray-light p-6 mb-8">
+          <div className="bg-white rounded-xl border border-cresol-gray-light p-6 mb-8">
             <div className="flex items-center mb-3">
               <Icon name="building-2" className="h-5 w-5 text-secondary mr-2" />
               <h2 className="text-lg font-semibold text-cresol-gray-dark">Sobre o Sub-setor</h2>
@@ -443,7 +443,7 @@ export default function SubsectorTeamPage() {
         )}
 
         {/* Equipe */}
-        <div className="bg-white rounded-xl shadow-sm border border-cresol-gray-light">
+        <div className="bg-white rounded-xl border border-cresol-gray-light">
           <div className="p-6 border-b border-cresol-gray-light">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -485,7 +485,7 @@ export default function SubsectorTeamPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {teamMembers.map(member => (
-                  <div key={member.id} className="border border-cresol-gray-light rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div key={member.id} className="border border-cresol-gray-light rounded-lg p-4 hover:border-primary/30 transition-colors">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center">
                         <div className="relative h-12 w-12 rounded-full overflow-hidden bg-cresol-gray-light mr-3">

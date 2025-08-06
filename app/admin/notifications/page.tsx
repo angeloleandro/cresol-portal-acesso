@@ -327,7 +327,7 @@ export default function NotificationsAdmin() {
 
         {/* Conteúdo das tabs */}
         {activeTab === 'send' && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg  border border-gray-200 p-6">
             <h2 className="text-xl font-semibold mb-6">Nova Notificação</h2>
             
             <form onSubmit={handleSendNotification} className="space-y-6">
@@ -495,7 +495,7 @@ export default function NotificationsAdmin() {
             </div>
 
             {showCreateGroup && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-lg  border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold mb-4">Criar Novo Grupo</h3>
                 
                 <form onSubmit={handleCreateGroup} className="space-y-4">
@@ -588,7 +588,7 @@ export default function NotificationsAdmin() {
               </div>
             )}
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg  border border-gray-200">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -644,7 +644,7 @@ export default function NotificationsAdmin() {
         )}
 
         {activeTab === 'history' && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg  border border-gray-200 p-6">
             <h2 className="text-xl font-semibold mb-4">Histórico de Notificações</h2>
             <p className="text-gray-500">Em desenvolvimento...</p>
           </div>

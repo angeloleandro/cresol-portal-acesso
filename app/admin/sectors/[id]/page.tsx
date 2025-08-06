@@ -1008,7 +1008,7 @@ export default function SectorDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Minimalista */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-6">
@@ -1307,7 +1307,7 @@ export default function SectorDashboard() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {subsectors.map((subsector) => (
-                  <div key={subsector.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-md transition-all">
+                  <div key={subsector.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:border-primary/30 transition-all">
                     <div className="flex items-start justify-between mb-4">
                       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                         <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1384,7 +1384,7 @@ export default function SectorDashboard() {
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Grupos do Setor</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {groups.map((group) => (
-                        <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-md transition-all">
+                        <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:border-primary/30 transition-all">
                           <div className="flex items-start justify-between mb-4">
                             <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                               <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1409,7 +1409,7 @@ export default function SectorDashboard() {
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Grupos Automáticos</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {automaticGroups.map((group) => (
-                        <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-md transition-all relative">
+                        <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:border-primary/30 transition-all relative">
                           <div className="absolute top-2 right-2">
                             <span className={`text-xs px-2 py-1 rounded-full ${
                               group.type === 'position' 

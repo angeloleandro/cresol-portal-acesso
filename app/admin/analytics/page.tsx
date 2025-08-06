@@ -6,6 +6,26 @@ import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { Icon } from '@/app/components/icons/Icon';
+import MetricCardEnterprise from '@/app/components/analytics/MetricCardEnterprise';
+import { MinimalistButton } from '@/app/components/ui/MinimalistButton';
+import { TruncatedText } from '@/app/components/ui/TruncatedText';
+import { LocationCard } from '@/app/components/ui/LocationCard';
+// Enhanced Figma-inspired components
+import MetricCardEnterprisePro from '@/app/components/analytics/MetricCardEnterprisePro';
+import ChartContainerPro from '@/app/components/analytics/ChartContainerPro';
+import NavigationControlsPro from '@/app/components/analytics/NavigationControlsPro';
+import AnimatedChart from '@/app/components/analytics/AnimatedChart';
+import { 
+  MetricsGrid, 
+  DashboardLayout, 
+  MainSection, 
+  SidebarSection, 
+  ResponsiveContainer 
+} from '@/app/components/analytics/GridLayoutResponsivo';
+import { 
+  PageTitle
+} from '@/app/components/analytics/TypographyEnterprise';
+import { DashboardShimmer } from '@/app/components/analytics/ShimmerLoading';
 
 interface AnalyticsData {
   users: {
@@ -232,14 +252,6 @@ export default function AnalyticsPage() {
     }
   };
 
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
-  };
 
   const getPeriodLabel = (period: string): string => {
     switch (period) {
@@ -253,11 +265,20 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando analytics...</p>
-        </div>
+      <div className="min-h-screen bg-gray-50">
+        <AdminHeader user={user} />
+        <ResponsiveContainer>
+          <div className="mb-6">
+            <Breadcrumb 
+              items={[
+                { label: 'Home', href: '/home', icon: 'house' },
+                { label: 'Administração', href: '/admin' },
+                { label: 'Analytics' }
+              ]} 
+            />
+          </div>
+          <DashboardShimmer />
+        </ResponsiveContainer>
       </div>
     );
   }
@@ -268,7 +289,7 @@ export default function AnalyticsPage() {
     <div className="min-h-screen bg-gray-50">
       <AdminHeader user={user} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <ResponsiveContainer>
         {/* Breadcrumb */}
         <div className="mb-6">
           <Breadcrumb 
@@ -280,209 +301,271 @@ export default function AnalyticsPage() {
           />
         </div>
         
-        {/* Header */}
+        {/* Simplified Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Analytics & Relatórios</h1>
-              <p className="mt-2 text-gray-600">Insights e estatísticas do portal</p>
-            </div>
-            
-            {/* Seletor de Período */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">Período:</span>
-              <select
-                value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="7d">7 dias</option>
-                <option value="30d">30 dias</option>
-                <option value="90d">90 dias</option>
-                <option value="1y">1 ano</option>
-              </select>
-            </div>
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h1 className="text-2xl font-semibold text-orange-600 mb-2">
+              Analytics
+            </h1>
+            <p className="text-gray-600">Dashboard de análise de dados</p>
           </div>
+        </div>
+
+        {/* Navigation Controls */}
+        <div className="mb-8">
+          <NavigationControlsPro
+            tabs={[
+              { label: 'Visão Geral', value: 'overview', icon: 'dashboard', count: 12 },
+              { label: 'Usuários', value: 'users', icon: 'user-group', count: analytics?.users.total },
+              { label: 'Sistemas', value: 'systems', icon: 'monitor', count: analytics?.systems.total },
+              { label: 'Relatórios', value: 'reports', icon: 'document', count: 8 }
+            ]}
+            activeTab="overview"
+            periods={[
+              { label: 'Últimos 7 dias', value: '7d', icon: 'calendar' },
+              { label: 'Últimos 30 dias', value: '30d', icon: 'calendar' },
+              { label: 'Últimos 90 dias', value: '90d', icon: 'calendar' },
+              { label: 'Último ano', value: '1y', icon: 'calendar' }
+            ]}
+            activePeriod={selectedPeriod}
+            onPeriodChange={(period) => setSelectedPeriod(period as any)}
+            searchEnabled={true}
+            onRefresh={() => fetchAnalyticsData()}
+            onExport={() => window.print()}
+            variant="default"
+            brandColor="orange"
+            size="md"
+          />
         </div>
 
         {analytics && (
           <>
-            {/* Cards de Estatísticas Principais */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {/* Usuários */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-orange-50">
-                    <Icon name="user-group" className="h-6 w-6 text-orange-500" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total de Usuários</p>
-                    <p className="text-2xl font-bold text-gray-900">{formatNumber(analytics.users.total)}</p>
-                    <p className="text-xs text-green-600">+{analytics.users.new} novos</p>
-                  </div>
-                </div>
-              </div>
+            {/* Metrics Cards */}
+            <MetricsGrid className="mb-12">
+              {/* Demonstração lado a lado: Original vs Pro */}
+              <MetricCardEnterprisePro
+                title="Total de Usuários"
+                value={analytics.users.total}
+                previousValue={analytics.users.total - analytics.users.new}
+                icon="user-group"
+                variant="primary"
+                trend={analytics.users.new > 0 ? 'up' : 'stable'}
+                subtitle={`+${analytics.users.new} novos usuários`}
+                description="Crescimento consistente na base de usuários"
+                size="md"
+                hoverEffect="lift"
+                enableAnimation={true}
+                isPressable={true}
+                onClick={() => router.push('/admin/users')}
+              />
+              
+              <MetricCardEnterprisePro
+                title="Sistemas Ativos"
+                value={analytics.systems.active}
+                previousValue={analytics.systems.total}
+                icon="monitor"
+                variant="secondary"
+                colorPalette="blue"
+                trend="stable"
+                subtitle={`${analytics.systems.total} sistemas total`}
+                description="Alta disponibilidade mantida"
+                size="md"
+                hoverEffect="lift"
+                enableAnimation={true}
+                isPressable={true}
+                onClick={() => router.push('/admin/systems')}
+              />
+              
+              <MetricCardEnterprisePro
+                title="Conteúdo Publicado"
+                value={analytics.content.news + analytics.content.events}
+                icon="chat-line"
+                variant="info"
+                colorPalette="blue"
+                trend="up"
+                subtitle={`${analytics.content.news} notícias, ${analytics.content.events} eventos`}
+                description="Engajamento da comunidade em alta"
+                size="md"
+                hoverEffect="glow"
+                enableAnimation={true}
+                isBlurred={true}
+              />
+              
+              <MetricCardEnterprisePro
+                title="Atividade Recente"
+                value={analytics.activity.logins}
+                icon="chart-bar-vertical"
+                variant="warning"
+                colorPalette="amber"
+                trend="up"
+                subtitle={`logins em ${getPeriodLabel(selectedPeriod).toLowerCase()}`}
+                description="Usuários altamente engajados"
+                size="md"
+                hoverEffect="border"
+                enableAnimation={true}
+              />
+            </MetricsGrid>
 
-              {/* Sistemas */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-orange-50">
-                    <Icon name="monitor" className="h-6 w-6 text-orange-500" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Sistemas Ativos</p>
-                    <p className="text-2xl font-bold text-gray-900">{analytics.systems.active}</p>
-                    <p className="text-xs text-gray-500">de {analytics.systems.total} total</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Conteúdo */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-orange-50">
-                    <Icon name="chat-line" className="h-6 w-6 text-orange-500" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Conteúdo Publicado</p>
-                    <p className="text-2xl font-bold text-gray-900">{analytics.content.news + analytics.content.events}</p>
-                    <p className="text-xs text-gray-500">{analytics.content.news} notícias, {analytics.content.events} eventos</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Atividade */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-lg bg-orange-50">
-                    <Icon name="chart-bar-vertical" className="h-6 w-6 text-orange-500" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Atividade ({getPeriodLabel(selectedPeriod)})</p>
-                    <p className="text-2xl font-bold text-gray-900">{formatNumber(analytics.activity.logins)}</p>
-                    <p className="text-xs text-gray-500">logins realizados</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Gráficos e Tabelas */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Gráfico Principal */}
-              <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">Distribuição por Categoria</h3>
-                  <div className="flex space-x-2">
-                    {[
-                      { key: 'users', label: 'Usuários' },
-                      { key: 'systems', label: 'Sistemas' },
-                      { key: 'activity', label: 'Atividade' }
-                    ].map((option) => (
-                      <button
-                        key={option.key}
-                        onClick={() => setActiveChart(option.key as any)}
-                        className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                          activeChart === option.key
-                            ? 'bg-orange-500 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Gráfico de Barras Simples */}
-                <div className="space-y-4">
-                  {chartData.labels.map((label, index) => (
-                    <div key={label} className="flex items-center space-x-4">
-                      <div className="w-20 text-sm text-gray-600 text-right">{label}</div>
-                      <div className="flex-1 h-8 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-1000 ease-out"
-                          style={{
-                            width: `${(chartData.values[index] / Math.max(...chartData.values)) * 100}%`,
-                            backgroundColor: chartData.colors[index] || '#6b7280'
-                          }}
-                        />
+            {/* Charts Section - Redesigned with Clean Professional Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+              {/* Main Chart Container - 2/3 width */}
+              <div className="lg:col-span-2">
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Header */}
+                  <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/30">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-900">Distribuição por Categoria</h2>
+                        <p className="text-sm text-gray-500 mt-1">Análise detalhada dos dados principais</p>
                       </div>
-                      <div className="w-16 text-sm text-gray-900 font-medium">
-                        {formatNumber(chartData.values[index])}
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => fetchAnalyticsData()}
+                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                          <Icon name="refresh" className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sidebar com Informações Adicionais */}
-              <div className="space-y-6">
-                {/* Top Localizações */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Usuários por Local</h3>
-                  <div className="space-y-3">
-                    {analytics.locations.userDistribution
-                      .sort((a, b) => b.users - a.users)
-                      .slice(0, 5)
-                      .map((location, index) => (
-                        <div key={location.name} className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className={`w-3 h-3 rounded-full ${
-                              index === 0 ? 'bg-orange-500' :
-                              index === 1 ? 'bg-orange-400' :
-                              index === 2 ? 'bg-orange-300' :
-                              'bg-gray-400'
-                            }`} />
-                            <span className="text-sm text-gray-600 truncate">{location.name}</span>
-                          </div>
-                          <span className="text-sm font-medium text-gray-900">{location.users}</span>
-                        </div>
+                  </div>
+                  
+                  {/* Chart Toggle Buttons */}
+                  <div className="px-6 py-3 bg-gray-50/50">
+                    <div className="flex space-x-1">
+                      {[
+                        { key: 'users', label: 'Usuários', icon: 'user-group' },
+                        { key: 'systems', label: 'Sistemas', icon: 'monitor' },
+                        { key: 'activity', label: 'Atividade', icon: 'chart-line' }
+                      ].map((option) => (
+                        <button
+                          key={option.key}
+                          onClick={() => setActiveChart(option.key as any)}
+                          className={`
+                            px-3 py-2 text-xs font-medium rounded-lg transition-all duration-200 
+                            flex items-center space-x-2
+                            ${activeChart === option.key
+                              ? 'bg-orange-500 text-white shadow-sm'
+                              : 'bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                            }
+                          `}
+                        >
+                          <Icon name={option.icon as any} className="h-3 w-3" />
+                          <span>{option.label}</span>
+                        </button>
                       ))}
+                    </div>
                   </div>
-                </div>
-
-                {/* Sistemas Mais Usados */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Sistemas Populares</h3>
-                  <div className="space-y-3">
-                    {analytics.systems.mostUsed.map((system, index) => (
-                      <div key={system.name} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">{system.name}</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-orange-500 rounded-full transition-all duration-1000"
-                              style={{ width: `${system.usage}%` }}
-                            />
-                          </div>
-                          <span className="text-xs text-gray-500 w-8">{system.usage}%</span>
-                        </div>
+                  
+                  {/* Chart Content */}
+                  <div className="p-6">
+                    <AnimatedChart
+                      data={chartData.labels.map((label, index) => ({
+                        label,
+                        value: chartData.values[index],
+                        color: chartData.colors[index] || '#F58220'
+                      }))}
+                      title=""
+                      type="bar"
+                      height={350}
+                      animated={true}
+                      className=""
+                    />
+                  </div>
+                  
+                  {/* Footer */}
+                  <div className="px-6 py-3 border-t border-gray-100 bg-gray-50/30">
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center space-x-4">
+                        <span>Atualizado: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="text-orange-500">• {chartData.labels.length} categorias</span>
                       </div>
-                    ))}
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span>Dados em tempo real</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar Analytics - 1/3 width */}
+              <div className="space-y-8">
+                {/* Usuários por Local */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/30">
+                    <h3 className="font-semibold text-gray-900">Usuários por Local</h3>
+                    <p className="text-xs text-gray-500 mt-1">Distribuição geográfica</p>
+                  </div>
+                  <div className="p-5">
+                    <div className="space-y-1">
+                      {analytics.locations.userDistribution
+                        .sort((a, b) => b.users - a.users)
+                        .slice(0, 6)
+                        .map((location, index) => {
+                          const percentage = analytics.users.total > 0 
+                            ? Math.round((location.users / analytics.users.total) * 100)
+                            : 0;
+                          return (
+                            <LocationCard
+                              key={location.name}
+                              name={location.name}
+                              users={location.users}
+                              percentage={percentage}
+                              rank={index}
+                            />
+                          );
+                        })}
+                    </div>
                   </div>
                 </div>
 
-                {/* Resumo Rápido */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumo</h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Taxa de Usuários Ativos</span>
-                      <span className="font-medium text-orange-600">
+                {/* Métricas-Chave */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/30">
+                    <h3 className="font-semibold text-gray-900">Métricas Principais</h3>
+                    <p className="text-xs text-gray-500 mt-1">Indicadores de performance</p>
+                  </div>
+                  <div className="p-5 space-y-4">
+                    {/* Taxa de Usuários Ativos */}
+                    <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100/50 rounded-xl border border-orange-200/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700">Usuários Ativos</span>
+                        <Icon name="trending-up" className="h-4 w-4 text-orange-500" />
+                      </div>
+                      <div className="text-2xl font-bold text-orange-600 mb-1">
                         {Math.round((analytics.users.active / analytics.users.total) * 100)}%
-                      </span>
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {analytics.users.active} de {analytics.users.total} usuários
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Notificações Lidas</span>
-                      <span className="font-medium text-orange-600">
-                        {Math.round((analytics.activity.notificationsRead / analytics.content.notifications) * 100) || 0}%
-                      </span>
+                    
+                    {/* Taxa de Notificações Lidas */}
+                    <div className="p-4 bg-gradient-to-r from-green-50 to-green-100/50 rounded-xl border border-green-200/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700">Taxa de Leitura</span>
+                        <Icon name="check" className="h-4 w-4 text-green-500" />
+                      </div>
+                      <div className="text-2xl font-bold text-green-600 mb-1">
+                        {Math.round((analytics.activity.notificationsRead / Math.max(analytics.content.notifications, 1)) * 100)}%
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {analytics.activity.notificationsRead} notificações lidas
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Crescimento de Usuários</span>
-                      <span className="font-medium text-orange-600">
-                        +{Math.round((analytics.users.new / analytics.users.total) * 100) || 0}%
-                      </span>
+                    
+                    {/* Crescimento */}
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-xl border border-blue-200/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700">Crescimento</span>
+                        <Icon name="user-add" className="h-4 w-4 text-blue-500" />
+                      </div>
+                      <div className="text-2xl font-bold text-blue-600 mb-1">
+                        +{Math.round((analytics.users.new / Math.max(analytics.users.total - analytics.users.new, 1)) * 100)}%
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {analytics.users.new} novos usuários
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -490,38 +573,56 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Ações Rápidas */}
-            <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
-              <div className="flex flex-wrap gap-3">
-                <button
+            <div className="mt-8">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Ações Rápidas</h2>
+                <p className="text-sm text-gray-600">Acesse rapidamente as principais funcionalidades</p>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <MinimalistButton
+                  variant="primary"
+                  size="lg"
+                  icon="user-group"
                   onClick={() => router.push('/admin/users')}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors text-sm"
+                  fullWidth
                 >
                   Gerenciar Usuários
-                </button>
-                <button
+                </MinimalistButton>
+                
+                <MinimalistButton
+                  variant="primary"
+                  size="lg"
+                  icon="monitor"
                   onClick={() => router.push('/admin/systems')}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors text-sm"
+                  fullWidth
                 >
                   Gerenciar Sistemas
-                </button>
-                <button
+                </MinimalistButton>
+                
+                <MinimalistButton
+                  variant="primary"
+                  size="lg"
+                  icon="bell"
                   onClick={() => router.push('/admin/notifications')}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors text-sm"
+                  fullWidth
                 >
                   Enviar Notificação
-                </button>
-                <button
+                </MinimalistButton>
+                
+                <MinimalistButton
+                  variant="outline"
+                  size="lg"
+                  icon="save"
                   onClick={() => window.print()}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
+                  fullWidth
                 >
                   Imprimir Relatório
-                </button>
+                </MinimalistButton>
               </div>
             </div>
           </>
         )}
-      </div>
+      </ResponsiveContainer>
     </div>
   );
 } 

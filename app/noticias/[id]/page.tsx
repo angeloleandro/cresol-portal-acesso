@@ -211,7 +211,7 @@ export default function NoticiaDetalhePage() {
         )}
 
         {/* Conteúdo da notícia */}
-        <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-6 mb-8">
+        <div className="bg-white rounded-lg border border-cresol-gray-light p-6 mb-8">
           <div 
             className="prose max-w-none prose-headings:text-cresol-gray prose-p:text-cresol-gray prose-li:text-cresol-gray prose-a:text-primary"
             dangerouslySetInnerHTML={renderHTML(news.content)}
@@ -227,7 +227,7 @@ export default function NoticiaDetalhePage() {
                 <Link 
                   key={item.id} 
                   href={`/noticias/${item.id}`}
-                  className="block bg-white rounded-lg shadow-sm border border-cresol-gray-light overflow-hidden hover:shadow-md transition-shadow"
+                  className="block bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-primary/30 transition-colors"
                 >
                   {item.image_url && (
                     <div className="relative h-40 w-full bg-cresol-gray-light">

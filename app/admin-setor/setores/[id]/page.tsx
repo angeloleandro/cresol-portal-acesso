@@ -433,7 +433,7 @@ export default function SectorContentManagement() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow">
+      <header className="bg-white border border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <div className="relative h-10 w-24 mr-4">
@@ -531,7 +531,7 @@ export default function SectorContentManagement() {
               </div>
               
               {showNewsForm && (
-                <div className="bg-white p-4 rounded shadow mb-6">
+                <div className="bg-white p-4 rounded border border-gray-200 mb-6">
                   <h4 className="text-lg font-medium mb-3">
                     {newsForm.id ? 'Editar Notícia' : 'Nova Notícia'}
                   </h4>
@@ -639,13 +639,13 @@ export default function SectorContentManagement() {
               )}
               
               {news.length === 0 ? (
-                <div className="bg-white p-6 rounded shadow text-center">
+                <div className="bg-white p-6 rounded border border-gray-200 text-center">
                   <p className="text-gray-500">Nenhuma notícia cadastrada para este setor.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {news.map((item) => (
-                    <div key={item.id} className="bg-white p-4 rounded shadow flex flex-col sm:flex-row">
+                    <div key={item.id} className="bg-white p-4 rounded border border-gray-200 flex flex-col sm:flex-row">
                       {item.image_url && (
                         <div className="sm:w-1/4 mb-3 sm:mb-0 sm:mr-4">
                           <div className="relative h-40 w-full sm:h-full">
@@ -718,7 +718,7 @@ export default function SectorContentManagement() {
               </div>
               
               {showEventForm && (
-                <div className="bg-white p-4 rounded shadow mb-6">
+                <div className="bg-white p-4 rounded border border-gray-200 mb-6">
                   <h4 className="text-lg font-medium mb-3">
                     {eventForm.id ? 'Editar Evento' : 'Novo Evento'}
                   </h4>
@@ -812,13 +812,13 @@ export default function SectorContentManagement() {
               )}
               
               {events.length === 0 ? (
-                <div className="bg-white p-6 rounded shadow text-center">
+                <div className="bg-white p-6 rounded border border-gray-200 text-center">
                   <p className="text-gray-500">Nenhum evento cadastrado para este setor.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {events.map((item) => (
-                    <div key={item.id} className="bg-white p-4 rounded shadow">
+                    <div key={item.id} className="bg-white p-4 rounded border border-gray-200">
                       <div className="flex justify-between mb-2">
                         <h3 className="text-lg font-medium">{item.title}</h3>
                         <div className="flex space-x-2">

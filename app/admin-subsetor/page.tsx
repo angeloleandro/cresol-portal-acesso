@@ -216,7 +216,7 @@ export default function AdminSubsectorPage() {
         </div>
 
         {subsectors.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
             <div className="text-6xl text-gray-300 mb-4">📂</div>
             <h3 className="text-lg font-semibold text-cresol-gray mb-2">
               Nenhum sub-setor encontrado
@@ -237,7 +237,7 @@ export default function AdminSubsectorPage() {
               };
 
               return (
-                <div key={subsector.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <div key={subsector.id} className="bg-white rounded-lg border border-gray-200 hover:border-primary/30 transition-colors">
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-cresol-gray">

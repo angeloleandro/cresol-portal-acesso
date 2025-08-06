@@ -273,7 +273,7 @@ function EventosPageContent() {
           {viewMode === 'list' && (
             <>
               {/* Barra de Filtros Avançados */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+              <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
                 <div className="flex flex-col lg:flex-row gap-4">
                   {/* Busca */}
                   <div className="flex-1 max-w-md">

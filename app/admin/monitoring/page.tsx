@@ -158,7 +158,7 @@ export default function MonitoringPage() {
             
             <button
               onClick={loadUserActivities}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
               <Icon name="arrow-left" className="h-4 w-4 mr-2 rotate-180" />
               Atualizar
@@ -167,7 +167,7 @@ export default function MonitoringPage() {
         </div>
 
         {/* Atividades dos usuários */}
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-white rounded-lg border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Atividades Recentes dos Usuários</h3>
           </div>

@@ -336,7 +336,7 @@ export default function GlobalSearch({
 
       {/* Resultados da busca */}
       {showResults && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg max-h-96 overflow-y-auto z-50">
           {/* Sugestões de pesquisa recente */}
           {query.length === 0 && recentSearches.length > 0 && (
             <div className="p-3 border-b border-gray-100">

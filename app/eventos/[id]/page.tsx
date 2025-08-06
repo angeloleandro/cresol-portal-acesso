@@ -210,7 +210,7 @@ export default function EventoDetalhePage() {
           <h1 className="text-3xl font-bold text-cresol-gray mb-4">{event.title}</h1>
           
           {/* Informações do evento */}
-          <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-6 mb-8">
+          <div className="bg-white rounded-lg border border-cresol-gray-light p-6 mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Data e Local */}
               <div>
@@ -271,7 +271,7 @@ export default function EventoDetalhePage() {
                 <Link 
                   key={item.id} 
                   href={`/eventos/${item.id}`}
-                  className="block bg-white rounded-lg shadow-sm border border-cresol-gray-light overflow-hidden hover:shadow-md transition-shadow"
+                  className="block bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-primary/30 transition-colors"
                 >
                   <div className="p-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary mb-2">

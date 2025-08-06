@@ -424,7 +424,7 @@ export default function ProfilePage() {
           <div className="relative px-6 pb-6">
             {/* Avatar */}
             <div className="absolute -top-16 left-6">
-              <div className="relative h-32 w-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100">
+              <div className="relative h-32 w-32 rounded-full border-4 border-white overflow-hidden bg-gray-100">
                 {(avatarPreview || avatarUrl) ? (
                   <OptimizedImage
                     src={avatarPreview || avatarUrl || ''}

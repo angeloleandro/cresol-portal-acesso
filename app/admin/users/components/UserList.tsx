@@ -101,7 +101,7 @@ export default function UserList({
 
   if (users.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-8 text-center">
+      <div className="bg-white rounded-lg border border-cresol-gray-light p-8 text-center">
         <p className="text-cresol-gray">Nenhum usuário encontrado.</p>
       </div>
     );
@@ -111,7 +111,7 @@ export default function UserList({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {users.map(user => (
-          <div key={user.id} className="bg-white rounded-lg shadow-sm border border-cresol-gray-light overflow-hidden hover:shadow-md transition-shadow">
+          <div key={user.id} className="bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-primary/30 transition-colors">
             <div className="p-4">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="relative h-12 w-12 rounded-full overflow-hidden bg-cresol-gray-light flex-shrink-0">

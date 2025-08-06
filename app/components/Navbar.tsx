@@ -323,7 +323,7 @@ export default function Navbar() {
               {/* Dropdown menu */}
               {isSectorsDropdownOpen && (
                 <div 
-                  className="absolute left-0 mt-0 w-56 bg-white rounded-md shadow-lg py-1 z-10"
+                  className="absolute left-0 mt-0 w-56 bg-white rounded-md  py-1 z-10"
                   onMouseEnter={handleOpenSectorsDropdown}
                   onMouseLeave={handleCloseSectorsDropdown}
                 >
@@ -369,7 +369,7 @@ export default function Navbar() {
               </button>
               {isGalleryDropdownOpen && (
                 <div 
-                  className="absolute left-0 mt-0 w-56 bg-white rounded-md shadow-lg py-1 z-10"
+                  className="absolute left-0 mt-0 w-56 bg-white rounded-md  py-1 z-10"
                   onMouseEnter={handleOpenGalleryDropdown}
                   onMouseLeave={handleCloseGalleryDropdown}
                 >
@@ -431,7 +431,7 @@ export default function Navbar() {
                 {/* Admin Setor Dropdown menu */}
                 {isAdminSectorDropdownOpen && (
                   <div 
-                    className="absolute right-0 mt-0 w-56 bg-white rounded-md shadow-lg py-1 z-10"
+                    className="absolute right-0 mt-0 w-56 bg-white rounded-md  py-1 z-10"
                     onMouseEnter={handleOpenAdminSectorDropdown}
                     onMouseLeave={handleCloseAdminSectorDropdown}
                   >
@@ -486,7 +486,7 @@ export default function Navbar() {
                     />
                     
                     {/* Dropdown de busca */}
-                    <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                    <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg  border border-gray-200 z-50">
                       <div className="p-4">
                         <h3 className="text-sm font-medium text-gray-900 mb-3">Buscar no Portal</h3>
                         <GlobalSearch 
@@ -530,7 +530,7 @@ export default function Navbar() {
                     />
                     
                     {/* Dropdown de notificações */}
-                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-hidden">
+                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg  border border-gray-200 z-50 max-h-96 overflow-hidden">
                       {/* Header */}
                       <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                         <h3 className="text-sm font-semibold text-gray-900">Notificações</h3>
@@ -627,7 +627,7 @@ export default function Navbar() {
               
               {isUserMenuOpen && (
                 <div 
-                  className="absolute right-0 mt-0 w-48 bg-white rounded-md shadow-lg py-1 z-10"
+                  className="absolute right-0 mt-0 w-48 bg-white rounded-md  py-1 z-10"
                   onMouseEnter={handleOpenUserMenu}
                   onMouseLeave={handleCloseUserMenu}
                 >

@@ -299,7 +299,7 @@ export default function SistemasPage() {
                     onClick={() => setViewMode('grid')}
                     className={`p-2 rounded-md transition-all duration-200 ${
                       viewMode === 'grid' 
-                        ? 'bg-primary text-white shadow-sm' 
+                        ? 'bg-primary text-white ' 
                         : 'text-muted hover:text-gray-700 hover:bg-gray-50'
                     }`}
                     title="Visualização em grade"
@@ -312,7 +312,7 @@ export default function SistemasPage() {
                     onClick={() => setViewMode('list')}
                     className={`p-2 rounded-md transition-all duration-200 ${
                       viewMode === 'list' 
-                        ? 'bg-primary text-white shadow-sm' 
+                        ? 'bg-primary text-white ' 
                         : 'text-muted hover:text-gray-700 hover:bg-gray-50'
                     }`}
                     title="Visualização em lista"

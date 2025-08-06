@@ -99,7 +99,7 @@ export default function VideosPage() {
         {/* Modal padronizado */}
         {modalOpen && selectedVideo && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+            <div className="bg-white rounded-lg border border-gray-300 max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
               {/* Cabeçalho do modal */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <h3 className="heading-4 text-title">{selectedVideo.title}</h3>
@@ -138,7 +138,7 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
   const shortTitle = video.title.length > maxLen ? video.title.slice(0, maxLen) + '...' : video.title;
   
   return (
-    <div className="card cursor-pointer hover:shadow-md transition-all duration-200 hover:-translate-y-1 group" onClick={() => onClick(video)}>
+    <div className="card cursor-pointer transition-all duration-200 group" onClick={() => onClick(video)}>
       <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden mb-3">
         {video.thumbnail_url ? (
           <OptimizedImage 

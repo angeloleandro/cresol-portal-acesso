@@ -305,7 +305,7 @@ export default function AccessRequests() {
             <p className="text-cresol-gray mb-4 md:mb-0">Gerencie as solicitações de acesso ao portal.</p>
           </div>
           
-          <div className="flex items-center bg-white rounded-lg shadow-sm border border-cresol-gray-light p-1">
+          <div className="flex items-center bg-white rounded-lg  border border-cresol-gray-light p-1">
             <label htmlFor="status-filter" className="text-sm font-medium text-cresol-gray ml-2 mr-2">
               Filtrar:
             </label>
@@ -328,11 +328,11 @@ export default function AccessRequests() {
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
           </div>
         ) : requests.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-8 text-center">
+          <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
             <p className="text-cresol-gray">Nenhuma solicitação encontrada com os filtros atuais.</p>
           </div>
         ) : (
-          <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-cresol-gray-light">
+          <div className="bg-white  rounded-lg overflow-hidden border border-cresol-gray-light">
             <table className="min-w-full divide-y divide-cresol-gray-light">
               <thead className="bg-gray-50">
                 <tr>

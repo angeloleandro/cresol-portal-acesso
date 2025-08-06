@@ -727,7 +727,7 @@ export default function SubsectorManagePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Minimalista */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-6">
@@ -997,7 +997,7 @@ export default function SubsectorManagePage() {
             </div>
 
             {systems.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+              <div className="bg-white rounded-lg  p-8 text-center">
                 <div className="text-6xl text-gray-300 mb-4">🖥️</div>
                 <h4 className="text-lg font-semibold text-cresol-gray mb-2">
                   Nenhum sistema encontrado
@@ -1009,7 +1009,7 @@ export default function SubsectorManagePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {systems.map((system) => (
-                  <div key={system.id} className="bg-white rounded-lg shadow-sm p-6">
+                  <div key={system.id} className="bg-white rounded-lg  p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-semibold text-cresol-gray">
                         {system.name}
@@ -1078,7 +1078,7 @@ export default function SubsectorManagePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {groups.map((group) => (
-                  <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-md transition-all">
+                  <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:border-primary/30 transition-all">
                     <div className="flex items-start justify-between mb-4">
                       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                         <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">

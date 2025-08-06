@@ -48,6 +48,15 @@ import { PlayIcon } from './PlayIcon';
 import { SortIcon } from './SortIcon';
 import { GridIcon } from './GridIcon';
 import { HouseIcon } from './HouseIcon';
+import { TrendingUpIcon } from './TrendingUpIcon';
+import { TrendingDownIcon } from './TrendingDownIcon';
+import { MinusIcon } from './MinusIcon';
+import { ChevronDownIcon } from './ChevronDownIcon';
+import { ChevronUpIcon } from './ChevronUpIcon';
+import { XIcon } from './XIcon';
+import { RefreshIcon } from './RefreshIcon';
+import { DownloadIcon } from './DownloadIcon';
+import { ChevronRightIcon } from './ChevronRightIcon';
 
 export type IconName =
   | 'arrow-left'
@@ -97,8 +106,17 @@ export type IconName =
   | 'menu'
   | 'play'
   | 'sort'
+  | 'trending-up'
+  | 'trending-down'
+  | 'minus'
   | 'grid'
-  | 'house';
+  | 'house'
+  | 'chevron-down'
+  | 'chevron-up'
+  | 'x'
+  | 'refresh'
+  | 'download'
+  | 'chevron-right';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   name: IconName;
@@ -154,6 +172,15 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   'sort': SortIcon,
   'grid': GridIcon,
   'house': HouseIcon,
+  'trending-up': TrendingUpIcon,
+  'trending-down': TrendingDownIcon,
+  'minus': MinusIcon,
+  'chevron-down': ChevronDownIcon,
+  'chevron-up': ChevronUpIcon,
+  'x': XIcon,
+  'refresh': RefreshIcon,
+  'download': DownloadIcon,
+  'chevron-right': ChevronRightIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, ...props }) => {

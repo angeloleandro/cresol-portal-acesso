@@ -326,7 +326,7 @@ export default function PositionsAdmin() {
           </button>
         </div>
         {showForm && (
-          <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-6 mb-6">
+          <div className="bg-white rounded-lg border border-cresol-gray-light p-6 mb-6">
             <h3 className="text-lg font-semibold text-primary mb-4">{editing ? 'Editar Cargo' : 'Cadastrar Novo Cargo'}</h3>
             {formError && (
               <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">{formError}</div>
@@ -484,7 +484,7 @@ export default function PositionsAdmin() {
             </form>
           </div>
         )}
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-cresol-gray-light">
+        <div className="bg-white rounded-lg overflow-hidden border border-cresol-gray-light">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-cresol-gray-light">
               <thead className="bg-gray-50">

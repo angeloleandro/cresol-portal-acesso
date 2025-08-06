@@ -442,7 +442,7 @@ export default function AdvancedSearch({
       <div className="fixed inset-0 flex items-start justify-center pt-16 px-4">
         <div 
           ref={modalRef}
-          className="w-full max-w-4xl bg-white rounded-lg shadow-xl max-h-[80vh] overflow-hidden"
+          className="w-full max-w-4xl bg-white rounded-lg border border-gray-300 max-h-[80vh] overflow-hidden"
         >
           {/* Header */}
           <div className="p-4 border-b border-gray-200">

@@ -363,7 +363,7 @@ export default function UserEditModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4 relative max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-lg border border-gray-300 w-full max-w-2xl mx-4 relative max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-cresol-gray-light">
           <h3 className="heading-4 text-primary">Editar Usuário</h3>
           <button

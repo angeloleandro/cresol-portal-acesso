@@ -333,7 +333,7 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
     <div className="fixed inset-0 z-50 overflow-hidden">
       <div className="absolute inset-0 bg-black bg-opacity-25"></div>
       
-      <div className="fixed right-0 top-0 h-full w-full max-w-lg bg-white shadow-xl">
+      <div className="fixed right-0 top-0 h-full w-full max-w-lg bg-white ">
         <div ref={panelRef} className="flex flex-col h-full">
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-200 bg-white">
@@ -510,7 +510,7 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
                                 </svg>
                               </button>
                               
-                              <div className="absolute right-0 top-6 w-40 bg-white rounded-md shadow-lg border border-gray-200 z-10 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto">
+                              <div className="absolute right-0 top-6 w-40 bg-white rounded-md  border border-gray-200 z-10 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto">
                                 <div className="py-1">
                                   <button
                                     onClick={() => notification.read ? markAsUnread(notification.id) : markAsRead(notification.id)}

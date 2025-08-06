@@ -99,7 +99,7 @@ export default function SetoresPage() {
               <Link 
                 key={sector.id}
                 href={`/setores/${sector.id}`}
-                className="card hover:shadow-md transition-all duration-200 hover:-translate-y-1 block"
+                className="card transition-all duration-200 block"
               >
                 {/* Ícone visual do setor */}
                 <div className="mb-4">

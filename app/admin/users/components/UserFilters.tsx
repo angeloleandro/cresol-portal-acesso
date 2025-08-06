@@ -27,7 +27,7 @@ export default function UserFilters({
   filteredCount
 }: UserFiltersProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-4 mb-6">
+    <div className="bg-white rounded-lg border border-cresol-gray-light p-4 mb-6">
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1">
           <label htmlFor="searchTerm" className="block text-xs font-medium text-cresol-gray mb-1">

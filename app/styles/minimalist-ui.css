@@ -1,0 +1,79 @@
+/* Estilos para botões minimalistas e componentes de UI */
+
+.minimalist-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.minimalist-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.minimalist-button:hover::before {
+  left: 100%;
+}
+
+/* Animações suaves para componentes */
+.location-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.location-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Tooltip personalizado */
+.custom-tooltip {
+  position: absolute;
+  z-index: 1000;
+  padding: 8px 12px;
+  background-color: #1f2937;
+  color: white;
+  font-size: 12px;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.custom-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.custom-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #1f2937;
+}
+
+/* Melhorias na responsividade */
+@media (max-width: 640px) {
+  .analytics-button-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .location-card {
+    padding: 12px;
+  }
+}

@@ -252,7 +252,7 @@ export default function SectorSystemsManagement() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow">
+      <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <div className="relative h-10 w-24 mr-4">
@@ -310,13 +310,13 @@ export default function SectorSystemsManagement() {
         </div>
         
         {systems.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
             <p className="text-gray-600">Nenhum sistema cadastrado para este setor. Adicione o primeiro sistema clicando no botão acima.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {systems.map((system) => (
-              <div key={system.id} className="bg-white rounded-lg shadow-md p-6">
+              <div key={system.id} className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center">
                     <div className="w-10 h-10 mr-3 relative">
@@ -377,7 +377,7 @@ export default function SectorSystemsManagement() {
       {/* Modal Adicionar Sistema */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+          <div className="bg-white rounded-lg border border-gray-300 max-w-md w-full p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Adicionar Novo Sistema</h3>
             
             <form onSubmit={handleAddSystem}>
@@ -471,7 +471,7 @@ export default function SectorSystemsManagement() {
       {/* Modal Editar Sistema */}
       {isEditModalOpen && editingSystem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+          <div className="bg-white rounded-lg border border-gray-300 max-w-md w-full p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Editar Sistema</h3>
             
             <form onSubmit={handleEditSystem}>

@@ -124,7 +124,7 @@ export default function ImageUploadForm({ initialData, onSave, onCancel }: Image
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 mb-6">
+    <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
       <h3 className="text-lg font-semibold mb-4">{initialData ? "Editar Imagem" : "Nova Imagem"}</h3>
       
       {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -218,7 +218,7 @@ export default function ImageUploadForm({ initialData, onSave, onCancel }: Image
       
       <div className="flex gap-2 mt-4">
         <button 
-          className="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary-dark transition" 
+          className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition" 
           onClick={handleSave} 
           disabled={loading}
         >

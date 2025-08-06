@@ -136,12 +136,12 @@ export default function AdminVideos() {
             <h2 className="text-2xl font-bold text-primary mb-2">Gerenciar Vídeos</h2>
             <p className="text-cresol-gray">Adicione, edite ou remova vídeos exibidos no dashboard do portal.</p>
           </div>
-          <button className="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary-dark transition" onClick={() => setShowForm(true)}>+ Novo Vídeo</button>
+          <button className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition" onClick={() => setShowForm(true)}>+ Novo Vídeo</button>
         </div>
         {error && <div className="text-red-500 mb-4">Erro: {error}</div>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {videos.map((video) => (
-            <div key={video.id} className="bg-white rounded-lg shadow border border-cresol-gray-light overflow-hidden flex flex-col">
+            <div key={video.id} className="bg-white rounded-lg border border-cresol-gray-light overflow-hidden flex flex-col">
               {video.thumbnail_url ? (
                 <OptimizedImage
                   src={video.thumbnail_url}

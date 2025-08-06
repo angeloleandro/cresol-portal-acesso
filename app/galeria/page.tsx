@@ -89,7 +89,7 @@ export default function GalleryPage() {
               {images.map((img) => (
                 <div 
                   key={img.id} 
-                  className="card cursor-pointer hover:shadow-md transition-all duration-200 hover:-translate-y-1 group" 
+                  className="card cursor-pointer transition-all duration-200 group" 
                   onClick={() => handleOpenModal(img)}
                 >
                   <div className="relative w-full aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden">
@@ -125,7 +125,7 @@ export default function GalleryPage() {
         {/* Modal padronizado */}
         {modalOpen && selectedImage && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+            <div className="bg-white rounded-lg border border-gray-300 max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
               {/* Cabeçalho do modal */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <h3 className="heading-4 text-title">

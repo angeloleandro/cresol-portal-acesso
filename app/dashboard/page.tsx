@@ -276,7 +276,7 @@ export default function Dashboard() {
               <Link
                 key={index}
                 href={action.href}
-                className="card text-white hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+                className="card text-white transition-all duration-200"
                 style={{ backgroundColor: action.color.includes('bg-purple') ? 'var(--color-secondary)' : 
                          action.color.includes('bg-blue') ? 'var(--color-info-text)' :
                          action.color.includes('bg-green') ? 'var(--color-success-text)' :
@@ -310,7 +310,7 @@ export default function Dashboard() {
                   href={system.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="card hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+                  className="card transition-all duration-200"
                 >
                   <div className="flex items-center mb-3">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">

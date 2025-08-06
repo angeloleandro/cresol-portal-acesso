@@ -249,7 +249,7 @@ export default function SectorSystemsManagement() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow">
+      <header className="bg-white border border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <div className="relative h-10 w-24 mr-4">
@@ -319,7 +319,7 @@ export default function SectorSystemsManagement() {
         {/* Lista de sistemas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {systems.map((system) => (
-            <div key={system.id} className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div key={system.id} className="bg-white rounded-lg  p-6 border border-gray-200">
               <div className="flex items-center mb-4">
                 <div className="h-12 w-12 mr-4">
                   <OptimizedImage 
@@ -355,7 +355,7 @@ export default function SectorSystemsManagement() {
         </div>
 
         {systems.length === 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+          <div className="bg-white rounded-lg  p-8 text-center">
             <p className="text-gray-600">Nenhum sistema cadastrado para este setor.</p>
           </div>
         )}

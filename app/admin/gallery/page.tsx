@@ -136,7 +136,7 @@ export default function AdminGallery() {
             <h2 className="text-2xl font-bold text-primary mb-2">Gerenciar Galeria de Imagens</h2>
             <p className="text-cresol-gray">Adicione, edite ou remova imagens exibidas na galeria do portal.</p>
           </div>
-          <button className="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary-dark transition" onClick={() => setShowForm(true)}>+ Nova Imagem</button>
+          <button className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition" onClick={() => setShowForm(true)}>+ Nova Imagem</button>
         </div>
         {showForm && !editImage && (
           <ImageUploadForm onSave={() => { setShowForm(false); fetchImages(); }} onCancel={() => setShowForm(false)} />
@@ -157,7 +157,7 @@ export default function AdminGallery() {
         {error && <div className="text-red-500 mb-4">Erro: {error}</div>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {images.map((img) => (
-            <div key={img.id} className="bg-white rounded-lg shadow border border-cresol-gray-light overflow-hidden flex flex-col">
+            <div key={img.id} className="bg-white rounded-lg border border-cresol-gray-light overflow-hidden flex flex-col">
               <div className="relative w-full h-48 bg-cresol-gray-light">
                 {img.image_url ? (
                   <OptimizedImage 

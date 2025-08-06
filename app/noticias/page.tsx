@@ -194,7 +194,7 @@ export default function NoticiasPage() {
               <Link 
                 key={item.id} 
                 href={`/noticias/${item.id}`}
-                className="card hover:shadow-md transition-all duration-200 hover:-translate-y-1 block"
+                className="card transition-all duration-200 block"
               >
                 <div className="flex flex-col md:flex-row">
                   {/* Imagem */}

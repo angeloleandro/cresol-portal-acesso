@@ -186,7 +186,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
         <h2 className="heading-3 text-title">Próximos Eventos</h2>
         <Link 
           href="/eventos" 
-          className="text-sm font-medium transition-colors flex items-center hover:shadow-sm px-3 py-1.5 rounded-md text-primary"
+          className="text-sm font-medium transition-colors flex items-center hover: px-3 py-1.5 rounded-md text-primary"
         >
           Ver todos
           <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -205,7 +205,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
             <Link 
               key={event.id} 
               href={`/eventos/${event.id}`}
-                              className="block bg-gray-50 border border-gray-100 rounded-lg hover:shadow-md hover:border-gray-200 transition-all duration-200 p-4"
+                              className="block bg-gray-50 border border-gray-100 rounded-lg hover: hover:border-gray-200 transition-all duration-200 p-4"
             >
               <div className="flex flex-col">
                 <div className="flex justify-between items-start mb-2">

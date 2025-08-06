@@ -563,7 +563,7 @@ export default function NotificationsPage() {
             filteredNotifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`card hover:shadow-md transition-shadow duration-200 ${
+                className={`card hover:border-primary/30 transition-colors duration-200 ${
                   !notification.read ? 'ring-2 ring-blue-200 bg-blue-50' : ''
                 }`}
               >

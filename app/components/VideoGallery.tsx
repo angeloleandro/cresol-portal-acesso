@@ -96,7 +96,7 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
         </div>
         {videos.length > limit && (
           <div className="flex justify-center mt-6">
-            <a href="/videos" className="text-white px-5 py-2.5 rounded text-xs font-medium transition-all duration-200 hover:shadow-sm bg-primary hover:bg-primary-dark">Ver galeria de vídeos</a>
+            <a href="/videos" className="text-white px-5 py-2.5 rounded text-xs font-medium transition-all duration-200 bg-primary hover:bg-primary-dark">Ver galeria de vídeos</a>
           </div>
         )}
       </>
@@ -107,7 +107,7 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
     <section className="card">
       <div className="flex justify-between items-center mb-6">
         <h2 className="heading-3 text-title">Vídeos em destaque</h2>
-        <a href="/videos" className="text-sm font-medium transition-colors flex items-center hover:shadow-sm px-3 py-1.5 rounded-md text-primary">
+        <a href="/videos" className="text-sm font-medium transition-colors flex items-center hover:bg-primary/10 px-3 py-1.5 rounded-md text-primary">
           Ver todos
           <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -119,7 +119,7 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="card max-w-2xl w-full mx-4 relative">
             <button
-              className="absolute top-6 right-6 bg-white border border-cresol-gray-light shadow-lg rounded-full w-14 h-14 flex items-center justify-center z-20 transition hover:bg-primary/10 group"
+              className="absolute top-6 right-6 bg-white border border-cresol-gray-light rounded-full w-14 h-14 flex items-center justify-center z-20 transition hover:bg-primary/10 group"
               onClick={handleCloseModal}
               aria-label="Fechar"
               tabIndex={0}
@@ -151,7 +151,7 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
 // Componente de Card de Vídeo extraído para reutilização
 function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: DashboardVideo) => void }) {
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-200 flex flex-col group h-full">
+    <div className="bg-gray-50 rounded-lg border border-gray-100 hover:border-gray-200 transition-all duration-200 flex flex-col group h-full">
       <div className="relative w-full aspect-video bg-gray-100 rounded-t-lg overflow-hidden">
         {video.thumbnail_url ? (
           <OptimizedImage 
@@ -159,7 +159,7 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
             alt={video.title} 
             fill 
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px" 
-            className="object-cover group-hover:scale-105 transition-transform duration-200"
+            className="object-cover transition-transform duration-200"
             quality={80}
             fallbackText="Thumbnail"
           />
@@ -182,7 +182,7 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
         <h3 className="text-sm font-medium text-gray-700 mb-4 line-clamp-2 group-hover:text-gray-900 flex-1">{video.title}</h3>
         <button
           onClick={() => onClick(video)}
-          className="mt-auto text-white px-4 py-2.5 rounded text-xs font-medium transition-all duration-200 hover:shadow-sm"
+          className="mt-auto text-white px-4 py-2.5 rounded text-xs font-medium transition-all duration-200"
           style={{ backgroundColor: '#F38332' }}
         >
           Assistir

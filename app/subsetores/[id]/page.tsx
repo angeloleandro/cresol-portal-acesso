@@ -336,7 +336,7 @@ export default function SubsectorDetailsPage() {
             
             {/* Notícias Recentes */}
             <section 
-              className="bg-white rounded-xl shadow-sm border border-cresol-gray-light"
+              className="bg-white rounded-xl  border border-cresol-gray-light"
               aria-labelledby="recent-news-heading"
             >
               <div className="p-6 border-b border-cresol-gray-light">
@@ -384,7 +384,7 @@ export default function SubsectorDetailsPage() {
 
             {/* Próximos Eventos */}
             <section 
-              className="bg-white rounded-xl shadow-sm border border-cresol-gray-light"
+              className="bg-white rounded-xl  border border-cresol-gray-light"
               aria-labelledby="upcoming-events-heading"
             >
               <div className="p-6 border-b border-cresol-gray-light">

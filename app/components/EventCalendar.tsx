@@ -245,7 +245,7 @@ export default function EventCalendar() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
+      <div className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
         <div className="h-64 bg-gray-200 rounded mb-4"></div>
       </div>
@@ -253,7 +253,7 @@ export default function EventCalendar() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x">
         {/* Calendário (3 colunas em telas grandes) */}
         <div className="lg:col-span-3 p-4">
@@ -336,7 +336,7 @@ export default function EventCalendar() {
                     <Link 
                       key={event.id} 
                       href={`/eventos/${event.id}`}
-                      className="block bg-white border border-cresol-gray-light rounded-lg overflow-hidden hover:shadow-md transition-shadow p-4"
+                      className="block bg-white border border-cresol-gray-light rounded-lg overflow-hidden hover:border-primary/30 transition-colors p-4"
                     >
                       <div className="flex justify-between items-start mb-2">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">

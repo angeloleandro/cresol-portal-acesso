@@ -268,7 +268,7 @@ export default function SetorDetalhesPage() {
         {activeTab === 'news' && (
           <div>
             {news.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-8 text-center">
+              <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
                 <p className="text-cresol-gray">Nenhuma notícia publicada para este setor.</p>
               </div>
             ) : (
@@ -276,7 +276,7 @@ export default function SetorDetalhesPage() {
                 {news.map((item) => (
                   <div 
                     key={item.id} 
-                    className="bg-white rounded-lg shadow-sm border border-cresol-gray-light overflow-hidden max-w-4xl mx-auto"
+                    className="bg-white rounded-lg  border border-cresol-gray-light overflow-hidden max-w-4xl mx-auto"
                   >
                     {item.image_url && (
                       <div className="relative w-full h-64">
@@ -321,7 +321,7 @@ export default function SetorDetalhesPage() {
         {activeTab === 'events' && (
           <div>
             {events.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-8 text-center">
+              <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
                 <p className="text-cresol-gray">Nenhum evento publicado para este setor.</p>
               </div>
             ) : (
@@ -329,7 +329,7 @@ export default function SetorDetalhesPage() {
                 {events.map((item) => (
                   <div 
                     key={item.id}
-                    className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-6"
+                    className="bg-white rounded-lg  border border-cresol-gray-light p-6"
                   >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                       <h2 className="text-xl font-semibold text-cresol-gray">{item.title}</h2>
@@ -380,7 +380,7 @@ export default function SetorDetalhesPage() {
         {activeTab === 'subsectors' && (
           <div>
             {subsectors.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border border-cresol-gray-light p-8 text-center">
+              <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
                 <p className="text-cresol-gray">Nenhum sub-setor cadastrado para este setor.</p>
               </div>
             ) : (
@@ -388,7 +388,7 @@ export default function SetorDetalhesPage() {
                 {subsectors.map((subsector) => (
                   <div 
                     key={subsector.id}
-                    className="bg-white rounded-lg shadow-sm border border-cresol-gray-light overflow-hidden"
+                    className="bg-white rounded-lg  border border-cresol-gray-light overflow-hidden"
                   >
                     <div className="p-6 border-b border-cresol-gray-light">
                       <h3 className="text-xl font-semibold text-cresol-gray-dark mb-2">
