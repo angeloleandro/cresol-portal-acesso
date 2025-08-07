@@ -1,0 +1,1066 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import AdminHeader from '@/app/components/AdminHeader';
+import Breadcrumb from '@/app/components/Breadcrumb';
+
+interface NotificationGroup {
+  id: string;
+  name: string;
+  description?: string;
+  created_by: string;
+  sector_id?: string;
+  subsector_id?: string;
+  created_at: string;
+  sectors?: { name: string };
+  subsectors?: { name: string };
+  profiles?: { full_name?: string; email: string };
+}
+
+interface User {
+  id: string;
+  full_name?: string;
+  email: string;
+  role: string;
+  sector_id?: string;
+  subsector_id?: string;
+}
+
+// Componente para card de estatísticas compacto
+const CompactStatsCard = ({ title, value, icon, color = "primary" }: {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  color?: "primary" | "secondary";
+}) => (
+  <div className="bg-white rounded-lg border border-gray-200 p-3">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{title}</p>
+        <p className={`text-lg font-bold ${color === 'primary' ? 'text-primary' : 'text-secondary'}`}>
+          {value}
+        </p>
+      </div>
+      <div className={`p-2 rounded-lg ${color === 'primary' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'}`}>
+        {icon}
+      </div>
+    </div>
+  </div>
+);
+
+// Componente para botões de ação inline
+const InlineActionButton = ({ onClick, icon, tooltip, variant = "default" }: {
+  onClick: () => void;
+  icon: React.ReactNode;
+  tooltip: string;
+  variant?: "default" | "danger";
+}) => (
+  <button
+    onClick={onClick}
+    className={`p-1.5 rounded-md transition-colors ${
+      variant === "danger" 
+        ? "text-gray-400 hover:text-red-600 hover:bg-red-50" 
+        : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+    }`}
+    title={tooltip}
+  >
+    {icon}
+  </button>
+);
+
+// Componente para agrupamento de campos
+const FormFieldGroup = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <div className="space-y-3">
+    <h4 className="text-sm font-medium text-gray-900 border-b border-gray-200 pb-1">{title}</h4>
+    {children}
+  </div>
+);
+
+export default function NotificationsAdmin() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'send' | 'groups' | 'history'>('send');
+  
+  // Estado para envio de notificações
+  const [notificationForm, setNotificationForm] = useState({
+    title: '',
+    message: '',
+    type: 'message',
+    priority: 'normal',
+    isGlobal: false,
+    groups: [] as string[],
+    users: [] as string[],
+    expiresAt: ''
+  });
+  
+  // Estado para grupos
+  const [groups, setGroups] = useState<NotificationGroup[]>([]);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [groupForm, setGroupForm] = useState({
+    name: '',
+    description: '',
+    sectorId: '',
+    subsectorId: '',
+    members: [] as string[]
+  });
+  
+  // Estado para usuários disponíveis
+  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  
+  // Estado para seções
+  const [sectors, setSectors] = useState<any[]>([]);
+  const [subsectors, setSubsectors] = useState<any[]>([]);
+
+  const checkUserAuth = useCallback(async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error || !user) {
+        router.replace('/login');
+        return;
+      }
+
+      // Verificar se é admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile || !['admin', 'sector_admin', 'subsector_admin'].includes(profile.role)) {
+        router.replace('/home');
+        return;
+      }
+
+      setUser(user);
+    } catch (error) {
+      console.error('Erro ao verificar autenticação:', error);
+      router.replace('/login');
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    checkUserAuth();
+  }, [checkUserAuth]);
+
+  useEffect(() => {
+    if (user) {
+      fetchGroups();
+      fetchUsers();
+      fetchSectors();
+    }
+  }, [user]);
+
+  const fetchGroups = async () => {
+    try {
+      const response = await fetch('/api/notifications/groups');
+      
+      if (!response.ok) {
+        console.error('Erro na API de grupos:', response.status, response.statusText);
+        setGroups([]); // Define array vazio em caso de erro
+        return;
+      }
+      
+      const result = await response.json();
+      
+      if (result.error) {
+        console.error('Erro ao buscar grupos:', result.error);
+        setGroups([]);
+        return;
+      }
+      
+      setGroups(result.groups || []);
+    } catch (error) {
+      console.error('Erro ao buscar grupos:', error);
+      setGroups([]); // Define array vazio em caso de erro
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, role, sector_id, subsector_id')
+        .order('full_name');
+
+      if (error) {
+        console.error('Erro ao buscar usuários:', error);
+        return;
+      }
+
+      setAvailableUsers(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error);
+    }
+  };
+
+  const fetchSectors = async () => {
+    try {
+      const { data: sectorsData, error: sectorsError } = await supabase
+        .from('sectors')
+        .select('id, name')
+        .order('name');
+
+      if (!sectorsError) {
+        setSectors(sectorsData || []);
+      }
+
+      const { data: subsectorsData, error: subsectorsError } = await supabase
+        .from('subsectors')
+        .select('id, name')
+        .order('name');
+
+      if (!subsectorsError) {
+        setSubsectors(subsectorsData || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar setores:', error);
+    }
+  };
+
+  const handleSendNotification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('/api/notifications/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: notificationForm.title,
+          message: notificationForm.message,
+          type: notificationForm.type,
+          priority: notificationForm.priority,
+          isGlobal: notificationForm.isGlobal,
+          groups: notificationForm.groups,
+          recipients: notificationForm.users,
+          expiresAt: notificationForm.expiresAt || null
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('Notificação enviada com sucesso!');
+        setNotificationForm({
+          title: '',
+          message: '',
+          type: 'message',
+          priority: 'normal',
+          isGlobal: false,
+          groups: [],
+          users: [],
+          expiresAt: ''
+        });
+      } else {
+        alert(`Erro: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao enviar notificação:', error);
+      alert('Erro ao enviar notificação');
+    }
+  };
+
+  const handleCreateGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('/api/notifications/groups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: groupForm.name,
+          description: groupForm.description,
+          sectorId: groupForm.sectorId || null,
+          subsectorId: groupForm.subsectorId || null,
+          members: groupForm.members
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('Grupo criado com sucesso!');
+        setGroupForm({
+          name: '',
+          description: '',
+          sectorId: '',
+          subsectorId: '',
+          members: []
+        });
+        setShowCreateGroup(false);
+        fetchGroups();
+      } else {
+        alert(`Erro: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao criar grupo:', error);
+      alert('Erro ao criar grupo');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <AdminHeader user={user} />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Breadcrumb */}
+        <div className="mb-4">
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Notificações' }
+            ]} 
+          />
+        </div>
+
+        {/* Header compacto */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Gerenciar Notificações</h1>
+              <p className="text-sm text-gray-500">Envie mensagens e gerencie grupos de notificação</p>
+            </div>
+            
+            {/* Quick actions */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveTab('send')}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'send' 
+                    ? 'bg-primary text-white' 
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Nova Notificação
+              </button>
+              <button
+                onClick={() => setShowCreateGroup(true)}
+                className="px-3 py-1.5 text-sm font-medium bg-secondary text-white rounded-md hover:bg-secondary/90 transition-colors"
+              >
+                Novo Grupo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Layout grid profissional */}
+        <div className="grid grid-cols-12 gap-6">
+          {/* Sidebar de estatísticas compacta */}
+          <div className="col-span-12 lg:col-span-3">
+            <div className="space-y-4">
+              <CompactStatsCard
+                title="Total Grupos"
+                value={groups.length}
+                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
+                color="primary"
+              />
+              
+              <CompactStatsCard
+                title="Usuários Ativos"
+                value={availableUsers.length}
+                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>}
+                color="secondary"
+              />
+
+              <CompactStatsCard
+                title="Notificações Hoje"
+                value="0"
+                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM5.07 7.07a10 10 0 0014.86 0M5.07 7.07A10 10 0 117.07 5.07M5.07 7.07L12 14l6.93-6.93" /></svg>}
+                color="primary"
+              />
+            </div>
+          </div>
+
+          {/* Área principal */}
+          <div className="col-span-12 lg:col-span-9">
+            <div className="bg-white rounded-lg border border-gray-200">{/* Tabs compactas */}
+
+        {/* Tabs Modernos */}
+        <div className="mb-8">
+          <div className="border-b border-cresol-gray-light">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('send')}
+                className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+                  activeTab === 'send'
+                    ? 'border-primary text-primary bg-primary/5'
+                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+                Enviar Notificação
+              </button>
+              <button
+                onClick={() => setActiveTab('groups')}
+                className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+                  activeTab === 'groups'
+                    ? 'border-primary text-primary bg-primary/5'
+                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Gerenciar Grupos
+                <span className="bg-primary text-white text-xs px-2 py-1 rounded-full">{groups.length}</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+                  activeTab === 'history'
+                    ? 'border-primary text-primary bg-primary/5'
+                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Histórico
+              </button>
+          </nav>
+        </div>
+
+        {/* Conteúdo das tabs */}
+        <div>
+          {activeTab === 'send' && (
+            <div className="bg-white rounded-xl border border-cresol-gray-light hover:border-primary/30 transition-all p-8">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="bg-primary/10 p-3 rounded-xl">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-cresol-gray-dark">Nova Notificação</h2>
+                  <p className="text-cresol-gray">Configure e envie mensagens para grupos ou usuários específicos</p>
+                </div>
+              </div>
+              
+              <form onSubmit={handleSendNotification} className="space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <label className="form-label flex items-center gap-2">
+                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2M7 4H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2" />
+                    </svg>
+                    Título da Notificação *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={notificationForm.title}
+                    onChange={(e) => setNotificationForm(prev => ({ ...prev, title: e.target.value }))}
+                    className="input focus:ring-primary/20 focus:border-primary"
+                    placeholder="Ex: Reunião Geral de Cooperados"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="form-label flex items-center gap-2">
+                    <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    Tipo de Notificação
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={notificationForm.type}
+                      onChange={(e) => setNotificationForm(prev => ({ ...prev, type: e.target.value }))}
+                      className="input focus:ring-secondary/20 focus:border-secondary appearance-none pr-10"
+                    >
+                      <option value="message">📝 Mensagem</option>
+                      <option value="system">⚙️ Sistema</option>
+                      <option value="news">📰 Notícia</option>
+                      <option value="event">📅 Evento</option>
+                    </select>
+                    <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cresol-gray pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="form-label flex items-center gap-2">
+                    <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    Nível de Prioridade
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[{value: 'low', label: 'Baixa', color: 'bg-green-50 border-green-200 text-green-700', icon: '🟢'}, 
+                      {value: 'normal', label: 'Normal', color: 'bg-blue-50 border-blue-200 text-blue-700', icon: '🔵'}, 
+                      {value: 'high', label: 'Alta', color: 'bg-orange-50 border-orange-200 text-orange-700', icon: '🟠'}, 
+                      {value: 'urgent', label: 'Urgente', color: 'bg-red-50 border-red-200 text-red-700', icon: '🔴'}].map(priority => (
+                      <button
+                        key={priority.value}
+                        type="button"
+                        onClick={() => setNotificationForm(prev => ({ ...prev, priority: priority.value }))}
+                        className={`p-3 rounded-lg border-2 transition-all text-left ${notificationForm.priority === priority.value ? priority.color + ' ring-2 ring-offset-2 ring-primary/20' : 'bg-white border-cresol-gray-light hover:border-primary/30'}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{priority.icon}</span>
+                          <span className="font-medium text-sm">{priority.label}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="form-label flex items-center gap-2">
+                    <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Data de Expiração
+                    <span className="text-xs bg-cresol-gray-light text-cresol-gray px-2 py-1 rounded-full">Opcional</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={notificationForm.expiresAt}
+                    onChange={(e) => setNotificationForm(prev => ({ ...prev, expiresAt: e.target.value }))}
+                    className="input focus:ring-purple-500/20 focus:border-purple-500"
+                  />
+                  <p className="text-xs text-cresol-gray">Deixe vazio para notificação permanente</p>
+                </div>
+              </div>
+
+              <div className="col-span-full space-y-3">
+                <label className="form-label flex items-center gap-2">
+                  <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Conteúdo da Mensagem *
+                </label>
+                <div className="relative">
+                  <textarea
+                    required
+                    rows={5}
+                    value={notificationForm.message}
+                    onChange={(e) => setNotificationForm(prev => ({ ...prev, message: e.target.value }))}
+                    className="input focus:ring-primary/20 focus:border-primary resize-none"
+                    placeholder="Digite aqui o conteúdo completo da notificação que será enviada aos usuários..."
+                  />
+                  <div className="absolute bottom-3 right-3 text-xs text-cresol-gray">
+                    {notificationForm.message.length} caracteres
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-span-full">
+                <div className="bg-cresol-gray-light/30 rounded-xl p-6 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-cresol-gray-dark flex items-center gap-2">
+                        <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        Destinatários
+                      </h3>
+                      <p className="text-sm text-cresol-gray">Escolha quem receberá esta notificação</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-cresol-gray-light">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          id="isGlobal"
+                          checked={notificationForm.isGlobal}
+                          onChange={(e) => setNotificationForm(prev => ({ ...prev, isGlobal: e.target.checked }))}
+                          className="h-5 w-5 text-primary focus:ring-primary border-cresol-gray-light rounded"
+                        />
+                        <label htmlFor="isGlobal" className="flex items-center gap-2 text-cresol-gray-dark font-medium">
+                          <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                          </svg>
+                          Envio Global
+                        </label>
+                      </div>
+                      <div className="text-sm text-cresol-gray">
+                        Todos os usuários ({availableUsers.length})
+                      </div>
+                    </div>
+
+                    {!notificationForm.isGlobal && (
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-3">
+                          <label className="form-label flex items-center gap-2">
+                            <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            Grupos Selecionados
+                            {notificationForm.groups.length > 0 && (
+                              <span className="bg-secondary text-white text-xs px-2 py-1 rounded-full">{notificationForm.groups.length}</span>
+                            )}
+                          </label>
+                          <div className="bg-white border border-cresol-gray-light rounded-lg max-h-40 overflow-y-auto">
+                            {groups.map(group => (
+                              <label key={group.id} className="flex items-center gap-3 p-3 hover:bg-cresol-gray-light/20 cursor-pointer border-b border-cresol-gray-light last:border-b-0">
+                                <input
+                                  type="checkbox"
+                                  checked={notificationForm.groups.includes(group.id)}
+                                  onChange={(e) => {
+                                    const groupId = group.id;
+                                    if (e.target.checked) {
+                                      setNotificationForm(prev => ({ ...prev, groups: [...prev.groups, groupId] }));
+                                    } else {
+                                      setNotificationForm(prev => ({ ...prev, groups: prev.groups.filter(id => id !== groupId) }));
+                                    }
+                                  }}
+                                  className="h-4 w-4 text-secondary focus:ring-secondary border-cresol-gray-light rounded"
+                                />
+                                <div>
+                                  <div className="font-medium text-sm text-cresol-gray-dark">{group.name}</div>
+                                  {group.sectors?.name && (
+                                    <div className="text-xs text-cresol-gray">{group.sectors.name}</div>
+                                  )}
+                                </div>
+                              </label>
+                            ))}
+                            {groups.length === 0 && (
+                              <div className="p-4 text-center text-cresol-gray">
+                                <svg className="w-8 h-8 mx-auto mb-2 text-cresol-gray-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                Nenhum grupo disponível
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <label className="form-label flex items-center gap-2">
+                            <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Usuários Individuais
+                            {notificationForm.users.length > 0 && (
+                              <span className="bg-primary text-white text-xs px-2 py-1 rounded-full">{notificationForm.users.length}</span>
+                            )}
+                          </label>
+                          <div className="bg-white border border-cresol-gray-light rounded-lg max-h-40 overflow-y-auto">
+                            {availableUsers.map(user => (
+                              <label key={user.id} className="flex items-center gap-3 p-3 hover:bg-cresol-gray-light/20 cursor-pointer border-b border-cresol-gray-light last:border-b-0">
+                                <input
+                                  type="checkbox"
+                                  checked={notificationForm.users.includes(user.id)}
+                                  onChange={(e) => {
+                                    const userId = user.id;
+                                    if (e.target.checked) {
+                                      setNotificationForm(prev => ({ ...prev, users: [...prev.users, userId] }));
+                                    } else {
+                                      setNotificationForm(prev => ({ ...prev, users: prev.users.filter(id => id !== userId) }));
+                                    }
+                                  }}
+                                  className="h-4 w-4 text-primary focus:ring-primary border-cresol-gray-light rounded"
+                                />
+                                <div className="flex-1">
+                                  <div className="font-medium text-sm text-cresol-gray-dark">{user.full_name || user.email}</div>
+                                  <div className="text-xs text-cresol-gray capitalize">{user.role}</div>
+                                </div>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  </div>
+                </div>
+
+                <div className="col-span-full flex justify-end gap-4 pt-6 border-t border-cresol-gray-light">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNotificationForm({
+                        title: '',
+                        message: '',
+                        type: 'message',
+                        priority: 'normal',
+                        isGlobal: false,
+                        groups: [],
+                        users: [],
+                        expiresAt: ''
+                      });
+                    }}
+                    className="btn-outline"
+                  >
+                    Limpar Formulário
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary flex items-center gap-2 px-8"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    Enviar Notificação
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {activeTab === 'groups' && (
+            <div className="space-y-8">
+              <div className="bg-white rounded-xl border border-cresol-gray-light p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-secondary/10 p-3 rounded-xl">
+                    <svg className="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-cresol-gray-dark">Grupos de Notificação</h2>
+                    <p className="text-cresol-gray">Organize usuários em grupos para facilitar o envio de mensagens</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-secondary">{groups.length}</div>
+                    <div className="text-sm text-cresol-gray">Grupos Ativos</div>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateGroup(true)}
+                    className="btn-primary flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Criar Grupo
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {showCreateGroup && (
+              <div className="bg-white rounded-xl border border-cresol-gray-light hover:border-primary/30 transition-all p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="bg-secondary/10 p-2 rounded-lg">
+                    <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-cresol-gray-dark">Criar Novo Grupo</h3>
+                    <p className="text-cresol-gray text-sm">Configure as informações do grupo de notificação</p>
+                  </div>
+                </div>
+                
+                <form onSubmit={handleCreateGroup} className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <label className="form-label flex items-center gap-2">
+                        <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        Nome do Grupo *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={groupForm.name}
+                        onChange={(e) => setGroupForm(prev => ({ ...prev, name: e.target.value }))}
+                        className="input focus:ring-secondary/20 focus:border-secondary"
+                        placeholder="Ex: Gerentes Regionais, Equipe Vendas, TI"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="form-label flex items-center gap-2">
+                        <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        Setor Vinculado
+                        <span className="text-xs bg-cresol-gray-light text-cresol-gray px-2 py-1 rounded-full">Opcional</span>
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={groupForm.sectorId}
+                          onChange={(e) => setGroupForm(prev => ({ ...prev, sectorId: e.target.value }))}
+                          className="input focus:ring-primary/20 focus:border-primary appearance-none pr-10"
+                        >
+                          <option value="">🏢 Todos os Setores</option>
+                          {sectors.map(sector => (
+                            <option key={sector.id} value={sector.id}>
+                              💼 {sector.name}
+                            </option>
+                          ))}
+                        </select>
+                        <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cresol-gray pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-span-full space-y-3">
+                    <label className="form-label flex items-center gap-2">
+                      <svg className="w-4 h-4 text-cresol-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                      </svg>
+                      Descrição do Grupo
+                      <span className="text-xs bg-cresol-gray-light text-cresol-gray px-2 py-1 rounded-full">Opcional</span>
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={groupForm.description}
+                      onChange={(e) => setGroupForm(prev => ({ ...prev, description: e.target.value }))}
+                      className="input focus:ring-primary/20 focus:border-primary resize-none"
+                      placeholder="Ex: Grupo para comunicações direcionadas aos gerentes regionais..."
+                    />
+                  </div>
+
+                  <div className="col-span-full space-y-3">
+                    <label className="form-label flex items-center gap-2">
+                      <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                      </svg>
+                      Membros do Grupo
+                      {groupForm.members.length > 0 && (
+                        <span className="bg-secondary text-white text-xs px-2 py-1 rounded-full">{groupForm.members.length}</span>
+                      )}
+                    </label>
+                    <div className="bg-cresol-gray-light/20 rounded-lg border border-cresol-gray-light max-h-48 overflow-y-auto">
+                      {availableUsers.map(user => (
+                        <label key={user.id} className="flex items-center gap-3 p-3 hover:bg-white/50 cursor-pointer border-b border-cresol-gray-light/50 last:border-b-0">
+                          <input
+                            type="checkbox"
+                            checked={groupForm.members.includes(user.id)}
+                            onChange={(e) => {
+                              const userId = user.id;
+                              if (e.target.checked) {
+                                setGroupForm(prev => ({ ...prev, members: [...prev.members, userId] }));
+                              } else {
+                                setGroupForm(prev => ({ ...prev, members: prev.members.filter(id => id !== userId) }));
+                              }
+                            }}
+                            className="h-4 w-4 text-secondary focus:ring-secondary border-cresol-gray-light rounded"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium text-sm text-cresol-gray-dark">{user.full_name || user.email}</div>
+                            <div className="text-xs text-cresol-gray capitalize">{user.role}</div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-xs text-cresol-gray">Selecione os usuários que farão parte deste grupo</p>
+                  </div>
+
+                  <div className="col-span-full flex justify-end gap-4 pt-6 border-t border-cresol-gray-light">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCreateGroup(false);
+                        setGroupForm({ name: '', description: '', sectorId: '', subsectorId: '', members: [] });
+                      }}
+                      className="btn-outline"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn-secondary flex items-center gap-2 px-6"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Criar Grupo
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {groups.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {groups.map(group => (
+                  <div key={group.id} className="bg-white rounded-xl border border-cresol-gray-light hover:border-secondary/30 transition-all p-6 group">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="bg-secondary/10 p-2 rounded-lg">
+                            <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                          </div>
+                          <h3 className="text-lg font-semibold text-cresol-gray-dark group-hover:text-secondary transition-colors">
+                            {group.name}
+                          </h3>
+                        </div>
+                        
+                        {group.description && (
+                          <p className="text-sm text-cresol-gray mb-3 line-clamp-2">
+                            {group.description}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="flex gap-1 ml-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => {/* TODO: Implementar editar grupo */}}
+                          className="p-2 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          title="Editar grupo"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => {/* TODO: Implementar excluir grupo */}}
+                          className="p-2 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Excluir grupo"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {/* Informações do Setor */}
+                      {(group.sectors?.name || group.subsectors?.name) && (
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          <span className="text-sm font-medium text-primary">
+                            {group.sectors?.name || group.subsectors?.name}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {/* Criado por */}
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-cresol-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span className="text-sm text-cresol-gray">
+                          {group.profiles?.full_name || group.profiles?.email || 'Usuário não identificado'}
+                        </span>
+                      </div>
+                      
+                      {/* Data de criação */}
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-cresol-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-sm text-cresol-gray">
+                          {new Date(group.created_at).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit', 
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Ações do Card */}
+                    <div className="mt-4 pt-4 border-t border-cresol-gray-light">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-1">
+                          <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                          </svg>
+                          <span className="text-sm text-cresol-gray">ID: </span>
+                          <code className="text-xs bg-cresol-gray-light/50 px-2 py-1 rounded text-cresol-gray-dark font-mono">
+                            {group.id.slice(0, 8)}...
+                          </code>
+                        </div>
+                        <span className="badge-secondary">
+                          Ativo
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-cresol-gray-light p-12 text-center">
+                <div className="max-w-md mx-auto">
+                  <div className="bg-cresol-gray-light/30 rounded-full p-6 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                    <svg className="w-12 h-12 text-cresol-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 515.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-cresol-gray-dark mb-3">Nenhum grupo encontrado</h3>
+                  <p className="text-cresol-gray mb-6">
+                    Organize seus usuários em grupos para facilitar o envio de notificações direcionadas.
+                  </p>
+                  <button
+                    onClick={() => setShowCreateGroup(true)}
+                    className="btn-secondary flex items-center gap-2 mx-auto"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Criar Primeiro Grupo
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'history' && (
+          <div className="bg-white rounded-xl border border-cresol-gray-light p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-primary/10 p-3 rounded-xl">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-cresol-gray-dark">Histórico de Notificações</h2>
+                <p className="text-cresol-gray">Acompanhe todas as mensagens enviadas</p>
+              </div>
+            </div>
+            
+            <div className="bg-cresol-gray-light/20 rounded-lg border-2 border-dashed border-cresol-gray-light p-12 text-center">
+              <div className="max-w-sm mx-auto">
+                <div className="bg-primary/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-cresol-gray-dark mb-2">Em desenvolvimento</h3>
+                <p className="text-cresol-gray text-sm">
+                  Esta funcionalidade estará disponível em breve para visualizar o histórico completo de notificações enviadas.
+                </p>
+              </div>
+            </div>
+          </div>
+          )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 

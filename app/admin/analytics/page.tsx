@@ -301,18 +301,18 @@ export default function AnalyticsPage() {
           />
         </div>
         
-        {/* Simplified Header */}
-        <div className="mb-8">
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h1 className="text-2xl font-semibold text-orange-600 mb-2">
+        {/* Compact Header */}
+        <div className="mb-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h1 className="text-xl font-semibold text-orange-600 mb-1">
               Analytics
             </h1>
-            <p className="text-gray-600">Dashboard de análise de dados</p>
+            <p className="text-sm text-gray-600">Dashboard de análise de dados</p>
           </div>
         </div>
 
-        {/* Navigation Controls */}
-        <div className="mb-8">
+        {/* Navigation Controls - Compact */}
+        <div className="mb-6">
           <NavigationControlsPro
             tabs={[
               { label: 'Visão Geral', value: 'overview', icon: 'dashboard', count: 12 },
@@ -322,27 +322,26 @@ export default function AnalyticsPage() {
             ]}
             activeTab="overview"
             periods={[
-              { label: 'Últimos 7 dias', value: '7d', icon: 'calendar' },
-              { label: 'Últimos 30 dias', value: '30d', icon: 'calendar' },
-              { label: 'Últimos 90 dias', value: '90d', icon: 'calendar' },
-              { label: 'Último ano', value: '1y', icon: 'calendar' }
+              { label: '7 dias', value: '7d', icon: 'calendar' },
+              { label: '30 dias', value: '30d', icon: 'calendar' },
+              { label: '90 dias', value: '90d', icon: 'calendar' },
+              { label: '1 ano', value: '1y', icon: 'calendar' }
             ]}
             activePeriod={selectedPeriod}
             onPeriodChange={(period) => setSelectedPeriod(period as any)}
-            searchEnabled={true}
+            searchEnabled={false}
             onRefresh={() => fetchAnalyticsData()}
             onExport={() => window.print()}
-            variant="default"
+            variant="minimal"
             brandColor="orange"
-            size="md"
+            size="sm"
           />
         </div>
 
         {analytics && (
           <>
-            {/* Metrics Cards */}
-            <MetricsGrid className="mb-12">
-              {/* Demonstração lado a lado: Original vs Pro */}
+            {/* Metrics Cards - Responsive Professional */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 lg:mb-8">
               <MetricCardEnterprisePro
                 title="Total de Usuários"
                 value={analytics.users.total}
@@ -350,11 +349,11 @@ export default function AnalyticsPage() {
                 icon="user-group"
                 variant="primary"
                 trend={analytics.users.new > 0 ? 'up' : 'stable'}
-                subtitle={`+${analytics.users.new} novos usuários`}
-                description="Crescimento consistente na base de usuários"
-                size="md"
+                subtitle={`+${analytics.users.new} novos`}
+                description="Crescimento na base"
+                size="sm"
                 hoverEffect="lift"
-                enableAnimation={true}
+                enableAnimation={false}
                 isPressable={true}
                 onClick={() => router.push('/admin/users')}
               />
@@ -367,11 +366,11 @@ export default function AnalyticsPage() {
                 variant="secondary"
                 colorPalette="blue"
                 trend="stable"
-                subtitle={`${analytics.systems.total} sistemas total`}
-                description="Alta disponibilidade mantida"
-                size="md"
+                subtitle={`${analytics.systems.total} total`}
+                description="Alta disponibilidade"
+                size="sm"
                 hoverEffect="lift"
-                enableAnimation={true}
+                enableAnimation={false}
                 isPressable={true}
                 onClick={() => router.push('/admin/systems')}
               />
@@ -381,56 +380,54 @@ export default function AnalyticsPage() {
                 value={analytics.content.news + analytics.content.events}
                 icon="chat-line"
                 variant="info"
-                colorPalette="blue"
+                colorPalette="green"
                 trend="up"
-                subtitle={`${analytics.content.news} notícias, ${analytics.content.events} eventos`}
-                description="Engajamento da comunidade em alta"
-                size="md"
-                hoverEffect="glow"
-                enableAnimation={true}
-                isBlurred={true}
+                subtitle={`${analytics.content.news} notícias`}
+                description="Engajamento alto"
+                size="sm"
+                hoverEffect="lift"
+                enableAnimation={false}
+                isBlurred={false}
               />
               
               <MetricCardEnterprisePro
                 title="Atividade Recente"
                 value={analytics.activity.logins}
                 icon="chart-bar-vertical"
-                variant="warning"
-                colorPalette="amber"
+                variant="success"
+                colorPalette="purple"
                 trend="up"
-                subtitle={`logins em ${getPeriodLabel(selectedPeriod).toLowerCase()}`}
-                description="Usuários altamente engajados"
-                size="md"
-                hoverEffect="border"
-                enableAnimation={true}
+                subtitle={`${getPeriodLabel(selectedPeriod).replace('Últimos ', '').toLowerCase()}`}
+                description="Engajamento alto"
+                size="sm"
+                hoverEffect="lift"
+                enableAnimation={false}
               />
-            </MetricsGrid>
+            </div>
 
-            {/* Charts Section - Redesigned with Clean Professional Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-              {/* Main Chart Container - 2/3 width */}
-              <div className="lg:col-span-2">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  {/* Header */}
-                  <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/30">
+            {/* Charts Section - Responsive Professional Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+              {/* Main Chart Container - Responsive */}
+              <div className="lg:col-span-2 order-2 lg:order-1">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  {/* Compact Header */}
+                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Distribuição por Categoria</h2>
-                        <p className="text-sm text-gray-500 mt-1">Análise detalhada dos dados principais</p>
+                        <h2 className="text-base font-semibold text-gray-900">Distribuição por Categoria</h2>
+                        <p className="text-xs text-gray-500 mt-0.5">Análise detalhada dos dados</p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => fetchAnalyticsData()}
-                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                          <Icon name="refresh" className="h-4 w-4" />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => fetchAnalyticsData()}
+                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                      >
+                        <Icon name="refresh" className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   </div>
                   
-                  {/* Chart Toggle Buttons */}
-                  <div className="px-6 py-3 bg-gray-50/50">
+                  {/* Compact Chart Toggle */}
+                  <div className="px-4 py-2 bg-gray-50">
                     <div className="flex space-x-1">
                       {[
                         { key: 'users', label: 'Usuários', icon: 'user-group' },
@@ -441,11 +438,11 @@ export default function AnalyticsPage() {
                           key={option.key}
                           onClick={() => setActiveChart(option.key as any)}
                           className={`
-                            px-3 py-2 text-xs font-medium rounded-lg transition-all duration-200 
-                            flex items-center space-x-2
+                            px-2.5 py-1.5 text-xs font-medium rounded transition-all duration-200 
+                            flex items-center space-x-1.5
                             ${activeChart === option.key
-                              ? 'bg-orange-500 text-white shadow-sm'
-                              : 'bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                              ? 'bg-orange-500 text-white'
+                              : 'bg-white text-gray-600 hover:bg-gray-100'
                             }
                           `}
                         >
@@ -456,8 +453,8 @@ export default function AnalyticsPage() {
                     </div>
                   </div>
                   
-                  {/* Chart Content */}
-                  <div className="p-6">
+                  {/* Chart Content - More Compact */}
+                  <div className="p-4">
                     <AnimatedChart
                       data={chartData.labels.map((label, index) => ({
                         label,
@@ -466,105 +463,105 @@ export default function AnalyticsPage() {
                       }))}
                       title=""
                       type="bar"
-                      height={350}
+                      height={280}
                       animated={true}
                       className=""
                     />
                   </div>
                   
-                  {/* Footer */}
-                  <div className="px-6 py-3 border-t border-gray-100 bg-gray-50/30">
+                  {/* Compact Footer */}
+                  <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <div className="flex items-center space-x-4">
-                        <span>Atualizado: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
-                        <span className="text-orange-500">• {chartData.labels.length} categorias</span>
-                      </div>
+                      <span>Atualizado: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        <span>Dados em tempo real</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                        <span>Tempo real</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Sidebar Analytics - 1/3 width */}
-              <div className="space-y-8">
-                {/* Usuários por Local */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/30">
-                    <h3 className="font-semibold text-gray-900">Usuários por Local</h3>
-                    <p className="text-xs text-gray-500 mt-1">Distribuição geográfica</p>
+              {/* Compact Sidebar Analytics - Responsive Order */}
+              <div className="space-y-4 lg:space-y-6 order-1 lg:order-2">
+                {/* Usuários por Local - Compact */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="px-4 py-2.5 border-b border-gray-100 bg-gray-50">
+                    <h3 className="text-sm font-semibold text-gray-900">Usuários por Local</h3>
+                    <p className="text-xs text-gray-500">Distribuição geográfica</p>
                   </div>
-                  <div className="p-5">
-                    <div className="space-y-1">
+                  <div className="p-3">
+                    <div className="space-y-2">
                       {analytics.locations.userDistribution
                         .sort((a, b) => b.users - a.users)
-                        .slice(0, 6)
+                        .slice(0, 5)
                         .map((location, index) => {
                           const percentage = analytics.users.total > 0 
                             ? Math.round((location.users / analytics.users.total) * 100)
                             : 0;
                           return (
-                            <LocationCard
-                              key={location.name}
-                              name={location.name}
-                              users={location.users}
-                              percentage={percentage}
-                              rank={index}
-                            />
+                            <div key={location.name} className="flex items-center justify-between py-1.5">
+                              <div className="flex items-center space-x-2 flex-1 min-w-0">
+                                <div className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0"></div>
+                                <span className="text-xs font-medium text-gray-700 truncate">
+                                  {location.name}
+                                </span>
+                              </div>
+                              <div className="text-right flex-shrink-0 ml-2">
+                                <div className="text-xs font-semibold text-gray-900">{location.users}</div>
+                                <div className="text-xs text-gray-500">{percentage}%</div>
+                              </div>
+                            </div>
                           );
                         })}
                     </div>
                   </div>
                 </div>
 
-                {/* Métricas-Chave */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/30">
-                    <h3 className="font-semibold text-gray-900">Métricas Principais</h3>
-                    <p className="text-xs text-gray-500 mt-1">Indicadores de performance</p>
+                {/* Métricas Principais - Compact */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="px-4 py-2.5 border-b border-gray-100 bg-gray-50">
+                    <h3 className="text-sm font-semibold text-gray-900">Métricas Principais</h3>
+                    <p className="text-xs text-gray-500">Indicadores de performance</p>
                   </div>
-                  <div className="p-5 space-y-4">
-                    {/* Taxa de Usuários Ativos */}
-                    <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100/50 rounded-xl border border-orange-200/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">Usuários Ativos</span>
-                        <Icon name="trending-up" className="h-4 w-4 text-orange-500" />
+                  <div className="p-3 space-y-3">
+                    {/* Compact Metric Cards */}
+                    <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-gray-700">Usuários Ativos</span>
+                        <Icon name="trending-up" className="h-3 w-3 text-orange-500" />
                       </div>
-                      <div className="text-2xl font-bold text-orange-600 mb-1">
+                      <div className="text-lg font-bold text-orange-600">
                         {Math.round((analytics.users.active / analytics.users.total) * 100)}%
                       </div>
                       <div className="text-xs text-gray-600">
-                        {analytics.users.active} de {analytics.users.total} usuários
+                        {analytics.users.active} de {analytics.users.total}
                       </div>
                     </div>
                     
-                    {/* Taxa de Notificações Lidas */}
-                    <div className="p-4 bg-gradient-to-r from-green-50 to-green-100/50 rounded-xl border border-green-200/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">Taxa de Leitura</span>
-                        <Icon name="check" className="h-4 w-4 text-green-500" />
+                    <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-gray-700">Taxa de Leitura</span>
+                        <Icon name="check" className="h-3 w-3 text-green-500" />
                       </div>
-                      <div className="text-2xl font-bold text-green-600 mb-1">
+                      <div className="text-lg font-bold text-green-600">
                         {Math.round((analytics.activity.notificationsRead / Math.max(analytics.content.notifications, 1)) * 100)}%
                       </div>
                       <div className="text-xs text-gray-600">
-                        {analytics.activity.notificationsRead} notificações lidas
+                        {analytics.activity.notificationsRead} lidas
                       </div>
                     </div>
                     
-                    {/* Crescimento */}
-                    <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-xl border border-blue-200/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">Crescimento</span>
-                        <Icon name="user-add" className="h-4 w-4 text-blue-500" />
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-gray-700">Crescimento</span>
+                        <Icon name="user-add" className="h-3 w-3 text-blue-500" />
                       </div>
-                      <div className="text-2xl font-bold text-blue-600 mb-1">
+                      <div className="text-lg font-bold text-blue-600">
                         +{Math.round((analytics.users.new / Math.max(analytics.users.total - analytics.users.new, 1)) * 100)}%
                       </div>
                       <div className="text-xs text-gray-600">
-                        {analytics.users.new} novos usuários
+                        {analytics.users.new} novos
                       </div>
                     </div>
                   </div>
@@ -572,51 +569,51 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            {/* Ações Rápidas */}
-            <div className="mt-8">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Ações Rápidas</h2>
-                <p className="text-sm text-gray-600">Acesse rapidamente as principais funcionalidades</p>
+            {/* Ações Rápidas - Professional Compact */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+              <div className="mb-3">
+                <h2 className="text-sm font-semibold text-gray-900 mb-0.5">Ações Rápidas</h2>
+                <p className="text-xs text-gray-500">Acesso rápido às funcionalidades</p>
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex flex-wrap gap-2">
                 <MinimalistButton
                   variant="primary"
-                  size="lg"
+                  size="sm"
                   icon="user-group"
                   onClick={() => router.push('/admin/users')}
-                  fullWidth
+                  className="min-w-0"
                 >
-                  Gerenciar Usuários
+                  Usuários
                 </MinimalistButton>
                 
                 <MinimalistButton
                   variant="primary"
-                  size="lg"
+                  size="sm"
                   icon="monitor"
                   onClick={() => router.push('/admin/systems')}
-                  fullWidth
+                  className="min-w-0"
                 >
-                  Gerenciar Sistemas
+                  Sistemas
                 </MinimalistButton>
                 
                 <MinimalistButton
                   variant="primary"
-                  size="lg"
+                  size="sm"
                   icon="bell"
                   onClick={() => router.push('/admin/notifications')}
-                  fullWidth
+                  className="min-w-0"
                 >
-                  Enviar Notificação
+                  Notificações
                 </MinimalistButton>
                 
                 <MinimalistButton
-                  variant="outline"
-                  size="lg"
+                  variant="secondary"
+                  size="sm"
                   icon="save"
                   onClick={() => window.print()}
-                  fullWidth
+                  className="min-w-0"
                 >
-                  Imprimir Relatório
+                  Relatório
                 </MinimalistButton>
               </div>
             </div>

@@ -2,24 +2,24 @@
 
 Sistema completo de componentes acessíveis para dashboard analytics enterprise, implementado com **HeadlessUI** patterns para conformidade **WCAG 2.1 AA**.
 
-## 🎯 Objetivos de Acessibilidade
+## Objetivos de Acessibilidade
 
 ### WCAG 2.1 AA Compliance Achieved:
-- ✅ **Perceivable**: Contraste 4.5:1+, texto redimensionável, alternativas textuais
-- ✅ **Operable**: Navegação por teclado completa, sem seizures, timeouts extensíveis  
-- ✅ **Understandable**: Texto legível, funcionalidade previsível, prevenção de erros
-- ✅ **Robust**: Compatibilidade com tecnologias assistivas, markup válido
+- **Perceivable**: Contraste 4.5:1+, texto redimensionável, alternativas textuais
+- **Operable**: Navegação por teclado completa, sem seizures, timeouts extensíveis  
+- **Understandable**: Texto legível, funcionalidade previsível, prevenção de erros
+- **Robust**: Compatibilidade com tecnologias assistivas, markup válido
 
-## 🧩 Componentes Implementados
+## Componentes Implementados
 
 ### 1. AccessibleMetricCard
 **HeadlessUI Disclosure Pattern**
-- ✅ Focus management avançado
-- ✅ Screen reader announcements (aria-live)
-- ✅ Keyboard navigation (Enter/Space, arrows)
-- ✅ Expandable content com proper ARIA
-- ✅ Loading states acessíveis
-- ✅ Color contrast 4.5:1+ compliance
+- Focus management avançado
+- Screen reader announcements (aria-live)
+- Keyboard navigation (Enter/Space, arrows)
+- Expandable content com proper ARIA
+- Loading states acessíveis
+- Color contrast 4.5:1+ compliance
 
 ```tsx
 <AccessibleMetricCard
@@ -90,7 +90,7 @@ Sistema completo de componentes acessíveis para dashboard analytics enterprise,
 />
 ```
 
-## 🔧 Hooks de Acessibilidade
+## Hooks de Acessibilidade
 
 ### useAccessibleFocus
 **Advanced Focus Management**
@@ -153,7 +153,7 @@ const prefersReducedMotion = useReducedMotion();
 - **Enter**: Selecionar item
 - **Digite**: Search/filter em combobox
 
-## 📱 Motor Accessibility
+## Motor Accessibility
 
 ### Touch Targets
 - **Minimum Size**: 44x44px (iOS) / 48x48px (Material)
@@ -168,7 +168,7 @@ const prefersReducedMotion = useReducedMotion();
 - **Text Scaling**: Supports up to 200% zoom
 - **Reduced Motion**: Respects prefers-reduced-motion
 
-## 🔍 Screen Reader Optimization
+## Screen Reader Optimization
 
 ### Semantic HTML
 ```tsx
@@ -218,7 +218,7 @@ const prefersReducedMotion = useReducedMotion();
 </table>
 ```
 
-## 🎨 Design System Integration
+## Design System Integration
 
 ### Cresol Brand Colors (WCAG Compliant)
 ```css
@@ -250,7 +250,7 @@ const prefersReducedMotion = useReducedMotion();
 }
 ```
 
-## 📊 Performance & Accessibility
+## Performance & Accessibility
 
 ### Loading States
 - **Skeleton Loading**: Preserva layout durante load
@@ -298,7 +298,7 @@ npm run lighthouse -- --accessibility
 - ✅ iOS Safari 14+
 - ✅ Android Chrome 90+
 
-## 💡 Usage Examples
+## Usage Examples
 
 ### Basic Implementation
 ```tsx

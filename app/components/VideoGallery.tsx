@@ -11,6 +11,13 @@ interface DashboardVideo {
   thumbnail_url: string | null;
   is_active: boolean;
   order_index: number;
+  upload_type: 'youtube' | 'vimeo' | 'direct';
+  file_path?: string | null;
+  file_size?: number | null;
+  mime_type?: string | null;
+  original_filename?: string | null;
+  processing_status?: string;
+  upload_progress?: number;
 }
 
 interface VideoGalleryProps {
@@ -22,7 +29,9 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<DashboardVideo | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -31,7 +40,16 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
         .select("*")
         .eq("is_active", true)
         .order("order_index", { ascending: true });
-      setVideos(data || []);
+      
+      // Filter to only show ready videos
+      const readyVideos = (data || []).filter(video => {
+        if (video.upload_type === 'youtube') return true;
+        if (video.upload_type === 'direct') {
+          return video.processing_status === 'ready' && video.upload_progress === 100;
+        }
+        return false; // Filter out vimeo videos
+      });
+      setVideos(readyVideos);
       setLoading(false);
     };
     fetchVideos();
@@ -40,11 +58,23 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
   const handleOpenModal = (video: DashboardVideo) => {
     setSelectedVideo(video);
     setModalOpen(true);
+    setVideoError(null);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedVideo(null);
+    setVideoError(null);
+    
+    // Stop video playback if it's a direct upload
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
+
+  const handleVideoError = () => {
+    setVideoError('Erro ao carregar o vídeo. Tente novamente mais tarde.');
   };
 
   // Fechar modal com ESC
@@ -129,17 +159,76 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
               </svg>
             </button>
             <div className="aspect-video w-full rounded-t-lg overflow-hidden bg-black">
-              <iframe
-                ref={iframeRef}
-                src={selectedVideo.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
-                title={selectedVideo.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full min-h-[360px]"
-              />
+              {videoError ? (
+                <div className="flex items-center justify-center h-full text-white bg-gray-800">
+                  <div className="text-center">
+                    <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm">{videoError}</p>
+                  </div>
+                </div>
+              ) : selectedVideo.upload_type === 'youtube' ? (
+                <iframe
+                  ref={iframeRef}
+                  src={selectedVideo.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                  title={selectedVideo.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full min-h-[360px]"
+                  onError={handleVideoError}
+                />
+              ) : selectedVideo.upload_type === 'direct' ? (
+                <video
+                  ref={videoRef}
+                  controls
+                  className="w-full h-full min-h-[360px]"
+                  poster={selectedVideo.thumbnail_url || undefined}
+                  onError={handleVideoError}
+                  preload="metadata"
+                >
+                  <source src={selectedVideo.video_url} type={selectedVideo.mime_type || 'video/mp4'} />
+                  <p className="text-white p-4">
+                    Seu navegador não suporta reprodução de vídeo. 
+                    <a href={selectedVideo.video_url} className="underline ml-1" download>
+                      Baixar vídeo
+                    </a>
+                  </p>
+                </video>
+              ) : (
+                <div className="flex items-center justify-center h-full text-white bg-gray-800">
+                  <div className="text-center">
+                    <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-sm">Formato de vídeo não suportado</p>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="p-4">
-              <h3 className="heading-4 text-title mb-2">{selectedVideo.title}</h3>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="heading-4 text-title mb-2">{selectedVideo.title}</h3>
+                  {selectedVideo.upload_type === 'direct' && selectedVideo.original_filename && (
+                    <p className="text-sm text-gray-600 mb-1">
+                      📁 {selectedVideo.original_filename}
+                    </p>
+                  )}
+                  {selectedVideo.file_size && (
+                    <p className="text-xs text-gray-500">
+                      Tamanho: {(selectedVideo.file_size / (1024 * 1024)).toFixed(1)} MB
+                    </p>
+                  )}
+                </div>
+                <span className={`px-2 py-1 text-xs rounded-full ml-4 ${
+                  selectedVideo.upload_type === 'direct' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {selectedVideo.upload_type === 'direct' ? '🎥 Upload Direto' : '📺 YouTube'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -170,6 +259,18 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
             </svg>
           </div>
         )}
+        
+        {/* Upload type indicator */}
+        <div className="absolute top-2 right-2">
+          <span className={`px-1.5 py-0.5 text-xs rounded-full font-medium shadow-sm ${
+            video.upload_type === 'direct' 
+              ? 'bg-green-600 text-white' 
+              : 'bg-red-600 text-white'
+          }`}>
+            {video.upload_type === 'direct' ? '🎥' : '📺'}
+          </span>
+        </div>
+        
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 flex items-center justify-center">
           <div className="rounded-full p-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ backgroundColor: 'rgba(243, 131, 50, 0.9)' }}>
             <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -179,7 +280,14 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
         </div>
       </div>
       <div className="p-4 flex-1 flex flex-col min-h-[120px]">
-        <h3 className="text-sm font-medium text-gray-700 mb-4 line-clamp-2 group-hover:text-gray-900 flex-1">{video.title}</h3>
+        <h3 className="text-sm font-medium text-gray-700 mb-2 line-clamp-2 group-hover:text-gray-900 flex-1">{video.title}</h3>
+        
+        {video.upload_type === 'direct' && video.file_size && (
+          <p className="text-xs text-gray-500 mb-3">
+            {(video.file_size / (1024 * 1024)).toFixed(1)} MB
+          </p>
+        )}
+        
         <button
           onClick={() => onClick(video)}
           className="mt-auto text-white px-4 py-2.5 rounded text-xs font-medium transition-all duration-200"

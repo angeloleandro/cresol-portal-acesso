@@ -54,14 +54,14 @@ export default function AnalyticsShowcase() {
             variant="solid"
             size="lg"
           >
-            🔄 Atualizar Dashboard
+            Atualizar Dashboard
           </ShimmerButton>
           
           <ShimmerButton
             colorPalette="green"
             variant="outline"
             size="lg"
-            rightIcon={<span>📊</span>}
+            rightIcon={<span></span>}
           >
             Exportar Relatório
           </ShimmerButton>
@@ -352,7 +352,7 @@ export default function AnalyticsShowcase() {
                 Próximo
               </ShimmerButton>
               <ShimmerButton 
-                leftIcon={<span>💾</span>}
+                leftIcon={<span></span>}
                 rightIcon={<span>✓</span>}
                 colorPalette="purple"
                 variant="subtle"

@@ -6,7 +6,7 @@ import OptimizedImage from "@/app/components/OptimizedImage";
 import AdminHeader from "@/app/components/AdminHeader";
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { supabase } from "@/lib/supabase";
-import VideoUploadForm from '@/app/components/VideoUploadForm';
+import VideoUploadFormEnhanced from '@/app/components/VideoUploadFormEnhanced';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 
 interface DashboardVideo {
@@ -16,6 +16,13 @@ interface DashboardVideo {
   thumbnail_url: string | null;
   is_active: boolean;
   order_index: number;
+  upload_type: 'youtube' | 'vimeo' | 'direct';
+  file_path?: string | null;
+  file_size?: number | null;
+  mime_type?: string | null;
+  original_filename?: string | null;
+  processing_status?: string;
+  upload_progress?: number;
 }
 
 export default function AdminVideos() {
@@ -157,11 +164,76 @@ export default function AdminVideos() {
                 <div className="flex items-center justify-center h-48 bg-cresol-gray-light text-cresol-gray">Sem thumbnail</div>
               )}
               <div className="p-4 flex-1 flex flex-col">
-                <h3 className="text-lg font-semibold text-cresol-gray mb-1">{video.title}</h3>
-                <a href={video.video_url} className="text-primary text-sm underline break-all" target="_blank" rel="noopener noreferrer">{video.video_url}</a>
-                <div className="mt-auto flex gap-2 pt-4">
-                  <button className="text-primary hover:underline" onClick={() => setEditVideo(video)}>Editar</button>
-                  <button className="text-red-500 hover:underline" onClick={() => handleDeleteClick(video)}>Remover</button>
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-cresol-gray">{video.title}</h3>
+                  <span className={`px-2 py-1 text-xs rounded-full ${
+                    video.upload_type === 'direct' 
+                      ? 'bg-green-100 text-green-800' 
+                      : video.upload_type === 'youtube'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {video.upload_type === 'direct' ? '🎥 Direto' : 
+                     video.upload_type === 'youtube' ? '📺 YouTube' : '🎬 Vimeo'}
+                  </span>
+                </div>
+                
+                {video.upload_type === 'direct' && video.original_filename ? (
+                  <div className="mb-2">
+                    <p className="text-sm text-cresol-gray truncate">📁 {video.original_filename}</p>
+                    {video.file_size && (
+                      <p className="text-xs text-cresol-gray/70">
+                        {(video.file_size / (1024 * 1024)).toFixed(1)} MB
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <a 
+                    href={video.video_url} 
+                    className="text-primary text-sm underline break-all hover:text-primary-dark transition-colors mb-2" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    {video.video_url}
+                  </a>
+                )}
+                
+                {video.processing_status && video.processing_status !== 'ready' && (
+                  <div className="mb-2">
+                    <div className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${
+                      video.processing_status === 'error' 
+                        ? 'bg-red-100 text-red-700'
+                        : video.processing_status === 'uploading'
+                        ? 'bg-yellow-100 text-yellow-700'  
+                        : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {video.processing_status === 'error' ? '❌' : '⏳'} 
+                      {video.processing_status === 'uploading' ? 'Enviando...' : 
+                       video.processing_status === 'processing' ? 'Processando...' : 
+                       video.processing_status}
+                      {video.upload_progress !== undefined && video.upload_progress < 100 && (
+                        <span>({video.upload_progress}%)</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`inline-flex items-center text-xs ${video.is_active ? 'text-green-600' : 'text-gray-500'}`}>
+                    {video.is_active ? '✅ Ativo' : '⭕ Inativo'}
+                  </span>
+                  <span className="text-xs text-cresol-gray/70">
+                    Ordem: {video.order_index}
+                  </span>
+                </div>
+                
+                <div className="mt-auto flex gap-2 pt-3 border-t border-gray-100">
+                  <button className="text-primary hover:underline text-sm font-medium" onClick={() => setEditVideo(video)}>
+                    ✏️ Editar
+                  </button>
+                  <button className="text-red-500 hover:underline text-sm font-medium" onClick={() => handleDeleteClick(video)}>
+                    🗑️ Remover
+                  </button>
                 </div>
               </div>
             </div>
@@ -171,10 +243,10 @@ export default function AdminVideos() {
           <div className="text-cresol-gray text-center mt-12">Nenhum vídeo cadastrado ainda.</div>
         )}
         {showForm && !editVideo && (
-          <VideoUploadForm onSave={() => { setShowForm(false); fetchVideos(); }} onCancel={() => setShowForm(false)} />
+          <VideoUploadFormEnhanced onSave={() => { setShowForm(false); fetchVideos(); }} onCancel={() => setShowForm(false)} />
         )}
         {editVideo && (
-          <VideoUploadForm
+          <VideoUploadFormEnhanced
             initialData={{
               id: editVideo.id,
               title: editVideo.title,
@@ -182,6 +254,9 @@ export default function AdminVideos() {
               thumbnail_url: editVideo.thumbnail_url ?? undefined,
               is_active: editVideo.is_active,
               order_index: editVideo.order_index,
+              upload_type: editVideo.upload_type === 'vimeo' ? 'youtube' : editVideo.upload_type, // Convert vimeo to youtube for editing
+              file_size: editVideo.file_size ?? undefined,
+              original_filename: editVideo.original_filename ?? undefined
             }}
             onSave={() => { setEditVideo(null); fetchVideos(); }}
             onCancel={() => setEditVideo(null)}

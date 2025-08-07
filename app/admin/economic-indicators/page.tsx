@@ -24,15 +24,15 @@ interface EconomicIndicator {
 }
 
 const AVAILABLE_ICONS = [
-  { value: 'users', label: 'Usuários', icon: '👥' },
-  { value: 'building', label: 'Edifício', icon: '🏢' },
-  { value: 'bank', label: 'Banco', icon: '🏦' },
-  { value: 'money', label: 'Dinheiro', icon: '💰' },
-  { value: 'treasure', label: 'Tesouro', icon: '💎' },
-  { value: 'piggy-bank', label: 'Poupança', icon: '🐷' },
-  { value: 'handshake', label: 'Negócio', icon: '🤝' },
-  { value: 'tractor', label: 'Agricultura', icon: '🚜' },
-  { value: 'briefcase', label: 'Carteira', icon: '💼' },
+  { value: 'users', label: 'Usuários', icon: '' },
+  { value: 'building', label: 'Edifício', icon: '' },
+  { value: 'bank', label: 'Banco', icon: '' },
+  { value: 'money', label: 'Dinheiro', icon: '' },
+  { value: 'treasure', label: 'Tesouro', icon: '' },
+  { value: 'piggy-bank', label: 'Poupança', icon: '' },
+  { value: 'handshake', label: 'Negócio', icon: '' },
+  { value: 'tractor', label: 'Agricultura', icon: '' },
+  { value: 'briefcase', label: 'Carteira', icon: '' },
 ];
 
 export default function EconomicIndicatorsAdmin() {
@@ -449,7 +449,7 @@ export default function EconomicIndicatorsAdmin() {
                         <div className="flex-shrink-0">
                           <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                             <span className="text-xl">
-                              {AVAILABLE_ICONS.find(icon => icon.value === indicator.icon)?.icon || '💰'}
+                              {AVAILABLE_ICONS.find(icon => icon.value === indicator.icon)?.icon || ''}
                             </span>
                           </div>
                         </div>

@@ -1,0 +1,8 @@
+{
+  "mcp.enabled": true,
+  "mcp.servers": {
+    "figma": {
+      "enabled": true
+    }
+  }
+}

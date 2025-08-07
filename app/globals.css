@@ -4,6 +4,7 @@
 
 /* Import estilos customizados */
 @import './styles/minimalist-ui.css';
+@import './styles/forms.css';
 
 :root {
   /* Cores Primárias */

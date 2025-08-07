@@ -137,3 +137,8 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - Test role-based access control thoroughly
 - Verify RLS policies work correctly with different user roles
 - Test file upload functionality with proper error handling
+
+## Design Guidelines
+
+### UI/UX Principles
+- Não usar emogi nos componentes, e usar icones somente quando realmente necessario

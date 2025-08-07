@@ -1,62 +1,62 @@
 import React from 'react';
-import { ArrowLeftIcon } from './ArrowLeftIcon';
-import { UserAddIcon } from './UserAddIcon';
-import { UserIcon } from './UserIcon';
-import { Building1Icon } from './Building1Icon';
-import { Building2Icon } from './Building2Icon';
-import { MapIcon } from './MapIcon';
-import { ImageIcon } from './ImageIcon';
-import { MonitorIcon } from './MonitorIcon';
-import { SaveIcon } from './SaveIcon';
-import { MonitorPlayIcon } from './MonitorPlayIcon';
-import { BellNotificationIcon } from './BellNotificationIcon';
-import { BellIcon } from './BellIcon';
-import { ChartBarVerticalIcon } from './ChartBarVerticalIcon';
-import { ChatLineIcon } from './ChatLineIcon';
-import { LinkIcon } from './LinkIcon';
-import { CheckIcon } from './CheckIcon';
-import { SuitcaseIcon } from './SuitcaseIcon';
-import { TrashIcon } from './TrashIcon';
-import { FilterIcon } from './FilterIcon';
-import { User2Icon } from './User2Icon';
-import { UserRemoveIcon } from './UserRemoveIcon';
-import { UserCircleIcon } from './UserCircleIcon';
-import { UserSquareIcon } from './UserSquareIcon';
-import { UserCheckIcon } from './UserCheckIcon';
-import { UserGroupIcon } from './UserGroupIcon';
-import { UserCloseIcon } from './UserCloseIcon';
-import { WorkEconomiIndicatorIcon } from './WorkEconomiIndicatorIcon';
-import { ClockIcon } from './ClockIcon';
-import { ExternalLinkIcon } from './ExternalLinkIcon';
-import { TriangleAlertIcon } from './TriangleAlertIcon';
-import { PlusIcon } from './PlusIcon';
-import { PencilIcon } from './PencilIcon';
-import { FolderIcon } from './FolderIcon';
-import { FolderPlusIcon } from './FolderPlusIcon';
-import { SettingsIcon } from './SettingsIcon';
-import { CloseIcon } from './CloseIcon';
-import { MailIcon } from './MailIcon';
-import { SearchIcon } from './SearchIcon';
-// Novos ícones padronizados
-import { CalendarIcon } from './CalendarIcon';
-import { ListIcon } from './ListIcon';
-import { VideoIcon } from './VideoIcon';
-import { StarIcon } from './StarIcon';
-import { ArrowDownIcon } from './ArrowDownIcon';
-import { MenuIcon } from './MenuIcon';
-import { PlayIcon } from './PlayIcon';
-import { SortIcon } from './SortIcon';
-import { GridIcon } from './GridIcon';
-import { HouseIcon } from './HouseIcon';
-import { TrendingUpIcon } from './TrendingUpIcon';
-import { TrendingDownIcon } from './TrendingDownIcon';
-import { MinusIcon } from './MinusIcon';
-import { ChevronDownIcon } from './ChevronDownIcon';
-import { ChevronUpIcon } from './ChevronUpIcon';
-import { XIcon } from './XIcon';
-import { RefreshIcon } from './RefreshIcon';
-import { DownloadIcon } from './DownloadIcon';
-import { ChevronRightIcon } from './ChevronRightIcon';
+// Heroicons imports
+import {
+  ArrowLeftIcon,
+  ArrowDownIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ChevronRightIcon,
+  HomeIcon,
+  Bars3Icon,
+  XMarkIcon,
+  MagnifyingGlassIcon,
+  ArrowTopRightOnSquareIcon,
+  UserIcon,
+  UserPlusIcon,
+  UserMinusIcon,
+  UserCircleIcon,
+  UsersIcon,
+  BuildingOfficeIcon,
+  BuildingOffice2Icon,
+  MapIcon,
+  BellIcon,
+  BellAlertIcon,
+  EnvelopeIcon,
+  ChatBubbleLeftIcon,
+  PlusIcon,
+  MinusIcon,
+  CheckIcon,
+  PencilIcon,
+  TrashIcon,
+  DocumentArrowDownIcon,
+  ArrowPathIcon,
+  ArrowDownTrayIcon,
+  CogIcon,
+  PhotoIcon,
+  VideoCameraIcon,
+  PlayIcon,
+  ComputerDesktopIcon,
+  TvIcon,
+  FolderIcon,
+  FolderPlusIcon,
+  CalendarIcon,
+  ClockIcon,
+  ListBulletIcon,
+  Squares2X2Icon,
+  BarsArrowUpIcon,
+  FunnelIcon,
+  StarIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  LinkIcon,
+  BriefcaseIcon,
+} from '@heroicons/react/24/outline';
 
 export type IconName =
   | 'arrow-left'
@@ -116,80 +116,153 @@ export type IconName =
   | 'x'
   | 'refresh'
   | 'download'
-  | 'chevron-right';
+  | 'chevron-right'
+  // Form icons
+  | 'Loader'
+  | 'AlertTriangle'
+  | 'Info' 
+  | 'CheckCircle'
+  | 'Eye'
+  | 'EyeOff'
+  // Form aliases for better component compatibility
+  | 'X'
+  | 'ChevronDown'
+  | 'ChevronUp'
+  | 'Check'
+  | 'Search'
+  | 'Mail';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   name: IconName;
 }
 
+// Custom composite components for complex icons
+const UserCheckIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <div className="relative inline-block">
+    <UserIcon {...props} />
+    <CheckIcon className="absolute -top-1 -right-1 w-3 h-3 text-green-500" />
+  </div>
+);
+
+const UserCloseIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <div className="relative inline-block">
+    <UserIcon {...props} />
+    <XMarkIcon className="absolute -top-1 -right-1 w-3 h-3 text-red-500" />
+  </div>
+);
+
+// Animated loader component
+const LoaderIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <ArrowPathIcon {...props} className={`animate-spin ${props.className || ''}`} />
+);
+
 const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
+  // Navigation & Interface
   'arrow-left': ArrowLeftIcon,
-  'user-add': UserAddIcon,
-  'user': UserIcon,
-  'building-1': Building1Icon,
-  'building-2': Building2Icon,
-  'map': MapIcon,
-  'image': ImageIcon,
-  'monitor': MonitorIcon,
-  'save': SaveIcon,
-  'monitor-play': MonitorPlayIcon,
-  'bell-notification': BellNotificationIcon,
-  'bell': BellIcon,
-  'chart-bar-vertical': ChartBarVerticalIcon,
-  'chat-line': ChatLineIcon,
-  'link': LinkIcon,
-  'check': CheckIcon,
-  'suitcase': SuitcaseIcon,
-  'trash': TrashIcon,
-  'filter': FilterIcon,
-  'user-2': User2Icon,
-  'user-remove': UserRemoveIcon,
-  'user-circle': UserCircleIcon,
-  'user-square': UserSquareIcon,
-  'user-check': UserCheckIcon,
-  'user-group': UserGroupIcon,
-  'user-close': UserCloseIcon,
-  'work-economi-indicator': WorkEconomiIndicatorIcon,
-  'clock': ClockIcon,
-  'external-link': ExternalLinkIcon,
-  'triangle-alert': TriangleAlertIcon,
-  'plus': PlusIcon,
-  'pencil': PencilIcon,
-  'folder': FolderIcon,
-  'folder-plus': FolderPlusIcon,
-  'settings': SettingsIcon,
-  'close': CloseIcon,
-  'mail': MailIcon,
-  'search': SearchIcon,
-  // Novos ícones
-  'calendar': CalendarIcon,
-  'list': ListIcon,
-  'video': VideoIcon,
-  'star': StarIcon,
   'arrow-down': ArrowDownIcon,
-  'menu': MenuIcon,
-  'play': PlayIcon,
-  'sort': SortIcon,
-  'grid': GridIcon,
-  'house': HouseIcon,
-  'trending-up': TrendingUpIcon,
-  'trending-down': TrendingDownIcon,
-  'minus': MinusIcon,
   'chevron-down': ChevronDownIcon,
   'chevron-up': ChevronUpIcon,
-  'x': XIcon,
-  'refresh': RefreshIcon,
-  'download': DownloadIcon,
   'chevron-right': ChevronRightIcon,
+  'house': HomeIcon,
+  'menu': Bars3Icon,
+  'close': XMarkIcon,
+  'x': XMarkIcon,
+  'search': MagnifyingGlassIcon,
+  'external-link': ArrowTopRightOnSquareIcon,
+
+  // Users & People
+  'user': UserIcon,
+  'user-2': UserIcon,
+  'user-add': UserPlusIcon,
+  'user-remove': UserMinusIcon,
+  'user-circle': UserCircleIcon,
+  'user-square': UserIcon,
+  'user-check': UserCheckIcon as any,
+  'user-group': UsersIcon,
+  'user-close': UserCloseIcon as any,
+
+  // Buildings & Locations
+  'building-1': BuildingOfficeIcon,
+  'building-2': BuildingOffice2Icon,
+  'map': MapIcon,
+
+  // Communication & Notifications
+  'bell': BellIcon,
+  'bell-notification': BellAlertIcon,
+  'mail': EnvelopeIcon,
+  'chat-line': ChatBubbleLeftIcon,
+
+  // Actions & Controls
+  'plus': PlusIcon,
+  'minus': MinusIcon,
+  'check': CheckIcon,
+  'pencil': PencilIcon,
+  'trash': TrashIcon,
+  'save': DocumentArrowDownIcon,
+  'refresh': ArrowPathIcon,
+  'download': ArrowDownTrayIcon,
+  'settings': CogIcon,
+
+  // Media & Files
+  'image': PhotoIcon,
+  'video': VideoCameraIcon,
+  'play': PlayIcon,
+  'monitor': ComputerDesktopIcon,
+  'monitor-play': TvIcon,
+  'folder': FolderIcon,
+  'folder-plus': FolderPlusIcon,
+
+  // Data & Time
+  'calendar': CalendarIcon,
+  'clock': ClockIcon,
+
+  // Visualization & Layout
+  'list': ListBulletIcon,
+  'grid': Squares2X2Icon,
+  'sort': BarsArrowUpIcon,
+  'filter': FunnelIcon,
+  'star': StarIcon,
+
+  // Charts & Analytics
+  'chart-bar-vertical': ChartBarIcon,
+  'trending-up': ArrowTrendingUpIcon,
+  'trending-down': ArrowTrendingDownIcon,
+
+  // Status & Feedback
+  'CheckCircle': CheckCircleIcon,
+  'triangle-alert': ExclamationTriangleIcon,
+  'AlertTriangle': ExclamationTriangleIcon,
+  'Info': InformationCircleIcon,
+  'Eye': EyeIcon,
+  'EyeOff': EyeSlashIcon,
+
+  // Utilities & Loading
+  'link': LinkIcon,
+  'Loader': LoaderIcon,
+
+  // Specific System Icons
+  'suitcase': BriefcaseIcon,
+  'work-economi-indicator': ChartBarIcon,
+
+  // Form aliases for better component compatibility  
+  'X': XMarkIcon,
+  'ChevronDown': ChevronDownIcon,
+  'ChevronUp': ChevronUpIcon,
+  'Check': CheckIcon,
+  'Search': MagnifyingGlassIcon,
+  'Mail': EnvelopeIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, ...props }) => {
   const IconComponent = iconMap[name];
 
   if (!IconComponent) {
-    // Você pode renderizar um ícone padrão ou null
-    return null;
+    console.warn(`Icon "${name}" not found in iconMap. Available icons:`, Object.keys(iconMap));
+    // Return a default icon instead of null
+    return <ExclamationTriangleIcon {...props} className={`text-red-500 ${props.className || ''}`} />;
   }
 
   return <IconComponent {...props} />;
 };
+
+export default Icon;

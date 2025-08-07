@@ -57,7 +57,7 @@ export function usePerformanceMonitor(
     // Log slow renders
     if (renderTime > logThreshold) {
       console.warn(
-        `🐌 Slow render detected in ${componentName}:`,
+        `Slow render detected in ${componentName}:`,
         `${renderTime.toFixed(2)}ms`,
         `(${renderCountRef.current} renders)`
       );
@@ -101,7 +101,7 @@ export function usePerformanceMonitor(
 
     if (duration > logThreshold) {
       console.warn(
-        `⚡ Slow operation in ${componentName}.${operationName}:`,
+        `Slow operation in ${componentName}.${operationName}:`,
         `${duration.toFixed(2)}ms`
       );
     }
@@ -121,7 +121,7 @@ export function usePerformanceMonitor(
 
     if (duration > logThreshold) {
       console.warn(
-        `⚡ Slow async operation in ${componentName}.${operationName}:`,
+        `Slow async operation in ${componentName}.${operationName}:`,
         `${duration.toFixed(2)}ms`
       );
     }
@@ -164,7 +164,7 @@ export function useBundleMonitor(componentName: string) {
       
       if (estimate > 10) {
         console.info(
-          `📦 Bundle impact warning for ${componentName}:`,
+          `Bundle impact warning for ${componentName}:`,
           `${estimate} instances detected`
         );
       }
@@ -183,7 +183,7 @@ export function useMemoryLeakDetection(componentName: string) {
       // Warn about potential memory leaks
       if (instanceCountRef.current > 50) {
         console.warn(
-          `🚨 Potential memory leak in ${componentName}:`,
+          `Potential memory leak in ${componentName}:`,
           `${instanceCountRef.current} instances created`
         );
       }

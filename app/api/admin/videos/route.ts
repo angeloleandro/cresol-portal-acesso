@@ -27,7 +27,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
-    // Get video details before deletion (for cleanup if needed)
+    // Get video details before deletion (for cleanup)
     const { data: video, error: fetchError } = await supabase
       .from('dashboard_videos')
       .select('*')
@@ -38,7 +38,44 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Vídeo não encontrado' }, { status: 404 });
     }
 
-    // Delete the video
+    // Clean up storage files for direct uploads
+    if (video.upload_type === 'direct' && video.file_path) {
+      // Delete the video file from storage
+      const { error: videoDeleteError } = await supabase.storage
+        .from('videos')
+        .remove([video.file_path]);
+      
+      if (videoDeleteError) {
+        console.warn('Erro ao remover arquivo de vídeo:', videoDeleteError);
+        // Continue with database deletion even if file cleanup fails
+      }
+      
+      // Also clean up any temporary chunks that might still exist
+      const { data: tempFiles } = await supabase.storage
+        .from('videos')
+        .list('temp', {
+          search: id
+        });
+
+      if (tempFiles && tempFiles.length > 0) {
+        const tempPaths = tempFiles.map(file => `temp/${file.name}`);
+        await supabase.storage
+          .from('videos')
+          .remove(tempPaths);
+      }
+    }
+
+    // Clean up custom thumbnail if it exists and is hosted in our storage
+    if (video.thumbnail_url && video.thumbnail_url.includes('supabase')) {
+      const thumbnailPath = video.thumbnail_url.split('/').pop();
+      if (thumbnailPath) {
+        await supabase.storage
+          .from('banners')
+          .remove([thumbnailPath]);
+      }
+    }
+
+    // Delete the video record from database
     const { error: deleteError } = await supabase
       .from('dashboard_videos')
       .delete()
@@ -48,9 +85,6 @@ export async function DELETE(request: NextRequest) {
       console.error('Erro ao excluir vídeo:', deleteError);
       return NextResponse.json({ error: 'Erro ao excluir vídeo' }, { status: 500 });
     }
-
-    // Note: In a real implementation, you might also want to delete the thumbnail file from storage
-    // if it's no longer referenced by other records
 
     return NextResponse.json({ message: 'Vídeo excluído com sucesso' });
 

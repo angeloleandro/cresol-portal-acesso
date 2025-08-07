@@ -15,6 +15,13 @@ interface DashboardVideo {
   thumbnail_url: string | null;
   is_active: boolean;
   order_index: number;
+  upload_type: 'youtube' | 'vimeo' | 'direct';
+  file_path?: string | null;
+  file_size?: number | null;
+  mime_type?: string | null;
+  original_filename?: string | null;
+  processing_status?: string;
+  upload_progress?: number;
 }
 
 export default function VideosPage() {
@@ -22,6 +29,7 @@ export default function VideosPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<DashboardVideo | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
 
   useEffect(() => {
     // Só executar no lado do cliente
@@ -34,7 +42,16 @@ export default function VideosPage() {
           .select("*")
           .eq("is_active", true)
           .order("order_index", { ascending: true });
-        setVideos(data || []);
+        
+        // Filter to only show ready videos
+        const readyVideos = (data || []).filter(video => {
+          if (video.upload_type === 'youtube') return true;
+          if (video.upload_type === 'direct') {
+            return video.processing_status === 'ready' && video.upload_progress === 100;
+          }
+          return false; // Filter out vimeo videos
+        });
+        setVideos(readyVideos);
       } catch (error) {
         console.error('Erro ao buscar vídeos:', error);
       } finally {
@@ -47,11 +64,29 @@ export default function VideosPage() {
   const handleOpenModal = (video: DashboardVideo) => {
     setSelectedVideo(video);
     setModalOpen(true);
+    setVideoError(null);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedVideo(null);
+    setVideoError(null);
+  };
+
+  const handleVideoError = () => {
+    setVideoError('Erro ao carregar o vídeo. Tente novamente mais tarde.');
+  };
+
+  // Helper function to get YouTube embed URL
+  const getYouTubeEmbedUrl = (url: string): string => {
+    if (url.includes('embed/')) return url;
+    
+    const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+    if (videoIdMatch) {
+      return `https://www.youtube.com/embed/${videoIdMatch[1]}`;
+    }
+    
+    return url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/');
   };
 
   return (
@@ -96,15 +131,31 @@ export default function VideosPage() {
           )}
         </div>
 
-        {/* Modal padronizado */}
+        {/* Modal Unificado para YouTube e Upload Direto */}
         {modalOpen && selectedVideo && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
             <div className="bg-white rounded-lg border border-gray-300 max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
               {/* Cabeçalho do modal */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <h3 className="heading-4 text-title">{selectedVideo.title}</h3>
+                <div className="flex-1 min-w-0">
+                  <h3 className="heading-4 text-title truncate">{selectedVideo.title}</h3>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      selectedVideo.upload_type === 'direct' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {selectedVideo.upload_type === 'direct' ? '🎥 Upload Direto' : '📺 YouTube'}
+                    </span>
+                    {selectedVideo.upload_type === 'direct' && selectedVideo.file_size && (
+                      <span className="text-xs text-gray-500">
+                        {(selectedVideo.file_size / (1024 * 1024)).toFixed(1)} MB
+                      </span>
+                    )}
+                  </div>
+                </div>
                 <button
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors ml-4 flex-shrink-0"
                   onClick={handleCloseModal}
                   aria-label="Fechar"
                 >
@@ -114,14 +165,61 @@ export default function VideosPage() {
               
               {/* Conteúdo do modal */}
               <div className="aspect-video w-full bg-black">
-                <iframe
-                  src={selectedVideo.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
-                  title={selectedVideo.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-full min-h-[360px]"
-                />
+                {videoError ? (
+                  <div className="flex items-center justify-center h-full text-white">
+                    <div className="text-center">
+                      <Icon name="AlertTriangle" className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <p className="text-sm">{videoError}</p>
+                    </div>
+                  </div>
+                ) : selectedVideo.upload_type === 'youtube' ? (
+                  <iframe
+                    src={getYouTubeEmbedUrl(selectedVideo.video_url)}
+                    title={selectedVideo.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full min-h-[360px]"
+                    onError={handleVideoError}
+                  />
+                ) : selectedVideo.upload_type === 'direct' ? (
+                  <video
+                    controls
+                    className="w-full h-full min-h-[360px]"
+                    poster={selectedVideo.thumbnail_url || undefined}
+                    onError={handleVideoError}
+                    preload="metadata"
+                  >
+                    <source src={selectedVideo.video_url} type={selectedVideo.mime_type || 'video/mp4'} />
+                    <p className="text-white p-4">
+                      Seu navegador não suporta reprodução de vídeo. 
+                      <a href={selectedVideo.video_url} className="underline ml-1" download>
+                        Baixar vídeo
+                      </a>
+                    </p>
+                  </video>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-white">
+                    <div className="text-center">
+                      <Icon name="video" className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <p className="text-sm">Formato de vídeo não suportado</p>
+                    </div>
+                  </div>
+                )}
               </div>
+              
+              {/* Informações adicionais para uploads diretos */}
+              {selectedVideo.upload_type === 'direct' && selectedVideo.original_filename && (
+                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                  <p className="text-sm text-gray-600">
+                    📁 <strong>Arquivo:</strong> {selectedVideo.original_filename}
+                  </p>
+                  {selectedVideo.mime_type && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Tipo: {selectedVideo.mime_type}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -156,6 +254,17 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
           </div>
         )}
         
+        {/* Upload type indicator */}
+        <div className="absolute top-2 right-2">
+          <span className={`px-1.5 py-0.5 text-xs rounded-full font-medium shadow-sm ${
+            video.upload_type === 'direct' 
+              ? 'bg-green-600 text-white' 
+              : 'bg-red-600 text-white'
+          }`}>
+            {video.upload_type === 'direct' ? 'Direto' : 'YouTube'}
+          </span>
+        </div>
+        
         {/* Ícone de play overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
@@ -166,6 +275,11 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
       
       <div className="p-1">
         <h3 className="heading-4 text-title line-clamp-2" title={video.title}>{shortTitle}</h3>
+        {video.upload_type === 'direct' && video.file_size && (
+          <p className="text-xs text-muted mt-1">
+            {(video.file_size / (1024 * 1024)).toFixed(1)} MB
+          </p>
+        )}
       </div>
     </div>
   );
