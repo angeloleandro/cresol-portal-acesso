@@ -19,3 +19,51 @@ export function generateTemporaryPassword(): string {
 export function validateCrescolEmail(email: string): boolean {
   return email.endsWith(CRESOL_EMAIL_DOMAIN);
 }
+
+// File Size Limits (in bytes)
+export const FILE_SIZE_LIMITS = {
+  AVATAR_IMAGE: 2 * 1024 * 1024,     // 2MB
+  SECTOR_IMAGE: 5 * 1024 * 1024,     // 5MB
+  VIDEO_FILE: 500 * 1024 * 1024,     // 500MB
+} as const;
+
+// Video Configuration
+export const VIDEO_CONFIG = {
+  MAX_FILE_SIZE: FILE_SIZE_LIMITS.VIDEO_FILE,
+  ALLOWED_MIME_TYPES: [
+    'video/mp4',
+    'video/webm', 
+    'video/quicktime',
+    'video/x-msvideo',
+    'video/mov',
+    'video/avi'
+  ] as const,
+  ALLOWED_EXTENSIONS: ['.mp4', '.webm', '.mov', '.avi'] as const,
+  CACHE_CONTROL: '3600', // 1 hour
+  UPLOAD_TYPE: {
+    YOUTUBE: 'youtube' as const,
+    VIMEO: 'vimeo' as const,
+    DIRECT: 'direct' as const
+  }
+} as const;
+
+// Image Configuration
+export const IMAGE_CONFIG = {
+  MAX_AVATAR_SIZE: FILE_SIZE_LIMITS.AVATAR_IMAGE,
+  MAX_SECTOR_SIZE: FILE_SIZE_LIMITS.SECTOR_IMAGE,
+  ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'] as const,
+} as const;
+
+// Storage Configuration
+export const STORAGE_CONFIG = {
+  BUCKETS: {
+    IMAGES: 'images' as const,
+    VIDEOS: 'videos' as const,
+  },
+  FOLDERS: {
+    AVATARS: 'avatars' as const,
+    SECTOR_NEWS: 'sector-news' as const,
+    BANNERS: 'banners' as const,
+    VIDEO_UPLOADS: 'uploads' as const,
+  }
+} as const;

@@ -25,10 +25,16 @@ export async function middleware(request: NextRequest) {
     const isPublicApiGetRequest = publicApiRoutes.some(route => 
       request.nextUrl.pathname === route && request.method === 'GET'
     );
+
+    // Permitir que rotas de API admin lidem com sua própria autenticação via Authorization header
+    // O middleware não deve interceptar essas rotas, pois elas usam tokens Authorization
+    if (isApiAdminRoute && !isPublicApiGetRequest) {
+      return response; // Deixar a API lidar com autenticação
+    }
     
     if (!user) {
       // Se não estiver autenticado e tentar acessar área restrita
-      if (isAdminRoute || (isApiAdminRoute && !isPublicApiGetRequest) || isSectorAdminRoute) {
+      if (isAdminRoute || isSectorAdminRoute) {
         const redirectUrl = new URL('/login', request.url);
         redirectUrl.searchParams.set('redirectedFrom', request.nextUrl.pathname);
         redirectUrl.searchParams.set('auth', 'failed');
@@ -40,8 +46,8 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/home', request.url));
       }
       
-      // Se o usuário estiver autenticado, verificar seu papel
-      if (isAdminRoute || (isApiAdminRoute && !isPublicApiGetRequest)) {
+      // Se o usuário estiver autenticado, verificar seu papel apenas para rotas de página admin (não API)
+      if (isAdminRoute) {
         // Buscar o perfil diretamente do banco usando o ID do usuário autenticado
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
@@ -90,7 +96,6 @@ export async function middleware(request: NextRequest) {
     
     // Se ocorrer um erro, redirecionar para a página de login com mensagem de erro
     if (request.nextUrl.pathname.startsWith('/admin') || 
-        (request.nextUrl.pathname.startsWith('/api/admin') && !request.nextUrl.pathname.match(/\/(economic-indicators|system-links)$/)) || 
         request.nextUrl.pathname.startsWith('/admin-setor')) {
       const redirectUrl = new URL('/login', request.url);
       redirectUrl.searchParams.set('error', 'middleware_error');

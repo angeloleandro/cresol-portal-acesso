@@ -1,234 +1,173 @@
-// Simple Video Upload API for smaller files (< 500MB)
-// Fallback option alongside TUS for better compatibility
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { randomUUID } from 'crypto';
-import path from 'path';
+import { createClient } from '@/lib/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { VIDEO_CONFIG, STORAGE_CONFIG } from '@/lib/constants';
 
-// Initialize Supabase with service role for admin operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-// Allowed video file types and extensions
-const ALLOWED_VIDEO_TYPES = [
-  'video/mp4',
-  'video/webm',
-  'video/quicktime',
-  'video/x-msvideo', // AVI
-  'video/mov'
-];
-
-const ALLOWED_VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mov', '.avi'];
-const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB for simple upload
+function formatFileSize(bytes: number): string {
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  if (bytes === 0) return '0 Bytes';
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+}
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  let uploadMetrics = {
+    fileSize: 0,
+    uploadDuration: 0,
+    processingDuration: 0,
+    success: false
+  };
+
   try {
-    // Check authentication
+    const supabase = createClient();
+    
     const authHeader = request.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token de autorização necessário' }, { status: 401 });
     }
 
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    const token = authHeader.substring(7);
     
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid authentication' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
     }
 
-    // Check admin role
-    const { data: profile, error: profileError } = await supabaseAdmin
+    const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    if (profileError || profile?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.json({ error: 'Acesso negado - apenas administradores' }, { status: 403 });
     }
 
-    // Parse multipart form data
+    const serviceClient = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     const formData = await request.formData();
-    const file = formData.get('video') as File;
-    const title = formData.get('title') as string || 'Novo Vídeo';
+    const videoFile = formData.get('video') as File;
+    const title = formData.get('title') as string;
     const isActive = formData.get('isActive') === 'true';
     const orderIndex = parseInt(formData.get('orderIndex') as string) || 0;
 
-    if (!file) {
-      return NextResponse.json(
-        { error: 'Video file is required' },
-        { status: 400 }
-      );
+    if (!videoFile || !title) {
+      return NextResponse.json({ error: 'Arquivo de vídeo e título são obrigatórios' }, { status: 400 });
     }
 
-    // Validate file type
-    const fileExtension = path.extname(file.name).toLowerCase();
-    if (!ALLOWED_VIDEO_TYPES.includes(file.type) || !ALLOWED_VIDEO_EXTENSIONS.includes(fileExtension)) {
-      return NextResponse.json(
-        { 
-          error: 'Invalid file type', 
-          message: 'Only MP4, WebM, MOV, and AVI files are allowed',
-          allowedTypes: ALLOWED_VIDEO_EXTENSIONS
-        },
-        { status: 400 }
-      );
+    if (!VIDEO_CONFIG.ALLOWED_MIME_TYPES.includes(videoFile.type as any)) {
+      return NextResponse.json({ 
+        error: 'Tipo de arquivo não suportado. Use MP4, WebM, MOV ou AVI.' 
+      }, { status: 400 });
+    }
+    const fileExt = videoFile.name.split('.').pop()?.toLowerCase();
+    const mimeTypeExtensionMap: Record<string, string[]> = {
+      'video/mp4': ['mp4'],
+      'video/webm': ['webm'],
+      'video/quicktime': ['mov'],
+      'video/x-msvideo': ['avi'],
+      'video/mov': ['mov'],
+      'video/avi': ['avi']
+    };
+    
+    const allowedExtensions = mimeTypeExtensionMap[videoFile.type];
+    if (!allowedExtensions?.includes(fileExt || '')) {
+      return NextResponse.json({ 
+        error: 'Extensão de arquivo não corresponde ao tipo MIME.' 
+      }, { status: 400 });
     }
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        {
-          error: 'File too large',
-          message: `File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
-          maxSize: MAX_FILE_SIZE
-        },
-        { status: 413 }
-      );
+    if (videoFile.size > VIDEO_CONFIG.MAX_FILE_SIZE) {
+      return NextResponse.json({ 
+        error: `Arquivo muito grande. Máximo: ${(VIDEO_CONFIG.MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB` 
+      }, { status: 400 });
     }
 
-    // Generate unique file path
-    const videoId = randomUUID();
-    const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '/');
-    const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const fileName = `${videoId}_${safeFileName}`;
-    const filePath = `uploads/${timestamp}/${fileName}`;
+    if (videoFile.size === 0) {
+      return NextResponse.json({ 
+        error: 'Arquivo vazio ou corrompido' 
+      }, { status: 400 });
+    }
 
-    // Convert file to buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-      .from('videos')
-      .upload(filePath, buffer, {
-        cacheControl: '3600',
-        contentType: file.type,
-        upsert: false
+    uploadMetrics.fileSize = videoFile.size;
+    const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '/');
+    const uuid = crypto.randomUUID();
+    const sanitizedOriginalName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const fileName = `${uuid}_${sanitizedOriginalName}`;
+    const filePath = `${STORAGE_CONFIG.FOLDERS.VIDEO_UPLOADS}/${timestamp}/${fileName}`;
+    const { data: uploadData, error: uploadError } = await serviceClient.storage
+      .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
+      .upload(filePath, videoFile, {
+        contentType: videoFile.type,
+        upsert: false,
+        cacheControl: VIDEO_CONFIG.CACHE_CONTROL
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
-      return NextResponse.json(
-        { 
-          error: 'Upload failed', 
-          message: uploadError.message 
-        },
-        { status: 500 }
-      );
+      return NextResponse.json({ 
+        error: `Erro no upload: ${uploadError.message}` 
+      }, { status: 500 });
     }
 
-    // Generate signed URL for video access (1 year expiry)
-    const { data: signedUrlData, error: urlError } = await supabaseAdmin.storage
-      .from('videos')
-      .createSignedUrl(filePath, 60 * 60 * 24 * 365); // 1 year
+    const { data: urlData } = serviceClient.storage
+      .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
+      .getPublicUrl(filePath);
 
-    if (urlError) {
-      console.error('Signed URL error:', urlError);
-      // Cleanup uploaded file
-      await supabaseAdmin.storage.from('videos').remove([filePath]);
-      
-      return NextResponse.json(
-        { 
-          error: 'Failed to generate video URL', 
-          message: urlError.message 
-        },
-        { status: 500 }
-      );
+    if (!urlData.publicUrl) {
+      return NextResponse.json({ 
+        error: 'Erro ao gerar URL do vídeo' 
+      }, { status: 500 });
+    }
+    const { data: videoRecord, error: dbError } = await serviceClient
+      .rpc('create_video_record', {
+        p_title: title,
+        p_video_url: urlData.publicUrl,
+        p_thumbnail_url: null,
+        p_is_active: isActive,
+        p_order_index: orderIndex,
+        p_upload_type: 'direct',
+        p_file_path: filePath,
+        p_file_size: videoFile.size,
+        p_mime_type: videoFile.type,
+        p_original_filename: videoFile.name,
+        p_processing_status: 'ready',
+        p_upload_progress: 100
+      });
+
+    if (dbError || !videoRecord) {
+      await serviceClient.storage
+        .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
+        .remove([filePath]);
+
+      return NextResponse.json({ 
+        error: `Erro ao salvar no banco: ${dbError?.message || 'Função RPC falhou'}` 
+      }, { status: 500 });
     }
 
-    // Save video record to database
-    const { data: videoRecord, error: dbError } = await supabaseAdmin
-      .from('dashboard_videos')
-      .insert({
-        id: videoId,
-        title,
-        video_url: signedUrlData.signedUrl,
-        upload_type: 'direct',
-        file_path: filePath,
-        file_size: file.size,
-        mime_type: file.type,
-        original_filename: file.name,
-        processing_status: 'ready',
-        upload_progress: 100,
-        is_active: isActive,
-        order_index: orderIndex
-      })
-      .select()
-      .single();
-
-    if (dbError) {
-      console.error('Database error:', dbError);
-      // Cleanup uploaded file
-      await supabaseAdmin.storage.from('videos').remove([filePath]);
-      
-      return NextResponse.json(
-        { 
-          error: 'Failed to save video record', 
-          message: dbError.message 
-        },
-        { status: 500 }
-      );
-    }
-
-    // Return success response
+    const parsedRecord = typeof videoRecord === 'string' ? JSON.parse(videoRecord) : videoRecord;
+    
+    uploadMetrics.success = true;
+    uploadMetrics.uploadDuration = Date.now() - startTime;
     return NextResponse.json({
-      success: true,
-      message: 'Video uploaded successfully',
+      message: 'Vídeo enviado com sucesso!',
       video: {
-        id: videoRecord.id,
-        title: videoRecord.title,
-        url: videoRecord.video_url,
-        uploadType: videoRecord.upload_type,
-        fileName: videoRecord.original_filename,
-        fileSize: videoRecord.file_size,
-        mimeType: videoRecord.mime_type,
-        status: videoRecord.processing_status,
-        isActive: videoRecord.is_active,
-        orderIndex: videoRecord.order_index,
-        createdAt: videoRecord.created_at
+        id: parsedRecord.id,
+        url: urlData.publicUrl,
+        title: parsedRecord.title,
+        file_path: filePath,
+        file_size: videoFile.size,
+        original_filename: videoFile.name
       }
     });
 
-  } catch (error: any) {
-    console.error('Simple upload error:', error);
-    
-    return NextResponse.json(
-      { 
-        error: 'Internal server error', 
-        message: error.message,
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error('Video upload error:', error);
+    return NextResponse.json({ 
+      error: error instanceof Error ? error.message : 'Erro interno do servidor'
+    }, { status: 500 });
   }
-}
-
-// Get upload limits and allowed types
-export async function GET() {
-  return NextResponse.json({
-    maxFileSize: MAX_FILE_SIZE,
-    maxFileSizeMB: Math.round(MAX_FILE_SIZE / (1024 * 1024)),
-    allowedTypes: ALLOWED_VIDEO_TYPES,
-    allowedExtensions: ALLOWED_VIDEO_EXTENSIONS,
-    uploadMethods: {
-      simple: {
-        maxSize: MAX_FILE_SIZE,
-        description: 'Direct upload for files under 500MB'
-      },
-      tus: {
-        maxSize: 5 * 1024 * 1024 * 1024,
-        description: 'Resumable upload for large files up to 5GB'
-      }
-    }
-  });
 }

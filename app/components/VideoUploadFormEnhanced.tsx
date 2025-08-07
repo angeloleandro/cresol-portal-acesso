@@ -3,8 +3,12 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import OptimizedImage from "./OptimizedImage";
 import Cropper from "react-easy-crop";
+import ThumbnailPreview from "./ThumbnailPreview";
 import { supabase } from "@/lib/supabase";
 import { getCroppedImg } from "./getCroppedImg";
+import { formatFileSize, isValidVideoMimeType, getVideoUrl, getAuthenticatedSession, makeAuthenticatedRequest } from "@/lib/video-utils";
+import { VIDEO_CONFIG } from "@/lib/constants";
+import { useThumbnailGenerator } from "@/app/hooks/useThumbnailGenerator";
 
 interface VideoFormProps {
   initialData?: {
@@ -29,32 +33,21 @@ function getYoutubeThumbnail(url: string): string | null {
   return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null;
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
 
 function validateVideoFile(file: File): { valid: boolean; error?: string } {
-  const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
-  const allowedExtensions = ['.mp4', '.webm', '.mov', '.avi'];
-  const maxSize = 500 * 1024 * 1024; // 500MB
-  
   const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
   
-  if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExt)) {
+  if (!isValidVideoMimeType(file.type) && !VIDEO_CONFIG.ALLOWED_EXTENSIONS.includes(fileExt as any)) {
     return { 
       valid: false, 
       error: 'Formato não suportado. Use MP4, WebM, MOV ou AVI.' 
     };
   }
   
-  if (file.size > maxSize) {
+  if (file.size > VIDEO_CONFIG.MAX_FILE_SIZE) {
     return { 
       valid: false, 
-      error: `Arquivo muito grande. Máximo: ${formatFileSize(maxSize)}` 
+      error: `Arquivo muito grande. Máximo: ${formatFileSize(VIDEO_CONFIG.MAX_FILE_SIZE)}` 
     };
   }
   
@@ -80,6 +73,15 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(initialData?.thumbnail_url || null);
   const [useCustomThumb, setUseCustomThumb] = useState(false);
+  const [thumbnailMode, setThumbnailMode] = useState<'auto' | 'custom' | 'none'>(
+    initialData?.thumbnail_url ? 'custom' : (uploadType === 'youtube' ? 'auto' : 'auto')
+  );
+  
+  // Auto thumbnail generator
+  const thumbnailGenerator = useThumbnailGenerator({
+    videoFile: uploadType === 'direct' ? videoFile : null,
+    autoGenerate: uploadType === 'direct' && thumbnailMode === 'auto'
+  });
   
   // Crop states
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -96,6 +98,11 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
     setVideoUrl('');
     setError(null);
     setUploadProgress(0);
+    
+    // Reset thumbnail state
+    thumbnailGenerator.clearThumbnail();
+    setThumbnailMode(type === 'youtube' ? 'auto' : 'auto');
+    setUseCustomThumb(false);
   };
 
   // Handle video file selection
@@ -110,10 +117,11 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
       
       setVideoFile(file);
       setError(null);
+      
+      thumbnailGenerator.clearThumbnail();
     }
   };
 
-  // Handle drag and drop
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -140,6 +148,9 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
       
       setVideoFile(videoFile);
       setError(null);
+      
+      // Clear any existing thumbnails
+      thumbnailGenerator.clearThumbnail();
     }
   };
 
@@ -195,16 +206,15 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
     formData.append('isActive', isActive.toString());
     formData.append('orderIndex', orderIndex.toString());
 
-    // Get user token for authentication
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) {
-      throw new Error('Não autorizado');
+    const authResult = await getAuthenticatedSession();
+    if (authResult.error) {
+      throw new Error(authResult.error);
     }
 
     const response = await fetch('/api/videos/simple-upload', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${session.access_token}`
+        'Authorization': `Bearer ${authResult.token}`
       },
       body: formData
     });
@@ -232,16 +242,56 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
       let videoId: string;
       let finalVideoUrl: string;
 
-      if (uploadType === 'direct' && videoFile) {
-        // Upload video file
-        const uploadResult = await uploadVideoFile(videoFile);
-        videoId = uploadResult.id;
-        finalVideoUrl = uploadResult.url;
-        
-        // For direct uploads, we don't need to update the record since it's already created
-        // Just handle thumbnail if needed
-        if (useCustomThumb && thumbnailFile) {
-          await uploadThumbnail(videoId);
+      if (uploadType === 'direct') {
+        if (videoFile) {
+          // Upload new video file
+          const uploadResult = await uploadVideoFile(videoFile);
+          videoId = uploadResult.id;
+          finalVideoUrl = uploadResult.url;
+          
+          // Handle thumbnail for new direct uploads
+          if (thumbnailMode === 'auto' && thumbnailGenerator.thumbnail) {
+            // Upload auto-generated thumbnail
+            const thumbnailUrl = await thumbnailGenerator.uploadThumbnail();
+            if (thumbnailUrl) {
+              await supabase
+                .from('dashboard_videos')
+                .update({ thumbnail_url: thumbnailUrl })
+                .eq('id', videoId);
+            }
+          } else if (thumbnailMode === 'custom' && thumbnailFile) {
+            await uploadThumbnail(videoId);
+          }
+        } else if (initialData?.id && initialData?.upload_type === 'direct') {
+          // Editing existing direct upload without changing the video file
+          videoId = initialData.id;
+          finalVideoUrl = initialData.video_url || '';
+          
+          // Handle thumbnail updates for existing direct uploads
+          let thumbUrl = initialData.thumbnail_url || "";
+          if (thumbnailMode === 'custom' && thumbnailFile) {
+            thumbUrl = await uploadThumbnail();
+          }
+          
+          const response = await makeAuthenticatedRequest('/api/admin/videos', {
+            method: 'PUT',
+            body: JSON.stringify({
+              id: initialData.id,
+              title, 
+              video_url: finalVideoUrl,  // Keep existing video URL
+              is_active: isActive, 
+              order_index: orderIndex, 
+              thumbnail_url: thumbUrl,
+              upload_type: 'direct'
+            })
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro ao atualizar vídeo');
+          }
+        } else {
+          throw new Error('Arquivo de vídeo é obrigatório para upload direto');
         }
         
       } else if (uploadType === 'youtube' && videoUrl) {
@@ -249,17 +299,17 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
         let thumbUrl = initialData?.thumbnail_url || "";
 
         // Handle thumbnail upload
-        if (useCustomThumb && thumbnailFile) {
+        if (thumbnailMode === 'custom' && thumbnailFile) {
           thumbUrl = await uploadThumbnail();
-        } else if (!useCustomThumb && videoUrl) {
+        } else if (thumbnailMode === 'auto' && videoUrl) {
           thumbUrl = getYoutubeThumbnail(videoUrl) || "";
         }
 
         if (initialData?.id) {
-          // Update existing YouTube video
-          const { error: updateError } = await supabase
-            .from('dashboard_videos')
-            .update({ 
+          const response = await makeAuthenticatedRequest('/api/admin/videos', {
+            method: 'PUT',
+            body: JSON.stringify({
+              id: initialData.id,
               title, 
               video_url: videoUrl, 
               is_active: isActive, 
@@ -267,28 +317,35 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
               thumbnail_url: thumbUrl,
               upload_type: 'youtube'
             })
-            .eq('id', initialData.id);
+          });
           
-          if (updateError) throw updateError;
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro ao atualizar vídeo');
+          }
+          
           videoId = initialData.id;
           
         } else {
-          // Create new YouTube video
-          const { data: newVideo, error: insertError } = await supabase
-            .from('dashboard_videos')
-            .insert([{ 
+          const response = await makeAuthenticatedRequest('/api/admin/videos', {
+            method: 'POST',
+            body: JSON.stringify({
               title, 
               video_url: videoUrl, 
               is_active: isActive, 
               order_index: orderIndex, 
               thumbnail_url: thumbUrl,
               upload_type: 'youtube'
-            }])
-            .select()
-            .single();
+            })
+          });
           
-          if (insertError) throw insertError;
-          videoId = newVideo.id;
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro ao criar vídeo');
+          }
+          
+          const result = await response.json();
+          videoId = result.video.id;
         }
         finalVideoUrl = videoUrl;
       } else {
@@ -299,7 +356,6 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
       onSave();
       
     } catch (err: any) {
-      console.error('Upload error:', err);
       setError(err.message || 'Erro ao salvar vídeo');
     } finally {
       setIsUploading(false);
@@ -418,9 +474,37 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Arquivo de Vídeo *</label>
           
+          {/* Show existing video info if editing */}
+          {initialData?.id && initialData?.upload_type === 'direct' && !videoFile && (
+            <div className="mb-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-blue-900 mb-1">Vídeo Atual</h4>
+                  {initialData.original_filename && (
+                    <p className="text-sm text-blue-800 mb-1">📁 {initialData.original_filename}</p>
+                  )}
+                  {initialData.file_size && (
+                    <p className="text-xs text-blue-600">
+                      {(initialData.file_size / (1024 * 1024)).toFixed(1)} MB
+                    </p>
+                  )}
+                  <p className="text-xs text-blue-600 mt-2">
+                    💡 Para manter o vídeo atual, deixe o campo abaixo vazio. Para substituir, faça upload de um novo arquivo.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {!videoFile ? (
             <div 
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                 isDragOver 
                   ? 'border-primary bg-primary/5' 
                   : 'border-gray-300 hover:border-gray-400'
@@ -435,7 +519,10 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 <p className="text-sm text-gray-600">
-                  Arraste o arquivo aqui ou <span className="text-primary font-medium">clique para selecionar</span>
+                  {initialData?.id && initialData?.upload_type === 'direct' 
+                    ? 'Substituir vídeo atual (opcional)' 
+                    : 'Arraste o arquivo aqui ou'
+                  } <span className="text-primary font-medium">clique para selecionar</span>
                 </p>
                 <p className="text-xs text-gray-500">
                   MP4, WebM, MOV, AVI • Máximo: 500MB
@@ -495,24 +582,63 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
           <label className="flex items-center gap-2 cursor-pointer">
             <input 
               type="radio" 
-              checked={!useCustomThumb} 
-              onChange={() => setUseCustomThumb(false)}
+              checked={thumbnailMode === 'auto'} 
+              onChange={() => {
+                setThumbnailMode('auto');
+                setUseCustomThumb(false);
+              }}
               className="text-primary focus:ring-primary"
             />
-            {uploadType === 'youtube' ? 'Automática (YouTube)' : 'Sem thumbnail'}
+            {uploadType === 'youtube' ? 'Automática (YouTube)' : 'Automática (do vídeo)'}
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input 
               type="radio" 
-              checked={useCustomThumb} 
-              onChange={() => setUseCustomThumb(true)}
+              checked={thumbnailMode === 'custom'} 
+              onChange={() => {
+                setThumbnailMode('custom');
+                setUseCustomThumb(true);
+              }}
               className="text-primary focus:ring-primary"
             />
             Enviar imagem
           </label>
         </div>
 
-        {useCustomThumb && (
+        {/* Auto thumbnail for direct upload */}
+        {uploadType === 'direct' && thumbnailMode === 'auto' && (
+          <div className="mt-3">
+            <ThumbnailPreview
+              thumbnailResult={thumbnailGenerator.thumbnail}
+              videoFile={videoFile}
+              onThumbnailChange={() => {}}
+              onRegenerateAt={thumbnailGenerator.regenerateAt}
+              onManualUpload={(file) => {
+                setThumbnailFile(file);
+                setThumbnailMode('custom');
+                const url = URL.createObjectURL(file);
+                setThumbnailPreview(url);
+                setOriginalImage(url);
+                setIsCropping(true);
+                setUseCustomThumb(true);
+              }}
+              isGenerating={thumbnailGenerator.isGenerating}
+              error={thumbnailGenerator.error}
+              showFallback={!thumbnailGenerator.isSupported}
+            />
+            
+            {!thumbnailGenerator.isSupported && (
+              <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <p className="text-sm text-yellow-800">
+                  📱 Seu navegador tem suporte limitado para geração automática. 
+                  Use o carregamento manual de imagem.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {thumbnailMode === 'custom' && (
           <>
             <input 
               type="file" 
@@ -594,7 +720,7 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
           </>
         )}
         
-        {!useCustomThumb && uploadType === 'youtube' && videoUrl && getYoutubeThumbnail(videoUrl) && (
+        {thumbnailMode === 'auto' && uploadType === 'youtube' && videoUrl && getYoutubeThumbnail(videoUrl) && (
           <div className="mt-3 relative w-full h-32 border border-gray-200 rounded-md overflow-hidden">
             <OptimizedImage 
               src={getYoutubeThumbnail(videoUrl)!} 
@@ -645,7 +771,7 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
         <button 
           type="submit" 
           className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2" 
-          disabled={isUploading || (!videoUrl && uploadType === 'youtube') || (!videoFile && uploadType === 'direct')}
+          disabled={isUploading || thumbnailGenerator.isProcessing || (!videoUrl && uploadType === 'youtube') || (!videoFile && uploadType === 'direct' && !initialData?.id)}
         >
           {isUploading && (
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
@@ -653,7 +779,7 @@ export default function VideoUploadFormEnhanced({ initialData, onSave, onCancel 
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           )}
-          {isUploading ? 'Salvando...' : 'Salvar Vídeo'}
+          {isUploading ? 'Salvando...' : thumbnailGenerator.isProcessing ? 'Processando...' : 'Salvar Vídeo'}
         </button>
       </div>
     </form>

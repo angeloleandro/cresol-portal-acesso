@@ -8,6 +8,7 @@ import Breadcrumb from '@/app/components/Breadcrumb';
 import { supabase } from "@/lib/supabase";
 import VideoUploadFormEnhanced from '@/app/components/VideoUploadFormEnhanced';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import { getAuthenticatedSession } from '@/lib/video-utils';
 
 interface DashboardVideo {
   id: string;
@@ -68,13 +69,19 @@ export default function AdminVideos() {
 
   const fetchVideos = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("dashboard_videos")
-      .select("*")
-      .order("order_index", { ascending: true });
-    if (error) setError(error.message);
-    else setVideos(data || []);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from("dashboard_videos")
+        .select("*")
+        .order("order_index", { ascending: true });
+      if (error) throw error;
+      setVideos(data || []);
+      setError(null);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteClick = (video: DashboardVideo) => {
@@ -83,24 +90,41 @@ export default function AdminVideos() {
   };
 
   const handleDeleteConfirm = async () => {
-    if (!videoToDelete) return;
+    if (!videoToDelete || isDeleting) return;
     
     setIsDeleting(true);
     setError(null);
     
     try {
+      const authResult = await getAuthenticatedSession();
+      if (authResult.error) {
+        throw new Error(authResult.error);
+      }
+
+      
       const response = await fetch(`/api/admin/videos?id=${videoToDelete.id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authResult.token}`,
+          'Content-Type': 'application/json',
+        },
       });
+      
       
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Erro ao excluir vídeo');
       }
       
-      await fetchVideos();
+      await response.json();
+      
+      // Optimistic UI update - remove from local state immediately
+      setVideos(prevVideos => prevVideos.filter(video => video.id !== videoToDelete.id));
       setShowDeleteModal(false);
       setVideoToDelete(null);
+      
+      // Refresh data in background to ensure consistency
+      await fetchVideos();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -243,24 +267,32 @@ export default function AdminVideos() {
           <div className="text-cresol-gray text-center mt-12">Nenhum vídeo cadastrado ainda.</div>
         )}
         {showForm && !editVideo && (
-          <VideoUploadFormEnhanced onSave={() => { setShowForm(false); fetchVideos(); }} onCancel={() => setShowForm(false)} />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <VideoUploadFormEnhanced onSave={() => { setShowForm(false); fetchVideos(); }} onCancel={() => setShowForm(false)} />
+            </div>
+          </div>
         )}
         {editVideo && (
-          <VideoUploadFormEnhanced
-            initialData={{
-              id: editVideo.id,
-              title: editVideo.title,
-              video_url: editVideo.video_url,
-              thumbnail_url: editVideo.thumbnail_url ?? undefined,
-              is_active: editVideo.is_active,
-              order_index: editVideo.order_index,
-              upload_type: editVideo.upload_type === 'vimeo' ? 'youtube' : editVideo.upload_type, // Convert vimeo to youtube for editing
-              file_size: editVideo.file_size ?? undefined,
-              original_filename: editVideo.original_filename ?? undefined
-            }}
-            onSave={() => { setEditVideo(null); fetchVideos(); }}
-            onCancel={() => setEditVideo(null)}
-          />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <VideoUploadFormEnhanced
+                initialData={{
+                  id: editVideo.id,
+                  title: editVideo.title,
+                  video_url: editVideo.video_url,
+                  thumbnail_url: editVideo.thumbnail_url ?? undefined,
+                  is_active: editVideo.is_active,
+                  order_index: editVideo.order_index,
+                  upload_type: editVideo.upload_type === 'vimeo' ? 'youtube' : editVideo.upload_type, // Convert vimeo to youtube for editing
+                  file_size: editVideo.file_size ?? undefined,
+                  original_filename: editVideo.original_filename ?? undefined
+                }}
+                onSave={() => { setEditVideo(null); fetchVideos(); }}
+                onCancel={() => setEditVideo(null)}
+              />
+            </div>
+          </div>
         )}
       </main>
       

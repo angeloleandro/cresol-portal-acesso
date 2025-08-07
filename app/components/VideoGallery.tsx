@@ -3,6 +3,11 @@
 import { useEffect, useState, Fragment, useRef, useCallback } from "react";
 import OptimizedImage from "./OptimizedImage";
 import { supabase } from "@/lib/supabase";
+import { 
+  resolveVideoUrl, 
+  formatFileSize, 
+  checkVideoUrlAccessibility 
+} from "@/lib/video-utils";
 
 interface DashboardVideo {
   id: string;
@@ -30,6 +35,8 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<DashboardVideo | null>(null);
   const [videoError, setVideoError] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [urlLoading, setUrlLoading] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -41,30 +48,73 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
         .eq("is_active", true)
         .order("order_index", { ascending: true });
       
-      // Filter to only show ready videos
-      const readyVideos = (data || []).filter(video => {
-        if (video.upload_type === 'youtube') return true;
-        if (video.upload_type === 'direct') {
-          return video.processing_status === 'ready' && video.upload_progress === 100;
+      // Filter videos using same pattern as gallery (simplified validation)
+      const validVideos = [];
+      
+      for (const video of data || []) {
+        if (video.upload_type === 'youtube') {
+          validVideos.push(video);
+        } else if (video.upload_type === 'direct') {
+          // Use same simple validation as gallery - no blocking file validation
+          if (video.processing_status === 'ready' && video.upload_progress === 100) {
+            try {
+              // Resolve URL but don't block on validation failures
+              const resolvedUrl = await resolveVideoUrl(video.file_path, video.video_url);
+              video.video_url = resolvedUrl;
+              validVideos.push(video);
+            } catch (error) {
+              console.warn(`URL resolution failed for ${video.title}:`, error);
+              // Still add video - URL will be handled in modal
+              validVideos.push(video);
+            }
+          }
         }
-        return false; // Filter out vimeo videos
-      });
-      setVideos(readyVideos);
+        // Filter out vimeo videos
+      }
+      
+      setVideos(validVideos);
       setLoading(false);
     };
     fetchVideos();
   }, []);
 
-  const handleOpenModal = (video: DashboardVideo) => {
+  const handleOpenModal = async (video: DashboardVideo) => {
     setSelectedVideo(video);
     setModalOpen(true);
     setVideoError(null);
+    setVideoUrl(null);
+    setUrlLoading(true);
+    
+    // For direct upload videos, resolve the URL when opening modal
+    if (video.upload_type === 'direct' && video.file_path) {
+      try {
+        const resolvedUrl = await resolveVideoUrl(video.file_path, video.video_url);
+        
+        // Verify URL is accessible
+        const isAccessible = await checkVideoUrlAccessibility(resolvedUrl);
+        
+        if (isAccessible) {
+          setVideoUrl(resolvedUrl);
+        } else {
+          setVideoError('Vídeo temporariamente indisponível. Tente novamente mais tarde.');
+        }
+      } catch (error) {
+        console.error('Error resolving video URL:', error);
+        setVideoError('Erro ao carregar o vídeo. Tente novamente mais tarde.');
+      }
+    } else if (video.upload_type === 'youtube') {
+      setVideoUrl(video.video_url);
+    }
+    
+    setUrlLoading(false);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedVideo(null);
     setVideoError(null);
+    setVideoUrl(null);
+    setUrlLoading(false);
     
     // Stop video playback if it's a direct upload
     if (videoRef.current) {
@@ -168,17 +218,24 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
                     <p className="text-sm">{videoError}</p>
                   </div>
                 </div>
-              ) : selectedVideo.upload_type === 'youtube' ? (
+              ) : urlLoading ? (
+                <div className="flex items-center justify-center h-full text-white bg-gray-800">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-sm">Carregando vídeo...</p>
+                  </div>
+                </div>
+              ) : selectedVideo.upload_type === 'youtube' && videoUrl ? (
                 <iframe
                   ref={iframeRef}
-                  src={selectedVideo.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                  src={videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
                   title={selectedVideo.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="w-full h-full min-h-[360px]"
                   onError={handleVideoError}
                 />
-              ) : selectedVideo.upload_type === 'direct' ? (
+              ) : selectedVideo.upload_type === 'direct' && videoUrl ? (
                 <video
                   ref={videoRef}
                   controls
@@ -187,10 +244,10 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
                   onError={handleVideoError}
                   preload="metadata"
                 >
-                  <source src={selectedVideo.video_url} type={selectedVideo.mime_type || 'video/mp4'} />
+                  <source src={videoUrl} type={selectedVideo.mime_type || 'video/mp4'} />
                   <p className="text-white p-4">
                     Seu navegador não suporta reprodução de vídeo. 
-                    <a href={selectedVideo.video_url} className="underline ml-1" download>
+                    <a href={videoUrl} className="underline ml-1" download>
                       Baixar vídeo
                     </a>
                   </p>
@@ -201,7 +258,7 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
                     <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    <p className="text-sm">Formato de vídeo não suportado</p>
+                    <p className="text-sm">Vídeo indisponível</p>
                   </div>
                 </div>
               )}
@@ -217,7 +274,7 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
                   )}
                   {selectedVideo.file_size && (
                     <p className="text-xs text-gray-500">
-                      Tamanho: {(selectedVideo.file_size / (1024 * 1024)).toFixed(1)} MB
+                      Tamanho: {formatFileSize(selectedVideo.file_size)}
                     </p>
                   )}
                 </div>
@@ -238,7 +295,7 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
 }
 
 // Componente de Card de Vídeo extraído para reutilização
-function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: DashboardVideo) => void }) {
+function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: DashboardVideo) => Promise<void> }) {
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-100 hover:border-gray-200 transition-all duration-200 flex flex-col group h-full">
       <div className="relative w-full aspect-video bg-gray-100 rounded-t-lg overflow-hidden">
@@ -284,7 +341,7 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
         
         {video.upload_type === 'direct' && video.file_size && (
           <p className="text-xs text-gray-500 mb-3">
-            {(video.file_size / (1024 * 1024)).toFixed(1)} MB
+            {formatFileSize(video.file_size)}
           </p>
         )}
         
