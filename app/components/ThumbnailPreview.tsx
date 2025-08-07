@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import OptimizedImage from "./OptimizedImage";
 import ThumbnailFallback from "./ThumbnailFallback";
 import { ThumbnailResult } from "@/lib/thumbnail-generator";
+import Icon from '@/app/components/icons/Icon';
 
 interface ThumbnailPreviewProps {
   thumbnailResult: ThumbnailResult | null;
@@ -119,7 +120,10 @@ export default function ThumbnailPreview({
               <p className="text-xs text-gray-500 mt-1">{error}</p>
               
               <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-left">
-                <p className="text-sm text-yellow-800 font-medium mb-2">💡 Possíveis soluções:</p>
+                <p className="text-sm text-yellow-800 font-medium mb-2 flex items-center gap-2">
+                  <Icon name="Info" className="h-4 w-4" />
+                  Possíveis soluções:
+                </p>
                 <ul className="text-xs text-yellow-700 space-y-1">
                   <li>• Verifique o console do navegador (F12) para detalhes</li>
                   <li>• Tente outro formato de vídeo (MP4 recomendado)</li>
@@ -160,10 +164,7 @@ export default function ThumbnailPreview({
               className="flex items-center gap-2 px-3 py-1 text-sm text-primary border border-primary rounded hover:bg-primary/5 transition-colors"
               disabled={isGenerating}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
+              <Icon name="refresh" className="w-4 h-4" />
               Gerar em outro momento
             </button>
           </div>
@@ -197,14 +198,14 @@ export default function ThumbnailPreview({
               <button
                 type="button"
                 onClick={() => setShowTimeline(false)}
-                className="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                className="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleRegenerateConfirm}
-                className="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary/90"
+                className="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
                 disabled={isGenerating}
               >
                 Gerar Thumbnail

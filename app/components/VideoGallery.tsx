@@ -8,6 +8,7 @@ import {
   formatFileSize, 
   checkVideoUrlAccessibility 
 } from "@/lib/video-utils";
+import Icon from '@/app/components/icons/Icon';
 
 interface DashboardVideo {
   id: string;
@@ -268,8 +269,9 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
                 <div className="flex-1">
                   <h3 className="heading-4 text-title mb-2">{selectedVideo.title}</h3>
                   {selectedVideo.upload_type === 'direct' && selectedVideo.original_filename && (
-                    <p className="text-sm text-gray-600 mb-1">
-                      📁 {selectedVideo.original_filename}
+                    <p className="text-sm text-gray-600 mb-1 flex items-center gap-1">
+                      <Icon name="folder" className="h-4 w-4 text-gray-500" />
+                      {selectedVideo.original_filename}
                     </p>
                   )}
                   {selectedVideo.file_size && (
@@ -278,12 +280,16 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
                     </p>
                   )}
                 </div>
-                <span className={`px-2 py-1 text-xs rounded-full ml-4 ${
+                <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full ml-4 ${
                   selectedVideo.upload_type === 'direct' 
                     ? 'bg-green-100 text-green-800' 
                     : 'bg-red-100 text-red-800'
                 }`}>
-                  {selectedVideo.upload_type === 'direct' ? '🎥 Upload Direto' : '📺 YouTube'}
+                  <Icon 
+                    name={selectedVideo.upload_type === 'direct' ? 'video' : 'monitor-play'} 
+                    className="h-3 w-3" 
+                  />
+                  {selectedVideo.upload_type === 'direct' ? 'Upload Direto' : 'YouTube'}
                 </span>
               </div>
             </div>
@@ -297,7 +303,7 @@ export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
 // Componente de Card de Vídeo extraído para reutilização
 function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: DashboardVideo) => Promise<void> }) {
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-100 hover:border-gray-200 transition-all duration-200 flex flex-col group h-full">
+    <div className="bg-gray-50 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-200 flex flex-col group h-full">
       <div className="relative w-full aspect-video bg-gray-100 rounded-t-lg overflow-hidden">
         {video.thumbnail_url ? (
           <OptimizedImage 
@@ -319,12 +325,15 @@ function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: Das
         
         {/* Upload type indicator */}
         <div className="absolute top-2 right-2">
-          <span className={`px-1.5 py-0.5 text-xs rounded-full font-medium shadow-sm ${
+          <span className={`inline-flex items-center justify-center px-1.5 py-0.5 text-xs rounded-full font-medium shadow-sm ${
             video.upload_type === 'direct' 
               ? 'bg-green-600 text-white' 
               : 'bg-red-600 text-white'
           }`}>
-            {video.upload_type === 'direct' ? '🎥' : '📺'}
+            <Icon 
+              name={video.upload_type === 'direct' ? 'video' : 'monitor-play'} 
+              className="h-3 w-3" 
+            />
           </span>
         </div>
         

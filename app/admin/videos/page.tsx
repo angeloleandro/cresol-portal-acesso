@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import VideoUploadFormEnhanced from '@/app/components/VideoUploadFormEnhanced';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { getAuthenticatedSession } from '@/lib/video-utils';
+import Icon from '@/app/components/icons/Icon';
 
 interface DashboardVideo {
   id: string;
@@ -167,12 +168,18 @@ export default function AdminVideos() {
             <h2 className="text-2xl font-bold text-primary mb-2">Gerenciar Vídeos</h2>
             <p className="text-cresol-gray">Adicione, edite ou remova vídeos exibidos no dashboard do portal.</p>
           </div>
-          <button className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition" onClick={() => setShowForm(true)}>+ Novo Vídeo</button>
+          <button 
+            className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors" 
+            onClick={() => setShowForm(true)}
+          >
+            <Icon name="plus" className="h-4 w-4" />
+            Novo Vídeo
+          </button>
         </div>
         {error && <div className="text-red-500 mb-4">Erro: {error}</div>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {videos.map((video) => (
-            <div key={video.id} className="bg-white rounded-lg border border-cresol-gray-light overflow-hidden flex flex-col">
+            <div key={video.id} className="bg-white rounded-lg border border-cresol-gray-light overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
               {video.thumbnail_url ? (
                 <OptimizedImage
                   src={video.thumbnail_url}
@@ -190,23 +197,30 @@ export default function AdminVideos() {
               <div className="p-4 flex-1 flex flex-col">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="text-lg font-semibold text-cresol-gray">{video.title}</h3>
-                  <span className={`px-2 py-1 text-xs rounded-full ${
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full ${
                     video.upload_type === 'direct' 
                       ? 'bg-green-100 text-green-800' 
                       : video.upload_type === 'youtube'
                       ? 'bg-red-100 text-red-800'
                       : 'bg-blue-100 text-blue-800'
                   }`}>
-                    {video.upload_type === 'direct' ? '🎥 Direto' : 
-                     video.upload_type === 'youtube' ? '📺 YouTube' : '🎬 Vimeo'}
+                    <Icon 
+                      name={video.upload_type === 'direct' ? 'video' : 'monitor-play'} 
+                      className="h-3 w-3" 
+                    />
+                    {video.upload_type === 'direct' ? 'Direto' : 
+                     video.upload_type === 'youtube' ? 'YouTube' : 'Vimeo'}
                   </span>
                 </div>
                 
                 {video.upload_type === 'direct' && video.original_filename ? (
                   <div className="mb-2">
-                    <p className="text-sm text-cresol-gray truncate">📁 {video.original_filename}</p>
+                    <p className="text-sm text-cresol-gray truncate flex items-center gap-1">
+                      <Icon name="folder" className="h-4 w-4 text-cresol-gray/70" />
+                      {video.original_filename}
+                    </p>
                     {video.file_size && (
-                      <p className="text-xs text-cresol-gray/70">
+                      <p className="text-xs text-cresol-gray/70 ml-5">
                         {(video.file_size / (1024 * 1024)).toFixed(1)} MB
                       </p>
                     )}
@@ -231,7 +245,10 @@ export default function AdminVideos() {
                         ? 'bg-yellow-100 text-yellow-700'  
                         : 'bg-blue-100 text-blue-700'
                     }`}>
-                      {video.processing_status === 'error' ? '❌' : '⏳'} 
+                      <Icon 
+                        name={video.processing_status === 'error' ? 'triangle-alert' : 'clock'} 
+                        className="h-3 w-3" 
+                      />
                       {video.processing_status === 'uploading' ? 'Enviando...' : 
                        video.processing_status === 'processing' ? 'Processando...' : 
                        video.processing_status}
@@ -243,8 +260,12 @@ export default function AdminVideos() {
                 )}
                 
                 <div className="flex items-center gap-2 mb-2">
-                  <span className={`inline-flex items-center text-xs ${video.is_active ? 'text-green-600' : 'text-gray-500'}`}>
-                    {video.is_active ? '✅ Ativo' : '⭕ Inativo'}
+                  <span className={`inline-flex items-center gap-1 text-xs ${video.is_active ? 'text-green-600' : 'text-gray-500'}`}>
+                    <Icon 
+                      name={video.is_active ? 'CheckCircle' : 'x'} 
+                      className="h-3 w-3" 
+                    />
+                    {video.is_active ? 'Ativo' : 'Inativo'}
                   </span>
                   <span className="text-xs text-cresol-gray/70">
                     Ordem: {video.order_index}
@@ -252,11 +273,19 @@ export default function AdminVideos() {
                 </div>
                 
                 <div className="mt-auto flex gap-2 pt-3 border-t border-gray-100">
-                  <button className="text-primary hover:underline text-sm font-medium" onClick={() => setEditVideo(video)}>
-                    ✏️ Editar
+                  <button 
+                    className="inline-flex items-center gap-1 text-primary hover:underline text-sm font-medium transition-colors" 
+                    onClick={() => setEditVideo(video)}
+                  >
+                    <Icon name="pencil" className="h-4 w-4" />
+                    Editar
                   </button>
-                  <button className="text-red-500 hover:underline text-sm font-medium" onClick={() => handleDeleteClick(video)}>
-                    🗑️ Remover
+                  <button 
+                    className="inline-flex items-center gap-1 text-red-500 hover:underline text-sm font-medium transition-colors" 
+                    onClick={() => handleDeleteClick(video)}
+                  >
+                    <Icon name="trash" className="h-4 w-4" />
+                    Remover
                   </button>
                 </div>
               </div>

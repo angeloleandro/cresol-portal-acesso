@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Icon from '@/app/components/icons/Icon';
 
 interface ThumbnailFallbackProps {
   videoFileName?: string;
@@ -111,8 +112,9 @@ export default function ThumbnailFallback({
           </div>
         )}
         
-        <div className="mt-4 text-xs text-gray-500">
-          <p>💡 Dica: Use uma imagem representativa do conteúdo do vídeo</p>
+        <div className="mt-4 text-xs text-gray-500 flex items-center justify-center gap-1">
+          <Icon name="Info" className="h-3 w-3" />
+          <p>Dica: Use uma imagem representativa do conteúdo do vídeo</p>
         </div>
       </div>
     </div>
