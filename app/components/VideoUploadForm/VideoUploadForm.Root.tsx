@@ -181,6 +181,9 @@ export const VideoUploadFormRoot = memo(({
     dispatch(videoUploadActions.setFormData({ order_index: order }))
   }, [])
   
+  // Note: Thumbnail generation removed from here - will be handled separately after upload
+  // This prevents blocking the main upload process
+
   // Upload video file
   const uploadVideoFile = useCallback(async (file: File): Promise<{ id: string; url: string }> => {
     const formData = new FormData()
@@ -258,10 +261,29 @@ export const VideoUploadFormRoot = memo(({
           videoId = uploadResult.id
           finalVideoUrl = uploadResult.url
           
-          // Handle thumbnail for new direct uploads
-          if (state.thumbnailMode === 'custom' && state.formData.thumbnailFile) {
-            await uploadThumbnail(videoId)
+          // Handle thumbnail for new direct uploads - SIMPLIFIED
+          if (state.formData.thumbnailFile) {
+            // User provided custom thumbnail - upload it
+            const thumbnailUrl = await uploadThumbnail(videoId)
+            
+            // Update video record with custom thumbnail
+            if (thumbnailUrl) {
+              await makeAuthenticatedRequest('/api/admin/videos', {
+                method: 'PUT',
+                body: JSON.stringify({
+                  id: videoId,
+                  title: state.formData.title,
+                  video_url: finalVideoUrl,
+                  thumbnail_url: thumbnailUrl,
+                  is_active: state.formData.is_active,
+                  order_index: state.formData.order_index,
+                  upload_type: 'direct'
+                })
+              })
+            }
           }
+          // Note: Auto thumbnail generation will be handled separately in ThumbnailConfig component
+          // to avoid blocking the upload process
         } else if (initialData?.id && initialData?.upload_type === 'direct') {
           // Editing existing direct upload without changing the video file
           videoId = initialData.id
@@ -269,7 +291,7 @@ export const VideoUploadFormRoot = memo(({
           
           // Handle thumbnail updates for existing direct uploads
           let thumbUrl = initialData.thumbnail_url || ""
-          if (state.thumbnailMode === 'custom' && state.formData.thumbnailFile) {
+          if (state.formData.thumbnailFile) {
             thumbUrl = await uploadThumbnail()
           }
           
@@ -300,7 +322,8 @@ export const VideoUploadFormRoot = memo(({
         let thumbUrl = initialData?.thumbnail_url || ""
 
         // Handle thumbnail upload
-        if (state.thumbnailMode === 'custom' && state.formData.thumbnailFile) {
+        if (state.formData.thumbnailFile) {
+          // Se usuário forneceu/customizou thumbnail
           thumbUrl = await uploadThumbnail()
         } else if (state.thumbnailMode === 'auto' && state.formData.video_url) {
           thumbUrl = getYouTubeThumbnail(state.formData.video_url) || ""

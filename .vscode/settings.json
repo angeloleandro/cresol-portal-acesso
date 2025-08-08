@@ -1,42 +1,62 @@
 {
-  "github.copilot.chat.experimental.mcpServers": {
+  "github.copilot.chat.mcp.servers": {
     "github": {
-      "command": "cmd",
+      "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_TOKEN": "${env:GITHUB_TOKEN}"
       }
     },
-    "supabase-prisma-ia": {
-      "command": "cmd",
-      "args": [
-        "-y", 
-        "@supabase/mcp-server-supabase@latest",
-        "--project-ref=eefkvznetuidmvnsuxhm",
-        "--access-token=${env:SUPABASE_ACCESS_TOKEN}"
-      ]
-    },
-    "supabase-thais-silva-terapeuta": {
+    "supabase-cresol": {
       "command": "npx",
       "args": [
         "-y",
-        "@supabase/mcp-server-supabase@latest", 
-        "--read-only",
-        "--project-ref=btszxihzugeppcvnykxk"
-      ],
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=taodkzafqgoparihaljx",
+        "--access-token=${env:SUPABASE_ACCESS_TOKEN_CRESOL}"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "playwright-mcp-server"],
+      "env": {}
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "mcp-filesystem-server", "/home/angel/projetos"],
+      "env": {}
+    },
+    "figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp"],
       "env": {
-        "SUPABASE_ACCESS_TOKEN": "${env:SUPABASE_ACCESS_TOKEN}"
+        "FIGMA_API_KEY": "${env:FIGMA_API_KEY}"
       }
     },
-    "supabase-cresol": {
-      "command": "cmd",
-      "args": [
-        "-y",
-        "@supabase/mcp-server-supabase@latest",
-  "--project-ref=taodkzafqgoparihaljx",
-  "--access-token=${env:SUPABASE_ACCESS_TOKEN_CRESOL}"
-      ]
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@context7/mcp"],
+      "env": {}
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "mcp-memory-server"],
+      "env": {}
     }
   },
+  "mcp.autostart": "newAndOutdated",
+  "copilot.mcp.enabledServers": [
+    "github",
+    "supabase-cresol", 
+    "playwright",
+    "filesystem",
+    "figma",
+    "context7",
+    "memory"
+  ],
+  "cSpell.words": [
+    "assíncrona",
+    "obrigatório"
+  ],
   "chat.mcp.autostart": "newAndOutdated"
 }

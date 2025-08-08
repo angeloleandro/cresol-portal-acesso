@@ -5,8 +5,11 @@
 
 export interface ThumbnailOptions {
   seekTime?: number; // Tempo em segundos para capturar (default: auto)
+  timestamp?: number; // Alias para seekTime para compatibilidade
   maxWidth?: number;  // Largura máxima (default: 1280)
   maxHeight?: number; // Altura máxima (default: 720)
+  width?: number;     // Largura específica
+  height?: number;    // Altura específica
   quality?: number;   // Qualidade JPEG (default: 0.8)
 }
 
@@ -283,7 +286,7 @@ export async function generateVideoThumbnail(
  * Versão alternativa simples de geração de thumbnail para casos problemáticos
  */
 export async function generateVideoThumbnailSimple(
-  videoFile: File,
+  videoSource: File | string,
   options: ThumbnailOptions = {}
 ): Promise<ThumbnailResult> {
   console.log('🔄 Tentando geração simples de thumbnail...');
@@ -318,8 +321,8 @@ export async function generateVideoThumbnailSimple(
     video.addEventListener('loadedmetadata', () => {
       console.log('📊 Metadata simples carregada');
       
-      // Usar timestamp 0 como fallback
-      const seekTime = options.seekTime ?? 0;
+      // Usar timestamp/seekTime ou 0 como fallback
+      const seekTime = options.seekTime ?? options.timestamp ?? 0;
       video.currentTime = seekTime;
     });
 
@@ -382,8 +385,14 @@ export async function generateVideoThumbnailSimple(
     video.preload = 'metadata';
     video.controls = false;
     
-    videoUrl = URL.createObjectURL(videoFile);
-    video.src = videoUrl;
+    // Suportar tanto File quanto URL string
+    if (typeof videoSource === 'string') {
+      video.src = videoSource;
+      videoUrl = '';  // Não precisamos revogar URL externa
+    } else {
+      videoUrl = URL.createObjectURL(videoSource);
+      video.src = videoUrl;
+    }
   });
 }
 

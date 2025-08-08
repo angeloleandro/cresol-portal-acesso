@@ -3,10 +3,13 @@
  * Redesigned for minimal complexity and clear user flow
  */
 
-import { memo, useCallback, useState, useRef } from 'react'
+import { memo, useCallback, useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { ThumbnailConfigProps } from './VideoUploadForm.types'
 import { Icon } from '../icons/Icon'
+import { useThumbnailGenerator } from '@/app/hooks/useThumbnailGenerator'
+import { VideoUploadFormThumbnailTimePicker } from './VideoUploadForm.ThumbnailTimePicker'
+import { VideoUploadFormLocalThumbnailPreview } from './VideoUploadForm.LocalThumbnailPreview'
 
 // YouTube thumbnail helper
 function getYouTubeThumbnail(url: string): string | null {
@@ -20,13 +23,23 @@ export const VideoUploadFormSimpleThumbnail = memo(({
   onModeChange,
   uploadType,
   videoUrl,
+  videoFile,
   thumbnailFile,
   onThumbnailSelect,
   thumbnailPreview,
-  disabled = false
+  disabled = false,
+  onTimestampChange
 }: ThumbnailConfigProps) => {
   
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const lastAutoTimestamp = useRef<number | null>(null)
+
+  // Hook de geração automática - desabilitado pois agora usa preview local
+  const autoThumbState = useThumbnailGenerator({
+    videoFile: null, // Desabilitado - preview local gerencia isso
+    autoGenerate: false,
+    timestamp: 1.0
+  })
   const [dragActive, setDragActive] = useState(false)
   
   const handleModeChange = useCallback((newMode: 'auto' | 'custom' | 'none') => {
@@ -77,10 +90,32 @@ export const VideoUploadFormSimpleThumbnail = memo(({
     }
   }, [disabled])
 
-  // Auto thumbnail URL for display
+
+  // Auto thumbnail URL (YouTube ou gerada do vídeo direto)
   const autoThumbnailUrl = uploadType === 'youtube' && videoUrl 
     ? getYouTubeThumbnail(videoUrl)
-    : null
+    : (autoThumbState?.thumbnail?.url || null)
+
+  // Sincroniza file quando gerar auto (direto)
+  useEffect(() => {
+    if (
+      uploadType === 'direct' &&
+      mode === 'auto' &&
+      videoFile &&
+      autoThumbState?.thumbnail &&
+      !autoThumbState.isGenerating
+    ) {
+      const ts = autoThumbState.thumbnail.timestamp
+      if (lastAutoTimestamp.current !== ts) {
+        lastAutoTimestamp.current = ts
+        try {
+          const { blob, timestamp } = autoThumbState.thumbnail
+          const f = new File([blob], `auto-thumb-${Math.round(timestamp * 1000)}.jpg`, { type: blob.type || 'image/jpeg' })
+          onThumbnailSelect(f)
+        } catch (err) {}
+      }
+    }
+  }, [uploadType, mode, videoFile, autoThumbState?.thumbnail, autoThumbState?.isGenerating, onThumbnailSelect])
 
   return (
     <div className="space-y-4">
@@ -241,8 +276,8 @@ export const VideoUploadFormSimpleThumbnail = memo(({
         </div>
       )}
 
-      {/* Auto Thumbnail Preview */}
-      {mode === 'auto' && autoThumbnailUrl && (
+      {/* Auto Thumbnail Preview - YouTube */}
+      {mode === 'auto' && uploadType === 'youtube' && autoThumbnailUrl && (
         <div className="space-y-3">
           <div className="relative w-full aspect-video bg-neutral-100 rounded-lg overflow-hidden">
             <Image
@@ -259,12 +294,29 @@ export const VideoUploadFormSimpleThumbnail = memo(({
             </div>
           </div>
           
-          <div className="flex items-center gap-2 text-xs text-neutral-500 bg-neutral-50 px-3 py-2 rounded-lg">
-            <Icon name="check-circle" className="w-4 h-4 text-green-600" />
-            <span>Usando thumbnail oficial do YouTube</span>
+          <div className="flex items-center justify-between text-xs text-neutral-500 bg-neutral-50 px-3 py-2 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Icon name="check-circle" className="w-4 h-4 text-green-600" />
+              <span>Usando thumbnail oficial do YouTube</span>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Auto Thumbnail Preview - Local Video File */}
+      {mode === 'auto' && uploadType === 'direct' && videoFile && (
+        <VideoUploadFormLocalThumbnailPreview
+          videoFile={videoFile}
+          onThumbnailGenerated={(thumbnailFile, timestamp) => {
+            console.log('🎯 [SIMPLE_THUMBNAIL] Thumbnail local gerada:', { timestamp });
+            onThumbnailSelect(thumbnailFile);
+            onTimestampChange?.(timestamp);
+          }}
+          onTimestampChange={onTimestampChange}
+          disabled={disabled}
+        />
+      )}
+
 
       {/* No Thumbnail State */}
       {mode === 'none' && (

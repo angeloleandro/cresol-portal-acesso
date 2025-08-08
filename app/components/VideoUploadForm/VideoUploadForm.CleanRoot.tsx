@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useReducer, useCallback, useEffect, useMemo, memo } from 'react'
+import { useReducer, useCallback, useEffect, useMemo, memo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { VideoFormProps, VideoUploadFormInternalState } from './VideoUploadForm.types'
 import { 
@@ -22,6 +22,7 @@ import { VideoUploadFormYouTubeInput } from './VideoUploadForm.YouTubeInput'
 import { VideoUploadFormFileUpload } from './VideoUploadForm.FileUpload'
 import { VideoUploadFormSimpleThumbnail } from './VideoUploadForm.SimpleThumbnail'
 import { VideoUploadFormSettings } from './VideoUploadForm.Settings'
+import { VideoUploadFormAsyncThumbnailStatus } from './VideoUploadForm.AsyncThumbnailStatus'
 
 // API functions
 import { supabase } from '@/lib/supabase'
@@ -53,6 +54,23 @@ export const VideoUploadFormCleanRoot = memo(({
       thumbnailPreview: initialData?.thumbnail_url || null,
     }
   )
+
+  // Estado para controlar geração assíncrona de thumbnail
+  const [asyncThumbnailState, setAsyncThumbnailState] = useState<{
+    show: boolean
+    videoId: string | null
+    videoUrl: string | null
+  }>({
+    show: false,
+    videoId: null,
+    videoUrl: null
+  })
+
+  // Estado para timestamp personalizado de thumbnail
+  const [thumbnailTimestamp, setThumbnailTimestamp] = useState<number>(1.0)
+  
+  // Estado para avisos (não são erros)
+  const [warning, setWarning] = useState<string | null>(null)
   
   // Initialize form with initial data
   useEffect(() => {
@@ -73,10 +91,15 @@ export const VideoUploadFormCleanRoot = memo(({
       const thumbnailMode = initialData.thumbnail_url ? 'custom' : 'auto'
       dispatch(videoUploadActions.setThumbnailMode(thumbnailMode))
       
-      // Update internal thumbnail preview
+      // Update internal thumbnail preview e timestamp
       setInternalState({
         thumbnailPreview: initialData.thumbnail_url || null
       })
+      
+      // Se temos thumbnail_timestamp dos dados iniciais, usar ele
+      if (initialData.thumbnail_timestamp) {
+        setThumbnailTimestamp(initialData.thumbnail_timestamp)
+      }
     }
   }, [initialData])
   
@@ -166,6 +189,9 @@ export const VideoUploadFormCleanRoot = memo(({
     dispatch(videoUploadActions.setFormData({ order_index: order }))
   }, [])
   
+  // Note: Thumbnail generation removed from here - will be handled separately after upload
+  // This prevents blocking the main upload process
+
   // Upload video file
   const uploadVideoFile = useCallback(async (file: File): Promise<{ id: string; url: string }> => {
     const formData = new FormData()
@@ -173,6 +199,9 @@ export const VideoUploadFormCleanRoot = memo(({
     formData.append('title', state.formData.title)
     formData.append('isActive', state.formData.is_active.toString())
     formData.append('orderIndex', state.formData.order_index.toString())
+    if (thumbnailTimestamp !== null) {
+      formData.append('thumbnailTimestamp', thumbnailTimestamp.toString())
+    }
 
     const session = await getAuthenticatedSession()
     
@@ -194,7 +223,7 @@ export const VideoUploadFormCleanRoot = memo(({
       id: result.video.id,
       url: result.video.url
     }
-  }, [state.formData.title, state.formData.is_active, state.formData.order_index])
+  }, [state.formData.title, state.formData.is_active, state.formData.order_index, thumbnailTimestamp])
   
   // Upload thumbnail helper
   const uploadThumbnail = useCallback(async (videoId?: string): Promise<string> => {
@@ -225,7 +254,17 @@ export const VideoUploadFormCleanRoot = memo(({
   
   // Main form submission
   const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+    console.log('🚀 [SUBMIT] Iniciando processo de envio...');
     if (e) e.preventDefault()
+    
+    console.log('📋 [SUBMIT] Estado atual do formulário:', {
+      uploadType: state.formData.upload_type,
+      hasVideoFile: !!state.formData.videoFile,
+      hasVideoUrl: !!state.formData.video_url,
+      hasThumbnailFile: !!state.formData.thumbnailFile,
+      thumbnailMode: state.thumbnailMode,
+      title: state.formData.title
+    });
     
     dispatch(videoUploadActions.clearErrors())
     dispatch(videoUploadActions.setUploadStatus('uploading'))
@@ -236,16 +275,38 @@ export const VideoUploadFormCleanRoot = memo(({
       let finalVideoUrl: string
 
       if (state.formData.upload_type === 'direct') {
+        console.log('📹 [SUBMIT] Processando upload direto...');
         if (state.formData.videoFile) {
+          console.log('🔄 [SUBMIT] Enviando arquivo de vídeo...');
           // Upload new video file
           const uploadResult = await uploadVideoFile(state.formData.videoFile)
+          console.log('✅ [SUBMIT] Upload de vídeo concluído:', uploadResult);
           videoId = uploadResult.id
           finalVideoUrl = uploadResult.url
           
-          // Handle thumbnail for new direct uploads
-          if (state.thumbnailMode === 'custom' && state.formData.thumbnailFile) {
-            await uploadThumbnail(videoId)
+          // Handle thumbnail for new direct uploads - SIMPLIFIED
+          if (state.formData.thumbnailFile) {
+            // User provided custom thumbnail - upload it
+            const thumbnailUrl = await uploadThumbnail(videoId)
+            
+            // Update video record with custom thumbnail
+            if (thumbnailUrl) {
+              await makeAuthenticatedRequest('/api/admin/videos', {
+                method: 'PUT',
+                body: JSON.stringify({
+                  id: videoId,
+                  title: state.formData.title,
+                  video_url: finalVideoUrl,
+                  thumbnail_url: thumbnailUrl,
+                  is_active: state.formData.is_active,
+                  order_index: state.formData.order_index,
+                  upload_type: 'direct'
+                })
+              })
+            }
           }
+          // Note: Auto thumbnail generation will be handled separately in ThumbnailConfig component
+          // to avoid blocking the upload process
         } else if (initialData?.id && initialData?.upload_type === 'direct') {
           // Editing existing direct upload without changing the video file
           videoId = initialData.id
@@ -253,7 +314,7 @@ export const VideoUploadFormCleanRoot = memo(({
           
           // Handle thumbnail updates for existing direct uploads
           let thumbUrl = initialData.thumbnail_url || ""
-          if (state.thumbnailMode === 'custom' && state.formData.thumbnailFile) {
+          if (state.formData.thumbnailFile) {
             thumbUrl = await uploadThumbnail()
           }
           
@@ -266,13 +327,22 @@ export const VideoUploadFormCleanRoot = memo(({
               is_active: state.formData.is_active, 
               order_index: state.formData.order_index, 
               thumbnail_url: thumbUrl,
-              upload_type: 'direct'
+              upload_type: 'direct',
+              thumbnail_timestamp: thumbnailTimestamp
             })
           })
           
+          const responseData = await response.json()
+          
           if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || 'Erro ao atualizar vídeo')
+            throw new Error(responseData.error || 'Erro ao atualizar vídeo')
+          }
+          
+          // Verificar se há aviso do servidor
+          if (responseData.warning) {
+            setWarning(responseData.warning)
+            // Limpar aviso após 5 segundos
+            setTimeout(() => setWarning(null), 5000)
           }
         } else {
           throw new Error('Arquivo de vídeo é obrigatório para upload direto')
@@ -283,7 +353,7 @@ export const VideoUploadFormCleanRoot = memo(({
         let thumbUrl = initialData?.thumbnail_url || ""
 
         // Handle thumbnail upload
-        if (state.thumbnailMode === 'custom' && state.formData.thumbnailFile) {
+        if (state.formData.thumbnailFile) {
           thumbUrl = await uploadThumbnail()
         } else if (state.thumbnailMode === 'auto' && state.formData.video_url) {
           thumbUrl = getYouTubeThumbnail(state.formData.video_url) || ""
@@ -295,7 +365,8 @@ export const VideoUploadFormCleanRoot = memo(({
           is_active: state.formData.is_active, 
           order_index: state.formData.order_index, 
           thumbnail_url: thumbUrl,
-          upload_type: 'youtube'
+          upload_type: 'youtube',
+          thumbnail_timestamp: thumbnailTimestamp
         }
 
         if (initialData?.id) {
@@ -307,9 +378,17 @@ export const VideoUploadFormCleanRoot = memo(({
             })
           })
           
+          const responseData = await response.json()
+          
           if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || 'Erro ao atualizar vídeo')
+            throw new Error(responseData.error || 'Erro ao atualizar vídeo')
+          }
+          
+          // Verificar se há aviso do servidor (YouTube update)
+          if (responseData.warning) {
+            setWarning(responseData.warning)
+            // Limpar aviso após 5 segundos
+            setTimeout(() => setWarning(null), 5000)
           }
           
           videoId = initialData.id
@@ -319,12 +398,19 @@ export const VideoUploadFormCleanRoot = memo(({
             body: JSON.stringify(requestBody)
           })
           
+          const result = await response.json()
+          
           if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || 'Erro ao criar vídeo')
+            throw new Error(result.error || 'Erro ao criar vídeo')
           }
           
-          const result = await response.json()
+          // Verificar se há aviso do servidor (YouTube create)
+          if (result.warning) {
+            setWarning(result.warning)
+            // Limpar aviso após 5 segundos
+            setTimeout(() => setWarning(null), 5000)
+          }
+          
           videoId = result.video.id
         }
         finalVideoUrl = state.formData.video_url
@@ -334,18 +420,50 @@ export const VideoUploadFormCleanRoot = memo(({
 
       dispatch(videoUploadActions.setUploadProgress(100))
       dispatch(videoUploadActions.setUploadStatus('success'))
+
+      console.log('✅ [UPLOAD] Upload concluído com sucesso!', {
+        videoId,
+        finalVideoUrl,
+        hasCustomThumbnail: !!state.formData.thumbnailFile,
+        thumbnailMode: state.thumbnailMode,
+        uploadType: state.formData.upload_type
+      });
+
+      // Nota: Geração de thumbnail agora é feita localmente antes do upload
+      // Não precisa mais de geração assíncrona após upload
+
       onSave()
       
     } catch (err: any) {
       dispatch(videoUploadActions.setError(undefined, err.message || 'Erro ao salvar vídeo'))
       dispatch(videoUploadActions.setUploadStatus('error'))
     }
-  }, [state, initialData, uploadVideoFile, uploadThumbnail, getYouTubeThumbnail, onSave])
+  }, [state, initialData, uploadVideoFile, uploadThumbnail, getYouTubeThumbnail, onSave, thumbnailTimestamp])
   
   const handleCancel = useCallback(() => {
     dispatch(videoUploadActions.resetForm())
     onCancel()
   }, [onCancel])
+
+  // Handler para quando geração assíncrona de thumbnail completa
+  const handleAsyncThumbnailComplete = useCallback((thumbnailUrl: string, timestamp: number) => {
+    console.log('✅ Thumbnail assíncrona gerada:', { thumbnailUrl, timestamp })
+    
+    // Atualizar preview interno
+    setInternalState({
+      thumbnailPreview: thumbnailUrl
+    })
+
+    // Esconder o status após 3 segundos
+    setTimeout(() => {
+      setAsyncThumbnailState(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }, [])
+
+  // Handler para mudança de timestamp
+  const handleTimestampChange = useCallback((timestamp: number) => {
+    setThumbnailTimestamp(timestamp)
+  }, [])
   
   return (
     <div className="bg-white rounded-xl shadow-sm border border-neutral-200 max-w-2xl mx-auto">
@@ -375,6 +493,32 @@ export const VideoUploadFormCleanRoot = memo(({
                   </h4>
                   <p className="text-red-600 text-sm">
                     {generalError}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Warning Display */}
+        <AnimatePresence>
+          {warning && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="bg-amber-50 border border-amber-200 rounded-lg p-4"
+              role="alert"
+              aria-live="polite"
+            >
+              <div className="flex items-start gap-3">
+                <Icon name="info" className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-amber-800 mb-1">
+                    Aviso
+                  </h4>
+                  <p className="text-amber-700 text-sm">
+                    {warning}
                   </p>
                 </div>
               </div>
@@ -494,7 +638,18 @@ export const VideoUploadFormCleanRoot = memo(({
           showCrop={false} // Removed cropper for simplicity
           onShowCropChange={() => {}} // Disabled
           disabled={isUploading}
+          onTimestampChange={handleTimestampChange}
         />
+
+        {/* Async Thumbnail Status */}
+        {asyncThumbnailState.videoId && asyncThumbnailState.videoUrl && (
+          <VideoUploadFormAsyncThumbnailStatus
+            videoId={asyncThumbnailState.videoId}
+            videoUrl={asyncThumbnailState.videoUrl}
+            show={asyncThumbnailState.show}
+            onComplete={handleAsyncThumbnailComplete}
+          />
+        )}
         
         {/* Settings - Collapsed by default */}
         <details className="group">

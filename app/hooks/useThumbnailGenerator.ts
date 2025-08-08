@@ -15,6 +15,7 @@ interface UseThumbnailGeneratorProps {
   videoFile: File | null;
   autoGenerate?: boolean;
   defaultOptions?: ThumbnailOptions;
+  timestamp?: number;
 }
 
 interface ThumbnailState {
@@ -29,7 +30,8 @@ interface ThumbnailState {
 export function useThumbnailGenerator({
   videoFile,
   autoGenerate = true,
-  defaultOptions = {}
+  defaultOptions = {},
+  timestamp
 }: UseThumbnailGeneratorProps) {
   const [state, setState] = useState<ThumbnailState>({
     result: null,
@@ -55,6 +57,8 @@ export function useThumbnailGenerator({
       const options = { ...defaultOptions };
       if (seekTime !== undefined) {
         options.seekTime = seekTime;
+      } else if (timestamp !== undefined) {
+        options.seekTime = timestamp;
       }
 
       console.log('🎬 Tentando geração padrão de thumbnail...');
@@ -86,7 +90,7 @@ export function useThumbnailGenerator({
       }));
       return null;
     }
-  }, [videoFile, defaultOptions, state.isSupported]);
+  }, [videoFile, defaultOptions, timestamp, state.isSupported]);
 
   const uploadThumbnail = useCallback(async (): Promise<string | null> => {
     if (!state.result || !videoFile) {

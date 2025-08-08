@@ -8,6 +8,7 @@ export interface VideoUploadFormData {
   title: string
   video_url: string
   thumbnail_url?: string
+  thumbnail_timestamp?: number
   is_active: boolean
   order_index: number
   upload_type: 'youtube' | 'direct'
@@ -118,6 +119,7 @@ export interface ThumbnailConfigProps {
   showCrop: boolean
   onShowCropChange: (show: boolean) => void
   disabled?: boolean
+  onTimestampChange?: (timestamp: number) => void
 }
 
 export interface VideoSettingsProps {

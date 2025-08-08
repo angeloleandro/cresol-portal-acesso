@@ -498,7 +498,7 @@ export default function AdminVideos() {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+                className="max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-modal"
                 onClick={(e) => e.stopPropagation()}
               >
                 <VideoUploadFormClean

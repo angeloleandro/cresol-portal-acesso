@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     const requestBody = await request.json();
-    const { title, video_url, thumbnail_url, is_active, order_index, upload_type } = requestBody;
+    const { title, video_url, thumbnail_url, is_active, order_index, upload_type, thumbnail_timestamp } = requestBody;
     
 
     if (!title || !video_url) {
@@ -75,7 +75,8 @@ export async function POST(request: NextRequest) {
       thumbnail_url, 
       is_active: is_active ?? true, 
       order_index: finalOrderIndex, 
-      upload_type: upload_type || 'youtube'
+      upload_type: upload_type || 'youtube',
+      thumbnail_timestamp: thumbnail_timestamp || null
     };
     
     
@@ -139,7 +140,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, title, video_url, thumbnail_url, is_active, order_index, upload_type } = body;
+    const { id, title, video_url, thumbnail_url, is_active, order_index, upload_type, thumbnail_timestamp } = body;
 
     // Enhanced validation
     if (!id) {
@@ -181,6 +182,10 @@ export async function PUT(request: NextRequest) {
       updateData.upload_type = upload_type;
     }
 
+    if (thumbnail_timestamp !== undefined) {
+      updateData.thumbnail_timestamp = thumbnail_timestamp;
+    }
+
     const { data: updatedVideo, error: updateError } = await supabaseAdmin
       .from('dashboard_videos')
       .update(updateData)
@@ -189,9 +194,56 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (updateError) {
+      console.error('❌ [UPDATE] Erro na atualização:', updateError);
+      
+      // Tratamento específico para ordem duplicada
+      if (updateError.code === '23505' && updateError.message.includes('order_index')) {
+        console.log('🔄 [UPDATE] Detectado order_index duplicado, tentando próximo valor...');
+        
+        // Buscar o próximo order_index disponível
+        const { data: maxOrder } = await supabaseAdmin
+          .from('dashboard_videos')
+          .select('order_index')
+          .order('order_index', { ascending: false })
+          .limit(1)
+          .single();
+
+        const nextOrderIndex = (maxOrder?.order_index || 0) + 1;
+        
+        console.log('🔄 [UPDATE] Tentando com order_index:', nextOrderIndex);
+        
+        // Nova tentativa com order_index corrigido
+        const { data: updatedVideo2, error: updateError2 } = await supabaseAdmin
+          .from('dashboard_videos')
+          .update({ ...updateData, order_index: nextOrderIndex })
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (updateError2) {
+          return NextResponse.json({ 
+            error: `Erro persistente ao atualizar: ${updateError2.message}` 
+          }, { status: 500 });
+        }
+
+        // Sucesso na segunda tentativa - retornar com aviso
+        return NextResponse.json({ 
+          message: 'Vídeo atualizado com sucesso', 
+          video: updatedVideo2,
+          warning: `A ordem ${updateData.order_index} já estava em uso. O vídeo foi posicionado na ordem ${nextOrderIndex}.`
+        });
+      }
+      
+      // Outros tipos de erro com mensagens amigáveis
+      const friendlyError = updateError.message.includes('duplicate key') 
+        ? 'Já existe um vídeo com essas informações. Tente com dados diferentes.'
+        : updateError.message.includes('violates check constraint')
+        ? 'Dados inválidos fornecidos. Verifique se todos os campos estão corretos.'
+        : `Erro ao atualizar vídeo: ${updateError.message}`;
+
       return NextResponse.json({ 
-        error: `Erro ao atualizar vídeo: ${updateError.message}` 
-      }, { status: 500 });
+        error: friendlyError
+      }, { status: 400 });
     }
 
     return NextResponse.json({ 

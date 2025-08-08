@@ -9,7 +9,6 @@ import OptimizedImage from '../OptimizedImage'
 import ThumbnailPreview from '../ThumbnailPreview'
 import { ThumbnailConfigProps, CropSettings } from './VideoUploadForm.types'
 import { videoUploadStyles } from './VideoUploadForm.styles'
-import { a11yTokens } from '@/lib/design-tokens/video-system'
 import { getCroppedImg } from '../getCroppedImg'
 import { useThumbnailGenerator } from '@/app/hooks/useThumbnailGenerator'
 
@@ -50,6 +49,9 @@ export const VideoUploadFormThumbnailConfig = memo(({
     videoFile: uploadType === 'direct' ? videoFile || null : null,
     autoGenerate: uploadType === 'direct' && mode === 'auto'
   })
+
+  // Note: Removed automatic sync to parent to prevent loops and complexity
+  // Thumbnail will be displayed locally but not automatically uploaded
   
   const handleModeChange = useCallback((newMode: 'auto' | 'custom' | 'none') => {
     if (!disabled) {
@@ -96,7 +98,7 @@ export const VideoUploadFormThumbnailConfig = memo(({
     
     setIsProcessing(true)
     try {
-      const { file, url } = await getCroppedImg(originalImage, croppedAreaPixels, cropSettings.rotation)
+      const { file } = await getCroppedImg(originalImage, croppedAreaPixels, cropSettings.rotation)
       const croppedFile = new File([file], 'cropped-thumb.jpg', { type: 'image/jpeg' })
       
       onThumbnailSelect(croppedFile)
