@@ -247,11 +247,14 @@ export default function SystemLinksAdmin() {
               ]} 
             />
           </div>
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Links de Sistemas</h1>
-            <p className="mt-2 text-sm text-gray-600">
-              Gerencie os links de acesso aos sistemas exibidos na página inicial
-            </p>
+          {/* Header Section */}
+          <div className="mb-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <h1 className="text-3xl font-bold text-primary mb-1">
+                Links de Sistemas
+              </h1>
+              <p className="text-sm text-gray-600">Gerencie os links de acesso aos sistemas exibidos na página inicial</p>
+            </div>
           </div>
 
           {error && (

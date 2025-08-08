@@ -2,47 +2,37 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorMessage from '../components/ui/ErrorMessage';
+import { Icon } from '../components/icons';
+import { handleComponentError, devLog } from '@/lib/error-handler';
 
-interface System {
+interface SystemLink {
   id: string;
   name: string;
-  description: string;
   url: string;
-  icon: string;
-  sector_id: string | null;
-  sector_name?: string;
-}
-
-interface Sector {
-  id: string;
-  name: string;
+  description?: string;
+  display_order: number;
+  is_active: boolean;
 }
 
 export default function SistemasPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [systems, setSystems] = useState<System[]>([]);
-  const [filteredSystems, setFilteredSystems] = useState<System[]>([]);
-  const [sectors, setSectors] = useState<Sector[]>([]);
+  const [systems, setSystems] = useState<SystemLink[]>([]);
+  const [filteredSystems, setFilteredSystems] = useState<SystemLink[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sectorFilter, setSectorFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   const applyFilters = useCallback(() => {
     let filtered = [...systems];
-
-    // Filtrar por setor
-    if (sectorFilter !== 'all') {
-      filtered = filtered.filter(system => system.sector_id === sectorFilter);
-    }
 
     // Filtrar por termo de busca
     if (searchTerm.trim() !== '') {
@@ -50,12 +40,11 @@ export default function SistemasPage() {
       filtered = filtered.filter(
         system => 
           system.name.toLowerCase().includes(term) ||
-          system.description.toLowerCase().includes(term) ||
-          (system.sector_name && system.sector_name.toLowerCase().includes(term))
+          (system.description && system.description.toLowerCase().includes(term))
       );
     }
 
-    // Ordenar: favoritos primeiro, depois por nome
+    // Ordenar: favoritos primeiro, depois por display_order e nome
     filtered.sort((a, b) => {
       const aIsFavorite = favorites.has(a.id);
       const bIsFavorite = favorites.has(b.id);
@@ -63,11 +52,16 @@ export default function SistemasPage() {
       if (aIsFavorite && !bIsFavorite) return -1;
       if (!aIsFavorite && bIsFavorite) return 1;
       
+      // Se ambos são favoritos ou não são favoritos, ordenar por display_order primeiro
+      if (a.display_order !== b.display_order) {
+        return a.display_order - b.display_order;
+      }
+      
       return a.name.localeCompare(b.name);
     });
 
     setFilteredSystems(filtered);
-  }, [systems, sectorFilter, searchTerm, favorites]);
+  }, [systems, searchTerm, favorites]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -79,8 +73,7 @@ export default function SistemasPage() {
       
       setUser(data.user);
       await Promise.all([
-        fetchUserSystems(data.user.id),
-        fetchSectors(),
+        fetchSystemLinks(),
         loadFavorites(data.user.id)
       ]);
       
@@ -94,75 +87,24 @@ export default function SistemasPage() {
     applyFilters();
   }, [applyFilters]);
 
-  const fetchUserSystems = async (userId: string) => {
+  const fetchSystemLinks = async () => {
     try {
-      // Tentar usar a função RPC primeiro
-      const { data: userSystemsData, error: userSystemsError } = await supabase
-        .rpc('get_user_systems', { user_uuid: userId });
+      setError(null);
+      
+      const response = await fetch('/api/admin/system-links?active_only=true');
+      const data = await response.json();
 
-      if (userSystemsError) {
-        console.error('Erro RPC, tentando método alternativo:', userSystemsError);
-        
-        // Método alternativo: buscar todos os sistemas se o RPC falhar
-        const { data: allSystems, error: allSystemsError } = await supabase
-          .from('systems')
-          .select(`
-            id,
-            name,
-            description,
-            url,
-            icon,
-            sector_id,
-            sectors(name)
-          `)
-          .order('name');
-
-        if (allSystemsError) {
-          console.error('Erro ao buscar sistemas:', allSystemsError);
-          return;
-        }
-
-        // Formatar dados dos sistemas
-        const formattedSystems = (allSystems || []).map(system => {
-          let sectorName = '';
-          if (system.sectors) {
-            if (Array.isArray(system.sectors)) {
-              sectorName = system.sectors[0]?.name || '';
-            } else {
-              sectorName = (system.sectors as any)?.name || '';
-            }
-          }
-          
-          return {
-            ...system,
-            sector_name: sectorName
-          };
-        });
-
-        setSystems(formattedSystems);
-      } else {
-        setSystems(userSystemsData || []);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar sistemas do usuário:', error);
-    }
-  };
-
-  const fetchSectors = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('sectors')
-        .select('id, name')
-        .order('name');
-
-      if (error) {
-        console.error('Erro ao buscar setores:', error);
-        return;
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao carregar sistemas');
       }
 
-      setSectors(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar setores:', error);
+      setSystems(data.links || []);
+      devLog.info('Sistemas carregados na página', { count: data.links?.length });
+
+    } catch (error: any) {
+      const errorMessage = handleComponentError(error, 'fetchSystemLinks');
+      setError(errorMessage);
+      devLog.error('Erro ao buscar sistemas na página', { error });
     }
   };
 
@@ -201,12 +143,7 @@ export default function SistemasPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-center">
-            <div className="loading-spinner mx-auto mb-4"></div>
-            <p className="body-text text-muted">Carregando sistemas...</p>
-          </div>
-        </div>
+        <LoadingSpinner fullScreen message="Carregando sistemas..." />
         <Footer />
       </div>
     );
@@ -233,22 +170,34 @@ export default function SistemasPage() {
             <div className="flex-1">
               <h1 className="heading-1 text-title mb-2">Sistemas e Aplicações</h1>
               <p className="body-text text-muted">
-                Acesse todos os sistemas disponíveis para sua função
+                Acesse todos os sistemas corporativos disponíveis
               </p>
             </div>
             
             {/* Contador de sistemas */}
-            <div className="card-status min-w-[160px]">
+            <div className="bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-4 min-w-[160px]">
               <div className="body-text-small text-muted">Total de sistemas</div>
               <div className="text-2xl font-bold text-primary">{filteredSystems.length}</div>
             </div>
           </div>
 
           {/* Filtros e Busca */}
-          <div className="card">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-6">
+            {error && (
+              <div className="mb-6">
+                <ErrorMessage
+                  title="Erro ao Carregar Sistemas"
+                  message={error}
+                  type="error"
+                  showRetry
+                  onRetry={fetchSystemLinks}
+                />
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               {/* Busca */}
-              <div className="md:col-span-2">
+              <div>
                 <label htmlFor="search" className="form-label block mb-2">
                   Buscar sistemas
                 </label>
@@ -257,36 +206,27 @@ export default function SistemasPage() {
                     id="search"
                     type="text"
                     placeholder="Digite o nome do sistema ou descrição..."
-                    className="input w-full pl-10"
+                    className="input w-full pl-14"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Icon name="search" className="h-4 w-4 text-muted" />
                   </div>
                 </div>
               </div>
 
-              {/* Filtro por setor */}
-              <div>
-                <label htmlFor="sector-filter" className="form-label block mb-2">
-                  Filtrar por setor
-                </label>
-                <select
-                  id="sector-filter"
-                  className="input w-full"
-                  value={sectorFilter}
-                  onChange={(e) => setSectorFilter(e.target.value)}
-                >
-                  <option value="all">Todos os setores</option>
-                  {sectors.map((sector) => (
-                    <option key={sector.id} value={sector.id}>
-                      {sector.name}
-                    </option>
-                  ))}
-                </select>
+              {/* Limpar busca */}
+              <div className="flex items-end">
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="btn-secondary text-sm"
+                  >
+                    <Icon name="x" className="w-4 h-4 mr-1" />
+                    Limpar busca
+                  </button>
+                )}
               </div>
             </div>
 
@@ -304,9 +244,7 @@ export default function SistemasPage() {
                     }`}
                     title="Visualização em grade"
                   >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
+                    <Icon name="grid" className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
@@ -317,9 +255,7 @@ export default function SistemasPage() {
                     }`}
                     title="Visualização em lista"
                   >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
+                    <Icon name="list" className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -332,46 +268,40 @@ export default function SistemasPage() {
         </div>
 
         {/* Lista de sistemas */}
-        {filteredSystems.length === 0 ? (
-          <div className="card text-center py-12">
+        {!error && filteredSystems.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-12 text-center">
             <div className="max-w-md mx-auto">
-              <svg className="mx-auto h-16 w-16 text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+              <Icon name="monitor" className="mx-auto h-16 w-16 text-muted mb-4" />
               <h3 className="heading-3 text-title mb-2">Nenhum sistema encontrado</h3>
               <p className="body-text text-muted">
-                {searchTerm || sectorFilter !== 'all' 
-                  ? 'Tente ajustar os filtros para encontrar os sistemas desejados.'
-                  : 'Ainda não há sistemas cadastrados para o seu perfil.'
+                {searchTerm 
+                  ? 'Tente ajustar o termo de busca para encontrar os sistemas desejados.'
+                  : 'Ainda não há sistemas cadastrados.'
                 }
               </p>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="btn-primary mt-4"
+                >
+                  Ver todos os sistemas
+                </button>
+              )}
             </div>
           </div>
-        ) : (
+        ) : !error && (
           <div className={
             viewMode === 'grid' 
-              ? 'grid-responsive' 
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' 
               : 'space-y-4'
           }>
             {filteredSystems.map((system) => (
-              <div key={system.id} className="card group">
+              <div key={system.id} className="bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-6 group">
                 <div className={`${viewMode === 'list' ? 'flex items-start gap-4' : ''}`}>
                   {/* Ícone do sistema */}
                   <div className={`${viewMode === 'list' ? 'flex-shrink-0' : 'mb-4'}`}>
                     <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center transition-all duration-200 group-hover:bg-primary/20">
-                      {system.icon ? (
-                        <OptimizedImage
-                          src={system.icon}
-                          alt={`Ícone ${system.name}`}
-                          width={24}
-                          height={24}
-                          className="object-contain"
-                        />
-                      ) : (
-                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                      )}
+                      <Icon name="monitor" className="w-6 h-6 text-primary" />
                     </div>
                   </div>
 
@@ -390,40 +320,34 @@ export default function SistemasPage() {
                         }`}
                         title={favorites.has(system.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                       >
-                        <svg className="w-5 h-5" fill={favorites.has(system.id) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                        </svg>
+                        <Icon 
+                          name="star" 
+                          className={`w-5 h-5 ${favorites.has(system.id) ? 'fill-current' : ''}`} 
+                        />
                       </button>
                     </div>
                     
-                    {system.sector_name && (
-                      <div className="mb-3">
-                        <span className="badge-success">
-                          {system.sector_name}
-                        </span>
-                      </div>
+                    {system.description && (
+                      <p className="body-text-small text-muted mb-4 line-clamp-2">
+                        {system.description}
+                      </p>
                     )}
                     
-                    <p className="body-text-small text-muted mb-4 line-clamp-2">
-                      {system.description}
-                    </p>
-                    
                     <div className="flex items-center justify-between">
-                      <Link
+                      <a
                         href={system.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn-primary inline-flex items-center gap-2 text-sm"
                       >
                         Acessar Sistema
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </Link>
+                        <Icon name="external-link" className="w-4 h-4" />
+                      </a>
                       
                       {favorites.has(system.id) && (
-                        <span className="badge-warning">
-                          ⭐ Favorito
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <Icon name="star" className="w-3 h-3 mr-1 fill-current" />
+                          Favorito
                         </span>
                       )}
                     </div>

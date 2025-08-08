@@ -337,19 +337,23 @@ export default function UsersManagement() {
           />
         </div>
 
-        <div className="mb-6 border-b border-cresol-gray-light pb-4 flex flex-col md:flex-row md:justify-between md:items-end">
-          <div>
-            <h2 className="text-2xl font-bold text-primary mb-2">Gestão de Usuários</h2>
-            <p className="text-cresol-gray mb-4 md:mb-0">Gerencie os usuários do portal.</p>
+        <div className="mb-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+              <div>
+                <h1 className="text-3xl font-bold text-primary mb-1">Gestão de Usuários</h1>
+                <p className="text-sm text-gray-600">Gerencie os usuários do portal.</p>
+              </div>
+              
+              <button
+                type="button"
+                onClick={() => setShowForm(!showForm)}
+                className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors duration-150 mt-3 md:mt-0"
+              >
+                {showForm ? 'Cancelar' : 'Adicionar Usuário'}
+              </button>
+            </div>
           </div>
-          
-          <button
-            type="button"
-            onClick={() => setShowForm(!showForm)}
-            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors duration-150"
-          >
-            {showForm ? 'Cancelar' : 'Adicionar Usuário'}
-          </button>
         </div>
         
         {showForm && (

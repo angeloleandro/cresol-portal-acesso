@@ -126,11 +126,18 @@ export default function AdminBanners() {
           />
         </div>
 
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-primary mb-2">Gerenciar Banners</h2>
-            <p className="text-cresol-gray">Adicione, edite ou remova banners exibidos na página inicial do portal.</p>
+        {/* Header Section */}
+        <div className="mb-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h1 className="text-3xl font-bold text-primary mb-1">
+              Gerenciar Banners
+            </h1>
+            <p className="text-sm text-gray-600">Adicione, edite ou remova banners exibidos na página inicial do portal</p>
           </div>
+        </div>
+
+        {/* Actions Section */}
+        <div className="mb-6">
           <button className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors duration-150" onClick={() => setShowForm(true)}>+ Novo Banner</button>
         </div>
         {showForm && !editBanner && (

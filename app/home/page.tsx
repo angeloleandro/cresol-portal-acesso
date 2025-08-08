@@ -11,7 +11,7 @@ import VideoGallery from '@/app/components/VideoGallery';
 import ImageGallery from '../components/ImageGallery';
 import Footer from '../components/Footer';
 import GlobalSearch from '../components/GlobalSearch';
-import SystemLinks from '../components/SystemLinks';
+import SistemasLateral from '../components/SistemasLateral';
 import ParecerSolicitacao from '../components/ParecerSolicitacao';
 import NotificationsAndMessages from '../components/NotificationsAndMessages';
 import { handleComponentError, devLog } from '@/lib/error-handler';
@@ -81,17 +81,6 @@ export default function Home() {
         </div>
           </div>
           
-      {/* Sistemas - Moderno */}
-      <div className="py-8 bg-gradient-to-b from-white to-gray-50/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center lg:text-left mb-6">
-            <h2 className="heading-3 text-title">Sistemas e Apps</h2>
-            <p className="body-text-small text-muted">Acesse rapidamente os sistemas corporativos</p>
-          </div>
-          <SystemLinks />
-        </div>
-      </div>
-
       {/* Seções de Conteúdo - Layout 2/3 + 1/3 */}
       <div className="py-8 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -110,7 +99,8 @@ export default function Home() {
                 <h3 className="heading-4 text-title mb-4">Busca Global</h3>
                 <GlobalSearch compact />
               </div>
-              <EventosDestaque />
+              <EventosDestaque limit={4} />
+              <SistemasLateral />
               <NotificationsAndMessages />
             </div>
           </div>

@@ -139,13 +139,13 @@ export default function AdminDashboard({ initialUser, initialStats }: AdminDashb
         </div>
 
         {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="heading-1 heading-modern text-title mb-3">
-            Painel Administrativo
-          </h1>
-          <p className="body-text text-muted max-w-2xl">
-            Gerencie usuários, setores e sistemas do portal de acesso Cresol.
-          </p>
+        <div className="mb-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h1 className="text-3xl font-bold text-primary mb-1">
+              Painel Administrativo
+            </h1>
+            <p className="text-sm text-gray-600">Gerencie usuários, setores e sistemas do portal de acesso Cresol.</p>
+          </div>
         </div>
 
         {/* Statistics Grid */}

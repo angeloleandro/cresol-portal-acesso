@@ -69,17 +69,16 @@ export default function NotificationsAdmin() {
           />
         </div>
 
-        {/* Mobile-First Header Section */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-primary/10 rounded-xl sm:rounded-2xl mb-3 sm:mb-4">
-            <Icon name="bell-notification" className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-primary" />
+        {/* Header Section */}
+        <div className="mb-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h1 className="text-3xl font-bold text-primary mb-1">
+              Central de Notificações
+            </h1>
+            <p className="text-sm text-gray-600">
+              Gerencie comunicações, configure grupos de usuários e acompanhe o histórico de mensagens enviadas
+            </p>
           </div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 px-4">
-            Central de Notificações
-          </h1>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4 leading-relaxed">
-            Gerencie comunicações, configure grupos de usuários e acompanhe o histórico de mensagens enviadas
-          </p>
         </div>
 
         {/* Mobile-Optimized Stats Overview */}

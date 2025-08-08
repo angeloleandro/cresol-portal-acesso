@@ -290,7 +290,7 @@ export default function AnalyticsPage() {
         {/* Compact Header */}
         <div className="mb-6">
           <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <h1 className="text-xl font-semibold text-orange-600 mb-1">
+            <h1 className="text-3xl font-bold text-primary mb-1">
               Analytics
             </h1>
             <p className="text-sm text-gray-600">Dashboard de análise de dados</p>
@@ -362,7 +362,7 @@ export default function AnalyticsPage() {
                   {
                     title: 'Visão Geral',
                     value: 12,
-                    icon: 'dashboard',
+                    icon: 'chart-bar-vertical',
                     description: 'Indicadores principais',
                     trend: 'stable',
                     color: 'orange'
@@ -390,7 +390,7 @@ export default function AnalyticsPage() {
                   {
                     title: 'Relatórios',
                     value: 8,
-                    icon: 'document',
+                    icon: 'file',
                     description: 'Relatórios disponíveis',
                     trend: 'stable',
                     color: 'purple'
@@ -429,7 +429,7 @@ export default function AnalyticsPage() {
                       {[
                         { key: 'users', label: 'Usuários', icon: 'user-group' },
                         { key: 'systems', label: 'Sistemas', icon: 'monitor' },
-                        { key: 'activity', label: 'Atividade', icon: 'chart-line' }
+                        { key: 'activity', label: 'Atividade', icon: 'trending-up' }
                       ].map((option) => (
                         <button
                           key={option.key}

@@ -144,7 +144,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
               <Link 
                 key={event.id} 
                 href={`/eventos/${event.id}`}
-                className={`block py-3 ${index > 0 ? 'border-t border-cresol-gray-light/30' : ''}`}
+                className={`block py-2.5 ${index > 0 ? 'border-t border-cresol-gray-light/30' : ''}`}
               >
                 <div className="flex flex-col">
                   <div className="flex justify-between items-start mb-1">
@@ -203,15 +203,15 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
           <p className="body-text text-muted">Nenhum evento programado disponível</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {featuredEvents.map((event) => (
             <Link 
               key={event.id} 
               href={`/eventos/${event.id}`}
-                              className="block bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-lg transition-colors duration-150 p-4"
+                              className="block bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-lg transition-colors duration-150 p-3"
             >
               <div className="flex flex-col">
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-1.5">
                   <span className="badge-text text-white" style={{ backgroundColor: 'var(--color-primary)', padding: '0.25rem 0.625rem', borderRadius: 'var(--border-radius-full)' }}>
                     Evento
                   </span>
@@ -222,9 +222,9 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
                   )}
                 </div>
                 
-                <h3 className="heading-4 text-title mb-2 leading-tight">{event.title}</h3>
+                <h3 className="heading-4 text-title mb-1.5 leading-tight">{event.title}</h3>
                 
-                <div className="body-text-small text-body mb-3">
+                <div className="body-text-small text-body mb-2">
                   <div className="flex items-center mb-1">
                     <svg className="h-4 w-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -241,7 +241,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
                   </div>
                 </div>
                 
-                <p className="body-text-small text-body mb-4 line-clamp-2 leading-relaxed">{event.description}</p>
+                <p className="body-text-small text-body mb-3 line-clamp-2 leading-snug">{event.description}</p>
                 
                 <div className="text-sm font-medium mt-auto text-primary">
                   Ver detalhes →

@@ -374,7 +374,22 @@ export default function AdminVideos() {
 
         <ErrorBanner />
         
-        {/* Header with Stats and Actions */}
+        {/* Header Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-6"
+        >
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h1 className="text-3xl font-bold text-primary mb-1">
+              Gerenciar Vídeos
+            </h1>
+            <p className="text-sm text-gray-600">Gerencie todos os vídeos do sistema com filtros avançados</p>
+          </div>
+        </motion.div>
+
+        {/* Stats and Actions */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -383,7 +398,7 @@ export default function AdminVideos() {
         >
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
             <VideoGalleryStatsHeader
-              title="Gerenciar Vídeos"
+              title=""
               stats={videoStats}
             />
             
@@ -407,7 +422,7 @@ export default function AdminVideos() {
           {/* Advanced Header with Search and Filters */}
           <AdvancedVideoGalleryHeader
             title=""
-            subtitle="Gerencie todos os vídeos do sistema com filtros avançados"
+            subtitle=""
             videoCount={filteredVideos.length}
             showSeeAll={false}
             showSearch={true}
