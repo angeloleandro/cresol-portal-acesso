@@ -7,6 +7,7 @@ import Breadcrumb from '@/app/components/Breadcrumb';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/app/components/icons/Icon';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface Position {
   id: string;
@@ -280,14 +281,7 @@ export default function PositionsAdmin() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
   }
 
   return (

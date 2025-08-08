@@ -49,14 +49,7 @@ export default function SystemLinks() {
   };
 
   if (loading) {
-    return (
-      <div className="py-2">
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <span className="body-text-small text-muted">Carregando sistemas...</span>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner size="sm" message="Carregando sistemas..." />;
   }
 
   if (error) {
@@ -91,7 +84,7 @@ export default function SystemLinks() {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center justify-center gap-1 px-2 py-3 bg-gray-50/70 hover:bg-primary/5 border border-gray-200/80 hover:border-primary/20 rounded-lg transition-all duration-200 text-center"
+            className="group flex items-center justify-center gap-1 px-2 py-3 bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-lg transition-colors duration-150 text-center"
             title={link.description || `Acessar ${link.name}`}
           >
             {/* Nome do sistema - estilo Figma */}

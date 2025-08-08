@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import AdvancedSearch from './AdvancedSearch';
 import { Icon } from './icons/Icon';
+import { Spinner } from '@chakra-ui/react';
 
 interface QuickResult {
   id: string;
@@ -30,6 +32,7 @@ export default function GlobalSearch({
   autoFocus = false,
   compact = false
 }: GlobalSearchProps) {
+  const pathname = usePathname();
   const [query, setQuery] = useState('');
   const [quickResults, setQuickResults] = useState<QuickResult[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -321,7 +324,7 @@ export default function GlobalSearch({
           onChange={handleInputChange}
           onFocus={handleInputFocus}
           placeholder={compact ? 'Buscar...' : placeholder}
-          className={`block w-full pl-9 pr-3 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-gray-400 transition-all duration-200 ${
+          className={`block w-full pl-9 pr-3 text-sm bg-white border border-gray-200/40 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-gray-400 transition-all duration-150 ${
             compact ? 'py-2 w-48' : 'py-2.5'
           }`}
         />
@@ -329,14 +332,22 @@ export default function GlobalSearch({
         {/* Indicador de carregamento */}
         {loading && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-primary rounded-full" />
+            <Spinner
+              size="sm"
+              color={pathname?.startsWith('/admin') ? '#727176' : '#F58220'}
+              css={{
+                "--spinner-track-color": pathname?.startsWith('/admin') 
+                  ? 'rgba(114, 113, 118, 0.2)' 
+                  : 'rgba(245, 130, 32, 0.2)'
+              }}
+            />
           </div>
         )}
       </div>
 
       {/* Resultados da busca */}
       {showResults && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg max-h-96 overflow-y-auto z-50">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200/40 rounded-lg max-h-96 overflow-y-auto z-50">
           {/* Sugestões de pesquisa recente */}
           {query.length === 0 && recentSearches.length > 0 && (
             <div className="p-3 border-b border-gray-100">
@@ -346,7 +357,7 @@ export default function GlobalSearch({
                   <button
                     key={index}
                     onClick={() => setQuery(search)}
-                    className="block text-left w-full px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors"
+                    className="block text-left w-full px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors duration-150"
                   >
                     <Icon name="clock" className="inline h-3 w-3 text-gray-400 mr-2" />
                     {search}
@@ -364,7 +375,7 @@ export default function GlobalSearch({
                   key={result.id}
                   href={result.url}
                   onClick={() => handleResultClick(result)}
-                  className={`block px-4 py-2.5 hover:bg-gray-50 transition-colors ${
+                  className={`block px-4 py-2.5 hover:bg-gray-50 transition-colors duration-150 ${
                     selectedIndex === index ? 'bg-gray-50' : ''
                   }`}
                 >
@@ -393,7 +404,7 @@ export default function GlobalSearch({
                 <div className="border-t border-gray-100 p-2">
                   <button
                     onClick={openAdvancedSearch}
-                    className="w-full text-left px-2 py-1.5 text-sm text-primary hover:bg-primary/5 rounded transition-colors"
+                    className="w-full text-left px-2 py-1.5 text-sm text-primary hover:bg-primary/5 rounded transition-colors duration-150"
                   >
                     Ver todos os resultados para &quot;{query}&quot;
                   </button>

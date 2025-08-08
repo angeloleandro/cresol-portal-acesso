@@ -6,18 +6,32 @@
 "use client";
 
 import { VideoGalleryRoot } from './VideoGallery/';
+import HomeVideoGallery from './HomeVideoGallery';
 
 /**
  * Main VideoGallery Component
  * 
  * This component now uses the new modular VideoGallery system
  * with enhanced features, accessibility, and performance optimizations.
+ * 
+ * For home page (limit=3), uses clean Chakra UI-inspired cards
+ * For other pages, uses the full-featured VideoGalleryRoot
  */
 interface VideoGalleryProps {
   limit?: number;
 }
 
-export default function VideoGallery({ limit = 4 }: VideoGalleryProps) {
+export default function VideoGallery({ limit = 3 }: VideoGalleryProps) {
+  // Use HomeVideoGallery for home page (limit=3 or less)
+  if (limit <= 3) {
+    return (
+      <HomeVideoGallery 
+        className="card"
+      />
+    );
+  }
+  
+  // Use full VideoGalleryRoot for other pages
   return (
     <VideoGalleryRoot 
       limit={limit}

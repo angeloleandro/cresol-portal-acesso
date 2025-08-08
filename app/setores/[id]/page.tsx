@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import Navbar from '../../components/Navbar';
 import SubsectorTeam from '../../components/SubsectorTeam';
 import Breadcrumb from '../../components/Breadcrumb';
+import { HomeSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface Sector {
   id: string;
@@ -162,14 +163,7 @@ export default function SetorDetalhesPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <HomeSpinner fullScreen message="Carregando..." size="lg" />;
   }
 
   if (!sector) {

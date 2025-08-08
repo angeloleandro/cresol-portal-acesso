@@ -16,11 +16,11 @@ export const Card: React.FC<CardProps> = ({
   const getVariantClasses = () => {
     switch (variant) {
       case 'elevated':
-        return 'bg-white border border-gray-200';
+        return 'bg-white border border-gray-200/40 hover:border-gray-200/70';
       case 'outlined':
-        return 'bg-white border border-gray-200';
+        return 'bg-white border border-gray-200/40 hover:border-gray-200/70';
       default:
-        return 'bg-white border border-gray-200';
+        return 'bg-white border border-gray-200/40 hover:border-gray-200/70';
     }
   };
 
@@ -41,7 +41,7 @@ export const Card: React.FC<CardProps> = ({
         ${getVariantClasses()}
         ${getPaddingClasses()}
         rounded-lg sm:rounded-xl
-        transition-all duration-250
+        transition-colors duration-150
         ${className}
       `}
     >

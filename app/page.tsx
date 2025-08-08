@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import Image from 'next/image';
+import { HomeSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 export default function RootPage() {
   const router = useRouter();
@@ -25,13 +26,6 @@ export default function RootPage() {
     checkAuthAndRedirect();
   }, [router]);
 
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-        <p className="mt-4 text-cresol-gray">Redirecionando...</p>
-      </div>
-    </div>
-  );
+  return <HomeSpinner fullScreen message="Redirecionando..." size="lg" />;
 }
 

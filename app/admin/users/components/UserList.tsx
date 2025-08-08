@@ -101,7 +101,7 @@ export default function UserList({
 
   if (users.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-cresol-gray-light p-8 text-center">
+      <div className="bg-white rounded-lg border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-8 text-center">
         <p className="text-cresol-gray">Nenhum usuário encontrado.</p>
       </div>
     );
@@ -111,7 +111,7 @@ export default function UserList({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {users.map(user => (
-          <div key={user.id} className="bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-primary/30 transition-colors">
+          <div key={user.id} className="bg-white rounded-lg border border-gray-200/40 hover:border-gray-200/70 overflow-hidden transition-colors duration-150">
             <div className="p-4">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="relative h-12 w-12 rounded-full overflow-hidden bg-cresol-gray-light flex-shrink-0">
@@ -170,7 +170,7 @@ export default function UserList({
               </div>
             </div>
             
-            <div className="p-4 bg-gray-50 border-t border-cresol-gray-light flex items-center justify-between">
+            <div className="p-4 bg-gray-50 border-t border-gray-200/40 flex items-center justify-between">
               <div className="flex space-x-2">
                 <button
                   type="button"
@@ -191,7 +191,7 @@ export default function UserList({
               
               <button
                 type="button"
-                className="text-xs bg-primary hover:bg-primary-dark text-white px-2 py-1 rounded transition-colors"
+                className="text-xs bg-primary hover:bg-primary-dark text-white px-2 py-1 rounded transition-colors duration-150"
                 onClick={() => onOpenRoleModal(user.id, user.role)}
               >
                 Gerenciar Role

@@ -66,10 +66,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   return (
     <Card 
       variant="outlined" 
-      className={`
-        transition-colors duration-200 hover:bg-gray-50
-        ${className}
-      `}
+      className={className}
       padding="sm"
     >
       <div className="flex items-start justify-between gap-3">

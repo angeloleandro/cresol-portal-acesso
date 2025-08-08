@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { Icon } from '@/app/components/icons/Icon';
+import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface System {
   id: string;
@@ -221,14 +222,7 @@ export default function SystemsManagement() {
     : systems.filter(system => system.sector_id === sectorFilter);
 
   if (loading && systems.length === 0) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
   }
 
   return (

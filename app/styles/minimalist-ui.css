@@ -27,12 +27,12 @@
 
 /* Animações suaves para componentes */
 .location-card {
-  transition: all 0.2s ease-in-out;
+  border: 1px solid rgba(210, 210, 206, 0.4);
+  transition: border-color 150ms ease;
 }
 
 .location-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: rgba(210, 210, 206, 0.7);
 }
 
 /* Tooltip personalizado */

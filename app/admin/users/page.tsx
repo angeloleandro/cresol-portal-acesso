@@ -10,6 +10,7 @@ import UserFilters from './components/UserFilters';
 import UserForm from './components/UserForm';
 import UserList from './components/UserList';
 import RoleModal from './components/RoleModal';
+import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface ProfileUser {
   id: string;
@@ -317,14 +318,7 @@ export default function UsersManagement() {
   });
 
   if (loading && !users.length) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto" />
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
   }
 
   return (
@@ -352,7 +346,7 @@ export default function UsersManagement() {
           <button
             type="button"
             onClick={() => setShowForm(!showForm)}
-            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors"
+            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors duration-150"
           >
             {showForm ? 'Cancelar' : 'Adicionar Usuário'}
           </button>

@@ -8,6 +8,7 @@ import AdminHeader from "@/app/components/AdminHeader";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import BannerUploadForm from '@/app/components/BannerUploadForm';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface Banner {
   id: string;
@@ -107,14 +108,7 @@ export default function AdminBanners() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
   }
 
   return (
@@ -137,7 +131,7 @@ export default function AdminBanners() {
             <h2 className="text-2xl font-bold text-primary mb-2">Gerenciar Banners</h2>
             <p className="text-cresol-gray">Adicione, edite ou remova banners exibidos na página inicial do portal.</p>
           </div>
-          <button className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition" onClick={() => setShowForm(true)}>+ Novo Banner</button>
+          <button className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors duration-150" onClick={() => setShowForm(true)}>+ Novo Banner</button>
         </div>
         {showForm && !editBanner && (
           <BannerUploadForm onSave={() => { setShowForm(false); fetchBanners(); }} onCancel={() => setShowForm(false)} />
@@ -159,7 +153,7 @@ export default function AdminBanners() {
         {error && <div className="text-red-500 mb-4">Erro: {error}</div>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {banners.map((banner) => (
-            <div key={banner.id} className="bg-white rounded-lg border border-cresol-gray-light overflow-hidden flex flex-col">
+            <div key={banner.id} className="bg-white rounded-lg border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 overflow-hidden flex flex-col">
               <div className="relative w-full h-48 bg-cresol-gray-light">
                 {banner.image_url ? (
                   <OptimizedImage 

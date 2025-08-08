@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
+import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface AccessRequest {
   id: string;
@@ -272,14 +273,7 @@ export default function AccessRequests() {
   };
 
   if (loading && !requests.length) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
   }
 
   return (
@@ -325,7 +319,7 @@ export default function AccessRequests() {
         
         {loading ? (
           <div className="flex justify-center my-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+            <AdminSpinner message="Carregando mais dados..." size="md" />
           </div>
         ) : requests.length === 0 ? (
           <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">

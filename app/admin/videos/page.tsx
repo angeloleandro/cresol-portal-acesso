@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AdminHeader from "@/app/components/AdminHeader";
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { supabase } from "@/lib/supabase";
+import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
 import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { VideoGalleryStatsHeader, AdvancedVideoGalleryHeader } from '@/app/components/VideoGallery/VideoGallery.Header';
@@ -216,18 +217,7 @@ export default function AdminVideos() {
 
   // Loading state
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center space-y-4"
-        >
-          <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-neutral-600">Carregando painel administrativo...</p>
-        </motion.div>
-      </div>
-    );
+    return <AdminSpinner fullScreen message="Carregando painel administrativo..." size="lg" />;
   }
 
   // Access control
@@ -257,12 +247,12 @@ export default function AdminVideos() {
     <button
       onClick={onClick}
       className={clsx(
-        'px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200',
+        'px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-150',
         'border',
         'focus:outline-none focus:ring-2 focus:ring-primary/20',
         isActive
           ? 'bg-primary text-white border-primary shadow-sm'
-          : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50'
+          : 'bg-white text-neutral-700 border-neutral-300/40 hover:border-neutral-300/70'
       )}
       aria-pressed={isActive}
     >
@@ -403,7 +393,7 @@ export default function AdminVideos() {
               className={clsx(
                 'inline-flex items-center gap-2 px-6 py-3',
                 'bg-primary text-white rounded-lg font-medium',
-                'hover:bg-primary/90 transition-colors',
+                'hover:bg-primary/90 transition-colors duration-150',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20',
                 'shadow-sm lg:self-start'
               )}
@@ -433,7 +423,7 @@ export default function AdminVideos() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className={clsx(
-            'bg-white rounded-xl shadow-sm border border-neutral-200',
+            'bg-white rounded-xl shadow-sm border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150',
             'overflow-hidden min-h-[500px]'
           )}
         >

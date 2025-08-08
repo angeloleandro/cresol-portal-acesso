@@ -79,8 +79,8 @@ export function EnhancedVideoCard({
       variants={cardAnimations}
       className={clsx(
         'group cursor-pointer',
-        'bg-white rounded-xl border border-neutral-200',
-        'hover:border-neutral-300 transition-colors duration-300',
+        'bg-white rounded-xl border border-gray-200/40',
+        'hover:border-gray-200/70 transition-colors duration-150',
         'overflow-hidden',
         'flex flex-col h-full',
         className
@@ -135,7 +135,7 @@ export function EnhancedVideoCard({
         <h3 className={clsx(
           'font-semibold text-neutral-900',
           'line-clamp-2 leading-tight text-sm',
-          'group-hover:text-primary transition-colors duration-200',
+          'group-hover:text-primary transition-colors duration-150',
           'flex-grow'
         )}>
           {video.title}
@@ -159,7 +159,7 @@ export function EnhancedVideoCard({
         )}
         
         {/* Action Area */}
-        <div className="flex items-center justify-between pt-2 border-t border-neutral-100 mt-auto">
+        <div className="flex items-center justify-between pt-2 border-t border-gray-200/40 mt-auto">
           <div className="flex flex-col gap-1">
             {video.created_at && (
               <span className="text-xs text-neutral-400">
@@ -175,7 +175,7 @@ export function EnhancedVideoCard({
               'px-3 py-1.5 rounded-md text-xs font-medium',
               'bg-primary/10 text-primary',
               'hover:bg-primary hover:text-white',
-              'transition-colors duration-200',
+              'transition-colors duration-150',
               'opacity-0 group-hover:opacity-100',
               'focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary/20'
             )}
@@ -249,8 +249,8 @@ export function AdminVideoCard({
       variants={cardAnimations}
       className={clsx(
         'group cursor-pointer',
-        'bg-white rounded-xl border border-neutral-200',
-        'hover:border-neutral-300 transition-colors duration-300',
+        'bg-white rounded-xl border border-gray-200/40',
+        'hover:border-gray-200/70 transition-colors duration-150',
         'overflow-hidden',
         'flex flex-col h-full',
         className
@@ -303,7 +303,7 @@ export function AdminVideoCard({
         <h3 className={clsx(
           'font-semibold text-neutral-900',
           'line-clamp-2 leading-tight text-sm',
-          'group-hover:text-primary transition-colors duration-200',
+          'group-hover:text-primary transition-colors duration-150',
           'flex-grow'
         )}>
           {video.title}
@@ -327,7 +327,7 @@ export function AdminVideoCard({
         )}
         
         {/* Action Area */}
-        <div className="flex items-center justify-between pt-2 border-t border-neutral-100 mt-auto">
+        <div className="flex items-center justify-between pt-2 border-t border-gray-200/40 mt-auto">
           <div className="flex flex-col gap-1">
             {video.created_at && (
               <span className="text-xs text-neutral-400">
@@ -346,7 +346,7 @@ export function AdminVideoCard({
                   'px-2 py-1 rounded text-xs font-medium',
                   'bg-neutral-100 text-neutral-700',
                   'hover:bg-neutral-200',
-                  'transition-colors duration-200',
+                  'transition-colors duration-150',
                   'focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-neutral-300/50'
                 )}
                 onClick={handleEditClick}
@@ -364,7 +364,7 @@ export function AdminVideoCard({
                   'px-2 py-1 rounded text-xs font-medium',
                   'bg-red-50 text-red-600',
                   'hover:bg-red-100',
-                  'transition-colors duration-200',
+                  'transition-colors duration-150',
                   'focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-300/50'
                 )}
                 onClick={handleDeleteClick}

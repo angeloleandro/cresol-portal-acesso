@@ -808,6 +808,42 @@ import { EmptyVideoCard } from '@/components/VideoGallery';
 - **Interactive States**: Hover effects, focus management, click handling
 - **Metadata Display**: Title, duration, upload type, file size formatting
 
+**Home Video Card (HomeVideoCard) - Updated Design Pattern**:
+
+```typescript
+// Clean video card for home page with standardized layout
+import HomeVideoCard from '@/components/VideoCard';
+
+<HomeVideoCard
+  video={videoData}
+  onClick={handleVideoClick}
+  priority={true}
+  className="w-full"
+/>
+```
+
+**Design Improvements (January 2025)**:
+- **✅ Consistent Height**: `min-h-[80px]` for card body and `min-h-[48px]` for footer ensuring uniform card heights
+- **✅ Title Truncation**: `line-clamp-2` implementation for titles preventing layout breaks
+- **✅ Simplified Badge System**: Only video type badges (YouTube/Vídeo), removed "Ativo" status indicator
+- **✅ Clean Interaction Design**: Removed ring/outline highlights for cleaner professional appearance
+- **✅ Flexible Layout**: `flex flex-col` with `flex-1` and `mt-auto` for optimal space distribution
+- **✅ Chakra UI Compliance**: Following Chakra UI Card patterns with proper spacing and typography hierarchy
+
+**Layout Structure**:
+```tsx
+// Card Body - Guaranteed minimum height with flexible title space
+<div className="p-4 space-y-2 min-h-[80px] flex flex-col">
+  <h3 className="line-clamp-2 flex-1">Title</h3>
+  <div className="mt-auto">Description</div>
+</div>
+
+// Card Footer - Consistent button placement
+<div className="px-4 pb-4 min-h-[48px] flex items-center justify-end">
+  <button>Assistir</button>
+</div>
+```
+
 #### 3.4 VideoGallery.Header
 
 **Header Components**: Multiple header variants for different contexts and information density.
@@ -3145,6 +3181,50 @@ priority: {
 - **Usage**: Container padrão para agrupamento visual
 - **WCAG**: AA compliant com contrast ratio ≥ 4.5:1
 
+#### Home Video Card Pattern
+**New standardized video card following Chakra UI structure** - Updated 2025
+
+```typescript
+// HomeVideoCard - Clean design adapted from Chakra UI pattern
+import HomeVideoCard from '@/components/VideoCard';
+
+<HomeVideoCard
+  video={videoData}
+  onClick={handleVideoClick}
+  priority={true}
+  className="w-full"
+/>
+```
+
+**Design Pattern Structure**:
+- **Card.Root**: Base container with standardized borders
+  - `bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70`
+  - `transition-colors duration-150`
+  - `max-w-sm w-full`
+
+- **Card.Image**: Aspect ratio video container with overlay effects
+  - `aspect-video w-full overflow-hidden bg-gray-100`
+  - Play button overlay with hover effects
+  - Video type badge (YouTube/Vídeo only)
+
+- **Card.Body**: Content area with consistent height management
+  - `p-4 space-y-2 min-h-[80px] flex flex-col`
+  - Title with `line-clamp-2` truncation
+  - Flexible layout with `flex-1`
+
+- **Card.Footer**: Action area with consistent height
+  - `px-4 pb-4 min-h-[48px] flex items-center justify-end`
+  - Primary action button with micro-interactions
+
+**Key Features**:
+- **Height Consistency**: Minimum heights prevent layout shifts
+- **Title Truncation**: Maximum 2 lines with `line-clamp-2`
+- **Clean Metadata**: No file size/technical details displayed
+- **Video Type Tags**: Only "YouTube" or "Vídeo" indicators
+- **Standardized Borders**: Follows project-wide border opacity pattern
+- **Accessibility**: ARIA labels, keyboard navigation, focus management
+- **Performance**: Optimized images with lazy loading and priority handling
+
 ### Input Component
 - **States**: default, focus, error, disabled
 - **Sizes**: sm, md, lg
@@ -3213,6 +3293,156 @@ const NotificationForm = () => (
   </Card>
 );
 ```
+
+### NewsCard Component System
+
+**Latest Implementation**: Standardized news cards following Chakra UI horizontal card pattern (January 2025)
+
+```typescript
+interface NewsItem {
+  id: string;
+  title: string;
+  summary: string;
+  image_url?: string;
+  created_at: string;
+  category: string;
+  is_featured?: boolean;
+}
+
+interface NewsCardProps {
+  news: NewsItem;
+  variant?: 'horizontal' | 'compact' | 'featured';
+  className?: string;
+  priority?: boolean;
+  showCategory?: boolean;
+  showDate?: boolean;
+  showImage?: boolean;
+}
+```
+
+**Component Variants**:
+
+#### 1. HorizontalNewsCard (Default)
+**Chakra UI Pattern**: Card.Root with horizontal flex layout equivalent
+
+```typescript
+// Usage
+import { NewsCard } from '@/components/NewsCard';
+
+<NewsCard 
+  news={newsItem}
+  variant="horizontal"
+  priority={true}
+  showCategory={true}
+  showDate={true}
+  showImage={true}
+/>
+```
+
+**Design Structure**:
+- **Card.Root**: `flex flex-col md:flex-row max-w-4xl`
+- **Image Section**: `md:w-1/3 h-56 md:h-auto relative overflow-hidden flex-shrink-0`
+- **Content Section**: `flex-1 flex flex-col`
+- **Card.Body**: `p-6 flex-1 flex flex-col`
+- **Card.Footer**: `px-6 pb-6` with "Leia mais" action
+
+#### 2. CompactNewsCard
+**Use Case**: Sidebar layouts and reduced space contexts
+
+```typescript
+<CompactNewsCard
+  news={newsItem}
+  showCategory={true}
+  showDate={true}
+/>
+```
+
+**Features**:
+- No image display for space efficiency
+- Single-line layout with metadata
+- Hover states with primary color transitions
+- Date and category display with separator
+
+#### 3. FeaturedNewsCard  
+**Use Case**: Hero sections and promotional content
+
+```typescript
+<FeaturedNewsCard
+  news={newsItem}
+  priority={true}
+  showCategory={true}
+  showDate={true}
+  showImage={true}
+/>
+```
+
+**Enhanced Features**:
+- Aspect-video image container
+- Overlay badge with glassmorphism effect
+- Shadow elevation on hover
+- Larger typography hierarchy
+
+**Chakra UI Adaptations Applied**:
+
+1. **Visual Consistency**: 
+   - `border-gray-200/40 hover:border-gray-200/70` pattern
+   - `transition-colors duration-150` for smooth interactions
+   - `rounded-xl overflow-hidden` for modern appearance
+
+2. **Layout Structure**:
+   - **HStack equivalent**: `flex items-center gap-2` for badges and metadata
+   - **Box equivalent**: Semantic content containers with proper flex behavior
+   - **Image equivalent**: Aspect ratio containers with fallback gradients
+
+3. **Content Organization**:
+   - **Card.Title**: `heading-4 text-title` with hover primary color transition
+   - **Card.Description**: `body-text text-body line-clamp-3` for consistent truncation
+   - **Badges**: Primary/category styling with border and background consistency
+
+4. **Responsive Design**:
+   - Mobile: Vertical stack with full-width images
+   - Desktop: Horizontal layout with 1/3 image, 2/3 content split
+   - Consistent spacing using established design tokens
+
+**Integration with NoticiasDestaque**:
+
+```typescript
+// Updated usage in NoticiasDestaque component
+import { NewsCard, CompactNewsCard } from './NewsCard';
+
+// Featured news (horizontal)
+<NewsCard
+  key={news.id}
+  news={news}
+  variant="horizontal"
+  priority={true}
+  showCategory={true}
+  showDate={true}
+  showImage={true}
+/>
+
+// Secondary news (compact)
+<CompactNewsCard
+  key={news.id}
+  news={news}
+  showCategory={true}
+  showDate={true}
+/>
+```
+
+**Key Design System Benefits**:
+- **Consistency**: Unified border, spacing, and typography patterns
+- **Accessibility**: WCAG 2.1 AA compliance with proper ARIA labels
+- **Performance**: Optimized image loading with Next.js Image component
+- **Maintainability**: Single source component system with variant support
+- **Professional Appearance**: Clean, enterprise-grade aesthetic
+- **Developer Experience**: TypeScript interfaces with comprehensive prop support
+
+**Asset Dependencies**:
+- **Images**: OptimizedImage component for performance
+- **Typography**: Established heading/body text classes from globals.css  
+- **Colors**: CSS custom properties for primary/secondary/muted colors
+- **Icons**: Arrow icon for "Leia mais" actions (inline SVG)
 
 ## Quality Gates
 

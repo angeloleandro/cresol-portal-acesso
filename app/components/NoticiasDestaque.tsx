@@ -3,16 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import OptimizedImage from './OptimizedImage';
-
-interface NewsItem {
-  id: string;
-  title: string;
-  summary: string;
-  image_url?: string;
-  created_at: string;
-  category: string;
-}
+import { NewsCard, CompactNewsCard, FeaturedNewsCard } from './NewsCard';
+import type { NewsItem } from './NewsCard';
 
 interface NoticiasDestaqueProps {
   compact?: boolean;
@@ -136,100 +128,39 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
         </div>
       ) : (
         <div className={compact ? "space-y-2" : "space-y-4"}>
-          {/* No modo compacto, mostrar apenas lista simples */}
+          {/* No modo compacto, usar CompactNewsCard */}
           {compact ? (
             featuredNews.map((news) => (
-              <Link 
-                key={news.id} 
-                href={`/noticias/${news.id}`}
-                className="block p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="body-text-bold text-title line-clamp-2 mb-1">
-                      {news.title}
-                    </h3>
-                    <p className="text-xs text-muted">
-                      {formatDate(news.created_at)}
-                    </p>
-                  </div>
-                  <span className="badge-text text-white ml-2" style={{ backgroundColor: 'var(--color-primary)', padding: '0.25rem 0.5rem', borderRadius: 'var(--border-radius-small)' }}>
-                    {news.category}
-                  </span>
-                </div>
-              </Link>
+              <CompactNewsCard
+                key={news.id}
+                news={news}
+                showCategory={true}
+                showDate={true}
+              />
             ))
           ) : (
             <>
-              {/* Mostrar a primeira notícia em destaque no formato horizontal */}
+              {/* Primeira notícia em formato horizontal (featured) */}
               {featuredNews.slice(0, 1).map((news) => (
-                <Link 
-                  key={news.id} 
-                  href={`/noticias/${news.id}`}
-                  className="block bg-gray-50 border border-gray-100 rounded-lg overflow-hidden hover: hover:border-gray-200 transition-all duration-200"
-                >
-                  <div className="flex flex-col md:flex-row">
-                    {news.image_url ? (
-                      <div className="md:w-1/3 h-56 md:h-auto relative overflow-hidden">
-                        <OptimizedImage
-                          src={news.image_url}
-                          alt={news.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </div>
-                    ) : (
-                      <div className="md:w-1/3 h-56 md:h-auto bg-gray-100 flex items-center justify-center">
-                        <span className="font-medium" style={{ color: '#F38332' }}>Cresol</span>
-                      </div>
-                    )}
-                    
-                    <div className="p-6 md:w-2/3">
-                      <div className="flex flex-col h-full">
-                        <div className="mb-auto">
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="badge-text text-white" style={{ backgroundColor: 'var(--color-primary)', padding: '0.25rem 0.625rem', borderRadius: 'var(--border-radius-full)' }}>
-                              {news.category}
-                            </span>
-                            <span className="text-xs text-muted">
-                              {formatDate(news.created_at)}
-                            </span>
-                          </div>
-                          <h3 className="heading-4 text-title mb-3 leading-tight">{news.title}</h3>
-                          <p className="body-text text-body mb-4 leading-relaxed">{news.summary}</p>
-                        </div>
-                        <div className="text-sm font-medium text-primary">
-                          Leia mais →
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                <NewsCard
+                  key={news.id}
+                  news={news}
+                  variant="horizontal"
+                  priority={true}
+                  showCategory={true}
+                  showDate={true}
+                  showImage={true}
+                />
               ))}
               
-              {/* Outras notícias em formato de cards menores */}
+              {/* Outras notícias em formato compacto */}
               {featuredNews.slice(1).map((news) => (
-                <Link 
-                  key={news.id} 
-                  href={`/noticias/${news.id}`}
-                  className="block bg-gray-50 border border-gray-100 rounded-lg p-4 hover: hover:border-gray-200 transition-all duration-200"
-                >
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="badge-text text-white" style={{ backgroundColor: 'var(--color-primary)', padding: '0.25rem 0.625rem', borderRadius: 'var(--border-radius-full)' }}>
-                          {news.category}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {formatDate(news.created_at)}
-                        </span>
-                      </div>
-                      <h3 className="heading-4 text-title mb-2 leading-tight">{news.title}</h3>
-                      <p className="body-text-small text-body line-clamp-2">{news.summary}</p>
-                    </div>
-                  </div>
-                </Link>
+                <CompactNewsCard
+                  key={news.id}
+                  news={news}
+                  showCategory={true}
+                  showDate={true}
+                />
               ))}
             </>
           )}

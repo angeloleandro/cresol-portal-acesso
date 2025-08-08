@@ -13,7 +13,7 @@ export const CompactStatsCard: React.FC<CompactStatsCardProps> = ({
   icon, 
   color = 'primary' 
 }) => (
-  <div className="bg-white rounded-lg border border-gray-200 p-3">
+  <div className="bg-white rounded-lg border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-3">
     <div className="flex items-center justify-between">
       <div>
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">

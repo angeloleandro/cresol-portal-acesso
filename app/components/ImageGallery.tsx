@@ -93,7 +93,7 @@ export default function ImageGallery({ limit = 6 }: ImageGalleryProps) {
           const maxLen = 35;
           const shortTitle = img.title && img.title.length > maxLen ? img.title.slice(0, maxLen) + '...' : img.title;
           return (
-            <div key={img.id} className="bg-gray-50 rounded-lg border border-gray-100 cursor-pointer hover:border-gray-200 transition-all duration-200 overflow-hidden group" onClick={() => handleOpenModal(img)}>
+            <div key={img.id} className="bg-white rounded-lg border border-gray-200/40 cursor-pointer hover:border-gray-200/70 transition-colors duration-150 overflow-hidden group" onClick={() => handleOpenModal(img)}>
               <div className="relative w-full aspect-[4/3] bg-gray-100">
                 <OptimizedImage 
                   src={img.image_url} 

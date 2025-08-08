@@ -83,21 +83,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             onClick={handleConfirm}
             disabled={isLoading || (requiresConfirmationInput && !isConfirmed)}
-            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors duration-200 min-h-[44px] inline-flex items-center justify-center font-medium"
-            style={{
-              backgroundColor: 'var(--color-error-text)',
-              borderRadius: 'var(--border-radius-medium)'
-            }}
-            onMouseEnter={(e) => {
-              if (!isLoading && (!requiresConfirmationInput || isConfirmed)) {
-                e.currentTarget.style.backgroundColor = '#B91C1C';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isLoading && (!requiresConfirmationInput || isConfirmed)) {
-                e.currentTarget.style.backgroundColor = 'var(--color-error-text)';
-              }
-            }}
+            className="bg-red-600 text-white px-4 py-2 rounded-md border border-red-600 hover:border-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors duration-150 min-h-[44px] inline-flex items-center justify-center font-medium"
           >
             {isLoading ? 'Excluindo...' : confirmButtonText}
           </button>

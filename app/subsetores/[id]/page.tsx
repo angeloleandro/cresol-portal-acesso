@@ -9,6 +9,7 @@ import Navbar from '../../components/Navbar';
 import SubsectorTeam from '../../components/SubsectorTeam';
 import { Icon } from '../../components/icons';
 import Breadcrumb from '../../components/Breadcrumb';
+import { HomeSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface Subsector {
   id: string;
@@ -176,15 +177,7 @@ export default function SubsectorDetailsPage() {
     return (
       <div className="min-h-screen bg-cresol-gray-light/30">
         <Navbar />
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-center" role="status" aria-live="polite">
-            <div 
-              className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"
-              aria-hidden="true"
-            />
-            <p className="mt-4 text-cresol-gray">Carregando informações do sub-setor...</p>
-          </div>
-        </div>
+        <HomeSpinner message="Carregando informações do sub-setor..." size="lg" />
       </div>
     );
   }

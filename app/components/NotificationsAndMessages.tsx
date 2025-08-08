@@ -185,8 +185,8 @@ export default function NotificationsAndMessages() {
             notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-3 rounded-lg border transition-colors hover:bg-gray-50 ${
-                  notification.is_read ? 'bg-white border-gray-200' : 'bg-blue-50 border-blue-200'
+                className={`p-3 rounded-lg border transition-colors duration-150 ${
+                  notification.is_read ? 'bg-white border-gray-200/40 hover:border-gray-200/70' : 'bg-blue-50 border-blue-200/40 hover:border-blue-200/70'
                 }`}
               >
                 <div className="flex items-start space-x-3">
@@ -220,8 +220,8 @@ export default function NotificationsAndMessages() {
             messages.map((message) => (
               <div
                 key={message.id}
-                className={`p-3 rounded-lg border transition-colors hover:bg-gray-50 cursor-pointer ${
-                  message.is_read ? 'bg-white border-gray-200' : 'bg-blue-50 border-blue-200'
+                className={`p-3 rounded-lg border transition-colors duration-150 cursor-pointer ${
+                  message.is_read ? 'bg-white border-gray-200/40 hover:border-gray-200/70' : 'bg-blue-50 border-blue-200/40 hover:border-blue-200/70'
                 }`}
               >
                 <div className="flex items-start space-x-3">

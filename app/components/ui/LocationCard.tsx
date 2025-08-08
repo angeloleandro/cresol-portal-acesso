@@ -35,7 +35,7 @@ export const LocationCard: React.FC<LocationCardProps> = ({
   };
   
   return (
-    <div className={`group hover:bg-gray-50 rounded-lg p-3 transition-colors duration-200 ${className}`}>
+    <div className={`group bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-lg p-3 transition-colors duration-150 ${className}`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-3 flex-1 min-w-0">
           <div className="flex items-center space-x-2">
@@ -60,13 +60,13 @@ export const LocationCard: React.FC<LocationCardProps> = ({
       {/* Progress Bar */}
       <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
         <div 
-          className={`h-full rounded-full transition-all duration-700 ease-out ${getColorByRank(rank)}`}
+          className={`h-full rounded-full ${getColorByRank(rank)}`}
           style={{ width: `${percentage}%` }}
         />
       </div>
       
       {/* Hover effect indicator */}
-      <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         <div className="text-xs text-gray-500 flex items-center justify-between">
           <span>#{rank + 1} posição</span>
           <span>{users} {users === 1 ? 'usuário' : 'usuários'}</span>
