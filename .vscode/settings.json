@@ -1,8 +1,42 @@
 {
-  "mcp.enabled": true,
-  "mcp.servers": {
-    "figma": {
-      "enabled": true
+  "github.copilot.chat.experimental.mcpServers": {
+    "github": {
+      "command": "cmd",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${env:GITHUB_TOKEN}"
+      }
+    },
+    "supabase-prisma-ia": {
+      "command": "cmd",
+      "args": [
+        "-y", 
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=eefkvznetuidmvnsuxhm",
+        "--access-token=${env:SUPABASE_ACCESS_TOKEN}"
+      ]
+    },
+    "supabase-thais-silva-terapeuta": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest", 
+        "--read-only",
+        "--project-ref=btszxihzugeppcvnykxk"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${env:SUPABASE_ACCESS_TOKEN}"
+      }
+    },
+    "supabase-cresol": {
+      "command": "cmd",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+  "--project-ref=taodkzafqgoparihaljx",
+  "--access-token=${env:SUPABASE_ACCESS_TOKEN_CRESOL}"
+      ]
     }
-  }
+  },
+  "chat.mcp.autostart": "newAndOutdated"
 }

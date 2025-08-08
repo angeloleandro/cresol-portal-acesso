@@ -18,6 +18,41 @@
   /* Cores Neutras Corporativas */
   --color-gray: #727176;
   --color-gray-light: #D0D0CE;
+  
+  /* Video System Colors */
+  --vs-primary: #F58220;
+  --vs-primary-hover: #E6750E;
+  --vs-primary-active: #D85F00;
+  --vs-success: #10B981;
+  --vs-error: #EF4444;
+  --vs-warning: #F59E0B;
+  --vs-info: #3B82F6;
+  
+  /* Video System Spacing */
+  --vs-space-xs: 0.5rem;
+  --vs-space-sm: 0.75rem;
+  --vs-space-md: 1rem;
+  --vs-space-lg: 1.5rem;
+  --vs-space-xl: 2rem;
+  
+  /* Video System Typography */
+  --vs-font-heading: 'Inter', 'ui-sans-serif', 'system-ui', sans-serif;
+  --vs-font-body: 'Inter', 'ui-sans-serif', 'system-ui', sans-serif;
+  
+  /* Video System Borders */
+  --vs-border-radius-sm: 0.375rem;
+  --vs-border-radius-md: 0.5rem;
+  --vs-border-radius-lg: 0.75rem;
+  
+  /* Video System Shadows */
+  --vs-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --vs-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --vs-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Video System Transitions */
+  --vs-transition-fast: 150ms ease-out;
+  --vs-transition-normal: 200ms ease-out;
+  --vs-transition-slow: 300ms ease-out;
   --color-gray-dark: #4A4A4A;
   --color-title: #616160; /* Cor específica para títulos */
   --color-white: #FFFFFF;

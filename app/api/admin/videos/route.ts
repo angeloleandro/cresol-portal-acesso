@@ -1,65 +1,140 @@
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
+  console.log('📝 [VIDEO_POST_API] Iniciando criação de vídeo');
+  
   try {
+    // Criar cliente do Supabase com a chave de serviço
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    console.log('🔧 [VIDEO_POST_API] Configuração:', { 
+      supabaseUrl: !!supabaseUrl, 
+      serviceKey: !!serviceKey 
+    });
+    
+    if (!supabaseUrl || !serviceKey) {
+      console.error('❌ [VIDEO_POST_API] Configuração do servidor incompleta');
+      return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false }
+    });
+
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
     
+    console.log('🔐 [VIDEO_POST_API] Token extraído:', !!token);
+    
     if (!token) {
+      console.error('❌ [VIDEO_POST_API] Token de autorização não encontrado');
       return NextResponse.json({ error: 'Token de autorização não encontrado' }, { status: 401 });
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    console.log('👤 [VIDEO_POST_API] Validando usuário...');
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    console.log('👤 [VIDEO_POST_API] Usuário encontrado:', !!user);
+    console.log('❌ [VIDEO_POST_API] Erro de autenticação:', authError?.message || 'NENHUM');
+    
     if (authError || !user) {
+      console.error('❌ [VIDEO_POST_API] Não autorizado - erro de usuário');
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { data: profile, error: profileError } = await supabase
+    console.log('🔍 [VIDEO_POST_API] Buscando perfil do usuário:', user.id);
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    if (profileError || profile?.role !== 'admin') {
+    console.log('👤 [VIDEO_POST_API] Perfil encontrado:', !!profile);
+    console.log('🎭 [VIDEO_POST_API] Role do usuário:', profile?.role);
+    console.log('❌ [VIDEO_POST_API] Erro de perfil:', profileError?.message || 'NENHUM');
+
+    if (profileError || !['admin', 'sector_admin'].includes(profile?.role)) {
+      console.error('❌ [VIDEO_POST_API] Acesso negado - sem privilégios');
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
-    const { title, video_url, thumbnail_url, is_active, order_index, upload_type } = await request.json();
+    console.log('📥 [VIDEO_POST_API] Processando dados do body...');
+    const requestBody = await request.json();
+    const { title, video_url, thumbnail_url, is_active, order_index, upload_type } = requestBody;
+    
+    console.log('📋 [VIDEO_POST_API] Dados recebidos:', { 
+      title, 
+      video_url, 
+      thumbnail_url: !!thumbnail_url, 
+      is_active, 
+      order_index, 
+      upload_type 
+    });
 
+    console.log('✅ [VIDEO_POST_API] Validando dados obrigatórios...');
     if (!title || !video_url) {
+      console.error('❌ [VIDEO_POST_API] Dados obrigatórios ausentes:', { title: !!title, video_url: !!video_url });
       return NextResponse.json({ error: 'Título e URL são obrigatórios' }, { status: 400 });
     }
 
-    const { data: newVideo, error: insertError } = await supabase
+    console.log('💾 [VIDEO_POST_API] Inserindo vídeo no banco...');
+    const insertData = { 
+      title, 
+      video_url, 
+      thumbnail_url, 
+      is_active: is_active ?? true, 
+      order_index: order_index ?? 0, 
+      upload_type: upload_type || 'youtube'
+    };
+    
+    console.log('📊 [VIDEO_POST_API] Dados para inserção:', insertData);
+    
+    const { data: newVideo, error: insertError } = await supabaseAdmin
       .from('dashboard_videos')
-      .insert([{ 
-        title, 
-        video_url, 
-        thumbnail_url, 
-        is_active: is_active ?? true, 
-        order_index: order_index ?? 0, 
-        upload_type: upload_type || 'youtube'
-      }])
+      .insert([insertData])
       .select()
       .single();
 
+    console.log('✅ [VIDEO_POST_API] Vídeo inserido:', !!newVideo);
+    console.log('❌ [VIDEO_POST_API] Erro de inserção:', insertError?.message || 'NENHUM');
+    console.log('📊 [VIDEO_POST_API] Código do erro:', insertError?.code || 'NENHUM');
+    console.log('📋 [VIDEO_POST_API] Detalhes do erro:', insertError?.details || 'NENHUM');
+
     if (insertError) {
-      return NextResponse.json({ error: 'Erro ao criar vídeo' }, { status: 500 });
+      console.error('💥 [VIDEO_POST_API] Falha na inserção:', insertError);
+      return NextResponse.json({ error: `Erro ao criar vídeo: ${insertError.message}` }, { status: 500 });
     }
 
+    console.log('🎉 [VIDEO_POST_API] Vídeo criado com sucesso:', newVideo?.id);
     return NextResponse.json({ 
       message: 'Vídeo criado com sucesso', 
       video: newVideo 
     });
 
   } catch (error) {
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    console.error('💥 [VIDEO_POST_API] Erro interno do servidor:', error);
+    console.error('💥 [VIDEO_POST_API] Stack trace:', error instanceof Error ? error.stack : 'Não disponível');
+    return NextResponse.json({ 
+      error: `Erro interno do servidor: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    }, { status: 500 });
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
+    // Criar cliente do Supabase com a chave de serviço
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !serviceKey) {
+      return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false }
+    });
+
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
     
@@ -67,18 +142,18 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Token de autorização não encontrado' }, { status: 401 });
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    if (profileError || profile?.role !== 'admin') {
+    if (profileError || !['admin', 'sector_admin'].includes(profile?.role)) {
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
@@ -95,7 +170,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Validate that video exists before updating
-    const { data: existingVideo, error: fetchError } = await supabase
+    const { data: existingVideo, error: fetchError } = await supabaseAdmin
       .from('dashboard_videos')
       .select('id')
       .eq('id', id)
@@ -125,7 +200,7 @@ export async function PUT(request: NextRequest) {
       updateData.upload_type = upload_type;
     }
 
-    const { data: updatedVideo, error: updateError } = await supabase
+    const { data: updatedVideo, error: updateError } = await supabaseAdmin
       .from('dashboard_videos')
       .update(updateData)
       .eq('id', id)
@@ -159,6 +234,19 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
+    // Criar cliente do Supabase com a chave de serviço
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !serviceKey) {
+      return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false }
+    });
+
+    // Get auth token from header - consistent with POST/PUT methods
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
     
@@ -166,77 +254,81 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Token de autorização não encontrado' }, { status: 401 });
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { data: profile, error: profileError } = await supabase
+    // Check if user is admin - following gallery/banners pattern
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    if (profileError || profile?.role !== 'admin') {
+    if (profileError || !['admin', 'sector_admin'].includes(profile?.role)) {
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
-    const { data: video, error: fetchError } = await supabase
+    // Get video details before deletion - following gallery/banners pattern
+    const { data: video, error: fetchError } = await supabaseAdmin
       .from('dashboard_videos')
       .select('*')
       .eq('id', id)
       .single();
 
     if (fetchError) {
-      if (fetchError.code === 'PGRST116' || fetchError.message?.includes('No rows returned')) {
-        return NextResponse.json({ message: 'Vídeo já foi excluído anteriormente' });
-      }
-      return NextResponse.json({ error: 'Erro ao buscar vídeo' }, { status: 500 });
+      return NextResponse.json({ error: 'Vídeo não encontrado' }, { status: 404 });
     }
 
-
+    // Clean up associated files if needed
     if (video.upload_type === 'direct' && video.file_path) {
-      const { error: videoDeleteError } = await supabase.storage
+      const { error: fileDeleteError } = await supabaseAdmin.storage
         .from('videos')
         .remove([video.file_path]);
       
-      // Silently handle storage errors
-      
-      const { data: tempFiles } = await supabase.storage
-        .from('videos')
-        .list('temp', {
-          search: id
-        });
+      if (fileDeleteError) {
+        console.error('Erro ao remover arquivo de vídeo:', fileDeleteError);
+        // Continue with deletion even if file removal fails
+      }
 
+      // Clean up temporary files
+      const { data: tempFiles } = await supabaseAdmin.storage
+        .from('videos')
+        .list('temp', { search: video.id });
+      
       if (tempFiles && tempFiles.length > 0) {
-        const tempPaths = tempFiles.map(file => `temp/${file.name}`);
-        await supabase.storage
-          .from('videos')
-          .remove(tempPaths);
+        const tempPaths = tempFiles.map((file: any) => `temp/${file.name}`);
+        await supabaseAdmin.storage.from('videos').remove(tempPaths);
       }
     }
 
+    // Clean up thumbnail if stored in Supabase
     if (video.thumbnail_url && video.thumbnail_url.includes('supabase')) {
       const thumbnailPath = video.thumbnail_url.split('/').pop();
       if (thumbnailPath) {
-        await supabase.storage
-          .from('banners')
-          .remove([thumbnailPath]);
+        const { error: thumbnailDeleteError } = await supabaseAdmin.storage.from('banners').remove([thumbnailPath]);
+        if (thumbnailDeleteError) {
+          console.error('Erro ao remover thumbnail:', thumbnailDeleteError);
+        }
       }
     }
 
-    const { error: deleteError } = await supabase
+    // Delete the video record - following gallery/banners pattern
+    const { error: deleteError } = await supabaseAdmin
       .from('dashboard_videos')
       .delete()
       .eq('id', id);
 
     if (deleteError) {
+      console.error('Erro ao excluir vídeo:', deleteError);
       return NextResponse.json({ error: 'Erro ao excluir vídeo' }, { status: 500 });
     }
 
     return NextResponse.json({ message: 'Vídeo excluído com sucesso' });
 
   } catch (error) {
+    console.error('Erro interno:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }

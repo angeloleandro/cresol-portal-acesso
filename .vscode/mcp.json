@@ -1,0 +1,118 @@
+{
+  "inputs": [
+    {
+      "id": "figma_api_key",
+      "description": "Figma API key for design integration",
+      "type": "promptString",
+      "password": true
+    },
+    {
+      "id": "github_token", 
+      "description": "GitHub personal access token",
+      "type": "promptString",
+      "password": true
+    }
+  ],
+  "servers": {
+    "supabase-cresol": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server",
+        "--stdio"
+      ],
+      "env": {
+        "SUPABASE_URL": "https://taodkzafqgoparihaljx.supabase.co",
+        "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhb2RremFmcWdvcGFyaWhhbGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MzEyNTEsImV4cCI6MjA2MTUwNzI1MX0.J8O2DoHLLz5qTRktXbcnVqhL5KtkVML28w1XyM827CY",
+        "SUPABASE_SERVICE_ROLE_KEY": "${env:SUPABASE_SERVICE_ROLE_KEY}"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp-server"
+      ],
+      "env": {}
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@mcp/server-filesystem",
+        "/home/angel/projetos/cresol-portal-acesso"
+      ],
+      "env": {}
+    },
+    "figma": {
+      "type": "stdio", 
+      "command": "npx",
+      "args": [
+        "-y",
+        "figma-developer-mcp"
+      ],
+      "env": {
+        "FIGMA_API_KEY": "${input:figma_api_key}"
+      }
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx", 
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "${input:github_token}"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y", 
+        "@context7/mcp-server"
+      ],
+      "env": {}
+    },
+    "magic-ui": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@magic-ui/mcp-server"
+      ],
+      "env": {}
+    },
+    "memory": {
+      "type": "stdio", 
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-memory-server"
+      ],
+      "env": {}
+    },
+    "mui": {
+      "type": "stdio",
+      "command": "npx", 
+      "args": [
+        "-y",
+        "@mui/mcp-server"
+      ],
+      "env": {}
+    },
+    "chakra-ui": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y", 
+        "@chakra-ui/mcp-server"
+      ],
+      "env": {}
+    }
+  }
+}

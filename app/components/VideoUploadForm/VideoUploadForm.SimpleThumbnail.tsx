@@ -1,0 +1,275 @@
+/**
+ * VideoUploadForm Simple Thumbnail Component
+ * Redesigned for minimal complexity and clear user flow
+ */
+
+import { memo, useCallback, useState, useRef } from 'react'
+import { ThumbnailConfigProps } from './VideoUploadForm.types'
+import { Icon } from '../icons/Icon'
+
+// YouTube thumbnail helper
+function getYouTubeThumbnail(url: string): string | null {
+  if (!url) return null
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null
+}
+
+export const VideoUploadFormSimpleThumbnail = memo(({ 
+  mode,
+  onModeChange,
+  uploadType,
+  videoUrl,
+  thumbnailFile,
+  onThumbnailSelect,
+  thumbnailPreview,
+  disabled = false
+}: ThumbnailConfigProps) => {
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [dragActive, setDragActive] = useState(false)
+  
+  const handleModeChange = useCallback((newMode: 'auto' | 'custom' | 'none') => {
+    if (!disabled) {
+      onModeChange(newMode)
+    }
+  }, [disabled, onModeChange])
+  
+  const handleFileSelect = useCallback((file: File) => {
+    if (file && !disabled) {
+      onThumbnailSelect(file)
+      if (mode !== 'custom') {
+        onModeChange('custom')
+      }
+    }
+  }, [disabled, onThumbnailSelect, mode, onModeChange])
+  
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleFileSelect(file)
+    }
+  }, [handleFileSelect])
+  
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setDragActive(false)
+    
+    const file = e.dataTransfer.files?.[0]
+    if (file && file.type.startsWith('image/')) {
+      handleFileSelect(file)
+    }
+  }, [handleFileSelect])
+  
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setDragActive(true)
+  }, [])
+  
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setDragActive(false)
+  }, [])
+  
+  const openFileDialog = useCallback(() => {
+    if (!disabled && fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }, [disabled])
+
+  // Auto thumbnail URL for display
+  const autoThumbnailUrl = uploadType === 'youtube' && videoUrl 
+    ? getYouTubeThumbnail(videoUrl)
+    : null
+
+  return (
+    <div className="space-y-4">
+      {/* Mode Selection - Simplified Pills */}
+      <div>
+        <label className="block text-sm font-medium text-neutral-700 mb-3">
+          Thumbnail do Vídeo
+        </label>
+        
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => handleModeChange('auto')}
+            disabled={disabled}
+            className={`
+              px-4 py-2 rounded-full text-sm font-medium border transition-all
+              ${mode === 'auto'
+                ? 'bg-primary text-white border-primary shadow-sm'
+                : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+              }
+            `}
+          >
+            Automática
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => handleModeChange('custom')}
+            disabled={disabled}
+            className={`
+              px-4 py-2 rounded-full text-sm font-medium border transition-all
+              ${mode === 'custom'
+                ? 'bg-primary text-white border-primary shadow-sm'
+                : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+              }
+            `}
+          >
+            Personalizada
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => handleModeChange('none')}
+            disabled={disabled}
+            className={`
+              px-4 py-2 rounded-full text-sm font-medium border transition-all
+              ${mode === 'none'
+                ? 'bg-neutral-600 text-white border-neutral-600 shadow-sm'
+                : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+              }
+            `}
+          >
+            Sem imagem
+          </button>
+        </div>
+      </div>
+
+      {/* Thumbnail Preview/Upload Area */}
+      {mode === 'custom' && (
+        <div className="space-y-4">
+          {/* Upload Area */}
+          <div
+            className={`
+              relative border-2 border-dashed rounded-xl p-8 text-center transition-all
+              ${dragActive 
+                ? 'border-primary bg-primary/5 scale-[1.02]' 
+                : 'border-neutral-300 bg-neutral-50 hover:border-neutral-400'
+              }
+            `}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={disabled}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+            
+            <div className="space-y-4">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto">
+                <Icon name="photo" className="w-8 h-8 text-neutral-400" />
+              </div>
+              
+              <div>
+                <p className="text-base font-medium text-neutral-700 mb-1">
+                  Clique ou arraste uma imagem
+                </p>
+                <p className="text-sm text-neutral-500">
+                  PNG, JPG até 5MB • Recomendado: 1280×720px
+                </p>
+              </div>
+              
+              <button
+                type="button"
+                onClick={openFileDialog}
+                disabled={disabled}
+                className="
+                  px-6 py-2 bg-white border border-neutral-300 rounded-lg 
+                  text-sm font-medium text-neutral-700 
+                  hover:bg-neutral-50 hover:border-neutral-400 
+                  focus:outline-none focus:ring-2 focus:ring-primary/20
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-all
+                "
+              >
+                Selecionar Arquivo
+              </button>
+            </div>
+          </div>
+
+          {/* Custom Thumbnail Preview */}
+          {thumbnailPreview && (
+            <div className="space-y-3">
+              <div className="relative w-full aspect-video bg-neutral-100 rounded-lg overflow-hidden">
+                <img
+                  src={thumbnailPreview}
+                  alt="Preview da thumbnail"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <button
+                  type="button"
+                  onClick={openFileDialog}
+                  disabled={disabled}
+                  className="
+                    absolute top-3 right-3 w-8 h-8 bg-black/50 hover:bg-black/70 
+                    text-white rounded-full flex items-center justify-center
+                    transition-colors
+                  "
+                  title="Alterar imagem"
+                >
+                  <Icon name="pencil" className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-between text-xs text-neutral-500 bg-neutral-50 px-3 py-2 rounded-lg">
+                <span>✓ Imagem carregada com sucesso</span>
+                <button
+                  type="button"
+                  onClick={openFileDialog}
+                  disabled={disabled}
+                  className="text-primary hover:text-primary/80 font-medium"
+                >
+                  Alterar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Auto Thumbnail Preview */}
+      {mode === 'auto' && autoThumbnailUrl && (
+        <div className="space-y-3">
+          <div className="relative w-full aspect-video bg-neutral-100 rounded-lg overflow-hidden">
+            <img
+              src={autoThumbnailUrl}
+              alt="Thumbnail automática do YouTube"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            <div className="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+              <Icon name="play" className="w-3 h-3" />
+              YouTube
+            </div>
+          </div>
+          
+          <div className="text-xs text-neutral-500 bg-neutral-50 px-3 py-2 rounded-lg">
+            ✓ Usando thumbnail oficial do YouTube
+          </div>
+        </div>
+      )}
+
+      {/* No Thumbnail State */}
+      {mode === 'none' && (
+        <div className="py-8 text-center">
+          <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Icon name="x" className="w-8 h-8 text-neutral-400" />
+          </div>
+          <p className="text-sm text-neutral-500">
+            Nenhuma thumbnail será exibida para este vídeo
+          </p>
+        </div>
+      )}
+    </div>
+  )
+})
+
+VideoUploadFormSimpleThumbnail.displayName = 'VideoUploadFormSimpleThumbnail'

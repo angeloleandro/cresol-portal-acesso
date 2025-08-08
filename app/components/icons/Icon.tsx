@@ -3,9 +3,11 @@ import React from 'react';
 import {
   ArrowLeftIcon,
   ArrowDownIcon,
+  ArrowRightIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   ChevronRightIcon,
+  ChevronLeftIcon,
   HomeIcon,
   Bars3Icon,
   XMarkIcon,
@@ -35,6 +37,7 @@ import {
   PhotoIcon,
   VideoCameraIcon,
   PlayIcon,
+  PauseIcon,
   ComputerDesktopIcon,
   TvIcon,
   FolderIcon,
@@ -56,10 +59,17 @@ import {
   EyeSlashIcon,
   LinkIcon,
   BriefcaseIcon,
+  DocumentIcon,
+  SpeakerWaveIcon,
+  SpeakerXMarkIcon,
+  FilmIcon,
+  WrenchScrewdriverIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/outline';
 
 export type IconName =
   | 'arrow-left'
+  | 'arrow-right'
   | 'user-add'
   | 'user'
   | 'building-1'
@@ -105,6 +115,7 @@ export type IconName =
   | 'arrow-down'
   | 'menu'
   | 'play'
+  | 'pause'
   | 'sort'
   | 'trending-up'
   | 'trending-down'
@@ -113,10 +124,22 @@ export type IconName =
   | 'house'
   | 'chevron-down'
   | 'chevron-up'
+  | 'chevron-left'
   | 'x'
   | 'refresh'
+  | 'refresh-cw'
   | 'download'
   | 'chevron-right'
+  | 'file'
+  | 'volume-1'
+  | 'volume-2'
+  | 'volume-x'
+  | 'video-off'
+  | 'alert-circle'
+  | 'check-circle'
+  | 'info'
+  | 'tool'
+  | 'lock'
   // Form icons
   | 'Loader'
   | 'AlertTriangle'
@@ -159,10 +182,12 @@ const LoaderIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   // Navigation & Interface
   'arrow-left': ArrowLeftIcon,
+  'arrow-right': ArrowRightIcon,
   'arrow-down': ArrowDownIcon,
   'chevron-down': ChevronDownIcon,
   'chevron-up': ChevronUpIcon,
   'chevron-right': ChevronRightIcon,
+  'chevron-left': ChevronLeftIcon,
   'house': HomeIcon,
   'menu': Bars3Icon,
   'close': XMarkIcon,
@@ -207,10 +232,16 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   'image': PhotoIcon,
   'video': VideoCameraIcon,
   'play': PlayIcon,
+  'pause': PauseIcon,
   'monitor': ComputerDesktopIcon,
   'monitor-play': TvIcon,
   'folder': FolderIcon,
   'folder-plus': FolderPlusIcon,
+  'file': DocumentIcon,
+  'volume-1': SpeakerWaveIcon,
+  'volume-2': SpeakerWaveIcon,
+  'volume-x': SpeakerXMarkIcon,
+  'video-off': FilmIcon,
 
   // Data & Time
   'calendar': CalendarIcon,
@@ -230,15 +261,21 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
 
   // Status & Feedback
   'CheckCircle': CheckCircleIcon,
+  'check-circle': CheckCircleIcon,
   'triangle-alert': ExclamationTriangleIcon,
   'AlertTriangle': ExclamationTriangleIcon,
+  'alert-circle': ExclamationTriangleIcon,
   'Info': InformationCircleIcon,
+  'info': InformationCircleIcon,
   'Eye': EyeIcon,
   'EyeOff': EyeSlashIcon,
 
   // Utilities & Loading
   'link': LinkIcon,
   'Loader': LoaderIcon,
+  'refresh-cw': ArrowPathIcon,
+  'tool': WrenchScrewdriverIcon,
+  'lock': LockClosedIcon,
 
   // Specific System Icons
   'suitcase': BriefcaseIcon,

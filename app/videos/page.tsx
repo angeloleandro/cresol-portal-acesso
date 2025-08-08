@@ -1,35 +1,33 @@
+/**
+ * Videos Gallery Page - Modernized Version
+ * Enterprise-grade video gallery with modern UI/UX patterns
+ * WCAG 2.1 AA compliant with Cresol branding
+ */
+
 "use client";
 
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Breadcrumb from "../components/Breadcrumb";
-import { useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
-import OptimizedImage from "../components/OptimizedImage";
-import { Icon } from "../components/icons/Icon";
-
-interface DashboardVideo {
-  id: string;
-  title: string;
-  video_url: string;
-  thumbnail_url: string | null;
-  is_active: boolean;
-  order_index: number;
-  upload_type: 'youtube' | 'vimeo' | 'direct';
-  file_path?: string | null;
-  file_size?: number | null;
-  mime_type?: string | null;
-  original_filename?: string | null;
-  processing_status?: string;
-  upload_progress?: number;
-}
+import { VideoGalleryHeader, AdvancedVideoGalleryHeader } from "../components/VideoGallery/VideoGallery.Header";
+import { VideoGalleryGrid } from "../components/VideoGallery/VideoGallery.Grid";
+import { VideoModal } from "../components/VideoGallery/VideoGallery.Modal";
+import { VideoGalleryEmptyState } from "../components/VideoGallery/VideoGallery.EmptyState";
+import { EnhancedVideoCard } from "../components/VideoGallery/VideoGallery.Card";
+import { DashboardVideo, VideoFilters } from "../types/video";
+import clsx from "clsx";
 
 export default function VideosPage() {
   const [videos, setVideos] = useState<DashboardVideo[]>([]);
+  const [filteredVideos, setFilteredVideos] = useState<DashboardVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<DashboardVideo | null>(null);
-  const [videoError, setVideoError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<VideoFilters>({ search: '', type: 'all' });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Só executar no lado do cliente
@@ -37,11 +35,14 @@ export default function VideosPage() {
     
     const fetchVideos = async () => {
       try {
-        const { data } = await getSupabaseClient()
+        setError(null);
+        const { data, error: fetchError } = await getSupabaseClient()
           .from("dashboard_videos")
           .select("*")
           .eq("is_active", true)
           .order("order_index", { ascending: true });
+        
+        if (fetchError) throw fetchError;
         
         // Filter to only show ready videos
         const readyVideos = (data || []).filter(video => {
@@ -51,9 +52,12 @@ export default function VideosPage() {
           }
           return false; // Filter out vimeo videos
         });
+        
         setVideos(readyVideos);
-      } catch (error) {
+        setFilteredVideos(readyVideos);
+      } catch (error: any) {
         console.error('Erro ao buscar vídeos:', error);
+        setError(error.message || 'Erro ao carregar vídeos');
       } finally {
         setLoading(false);
       }
@@ -61,226 +65,220 @@ export default function VideosPage() {
     fetchVideos();
   }, []);
 
+  // Filter videos based on search and type
+  useEffect(() => {
+    let filtered = [...videos];
+    
+    // Apply search filter
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      filtered = filtered.filter(video => 
+        video.title.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Apply type filter
+    if (filters.type !== 'all') {
+      filtered = filtered.filter(video => video.upload_type === filters.type);
+    }
+    
+    setFilteredVideos(filtered);
+  }, [videos, filters]);
+
   const handleOpenModal = (video: DashboardVideo) => {
     setSelectedVideo(video);
     setModalOpen(true);
-    setVideoError(null);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedVideo(null);
-    setVideoError(null);
   };
 
-  const handleVideoError = () => {
-    setVideoError('Erro ao carregar o vídeo. Tente novamente mais tarde.');
+  const handleSearch = (query: string) => {
+    setFilters(prev => ({ ...prev, search: query }));
   };
 
-  // Helper function to get YouTube embed URL
-  const getYouTubeEmbedUrl = (url: string): string => {
-    if (url.includes('embed/')) return url;
-    
-    const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-    if (videoIdMatch) {
-      return `https://www.youtube.com/embed/${videoIdMatch[1]}`;
-    }
-    
-    return url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/');
+  const handleTypeFilter = (type: VideoFilters['type']) => {
+    setFilters(prev => ({ ...prev, type }));
   };
+
+  // Statistics for header
+  const videoStats = {
+    total: videos.length,
+    youtube: videos.filter(v => v.upload_type === 'youtube').length,
+    direct: videos.filter(v => v.upload_type === 'direct').length
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-50">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8 max-w-7xl">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-16 space-y-4"
+          >
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-neutral-600 text-sm">Carregando vídeos...</p>
+          </motion.div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Filter components
+  const TypeFilterButton = ({ type, label, count }: { 
+    type: VideoFilters['type']; 
+    label: string; 
+    count: number; 
+  }) => (
+    <button
+      onClick={() => handleTypeFilter(type)}
+      className={clsx(
+        'px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200',
+        'border border-transparent',
+        'focus:outline-none focus:ring-2 focus:ring-primary/20',
+        filters.type === type
+          ? 'bg-primary text-white shadow-sm'
+          : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+      )}
+      aria-pressed={filters.type === type}
+    >
+      {label} ({count})
+    </button>
+  );
+
+  const FilterSection = () => (
+    <div className="flex flex-wrap gap-2">
+      <TypeFilterButton type="all" label="Todos" count={videoStats.total} />
+      <TypeFilterButton type="youtube" label="YouTube" count={videoStats.youtube} />
+      <TypeFilterButton type="direct" label="Diretos" count={videoStats.direct} />
+    </div>
+  );
+
+  // Error state component
+  const ErrorState = () => (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-center py-12 px-4"
+      role="alert"
+    >
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+        <h3 className="text-lg font-semibold text-red-800 mb-2">Erro ao carregar vídeos</h3>
+        <p className="text-red-600 text-sm mb-4">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm"
+        >
+          Tentar novamente
+        </button>
+      </div>
+    </motion.div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-50">
       <Navbar />
-      <main className="container py-8">
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Breadcrumb */}
-        <div className="mb-6">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
           <Breadcrumb 
             items={[
               { label: 'Home', href: '/home', icon: 'house' },
               { label: 'Vídeos' }
             ]} 
           />
-        </div>
+        </motion.div>
 
-        <div className="mb-8">
-          <h1 className="heading-1 text-title mb-2">Galeria de Vídeos</h1>
-          <p className="body-text text-muted">Assista aos vídeos institucionais e de treinamento da Cresol.</p>
-        </div>
+        {/* Header with Search and Filters */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <AdvancedVideoGalleryHeader
+            title="Galeria de Vídeos"
+            subtitle="Assista aos vídeos institucionais e de treinamento da Cresol"
+            videoCount={filteredVideos.length}
+            showSeeAll={false}
+            showSearch={true}
+            onSearch={handleSearch}
+            searchQuery={filters.search}
+            filters={<FilterSection />}
+          />
+        </motion.div>
 
-        <div className="card">
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="loading-spinner mx-auto"></div>
-              <p className="mt-4 body-text text-muted">Carregando vídeos...</p>
-            </div>
-          ) : videos.length === 0 ? (
-            <div className="text-center py-12">
-              <Icon name="video" className="mx-auto h-16 w-16 text-muted mb-4" />
-              <h3 className="heading-3 text-title mb-2">Nenhum vídeo encontrado</h3>
-              <p className="body-text text-muted">A galeria de vídeos ainda não possui conteúdo disponível.</p>
-            </div>
+        {/* Content Area */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className={clsx(
+            'bg-white rounded-xl shadow-sm border border-neutral-200',
+            'overflow-hidden min-h-[400px]'
+          )}
+        >
+          {error ? (
+            <ErrorState />
+          ) : filteredVideos.length === 0 ? (
+            <VideoGalleryEmptyState 
+              title={filters.search || filters.type !== 'all' 
+                ? "Nenhum vídeo encontrado" 
+                : "Galeria vazia"
+              }
+              message={filters.search || filters.type !== 'all'
+                ? "Tente ajustar os filtros para encontrar vídeos."
+                : "A galeria de vídeos ainda não possui conteúdo disponível."
+              }
+            />
           ) : (
-            <div className="grid-responsive">
-              {videos.map((video) => (
-                <div key={video.id} className="w-full">
-                  <VideoCard video={video} onClick={handleOpenModal} />
-                </div>
-              ))}
+            <div className="p-6">
+              <VideoGalleryGrid
+                videoCount={filteredVideos.length}
+                enableAnimations={true}
+              >
+                {filteredVideos.map((video, index) => (
+                  <motion.div
+                    key={video.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <EnhancedVideoCard 
+                      video={video} 
+                      onClick={handleOpenModal}
+                      index={index}
+                    />
+                  </motion.div>
+                ))}
+              </VideoGalleryGrid>
             </div>
           )}
-        </div>
+        </motion.div>
 
-        {/* Modal Unificado para YouTube e Upload Direto */}
-        {modalOpen && selectedVideo && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-white rounded-lg border border-gray-300 max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
-              {/* Cabeçalho do modal */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <div className="flex-1 min-w-0">
-                  <h3 className="heading-4 text-title truncate">{selectedVideo.title}</h3>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      selectedVideo.upload_type === 'direct' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {selectedVideo.upload_type === 'direct' ? '🎥 Upload Direto' : '📺 YouTube'}
-                    </span>
-                    {selectedVideo.upload_type === 'direct' && selectedVideo.file_size && (
-                      <span className="text-xs text-gray-500">
-                        {(selectedVideo.file_size / (1024 * 1024)).toFixed(1)} MB
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <button
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors ml-4 flex-shrink-0"
-                  onClick={handleCloseModal}
-                  aria-label="Fechar"
-                >
-                  <Icon name="close" className="h-6 w-6 text-muted" />
-                </button>
-              </div>
-              
-              {/* Conteúdo do modal */}
-              <div className="aspect-video w-full bg-black">
-                {videoError ? (
-                  <div className="flex items-center justify-center h-full text-white">
-                    <div className="text-center">
-                      <Icon name="AlertTriangle" className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <p className="text-sm">{videoError}</p>
-                    </div>
-                  </div>
-                ) : selectedVideo.upload_type === 'youtube' ? (
-                  <iframe
-                    src={getYouTubeEmbedUrl(selectedVideo.video_url)}
-                    title={selectedVideo.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full min-h-[360px]"
-                    onError={handleVideoError}
-                  />
-                ) : selectedVideo.upload_type === 'direct' ? (
-                  <video
-                    controls
-                    className="w-full h-full min-h-[360px]"
-                    poster={selectedVideo.thumbnail_url || undefined}
-                    onError={handleVideoError}
-                    preload="metadata"
-                  >
-                    <source src={selectedVideo.video_url} type={selectedVideo.mime_type || 'video/mp4'} />
-                    <p className="text-white p-4">
-                      Seu navegador não suporta reprodução de vídeo. 
-                      <a href={selectedVideo.video_url} className="underline ml-1" download>
-                        Baixar vídeo
-                      </a>
-                    </p>
-                  </video>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-white">
-                    <div className="text-center">
-                      <Icon name="video" className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <p className="text-sm">Formato de vídeo não suportado</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Informações adicionais para uploads diretos */}
-              {selectedVideo.upload_type === 'direct' && selectedVideo.original_filename && (
-                <div className="p-4 border-t border-gray-200 bg-gray-50">
-                  <p className="text-sm text-gray-600">
-                    📁 <strong>Arquivo:</strong> {selectedVideo.original_filename}
-                  </p>
-                  {selectedVideo.mime_type && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Tipo: {selectedVideo.mime_type}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Video Modal */}
+        <AnimatePresence mode="wait">
+          {modalOpen && selectedVideo && (
+            <VideoModal
+              video={selectedVideo}
+              isOpen={modalOpen}
+              onClose={handleCloseModal}
+            />
+          )}
+        </AnimatePresence>
       </main>
       
       <Footer />
     </div>
   );
 }
-
-// Card de vídeo padronizado
-function VideoCard({ video, onClick }: { video: DashboardVideo, onClick: (v: DashboardVideo) => void }) {
-  const maxLen = 50;
-  const shortTitle = video.title.length > maxLen ? video.title.slice(0, maxLen) + '...' : video.title;
-  
-  return (
-    <div className="card cursor-pointer transition-all duration-200 group" onClick={() => onClick(video)}>
-      <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden mb-3">
-        {video.thumbnail_url ? (
-          <OptimizedImage 
-            src={video.thumbnail_url} 
-            alt={video.title} 
-            fill 
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px" 
-            className="object-cover"
-            quality={80}
-            fallbackText="Thumbnail indisponível"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <Icon name="video" className="h-16 w-16 text-muted" />
-          </div>
-        )}
-        
-        {/* Upload type indicator */}
-        <div className="absolute top-2 right-2">
-          <span className={`px-1.5 py-0.5 text-xs rounded-full font-medium shadow-sm ${
-            video.upload_type === 'direct' 
-              ? 'bg-green-600 text-white' 
-              : 'bg-red-600 text-white'
-          }`}>
-            {video.upload_type === 'direct' ? 'Direto' : 'YouTube'}
-          </span>
-        </div>
-        
-        {/* Ícone de play overlay */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
-            <Icon name="play" className="h-8 w-8 text-primary ml-1" />
-          </div>
-        </div>
-      </div>
-      
-      <div className="p-1">
-        <h3 className="heading-4 text-title line-clamp-2" title={video.title}>{shortTitle}</h3>
-        {video.upload_type === 'direct' && video.file_size && (
-          <p className="text-xs text-muted mt-1">
-            {(video.file_size / (1024 * 1024)).toFixed(1)} MB
-          </p>
-        )}
-      </div>
-    </div>
-  );
-} 

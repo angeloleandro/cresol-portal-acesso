@@ -142,3 +142,8 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 
 ### UI/UX Principles
 - Não usar emogi nos componentes, e usar icones somente quando realmente necessario
+
+## Development Best Practices
+
+### Environment Management
+- sempre fechar a porta de desenvolvimento que for usada para teste
