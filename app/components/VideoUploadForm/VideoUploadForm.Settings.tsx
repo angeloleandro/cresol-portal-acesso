@@ -1,11 +1,10 @@
 /**
- * VideoUploadForm Settings Component
- * Active status and order configuration
+ * VideoUploadForm Clean Settings Component
+ * Minimalist active status and order configuration
  */
 
 import { memo, useCallback } from 'react'
 import { VideoSettingsProps } from './VideoUploadForm.types'
-import { videoUploadStyles } from './VideoUploadForm.styles'
 
 export const VideoUploadFormSettings = memo(({ 
   isActive,
@@ -29,23 +28,27 @@ export const VideoUploadFormSettings = memo(({
   }, [disabled, onOrderChange])
   
   return (
-    <div className={videoUploadStyles.form.fieldGroup}>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {/* Active Checkbox */}
-      <div className={videoUploadStyles.checkbox.container}>
+      <div className="flex items-center gap-2">
         <input
           id="video-active-checkbox"
           type="checkbox"
           checked={isActive}
           onChange={handleActiveChange}
           disabled={disabled}
-          className={videoUploadStyles.checkbox.input}
+          className="
+            w-4 h-4 text-neutral-600 border-neutral-300 rounded 
+            focus:ring-2 focus:ring-neutral-500/20
+            disabled:opacity-60 disabled:cursor-not-allowed
+          "
           aria-describedby="active-help"
         />
         <label 
           htmlFor="video-active-checkbox"
-          className={videoUploadStyles.checkbox.label}
+          className="text-sm font-medium text-neutral-700 cursor-pointer"
         >
-          Ativo
+          Vídeo ativo
         </label>
       </div>
       
@@ -53,7 +56,7 @@ export const VideoUploadFormSettings = memo(({
       <div className="flex items-center gap-2">
         <label 
           htmlFor="video-order-input"
-          className={videoUploadStyles.form.label}
+          className="text-sm font-medium text-neutral-700"
         >
           Ordem:
         </label>
@@ -65,16 +68,21 @@ export const VideoUploadFormSettings = memo(({
           value={orderIndex}
           onChange={handleOrderChange}
           disabled={disabled}
-          className={`${videoUploadStyles.input.base} w-20 text-center`}
+          className="
+            w-20 border border-neutral-300 rounded-lg px-3 py-2 text-sm text-center
+            bg-white focus:outline-none focus:ring-2 focus:ring-neutral-500/20 
+            focus:border-neutral-500 hover:border-neutral-400 transition-all duration-200
+            disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-neutral-50
+          "
           aria-describedby="order-help"
           aria-label="Número da ordem de exibição"
         />
       </div>
       
       {/* Help text */}
-      <div className={videoUploadStyles.form.helpText}>
+      <div className="text-xs text-neutral-500 col-span-1 sm:col-span-2">
         <div id="active-help" className="mb-1">
-          {isActive ? 'Vídeo será exibido publicamente' : 'Vídeo ficará oculto'}
+          {isActive ? 'Vídeo público' : 'Vídeo oculto'}
         </div>
         <div id="order-help">
           Ordem de exibição (0 = primeiro)

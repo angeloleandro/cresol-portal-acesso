@@ -164,7 +164,7 @@ export const VideoUploadFormSimpleThumbnail = memo(({
             
             <div className="space-y-4">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto">
-                <Icon name="photo" className="w-8 h-8 text-neutral-400" />
+                <Icon name="image" className="w-8 h-8 text-neutral-400" />
               </div>
               
               <div>
@@ -220,7 +220,10 @@ export const VideoUploadFormSimpleThumbnail = memo(({
               </div>
               
               <div className="flex items-center justify-between text-xs text-neutral-500 bg-neutral-50 px-3 py-2 rounded-lg">
-                <span>✓ Imagem carregada com sucesso</span>
+                <div className="flex items-center gap-2">
+                  <Icon name="check-circle" className="w-4 h-4 text-green-600" />
+                  <span>Imagem carregada com sucesso</span>
+                </div>
                 <button
                   type="button"
                   onClick={openFileDialog}
@@ -251,8 +254,9 @@ export const VideoUploadFormSimpleThumbnail = memo(({
             </div>
           </div>
           
-          <div className="text-xs text-neutral-500 bg-neutral-50 px-3 py-2 rounded-lg">
-            ✓ Usando thumbnail oficial do YouTube
+          <div className="flex items-center gap-2 text-xs text-neutral-500 bg-neutral-50 px-3 py-2 rounded-lg">
+            <Icon name="check-circle" className="w-4 h-4 text-green-600" />
+            <span>Usando thumbnail oficial do YouTube</span>
           </div>
         </div>
       )}

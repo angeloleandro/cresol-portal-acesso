@@ -134,40 +134,22 @@ export const VideoUploadFormFileUpload = memo(({
       
       {/* Existing video info */}
       {existingVideoInfo && !videoFile && (
-        <div className={videoUploadStyles.alert.info}>
-          <div className={videoUploadStyles.alert.content}>
-            <svg 
-              className={videoUploadStyles.alert.icon}
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" 
-              />
-            </svg>
-            <div>
-              <div className={videoUploadStyles.alert.title}>
-                Vídeo Atual
-              </div>
-              <div className={videoUploadStyles.alert.description}>
-                {existingVideoInfo.filename && (
-                  <p className="font-medium">📁 {existingVideoInfo.filename}</p>
-                )}
-                {existingVideoInfo.fileSize && (
-                  <p className="text-sm mt-1">
-                    {formatFileSize(existingVideoInfo.fileSize)}
-                  </p>
-                )}
-                <p className="text-sm mt-2">
-                  💡 Para manter o vídeo atual, deixe o campo abaixo vazio. Para substituir, faça upload de um novo arquivo.
-                </p>
-              </div>
+        <div className="mb-4 p-3 bg-gray-50 border rounded-md">
+          <div className="text-sm font-medium text-gray-900 mb-1">
+            Arquivo Atual
+          </div>
+          {existingVideoInfo.filename && (
+            <div className="text-sm text-gray-700 truncate">
+              {existingVideoInfo.filename}
             </div>
+          )}
+          {existingVideoInfo.fileSize && (
+            <div className="text-xs text-gray-500 mb-2">
+              {formatFileSize(existingVideoInfo.fileSize)}
+            </div>
+          )}
+          <div className="text-xs text-gray-600">
+            Deixe vazio para manter atual ou selecione novo arquivo para substituir.
           </div>
         </div>
       )}

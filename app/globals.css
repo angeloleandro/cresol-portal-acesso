@@ -166,6 +166,127 @@ body {
   100% { transform: rotate(360deg); }
 }
 
+/* ========================================
+   ENTERPRISE SCROLLBAR SYSTEM
+   Clean, professional scrollbar design
+======================================== */
+
+/* Base Scrollbar Styles - Webkit */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #CBD5E1; /* slate-300 */
+  border-radius: 4px;
+  border: none;
+  transition: background-color var(--vs-transition-normal);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #94A3B8; /* slate-400 */
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: #64748B; /* slate-500 */
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox Scrollbar Styles */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+}
+
+/* Professional Scrollbar Classes */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #CBD5E1;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: #94A3B8;
+}
+
+/* Modal Scrollbar - Enterprise Clean */
+.scrollbar-modal {
+  scrollbar-width: thin;
+  scrollbar-color: #E2E8F0 transparent;
+}
+
+.scrollbar-modal::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-modal::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.scrollbar-modal::-webkit-scrollbar-thumb {
+  background-color: #E2E8F0; /* slate-200 */
+  border-radius: 3px;
+  border: none;
+}
+
+.scrollbar-modal::-webkit-scrollbar-thumb:hover {
+  background-color: #CBD5E1; /* slate-300 */
+}
+
+/* Primary Branded Scrollbar */
+.scrollbar-branded {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 130, 32, 0.3) transparent;
+}
+
+.scrollbar-branded::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-branded::-webkit-scrollbar-thumb {
+  background-color: rgba(245, 130, 32, 0.3);
+  border-radius: 3px;
+}
+
+.scrollbar-branded::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(245, 130, 32, 0.5);
+}
+
+.scrollbar-branded::-webkit-scrollbar-thumb:active {
+  background-color: rgba(245, 130, 32, 0.7);
+}
+
+/* Hidden Scrollbar - Clean Interface */
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 /* Botões Padronizados - Design System */
 .btn-primary {
   background-color: var(--color-primary);

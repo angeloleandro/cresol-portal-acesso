@@ -53,25 +53,16 @@ export async function checkVideoUrlAccessibility(url: string): Promise<boolean> 
 }
 
 export async function getAuthenticatedSession() {
-  console.log('🔐 [VIDEO_UTILS] Obtendo sessão autenticada...');
   const { data: { session }, error } = await supabase.auth.getSession();
-  console.log('👤 [VIDEO_UTILS] Sessão encontrada:', !!session);
-  console.log('❌ [VIDEO_UTILS] Erro de sessão:', error?.message || 'NENHUM');
   
   if (error || !session) {
-    console.error('❌ [VIDEO_UTILS] Usuário não autenticado');
     throw new Error('Usuário não autenticado');
   }
   
-  console.log('✅ [VIDEO_UTILS] Sessão obtida com sucesso');
   return session;
 }
 
 export async function makeAuthenticatedRequest(url: string, options: RequestInit = {}) {
-  console.log('🌐 [VIDEO_UTILS] Fazendo requisição autenticada para:', url);
-  console.log('📋 [VIDEO_UTILS] Método:', options.method || 'GET');
-  console.log('📋 [VIDEO_UTILS] Body:', options.body || 'NENHUM');
-  
   const session = await getAuthenticatedSession();
   
   const requestOptions = {
@@ -83,15 +74,7 @@ export async function makeAuthenticatedRequest(url: string, options: RequestInit
     },
   };
   
-  console.log('📡 [VIDEO_UTILS] Enviando requisição...');
   const response = await fetch(url, requestOptions);
-  console.log('📡 [VIDEO_UTILS] Status da resposta:', response.status);
-  console.log('✅ [VIDEO_UTILS] Resposta OK:', response.ok);
-  
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('❌ [VIDEO_UTILS] Resposta de erro:', errorText);
-  }
   
   return response;
 }

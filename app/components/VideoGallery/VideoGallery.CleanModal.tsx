@@ -173,7 +173,7 @@ function CleanDirectVideoPlayer({
       {/* Fallback content */}
       <div className="flex items-center justify-center h-full text-white p-8">
         <div className="text-center space-y-4">
-          <Icon name="video-camera" className="w-12 h-12 mx-auto text-neutral-400" />
+          <Icon name="video" className="w-12 h-12 mx-auto text-neutral-400" />
           <div>
             <p className="text-lg font-medium mb-2">
               Seu navegador não suporta reprodução de vídeo.

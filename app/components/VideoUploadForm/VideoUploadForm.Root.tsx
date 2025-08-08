@@ -242,17 +242,6 @@ export const VideoUploadFormRoot = memo(({
   const handleSubmit = useCallback(async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     
-    console.log('📝 [UPLOAD_FORM] Iniciando submissão do formulário');
-    console.log('📋 [UPLOAD_FORM] Dados do formulário:', {
-      id: initialData?.id,
-      title: state.formData.title,
-      upload_type: state.formData.upload_type,
-      video_url: state.formData.video_url,
-      is_active: state.formData.is_active,
-      order_index: state.formData.order_index,
-      thumbnailMode: state.thumbnailMode,
-      thumbnailFile: !!state.formData.thumbnailFile
-    });
     
     dispatch(videoUploadActions.clearErrors())
     dispatch(videoUploadActions.setUploadStatus('uploading'))
@@ -306,22 +295,15 @@ export const VideoUploadFormRoot = memo(({
         }
         
       } else if (state.formData.upload_type === 'youtube' && state.formData.video_url) {
-        console.log('🎬 [UPLOAD_FORM] Processando vídeo do YouTube');
-        console.log('🔗 [UPLOAD_FORM] URL do vídeo:', state.formData.video_url);
-        console.log('🖼️ [UPLOAD_FORM] Modo de thumbnail:', state.thumbnailMode);
         
         // Handle YouTube video
         let thumbUrl = initialData?.thumbnail_url || ""
 
         // Handle thumbnail upload
         if (state.thumbnailMode === 'custom' && state.formData.thumbnailFile) {
-          console.log('🖼️ [UPLOAD_FORM] Upload de thumbnail personalizada para YouTube');
           thumbUrl = await uploadThumbnail()
-          console.log('🖼️ [UPLOAD_FORM] URL da thumbnail personalizada:', thumbUrl);
         } else if (state.thumbnailMode === 'auto' && state.formData.video_url) {
-          console.log('🖼️ [UPLOAD_FORM] Usando thumbnail automática do YouTube');
           thumbUrl = getYouTubeThumbnail(state.formData.video_url) || ""
-          console.log('🖼️ [UPLOAD_FORM] URL da thumbnail automática:', thumbUrl);
         }
 
         const requestBody = {
@@ -333,11 +315,8 @@ export const VideoUploadFormRoot = memo(({
           upload_type: 'youtube'
         }
 
-        console.log('📋 [UPLOAD_FORM] Dados do request body completo:', requestBody);
 
         if (initialData?.id) {
-          console.log('✏️ [UPLOAD_FORM] Editando vídeo do YouTube existente');
-          console.log('🌐 [UPLOAD_FORM] Enviando PUT para API de vídeos');
           
           const response = await makeAuthenticatedRequest('/api/admin/videos', {
             method: 'PUT',
@@ -347,58 +326,39 @@ export const VideoUploadFormRoot = memo(({
             })
           })
           
-          console.log('📡 [UPLOAD_FORM] Status da resposta PUT:', response.status);
           
           if (!response.ok) {
             const errorData = await response.json()
-            console.error('❌ [UPLOAD_FORM] Erro na resposta PUT:', errorData);
             throw new Error(errorData.error || 'Erro ao atualizar vídeo')
           }
           
           videoId = initialData.id
-          console.log('✅ [UPLOAD_FORM] Vídeo do YouTube atualizado com sucesso:', videoId);
         } else {
-          console.log('🆕 [UPLOAD_FORM] Criando novo vídeo do YouTube');
-          console.log('📋 [UPLOAD_FORM] Dados do request body para POST:', requestBody);
-          console.log('🌐 [UPLOAD_FORM] Enviando POST para API de vídeos');
           
           const response = await makeAuthenticatedRequest('/api/admin/videos', {
             method: 'POST',
             body: JSON.stringify(requestBody)
           })
           
-          console.log('📡 [UPLOAD_FORM] Status da resposta POST:', response.status);
           
           if (!response.ok) {
             const errorData = await response.json()
-            console.error('❌ [UPLOAD_FORM] Erro na resposta POST:', errorData);
             throw new Error(errorData.error || 'Erro ao criar vídeo')
           }
           
           const result = await response.json()
           videoId = result.video.id
-          console.log('✅ [UPLOAD_FORM] Novo vídeo do YouTube criado:', videoId);
         }
         finalVideoUrl = state.formData.video_url
       } else {
-        console.error('❌ [UPLOAD_FORM] Configuração de upload inválida');
-        console.error('❌ [UPLOAD_FORM] Estado atual:', {
-          upload_type: state.formData.upload_type,
-          video_url: state.formData.video_url,
-          videoFile: !!state.formData.videoFile
-        });
         throw new Error('Configuração de upload inválida')
       }
 
-      console.log('🎉 [UPLOAD_FORM] Formulário processado com sucesso');
       dispatch(videoUploadActions.setUploadProgress(100))
       dispatch(videoUploadActions.setUploadStatus('success'))
       onSave()
       
     } catch (err: any) {
-      console.error('💥 [UPLOAD_FORM] Erro durante submissão:', err);
-      console.error('💥 [UPLOAD_FORM] Message:', err.message);
-      console.error('💥 [UPLOAD_FORM] Stack:', err.stack);
       dispatch(videoUploadActions.setError(undefined, err.message || 'Erro ao salvar vídeo'))
       dispatch(videoUploadActions.setUploadStatus('error'))
     }
@@ -410,73 +370,57 @@ export const VideoUploadFormRoot = memo(({
   }, [onCancel])
   
   return (
-    <div className={videoUploadStyles.container}>
-      {/* Form */}
-      <form onSubmit={handleSubmit} className={videoUploadStyles.form.root} noValidate>
-        {/* Header */}
-        <VideoUploadFormHeader 
-          title={initialData?.id ? 'Editar Vídeo' : 'Novo Vídeo'}
-          isEditing={!!initialData?.id}
-        />
-        
+    <div className="bg-white rounded-xl border border-neutral-200 max-w-3xl mx-auto shadow-lg overflow-hidden max-h-[85vh] flex flex-col">
+      {/* Header */}
+      <VideoUploadFormHeader 
+        title={initialData?.id ? 'Editar Vídeo' : 'Novo Vídeo'}
+        isEditing={!!initialData?.id}
+      />
+      
+      {/* Scrollable Form Body */}
+      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 min-h-0" noValidate>
         {/* General Error */}
         {generalError && (
           <div 
-            className={videoUploadStyles.alert.error}
+            className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800"
             role="alert"
             aria-live="polite"
           >
-            <div className={videoUploadStyles.alert.content}>
-              <svg 
-                className={videoUploadStyles.alert.icon}
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-                />
-              </svg>
-              <div>
-                <div className={videoUploadStyles.alert.title}>
-                  Erro
-                </div>
-                <div className={videoUploadStyles.alert.description}>
-                  {generalError}
-                </div>
-              </div>
-            </div>
+            <div className="font-medium mb-1">Erro</div>
+            <div>{generalError}</div>
           </div>
         )}
         
-        {/* Title Input */}
-        <div className={videoUploadStyles.form.section}>
-          <label 
-            htmlFor="video-title-input"
-            className={videoUploadStyles.form.label}
-          >
-            Título
-            <span className={videoUploadStyles.form.required} aria-label="obrigatório">
-              *
-            </span>
-          </label>
-          <input
-            id="video-title-input"
-            type="text"
-            required
-            value={state.formData.title}
-            onChange={handleTitleChange}
-            placeholder="Digite o título do vídeo"
-            disabled={isUploading}
-            className={videoUploadStyles.input.base}
-            aria-describedby="title-help"
-          />
-          <div id="title-help" className={videoUploadStyles.form.helpText}>
-            Digite um título descritivo para o vídeo
+        {/* Title Input Section */}
+        <div className="space-y-4">
+          <div>
+            <label 
+              htmlFor="video-title-input"
+              className="block text-sm font-medium text-neutral-700"
+            >
+              Título
+              <span className="text-red-500 ml-1" aria-label="obrigatório">*</span>
+            </label>
+            <input
+              id="video-title-input"
+              type="text"
+              required
+              value={state.formData.title}
+              onChange={handleTitleChange}
+              placeholder="Digite o título do vídeo"
+              disabled={isUploading}
+              className="
+                mt-1 w-full border border-neutral-300 rounded-lg px-4 py-3 text-sm 
+                placeholder-neutral-400 bg-white focus:outline-none focus:ring-2 
+                focus:ring-neutral-500/20 focus:border-neutral-500 hover:border-neutral-400 
+                transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed 
+                disabled:bg-neutral-50
+              "
+              aria-describedby="title-help"
+            />
+            <div id="title-help" className="text-xs text-neutral-500 mt-1">
+              Digite um título descritivo para o vídeo
+            </div>
           </div>
         </div>
         
@@ -536,17 +480,17 @@ export const VideoUploadFormRoot = memo(({
           onOrderChange={handleOrderChange}
           disabled={isUploading}
         />
-        
-        {/* Actions */}
-        <VideoUploadFormActions
-          onSave={handleSubmit}
-          onCancel={handleCancel}
-          isUploading={state.uploadStatus === 'uploading'}
-          isProcessing={state.uploadStatus === 'processing'}
-          canSave={canSave}
-          disabled={isUploading}
-        />
       </form>
+      
+      {/* Fixed Footer Actions */}
+      <VideoUploadFormActions
+        onSave={handleSubmit}
+        onCancel={handleCancel}
+        isUploading={state.uploadStatus === 'uploading'}
+        isProcessing={state.uploadStatus === 'processing'}
+        canSave={canSave}
+        disabled={isUploading}
+      />
     </div>
   )
 })

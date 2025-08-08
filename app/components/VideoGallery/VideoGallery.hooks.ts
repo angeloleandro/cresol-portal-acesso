@@ -59,7 +59,6 @@ export function useVideoGallery(limit?: number) {
               video.video_url = resolvedUrl;
               validVideos.push(video);
             } catch (error) {
-              console.warn(`URL resolution failed for ${video.title}:`, error);
               validVideos.push(video);
             }
           }
@@ -306,11 +305,7 @@ export function usePerformanceMonitor(componentName: string) {
     const endTime = performance.now();
     const renderTime = endTime - startTimeRef.current;
     
-    if (renderTime > 16) { // Mais de um frame a 60fps
-      console.warn(
-        `${componentName} render took ${renderTime.toFixed(2)}ms (render #${renderCountRef.current})`
-      );
-    }
+    // Performance monitoring without logging
     
     startTimeRef.current = performance.now();
   });

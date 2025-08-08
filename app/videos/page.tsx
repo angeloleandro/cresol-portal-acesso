@@ -56,7 +56,6 @@ export default function VideosPage() {
         setVideos(readyVideos);
         setFilteredVideos(readyVideos);
       } catch (error: any) {
-        console.error('Erro ao buscar vídeos:', error);
         setError(error.message || 'Erro ao carregar vídeos');
       } finally {
         setLoading(false);

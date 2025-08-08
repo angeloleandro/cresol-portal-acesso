@@ -2,20 +2,12 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  console.log('📝 [VIDEO_POST_API] Iniciando criação de vídeo');
-  
   try {
     // Criar cliente do Supabase com a chave de serviço
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    console.log('🔧 [VIDEO_POST_API] Configuração:', { 
-      supabaseUrl: !!supabaseUrl, 
-      serviceKey: !!serviceKey 
-    });
-    
     if (!supabaseUrl || !serviceKey) {
-      console.error('❌ [VIDEO_POST_API] Configuração do servidor incompleta');
       return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
     }
 
@@ -26,69 +18,66 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
     
-    console.log('🔐 [VIDEO_POST_API] Token extraído:', !!token);
-    
     if (!token) {
-      console.error('❌ [VIDEO_POST_API] Token de autorização não encontrado');
       return NextResponse.json({ error: 'Token de autorização não encontrado' }, { status: 401 });
     }
 
-    console.log('👤 [VIDEO_POST_API] Validando usuário...');
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    console.log('👤 [VIDEO_POST_API] Usuário encontrado:', !!user);
-    console.log('❌ [VIDEO_POST_API] Erro de autenticação:', authError?.message || 'NENHUM');
     
     if (authError || !user) {
-      console.error('❌ [VIDEO_POST_API] Não autorizado - erro de usuário');
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    console.log('🔍 [VIDEO_POST_API] Buscando perfil do usuário:', user.id);
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    console.log('👤 [VIDEO_POST_API] Perfil encontrado:', !!profile);
-    console.log('🎭 [VIDEO_POST_API] Role do usuário:', profile?.role);
-    console.log('❌ [VIDEO_POST_API] Erro de perfil:', profileError?.message || 'NENHUM');
 
     if (profileError || !['admin', 'sector_admin'].includes(profile?.role)) {
-      console.error('❌ [VIDEO_POST_API] Acesso negado - sem privilégios');
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
-    console.log('📥 [VIDEO_POST_API] Processando dados do body...');
     const requestBody = await request.json();
     const { title, video_url, thumbnail_url, is_active, order_index, upload_type } = requestBody;
     
-    console.log('📋 [VIDEO_POST_API] Dados recebidos:', { 
-      title, 
-      video_url, 
-      thumbnail_url: !!thumbnail_url, 
-      is_active, 
-      order_index, 
-      upload_type 
-    });
 
-    console.log('✅ [VIDEO_POST_API] Validando dados obrigatórios...');
     if (!title || !video_url) {
-      console.error('❌ [VIDEO_POST_API] Dados obrigatórios ausentes:', { title: !!title, video_url: !!video_url });
       return NextResponse.json({ error: 'Título e URL são obrigatórios' }, { status: 400 });
     }
 
-    console.log('💾 [VIDEO_POST_API] Inserindo vídeo no banco...');
+    // Calcular próximo order_index disponível se não fornecido ou for 0 (novo vídeo)
+    let finalOrderIndex = order_index;
+    
+    if (finalOrderIndex === undefined || finalOrderIndex === null || finalOrderIndex === 0) {
+      
+      const { data: maxOrderData, error: maxOrderError } = await supabaseAdmin
+        .from('dashboard_videos')
+        .select('order_index')
+        .eq('is_active', true)
+        .order('order_index', { ascending: false })
+        .limit(1);
+
+      if (maxOrderError) {
+        return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+      }
+
+      finalOrderIndex = maxOrderData && maxOrderData.length > 0 
+        ? maxOrderData[0].order_index + 1 
+        : 0;
+      
+    }
+
     const insertData = { 
       title, 
       video_url, 
       thumbnail_url, 
       is_active: is_active ?? true, 
-      order_index: order_index ?? 0, 
+      order_index: finalOrderIndex, 
       upload_type: upload_type || 'youtube'
     };
     
-    console.log('📊 [VIDEO_POST_API] Dados para inserção:', insertData);
     
     const { data: newVideo, error: insertError } = await supabaseAdmin
       .from('dashboard_videos')
@@ -96,25 +85,17 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    console.log('✅ [VIDEO_POST_API] Vídeo inserido:', !!newVideo);
-    console.log('❌ [VIDEO_POST_API] Erro de inserção:', insertError?.message || 'NENHUM');
-    console.log('📊 [VIDEO_POST_API] Código do erro:', insertError?.code || 'NENHUM');
-    console.log('📋 [VIDEO_POST_API] Detalhes do erro:', insertError?.details || 'NENHUM');
 
     if (insertError) {
-      console.error('💥 [VIDEO_POST_API] Falha na inserção:', insertError);
       return NextResponse.json({ error: `Erro ao criar vídeo: ${insertError.message}` }, { status: 500 });
     }
 
-    console.log('🎉 [VIDEO_POST_API] Vídeo criado com sucesso:', newVideo?.id);
     return NextResponse.json({ 
       message: 'Vídeo criado com sucesso', 
       video: newVideo 
     });
 
   } catch (error) {
-    console.error('💥 [VIDEO_POST_API] Erro interno do servidor:', error);
-    console.error('💥 [VIDEO_POST_API] Stack trace:', error instanceof Error ? error.stack : 'Não disponível');
     return NextResponse.json({ 
       error: `Erro interno do servidor: ${error instanceof Error ? error.message : 'Unknown error'}` 
     }, { status: 500 });
@@ -288,7 +269,6 @@ export async function DELETE(request: NextRequest) {
         .remove([video.file_path]);
       
       if (fileDeleteError) {
-        console.error('Erro ao remover arquivo de vídeo:', fileDeleteError);
         // Continue with deletion even if file removal fails
       }
 
@@ -308,9 +288,6 @@ export async function DELETE(request: NextRequest) {
       const thumbnailPath = video.thumbnail_url.split('/').pop();
       if (thumbnailPath) {
         const { error: thumbnailDeleteError } = await supabaseAdmin.storage.from('banners').remove([thumbnailPath]);
-        if (thumbnailDeleteError) {
-          console.error('Erro ao remover thumbnail:', thumbnailDeleteError);
-        }
       }
     }
 
@@ -321,14 +298,12 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (deleteError) {
-      console.error('Erro ao excluir vídeo:', deleteError);
       return NextResponse.json({ error: 'Erro ao excluir vídeo' }, { status: 500 });
     }
 
     return NextResponse.json({ message: 'Vídeo excluído com sucesso' });
 
   } catch (error) {
-    console.error('Erro interno:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }

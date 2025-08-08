@@ -7,86 +7,115 @@ import { cn } from '@/lib/utils/cn'
 import { videoSystemTokens, videoComponentTokens } from '@/lib/design-tokens/video-system'
 
 export const videoUploadStyles = {
-  // Container styles
+  // Container styles - Enterprise Professional Modal
   container: cn(
-    'bg-white rounded-lg border border-neutral-200 p-4 max-w-2xl mx-auto',
-    'shadow-sm hover:shadow-md transition-shadow duration-200',
-    'sm:p-6 lg:p-8 lg:max-w-4xl xl:max-w-6xl'
+    'bg-white rounded-xl border border-slate-200 p-0 max-w-3xl mx-auto',
+    'shadow-lg shadow-slate-900/10 backdrop-blur-sm',
+    'overflow-hidden max-h-[85vh] flex flex-col',
+    'scrollbar-modal' // Apply professional scrollbar
   ),
   
-  // Header styles
+  // Header styles - Professional Modal Header
   header: {
+    container: cn(
+      'px-6 py-5 border-b border-slate-200 bg-slate-50/50',
+      'flex items-center justify-between flex-shrink-0'
+    ),
+    
     title: cn(
-      'text-lg font-semibold text-neutral-900 mb-4',
-      'sm:text-xl sm:mb-6'
+      'text-xl font-semibold text-slate-900',
+      'sm:text-2xl font-medium tracking-tight'
     ),
     
     subtitle: cn(
-      'text-sm text-neutral-600 mb-2',
+      'text-sm text-slate-600 mt-1',
       'sm:text-base'
+    ),
+    
+    badge: cn(
+      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+      'bg-orange-100 text-orange-800 border border-orange-200'
     ),
   },
   
-  // Form layout
+  // Form layout - Enterprise Professional
   form: {
-    root: 'space-y-4 sm:space-y-6',
+    root: cn(
+      'flex-1 overflow-y-auto scrollbar-modal px-6 py-6',
+      'space-y-8 min-h-0' // Ensure flex-child can shrink
+    ),
     
-    section: 'space-y-3',
+    section: cn(
+      'space-y-4 p-4 rounded-lg border border-slate-100 bg-slate-50/30',
+      'hover:border-slate-200 transition-colors duration-200'
+    ),
+    
+    sectionTitle: cn(
+      'text-base font-medium text-slate-800 mb-3',
+      'flex items-center gap-2'
+    ),
     
     fieldGroup: cn(
       'grid gap-4',
       'grid-cols-1',
-      'sm:grid-cols-2', 
-      'lg:grid-cols-3'
+      'sm:grid-cols-2'
     ),
+    
+    field: 'space-y-2',
     
     label: cn(
-      'block text-sm font-medium text-neutral-700 mb-2',
-      'sm:text-base'
+      'block text-sm font-medium text-slate-700',
+      'flex items-center gap-1'
     ),
     
-    required: 'text-red-500 ml-1',
+    required: 'text-orange-500 text-sm',
     
     helpText: cn(
-      'text-xs text-neutral-500 mt-1',
-      'sm:text-sm'
+      'text-xs text-slate-500',
+      'sm:text-sm leading-relaxed'
     ),
   },
   
-  // Input styles
+  // Input styles - Modern Professional
   input: {
     base: cn(
-      'w-full border border-neutral-300 rounded-md px-3 py-2',
-      'text-sm placeholder-neutral-400',
-      'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
-      'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral-50',
-      'transition-colors duration-150',
-      'sm:text-base sm:px-4 sm:py-3'
+      'w-full border border-slate-300 rounded-lg px-4 py-3',
+      'text-sm placeholder-slate-400 bg-white',
+      'focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500',
+      'hover:border-slate-400 transition-all duration-200',
+      'disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-slate-50',
+      'shadow-sm'
     ),
     
     error: cn(
-      'border-error focus:border-error focus:ring-error/20'
+      'border-red-400 focus:border-red-500 focus:ring-red-500/20',
+      'bg-red-50/50'
     ),
     
     success: cn(
-      'border-success focus:border-success focus:ring-success/20'
+      'border-green-400 focus:border-green-500 focus:ring-green-500/20',
+      'bg-green-50/50'
     ),
   },
   
-  // Radio and checkbox styles
+  // Radio and checkbox styles - Professional Design
   radioGroup: {
-    container: 'flex gap-4 sm:gap-6',
+    container: 'flex gap-6',
     
     option: cn(
-      'flex items-center gap-2 cursor-pointer',
-      'text-sm sm:text-base'
+      'flex items-center gap-3 cursor-pointer p-3 rounded-lg',
+      'border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50',
+      'transition-all duration-200 text-sm font-medium',
+      'checked:border-orange-300 checked:bg-orange-50/50'
     ),
     
     input: cn(
-      'w-4 h-4 text-primary border-neutral-300',
-      'focus:ring-2 focus:ring-primary/20',
-      'sm:w-5 sm:h-5'
+      'w-4 h-4 text-orange-500 border-slate-300 rounded-full',
+      'focus:ring-2 focus:ring-orange-500/20 focus:ring-offset-2',
+      'transition-all duration-200'
     ),
+    
+    label: 'text-slate-700 font-medium',
   },
   
   checkbox: {
@@ -230,42 +259,42 @@ export const videoUploadStyles = {
     actions: 'flex gap-2 mt-4 justify-end',
   },
   
-  // Button styles
+  // Button styles - Enterprise Professional
   button: {
     primary: cn(
-      'px-4 py-2 bg-primary text-white rounded-lg font-medium',
-      'hover:bg-primary-hover active:bg-primary-active',
-      'focus:outline-none focus:ring-2 focus:ring-primary/20',
-      'disabled:opacity-50 disabled:cursor-not-allowed',
-      'transition-colors duration-150',
-      'sm:px-6 sm:py-3'
+      'px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold',
+      'hover:bg-orange-600 active:bg-orange-700',
+      'focus:outline-none focus:ring-3 focus:ring-orange-500/30 focus:ring-offset-2',
+      'disabled:opacity-60 disabled:cursor-not-allowed',
+      'transition-all duration-200 shadow-sm hover:shadow-md',
+      'inline-flex items-center gap-2 min-h-[44px]'
     ),
     
     secondary: cn(
-      'px-4 py-2 bg-white text-neutral-700 border border-neutral-300 rounded-lg font-medium',
-      'hover:bg-neutral-50 active:bg-neutral-100',
-      'focus:outline-none focus:ring-2 focus:ring-neutral-200',
-      'disabled:opacity-50 disabled:cursor-not-allowed',
-      'transition-colors duration-150',
-      'sm:px-6 sm:py-3'
+      'px-6 py-3 bg-white text-slate-700 border border-slate-300 rounded-lg font-semibold',
+      'hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100',
+      'focus:outline-none focus:ring-3 focus:ring-slate-300/30 focus:ring-offset-2',
+      'disabled:opacity-60 disabled:cursor-not-allowed',
+      'transition-all duration-200 shadow-sm hover:shadow-md',
+      'inline-flex items-center gap-2 min-h-[44px]'
     ),
     
     danger: cn(
-      'px-4 py-2 bg-error text-white rounded-lg font-medium',
-      'hover:bg-error-dark active:bg-error-dark',
-      'focus:outline-none focus:ring-2 focus:ring-error/20',
-      'disabled:opacity-50 disabled:cursor-not-allowed',
-      'transition-colors duration-150',
-      'sm:px-6 sm:py-3'
+      'px-6 py-3 bg-red-500 text-white rounded-lg font-semibold',
+      'hover:bg-red-600 active:bg-red-700',
+      'focus:outline-none focus:ring-3 focus:ring-red-500/30 focus:ring-offset-2',
+      'disabled:opacity-60 disabled:cursor-not-allowed',
+      'transition-all duration-200 shadow-sm hover:shadow-md',
+      'inline-flex items-center gap-2 min-h-[44px]'
     ),
     
     ghost: cn(
-      'px-4 py-2 text-neutral-600 rounded-lg font-medium',
-      'hover:bg-neutral-100 active:bg-neutral-200',
-      'focus:outline-none focus:ring-2 focus:ring-neutral-200',
-      'disabled:opacity-50 disabled:cursor-not-allowed',
-      'transition-colors duration-150',
-      'sm:px-6 sm:py-3'
+      'px-6 py-3 text-slate-600 rounded-lg font-semibold',
+      'hover:bg-slate-100 hover:text-slate-800 active:bg-slate-200',
+      'focus:outline-none focus:ring-3 focus:ring-slate-300/30 focus:ring-offset-2',
+      'disabled:opacity-60 disabled:cursor-not-allowed',
+      'transition-all duration-200',
+      'inline-flex items-center gap-2 min-h-[44px]'
     ),
   },
   
@@ -282,37 +311,37 @@ export const videoUploadStyles = {
   // Alert and message styles
   alert: {
     base: cn(
-      'p-3 rounded-lg border text-sm',
-      'sm:p-4 sm:text-base'
+      'p-4 rounded-lg border text-sm',
+      'sm:p-5 sm:text-base'
     ),
     
     error: cn(
-      'bg-error-light border-error text-error-dark',
-      'dark:bg-error-dark/10 dark:border-error dark:text-error-light'
+      'bg-red-50 border-red-200 text-red-800',
+      'dark:bg-red-900/10 dark:border-red-800 dark:text-red-300'
     ),
     
     success: cn(
-      'bg-success-light border-success text-success-dark',
-      'dark:bg-success-dark/10 dark:border-success dark:text-success-light'
+      'bg-green-50 border-green-200 text-green-800',
+      'dark:bg-green-900/10 dark:border-green-800 dark:text-green-300'
     ),
     
     warning: cn(
-      'bg-warning-light border-warning text-warning-dark',
-      'dark:bg-warning-dark/10 dark:border-warning dark:text-warning-light'
+      'bg-amber-50 border-amber-200 text-amber-800',
+      'dark:bg-amber-900/10 dark:border-amber-800 dark:text-amber-300'
     ),
     
     info: cn(
-      'bg-info-light border-info text-info-dark',
-      'dark:bg-info-dark/10 dark:border-info dark:text-info-light'
+      'bg-blue-50 border-blue-200 text-blue-800',
+      'dark:bg-blue-900/10 dark:border-blue-800 dark:text-blue-300'
     ),
     
-    icon: 'w-5 h-5 flex-shrink-0 mt-0.5',
+    icon: 'w-5 h-5 flex-shrink-0 text-current',
     
     content: 'flex items-start gap-3',
     
-    title: 'font-medium mb-1',
+    title: 'font-semibold text-base mb-1',
     
-    description: 'text-sm opacity-90',
+    description: 'text-sm leading-relaxed',
   },
   
   // YouTube embed styles
@@ -328,12 +357,11 @@ export const videoUploadStyles = {
     ),
   },
   
-  // Form actions
+  // Form actions - Professional Footer
   actions: {
     container: cn(
-      'flex gap-3 justify-end pt-4',
-      'border-t border-neutral-200',
-      'sm:pt-6'
+      'flex gap-3 justify-end px-6 py-4 border-t border-slate-200',
+      'bg-slate-50/50 flex-shrink-0'
     ),
   },
   

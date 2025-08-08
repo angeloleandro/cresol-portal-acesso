@@ -1,11 +1,10 @@
 /**
- * VideoUploadForm Actions Component
- * Save and Cancel buttons with loading states
+ * VideoUploadForm Clean Actions Component
+ * Minimalist button design with neutral colors and simple loading states
  */
 
 import { memo, useCallback } from 'react'
 import { VideoActionsProps } from './VideoUploadForm.types'
-import { videoUploadStyles } from './VideoUploadForm.styles'
 
 export const VideoUploadFormActions = memo(({ 
   onSave,
@@ -33,13 +32,19 @@ export const VideoUploadFormActions = memo(({
   const buttonDisabled = disabled || !canSave || isLoading
   
   return (
-    <div className={videoUploadStyles.actions.container}>
+    <div className="flex gap-3 justify-end px-6 py-4 border-t border-neutral-200 bg-neutral-50/50 flex-shrink-0">
       {/* Cancel Button */}
       <button
         type="button"
         onClick={handleCancel}
         disabled={disabled || isUploading}
-        className={videoUploadStyles.button.secondary}
+        className="
+          px-4 py-2 border border-neutral-300 bg-white text-neutral-700 rounded-lg
+          text-sm font-medium hover:bg-neutral-50 hover:border-neutral-400
+          focus:outline-none focus:ring-2 focus:ring-neutral-500/20
+          disabled:opacity-60 disabled:cursor-not-allowed
+          transition-all duration-200
+        "
         aria-label="Cancelar operação"
       >
         Cancelar
@@ -50,26 +55,32 @@ export const VideoUploadFormActions = memo(({
         type="submit"
         onClick={handleSave}
         disabled={buttonDisabled}
-        className={videoUploadStyles.button.primary}
+        className="
+          px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm font-medium
+          hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-500/20
+          disabled:opacity-60 disabled:cursor-not-allowed
+          transition-all duration-200 flex items-center gap-2
+        "
         aria-label={isLoading ? 'Operação em andamento' : 'Salvar vídeo'}
         aria-describedby={!canSave ? 'save-button-help' : undefined}
       >
-        <div className={videoUploadStyles.loading.container}>
-          {/* Loading spinner */}
-          {isLoading && (
-            <div className={videoUploadStyles.loading.spinner} aria-hidden="true" />
-          )}
-          
-          {/* Button text */}
-          <span>
-            {isUploading 
-              ? 'Salvando...' 
-              : isProcessing 
-                ? 'Processando...' 
-                : 'Salvar Vídeo'
-            }
-          </span>
-        </div>
+        {/* Loading spinner */}
+        {isLoading && (
+          <div 
+            className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" 
+            aria-hidden="true" 
+          />
+        )}
+        
+        {/* Button text */}
+        <span>
+          {isUploading 
+            ? 'Salvando...' 
+            : isProcessing 
+              ? 'Processando...' 
+              : 'Salvar'
+          }
+        </span>
         
         {/* Screen reader status */}
         {isLoading && (
@@ -84,8 +95,8 @@ export const VideoUploadFormActions = memo(({
       
       {/* Help text for disabled save button */}
       {!canSave && !isLoading && (
-        <div id="save-button-help" className={videoUploadStyles.form.helpText}>
-          Preencha todos os campos obrigatórios para salvar
+        <div id="save-button-help" className="text-xs text-neutral-500 mt-1">
+          Preencha todos os campos obrigatórios
         </div>
       )}
     </div>

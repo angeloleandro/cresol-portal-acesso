@@ -52,17 +52,12 @@ export class VideoService {
    * Validate that user has admin privileges
    */
   async validateAdminAccess(userId: string): Promise<void> {
-    console.log('🔍 [VIDEO_SERVICE] Validando acesso admin para usuário:', userId);
-    
     const { data: profile, error: profileError } = await this.adminClient
       .from('profiles')
       .select('role')
       .eq('id', userId)
       .single();
     
-    console.log('👤 [VIDEO_SERVICE] Perfil encontrado:', !!profile);
-    console.log('🎭 [VIDEO_SERVICE] Role do usuário:', profile?.role);
-    console.log('❌ [VIDEO_SERVICE] Erro de perfil:', profileError?.message || 'NENHUM');
 
     if (profileError) {
       throw new ApiError(
@@ -81,29 +76,18 @@ export class VideoService {
       );
     }
 
-    console.log('✅ [VIDEO_SERVICE] Acesso admin validado');
   }
 
   /**
    * Find video by ID with comprehensive error handling
    */
   async findVideoById(videoId: string): Promise<VideoRecord> {
-    console.log('🔍 [VIDEO_SERVICE] Buscando vídeo:', videoId);
-    
     const { data: video, error: fetchError } = await this.adminClient
       .from('dashboard_videos')
       .select('*')
       .eq('id', videoId)
       .single();
     
-    console.log('🎬 [VIDEO_SERVICE] Vídeo encontrado:', !!video);
-    console.log('🎬 [VIDEO_SERVICE] Dados do vídeo:', video ? { 
-      title: video.title, 
-      upload_type: video.upload_type, 
-      file_path: video.file_path 
-    } : 'NENHUM');
-    console.log('❌ [VIDEO_SERVICE] Erro de busca:', fetchError?.message || 'NENHUM');
-    console.log('📊 [VIDEO_SERVICE] Código do erro:', fetchError?.code || 'NENHUM');
 
     if (fetchError) {
       if (fetchError.code === 'PGRST116' || fetchError.message?.includes('No rows returned')) {
@@ -131,7 +115,6 @@ export class VideoService {
       );
     }
 
-    console.log('✅ [VIDEO_SERVICE] Vídeo encontrado com sucesso');
     return video;
   }
 
@@ -140,75 +123,58 @@ export class VideoService {
    */
   async cleanupVideoFiles(video: VideoRecord): Promise<string[]> {
     const deletedFiles: string[] = [];
-    console.log('🗂️ [VIDEO_SERVICE] Iniciando limpeza de arquivos...');
 
     // Clean up direct upload files
     if (video.upload_type === 'direct' && video.file_path) {
-      console.log('📁 [VIDEO_SERVICE] Removendo arquivo principal:', video.file_path);
-      
       const { error: videoDeleteError } = await this.adminClient.storage
         .from('videos')
         .remove([video.file_path]);
       
       if (videoDeleteError) {
-        console.log('⚠️ [VIDEO_SERVICE] Erro ao remover arquivo principal:', videoDeleteError.message);
-        // Don't throw error for storage cleanup failures - log and continue
+        // Don't throw error for storage cleanup failures - continue
       } else {
         deletedFiles.push(video.file_path);
-        console.log('✅ [VIDEO_SERVICE] Arquivo principal removido');
       }
       
       // Clean up temporary files
-      console.log('🔍 [VIDEO_SERVICE] Buscando arquivos temporários...');
       const { data: tempFiles } = await this.adminClient.storage
         .from('videos')
         .list('temp', {
           search: video.id
         });
-      
-      console.log('📁 [VIDEO_SERVICE] Arquivos temporários encontrados:', tempFiles?.length || 0);
 
       if (tempFiles && tempFiles.length > 0) {
         const tempPaths = tempFiles.map(file => `temp/${file.name}`);
-        console.log('🗑️ [VIDEO_SERVICE] Removendo arquivos temporários:', tempPaths);
-        
         const { error: tempDeleteError } = await this.adminClient.storage
           .from('videos')
           .remove(tempPaths);
         
         if (tempDeleteError) {
-          console.log('⚠️ [VIDEO_SERVICE] Erro ao remover temporários:', tempDeleteError.message);
+          // Error removing temporary files - continue
         } else {
           deletedFiles.push(...tempPaths);
-          console.log('✅ [VIDEO_SERVICE] Arquivos temporários removidos');
         }
       }
     } else {
-      console.log('ℹ️ [VIDEO_SERVICE] Não há arquivos para remover (upload_type: ' + video.upload_type + ')');
     }
 
     // Clean up thumbnail if stored in Supabase
     if (video.thumbnail_url && video.thumbnail_url.includes('supabase')) {
       const thumbnailPath = video.thumbnail_url.split('/').pop();
-      console.log('🖼️ [VIDEO_SERVICE] Removendo thumbnail:', thumbnailPath);
-      
       if (thumbnailPath) {
         const { error: thumbnailDeleteError } = await this.adminClient.storage
           .from('banners')
           .remove([thumbnailPath]);
         
         if (thumbnailDeleteError) {
-          console.log('⚠️ [VIDEO_SERVICE] Erro ao remover thumbnail:', thumbnailDeleteError.message);
+          // Error removing thumbnail - continue
         } else {
           deletedFiles.push(thumbnailPath);
-          console.log('✅ [VIDEO_SERVICE] Thumbnail removido');
         }
       }
     } else {
-      console.log('ℹ️ [VIDEO_SERVICE] Não há thumbnail do Supabase para remover');
     }
 
-    console.log('✅ [VIDEO_SERVICE] Limpeza de arquivos concluída:', deletedFiles);
     return deletedFiles;
   }
 
@@ -216,15 +182,11 @@ export class VideoService {
    * Delete video record from database
    */
   async deleteVideoRecord(videoId: string): Promise<void> {
-    console.log('🗑️ [VIDEO_SERVICE] Removendo registro do banco de dados:', videoId);
-    
     const { error: deleteError } = await this.adminClient
       .from('dashboard_videos')
       .delete()
       .eq('id', videoId);
     
-    console.log('❌ [VIDEO_SERVICE] Erro ao excluir do banco:', deleteError?.message || 'NENHUM');
-    console.log('📊 [VIDEO_SERVICE] Código do erro de exclusão:', deleteError?.code || 'NENHUM');
 
     if (deleteError) {
       throw new ApiError(
@@ -235,7 +197,6 @@ export class VideoService {
       );
     }
 
-    console.log('✅ [VIDEO_SERVICE] Registro removido do banco de dados');
   }
 
   /**
@@ -243,7 +204,6 @@ export class VideoService {
    */
   async deleteVideo(request: DeleteVideoRequest): Promise<DeleteVideoResult> {
     const { videoId, userId } = request;
-    console.log('🔍 [VIDEO_SERVICE] Iniciando exclusão de vídeo:', { videoId, userId });
 
     // Step 1: Validate admin access
     await this.validateAdminAccess(userId);
@@ -263,7 +223,6 @@ export class VideoService {
       deletedFiles
     };
 
-    console.log('✅ [VIDEO_SERVICE] Exclusão concluída com sucesso:', result);
     return result;
   }
 }
