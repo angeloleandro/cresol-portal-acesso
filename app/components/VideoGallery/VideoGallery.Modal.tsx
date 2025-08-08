@@ -347,7 +347,7 @@ function VideoTypeBadge({ uploadType }: { uploadType: DashboardVideo['upload_typ
   const config = {
     direct: {
       icon: 'video' as const,
-      label: 'Upload Direto',
+      label: 'Upload Interno',
       className: 'bg-green-100 text-green-800 border-green-200'
     },
     youtube: {

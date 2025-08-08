@@ -3099,3 +3099,142 @@ This design system serves as both a technical implementation and a living docume
 **Next Review**: March 2025
 
 ---
+
+# Notification System Design System
+
+**Date**: January 2025  
+**Author**: Development Team  
+**Status**: Production Ready
+
+---
+
+## Overview
+
+Sistema completo de gerenciamento de notificações com interface modernizada, seguindo padrões enterprise e identity visual Cresol. Implementado com foco em produtividade, acessibilidade e experiência do usuário profissional.
+
+## Design Tokens
+
+### Cores do Sistema Cresol
+
+```typescript
+primary: {
+  50: "#FFF7F0",   // Background subtle
+  500: "#F58220",  // Main brand orange - Primary actions
+  600: "#EA580C",  // Hover states
+}
+
+secondary: {
+  500: "#005C46",  // Main brand green - Secondary actions
+  600: "#004935",  // Hover states
+}
+
+// Sistema de Prioridades
+priority: {
+  low: { bg: "bg-green-50", border: "border-green-200", text: "text-green-700" },
+  normal: { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-700" },
+  high: { bg: "bg-orange-50", border: "border-orange-200", text: "text-orange-700" },
+  urgent: { bg: "bg-red-50", border: "border-red-200", text: "text-red-700" }
+}
+```
+
+## Component Library
+
+### Card Component
+- **Variants**: default, elevated, outlined
+- **Padding**: sm (16px), md (24px), lg (32px)
+- **Usage**: Container padrão para agrupamento visual
+- **WCAG**: AA compliant com contrast ratio ≥ 4.5:1
+
+### Input Component
+- **States**: default, focus, error, disabled
+- **Sizes**: sm, md, lg
+- **Features**: Validation visual, help text, required indicators
+- **Accessibility**: Keyboard navigation, screen reader support
+
+### Button Component
+- **Variants**: primary, secondary, outline, ghost, danger
+- **States**: hover, focus, active, disabled, loading
+- **Features**: Icon support, loading spinners, full-width option
+- **Performance**: CSS transforms para micro-interactions
+
+### Priority Badge Component
+- **Visual System**: Dot indicators com cores semânticas
+- **Responsive**: Adapta tamanho baseado no contexto
+- **Accessibility**: Color + text para comunicação de prioridade
+
+## Implementation Guidelines
+
+### Code Quality Standards
+- TypeScript interfaces completas
+- Error handling em todos os componentes
+- Cross-browser compatibility (Chrome, Firefox, Safari, Edge)
+- Mobile-first responsive design
+- Performance: Core Web Vitals targets alcançados
+
+### Accessibility Compliance
+- WCAG 2.1 AA certification
+- Keyboard navigation completa
+- Screen reader compatibility
+- Color contrast ratios ≥ 4.5:1
+- Focus indicators visíveis
+
+### Performance Metrics
+- Bundle size otimizado com tree-shaking
+- CSS-in-JS evitado em favor de Tailwind
+- Animations usando transforms para GPU acceleration
+- Lazy loading de componentes quando aplicável
+
+## Asset Inventory
+
+### Icons
+- **Source**: Heroicons inline SVG
+- **Style**: Outline style para consistency
+- **Sizes**: 16px (sm), 20px (md), 24px (lg)
+- **Color**: Inherited via currentColor
+
+### Design Tokens
+- **Location**: `/design-system/tokens.ts`
+- **Coverage**: Colors, spacing, typography, shadows
+- **Usage**: Importação centralizada em componentes
+
+## Integration Examples
+
+```typescript
+// Formulário completo com design system
+import { Card, Input, Button, Textarea } from "../design-system/components";
+
+const NotificationForm = () => (
+  <Card variant="elevated">
+    <Input label="Título" required error={validation.title} />
+    <Textarea label="Mensagem" maxLength={1000} />
+    <Button variant="primary" loading={submitting}>
+      Enviar Notificação
+    </Button>
+  </Card>
+);
+```
+
+## Quality Gates
+
+### Visual Fidelity
+- ≥95% accuracy com design de referência
+- Spacing consistente usando design tokens
+- Typography hierarchy seguindo escala definida
+- Color usage conforme brand guidelines
+
+### User Experience
+- Feedback visual claro para todas as ações
+- Loading states em operações assíncronas
+- Error handling com mensagens contextuais
+- Progressive disclosure para formulários complexos
+
+### Developer Experience
+- API consistente entre componentes
+- TypeScript support completo
+- Documentação inline com JSDoc
+- Examples de uso para cada componente
+
+---
+
+**Status**: ✅ Implementação completa do sistema de notificações modernizado
+**Next Steps**: Aplicação dos padrões em outros módulos administrativos

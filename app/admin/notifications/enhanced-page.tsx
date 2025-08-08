@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
-import Icon from '@/app/components/icons/Icon';
 import { Card } from './design-system/components';
 import { StatsCard } from './components/enhanced/StatsCard';
 import { TabNavigation } from './components/enhanced/TabNavigation';
@@ -13,7 +12,7 @@ import { NotificationHistory } from './components/NotificationHistory';
 import { useAuth, useFormData, useGroups } from './hooks';
 import { TabType } from './types';
 
-export default function NotificationsAdmin() {
+export default function NotificationsAdminEnhanced() {
   const { user, loading } = useAuth();
   const { availableUsers } = useFormData();
   const { groups } = useGroups();
@@ -38,18 +37,30 @@ export default function NotificationsAdmin() {
     {
       id: 'send' as TabType,
       label: 'Nova Notificação',
-      icon: <Icon name="mail" className="w-4 h-4" />,
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        </svg>
+      ),
     },
     {
       id: 'groups' as TabType,
       label: 'Grupos',
-      icon: <Icon name="user-group" className="w-4 h-4" />,
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
       badge: groups.length,
     },
     {
       id: 'history' as TabType,
       label: 'Histórico',
-      icon: <Icon name="clock" className="w-4 h-4" />,
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
     },
   ];
 
@@ -72,7 +83,9 @@ export default function NotificationsAdmin() {
         {/* Header Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-2xl mb-4">
-            <Icon name="bell-notification" className="w-10 h-10 text-primary" />
+            <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM5.07 7.07a10 10 0 0014.86 0M5.07 7.07A10 10 0 117.07 5.07M5.07 7.07L12 14l6.93-6.93" />
+            </svg>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Central de Notificações</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -85,7 +98,11 @@ export default function NotificationsAdmin() {
           <StatsCard
             title="Total de Grupos"
             value={groups.length}
-            icon={<Icon name="user-group" className="w-6 h-6" />}
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            }
             color="primary"
             trend={{ value: 12, isPositive: true, period: 'vs. mês anterior' }}
           />
@@ -93,7 +110,11 @@ export default function NotificationsAdmin() {
           <StatsCard
             title="Usuários Ativos"
             value={availableUsers.length}
-            icon={<Icon name="user-circle" className="w-6 h-6" />}
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            }
             color="secondary"
             trend={{ value: 8, isPositive: true, period: 'vs. mês anterior' }}
           />
@@ -101,7 +122,11 @@ export default function NotificationsAdmin() {
           <StatsCard
             title="Mensagens Hoje"
             value="0"
-            icon={<Icon name="mail" className="w-6 h-6" />}
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            }
             color="info"
           />
         </div>

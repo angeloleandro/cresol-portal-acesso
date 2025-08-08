@@ -295,7 +295,7 @@ export function VideoGalleryStatsHeader({
         />
         <StatCard
           icon="download"
-          label="Diretos"
+          label="Internos"
           value={stats.direct}
           color="green"
         />

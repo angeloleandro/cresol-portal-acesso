@@ -4,6 +4,7 @@
  */
 
 import { memo, useCallback, useState, useEffect } from 'react'
+import Image from 'next/image'
 import { YouTubeInputProps } from './VideoUploadForm.types'
 
 // YouTube URL validation and ID extraction
@@ -110,10 +111,12 @@ export const VideoUploadFormYouTubeInput = memo(({
       {isValidUrl && thumbnailUrl() && (
         <div className="mt-4">
           <div className="relative w-full aspect-video bg-neutral-100 rounded-lg overflow-hidden">
-            <img
+            <Image
               src={thumbnailUrl()!}
               alt="Thumbnail do vídeo do YouTube"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             <div className="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-2 py-1 rounded">

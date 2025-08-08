@@ -147,3 +147,24 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 
 ### Environment Management
 - sempre fechar a porta de desenvolvimento que for usada para teste
+
+### Additional Key Dependencies
+- **Animation**: `framer-motion` for advanced animations and micro-interactions
+- **Virtualization**: `@tanstack/react-virtual` for efficient large list rendering 
+- **File Upload**: `tus-js-client` and `@tus/server` for resumable file uploads
+- **Image Processing**: Custom cropping utilities in `lib/imageUtils.ts`
+- **Date Handling**: `date-fns` for consistent date formatting across components
+- **HTTP Client**: `axios` for API requests with custom error handling
+
+### Video System Architecture
+- **Upload Types**: YouTube, Vimeo, and direct file uploads supported
+- **File Processing**: Thumbnail generation with `lib/thumbnail-generator.ts`
+- **Storage**: Organized in Supabase storage with folder structure (`uploads/`, `thumbnails/`)
+- **UI Components**: Modular video system in `app/components/VideoGallery/`
+- **Configuration**: Centralized video constants in `lib/constants/video-ui.ts`
+
+### Performance Optimizations
+- **Image Optimization**: Next.js Image component with Vercel-optimized settings
+- **Virtual Scrolling**: For large datasets using `@tanstack/react-virtual`
+- **Caching**: Strategic caching for video thumbnails and economic indicators
+- **Bundle Optimization**: SWC minification enabled in `next.config.js`

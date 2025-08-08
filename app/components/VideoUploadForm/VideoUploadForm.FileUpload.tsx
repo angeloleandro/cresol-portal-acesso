@@ -9,6 +9,7 @@ import { videoUploadStyles } from './VideoUploadForm.styles'
 import { a11yTokens } from '@/lib/design-tokens/video-system'
 import { formatFileSize, isValidVideoMimeType } from '@/lib/video-utils'
 import { VIDEO_CONFIG } from '@/lib/constants'
+import { VIDEO_MESSAGES } from '@/lib/constants/video-ui'
 
 // File validation function
 function validateVideoFile(file: File): { valid: boolean; error?: string } {
@@ -17,14 +18,14 @@ function validateVideoFile(file: File): { valid: boolean; error?: string } {
   if (!isValidVideoMimeType(file.type) && !VIDEO_CONFIG.ALLOWED_EXTENSIONS.includes(fileExt as any)) {
     return { 
       valid: false, 
-      error: 'Formato não suportado. Use MP4, WebM, MOV ou AVI.' 
+      error: VIDEO_MESSAGES.ERRORS.UNSUPPORTED_FORMAT
     }
   }
   
   if (file.size > VIDEO_CONFIG.MAX_FILE_SIZE) {
     return { 
       valid: false, 
-      error: `Arquivo muito grande. Máximo: ${formatFileSize(VIDEO_CONFIG.MAX_FILE_SIZE)}` 
+      error: `${VIDEO_MESSAGES.ERRORS.FILE_TOO_LARGE} Máximo: ${formatFileSize(VIDEO_CONFIG.MAX_FILE_SIZE)}` 
     }
   }
   
@@ -51,7 +52,7 @@ export const VideoUploadFormFileUpload = memo(({
     if (file) {
       const validation = validateVideoFile(file)
       if (!validation.valid) {
-        setLocalError(validation.error || 'Arquivo inválido')
+        setLocalError(validation.error || VIDEO_MESSAGES.ERRORS.INVALID_FILE)
         return
       }
       
@@ -84,7 +85,7 @@ export const VideoUploadFormFileUpload = memo(({
     if (videoFile) {
       const validation = validateVideoFile(videoFile)
       if (!validation.valid) {
-        setLocalError(validation.error || 'Arquivo inválido')
+        setLocalError(validation.error || VIDEO_MESSAGES.ERRORS.INVALID_FILE)
         return
       }
       

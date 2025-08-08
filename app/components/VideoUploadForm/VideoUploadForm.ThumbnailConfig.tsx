@@ -102,7 +102,10 @@ export const VideoUploadFormThumbnailConfig = memo(({
       onThumbnailSelect(croppedFile)
       onShowCropChange(false)
     } catch (error) {
-      console.error('Erro ao recortar imagem:', error)
+      // Error should be handled by proper error boundary or reporting service
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao recortar imagem:', error)
+      }
     } finally {
       setIsProcessing(false)
     }

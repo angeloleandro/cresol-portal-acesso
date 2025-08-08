@@ -224,7 +224,10 @@ export const useVideoGalleryContext = () => {
       enableVirtualization: false,
       performanceMode: 'normal' as const,
       errorReporting: (error: Error, context: string) => {
-        console.error(`VideoGallery Error [${context}]:`, error);
+        // Production error reporting should be handled by error tracking service
+        if (process.env.NODE_ENV === 'development') {
+          console.error(`VideoGallery Error [${context}]:`, error);
+        }
       }
     };
   }

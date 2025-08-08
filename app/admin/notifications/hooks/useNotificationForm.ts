@@ -12,9 +12,18 @@ const initialFormData: NotificationFormData = {
   expiresAt: ''
 };
 
+interface FormErrors {
+  title?: string;
+  message?: string;
+  type?: string;
+  priority?: string;
+  expiresAt?: string;
+}
+
 export const useNotificationForm = () => {
   const [notificationForm, setNotificationForm] = useState<NotificationFormData>(initialFormData);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const updateForm = (updates: Partial<NotificationFormData>) => {
     setNotificationForm(prev => ({ ...prev, ...updates }));
@@ -68,6 +77,7 @@ export const useNotificationForm = () => {
   return {
     notificationForm,
     loading,
+    errors,
     updateForm,
     resetForm,
     handleSubmit

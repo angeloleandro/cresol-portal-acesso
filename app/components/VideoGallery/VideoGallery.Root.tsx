@@ -5,10 +5,11 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import { useVideoGallery, useKeyboardNavigation, useInView, usePerformanceMonitor } from './VideoGallery.hooks';
+import { useOptimizedVideoGallery, useOptimizedInView } from '@/hooks/useOptimizedVideoGallery';
+import { useKeyboardNavigation, usePerformanceMonitor } from './VideoGallery.hooks';
 import { VideoGalleryGrid } from './VideoGallery.Grid';
 import { EnhancedVideoCard, SkeletonVideoCard } from './VideoGallery.Card';
 import { VideoCleanModal } from './VideoGallery.CleanModal';
@@ -35,13 +36,13 @@ export function VideoGalleryRoot({
   // Performance monitoring
   usePerformanceMonitor('VideoGalleryRoot');
   
-  // Intersection observer for lazy loading
-  const { ref: containerRef, isInView, hasBeenInView } = useInView({
+  // Intersection observer for lazy loading (otimizado)
+  const { ref: containerRef, isInView, hasBeenInView } = useOptimizedInView({
     rootMargin: '100px',
     threshold: 0.1
   });
 
-  // Main gallery hook
+  // Main gallery hook (otimizado)
   const {
     videos,
     loading,
@@ -50,7 +51,7 @@ export function VideoGalleryRoot({
     selectedVideo,
     displayVideos,
     actions: { openModal, closeModal, refetch }
-  } = useVideoGallery(limit);
+  } = useOptimizedVideoGallery(limit);
 
   // Keyboard navigation
   useKeyboardNavigation({
@@ -354,7 +355,7 @@ interface CompactVideoGalleryProps extends Omit<VideoGalleryProps, 'showHeader'>
   maxHeight?: string;
 }
 
-export function CompactVideoGallery({
+export const CompactVideoGallery = memo(function CompactVideoGallery({
   limit = 6,
   title = "Vídeos recentes",
   maxHeight = "400px",
@@ -369,7 +370,7 @@ export function CompactVideoGallery({
     selectedVideo,
     displayVideos,
     actions: { openModal, closeModal }
-  } = useVideoGallery(limit);
+  } = useOptimizedVideoGallery(limit);
 
   if (loading) {
     return (
@@ -468,6 +469,6 @@ export function CompactVideoGallery({
       />
     </div>
   );
-}
+});
 
 export default VideoGalleryRoot;

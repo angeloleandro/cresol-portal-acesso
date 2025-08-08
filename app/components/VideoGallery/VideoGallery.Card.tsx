@@ -1,11 +1,12 @@
 /**
  * Enhanced Video Card Component
  * Enterprise-grade video card with rich visual states and advanced thumbnail system
+ * Otimizado com React.memo e hooks otimizados
  */
 
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -13,10 +14,11 @@ import clsx from 'clsx';
 import Icon from '../icons/Icon';
 import { formatFileSize } from '@/lib/video-utils';
 import { cardAnimations, playButtonAnimations, badgeAnimations, thumbnailAnimations } from './VideoGallery.animations';
-import { useImagePreload } from './VideoGallery.hooks';
+import { useOptimizedImagePreload } from '@/hooks/useOptimizedVideoGallery';
 import { VideoCardProps, DashboardVideo } from './VideoGallery.types';
 // Enhanced thumbnail system
 import { VideoThumbnail } from '../VideoThumbnail';
+import { useImagePreload } from './VideoGallery.hooks';
 
 /**
  * Admin Video Card Props - Extends base props with separate action handlers
@@ -43,7 +45,7 @@ export function EnhancedVideoCard({
   const [isHovered, setIsHovered] = useState(false);
   
   // Preload thumbnail for better UX
-  const { isImageLoaded } = useImagePreload(
+  const { isImageLoaded } = useOptimizedImagePreload(
     video.thumbnail_url ? [video.thumbnail_url] : []
   );
 
@@ -80,7 +82,6 @@ export function EnhancedVideoCard({
         'bg-white rounded-xl border border-neutral-200',
         'shadow-sm hover:shadow-lg transition-shadow duration-300',
         'overflow-hidden',
-        'focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary',
         'flex flex-col h-full',
         className
       )}
@@ -251,7 +252,6 @@ export function AdminVideoCard({
         'bg-white rounded-xl border border-neutral-200',
         'shadow-sm hover:shadow-lg transition-shadow duration-300',
         'overflow-hidden',
-        'focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary',
         'flex flex-col h-full',
         className
       )}
@@ -396,7 +396,7 @@ function VideoBadge({ uploadType, className }: VideoBadgeProps) {
       case 'direct':
         return {
           icon: 'video' as const,
-          label: 'Direto',
+          label: 'Interno',
           className: 'bg-green-600 text-white'
         };
       case 'youtube':
@@ -503,7 +503,6 @@ export function CompactVideoCard({
         'flex gap-3 p-3',
         'bg-white rounded-lg border border-neutral-200',
         'hover:shadow-md transition-shadow duration-200',
-        'focus-within:ring-2 focus-within:ring-primary/20'
       )}
       onClick={handleClick}
       tabIndex={0}

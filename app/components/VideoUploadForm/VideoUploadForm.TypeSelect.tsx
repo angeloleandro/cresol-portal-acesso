@@ -96,7 +96,7 @@ export const VideoUploadFormTypeSelect = memo(({
                 aria-describedby="direct-help"
               />
               <div>
-                <div className="text-neutral-900">Upload Direto</div>
+                <div className="text-neutral-900">Upload Interno</div>
                 <div className="text-xs text-neutral-500">Arquivo local</div>
               </div>
             </label>

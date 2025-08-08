@@ -5,6 +5,7 @@
 
 import { memo, useCallback } from 'react'
 import { VideoSettingsProps } from './VideoUploadForm.types'
+import { VIDEO_UI_CLASSES } from '@/lib/constants/video-ui'
 
 export const VideoUploadFormSettings = memo(({ 
   isActive,
@@ -28,9 +29,9 @@ export const VideoUploadFormSettings = memo(({
   }, [disabled, onOrderChange])
   
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className={VIDEO_UI_CLASSES.GRID.TWO_COLUMN}>
       {/* Active Checkbox */}
-      <div className="flex items-center gap-2">
+      <div className={VIDEO_UI_CLASSES.FLEX.ITEMS_CENTER}>
         <input
           id="video-active-checkbox"
           type="checkbox"
@@ -46,17 +47,17 @@ export const VideoUploadFormSettings = memo(({
         />
         <label 
           htmlFor="video-active-checkbox"
-          className="text-sm font-medium text-neutral-700 cursor-pointer"
+          className={VIDEO_UI_CLASSES.TEXT.LABEL_CLICKABLE}
         >
           Vídeo ativo
         </label>
       </div>
       
       {/* Order Input */}
-      <div className="flex items-center gap-2">
+      <div className={VIDEO_UI_CLASSES.FLEX.ITEMS_CENTER}>
         <label 
           htmlFor="video-order-input"
-          className="text-sm font-medium text-neutral-700"
+          className={VIDEO_UI_CLASSES.TEXT.LABEL}
         >
           Ordem:
         </label>
@@ -80,7 +81,7 @@ export const VideoUploadFormSettings = memo(({
       </div>
       
       {/* Help text */}
-      <div className="text-xs text-neutral-500 col-span-1 sm:col-span-2">
+      <div className={VIDEO_UI_CLASSES.CONTAINERS.HELP_SPAN}>
         <div id="active-help" className="mb-1">
           {isActive ? 'Vídeo público' : 'Vídeo oculto'}
         </div>

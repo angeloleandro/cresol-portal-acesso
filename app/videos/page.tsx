@@ -155,7 +155,7 @@ export default function VideosPage() {
     <div className="flex flex-wrap gap-2">
       <TypeFilterButton type="all" label="Todos" count={videoStats.total} />
       <TypeFilterButton type="youtube" label="YouTube" count={videoStats.youtube} />
-      <TypeFilterButton type="direct" label="Diretos" count={videoStats.direct} />
+      <TypeFilterButton type="direct" label="Internos" count={videoStats.direct} />
     </div>
   );
 

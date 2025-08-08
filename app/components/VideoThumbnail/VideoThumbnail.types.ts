@@ -3,7 +3,7 @@
  * Enterprise-grade TypeScript interfaces for video thumbnail system
  */
 
-import { DashboardVideo } from '../VideoGallery/VideoGallery.types';
+import { DashboardVideo } from '@/app/types/video';
 
 export interface BaseThumbnailProps {
   video: DashboardVideo;

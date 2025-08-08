@@ -4,6 +4,7 @@
  */
 
 import { memo, useCallback, useState, useRef } from 'react'
+import Image from 'next/image'
 import { ThumbnailConfigProps } from './VideoUploadForm.types'
 import { Icon } from '../icons/Icon'
 
@@ -198,10 +199,12 @@ export const VideoUploadFormSimpleThumbnail = memo(({
           {thumbnailPreview && (
             <div className="space-y-3">
               <div className="relative w-full aspect-video bg-neutral-100 rounded-lg overflow-hidden">
-                <img
+                <Image
                   src={thumbnailPreview}
                   alt="Preview da thumbnail"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                 <button
@@ -242,10 +245,12 @@ export const VideoUploadFormSimpleThumbnail = memo(({
       {mode === 'auto' && autoThumbnailUrl && (
         <div className="space-y-3">
           <div className="relative w-full aspect-video bg-neutral-100 rounded-lg overflow-hidden">
-            <img
+            <Image
               src={autoThumbnailUrl}
               alt="Thumbnail automática do YouTube"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             <div className="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">

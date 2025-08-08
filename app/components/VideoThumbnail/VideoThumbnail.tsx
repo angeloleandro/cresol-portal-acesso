@@ -349,7 +349,7 @@ function ThumbnailBadge({ uploadType, variant, isHovered }: ThumbnailBadgeProps)
       case 'direct':
         return {
           icon: 'video' as const,
-          label: 'Direto',
+          label: 'Interno',
           color: 'bg-green-600'
         };
       default:

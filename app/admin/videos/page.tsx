@@ -303,7 +303,7 @@ export default function AdminVideos() {
             onClick={() => handleTypeFilter('direct')}
             count={videoStats.direct}
           >
-            Diretos
+            Internos
           </FilterButton>
         </div>
       </div>

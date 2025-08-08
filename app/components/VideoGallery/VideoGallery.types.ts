@@ -3,22 +3,9 @@
  * Enterprise-grade TypeScript interfaces for video gallery system
  */
 
-export interface DashboardVideo {
-  id: string;
-  title: string;
-  video_url: string;
-  thumbnail_url: string | null;
-  is_active: boolean;
-  order_index: number;
-  upload_type: 'youtube' | 'vimeo' | 'direct';
-  file_path?: string | null;
-  file_size?: number | null;
-  mime_type?: string | null;
-  original_filename?: string | null;
-  processing_status?: string;
-  upload_progress?: number;
-  created_at?: string;
-}
+// Import centralized video types to eliminate duplication  
+import type { DashboardVideo } from '@/app/types/video';
+export type { DashboardVideo };
 
 export interface VideoGalleryProps {
   limit?: number;
