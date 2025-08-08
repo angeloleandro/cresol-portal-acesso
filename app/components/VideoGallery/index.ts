@@ -20,6 +20,7 @@ export {
   CompactVideoCard 
 } from './VideoGallery.Card';
 export { VideoModal, CompactVideoModal } from './VideoGallery.Modal';
+export { VideoCleanModal } from './VideoGallery.CleanModal';
 export { VideoPlayer } from './VideoGallery.Player';
 export { 
   VideoGalleryHeader, 

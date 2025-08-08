@@ -60,7 +60,7 @@ export function VideoCleanModal({ isOpen, video, onClose }: VideoModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] } }}
             exit={{ opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.15 } }}
-            className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden scrollbar-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"

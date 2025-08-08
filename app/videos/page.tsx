@@ -14,7 +14,7 @@ import Breadcrumb from "../components/Breadcrumb";
 import { getSupabaseClient } from "@/lib/supabase";
 import { VideoGalleryHeader, AdvancedVideoGalleryHeader } from "../components/VideoGallery/VideoGallery.Header";
 import { VideoGalleryGrid } from "../components/VideoGallery/VideoGallery.Grid";
-import { VideoModal } from "../components/VideoGallery/VideoGallery.Modal";
+import { VideoCleanModal } from "../components/VideoGallery/VideoGallery.CleanModal";
 import { VideoGalleryEmptyState } from "../components/VideoGallery/VideoGallery.EmptyState";
 import { EnhancedVideoCard } from "../components/VideoGallery/VideoGallery.Card";
 import { DashboardVideo, VideoFilters } from "../types/video";
@@ -268,7 +268,7 @@ export default function VideosPage() {
         {/* Video Modal */}
         <AnimatePresence mode="wait">
           {modalOpen && selectedVideo && (
-            <VideoModal
+            <VideoCleanModal
               video={selectedVideo}
               isOpen={modalOpen}
               onClose={handleCloseModal}

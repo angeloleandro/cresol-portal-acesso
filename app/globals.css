@@ -168,116 +168,198 @@ body {
 
 /* ========================================
    ENTERPRISE SCROLLBAR SYSTEM
-   Clean, professional scrollbar design
+   Professional scrollbar design inspired by VS Code, Figma, and modern apps
 ======================================== */
 
-/* Base Scrollbar Styles - Webkit */
+/* CSS Variables for Scrollbar System */
+:root {
+  /* Professional Scrollbar Colors */
+  --scrollbar-bg-track: transparent;
+  --scrollbar-bg-thumb: rgba(148, 163, 184, 0.6); /* slate-400 with opacity */
+  --scrollbar-bg-thumb-hover: rgba(100, 116, 139, 0.8); /* slate-500 with opacity */
+  --scrollbar-bg-thumb-active: rgba(71, 85, 105, 0.9); /* slate-600 with opacity */
+  
+  /* Brand Scrollbar Colors */
+  --scrollbar-brand-thumb: rgba(245, 130, 32, 0.4); /* Cresol primary with opacity */
+  --scrollbar-brand-thumb-hover: rgba(245, 130, 32, 0.6);
+  --scrollbar-brand-thumb-active: rgba(224, 109, 16, 0.8);
+  
+  /* Scrollbar Dimensions - Professional sizes */
+  --scrollbar-size-thin: 6px;
+  --scrollbar-size-default: 10px;  /* Increased for better usability */
+  --scrollbar-size-thick: 14px;
+  
+  /* Scrollbar Radius */
+  --scrollbar-radius: 5px;
+  --scrollbar-radius-small: 3px;
+}
+
+/* Base Scrollbar Styles - Modern Professional */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: var(--scrollbar-size-default);
+  height: var(--scrollbar-size-default);
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 4px;
+  background: var(--scrollbar-bg-track);
+  border-radius: var(--scrollbar-radius);
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #CBD5E1; /* slate-300 */
-  border-radius: 4px;
-  border: none;
+  background-color: var(--scrollbar-bg-thumb);
+  border-radius: var(--scrollbar-radius);
+  border: 2px solid transparent;
+  background-clip: content-box;
   transition: background-color var(--vs-transition-normal);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #94A3B8; /* slate-400 */
+  background-color: var(--scrollbar-bg-thumb-hover);
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background-color: #64748B; /* slate-500 */
+  background-color: var(--scrollbar-bg-thumb-active);
 }
 
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
 
-/* Firefox Scrollbar Styles */
+/* Firefox Scrollbar Styles - Professional */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #CBD5E1 transparent;
+  scrollbar-color: var(--scrollbar-bg-thumb) transparent;
 }
 
-/* Professional Scrollbar Classes */
+/* ========================================
+   PROFESSIONAL SCROLLBAR CLASSES
+   Context-specific scrollbar implementations
+======================================== */
+
+/* Thin Scrollbar - For compact interfaces */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: #CBD5E1 transparent;
+  scrollbar-color: var(--scrollbar-bg-thumb) transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: var(--scrollbar-size-thin);
+  height: var(--scrollbar-size-thin);
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: var(--scrollbar-bg-track);
+  border-radius: var(--scrollbar-radius-small);
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: #CBD5E1;
-  border-radius: 3px;
+  background-color: var(--scrollbar-bg-thumb);
+  border-radius: var(--scrollbar-radius-small);
+  border: 1px solid transparent;
+  background-clip: content-box;
+  transition: background-color var(--vs-transition-normal);
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: #94A3B8;
+  background-color: var(--scrollbar-bg-thumb-hover);
 }
 
-/* Modal Scrollbar - Enterprise Clean */
+/* Modal Scrollbar - Professional modal design */
 .scrollbar-modal {
   scrollbar-width: thin;
-  scrollbar-color: #E2E8F0 transparent;
+  scrollbar-color: var(--scrollbar-bg-thumb) transparent;
 }
 
 .scrollbar-modal::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: var(--scrollbar-size-default);
+  height: var(--scrollbar-size-default);
 }
 
 .scrollbar-modal::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--scrollbar-radius);
+  margin: 4px;
 }
 
 .scrollbar-modal::-webkit-scrollbar-thumb {
-  background-color: #E2E8F0; /* slate-200 */
-  border-radius: 3px;
-  border: none;
+  background-color: rgba(148, 163, 184, 0.5);
+  border-radius: var(--scrollbar-radius);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: all var(--vs-transition-normal);
 }
 
 .scrollbar-modal::-webkit-scrollbar-thumb:hover {
-  background-color: #CBD5E1; /* slate-300 */
+  background-color: rgba(100, 116, 139, 0.7);
+  border-width: 1px;
 }
 
-/* Primary Branded Scrollbar */
+.scrollbar-modal::-webkit-scrollbar-thumb:active {
+  background-color: rgba(71, 85, 105, 0.8);
+}
+
+/* Branded Scrollbar - Cresol theme */
 .scrollbar-branded {
   scrollbar-width: thin;
-  scrollbar-color: rgba(245, 130, 32, 0.3) transparent;
+  scrollbar-color: var(--scrollbar-brand-thumb) transparent;
 }
 
 .scrollbar-branded::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: var(--scrollbar-size-default);
+  height: var(--scrollbar-size-default);
+}
+
+.scrollbar-branded::-webkit-scrollbar-track {
+  background: rgba(245, 130, 32, 0.05);
+  border-radius: var(--scrollbar-radius);
 }
 
 .scrollbar-branded::-webkit-scrollbar-thumb {
-  background-color: rgba(245, 130, 32, 0.3);
-  border-radius: 3px;
+  background-color: var(--scrollbar-brand-thumb);
+  border-radius: var(--scrollbar-radius);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background-color var(--vs-transition-normal);
 }
 
 .scrollbar-branded::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(245, 130, 32, 0.5);
+  background-color: var(--scrollbar-brand-thumb-hover);
 }
 
 .scrollbar-branded::-webkit-scrollbar-thumb:active {
-  background-color: rgba(245, 130, 32, 0.7);
+  background-color: var(--scrollbar-brand-thumb-active);
 }
 
-/* Hidden Scrollbar - Clean Interface */
+/* Thick Scrollbar - For content-heavy areas */
+.scrollbar-thick {
+  scrollbar-width: auto;
+  scrollbar-color: var(--scrollbar-bg-thumb) transparent;
+}
+
+.scrollbar-thick::-webkit-scrollbar {
+  width: var(--scrollbar-size-thick);
+  height: var(--scrollbar-size-thick);
+}
+
+.scrollbar-thick::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: var(--scrollbar-radius);
+  margin: 2px;
+}
+
+.scrollbar-thick::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-bg-thumb);
+  border-radius: var(--scrollbar-radius);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  transition: background-color var(--vs-transition-normal);
+}
+
+.scrollbar-thick::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-bg-thumb-hover);
+}
+
+/* Hidden Scrollbar - Clean interface without scrollbars */
 .scrollbar-hidden {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -285,6 +367,41 @@ body {
 
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
+}
+
+/* Auto-hide Scrollbar - Shows on hover */
+.scrollbar-auto-hide {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color var(--vs-transition-normal);
+}
+
+.scrollbar-auto-hide:hover {
+  scrollbar-color: var(--scrollbar-bg-thumb) transparent;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar {
+  width: var(--scrollbar-size-default);
+  height: var(--scrollbar-size-default);
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: var(--scrollbar-radius);
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: var(--scrollbar-radius);
+  transition: background-color var(--vs-transition-normal);
+}
+
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-bg-thumb);
+}
+
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-bg-thumb-hover);
 }
 
 /* Botões Padronizados - Design System */

@@ -54,7 +54,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="card w-full max-w-md">
+      <div className="card w-full max-w-md scrollbar-modal">
         <h2 className="heading-4 mb-4">{title}</h2>
         <p className="body-text mb-4" dangerouslySetInnerHTML={{ __html: message }}></p>
         {requiresConfirmationInput && (

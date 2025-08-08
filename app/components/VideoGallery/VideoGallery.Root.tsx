@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import { useVideoGallery, useKeyboardNavigation, useInView, usePerformanceMonitor } from './VideoGallery.hooks';
 import { VideoGalleryGrid } from './VideoGallery.Grid';
 import { EnhancedVideoCard, SkeletonVideoCard } from './VideoGallery.Card';
-import { VideoModal } from './VideoGallery.Modal';
+import { VideoCleanModal } from './VideoGallery.CleanModal';
 import { VideoGalleryHeader } from './VideoGallery.Header';
 import { VideoGalleryLoadingState } from './VideoGallery.LoadingState';
 import { VideoGalleryEmptyState } from './VideoGallery.EmptyState';
@@ -233,7 +233,7 @@ export function VideoGalleryRoot({
       )}
 
       {/* Video Modal */}
-      <VideoModal
+      <VideoCleanModal
         isOpen={modalOpen}
         video={selectedVideo}
         onClose={closeModal}
@@ -461,7 +461,7 @@ export function CompactVideoGallery({
         ))}
       </div>
 
-      <VideoModal
+      <VideoCleanModal
         isOpen={modalOpen}
         video={selectedVideo}
         onClose={closeModal}
