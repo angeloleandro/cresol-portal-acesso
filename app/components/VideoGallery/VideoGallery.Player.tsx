@@ -8,7 +8,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
-import Icon from '../icons/Icon';
+import { Icon } from '../icons/Icon';
 import { DashboardVideo } from './VideoGallery.types';
 import { loadingAnimations, errorAnimations } from './VideoGallery.animations';
 

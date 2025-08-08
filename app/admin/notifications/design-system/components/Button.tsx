@@ -43,11 +43,11 @@ export const Button: React.FC<ButtonProps> = ({
   const getSizeClasses = () => {
     switch (size) {
       case 'sm':
-        return 'px-3 py-1.5 text-xs font-medium';
+        return 'px-3 py-2 sm:px-3 sm:py-1.5 text-xs font-medium min-h-[36px]';
       case 'lg':
-        return 'px-6 py-3 text-base font-semibold';
+        return 'px-6 py-3 sm:px-6 sm:py-3 text-sm sm:text-base font-semibold min-h-[48px]';
       default:
-        return 'px-4 py-2 text-sm font-medium';
+        return 'px-4 py-2.5 sm:px-4 sm:py-2 text-sm font-medium min-h-[44px]';
     }
   };
 
@@ -66,13 +66,13 @@ export const Button: React.FC<ButtonProps> = ({
         items-center
         justify-center
         gap-2
-        rounded-lg
-        shadow-sm
-        transition-all
+        rounded-lg sm:rounded-xl
+        transition-colors
         duration-200
         focus:outline-none
         focus:ring-2
         focus:ring-offset-2
+        touch-manipulation
         ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         ${className}
       `}

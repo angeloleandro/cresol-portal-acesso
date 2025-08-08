@@ -182,13 +182,16 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
   // Versão normal (não compacta)
   return (
     <div className="card">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="heading-3 text-title">Próximos Eventos</h2>
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h2 className="heading-3 text-title">Próximos Eventos</h2>
+          <p className="body-text-small text-muted mt-1">Confira a agenda de atividades</p>
+        </div>
         <Link 
           href="/eventos" 
-          className="text-sm font-medium transition-colors flex items-center hover: px-3 py-1.5 rounded-md text-primary"
+          className="text-sm font-medium transition-colors flex items-center hover:bg-primary/10 px-3 py-1.5 rounded-md text-primary"
         >
-          Ver todos
+          Ver todas
           <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

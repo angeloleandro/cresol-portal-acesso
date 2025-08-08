@@ -60,7 +60,7 @@ export const PrioritySelector: React.FC<PrioritySelectorProps> = ({
               ${
                 value === priority.value
                   ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                  : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
               }
             `}
           >

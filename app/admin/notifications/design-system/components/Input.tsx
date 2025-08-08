@@ -66,8 +66,7 @@ export const Input: React.FC<InputProps> = ({
             border
             rounded-lg
             bg-white
-            shadow-sm
-            transition-all duration-200
+            transition-colors duration-200
             focus:outline-none
             focus:ring-2
             placeholder:text-gray-400

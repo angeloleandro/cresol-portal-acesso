@@ -79,7 +79,7 @@ export const VideoUploadFormThumbnailTimePicker = memo(({
         await videoRef.current.play()
         setIsPlaying(true)
       } catch (error) {
-        console.warn('Erro ao reproduzir vídeo:', error)
+        // Error should be handled by proper error boundary
       }
     }
   }, [isPlaying])

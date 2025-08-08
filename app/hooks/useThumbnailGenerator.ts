@@ -10,9 +10,14 @@ import {
   ThumbnailResult,
   ThumbnailOptions 
 } from "@/lib/thumbnail-generator";
+import {
+  VIDEO_THUMBNAIL_CONFIG,
+  VIDEO_MESSAGES
+} from '@/lib/constants/video-ui';
 
 interface UseThumbnailGeneratorProps {
   videoFile: File | null;
+  videoUrl?: string;
   autoGenerate?: boolean;
   defaultOptions?: ThumbnailOptions;
   timestamp?: number;
@@ -29,6 +34,7 @@ interface ThumbnailState {
 
 export function useThumbnailGenerator({
   videoFile,
+  videoUrl,
   autoGenerate = true,
   defaultOptions = {},
   timestamp
@@ -45,7 +51,7 @@ export function useThumbnailGenerator({
   const [createdUrls, setCreatedUrls] = useState<string[]>([]);
 
   const generateThumbnail = useCallback(async (seekTime?: number) => {
-    if (!videoFile || !state.isSupported) return;
+    if ((!videoFile && !videoUrl) || !state.isSupported) return;
 
     setState(prev => ({ 
       ...prev, 
@@ -61,15 +67,50 @@ export function useThumbnailGenerator({
         options.seekTime = timestamp;
       }
 
-      console.log('🎬 Tentando geração padrão de thumbnail...');
       let result: ThumbnailResult;
       
-      try {
-        result = await generateVideoThumbnail(videoFile, options);
-      } catch (error) {
-        console.warn('⚠️ Geração padrão falhou, tentando versão simples...', error);
-        result = await generateVideoThumbnailSimple(videoFile, options);
-        console.log('✅ Geração simples funcionou como fallback');
+      if (videoFile) {
+        try {
+          result = await generateVideoThumbnail(videoFile, options);
+        } catch (error) {
+          result = await generateVideoThumbnailSimple(videoFile, options);
+        }
+      } else if (videoUrl) {
+        // Para videoUrl, vamos criar um elemento video temporário para gerar o thumbnail
+        const video = document.createElement('video');
+        video.crossOrigin = 'anonymous';
+        video.src = videoUrl;
+        
+        await new Promise((resolve, reject) => {
+          video.onloadedmetadata = resolve;
+          video.onerror = reject;
+        });
+        
+        video.currentTime = options.seekTime || VIDEO_THUMBNAIL_CONFIG.generation.defaultTimestamp;
+        
+        await new Promise(resolve => {
+          video.onseeked = resolve;
+        });
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(video, 0, 0);
+        
+        const blob = await new Promise<Blob>((resolve) => {
+          canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.8);
+        });
+        
+        result = {
+          blob,
+          url: URL.createObjectURL(blob),
+          timestamp: options.seekTime || VIDEO_THUMBNAIL_CONFIG.generation.defaultTimestamp,
+          width: canvas.width,
+          height: canvas.height
+        };
+      } else {
+        throw new Error('Nem videoFile nem videoUrl fornecidos');
       }
       
       setCreatedUrls(prev => [...prev, result.url]);
@@ -82,15 +123,14 @@ export function useThumbnailGenerator({
 
       return result;
     } catch (error) {
-      console.error('❌ Ambas as versões de geração falharam:', error);
       setState(prev => ({ 
         ...prev, 
         isGenerating: false, 
-        error: error instanceof Error ? error.message : 'Erro ao gerar thumbnail - tente um arquivo diferente'
+        error: error instanceof Error ? error.message : VIDEO_MESSAGES.ERRORS.GENERATION_FAILED
       }));
       return null;
     }
-  }, [videoFile, defaultOptions, timestamp, state.isSupported]);
+  }, [videoFile, videoUrl, defaultOptions, timestamp, state.isSupported]);
 
   const uploadThumbnail = useCallback(async (): Promise<string | null> => {
     if (!state.result || !videoFile) {
@@ -121,7 +161,6 @@ export function useThumbnailGenerator({
 
       return uploadedUrl;
     } catch (error) {
-      console.error('Erro ao fazer upload da thumbnail:', error);
       setState(prev => ({ 
         ...prev, 
         isUploading: false, 
@@ -163,12 +202,12 @@ export function useThumbnailGenerator({
     }));
   }, []);
 
-  // Auto-gerar thumbnail quando arquivo muda
+  // Auto-gerar thumbnail quando arquivo ou URL muda
   useEffect(() => {
-    if (videoFile && autoGenerate && state.isSupported) {
+    if ((videoFile || videoUrl) && autoGenerate && state.isSupported) {
       generateThumbnail();
     }
-  }, [videoFile, autoGenerate, state.isSupported, generateThumbnail]);
+  }, [videoFile, videoUrl, autoGenerate, state.isSupported, generateThumbnail]);
 
   // Cleanup URLs ao desmontar
   useEffect(() => {

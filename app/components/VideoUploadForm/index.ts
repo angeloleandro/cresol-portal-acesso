@@ -4,13 +4,14 @@
  */
 
 export { VideoUploadFormRoot as VideoUploadForm } from './VideoUploadForm.Root'
+export { VideoUploadFormRoot } from './VideoUploadForm.Root'
 
 // Export individual components for advanced usage
 export { VideoUploadFormHeader } from './VideoUploadForm.Header'
 export { VideoUploadFormTypeSelect } from './VideoUploadForm.TypeSelect'
 export { VideoUploadFormYouTubeInput } from './VideoUploadForm.YouTubeInput'
 export { VideoUploadFormFileUpload } from './VideoUploadForm.FileUpload'
-export { VideoUploadFormThumbnailConfig } from './VideoUploadForm.ThumbnailConfig'
+// VideoUploadFormThumbnailConfig removed - obsolete component replaced by SimpleThumbnail
 export { VideoUploadFormSettings } from './VideoUploadForm.Settings'
 export { VideoUploadFormActions } from './VideoUploadForm.Actions'
 

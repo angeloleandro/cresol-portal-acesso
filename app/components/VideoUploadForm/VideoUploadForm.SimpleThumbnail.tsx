@@ -9,13 +9,12 @@ import { ThumbnailConfigProps } from './VideoUploadForm.types'
 import { Icon } from '../icons/Icon'
 import { useThumbnailGenerator } from '@/app/hooks/useThumbnailGenerator'
 import { VideoUploadFormThumbnailTimePicker } from './VideoUploadForm.ThumbnailTimePicker'
-import { VideoUploadFormLocalThumbnailPreview } from './VideoUploadForm.LocalThumbnailPreview'
+import { VIDEO_HELPERS } from '@/lib/constants/video-ui'
 
-// YouTube thumbnail helper
+// Consolidated YouTube thumbnail helper
 function getYouTubeThumbnail(url: string): string | null {
-  if (!url) return null
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)
-  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null
+  const videoId = VIDEO_HELPERS.extractYouTubeId(url)
+  return videoId ? VIDEO_HELPERS.getYouTubeThumbnail(videoId) : null
 }
 
 export const VideoUploadFormSimpleThumbnail = memo(({ 
@@ -33,12 +32,15 @@ export const VideoUploadFormSimpleThumbnail = memo(({
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const lastAutoTimestamp = useRef<number | null>(null)
+  
+  // Estado para armazenar o timestamp selecionado no time picker
+  const [selectedTimestamp, setSelectedTimestamp] = useState<number>(1.0)
 
-  // Hook de geração automática - desabilitado pois agora usa preview local
+  // Hook de geração de thumbnail usando timestamp selecionado
   const autoThumbState = useThumbnailGenerator({
-    videoFile: null, // Desabilitado - preview local gerencia isso
-    autoGenerate: false,
-    timestamp: 1.0
+    videoFile: uploadType === 'direct' ? (videoFile || null) : null,
+    autoGenerate: false, // Geração manual via botão
+    timestamp: selectedTimestamp
   })
   const [dragActive, setDragActive] = useState(false)
   
@@ -305,16 +307,98 @@ export const VideoUploadFormSimpleThumbnail = memo(({
 
       {/* Auto Thumbnail Preview - Local Video File */}
       {mode === 'auto' && uploadType === 'direct' && videoFile && (
-        <VideoUploadFormLocalThumbnailPreview
-          videoFile={videoFile}
-          onThumbnailGenerated={(thumbnailFile, timestamp) => {
-            console.log('🎯 [SIMPLE_THUMBNAIL] Thumbnail local gerada:', { timestamp });
-            onThumbnailSelect(thumbnailFile);
-            onTimestampChange?.(timestamp);
-          }}
-          onTimestampChange={onTimestampChange}
-          disabled={disabled}
-        />
+        <div className="space-y-4">
+          {/* Visual Time Picker with Video Player */}
+          <div className="p-4 bg-neutral-50 border border-neutral-200 rounded-lg">
+            <h4 className="font-medium text-neutral-800 mb-4">Selecionar Momento da Thumbnail</h4>
+            <VideoUploadFormThumbnailTimePicker
+              videoFile={videoFile}
+              onTimeSelect={(timestamp) => {
+                setSelectedTimestamp(timestamp);
+                onTimestampChange?.(timestamp);
+              }}
+              disabled={disabled}
+            />
+            
+            <div className="mt-4 pt-4 border-t border-neutral-200">
+              <p className="text-sm text-neutral-600 mb-3">
+                Após escolher o momento ideal, clique em &quot;Gerar Thumbnail&quot; para criar a imagem.
+              </p>
+              
+              <button
+                type="button"
+                onClick={async () => {
+                  // Usar o sistema de geração local com o timestamp selecionado
+                  try {
+                    const result = await autoThumbState.generateThumbnail(selectedTimestamp);
+                    if (result && result.blob) {
+                      const thumbnailFile = new File(
+                        [result.blob], 
+                        `thumbnail_${selectedTimestamp.toFixed(1)}s.jpg`, 
+                        { type: 'image/jpeg' }
+                      );
+                      onThumbnailSelect(thumbnailFile);
+                    }
+                  } catch (error) {
+                    // Error handling
+                  }
+                }}
+                disabled={disabled || autoThumbState.isGenerating || !videoFile}
+                className="
+                  px-6 py-2 bg-primary text-white text-sm rounded-lg font-medium
+                  hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20
+                  disabled:opacity-50 disabled:cursor-not-allowed transition-colors
+                "
+              >
+                {autoThumbState.isGenerating ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Gerando...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Icon name="image" className="w-4 h-4" />
+                    <span>Gerar Thumbnail</span>
+                  </div>
+                )}
+              </button>
+            </div>
+          </div>
+          
+          {/* Thumbnail Preview Area */}
+          {autoThumbState.thumbnail && (
+            <div className="space-y-3">
+              <div className="relative aspect-video bg-neutral-100 rounded-lg overflow-hidden">
+                <Image
+                  src={autoThumbState.thumbnail.url}
+                  alt="Preview da thumbnail gerada"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+                <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                  {autoThumbState.thumbnail.timestamp?.toFixed(1) || '1.0'}s
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between text-xs text-neutral-500 bg-neutral-50 px-3 py-2 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Icon name="check-circle" className="w-4 h-4 text-green-600" />
+                  <span>Thumbnail gerada no momento selecionado</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {autoThumbState.error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2 text-red-800 text-sm">
+                <Icon name="triangle-alert" className="w-4 h-4" />
+                <span>{autoThumbState.error}</span>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
 

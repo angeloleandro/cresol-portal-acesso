@@ -1,32 +1,39 @@
 /**
- * VideoUploadForm Clean Header Component
- * Ultra-minimalist header design without unnecessary visual elements
+ * VideoUploadForm Header Component
+ * Enhanced header with visual hierarchy and contextual information
  */
 
 import { memo } from 'react'
 import { VideoUploadHeaderProps } from './VideoUploadForm.types'
+import { Icon } from '../icons/Icon'
 
 export const VideoUploadFormHeader = memo(({ 
   title, 
   isEditing 
 }: VideoUploadHeaderProps) => {
   return (
-    <header className="px-6 py-4 border-b border-neutral-200 bg-white flex-shrink-0">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 
-            id="video-upload-title"
-            className="text-lg font-medium text-neutral-900"
-            role="heading" 
-            aria-level={3}
-          >
-            {title}
-          </h3>
+    <header className="mb-8 pb-6 border-b border-neutral-100">
+      <div className="flex items-center gap-3 mb-2">
+        <div className={`
+          w-10 h-10 rounded-full flex items-center justify-center 
+          ${isEditing ? 'bg-amber-50 text-amber-600' : 'bg-primary/10 text-primary'}
+        `}>
+          <Icon 
+            name={isEditing ? "pencil" : "plus"} 
+            className="w-5 h-5" 
+          />
         </div>
         
-        {/* Minimal status indicator */}
-        <div className="text-xs text-neutral-500 px-2 py-1 bg-neutral-50 rounded">
-          {isEditing ? 'Editando' : 'Novo'}
+        <div>
+          <h2 className="text-xl font-semibold text-neutral-900">
+            {title}
+          </h2>
+          <p className="text-sm text-neutral-500 mt-0.5">
+            {isEditing 
+              ? 'Atualize as informações do vídeo'
+              : 'Adicione um novo vídeo ao sistema'
+            }
+          </p>
         </div>
       </div>
     </header>

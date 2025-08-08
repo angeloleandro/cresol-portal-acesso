@@ -8,7 +8,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import Icon, { IconName } from '../icons/Icon';
+import { Icon, IconName } from '../icons/Icon';
 import { headerAnimations } from './VideoGallery.animations';
 
 interface VideoGalleryHeaderProps {
@@ -50,16 +50,16 @@ export function VideoGalleryHeader({
     >
       {/* Title Section */}
       <div className="text-center sm:text-left">
-        <h2 className="text-2xl font-bold text-neutral-900 sm:text-3xl mb-1">
+        <h2 className="heading-3 text-title">
           {title}
           {videoCount !== undefined && (
-            <span className="ml-2 text-lg font-normal text-neutral-500">
+            <span className="ml-2 text-sm font-normal text-muted">
               ({videoCount})
             </span>
           )}
         </h2>
         {subtitle && (
-          <p className="text-neutral-600 text-sm sm:text-base">
+          <p className="body-text-small text-muted mt-1">
             {subtitle}
           </p>
         )}
@@ -97,24 +97,13 @@ function SeeAllButton({ href, text, enableAnimations = true }: SeeAllButtonProps
     <ButtonWrapper {...buttonProps}>
       <Link
         href={href}
-        className={clsx(
-          'inline-flex items-center gap-2 px-4 py-2',
-          'text-sm font-medium',
-          'text-primary hover:text-primary-dark',
-          'bg-primary/10 hover:bg-primary/20',
-          'rounded-lg transition-all duration-200',
-          'border border-transparent hover:border-primary/20',
-          'focus:outline-none focus:ring-2 focus:ring-primary/20',
-          'w-full sm:w-auto justify-center sm:justify-start'
-        )}
+        className="text-sm font-medium transition-colors flex items-center hover:bg-primary/10 px-3 py-1.5 rounded-md text-primary"
         aria-label={`${text} - navegar para galeria completa`}
       >
         <span>{text}</span>
-        <Icon 
-          name="arrow-right" 
-          className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
-          aria-hidden="true"
-        />
+        <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
       </Link>
     </ButtonWrapper>
   );

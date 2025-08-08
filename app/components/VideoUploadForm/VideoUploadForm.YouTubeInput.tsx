@@ -6,21 +6,16 @@
 import { memo, useCallback, useState, useEffect } from 'react'
 import Image from 'next/image'
 import { YouTubeInputProps } from './VideoUploadForm.types'
+import { VIDEO_HELPERS } from '@/lib/constants/video-ui'
 
-// YouTube URL validation and ID extraction
-function getYouTubeId(url: string): string | null {
-  if (!url) return null
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)
-  return match ? match[1] : null
-}
-
+// Consolidated YouTube helper functions using VIDEO_HELPERS
 function getYouTubeThumbnail(url: string): string | null {
-  const videoId = getYouTubeId(url)
-  return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null
+  const videoId = VIDEO_HELPERS.extractYouTubeId(url)
+  return videoId ? VIDEO_HELPERS.getYouTubeThumbnail(videoId) : null
 }
 
 function isValidYouTubeUrl(url: string): boolean {
-  return getYouTubeId(url) !== null
+  return VIDEO_HELPERS.extractYouTubeId(url) !== null
 }
 
 export const VideoUploadFormYouTubeInput = memo(({ 

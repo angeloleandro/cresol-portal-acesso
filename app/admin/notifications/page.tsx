@@ -57,9 +57,9 @@ export default function NotificationsAdmin() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <AdminHeader user={user} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Breadcrumb */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <Breadcrumb 
             items={[
               { label: 'Home', href: '/home', icon: 'house' },
@@ -69,23 +69,25 @@ export default function NotificationsAdmin() {
           />
         </div>
 
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-2xl mb-4">
-            <Icon name="bell-notification" className="w-10 h-10 text-primary" />
+        {/* Mobile-First Header Section */}
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-primary/10 rounded-xl sm:rounded-2xl mb-3 sm:mb-4">
+            <Icon name="bell-notification" className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Central de Notificações</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 px-4">
+            Central de Notificações
+          </h1>
+          <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4 leading-relaxed">
             Gerencie comunicações, configure grupos de usuários e acompanhe o histórico de mensagens enviadas
           </p>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        {/* Mobile-Optimized Stats Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           <StatsCard
             title="Total de Grupos"
             value={groups.length}
-            icon={<Icon name="user-group" className="w-6 h-6" />}
+            icon={<Icon name="user-group" className="w-5 h-5 sm:w-6 sm:h-6" />}
             color="primary"
             trend={{ value: 12, isPositive: true, period: 'vs. mês anterior' }}
           />
@@ -93,23 +95,25 @@ export default function NotificationsAdmin() {
           <StatsCard
             title="Usuários Ativos"
             value={availableUsers.length}
-            icon={<Icon name="user-circle" className="w-6 h-6" />}
+            icon={<Icon name="user-circle" className="w-5 h-5 sm:w-6 sm:h-6" />}
             color="secondary"
             trend={{ value: 8, isPositive: true, period: 'vs. mês anterior' }}
           />
 
-          <StatsCard
-            title="Mensagens Hoje"
-            value="0"
-            icon={<Icon name="mail" className="w-6 h-6" />}
-            color="info"
-          />
+          <div className="sm:col-span-2 lg:col-span-1">
+            <StatsCard
+              title="Mensagens Hoje"
+              value="0"
+              icon={<Icon name="mail" className="w-5 h-5 sm:w-6 sm:h-6" />}
+              color="info"
+            />
+          </div>
         </div>
 
-        {/* Main Content */}
+        {/* Mobile-First Main Content */}
         <Card variant="elevated" className="overflow-hidden">
-          {/* Tab Navigation */}
-          <div className="px-6 pt-6 pb-2">
+          {/* Mobile-Optimized Tab Navigation */}
+          <div className="px-3 sm:px-4 lg:px-6 pt-4 sm:pt-6 pb-2">
             <TabNavigation
               tabs={tabs}
               activeTab={activeTab}
@@ -119,10 +123,10 @@ export default function NotificationsAdmin() {
             />
           </div>
 
-          {/* Tab Content */}
+          {/* Mobile-Responsive Tab Content */}
           <div className="px-0">
             {activeTab === 'send' && (
-              <div className="p-6 pt-4">
+              <div className="p-3 sm:p-4 lg:p-6 pt-2 sm:pt-4">
                 <NotificationFormEnhanced 
                   availableUsers={availableUsers}
                   availableGroups={groups}
@@ -131,13 +135,13 @@ export default function NotificationsAdmin() {
             )}
 
             {activeTab === 'groups' && (
-              <div className="p-6 pt-4">
+              <div className="p-3 sm:p-4 lg:p-6 pt-2 sm:pt-4">
                 <GroupsManager />
               </div>
             )}
 
             {activeTab === 'history' && (
-              <div className="p-6 pt-4">
+              <div className="p-3 sm:p-4 lg:p-6 pt-2 sm:pt-4">
                 <NotificationHistory />
               </div>
             )}

@@ -48,6 +48,31 @@ export const VideoCleanModal = memo(function VideoCleanModal({ isOpen, video, on
     }
   }, [onClose]);
 
+  // Memoized styles to prevent re-renders
+  const backdropStyle = useMemo(() => ({
+    zIndex: 999999,
+    position: 'fixed' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    margin: 0,
+    padding: 0
+  }), []);
+
+  const modalContainerStyle = useMemo(() => ({
+    zIndex: 999999,
+    transition: 'background-color 0.2s ease',
+    pointerEvents: 'all' as const
+  }), []);
+
+  const videoStyle = useMemo(() => ({
+    maxWidth: '95vw',
+    maxHeight: '85vh',
+    outline: 'none',
+    borderRadius: '12px'
+  }), []);
+
   if (!isOpen || !video) return null;
 
   return (
@@ -55,16 +80,7 @@ export const VideoCleanModal = memo(function VideoCleanModal({ isOpen, video, on
       {isOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center"
-          style={{
-            zIndex: 999999,
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            margin: 0,
-            padding: 0
-          }}
+          style={backdropStyle}
           onClick={handleBackdropClick}
         >
           <motion.div
@@ -98,7 +114,7 @@ export const VideoCleanModal = memo(function VideoCleanModal({ isOpen, video, on
           >
             <button
               className="absolute top-4 right-4 w-10 h-10 bg-black/20 text-white rounded-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-white/50"
-              style={{ zIndex: 999999, transition: 'background-color 0.2s ease', pointerEvents: 'all' }}
+              style={modalContainerStyle}
               onMouseEnter={(e) => {
                 e.stopPropagation();
                 e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.4)';
@@ -240,9 +256,8 @@ const CleanDirectVideoPlayer = memo(function CleanDirectVideoPlayer({
   }, []);
 
   const handleError = useCallback(() => {
-    // Log error silently, fallback content will be shown
-    console.warn('Video playback error:', video.title);
-  }, [video.title]);
+    // Error handled silently, fallback content will be shown
+  }, []);
 
   return (
     <video

@@ -7,7 +7,7 @@
 
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import Icon from '../icons/Icon';
+import { Icon } from '../icons/Icon';
 import { 
   PlaceholderConfig, 
   PlaceholderVariant, 

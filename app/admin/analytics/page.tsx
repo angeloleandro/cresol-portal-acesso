@@ -6,25 +6,11 @@ import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { Icon } from '@/app/components/icons/Icon';
-import MetricCardEnterprise from '@/app/components/analytics/MetricCardEnterprise';
 import { MinimalistButton } from '@/app/components/ui/MinimalistButton';
-import { TruncatedText } from '@/app/components/ui/TruncatedText';
-import { LocationCard } from '@/app/components/ui/LocationCard';
-// Enhanced Figma-inspired components
-import MetricCardEnterprisePro from '@/app/components/analytics/MetricCardEnterprisePro';
-import ChartContainerPro from '@/app/components/analytics/ChartContainerPro';
-import NavigationControlsPro from '@/app/components/analytics/NavigationControlsPro';
+// Professional Analytics Components
+import MetricCards from '@/app/components/analytics/MetricCards';
 import AnimatedChart from '@/app/components/analytics/AnimatedChart';
-import { 
-  MetricsGrid, 
-  DashboardLayout, 
-  MainSection, 
-  SidebarSection, 
-  ResponsiveContainer 
-} from '@/app/components/analytics/GridLayoutResponsivo';
-import { 
-  PageTitle
-} from '@/app/components/analytics/TypographyEnterprise';
+import { ResponsiveContainer } from '@/app/components/analytics/GridLayoutResponsivo';
 import { DashboardShimmer } from '@/app/components/analytics/ShimmerLoading';
 
 interface AnalyticsData {
@@ -311,97 +297,108 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Navigation Controls - Compact */}
+        {/* Navigation Controls - Professional Minimal */}
         <div className="mb-6">
-          <NavigationControlsPro
-            tabs={[
-              { label: 'Visão Geral', value: 'overview', icon: 'dashboard', count: 12 },
-              { label: 'Usuários', value: 'users', icon: 'user-group', count: analytics?.users.total },
-              { label: 'Sistemas', value: 'systems', icon: 'monitor', count: analytics?.systems.total },
-              { label: 'Relatórios', value: 'reports', icon: 'document', count: 8 }
-            ]}
-            activeTab="overview"
-            periods={[
-              { label: '7 dias', value: '7d', icon: 'calendar' },
-              { label: '30 dias', value: '30d', icon: 'calendar' },
-              { label: '90 dias', value: '90d', icon: 'calendar' },
-              { label: '1 ano', value: '1y', icon: 'calendar' }
-            ]}
-            activePeriod={selectedPeriod}
-            onPeriodChange={(period) => setSelectedPeriod(period as any)}
-            searchEnabled={false}
-            onRefresh={() => fetchAnalyticsData()}
-            onExport={() => window.print()}
-            variant="minimal"
-            brandColor="orange"
-            size="sm"
-          />
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              
+              {/* Left - Period Selector */}
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-medium text-gray-700">Período:</span>
+                <div className="flex bg-gray-50 rounded-lg p-1">
+                  {[
+                    { label: '7d', value: '7d' },
+                    { label: '30d', value: '30d' },
+                    { label: '90d', value: '90d' },
+                    { label: '1a', value: '1y' }
+                  ].map((period) => (
+                    <button
+                      key={period.value}
+                      onClick={() => setSelectedPeriod(period.value as any)}
+                      className={`
+                        px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200
+                        ${selectedPeriod === period.value
+                          ? 'bg-orange-500 text-white shadow-sm'
+                          : 'text-gray-600 hover:bg-white hover:text-gray-900'
+                        }
+                      `}
+                    >
+                      {period.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right - Actions */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => fetchAnalyticsData()}
+                  className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center space-x-1.5"
+                  title="Atualizar dados"
+                >
+                  <Icon name="refresh" className="h-3.5 w-3.5" />
+                  <span>Atualizar</span>
+                </button>
+                
+                <button
+                  onClick={() => window.print()}
+                  className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center space-x-1.5"
+                  title="Exportar relatório"
+                >
+                  <Icon name="save" className="h-3.5 w-3.5" />
+                  <span>Exportar</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {analytics && (
           <>
-            {/* Metrics Cards - Responsive Professional */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 lg:mb-8">
-              <MetricCardEnterprisePro
-                title="Total de Usuários"
-                value={analytics.users.total}
-                previousValue={analytics.users.total - analytics.users.new}
-                icon="user-group"
-                variant="primary"
-                trend={analytics.users.new > 0 ? 'up' : 'stable'}
-                subtitle={`+${analytics.users.new} novos`}
-                description="Crescimento na base"
-                size="sm"
-                hoverEffect="lift"
-                enableAnimation={false}
-                isPressable={true}
-                onClick={() => router.push('/admin/users')}
-              />
-              
-              <MetricCardEnterprisePro
-                title="Sistemas Ativos"
-                value={analytics.systems.active}
-                previousValue={analytics.systems.total}
-                icon="monitor"
-                variant="secondary"
-                colorPalette="blue"
-                trend="stable"
-                subtitle={`${analytics.systems.total} total`}
-                description="Alta disponibilidade"
-                size="sm"
-                hoverEffect="lift"
-                enableAnimation={false}
-                isPressable={true}
-                onClick={() => router.push('/admin/systems')}
-              />
-              
-              <MetricCardEnterprisePro
-                title="Conteúdo Publicado"
-                value={analytics.content.news + analytics.content.events}
-                icon="chat-line"
-                variant="info"
-                colorPalette="green"
-                trend="up"
-                subtitle={`${analytics.content.news} notícias`}
-                description="Engajamento alto"
-                size="sm"
-                hoverEffect="lift"
-                enableAnimation={false}
-                isBlurred={false}
-              />
-              
-              <MetricCardEnterprisePro
-                title="Atividade Recente"
-                value={analytics.activity.logins}
-                icon="chart-bar-vertical"
-                variant="success"
-                colorPalette="purple"
-                trend="up"
-                subtitle={`${getPeriodLabel(selectedPeriod).replace('Últimos ', '').toLowerCase()}`}
-                description="Engajamento alto"
-                size="sm"
-                hoverEffect="lift"
-                enableAnimation={false}
+            {/* Metrics Cards - Professional Responsive Design */}
+            <div className="mb-6 lg:mb-8">
+              <MetricCards
+                data={[
+                  {
+                    title: 'Visão Geral',
+                    value: 12,
+                    icon: 'dashboard',
+                    description: 'Indicadores principais',
+                    trend: 'stable',
+                    color: 'orange'
+                  },
+                  {
+                    title: 'Usuários',
+                    value: analytics.users.total,
+                    previousValue: analytics.users.total - analytics.users.new,
+                    icon: 'user-group',
+                    description: `+${analytics.users.new} novos usuários`,
+                    trend: analytics.users.new > 0 ? 'up' : 'stable',
+                    color: 'blue',
+                    onClick: () => router.push('/admin/users')
+                  },
+                  {
+                    title: 'Sistemas',
+                    value: analytics.systems.active,
+                    previousValue: analytics.systems.total,
+                    icon: 'monitor',
+                    description: `${analytics.systems.total} sistemas total`,
+                    trend: 'stable',
+                    color: 'green',
+                    onClick: () => router.push('/admin/systems')
+                  },
+                  {
+                    title: 'Relatórios',
+                    value: 8,
+                    icon: 'document',
+                    description: 'Relatórios disponíveis',
+                    trend: 'stable',
+                    color: 'purple'
+                  }
+                ]}
+                size="md"
+                responsive={true}
+                isLoading={false}
               />
             </div>
 

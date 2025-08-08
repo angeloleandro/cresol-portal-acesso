@@ -9,7 +9,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import OptimizedImage from '../OptimizedImage';
-import Icon from '../icons/Icon';
+import { Icon } from '../icons/Icon';
 import { 
   VideoThumbnailProps, 
   ThumbnailVariant,
@@ -90,11 +90,11 @@ export function VideoThumbnail({
     'transition-all duration-300',
     aspectClass,
     {
-      'hover:shadow-lg': variant !== 'compact',
+      'hover:border-gray-300': variant !== 'compact',
       'rounded-lg': variant === 'default',
       'rounded-md': variant === 'compact',
       'rounded-xl': variant === 'hero',
-      'shadow-sm': variant === 'default' || variant === 'card'
+      'border border-gray-200': variant === 'default' || variant === 'card'
     },
     className
   );
@@ -373,7 +373,7 @@ function ThumbnailBadge({ uploadType, variant, isHovered }: ThumbnailBadgeProps)
     >
       <span className={clsx(
         'inline-flex items-center gap-1 rounded-full',
-        'text-white font-medium shadow-sm',
+        'text-white font-medium',
         'backdrop-blur-sm',
         config.color,
         size
@@ -412,12 +412,10 @@ function PlayButton({ variant, isHovered }: PlayButtonProps) {
           <motion.div
             className={clsx(
               'flex items-center justify-center rounded-full',
-              'bg-white/95 text-primary shadow-lg',
+              'bg-white/95 text-primary border border-gray-200',
               'backdrop-blur-sm',
               size
             )}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
           >
             <Icon 
               name="play" 

@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import clsx from 'clsx';
-import Icon from '../icons/Icon';
+import { Icon } from '../icons/Icon';
 import { formatFileSize } from '@/lib/video-utils';
 import { modalAnimations } from './VideoGallery.animations';
 import { useFocusManagement, useEscapeKey } from './VideoGallery.hooks';
@@ -62,7 +62,7 @@ export function VideoModal({ isOpen, video, onClose }: VideoModalProps) {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] } }}
             exit={{ opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } }}
-            className="relative w-full max-w-4xl mx-4 bg-white rounded-xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-4xl mx-4 bg-white border border-gray-200 rounded-xl overflow-hidden"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
@@ -77,7 +77,7 @@ export function VideoModal({ isOpen, video, onClose }: VideoModalProps) {
                 'border border-neutral-200 rounded-full',
                 'flex items-center justify-center',
                 'transition-all duration-200',
-                'hover:scale-105 focus:scale-105',
+                'hover:border-gray-300 focus:border-gray-300',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
               onClick={onClose}

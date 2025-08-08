@@ -195,11 +195,11 @@ export function VideoGalleryRoot({
       {showHeader && (
         <VideoGalleryHeader
           title="Vídeos em destaque"
-          subtitle="Assista aos conteúdos mais relevantes"
+          subtitle="Assista aos conteúdos em vídeo"
           videoCount={videos.length}
-          showSeeAll={showSeeAll && videos.length > limit}
+          showSeeAll={showSeeAll}
           seeAllHref="/videos"
-          seeAllText="Ver todos os vídeos"
+          seeAllText="Ver todas"
         />
       )}
 

@@ -9,23 +9,28 @@ import { videoUploadStyles } from './VideoUploadForm.styles'
 import { a11yTokens } from '@/lib/design-tokens/video-system'
 import { formatFileSize, isValidVideoMimeType } from '@/lib/video-utils'
 import { VIDEO_CONFIG } from '@/lib/constants'
-import { VIDEO_MESSAGES } from '@/lib/constants/video-ui'
+import {
+  VIDEO_MESSAGES,
+  VIDEO_FILE_CONFIG,
+  VIDEO_UI_CONFIG,
+  VIDEO_HELPERS
+} from '@/lib/constants/video-ui'
 
 // File validation function
 function validateVideoFile(file: File): { valid: boolean; error?: string } {
   const fileExt = '.' + file.name.split('.').pop()?.toLowerCase()
   
-  if (!isValidVideoMimeType(file.type) && !VIDEO_CONFIG.ALLOWED_EXTENSIONS.includes(fileExt as any)) {
+  if (!isValidVideoMimeType(file.type) && !VIDEO_FILE_CONFIG.supportedFormats.includes(fileExt.slice(1) as any)) {
     return { 
       valid: false, 
       error: VIDEO_MESSAGES.ERRORS.UNSUPPORTED_FORMAT
     }
   }
   
-  if (file.size > VIDEO_CONFIG.MAX_FILE_SIZE) {
+  if (file.size > VIDEO_FILE_CONFIG.maxSize) {
     return { 
       valid: false, 
-      error: `${VIDEO_MESSAGES.ERRORS.FILE_TOO_LARGE} Máximo: ${formatFileSize(VIDEO_CONFIG.MAX_FILE_SIZE)}` 
+      error: `${VIDEO_MESSAGES.ERRORS.FILE_TOO_LARGE} Máximo: ${VIDEO_HELPERS.formatFileSize(VIDEO_FILE_CONFIG.maxSize)}` 
     }
   }
   
@@ -46,6 +51,7 @@ export const VideoUploadFormFileUpload = memo(({
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [localError, setLocalError] = useState<string | null>(null)
+  const [isClickHandled, setIsClickHandled] = useState(false)
   
   const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -97,10 +103,16 @@ export const VideoUploadFormFileUpload = memo(({
   }, [disabled, onDragStateChange, onFileSelect])
   
   const handleClick = useCallback(() => {
-    if (!disabled && fileInputRef.current) {
+    if (!disabled && fileInputRef.current && !isClickHandled) {
+      setIsClickHandled(true)
       fileInputRef.current.click()
+      
+      // Reset click handler after a short delay to prevent double clicks
+      setTimeout(() => {
+        setIsClickHandled(false)
+      }, VIDEO_UI_CONFIG.delays.clickPrevent)
     }
-  }, [disabled])
+  }, [disabled, isClickHandled])
   
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
@@ -113,6 +125,7 @@ export const VideoUploadFormFileUpload = memo(({
     e.stopPropagation()
     onFileRemove()
     setLocalError(null)
+    setIsClickHandled(false)
     
     // Reset file input
     if (fileInputRef.current) {
@@ -127,8 +140,8 @@ export const VideoUploadFormFileUpload = memo(({
     <div className={videoUploadStyles.form.section}>
       {/* Label */}
       <label className={videoUploadStyles.form.label}>
-        Arquivo de Vídeo
-        <span className={videoUploadStyles.form.required} aria-label="obrigatório">
+        {VIDEO_MESSAGES.LABELS.VIDEO_FILE}
+        <span className={videoUploadStyles.form.required} aria-label={VIDEO_MESSAGES.LABELS.REQUIRED}>
           *
         </span>
       </label>
@@ -137,7 +150,7 @@ export const VideoUploadFormFileUpload = memo(({
       {existingVideoInfo && !videoFile && (
         <div className="mb-4 p-3 bg-gray-50 border rounded-md">
           <div className="text-sm font-medium text-gray-900 mb-1">
-            Arquivo Atual
+            {VIDEO_MESSAGES.LABELS.CURRENT_FILE}
           </div>
           {existingVideoInfo.filename && (
             <div className="text-sm text-gray-700 truncate">
@@ -150,7 +163,7 @@ export const VideoUploadFormFileUpload = memo(({
             </div>
           )}
           <div className="text-xs text-gray-600">
-            Deixe vazio para manter atual ou selecione novo arquivo para substituir.
+            {VIDEO_MESSAGES.INFO.KEEP_CURRENT}
           </div>
         </div>
       )}
@@ -192,17 +205,17 @@ export const VideoUploadFormFileUpload = memo(({
             {/* Upload text */}
             <p className={videoUploadStyles.uploadArea.text}>
               {existingVideoInfo 
-                ? 'Substituir vídeo atual (opcional)' 
-                : 'Arraste o arquivo aqui ou'
+                ? VIDEO_MESSAGES.INFO.REPLACE_CURRENT 
+                : VIDEO_MESSAGES.INFO.DRAG_DROP.split(' ou')[0] + ' ou'
               }{' '}
               <span className={videoUploadStyles.uploadArea.highlight}>
-                clique para selecionar
+                {VIDEO_MESSAGES.LABELS.CLICK_SELECT}
               </span>
             </p>
             
             {/* Help text */}
             <p className={videoUploadStyles.uploadArea.helpText}>
-              MP4, WebM, MOV, AVI • Máximo: {formatFileSize(VIDEO_CONFIG.MAX_FILE_SIZE)}
+              {VIDEO_MESSAGES.INFO.SUPPORTED_FORMATS.replace('Formatos suportados: ', '')} • Máximo: {VIDEO_HELPERS.formatFileSize(VIDEO_FILE_CONFIG.maxSize)}
             </p>
           </div>
           
@@ -210,7 +223,7 @@ export const VideoUploadFormFileUpload = memo(({
           <input
             ref={fileInputRef}
             type="file"
-            accept="video/mp4,video/webm,video/quicktime,video/x-msvideo,.mp4,.webm,.mov,.avi"
+            accept={VIDEO_FILE_CONFIG.acceptAttribute}
             onChange={handleFileInputChange}
             disabled={disabled}
             className={videoUploadStyles.uploadArea.input}
@@ -254,8 +267,8 @@ export const VideoUploadFormFileUpload = memo(({
                 type="button"
                 onClick={handleRemoveFile}
                 className={videoUploadStyles.filePreview.removeButton}
-                aria-label={`Remover arquivo ${videoFile.name}`}
-                title="Remover arquivo"
+                aria-label={`${VIDEO_MESSAGES.LABELS.REMOVE_FILE} ${videoFile.name}`}
+                title={VIDEO_MESSAGES.LABELS.REMOVE_FILE}
               >
                 <svg 
                   className="w-5 h-5" 
@@ -292,7 +305,7 @@ export const VideoUploadFormFileUpload = memo(({
                 />
               </div>
               <p className={videoUploadStyles.progressBar.label}>
-                {uploadProgress}% enviado
+                {uploadProgress}{VIDEO_MESSAGES.INFO.FILE_PROGRESS}
               </p>
             </div>
           )}
@@ -301,7 +314,7 @@ export const VideoUploadFormFileUpload = memo(({
       
       {/* Help text */}
       <div id="file-upload-help" className={videoUploadStyles.form.helpText}>
-        Formatos suportados: MP4, WebM, MOV, AVI. Tamanho máximo: {formatFileSize(VIDEO_CONFIG.MAX_FILE_SIZE)}
+        {VIDEO_MESSAGES.INFO.SUPPORTED_FORMATS}. Tamanho máximo: {VIDEO_HELPERS.formatFileSize(VIDEO_FILE_CONFIG.maxSize)}
       </div>
       
       {/* Error message */}

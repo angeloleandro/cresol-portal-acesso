@@ -60,7 +60,7 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
         {/* Logo and Brand */}
         <div className="admin-brand">
           <Link href="/admin" className="flex items-center gap-3" onClick={closeMobileMenu}>
-            <CresolLogo width={80} height={32} />
+            <CresolLogo width={128} height={40} />
             <div className="admin-brand-divider"></div>
             <span className="admin-brand-text">Admin</span>
           </Link>

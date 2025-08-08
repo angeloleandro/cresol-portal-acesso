@@ -2,25 +2,30 @@
  * Video utilities - Essential functions only
  */
 import { supabase } from '@/lib/supabase';
+import {
+  VIDEO_THUMBNAIL_CONFIG,
+  VIDEO_FILE_CONFIG,
+  YOUTUBE_CONFIG
+} from '@/lib/constants/video-ui';
 
 export function extractYouTubeVideoId(url: string): string | null {
-  const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-  const match = url.match(regex);
+  const match = url.match(VIDEO_THUMBNAIL_CONFIG.youtube.urlPattern);
   return match ? match[1] : null;
 }
 
-export function getYouTubeThumbnail(videoId: string, quality: 'default' | 'hqdefault' | 'maxresdefault' = 'hqdefault'): string {
-  return `https://img.youtube.com/vi/${videoId}/${quality}.jpg`;
+export function getYouTubeThumbnail(
+  videoId: string, 
+  quality: typeof VIDEO_THUMBNAIL_CONFIG.youtube.qualities[number] = VIDEO_THUMBNAIL_CONFIG.youtube.defaultQuality
+): string {
+  return `${YOUTUBE_CONFIG.thumbnail.baseUrl}/${videoId}/${quality}.jpg`;
 }
 
 export function isValidVideoFile(file: File): boolean {
-  const validTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
-  return validTypes.includes(file.type);
+  return VIDEO_FILE_CONFIG.supportedMimeTypes.includes(file.type as any);
 }
 
 export function isValidVideoMimeType(mimeType: string): boolean {
-  const validTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
-  return validTypes.includes(mimeType);
+  return VIDEO_FILE_CONFIG.supportedMimeTypes.includes(mimeType as any);
 }
 
 export function formatFileSize(bytes: number): string {
@@ -56,7 +61,7 @@ export async function getAuthenticatedSession() {
   const { data: { session }, error } = await supabase.auth.getSession();
   
   if (error || !session) {
-    throw new Error('Usuário não autenticado');
+      throw new Error('Usuário não autenticado');
   }
   
   return session;

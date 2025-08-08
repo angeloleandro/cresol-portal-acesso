@@ -70,7 +70,7 @@ const SectorsDropdown = memo(({ pathname, sectors, dropdown }: {
     
     {dropdown.isOpen && (
       <div 
-        className="absolute left-0 mt-0 w-56 bg-white rounded-md shadow-lg py-1 z-10"
+        className="absolute left-0 mt-0 w-56 bg-white border border-gray-200 rounded-md py-1 z-10"
         onMouseEnter={dropdown.handleOpen}
         onMouseLeave={dropdown.handleClose}
       >
@@ -125,7 +125,7 @@ const GalleryDropdown = memo(({ pathname, dropdown }: {
     
     {dropdown.isOpen && (
       <div 
-        className="absolute left-0 mt-0 w-56 bg-white rounded-md shadow-lg py-1 z-10"
+        className="absolute left-0 mt-0 w-56 bg-white border border-gray-200 rounded-md py-1 z-10"
         onMouseEnter={dropdown.handleOpen}
         onMouseLeave={dropdown.handleClose}
       >
@@ -168,7 +168,7 @@ const AdminSectorDropdown = memo(({ sectors, dropdown }: {
     
     {dropdown.isOpen && (
       <div 
-        className="absolute right-0 mt-0 w-56 bg-white rounded-md shadow-lg py-1 z-10"
+        className="absolute right-0 mt-0 w-56 bg-white border border-gray-200 rounded-md py-1 z-10"
         onMouseEnter={dropdown.handleOpen}
         onMouseLeave={dropdown.handleClose}
       >
@@ -227,7 +227,7 @@ const SearchButton = memo(({ isOpen, onToggle, user }: {
             onClick={onToggle}
           />
           
-          <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+          <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg border border-gray-200 z-50">
             <div className="p-4">
               <h3 className="text-sm font-medium text-gray-900 mb-3">Buscar no Portal</h3>
               <GlobalSearch 
@@ -290,7 +290,7 @@ const NotificationsButton = memo(({
             onClick={onToggle}
           />
           
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg border border-gray-200 z-50 max-h-96 overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-gray-900">Notificações</h3>
               {unreadCount > 0 && (
@@ -388,7 +388,7 @@ const UserMenu = memo(({ user, dropdown, onLogout }: {
     
     {dropdown.isOpen && (
       <div 
-        className="absolute right-0 mt-0 w-48 bg-white rounded-md shadow-lg py-1 z-10"
+        className="absolute right-0 mt-0 w-48 bg-white border border-gray-200 rounded-md py-1 z-10"
         onMouseEnter={dropdown.handleOpen}
         onMouseLeave={dropdown.handleClose}
       >
@@ -462,10 +462,10 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center">
-          <Link href="/home" className="flex items-center">
-            <div className="relative h-10 w-24 mr-3">
+          <Link href="/home" className="flex items-center justify-center">
+            <div className="relative h-10 w-32 flex items-center justify-center">
               <svg 
-                className="h-8 w-auto text-white"
+                className="h-10 w-auto text-white"
                 viewBox="0 0 151.02 29.93"
                 fill="currentColor"
               >
@@ -480,6 +480,14 @@ function Navbar() {
               </svg>
             </div>
           </Link>
+          
+          {/* Divisória vertical */}
+          <div className="h-6 w-px bg-white/30 mx-4"></div>
+          
+          {/* Texto HUB */}
+          <div className="hidden sm:flex items-center">
+            <span className="text-white font-bold text-lg tracking-wide">HUB</span>
+          </div>
         </div>
         
         {/* Desktop Menu */}

@@ -70,8 +70,7 @@ export const Select: React.FC<SelectProps> = ({
             border
             rounded-lg
             bg-white
-            shadow-sm
-            transition-all duration-200
+            transition-colors duration-200
             focus:outline-none
             focus:ring-2
             disabled:bg-gray-50

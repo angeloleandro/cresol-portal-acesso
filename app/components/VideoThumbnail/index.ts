@@ -22,23 +22,9 @@ export {
   defaultPerformanceConfig
 } from './VideoThumbnail.Performance';
 
-// Accessibility Components
-export {
-  AccessibleVideoThumbnail,
-  VideoGallerySkipLinks,
-  LiveRegion,
-  NavigationInstructions,
-  LoadingAnnouncement,
-  useVideoThumbnailAccessibility,
-  generateAccessibleAltText,
-  defaultAccessibilityConfig
-} from './VideoThumbnail.Accessibility';
+// Accessibility Components - REMOVED (unused advanced features)
 
-// Advanced Features
-export {
-  AdvancedVideoThumbnail,
-  MultiEffectThumbnail
-} from './VideoThumbnail.Advanced';
+// Advanced Features - REMOVED (unused advanced features)
 
 // Hooks
 export {
@@ -103,10 +89,4 @@ export type {
   ThumbnailProviderProps
 } from './VideoThumbnail.types';
 
-// Advanced Types
-export type {
-  AdvancedHoverConfig,
-  DurationOverlayConfig,
-  AdvancedAspectRatioConfig,
-  MultiEffectThumbnailProps
-} from './VideoThumbnail.Advanced';
+// Advanced Types - REMOVED (unused advanced features)

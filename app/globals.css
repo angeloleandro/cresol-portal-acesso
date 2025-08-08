@@ -726,7 +726,7 @@ h1, h2, h3, h4, h5, h6 {
   
   /* Modern card styling */
   --card-border-color: rgba(210, 210, 206, 0.6);
-  --card-hover-transform: translateY(-4px);
+  --card-hover-transform: none;
   
 }
 
@@ -740,8 +740,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-modern:hover {
-  transform: var(--card-hover-transform);
-  border-color: rgba(245, 130, 32, 0.2);
+  border-color: rgba(245, 130, 32, 0.4);
 }
 
 /* Enhanced stat cards */
@@ -755,8 +754,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stat-card-modern:hover {
-  transform: translateY(-2px);
-  border-color: rgba(245, 130, 32, 0.15);
+  border-color: rgba(245, 130, 32, 0.3);
 }
 
 /* Orange-themed stat cards */
@@ -916,26 +914,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .admin-nav-link:hover {
   color: var(--color-primary);
-  background-color: rgba(245, 130, 32, 0.05);
-  transform: translateY(-1px);
+  font-weight: 600;
 }
 
 .admin-nav-link.active {
   color: var(--color-primary);
-  background-color: rgba(245, 130, 32, 0.1);
   font-weight: 600;
-}
-
-.admin-nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 20px;
-  height: 2px;
-  background-color: var(--color-primary);
-  border-radius: 1px;
 }
 
 /* User Section */
@@ -1257,7 +1241,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .icon-container-modern:hover {
   background: linear-gradient(135deg, rgba(245, 130, 32, 0.15) 0%, rgba(245, 130, 32, 0.08) 100%);
-  transform: scale(1.05);
 }
 
 /* Enhanced grid layouts */
@@ -1408,4 +1391,26 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }

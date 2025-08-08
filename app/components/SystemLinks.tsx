@@ -83,36 +83,39 @@ export default function SystemLinks() {
 
   return (
     <div className="w-full">
-      {/* Header compacto */}
-      <div className="flex items-center mb-3">
-        <h3 className="heading-4 text-title mr-2">Sistemas e Apps</h3>
-        <div className="h-px bg-primary flex-1"></div>
-      </div>
-
-      {/* Lista de links em colunas organizadas */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-3">
+      {/* Grid compacto - estrutura original densa */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3">
         {links.map((link) => (
           <a
             key={link.id}
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-primary hover:text-primary-dark hover:underline transition-colors duration-200 font-medium truncate"
+            className="group flex items-center justify-center gap-1 px-2 py-3 bg-gray-50/70 hover:bg-primary/5 border border-gray-200/80 hover:border-primary/20 rounded-lg transition-all duration-200 text-center"
             title={link.description || `Acessar ${link.name}`}
           >
-            {link.name}
+            {/* Nome do sistema - estilo Figma */}
+            <span className="text-xs font-medium text-gray-700 group-hover:text-primary transition-colors duration-200 truncate flex-1">
+              {link.name}
+            </span>
+            
+            {/* Ícone de link externo - estilo Figma */}
+            <Icon 
+              name="external-link" 
+              className="w-3 h-3 text-gray-400 group-hover:text-primary transition-colors duration-200 flex-shrink-0" 
+            />
           </a>
         ))}
       </div>
 
-      {/* Link para ver todos - opcional */}
-      <div className="mt-3 pt-2 border-t border-gray-200">
+      {/* Link para ver todos - compacto */}
+      <div className="mt-4 text-center">
         <a 
           href="/sistemas" 
-          className="inline-flex items-center text-xs text-muted hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-primary transition-colors duration-200"
         >
-          <Icon name="external-link" className="w-3 h-3 mr-1" />
-          Ver todos os sistemas
+          <span>Ver todos os sistemas</span>
+          <Icon name="external-link" className="w-3 h-3" />
         </a>
       </div>
     </div>

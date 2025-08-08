@@ -12,13 +12,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import AdminHeader from "@/app/components/AdminHeader";
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { supabase } from "@/lib/supabase";
-import VideoUploadFormClean from '@/app/components/VideoUploadFormClean';
+import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { VideoGalleryStatsHeader, AdvancedVideoGalleryHeader } from '@/app/components/VideoGallery/VideoGallery.Header';
 import { VideoGalleryGrid } from '@/app/components/VideoGallery/VideoGallery.Grid';
 import { VideoGalleryEmptyState } from '@/app/components/VideoGallery/VideoGallery.EmptyState';
 import { AdminVideoCard } from '@/app/components/VideoGallery/VideoGallery.Card';
-import { VideoCleanModal } from '@/app/components/VideoGallery/VideoGallery.CleanModal';
+import { VideoModal } from '@/app/components/VideoGallery/VideoGallery.Modal';
 import { DashboardVideo, VideoFilters } from '@/app/types/video';
 import { Icon } from '@/app/components/icons/Icon';
 import clsx from 'clsx';
@@ -501,7 +501,7 @@ export default function AdminVideos() {
                 className="max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-modal"
                 onClick={(e) => e.stopPropagation()}
               >
-                <VideoUploadFormClean
+                <VideoUploadFormRoot
                   initialData={editVideo ? {
                     id: editVideo.id,
                     title: editVideo.title,
@@ -531,7 +531,7 @@ export default function AdminVideos() {
         {/* Video Player Modal */}
         <AnimatePresence mode="wait">
           {showVideoModal && selectedVideoForPlay && (
-            <VideoCleanModal
+            <VideoModal
               isOpen={showVideoModal}
               video={selectedVideoForPlay}
               onClose={handleCloseVideoModal}

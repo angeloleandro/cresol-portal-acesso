@@ -81,12 +81,12 @@ export default function Home() {
         </div>
           </div>
           
-      {/* Sistemas - Compacto */}
-      <div className="py-6 bg-white border-y border-gray-200/80">
+      {/* Sistemas - Moderno */}
+      <div className="py-8 bg-gradient-to-b from-white to-gray-50/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center lg:text-left mb-4">
-            <h2 className="heading-3 text-title">Hub Cresol Fronteiras PR/SC/SP/ES</h2>
-            <p className="body-text-small text-muted">Acesso centralizado aos sistemas</p>
+          <div className="text-center lg:text-left mb-6">
+            <h2 className="heading-3 text-title">Sistemas e Apps</h2>
+            <p className="body-text-small text-muted">Acesse rapidamente os sistemas corporativos</p>
           </div>
           <SystemLinks />
         </div>

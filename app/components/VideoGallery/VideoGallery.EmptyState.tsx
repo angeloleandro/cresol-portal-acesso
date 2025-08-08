@@ -8,9 +8,8 @@
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import Link from 'next/link';
-import Icon from '../icons/Icon';
+import { Icon, IconName } from '../icons/Icon';
 import { scrollAnimations } from './VideoGallery.animations';
-import { IconName } from '../icons/Icon';
 
 interface EmptyStateConfig {
   icon: IconName;

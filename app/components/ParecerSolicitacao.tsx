@@ -28,16 +28,19 @@ export default function ParecerSolicitacao() {
       {/* Container principal do relatório financeiro - Padronizado */}
       <div className="w-full">
         
-        {/* Seção do Cabeçalho - Usando tipografia padronizada */}
-        <header className="text-center mb-6">
-          <h2 className="heading-3">
-            Indicadores Econômicos Cresol Fronteiras
-          </h2>
-          <p className="body-text-small mt-2">
-            <span className="badge-warning">
-              Dados Referentes a 05/2025
-            </span>
-          </p>
+        {/* Seção do Cabeçalho - Padronizado */}
+        <header className="flex justify-between items-start mb-6">
+          <div>
+            <h2 className="heading-3 text-title">
+              Indicadores Econômicos Cresol Fronteiras
+            </h2>
+            <p className="body-text-small text-muted mt-1">
+              Acompanhe nossos principais números
+            </p>
+          </div>
+          <div className="text-sm font-medium text-primary">
+            Atualizado em 05/2025
+          </div>
         </header>
 
         {/* Conteúdo Principal */}

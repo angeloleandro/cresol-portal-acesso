@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import clsx from 'clsx';
-import Icon from '../icons/Icon';
+import { Icon } from '../icons/Icon';
 import { formatFileSize } from '@/lib/video-utils';
 import { cardAnimations, playButtonAnimations, badgeAnimations, thumbnailAnimations } from './VideoGallery.animations';
 import { useOptimizedImagePreload } from '@/hooks/useOptimizedVideoGallery';
@@ -80,7 +80,7 @@ export function EnhancedVideoCard({
       className={clsx(
         'group cursor-pointer',
         'bg-white rounded-xl border border-neutral-200',
-        'shadow-sm hover:shadow-lg transition-shadow duration-300',
+        'hover:border-neutral-300 transition-colors duration-300',
         'overflow-hidden',
         'flex flex-col h-full',
         className
@@ -250,7 +250,7 @@ export function AdminVideoCard({
       className={clsx(
         'group cursor-pointer',
         'bg-white rounded-xl border border-neutral-200',
-        'shadow-sm hover:shadow-lg transition-shadow duration-300',
+        'hover:border-neutral-300 transition-colors duration-300',
         'overflow-hidden',
         'flex flex-col h-full',
         className

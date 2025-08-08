@@ -124,8 +124,11 @@ export default function NotificationsAndMessages() {
   return (
     <div className="card">
       {/* Header */}
-      <div className="mb-4">
-        <h2 className="heading-4 text-title mb-3">Notificações & Mensagens</h2>
+      <div className="mb-6">
+        <div className="mb-4">
+          <h2 className="heading-3 text-title">Notificações e Mensagens</h2>
+          <p className="body-text-small text-muted mt-1">Fique sempre atualizado</p>
+        </div>
         
         {/* Tabs */}
         <div className="flex border-b border-gray-200">

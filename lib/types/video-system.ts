@@ -120,6 +120,12 @@ export interface ThumbnailConfigProps {
   onShowCropChange: (show: boolean) => void
   disabled?: boolean
   onTimestampChange?: (timestamp: number) => void
+  existingVideoData?: {
+    id: string
+    videoUrl: string
+    filename?: string
+    fileSize?: number
+  }
 }
 
 export interface VideoSettingsProps {

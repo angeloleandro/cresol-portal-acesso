@@ -27,10 +27,10 @@ export const MinimalistButton: React.FC<MinimalistButtonProps> = ({
   const baseClasses = 'group relative inline-flex items-center justify-center font-medium transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden';
   
   const variantClasses = {
-    primary: 'bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500 active:bg-orange-700 shadow-sm hover:shadow-md',
-    secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500 active:bg-gray-300 shadow-sm hover:shadow-md',
-    ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500 active:bg-gray-200',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500 active:bg-gray-100 shadow-sm hover:shadow-md'
+    primary: 'bg-orange-500 text-white border border-orange-500 hover:bg-orange-600 hover:border-orange-600 focus:ring-orange-500 active:bg-orange-700',
+    secondary: 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 hover:border-gray-300 focus:ring-gray-500 active:bg-gray-300',
+    ghost: 'text-gray-700 border border-transparent hover:bg-gray-100 hover:border-gray-200 focus:ring-gray-500 active:bg-gray-200',
+    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:ring-gray-500 active:bg-gray-100'
   };
   
   const sizeClasses = {
@@ -55,8 +55,6 @@ export const MinimalistButton: React.FC<MinimalistButtonProps> = ({
       disabled={disabled}
       className={classes}
     >
-      {/* Shine effect */}
-      <div className="absolute inset-0 -top-1 -bottom-1 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
       
       {icon && iconPosition === 'left' && (
         <Icon name={icon} className={iconSizeClasses[size]} />

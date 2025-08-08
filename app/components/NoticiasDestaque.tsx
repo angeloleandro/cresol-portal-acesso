@@ -114,11 +114,14 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
 
   return (
     <div className={`card ${compact ? 'p-4' : ''}`}>
-      <div className={`flex justify-between items-center ${compact ? 'mb-4' : 'mb-6'}`}>
-        <h2 className={`${compact ? 'heading-4' : 'heading-3'} text-title`}>Últimas Notícias</h2>
+      <div className={`flex justify-between items-start ${compact ? 'mb-4' : 'mb-6'}`}>
+        <div>
+          <h2 className={`${compact ? 'heading-4' : 'heading-3'} text-title`}>Últimas Notícias</h2>
+          {!compact && <p className="body-text-small text-muted mt-1">Acompanhe as informações mais recentes</p>}
+        </div>
         <Link 
           href="/noticias" 
-          className="text-sm font-medium transition-colors flex items-center hover: px-3 py-1.5 rounded-md text-primary"
+          className="text-sm font-medium transition-colors flex items-center hover:bg-primary/10 px-3 py-1.5 rounded-md text-primary"
         >
           Ver todas
           <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
