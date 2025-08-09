@@ -7,7 +7,7 @@ import { NextUIProviderWrapper } from './providers/NextUIProvider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Portal de Acesso Cresol',
+  title: 'HUB - Cresol Fronteiras PR/SC/SP/ES',
   description: 'Portal de acesso para sistema de informação empresarial interna da Cresol',
   icons: {
     icon: [

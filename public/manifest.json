@@ -1,6 +1,6 @@
 {
-  "name": "Portal de Acesso Cresol",
-  "short_name": "Cresol Portal",
+  "name": "HUB - Cresol Fronteiras PR/SC/SP/ES",
+  "short_name": "HUB Cresol Fronteiras",
   "description": "Portal de acesso para sistema de informação empresarial interna da Cresol",
   "start_url": "/home",
   "display": "standalone",

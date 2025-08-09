@@ -128,7 +128,7 @@ const GalleryDropdown = memo(({ pathname }: {
         isOpen={isDropdownOpen}
         onOpenChange={setIsDropdownOpen}
         classNames={{
-          content: "min-w-[200px] bg-white border border-default-200 shadow-lg",
+          content: "min-w-[200px] max-h-[400px] md:max-h-[60vh] bg-white border border-default-200 shadow-lg overflow-y-auto scrollbar-branded",
         }}
       >
         <DropdownTrigger>
@@ -204,7 +204,7 @@ const AdminSectorDropdown = memo(({ sectors, dropdown }: {
     
     {dropdown.isOpen && (
       <div 
-        className="absolute right-0 mt-0 w-56 bg-white border border-gray-200 rounded-md py-1 z-10"
+        className="absolute right-0 mt-0 w-56 max-h-[400px] md:max-h-[60vh] bg-white border border-gray-200 rounded-md py-1 z-10 overflow-y-auto scrollbar-branded"
         onMouseEnter={dropdown.handleOpen}
         onMouseLeave={dropdown.handleClose}
       >
@@ -339,7 +339,7 @@ const NotificationsButton = memo(({
               )}
             </div>
             
-            <div className="max-h-80 overflow-y-auto">
+            <div className="max-h-80 overflow-y-auto scrollbar-branded">
               {notifications.length > 0 ? (
                 notifications.map((notification) => (
                   <div
@@ -424,7 +424,7 @@ const UserMenu = memo(({ user, dropdown, onLogout }: {
     
     {dropdown.isOpen && (
       <div 
-        className="absolute right-0 mt-0 w-48 bg-white border border-gray-200 rounded-md py-1 z-10"
+        className="absolute right-0 mt-0 w-48 max-h-[400px] md:max-h-[60vh] bg-white border border-gray-200 rounded-md py-1 z-10 overflow-y-auto scrollbar-branded"
         onMouseEnter={dropdown.handleOpen}
         onMouseLeave={dropdown.handleClose}
       >
@@ -687,7 +687,7 @@ function Navbar() {
             </div>
             
             {isMobileSectorsOpen && sectors.length > 0 && (
-              <div className="pl-4 border-l border-white/30 ml-2 mt-1">
+              <div className="pl-4 border-l border-white/30 ml-2 mt-1 max-h-60 overflow-y-auto scrollbar-thin">
                 {sectors.map((sector) => (
                   <Link 
                     key={sector.id} 

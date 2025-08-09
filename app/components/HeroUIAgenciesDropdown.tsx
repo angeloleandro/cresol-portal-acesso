@@ -93,8 +93,10 @@ const HeroUIAgenciesDropdown = memo(({ pathname, agencies }: HeroUIAgenciesDropd
         placement="bottom-start"
         isOpen={isDropdownOpen}
         onOpenChange={setIsDropdownOpen}
+        shouldFlip={true}
+        shouldCloseOnBlur={true}
         classNames={{
-          content: "min-w-[320px] bg-white border border-default-200 shadow-lg",
+          content: "min-w-[320px] max-h-[75vh] min-h-[200px] bg-white border border-default-200 shadow-xl overflow-hidden z-50",
         }}
       >
       <DropdownTrigger>
@@ -120,7 +122,7 @@ const HeroUIAgenciesDropdown = memo(({ pathname, agencies }: HeroUIAgenciesDropd
 
       <DropdownMenu
         aria-label="Menu de Agências"
-        className="p-1"
+        className="p-1 pr-2 max-h-[70vh] overflow-y-auto scrollbar-branded"
         itemClasses={{
           base: [
             "rounded-md",

@@ -96,7 +96,7 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
     hoverTimeoutRef.current = setTimeout(() => {
       setOpenSubsectors(new Set());
       currentHoveredSector.current = null;
-    }, 150); // 150ms debounce
+    }, 200); // 200ms debounce para experiência mais suave
   }, []);
 
   // Manter aberto quando está sobre sub-setores
@@ -139,7 +139,8 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
       label: sector.name,
       sector: sector,
       hasSubsectors: sector.subsectors && sector.subsectors.length > 0,
-      isOpen: openSubsectors.has(sector.id)
+  isOpen: openSubsectors.has(sector.id),
+  className: sector.subsectors && sector.subsectors.length > 0 ? 'font-bold text-default-900' : undefined,
     });
     
     // Sub-setores (se estiver aberto)
@@ -150,7 +151,7 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
           type: 'link',
           href: `/subsetores/${subsector.id}`,
           label: subsector.name,
-          className: 'pl-6 text-xs bg-default-50',
+          className: 'pl-6 text-xs bg-amber-50 sector-subsector',
           isSubsector: true // Flag para identificar sub-setores
         });
       });
@@ -166,8 +167,10 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
         placement="bottom-start"
         isOpen={isDropdownOpen}
         onOpenChange={setIsDropdownOpen}
+        shouldFlip={true}
+        shouldCloseOnBlur={true}
         classNames={{
-          content: "min-w-[280px] bg-white border border-default-200 shadow-lg",
+          content: "w-[280px] max-h-[75vh] min-h-[200px] bg-white border border-default-200 shadow-xl overflow-hidden z-50",
         }}
       >
       <DropdownTrigger>
@@ -193,7 +196,7 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
 
       <DropdownMenu
         aria-label="Menu de Setores"
-        className="p-1"
+        className="p-1 pr-2 max-h-[70vh] overflow-y-auto scrollbar-branded"
         disabledKeys={[]}
         itemClasses={{
           base: [

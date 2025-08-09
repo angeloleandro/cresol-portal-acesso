@@ -167,78 +167,527 @@ body {
 }
 
 /* ========================================
-   ENTERPRISE SCROLLBAR SYSTEM
-   Professional scrollbar design inspired by VS Code, Figma, and modern apps
+   CRESOL ENTERPRISE SCROLLBAR SYSTEM
+   Professional cross-browser scrollbar implementation
+   Based on modern CSS standards with legacy browser support
 ======================================== */
 
 /* CSS Variables for Scrollbar System */
 :root {
-  /* Professional Scrollbar Colors */
+  /* Professional Scrollbar Colors - Enhanced with better opacity management */
   --scrollbar-bg-track: transparent;
-  --scrollbar-bg-thumb: rgba(148, 163, 184, 0.6); /* slate-400 with opacity */
-  --scrollbar-bg-thumb-hover: rgba(100, 116, 139, 0.8); /* slate-500 with opacity */
-  --scrollbar-bg-thumb-active: rgba(71, 85, 105, 0.9); /* slate-600 with opacity */
+  --scrollbar-bg-track-subtle: rgba(0, 0, 0, 0.02); /* Very subtle track for branded variants */
+  --scrollbar-bg-thumb: rgba(148, 163, 184, 0.5); /* slate-400 with reduced opacity */
+  --scrollbar-bg-thumb-hover: rgba(100, 116, 139, 0.7); /* slate-500 enhanced visibility */
+  --scrollbar-bg-thumb-active: rgba(71, 85, 105, 0.85); /* slate-600 strong feedback */
   
-  /* Brand Scrollbar Colors */
-  --scrollbar-brand-thumb: rgba(245, 130, 32, 0.4); /* Cresol primary with opacity */
-  --scrollbar-brand-thumb-hover: rgba(245, 130, 32, 0.6);
-  --scrollbar-brand-thumb-active: rgba(224, 109, 16, 0.8);
+  /* Cresol Brand Scrollbar Colors - Professional consistency */
+  --scrollbar-brand-thumb: rgba(245, 130, 32, 0.35); /* Cresol primary subtle */
+  --scrollbar-brand-thumb-hover: rgba(245, 130, 32, 0.55); /* Enhanced hover feedback */
+  --scrollbar-brand-thumb-active: rgba(224, 109, 16, 0.75); /* Strong active state */
+  --scrollbar-brand-track: rgba(245, 130, 32, 0.08); /* Very subtle branded track */
   
-  /* Scrollbar Dimensions - Professional sizes */
-  --scrollbar-size-thin: 6px;
-  --scrollbar-size-default: 10px;  /* Increased for better usability */
-  --scrollbar-size-thick: 14px;
+  /* Green accent for special sections */
+  --scrollbar-accent-thumb: rgba(0, 92, 70, 0.4); /* Cresol green */
+  --scrollbar-accent-thumb-hover: rgba(0, 92, 70, 0.6);
+  --scrollbar-accent-thumb-active: rgba(0, 73, 53, 0.8);
   
-  /* Scrollbar Radius */
-  --scrollbar-radius: 5px;
+  /* Scrollbar Dimensions - Enhanced thickness for better usability */
+  --scrollbar-size-thin: 14px;     /* Significantly increased for visibility */
+  --scrollbar-size-default: 22px;  /* Much thicker default scrollbar */
+  --scrollbar-size-thick: 28px;    /* Extra thick for content-heavy areas */
+  
+  /* Scrollbar Radius - Consistent with design system */
+  --scrollbar-radius: 6px;         /* Matches border-radius-medium */
   --scrollbar-radius-small: 3px;
+  --scrollbar-radius-large: 8px;
+  
+  /* Animation and Transition */
+  --scrollbar-transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --scrollbar-transition-fast: all 150ms ease-out;
 }
 
-/* Base Scrollbar Styles - Modern Professional */
-::-webkit-scrollbar {
+/* ========================================
+   COMPLETE SCROLLBAR ARROW ELIMINATION
+   Robust cross-browser removal of all scrollbar arrows and buttons
+======================================== */
+
+/* CRITICAL: Remove ALL scrollbar arrows and buttons - Universal approach */
+::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+  background: transparent;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Target all possible scrollbar button variations */
+::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment,
+::-webkit-scrollbar-button:horizontal:start:decrement,
+::-webkit-scrollbar-button:horizontal:end:increment,
+::-webkit-scrollbar-button:vertical:start:decrement,
+::-webkit-scrollbar-button:vertical:end:increment {
+  display: none;
+  height: 0;
+  width: 0;
+  background: transparent;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Additional safety for specific button states */
+::-webkit-scrollbar-button:hover,
+::-webkit-scrollbar-button:active,
+::-webkit-scrollbar-button:pressed {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* ULTIMATE SCROLLBAR ARROW ELIMINATION - Force removal on any element that shows arrows */
+* ::-webkit-scrollbar-button,
+html ::-webkit-scrollbar-button,
+body ::-webkit-scrollbar-button,
+div ::-webkit-scrollbar-button,
+section ::-webkit-scrollbar-button,
+article ::-webkit-scrollbar-button,
+main ::-webkit-scrollbar-button,
+aside ::-webkit-scrollbar-button,
+nav ::-webkit-scrollbar-button,
+ul ::-webkit-scrollbar-button,
+ol ::-webkit-scrollbar-button,
+li ::-webkit-scrollbar-button,
+p ::-webkit-scrollbar-button,
+pre ::-webkit-scrollbar-button,
+code ::-webkit-scrollbar-button,
+textarea ::-webkit-scrollbar-button,
+select ::-webkit-scrollbar-button,
+iframe ::-webkit-scrollbar-button {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+}
+
+/* ========================================
+   MODERN STANDARDS-BASED IMPLEMENTATION
+   Uses standardized scrollbar properties for supported browsers
+======================================== */
+
+/* Modern browsers with scrollbar-color and scrollbar-width support */
+@supports (scrollbar-width: auto) {
+  html {
+    scrollbar-width: auto; /* Thick scrollbar by default */
+    scrollbar-color: var(--scrollbar-bg-thumb) transparent;
+  }
+  
+  /* Smooth scrolling behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Override body scrollbar to ensure thickness */
+  body {
+    scrollbar-width: auto;
+    scrollbar-color: var(--scrollbar-bg-thumb) transparent;
+  }
+  
+  /* Force thick scrollbars on all elements */
+  *, 
+  *::before, 
+  *::after {
+    scrollbar-width: auto !important;
+    scrollbar-color: var(--scrollbar-bg-thumb) transparent;
+  }
+}
+
+/* ========================================
+   FORCE SCROLLBAR SYSTEM OVERRIDE
+   Override any system-level scrollbar styling
+======================================== */
+
+/* NUCLEAR OPTION: Force override system scrollbar styles EVERYWHERE */
+html, body, *, 
+*:before, *:after,
+div, section, article, main, aside, nav, header, footer,
+ul, ol, li, p, pre, code, blockquote,
+table, thead, tbody, tr, td, th,
+form, input, textarea, select, button,
+canvas, iframe, embed, object, video, audio,
+[class*="nextui"], [class*="chakra"], [class*="emotion"],
+[data-nextui-theme], [data-theme], [role],
+.modal, .dropdown, .menu, .tooltip, .popover,
+.scroll, .overflow, .container, .content {
+  /* FORCE THICK SCROLLBARS EVERYWHERE - NO EXCEPTIONS */
+  scrollbar-width: auto !important;
+  scrollbar-color: var(--scrollbar-bg-thumb) transparent !important;
+  
+  /* Remove system scrollbar arrow buttons globally */
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+/* ========================================
+   ULTIMATE ARROW ELIMINATION - NUCLEAR OPTION
+   Overrides any external library or system style
+======================================== */
+
+/* Additional override for any persistent arrows */
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:single-button,
+::-webkit-scrollbar-button:double-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: none !important;
+  border: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -10000px !important;
+  top: -10000px !important;
+  z-index: -9999 !important;
+}
+
+/* NUCLEAR OPTION: Override ALL possible scrollbar buttons from ANY source */
+*::-webkit-scrollbar-button,
+*::-webkit-scrollbar-button:start,
+*::-webkit-scrollbar-button:end,
+*::-webkit-scrollbar-button:vertical:start,
+*::-webkit-scrollbar-button:vertical:end,
+*::-webkit-scrollbar-button:horizontal:start,
+*::-webkit-scrollbar-button:horizontal:end,
+*::-webkit-scrollbar-button:start:decrement,
+*::-webkit-scrollbar-button:end:increment,
+*::-webkit-scrollbar-button:vertical:start:decrement,
+*::-webkit-scrollbar-button:vertical:end:increment,
+*::-webkit-scrollbar-button:horizontal:start:decrement,
+*::-webkit-scrollbar-button:horizontal:end:increment,
+[data-nextui-theme]::-webkit-scrollbar-button,
+[data-theme]::-webkit-scrollbar-button,
+.nextui-c::-webkit-scrollbar-button,
+.chakra-ui::-webkit-scrollbar-button,
+body *::-webkit-scrollbar-button,
+html *::-webkit-scrollbar-button,
+div *::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -10000px !important;
+  top: -10000px !important;
+  z-index: -10000 !important;
+  pointer-events: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  content: none !important;
+}
+
+/* ========================================
+   PSEUDO-ELEMENT ARROW ELIMINATION
+   Remove any ::before/::after that might simulate arrows
+======================================== */
+
+/* Eliminate any pseudo-elements that might be creating arrow-like visuals */
+::-webkit-scrollbar::before,
+::-webkit-scrollbar::after,
+::-webkit-scrollbar-track::before,
+::-webkit-scrollbar-track::after,
+::-webkit-scrollbar-thumb::before,
+::-webkit-scrollbar-thumb::after,
+*::-webkit-scrollbar::before,
+*::-webkit-scrollbar::after,
+*::-webkit-scrollbar-track::before,
+*::-webkit-scrollbar-track::after,
+*::-webkit-scrollbar-thumb::before,
+*::-webkit-scrollbar-thumb::after {
+  display: none !important;
+  content: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Force remove any CSS content that might create arrow symbols */
+::-webkit-scrollbar-button:before,
+::-webkit-scrollbar-button:after,
+*::-webkit-scrollbar-button:before,
+*::-webkit-scrollbar-button:after {
+  display: none !important;
+  content: "" !important;
+  background: none !important;
+  border: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* ========================================
+   SPECIFIC COMPONENT OVERRIDES - FINAL SOLUTION
+   Target specific NextUI and component scrollbars
+======================================== */
+
+/* NextUI Dropdown Overrides - FORCE NO ARROWS */
+[data-nextui="dropdown"] ::-webkit-scrollbar-button,
+[role="menu"] ::-webkit-scrollbar-button,
+[role="listbox"] ::-webkit-scrollbar-button,
+[data-slot="content"] ::-webkit-scrollbar-button,
+.nextui-dropdown-content ::-webkit-scrollbar-button,
+.nextui-c-dropdown-content ::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -10000px !important;
+  top: -10000px !important;
+}
+
+/* Modal and Dialog Overrides - FORCE NO ARROWS */
+[data-testid*="modal"] ::-webkit-scrollbar-button,
+[role="dialog"] ::-webkit-scrollbar-button,
+.modal ::-webkit-scrollbar-button,
+.dialog ::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* ULTIMATE OVERRIDE: Any element with overflow-y-auto - NO ARROWS EVER */
+[class*="overflow-y-auto"] ::-webkit-scrollbar-button,
+.overflow-y-auto ::-webkit-scrollbar-button,
+[style*="overflow-y: auto"] ::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -10000px !important;
+  top: -10000px !important;
+  z-index: -10000 !important;
+}
+
+/* ========================================
+   DIRECT CLASS OVERRIDES - FINAL NUCLEAR OPTION
+   Override the specific classes found in React components
+======================================== */
+
+/* Force scrollbar-branded class to NEVER show arrows */
+.scrollbar-branded ::-webkit-scrollbar-button,
+.scrollbar-branded::-webkit-scrollbar-button,
+*[class*="scrollbar-branded"] ::-webkit-scrollbar-button,
+*[class*="scrollbar-branded"]::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -10000px !important;
+  top: -10000px !important;
+  z-index: -10000 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Force scrollbar-modal class to NEVER show arrows */
+.scrollbar-modal ::-webkit-scrollbar-button,
+.scrollbar-modal::-webkit-scrollbar-button,
+*[class*="scrollbar-modal"] ::-webkit-scrollbar-button,
+*[class*="scrollbar-modal"]::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -10000px !important;
+  top: -10000px !important;
+  z-index: -10000 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Force ALL scrollbar utility classes to NEVER show arrows */
+.scrollbar-thin ::-webkit-scrollbar-button,
+.scrollbar-thin::-webkit-scrollbar-button,
+.scrollbar-thick ::-webkit-scrollbar-button,
+.scrollbar-thick::-webkit-scrollbar-button,
+.scrollbar-accent ::-webkit-scrollbar-button,
+.scrollbar-accent::-webkit-scrollbar-button,
+.scrollbar-auto-hide ::-webkit-scrollbar-button,
+.scrollbar-auto-hide::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -10000px !important;
+  top: -10000px !important;
+  z-index: -10000 !important;
+}
+
+/* ========================================
+   ULTIMATE FINAL OVERRIDE - MAXIMUM SPECIFICITY
+   Use maximum CSS specificity to override any library
+======================================== */
+
+/* Maximum specificity override for scrollbar buttons */
+html body div[class] ::-webkit-scrollbar-button,
+html body div[class]::-webkit-scrollbar-button,
+html body *[class*="scroll"] ::-webkit-scrollbar-button,
+html body *[class*="scroll"]::-webkit-scrollbar-button,
+html body *[style*="overflow"] ::-webkit-scrollbar-button,
+html body *[style*="overflow"]::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -10000px !important;
+  top: -10000px !important;
+  z-index: -10000 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border: none !important;
+  content: none !important;
+}
+
+/* FINAL GUARANTEE: Force scrollbar width to be thick everywhere */
+html body *[class] {
+  scrollbar-width: auto !important;
+}
+
+html body *::-webkit-scrollbar {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+/* ========================================
+   WEBKIT PSEUDO-ELEMENTS IMPLEMENTATION
+   Legacy support for Webkit-based browsers
+======================================== */
+
+/* Base Scrollbar Styles - Cross-browser professional design with HIGH SPECIFICITY */
+html ::-webkit-scrollbar,
+body ::-webkit-scrollbar,
+* ::-webkit-scrollbar {
   width: var(--scrollbar-size-default);
   height: var(--scrollbar-size-default);
 }
 
-::-webkit-scrollbar-track {
+/* Scrollbar arrows/buttons already removed globally above */
+/* All ::-webkit-scrollbar-button elements are handled by the global rules */
+
+html ::-webkit-scrollbar-track,
+body ::-webkit-scrollbar-track,
+* ::-webkit-scrollbar-track {
   background: var(--scrollbar-bg-track);
   border-radius: var(--scrollbar-radius);
+  margin: 2px; /* Small margin for better visual separation */
 }
 
-::-webkit-scrollbar-thumb {
+html ::-webkit-scrollbar-thumb,
+body ::-webkit-scrollbar-thumb,
+* ::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-bg-thumb);
   border-radius: var(--scrollbar-radius);
   border: 2px solid transparent;
   background-clip: content-box;
-  transition: background-color var(--vs-transition-normal);
+  transition: var(--scrollbar-transition);
+  cursor: pointer; /* Better UX feedback */
+  min-height: 20px; /* Ensure minimum thumb size for usability */
 }
 
-::-webkit-scrollbar-thumb:hover {
+html ::-webkit-scrollbar-thumb:hover,
+body ::-webkit-scrollbar-thumb:hover,
+* ::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-bg-thumb-hover);
+  border-width: 1px; /* Subtle expansion on hover */
 }
 
-::-webkit-scrollbar-thumb:active {
+html ::-webkit-scrollbar-thumb:active,
+body ::-webkit-scrollbar-thumb:active,
+* ::-webkit-scrollbar-thumb:active {
   background-color: var(--scrollbar-bg-thumb-active);
+  border-width: 1px;
+  transform: scale(0.98); /* Subtle feedback on click */
 }
 
-::-webkit-scrollbar-corner {
+html ::-webkit-scrollbar-corner,
+body ::-webkit-scrollbar-corner,
+* ::-webkit-scrollbar-corner {
   background: transparent;
 }
 
-/* Firefox Scrollbar Styles - Professional */
-* {
-  scrollbar-width: thin;
+/* Horizontal scrollbar specific adjustments */
+html ::-webkit-scrollbar:horizontal,
+body ::-webkit-scrollbar:horizontal,
+* ::-webkit-scrollbar:horizontal {
+  height: var(--scrollbar-size-default);
+}
+
+/* ========================================
+   FIREFOX SPECIFIC IMPLEMENTATION
+   Modern Firefox scrollbar styling
+======================================== */
+
+/* Firefox scrollbar styles with better integration - THICK SCROLLBAR */
+html {
+  scrollbar-width: auto; /* Changed from thin to auto for thick scrollbars */
   scrollbar-color: var(--scrollbar-bg-thumb) transparent;
+}
+
+/* Firefox-specific smooth scrolling */
+@-moz-document url-prefix() {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 /* ========================================
    PROFESSIONAL SCROLLBAR CLASSES
-   Context-specific scrollbar implementations
+   Context-specific scrollbar implementations with enhanced UX
 ======================================== */
 
-/* Thin Scrollbar - For compact interfaces */
+/* Thin Scrollbar - For compact interfaces and sidebars - FORCED THICK */
 .scrollbar-thin {
-  scrollbar-width: thin;
+  scrollbar-width: auto !important; /* FORCE THICK - NO MORE THIN! */
   scrollbar-color: var(--scrollbar-bg-thumb) transparent;
 }
 
@@ -247,9 +696,12 @@ body {
   height: var(--scrollbar-size-thin);
 }
 
+/* Scrollbar buttons removed by global rules above */
+
 .scrollbar-thin::-webkit-scrollbar-track {
   background: var(--scrollbar-bg-track);
   border-radius: var(--scrollbar-radius-small);
+  margin: 1px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
@@ -257,16 +709,23 @@ body {
   border-radius: var(--scrollbar-radius-small);
   border: 1px solid transparent;
   background-clip: content-box;
-  transition: background-color var(--vs-transition-normal);
+  transition: var(--scrollbar-transition-fast);
+  cursor: pointer;
+  min-height: 16px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-bg-thumb-hover);
+  border-width: 0.5px;
 }
 
-/* Modal Scrollbar - Professional modal design */
+.scrollbar-thin::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-bg-thumb-active);
+}
+
+/* Modal Scrollbar - Professional modal design with enhanced UX - FORCED THICK */
 .scrollbar-modal {
-  scrollbar-width: thin;
+  scrollbar-width: auto !important; /* FORCE THICK - NO MORE THIN! */
   scrollbar-color: var(--scrollbar-bg-thumb) transparent;
 }
 
@@ -275,33 +734,40 @@ body {
   height: var(--scrollbar-size-default);
 }
 
+/* Scrollbar buttons removed by global rules above */
+
 .scrollbar-modal::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--scrollbar-bg-track-subtle);
   border-radius: var(--scrollbar-radius);
-  margin: 4px;
+  margin: 3px;
 }
 
 .scrollbar-modal::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.5);
+  background-color: var(--scrollbar-bg-thumb);
   border-radius: var(--scrollbar-radius);
   border: 2px solid transparent;
   background-clip: content-box;
-  transition: all var(--vs-transition-normal);
+  transition: var(--scrollbar-transition);
+  cursor: pointer;
+  min-height: 20px;
 }
 
 .scrollbar-modal::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(100, 116, 139, 0.7);
+  background-color: var(--scrollbar-bg-thumb-hover);
   border-width: 1px;
+  transform: scale(1.05);
 }
 
 .scrollbar-modal::-webkit-scrollbar-thumb:active {
-  background-color: rgba(71, 85, 105, 0.8);
+  background-color: var(--scrollbar-bg-thumb-active);
+  border-width: 1px;
+  transform: scale(0.95);
 }
 
-/* Branded Scrollbar - Cresol theme */
+/* Branded Scrollbar - Cresol theme with professional polish - FORCED THICK */
 .scrollbar-branded {
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-brand-thumb) transparent;
+  scrollbar-width: auto !important; /* FORCE THICK - NO MORE THIN! */
+  scrollbar-color: var(--scrollbar-brand-thumb) var(--scrollbar-brand-track);
 }
 
 .scrollbar-branded::-webkit-scrollbar {
@@ -309,9 +775,13 @@ body {
   height: var(--scrollbar-size-default);
 }
 
+/* Scrollbar buttons removed by global rules above */
+
 .scrollbar-branded::-webkit-scrollbar-track {
-  background: rgba(245, 130, 32, 0.05);
+  background: var(--scrollbar-brand-track);
   border-radius: var(--scrollbar-radius);
+  /* Remove margins so the thumb can reach the very ends (top/bottom) */
+  margin: 0;
 }
 
 .scrollbar-branded::-webkit-scrollbar-thumb {
@@ -319,18 +789,63 @@ body {
   border-radius: var(--scrollbar-radius);
   border: 2px solid transparent;
   background-clip: content-box;
-  transition: background-color var(--vs-transition-normal);
+  transition: var(--scrollbar-transition);
+  cursor: pointer;
+  min-height: 20px;
 }
 
 .scrollbar-branded::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-brand-thumb-hover);
+  border-width: 1px;
+  transform: scale(1.08);
 }
 
 .scrollbar-branded::-webkit-scrollbar-thumb:active {
   background-color: var(--scrollbar-brand-thumb-active);
+  border-width: 1px;
+  transform: scale(0.92);
 }
 
-/* Thick Scrollbar - For content-heavy areas */
+/* Green Accent Scrollbar - For secondary branded sections - FORCED THICK */
+.scrollbar-accent {
+  scrollbar-width: auto !important; /* FORCE THICK - NO MORE THIN! */
+  scrollbar-color: var(--scrollbar-accent-thumb) transparent;
+}
+
+.scrollbar-accent::-webkit-scrollbar {
+  width: var(--scrollbar-size-default);
+  height: var(--scrollbar-size-default);
+}
+
+/* Scrollbar buttons removed by global rules above */
+
+.scrollbar-accent::-webkit-scrollbar-track {
+  background: rgba(0, 92, 70, 0.05);
+  border-radius: var(--scrollbar-radius);
+  margin: 2px;
+}
+
+.scrollbar-accent::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-accent-thumb);
+  border-radius: var(--scrollbar-radius);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: var(--scrollbar-transition);
+  cursor: pointer;
+  min-height: 20px;
+}
+
+.scrollbar-accent::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-accent-thumb-hover);
+  border-width: 1px;
+}
+
+.scrollbar-accent::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-accent-thumb-active);
+  border-width: 1px;
+}
+
+/* Thick Scrollbar - For content-heavy areas with enhanced usability */
 .scrollbar-thick {
   scrollbar-width: auto;
   scrollbar-color: var(--scrollbar-bg-thumb) transparent;
@@ -341,25 +856,37 @@ body {
   height: var(--scrollbar-size-thick);
 }
 
+/* Scrollbar buttons removed by global rules above */
+
 .scrollbar-thick::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: var(--scrollbar-radius);
+  background: var(--scrollbar-bg-track-subtle);
+  border-radius: var(--scrollbar-radius-large);
   margin: 2px;
 }
 
 .scrollbar-thick::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-bg-thumb);
-  border-radius: var(--scrollbar-radius);
+  border-radius: var(--scrollbar-radius-large);
   border: 3px solid transparent;
   background-clip: content-box;
-  transition: background-color var(--vs-transition-normal);
+  transition: var(--scrollbar-transition);
+  cursor: pointer;
+  min-height: 24px; /* Larger minimum for thick scrollbar */
 }
 
 .scrollbar-thick::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-bg-thumb-hover);
+  border-width: 2px;
+  transform: scale(1.05);
 }
 
-/* Hidden Scrollbar - Clean interface without scrollbars */
+.scrollbar-thick::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-bg-thumb-active);
+  border-width: 2px;
+  transform: scale(0.95);
+}
+
+/* Hidden Scrollbar - Clean interface without scrollbars (accessibility friendly) */
 .scrollbar-hidden {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -367,16 +894,25 @@ body {
 
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
+  width: 0;
+  height: 0;
 }
 
-/* Auto-hide Scrollbar - Shows on hover */
+/* Ensure keyboard navigation still works */
+.scrollbar-hidden:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* Auto-hide Scrollbar - Shows on hover/focus for better UX - FORCED THICK */
 .scrollbar-auto-hide {
-  scrollbar-width: thin;
+  scrollbar-width: auto !important; /* FORCE THICK - NO MORE THIN! */
   scrollbar-color: transparent transparent;
-  transition: scrollbar-color var(--vs-transition-normal);
+  transition: var(--scrollbar-transition);
 }
 
-.scrollbar-auto-hide:hover {
+.scrollbar-auto-hide:hover,
+.scrollbar-auto-hide:focus-within {
   scrollbar-color: var(--scrollbar-bg-thumb) transparent;
 }
 
@@ -384,6 +920,8 @@ body {
   width: var(--scrollbar-size-default);
   height: var(--scrollbar-size-default);
 }
+
+/* Scrollbar buttons removed by global rules above */
 
 .scrollbar-auto-hide::-webkit-scrollbar-track {
   background: transparent;
@@ -393,15 +931,121 @@ body {
 .scrollbar-auto-hide::-webkit-scrollbar-thumb {
   background-color: transparent;
   border-radius: var(--scrollbar-radius);
-  transition: background-color var(--vs-transition-normal);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: var(--scrollbar-transition);
+  cursor: pointer;
+  min-height: 20px;
 }
 
-.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb {
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb,
+.scrollbar-auto-hide:focus-within::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-bg-thumb);
 }
 
 .scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-bg-thumb-hover);
+}
+
+.scrollbar-auto-hide:hover::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-bg-thumb-active);
+}
+
+/* ========================================
+   RESPONSIVE AND ACCESSIBILITY ENHANCEMENTS
+   Mobile-friendly and inclusive scrollbar design
+======================================== */
+
+/* Mobile optimizations */
+@media (max-width: 768px) and (hover: none) {
+  /* Slightly thicker scrollbars on touch devices */
+  ::-webkit-scrollbar,
+  .scrollbar-thin::-webkit-scrollbar {
+    width: calc(var(--scrollbar-size-default) + 2px);
+    height: calc(var(--scrollbar-size-default) + 2px);
+  }
+  
+  .scrollbar-thick::-webkit-scrollbar {
+    width: calc(var(--scrollbar-size-thick) + 2px);
+    height: calc(var(--scrollbar-size-thick) + 2px);
+  }
+  
+  /* More visible thumb on mobile */
+  ::-webkit-scrollbar-thumb,
+  .scrollbar-thin::-webkit-scrollbar-thumb,
+  .scrollbar-modal::-webkit-scrollbar-thumb,
+  .scrollbar-branded::-webkit-scrollbar-thumb,
+  .scrollbar-thick::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-bg-thumb-hover);
+    border-width: 1px;
+    min-height: 28px; /* Larger touch target */
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  ::-webkit-scrollbar-thumb,
+  .scrollbar-thin::-webkit-scrollbar-thumb,
+  .scrollbar-modal::-webkit-scrollbar-thumb,
+  .scrollbar-branded::-webkit-scrollbar-thumb,
+  .scrollbar-thick::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-bg-thumb-active);
+    border: 2px solid currentColor;
+  }
+  
+  ::-webkit-scrollbar-track,
+  .scrollbar-thin::-webkit-scrollbar-track,
+  .scrollbar-modal::-webkit-scrollbar-track,
+  .scrollbar-branded::-webkit-scrollbar-track,
+  .scrollbar-thick::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  ::-webkit-scrollbar-thumb,
+  .scrollbar-thin::-webkit-scrollbar-thumb,
+  .scrollbar-modal::-webkit-scrollbar-thumb,
+  .scrollbar-branded::-webkit-scrollbar-thumb,
+  .scrollbar-thick::-webkit-scrollbar-thumb,
+  .scrollbar-auto-hide::-webkit-scrollbar-thumb {
+    transition: none;
+    transform: none !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Focus management for keyboard navigation */
+.scrollbar-focus-ring:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+  border-radius: var(--scrollbar-radius);
+}
+
+/* Print styles - hide custom scrollbars */
+@media print {
+  ::-webkit-scrollbar,
+  .scrollbar-thin::-webkit-scrollbar,
+  .scrollbar-modal::-webkit-scrollbar,
+  .scrollbar-branded::-webkit-scrollbar,
+  .scrollbar-thick::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Dark mode preparation (future enhancement) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --scrollbar-bg-thumb: rgba(156, 163, 175, 0.6);
+    --scrollbar-bg-thumb-hover: rgba(156, 163, 175, 0.8);
+    --scrollbar-bg-thumb-active: rgba(209, 213, 219, 0.9);
+    --scrollbar-bg-track-subtle: rgba(255, 255, 255, 0.05);
+  }
 }
 
 /* Botões Padronizados - Design System */
@@ -1446,4 +2090,100 @@ h1, h2, h3, h4, h5, h6 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+/* Dropdown scrolling enhancement - Fix para rolagem cortada */
+[data-dropdown] [role="menu"] {
+  max-height: 70vh !important;
+  overflow-y: auto !important;
+  scrollbar-width: auto !important;
+  scrollbar-color: var(--scrollbar-brand-thumb) var(--scrollbar-brand-track) !important;
+}
+
+[data-dropdown] [role="menu"]::-webkit-scrollbar {
+  width: var(--scrollbar-size-default) !important;
+}
+
+[data-dropdown] [role="menu"]::-webkit-scrollbar-track {
+  background: var(--scrollbar-brand-track) !important;
+  border-radius: var(--scrollbar-radius) !important;
+}
+
+[data-dropdown] [role="menu"]::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-brand-thumb) !important;
+  border-radius: var(--scrollbar-radius) !important;
+  border: 2px solid transparent !important;
+  background-clip: content-box !important;
+  transition: var(--scrollbar-transition) !important;
+  min-height: 20px !important;
+}
+
+[data-dropdown] [role="menu"]::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-brand-thumb-hover) !important;
+}
+
+/* Remove setas dos dropdowns - FORÇA MÁXIMA */
+[data-dropdown] [role="menu"]::-webkit-scrollbar-button,
+[data-slot="content"]::-webkit-scrollbar-button,
+.nextui-dropdown-content::-webkit-scrollbar-button,
+.nextui-dropdown-menu::-webkit-scrollbar-button,
+.scrollbar-branded::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -10000px !important;
+  top: -10000px !important;
+  z-index: -10000 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  content: none !important;
+}
+
+/* NextUI Dropdown specific enhancements */
+.nextui-dropdown-content {
+  max-height: 75vh !important;
+  overflow-y: auto !important;
+}
+
+.nextui-dropdown-content .nextui-dropdown-menu {
+  max-height: 70vh !important;
+  overflow-y: auto !important;
+}
+
+/* Animação suave para subsetores */
+.sector-subsector {
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: slideInSubsector 0.3s ease-out forwards;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInSubsector {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Smooth hover transitions para dropdown items */
+[data-dropdown] [role="menuitem"],
+.nextui-dropdown-menu [role="menuitem"] {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Melhor experiência de hover */
+[data-dropdown] [role="menuitem"]:hover,
+.nextui-dropdown-menu [role="menuitem"]:hover {
+  transform: translateX(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

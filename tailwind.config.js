@@ -114,6 +114,43 @@ module.exports = {
           '&::-webkit-scrollbar': {
             display: 'none'
           }
+        },
+        
+        /* Enhanced Cresol Scrollbar Utilities - THICK SCROLLBARS */
+        '.scrollbar-thin': {
+          'scrollbar-width': 'auto',  /* Changed from thin to auto for thickness */
+          'scrollbar-color': 'var(--scrollbar-bg-thumb) transparent',
+        },
+        
+        /* Force thick scrollbars globally */
+        '.scrollbar-default': {
+          'scrollbar-width': 'auto !important',
+          'scrollbar-color': 'var(--scrollbar-bg-thumb) transparent',
+        },
+        
+        '.scrollbar-branded': {
+          'scrollbar-width': 'auto',  /* Changed from thin to auto for thickness */
+          'scrollbar-color': 'var(--scrollbar-brand-thumb) var(--scrollbar-brand-track)',
+        },
+        
+        '.scrollbar-modal': {
+          'scrollbar-width': 'auto',  /* Changed from thin to auto for thickness */
+          'scrollbar-color': 'var(--scrollbar-bg-thumb) transparent',
+        },
+        
+        '.scrollbar-accent': {
+          'scrollbar-width': 'auto',  /* Changed from thin to auto for thickness */
+          'scrollbar-color': 'var(--scrollbar-accent-thumb) transparent',
+        },
+        
+        '.scrollbar-thick': {
+          'scrollbar-width': 'auto',
+          'scrollbar-color': 'var(--scrollbar-bg-thumb) transparent',
+        },
+        
+        '.scrollbar-auto-hide': {
+          'scrollbar-width': 'auto',  /* Changed from thin to auto for consistency */
+          'scrollbar-color': 'transparent transparent',
         }
       })
     }
