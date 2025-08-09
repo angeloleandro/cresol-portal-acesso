@@ -177,7 +177,7 @@ export default function AdminSubsectorPage() {
             >
               <div className="relative h-10 w-24 mr-3">
                 <OptimizedImage 
-                  src="/logo-cresol.png" 
+                  src="/logo-horizontal-laranja.svg" 
                   alt="Logo Cresol" 
                   fill
                   sizes="(max-width: 768px) 100vw, 96px"

@@ -1,0 +1,31 @@
+{
+  "name": "Portal de Acesso Cresol",
+  "short_name": "Cresol Portal",
+  "description": "Portal de acesso para sistema de informação empresarial interna da Cresol",
+  "start_url": "/home",
+  "display": "standalone",
+  "background_color": "#F58220",
+  "theme_color": "#F58220",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon-simple.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "apple touch icon"
+    }
+  ]
+}

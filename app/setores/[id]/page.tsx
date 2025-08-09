@@ -72,7 +72,7 @@ export default function SetorDetalhesPage() {
       .single();
     
     if (error) {
-      console.error('Erro ao buscar setor:', error);
+      console.error('[SetorDetalhes] Erro ao buscar setor:', error.message || error);
       router.replace('/setores');
       return;
     }
@@ -88,7 +88,7 @@ export default function SetorDetalhesPage() {
       .order('name');
     
     if (error) {
-      console.error('Erro ao buscar sub-setores:', error);
+      console.error('[SetorDetalhes] Erro ao buscar sub-setores:', error.message || error);
       return;
     }
     
@@ -104,7 +104,7 @@ export default function SetorDetalhesPage() {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error('Erro ao buscar notícias:', error);
+      console.error('[SetorDetalhes] Erro ao buscar notícias:', error.message || error);
       return;
     }
     
@@ -120,7 +120,7 @@ export default function SetorDetalhesPage() {
       .order('start_date', { ascending: true });
     
     if (error) {
-      console.error('Erro ao buscar eventos:', error);
+      console.error('[SetorDetalhes] Erro ao buscar eventos:', error.message || error);
       return;
     }
     
@@ -190,6 +190,7 @@ export default function SetorDetalhesPage() {
             onClick={() => router.back()}
             className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors mr-4"
             title="Voltar"
+            aria-label="Voltar à página anterior"
           >
             <svg
               className="w-5 h-5 text-gray-600"
@@ -223,7 +224,7 @@ export default function SetorDetalhesPage() {
           
           {/* Abas */}
           <div className="border-b border-cresol-gray-light mt-6">
-            <nav className="-mb-px flex space-x-8">
+            <nav className="-mb-px flex space-x-8" role="tablist">
               <button
                 onClick={() => setActiveTab('news')}
                 className={`${
@@ -231,6 +232,10 @@ export default function SetorDetalhesPage() {
                     ? 'border-primary text-primary'
                     : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray-light'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                aria-selected={activeTab === 'news'}
+                role="tab"
+                aria-controls="news-panel"
+                id="news-tab"
               >
                 Notícias
               </button>
@@ -241,6 +246,10 @@ export default function SetorDetalhesPage() {
                     ? 'border-primary text-primary'
                     : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray-light'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                aria-selected={activeTab === 'events'}
+                role="tab"
+                aria-controls="events-panel"
+                id="events-tab"
               >
                 Eventos
               </button>
@@ -251,6 +260,10 @@ export default function SetorDetalhesPage() {
                     ? 'border-primary text-primary'
                     : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray-light'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                aria-selected={activeTab === 'subsectors'}
+                role="tab"
+                aria-controls="subsectors-panel"
+                id="subsectors-tab"
               >
                 Sub-setores ({subsectors.length})
               </button>
@@ -260,7 +273,7 @@ export default function SetorDetalhesPage() {
 
         {/* Conteúdo da aba de Notícias */}
         {activeTab === 'news' && (
-          <div>
+          <div id="news-panel" role="tabpanel" aria-labelledby="news-tab">
             {news.length === 0 ? (
               <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
                 <p className="text-cresol-gray">Nenhuma notícia publicada para este setor.</p>
@@ -313,7 +326,7 @@ export default function SetorDetalhesPage() {
 
         {/* Conteúdo da aba de Eventos */}
         {activeTab === 'events' && (
-          <div>
+          <div id="events-panel" role="tabpanel" aria-labelledby="events-tab">
             {events.length === 0 ? (
               <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
                 <p className="text-cresol-gray">Nenhum evento publicado para este setor.</p>
@@ -372,7 +385,7 @@ export default function SetorDetalhesPage() {
 
         {/* Conteúdo da aba de Sub-setores */}
         {activeTab === 'subsectors' && (
-          <div>
+          <div id="subsectors-panel" role="tabpanel" aria-labelledby="subsectors-tab">
             {subsectors.length === 0 ? (
               <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
                 <p className="text-cresol-gray">Nenhum sub-setor cadastrado para este setor.</p>
@@ -380,30 +393,36 @@ export default function SetorDetalhesPage() {
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {subsectors.map((subsector) => (
-                  <div 
+                  <Link 
+                    href={`/subsetores/${subsector.id}`} 
                     key={subsector.id}
-                    className="bg-white rounded-lg  border border-cresol-gray-light overflow-hidden"
+                    className="block group"
+                    aria-label={`Acessar sub-setor ${subsector.name}`}
                   >
-                    <div className="p-6 border-b border-cresol-gray-light">
-                      <h3 className="text-xl font-semibold text-cresol-gray-dark mb-2">
-                        {subsector.name}
-                      </h3>
-                      {subsector.description && (
-                        <p className="text-cresol-gray text-sm">
-                          {subsector.description}
-                        </p>
-                      )}
+                    <div 
+                      className="bg-white rounded-lg border-2 border-cresol-gray-light overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-cresol-primary/10 hover:border-cresol-primary hover:-translate-y-1 cursor-pointer"
+                    >
+                      <div className="p-6 border-b border-cresol-gray-light">
+                        <h3 className="text-xl font-semibold text-cresol-gray-dark mb-2 group-hover:text-cresol-primary transition-colors duration-200">
+                          {subsector.name}
+                        </h3>
+                        {subsector.description && (
+                          <p className="text-cresol-gray text-sm">
+                            {subsector.description}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="p-4">
+                        <SubsectorTeam 
+                          subsectorId={subsector.id}
+                          subsectorName={subsector.name}
+                          showFullPage={true}
+                          maxMembers={4}
+                        />
+                      </div>
                     </div>
-                    
-                    <div className="p-4">
-                      <SubsectorTeam 
-                        subsectorId={subsector.id}
-                        subsectorName={subsector.name}
-                        showFullPage={true}
-                        maxMembers={4}
-                      />
-                    </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}

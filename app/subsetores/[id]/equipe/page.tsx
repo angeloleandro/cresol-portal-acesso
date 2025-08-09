@@ -362,15 +362,6 @@ export default function SubsectorTeamPage() {
               >
                 <Icon name="arrow-left" className="h-5 w-5" />
               </button>
-              <div className="relative h-10 w-24 mr-4">
-                <OptimizedImage 
-                  src="/logo-cresol.png" 
-                  alt="Logo Cresol" 
-                  fill
-                  sizes="(max-width: 768px) 100vw, 96px"
-                  className="object-contain"
-                />
-              </div>
               <div>
                 <h1 className="text-xl font-semibold text-cresol-gray-dark">
                   Equipe - {subsector.name}

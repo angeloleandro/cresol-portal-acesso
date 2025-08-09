@@ -47,10 +47,10 @@ export default function OptimizedImage({
   const isVercel = process.env.VERCEL_ENV !== undefined || process.env.VERCEL === '1';
   const isSupabaseImage = imageSrc?.includes('supabase.co');
   const isSvg = imageSrc?.toLowerCase().endsWith('.svg');
-  const shouldForceUnoptimized = isSupabaseImage; // Apenas Supabase precisa de unoptimized
+  const shouldForceUnoptimized = false; // Supabase funciona com Vercel Optimization
 
-  // Log de debug para entender o comportamento
-  if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV !== undefined) {
+  // Log de debug apenas em desenvolvimento
+  if (process.env.NODE_ENV === 'development') {
     console.log('OptimizedImage Config:', {
       src: imageSrc?.substring(0, 50) + '...',
       alt,
@@ -58,24 +58,18 @@ export default function OptimizedImage({
       isSupabaseImage,
       isSvg,
       shouldForceUnoptimized,
-      renderingStrategy: isSvg ? 'HTML_IMG_TAG' : 'NEXT_IMAGE',
-      vercelEnv: process.env.VERCEL_ENV,
-      nodeEnv: process.env.NODE_ENV
+      renderingStrategy: isSvg ? 'HTML_IMG_TAG' : 'NEXT_IMAGE'
     });
   }
 
   const handleImageError = () => {
-    // Log detalhado para debug na Vercel
-    if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV !== undefined) {
+    // Log detalhado apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
       console.error('OptimizedImage Error:', {
         src: imageSrc,
         originalSrc: src,
         alt,
         isValidUrl: isValidUrl(imageSrc),
-        environment: process.env.NODE_ENV,
-        vercelEnv: process.env.VERCEL_ENV,
-        isVercel: process.env.VERCEL_ENV !== undefined || process.env.VERCEL === '1',
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
         shouldForceUnoptimized,
         isSupabaseImage
       });

@@ -68,7 +68,7 @@ export const HomeVideoCard = memo(function HomeVideoCard({
       <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
         {!imageError ? (
           <OptimizedImage
-            src={video.thumbnail_url || '/placeholder-video.jpg'}
+            src={video.thumbnail_url || '/logo-cresol.svg'}
             alt={video.title || 'Thumbnail do vídeo'}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"

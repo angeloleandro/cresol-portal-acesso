@@ -253,16 +253,6 @@ export default function SubsectorDetailsPage() {
       <header className="bg-white border-b border-cresol-gray-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center mb-4">
-            <div className="relative h-12 w-28 mr-4">
-              <OptimizedImage 
-                src="/logo-cresol.png" 
-                alt="Logo Cresol" 
-                fill
-                sizes="(max-width: 768px) 100vw, 112px"
-                className="object-contain"
-                priority
-              />
-            </div>
             <div>
               <h1 className="text-2xl font-bold text-cresol-gray-dark">
                 {subsector.name}

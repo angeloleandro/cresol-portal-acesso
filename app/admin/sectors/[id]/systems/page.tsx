@@ -257,7 +257,7 @@ export default function SectorSystemsManagement() {
           <div className="flex items-center">
             <div className="relative h-10 w-24 mr-4">
               <OptimizedImage 
-                src="/logo-cresol.png" 
+                src="/logo-horizontal-laranja.svg" 
                 alt="Logo Cresol" 
                 fill
                 className="object-contain"

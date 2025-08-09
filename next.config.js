@@ -27,8 +27,8 @@ const nextConfig = {
     // Tamanhos otimizados para dispositivos comuns
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // Formatos suportados (WebP e AVIF automáticos na Vercel)
-    formats: ['image/webp'],
+    // Formatos suportados (AVIF + WebP para máxima compressão na Vercel)
+    formats: ['image/avif', 'image/webp'],
     // Cache TTL otimizado (31 dias conforme recomendação Vercel)
     minimumCacheTTL: 2678400, // 31 dias
     // Qualidades permitidas para otimização  

@@ -1,23 +1,41 @@
 'use client';
 
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, memo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import GlobalSearch from './GlobalSearch';
 import { Icon } from './icons/Icon';
+import HeroUISectorsDropdown from './HeroUISectorsDropdown';
+import HeroUIAgenciesDropdown from './HeroUIAgenciesDropdown';
+import { 
+  Dropdown, 
+  DropdownTrigger, 
+  DropdownMenu, 
+  DropdownItem, 
+  Button 
+} from '@nextui-org/react';
 import { 
   useOptimizedUser, 
   useOptimizedSectors, 
+  useOptimizedAgencies,
   useOptimizedNotifications, 
   useRelativeTime,
   useOptimizedDropdown 
 } from '@/hooks/useOptimizedNavbar';
 
 // Types
+interface Subsector {
+  id: string;
+  name: string;
+  description?: string;
+  sector_id: string;
+}
+
 interface Sector {
   id: string;
   name: string;
   description?: string;
+  subsectors?: Subsector[];
 }
 
 interface Notification {
@@ -47,106 +65,124 @@ const NavbarSkeleton = memo(() => (
 ));
   NavbarSkeleton.displayName = 'NavbarSkeleton';
 
-// Memoized Sectors Dropdown
-const SectorsDropdown = memo(({ pathname, sectors, dropdown }: {
-  pathname: string;
-  sectors: Sector[];
-  dropdown: ReturnType<typeof useOptimizedDropdown>;
-}) => (
-  <div 
-    className="relative"
-    onMouseEnter={dropdown.handleOpen}
-    onMouseLeave={dropdown.handleClose}
-  >
-    <Link 
-      href="/setores" 
-      className={`text-sm font-medium flex items-center ${
-        pathname.startsWith('/setores') ? 'text-white' : 'text-white/80 hover:text-white'
-      }`}
-    >
-      <span>Setores</span>
-      <Icon name="chevron-down" className={`ml-1 h-4 w-4 transition-transform ${dropdown.isOpen ? 'rotate-180' : ''}`} />
-    </Link>
-    
-    {dropdown.isOpen && (
-      <div 
-        className="absolute left-0 mt-0 w-56 bg-white border border-gray-200 rounded-md py-1 z-10"
-        onMouseEnter={dropdown.handleOpen}
-        onMouseLeave={dropdown.handleClose}
-      >
-        <div className="absolute h-2 w-full -top-2 left-0" />
-        
-        <Link 
-          href="/setores" 
-          className="block px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white"
-        >
-          Todos os Setores
-        </Link>
-        
-        {sectors.length > 0 && (
-          <div className="border-t border-gray-100 mt-1 pt-1">
-            {sectors.map((sector) => (
-              <Link 
-                key={sector.id} 
-                href={`/setores/${sector.id}`}
-                className="block px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white truncate"
-                title={sector.name}
-              >
-                {sector.name}
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-));
-  SectorsDropdown.displayName = 'SectorsDropdown';
 
-// Memoized Gallery Dropdown
-const GalleryDropdown = memo(({ pathname, dropdown }: {
+// Memoized Gallery Dropdown - Convertido para HeroUI
+const GalleryDropdown = memo(({ pathname }: {
   pathname: string;
-  dropdown: ReturnType<typeof useOptimizedDropdown>;
-}) => (
-  <div 
-    className="relative"
-    onMouseEnter={dropdown.handleOpen}
-    onMouseLeave={dropdown.handleClose}
-  >
-    <button
-      className={`text-sm font-medium flex items-center ${
-        pathname.startsWith('/galeria') || pathname.startsWith('/videos') ? 'text-white' : 'text-white/80 hover:text-white'
-      }`}
-      type="button"
-    >
-      <span>Galeria</span>
-      <Icon name="chevron-down" className={`ml-1 h-4 w-4 transition-transform ${dropdown.isOpen ? 'rotate-180' : ''}`} />
-    </button>
+}) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Limpar timeout quando component é desmontado
+  useEffect(() => {
+    return () => {
+      if (dropdownHoverTimeoutRef.current) {
+        clearTimeout(dropdownHoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handlers para hover behavior
+  const handleDropdownMouseEnter = useCallback(() => {
+    if (dropdownHoverTimeoutRef.current) {
+      clearTimeout(dropdownHoverTimeoutRef.current);
+      dropdownHoverTimeoutRef.current = null;
+    }
+    setIsDropdownOpen(true);
+  }, []);
+
+  const handleDropdownMouseLeave = useCallback(() => {
+    if (dropdownHoverTimeoutRef.current) {
+      clearTimeout(dropdownHoverTimeoutRef.current);
+    }
     
-    {dropdown.isOpen && (
-      <div 
-        className="absolute left-0 mt-0 w-56 bg-white border border-gray-200 rounded-md py-1 z-10"
-        onMouseEnter={dropdown.handleOpen}
-        onMouseLeave={dropdown.handleClose}
+    dropdownHoverTimeoutRef.current = setTimeout(() => {
+      setIsDropdownOpen(false);
+    }, 300); // 300ms debounce
+  }, []);
+
+  // Verificar se está ativo
+  const isActive = pathname.startsWith('/galeria') || pathname.startsWith('/videos');
+
+  // Preparar itens do menu
+  const menuItems = [
+    {
+      key: 'galeria-imagens',
+      href: '/galeria',
+      label: 'Galeria de Imagens'
+    },
+    {
+      key: 'galeria-videos', 
+      href: '/videos',
+      label: 'Galeria de Vídeos'
+    }
+  ];
+
+  return (
+    <div 
+      onMouseEnter={handleDropdownMouseEnter}
+      onMouseLeave={handleDropdownMouseLeave}
+    >
+      <Dropdown 
+        placement="bottom-start"
+        isOpen={isDropdownOpen}
+        onOpenChange={setIsDropdownOpen}
+        classNames={{
+          content: "min-w-[200px] bg-white border border-default-200 shadow-lg",
+        }}
       >
-        <div className="absolute h-2 w-full -top-2 left-0" />
-        <Link 
-          href="/galeria" 
-          className="block px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white"
+        <DropdownTrigger>
+          <Button
+            variant="light"
+            className={`
+              h-auto p-0 min-w-0 data-[hover]:bg-transparent
+              text-sm font-medium flex items-center gap-1
+              ${isActive ? 'text-white' : 'text-white/80 hover:text-white'}
+            `}
+            endContent={
+              <Icon 
+                name="chevron-down" 
+                className="h-4 w-4 transition-transform data-[open=true]:rotate-180" 
+              />
+            }
+          >
+            Galeria
+          </Button>
+        </DropdownTrigger>
+
+        <DropdownMenu
+          aria-label="Menu da Galeria"
+          className="p-1"
+          itemClasses={{
+            base: [
+              "rounded-md",
+              "text-default-700",
+              "transition-colors",
+              "data-[hover=true]:bg-primary",
+              "data-[hover=true]:text-white",
+              "data-[selectable=true]:focus:bg-primary", 
+              "data-[selectable=true]:focus:text-white",
+            ],
+          }}
         >
-          Galeria de Imagens
-        </Link>
-        <Link 
-          href="/videos" 
-          className="block px-4 py-2 text-sm text-cresol-gray hover:bg-primary hover:text-white"
-        >
-          Galeria de Vídeos
-        </Link>
-      </div>
-    )}
-  </div>
-));
+          {menuItems.map((item) => (
+            <DropdownItem
+              key={item.key}
+              href={item.href}
+              as={Link}
+            >
+              <span className="truncate" title={item.label}>
+                {item.label}
+              </span>
+            </DropdownItem>
+          ))}
+        </DropdownMenu>
+      </Dropdown>
+    </div>
+  );
+});
   GalleryDropdown.displayName = 'GalleryDropdown';
+
 
 // Memoized Admin Sector Dropdown
 const AdminSectorDropdown = memo(({ sectors, dropdown }: {
@@ -419,7 +455,8 @@ function Navbar() {
   
   // Hooks otimizados
   const { user, profile, loading, handleLogout } = useOptimizedUser();
-  const { sectors } = useOptimizedSectors(profile?.role, user?.id);
+  const { sectors } = useOptimizedSectors(profile?.role, user?.id, true); // excludeAgencies = true
+  const { agencies } = useOptimizedAgencies();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useOptimizedNotifications(user?.id);
   const { formatRelativeTime } = useRelativeTime();
   
@@ -430,8 +467,6 @@ function Navbar() {
   const [isMobileSectorsOpen, setIsMobileSectorsOpen] = useState(false);
   
   // Dropdowns otimizados
-  const sectorsDropdown = useOptimizedDropdown();
-  const galleryDropdown = useOptimizedDropdown();
   const adminSectorDropdown = useOptimizedDropdown();
   const userMenuDropdown = useOptimizedDropdown();
   
@@ -502,15 +537,18 @@ function Navbar() {
               Home
             </Link>
             
-            <SectorsDropdown 
+            <HeroUISectorsDropdown 
               pathname={pathname}
               sectors={sectors}
-              dropdown={sectorsDropdown}
+            />
+            
+            <HeroUIAgenciesDropdown 
+              pathname={pathname}
+              agencies={agencies}
             />
             
             <GalleryDropdown 
               pathname={pathname}
-              dropdown={galleryDropdown}
             />
             
             <Link 
@@ -662,6 +700,15 @@ function Navbar() {
               </div>
             )}
           </div>
+          
+          <Link 
+            href="/setores/5463d1ba-c290-428e-b39e-d7ad9c66eb71" 
+            className={`block py-2 text-sm font-medium ${
+              pathname.includes('5463d1ba-c290-428e-b39e-d7ad9c66eb71') ? 'text-white' : 'text-white/80'
+            }`}
+          >
+            Agências
+          </Link>
           
           <Link 
             href="/galeria" 
