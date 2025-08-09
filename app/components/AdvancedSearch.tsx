@@ -1,6 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Button
+} from '@nextui-org/react';
+import { Icon } from './icons/Icon';
 import OptimizedImage from './OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -567,22 +575,62 @@ export default function AdvancedSearch({
 
                   {/* Setores */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Setores</label>
-                    <select
-                      multiple
-                      value={selectedFilter.sectors}
-                      onChange={(e) => {
-                        const values = Array.from(e.target.selectedOptions, option => option.value);
-                        setSelectedFilter(prev => ({ ...prev, sectors: values }));
-                      }}
-                      className="w-full px-3 py-1 border border-gray-300 rounded text-sm h-20"
-                    >
-                      {sectors.map((sector) => (
-                        <option key={sector.id} value={sector.id}>
-                          {sector.name}
-                        </option>
-                      ))}
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Setores
+                      {selectedFilter.sectors.length > 0 && (
+                        <span className="ml-2 bg-primary text-white text-xs px-2 py-1 rounded-full">
+                          {selectedFilter.sectors.length}
+                        </span>
+                      )}
+                    </label>
+                    
+                    <Dropdown placement="bottom-start">
+                      <DropdownTrigger>
+                        <Button
+                          variant="bordered"
+                          className="w-full justify-between font-normal border-gray-300 hover:border-primary"
+                          endContent={
+                            <Icon name="chevron-down" className="h-4 w-4 text-gray-400" />
+                          }
+                        >
+                          <span className="truncate text-left">
+                            {selectedFilter.sectors.length > 0
+                              ? `${selectedFilter.sectors.length} selecionado${selectedFilter.sectors.length > 1 ? 's' : ''}`
+                              : 'Selecionar setores'
+                            }
+                          </span>
+                        </Button>
+                      </DropdownTrigger>
+                      
+                      <DropdownMenu
+                        aria-label="Selecionar setores"
+                        className="min-w-[250px] max-h-[300px] overflow-y-auto scrollbar-branded"
+                        selectedKeys={selectedFilter.sectors}
+                        selectionMode="multiple"
+                        closeOnSelect={false}
+                        onSelectionChange={(keys) => {
+                          const selected = Array.from(keys) as string[];
+                          setSelectedFilter(prev => ({ ...prev, sectors: selected }));
+                        }}
+                        itemClasses={{
+                          base: [
+                            "rounded-md",
+                            "text-default-700",
+                            "transition-colors",
+                            "data-[hover=true]:bg-primary",
+                            "data-[hover=true]:text-white",
+                            "data-[selectable=true]:focus:bg-primary",
+                            "data-[selectable=true]:focus:text-white",
+                          ]
+                        }}
+                      >
+                        {sectors.map((sector) => (
+                          <DropdownItem key={sector.id} textValue={sector.name}>
+                            <span className="truncate">{sector.name}</span>
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </Dropdown>
                   </div>
 
                   {/* Tags populares */}

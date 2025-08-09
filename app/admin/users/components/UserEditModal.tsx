@@ -1,6 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Button,
+  Input
+} from '@nextui-org/react';
+import { Icon } from '@/app/components/icons/Icon';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 
@@ -79,6 +88,38 @@ export default function UserEditModal({
   const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
   const [resetPasswordSuccess, setResetPasswordSuccess] = useState<string | null>(null);
   const [resetPasswordError, setResetPasswordError] = useState<string | null>(null);
+  const [positionSearch, setPositionSearch] = useState('');
+  const [locationSearch, setLocationSearch] = useState('');
+
+  // Filtrar posições com base na busca
+  const filteredPositions = useMemo(() => {
+    if (!positionSearch.trim()) return positions;
+    return positions.filter(position =>
+      position.name.toLowerCase().includes(positionSearch.toLowerCase()) ||
+      (position.department && position.department.toLowerCase().includes(positionSearch.toLowerCase()))
+    );
+  }, [positions, positionSearch]);
+
+  // Filtrar locais com base na busca
+  const filteredLocations = useMemo(() => {
+    if (!locationSearch.trim()) return workLocations;
+    return workLocations.filter(location =>
+      location.name.toLowerCase().includes(locationSearch.toLowerCase())
+    );
+  }, [workLocations, locationSearch]);
+
+  // Label do cargo selecionado
+  const selectedPositionLabel = useMemo(() => {
+    const position = positions.find(p => p.id === positionId);
+    if (!position) return 'Selecione um cargo';
+    return position.department ? `${position.name} - ${position.department}` : position.name;
+  }, [positions, positionId]);
+
+  // Label do local selecionado
+  const selectedLocationLabel = useMemo(() => {
+    const location = workLocations.find(l => l.id === workLocationId);
+    return location?.name || 'Selecione o local';
+  }, [workLocations, workLocationId]);
 
   useEffect(() => {
     if (user.role === 'sector_admin') {
@@ -457,40 +498,178 @@ export default function UserEditModal({
             </div>
             
             <div>
-              <label htmlFor={`position-${user.id}`} className="form-label">
+              <label className="form-label">
                 Cargo
               </label>
-              <select
-                id={`position-${user.id}`}
-                className="input"
-                value={positionId}
-                onChange={e => setPositionId(e.target.value)}
-              >
-                <option value="">Selecione um cargo</option>
-                {positions.map(position => (
-                  <option key={position.id} value={position.id}>
-                    {position.name}
-                    {position.department && ` - ${position.department}`}
-                  </option>
-                ))}
-              </select>
+              <Dropdown placement="bottom-start">
+                <DropdownTrigger>
+                  <Button
+                    variant="bordered"
+                    className="w-full justify-between font-normal border-cresol-gray-light hover:border-primary focus:border-primary focus:outline-none focus:ring-0"
+                    endContent={
+                      <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
+                    }
+                  >
+                    <span className="truncate text-left">{selectedPositionLabel}</span>
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="Selecionar cargo"
+                  className="min-w-[350px] max-h-[300px] overflow-y-auto scrollbar-branded"
+                  selectedKeys={positionId ? [positionId] : []}
+                  selectionMode="single"
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys)[0] as string;
+                    setPositionId(selected || '');
+                    setPositionSearch('');
+                  }}
+                  itemClasses={{
+                    base: [
+                      "rounded-md",
+                      "text-default-700",
+                      "transition-colors",
+                      "data-[hover=true]:bg-primary",
+                      "data-[hover=true]:text-white",
+                      "data-[selectable=true]:focus:bg-primary",
+                      "data-[selectable=true]:focus:text-white",
+                    ]
+                  }}
+                >
+                  <DropdownItem key="header" isReadOnly className="h-14 gap-2">
+                    <Input
+                      autoFocus
+                      placeholder="Buscar cargo..."
+                      startContent={<Icon name="search" className="h-4 w-4" />}
+                      value={positionSearch}
+                      onValueChange={setPositionSearch}
+                      variant="bordered"
+                      className="w-full dropdown-search-override"
+                      classNames={{
+                        input: "text-sm bg-white",
+                        inputWrapper: [
+                          "h-10",
+                          "bg-white",
+                          "border-gray-300",
+                          "border",
+                          "rounded-md",
+                          "hover:border-gray-300",
+                          "focus-within:border-primary",
+                          "focus-within:ring-1",
+                          "focus-within:ring-primary/20",
+                          "data-[hover=true]:border-gray-300",
+                          "data-[focus=true]:border-primary",
+                          "data-[focus=true]:ring-1",
+                          "data-[focus=true]:ring-primary/20"
+                        ]
+                      }}
+                    />
+                  </DropdownItem>
+                  <DropdownItem key="empty-option" textValue="Nenhum cargo">
+                    <span className="text-gray-500">Nenhum cargo</span>
+                  </DropdownItem>
+                  {filteredPositions.length === 0 && positionSearch ? (
+                    <DropdownItem key="no-results" isReadOnly>
+                      <span className="text-gray-500 italic">Nenhum cargo encontrado</span>
+                    </DropdownItem>
+                  ) : (
+                    filteredPositions.map((position) => (
+                      <DropdownItem key={position.id} textValue={`${position.name} ${position.department || ''}`}>
+                        <div>
+                          <span className="font-medium">{position.name}</span>
+                          {position.department && (
+                            <span className="text-gray-500 text-sm ml-2">- {position.department}</span>
+                          )}
+                        </div>
+                      </DropdownItem>
+                    ))
+                  )}
+                </DropdownMenu>
+              </Dropdown>
             </div>
             
             <div>
-              <label htmlFor={`location-${user.id}`} className="form-label">
+              <label className="form-label">
                 Local de Atuação
               </label>
-              <select
-                id={`location-${user.id}`}
-                className="input"
-                value={workLocationId}
-                onChange={e => setWorkLocationId(e.target.value)}
-              >
-                <option value="">Selecione</option>
-                {workLocations.map(loc => (
-                  <option key={loc.id} value={loc.id}>{loc.name}</option>
-                ))}
-              </select>
+              <Dropdown placement="bottom-start">
+                <DropdownTrigger>
+                  <Button
+                    variant="bordered"
+                    className="w-full justify-between font-normal border-cresol-gray-light hover:border-primary focus:border-primary focus:outline-none focus:ring-0"
+                    endContent={
+                      <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
+                    }
+                  >
+                    <span className="truncate text-left">{selectedLocationLabel}</span>
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="Selecionar local de atuação"
+                  className="min-w-[300px] max-h-[300px] overflow-y-auto scrollbar-branded"
+                  selectedKeys={workLocationId ? [workLocationId] : []}
+                  selectionMode="single"
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys)[0] as string;
+                    setWorkLocationId(selected || '');
+                    setLocationSearch('');
+                  }}
+                  itemClasses={{
+                    base: [
+                      "rounded-md",
+                      "text-default-700",
+                      "transition-colors",
+                      "data-[hover=true]:bg-primary",
+                      "data-[hover=true]:text-white",
+                      "data-[selectable=true]:focus:bg-primary",
+                      "data-[selectable=true]:focus:text-white",
+                    ]
+                  }}
+                >
+                  <DropdownItem key="header" isReadOnly className="h-14 gap-2">
+                    <Input
+                      autoFocus
+                      placeholder="Buscar local..."
+                      startContent={<Icon name="search" className="h-4 w-4" />}
+                      value={locationSearch}
+                      onValueChange={setLocationSearch}
+                      variant="bordered"
+                      className="w-full dropdown-search-override"
+                      classNames={{
+                        input: "text-sm bg-white",
+                        inputWrapper: [
+                          "h-10",
+                          "bg-white",
+                          "border-gray-300",
+                          "border",
+                          "rounded-md",
+                          "hover:border-gray-300",
+                          "focus-within:border-primary",
+                          "focus-within:ring-1",
+                          "focus-within:ring-primary/20",
+                          "data-[hover=true]:border-gray-300",
+                          "data-[focus=true]:border-primary",
+                          "data-[focus=true]:ring-1",
+                          "data-[focus=true]:ring-primary/20"
+                        ]
+                      }}
+                    />
+                  </DropdownItem>
+                  <DropdownItem key="empty-option" textValue="Nenhum local">
+                    <span className="text-gray-500">Nenhum local</span>
+                  </DropdownItem>
+                  {filteredLocations.length === 0 && locationSearch ? (
+                    <DropdownItem key="no-results" isReadOnly>
+                      <span className="text-gray-500 italic">Nenhum local encontrado</span>
+                    </DropdownItem>
+                  ) : (
+                    filteredLocations.map((location) => (
+                      <DropdownItem key={location.id} textValue={location.name}>
+                        <span className="truncate">{location.name}</span>
+                      </DropdownItem>
+                    ))
+                  )}
+                </DropdownMenu>
+              </Dropdown>
             </div>
             
             {user.role === 'sector_admin' && (

@@ -1,6 +1,14 @@
 'use client';
 
-import React, { forwardRef, useState, useRef, useEffect } from 'react';
+import React, { forwardRef, useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { 
+  Dropdown, 
+  DropdownTrigger, 
+  DropdownMenu, 
+  DropdownItem, 
+  Button,
+  Spinner 
+} from '@nextui-org/react';
 import { Icon } from '@/app/components/icons/Icon';
 
 export interface SelectOption {
@@ -30,44 +38,25 @@ export interface FormSelectProps extends Omit<React.SelectHTMLAttributes<HTMLSel
 }
 
 /**
- * FormSelect - Professional select/dropdown component
+ * FormSelect - Professional HeroUI-based select/dropdown component
  * 
- * Enterprise-grade select component with advanced features:
- * - Multiple variants: outline (default), filled, underline
- * - Three sizes: sm, md (default), lg
- * - Search functionality with keyboard navigation
- * - Option groups support
- * - Async data loading capability
- * - Clear functionality
- * - Loading states with spinner
- * - Error and success states
- * - Full keyboard accessibility (Arrow keys, Enter, Escape, Tab)
- * - WCAG 2.1 AA accessibility compliance
- * - Cresol design system integration
- * - React Hook Form compatibility
- * - TypeScript support with proper option typing
- * 
- * Features:
- * - Single and multi-select support (future)
- * - Custom option rendering
- * - Virtualization for large lists (future)
- * - Portal-based dropdown positioning
- * - Touch-friendly mobile interface
+ * Enterprise-grade select component standardized with Cresol navbar dropdown pattern:
+ * - HeroUI/NextUI dropdown implementation for consistency
+ * - Same API as original FormSelect for seamless migration
+ * - Cresol design tokens and hover behaviors
+ * - Advanced features: search, groups, loading, clear
+ * - Full keyboard accessibility and WCAG 2.1 AA compliance
+ * - Optimized hover behavior with debounce (300ms)
+ * - React Hook Form compatible
  * 
  * @param options - Array of select options
  * @param variant - Visual style variant
  * @param size - Select size
  * @param isInvalid - Error state
  * @param isLoading - Loading state
- * @param fullWidth - Take full width of container
  * @param searchable - Enable search functionality
  * @param clearable - Show clear button
- * @param onClear - Clear handler
- * @param noOptionsText - Text when no options available
- * @param loadingText - Text during loading
- * @param emptyText - Text when search has no results
- * @param maxHeight - Maximum dropdown height in px
- * @param onSearch - Search query handler for async loading
+ * @param placeholder - Placeholder text
  */
 export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
   options = [],
@@ -92,20 +81,28 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
 }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [isFocused, setIsFocused] = useState(false);
   
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  // Timeout refs for debounced hover behavior (following navbar pattern)
+  const dropdownHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const optionsRef = useRef<HTMLDivElement>(null);
-  
+
   // Generate unique field ID for accessibility
-  const fieldId = React.useMemo(() => 
-    props.id || `select-${Math.random().toString(36).substr(2, 9)}`, [props.id]
+  const fieldId = useMemo(() => 
+    props.id || `form-select-${Math.random().toString(36).substring(2, 9)}`, 
+    [props.id]
   );
   
+  // Cleanup hover timeouts on unmount (navbar pattern)
+  useEffect(() => {
+    return () => {
+      if (dropdownHoverTimeoutRef.current) {
+        clearTimeout(dropdownHoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Filter options based on search query
-  const filteredOptions = React.useMemo(() => {
+  const filteredOptions = useMemo(() => {
     if (!searchQuery.trim()) return options;
     
     return options.filter(option =>
@@ -113,9 +110,9 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
       option.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [options, searchQuery]);
-  
+
   // Group options if they have group property
-  const groupedOptions = React.useMemo(() => {
+  const groupedOptions = useMemo(() => {
     const groups: { [key: string]: SelectOption[] } = {};
     const ungrouped: SelectOption[] = [];
     
@@ -132,77 +129,41 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
     
     return { groups, ungrouped };
   }, [filteredOptions]);
-  
+
   // Find selected option
-  const selectedOption = options.find(option => option.value === value);
-  
-  // Handle keyboard navigation
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        if (!isOpen) {
-          setIsOpen(true);
-          setHighlightedIndex(0);
-        } else {
-          setHighlightedIndex(prev => 
-            prev < filteredOptions.length - 1 ? prev + 1 : 0
-          );
-        }
-        break;
-        
-      case 'ArrowUp':
-        e.preventDefault();
-        if (isOpen) {
-          setHighlightedIndex(prev => 
-            prev > 0 ? prev - 1 : filteredOptions.length - 1
-          );
-        }
-        break;
-        
-      case 'Enter':
-        e.preventDefault();
-        if (isOpen && highlightedIndex >= 0) {
-          const selectedOption = filteredOptions[highlightedIndex];
-          if (selectedOption && !selectedOption.disabled) {
-            handleOptionSelect(selectedOption);
-          }
-        } else {
-          setIsOpen(true);
-        }
-        break;
-        
-      case 'Escape':
-        setIsOpen(false);
-        setSearchQuery('');
-        setHighlightedIndex(-1);
-        break;
-        
-      case 'Tab':
-        setIsOpen(false);
-        setSearchQuery('');
-        break;
-        
-      default:
-        // If searchable and not a modifier key, focus search input
-        if (searchable && !e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1) {
-          if (!isOpen) setIsOpen(true);
-          // Focus search input on next tick
-          setTimeout(() => {
-            searchInputRef.current?.focus();
-          }, 0);
-        }
+  const selectedOption = useMemo(() => 
+    options.find(option => option.value === value), 
+    [options, value]
+  );
+
+  // Hover behavior handlers (navbar pattern)
+  const handleDropdownMouseEnter = useCallback(() => {
+    if (dropdownHoverTimeoutRef.current) {
+      clearTimeout(dropdownHoverTimeoutRef.current);
+      dropdownHoverTimeoutRef.current = null;
     }
-  };
-  
-  // Handle option selection
-  const handleOptionSelect = (option: SelectOption) => {
-    if (option.disabled) return;
+    setIsOpen(true);
+  }, []);
+
+  const handleDropdownMouseLeave = useCallback(() => {
+    if (dropdownHoverTimeoutRef.current) {
+      clearTimeout(dropdownHoverTimeoutRef.current);
+    }
     
-    // Create synthetic change event
+    dropdownHoverTimeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+      setSearchQuery('');
+    }, 300); // 300ms debounce (navbar pattern)
+  }, []);
+
+  // Handle option selection
+  const handleOptionSelect = useCallback((option: SelectOption) => {
+    if (option.disabled || isLoading) return;
+    
+    // Create synthetic change event for React Hook Form compatibility
     const syntheticEvent = {
-      target: { value: option.value },
-      currentTarget: { value: option.value }
+      target: { value: option.value, name: props.name },
+      currentTarget: { value: option.value, name: props.name }
     } as React.ChangeEvent<HTMLSelectElement>;
     
     if (props.onChange) {
@@ -211,22 +172,20 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
     
     setIsOpen(false);
     setSearchQuery('');
-    setHighlightedIndex(-1);
-  };
-  
+  }, [props.onChange, props.name, isLoading]);
+
   // Handle search input
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
-    setHighlightedIndex(-1);
     
     if (onSearch) {
       onSearch(query);
     }
-  };
-  
-  // Handle clear
-  const handleClear = (e: React.MouseEvent) => {
+  }, [onSearch]);
+
+  // Handle clear action
+  const handleClear = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     
     if (onClear) {
@@ -235,61 +194,77 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
     
     // Create synthetic clear event
     const syntheticEvent = {
-      target: { value: '' },
-      currentTarget: { value: '' }
+      target: { value: '', name: props.name },
+      currentTarget: { value: '', name: props.name }
     } as React.ChangeEvent<HTMLSelectElement>;
     
     if (props.onChange) {
       props.onChange(syntheticEvent);
     }
-  };
-  
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setSearchQuery('');
-      }
-    };
     
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-  
-  // Scroll highlighted option into view
-  useEffect(() => {
-    if (isOpen && highlightedIndex >= 0 && optionsRef.current) {
-      const optionElement = optionsRef.current.children[highlightedIndex] as HTMLElement;
-      if (optionElement) {
-        optionElement.scrollIntoView({ block: 'nearest' });
-      }
+    setSearchQuery('');
+  }, [onClear, props.onChange, props.name]);
+
+  // Size mapping for HeroUI
+  const getButtonSize = () => {
+    switch (size) {
+      case 'sm': return 'sm';
+      case 'lg': return 'lg';
+      default: return 'md';
     }
-  }, [highlightedIndex, isOpen]);
-  
-  // Build CSS classes
-  const selectClasses = [
-    'form-select-base',
-    `form-select-${variant}`,
-    `form-select-${size}`,
-    fullWidth ? 'form-select-full-width' : '',
-    isInvalid ? 'form-select-invalid' : '',
-    isLoading ? 'form-select-loading' : '',
-    isFocused || isOpen ? 'form-select-focused' : '',
-    disabled ? 'form-select-disabled' : '',
+  };
+
+  // Get container width classes
+  const containerClasses = [
+    'form-select-container',
+    fullWidth ? 'w-full' : 'w-auto',
     className
   ].filter(Boolean).join(' ');
+
+  // Prepare menu items (including grouped options)
+  const menuItems = [];
   
+  // Add ungrouped options
+  groupedOptions.ungrouped.forEach((option) => {
+    menuItems.push({
+      key: option.value,
+      option,
+      isGroup: false
+    });
+  });
+  
+  // Add grouped options
+  Object.entries(groupedOptions.groups).forEach(([groupName, groupOptions]) => {
+    // Add group header
+    menuItems.push({
+      key: `group-${groupName}`,
+      groupName,
+      isGroup: true,
+      isGroupHeader: true
+    });
+    
+    // Add group options
+    groupOptions.forEach((option) => {
+      menuItems.push({
+        key: option.value,
+        option,
+        isGroup: true,
+        groupName
+      });
+    });
+  });
+
   return (
-    <div className="form-select-wrapper" ref={dropdownRef} data-variant={variant} data-size={size}>
+    <div className={containerClasses}>
       {/* Hidden native select for form submission and accessibility fallback */}
       <select
         ref={ref}
         value={value}
         disabled={disabled || isLoading}
-        className="form-select-native"
+        className="sr-only"
         tabIndex={-1}
         aria-hidden="true"
+        name={props.name}
         {...props}
       >
         <option value="">{placeholder}</option>
@@ -300,184 +275,190 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
         ))}
       </select>
       
-      {/* Custom Select Button */}
-      <button
-        type="button"
-        className={selectClasses}
-        onClick={() => !disabled && !isLoading && setIsOpen(!isOpen)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        disabled={disabled || isLoading}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-        aria-controls={isOpen ? `${fieldId}-listbox` : undefined}
-        aria-labelledby={props['aria-labelledby']}
-        role="combobox"
+      {/* HeroUI Dropdown */}
+      <div 
+        onMouseEnter={handleDropdownMouseEnter}
+        onMouseLeave={handleDropdownMouseLeave}
       >
-        <span className="form-select-value">
-          {isLoading ? (
-            <span className="form-select-loading-text">{loadingText}</span>
-          ) : selectedOption ? (
-            <span className="form-select-selected-option">
-              {selectedOption.label}
-              {selectedOption.description && (
-                <span className="form-select-option-description">
-                  {selectedOption.description}
-                </span>
-              )}
-            </span>
-          ) : (
-            <span className="form-select-placeholder">{placeholder}</span>
-          )}
-        </span>
-        
-        <div className="form-select-icons">
-          {/* Clear Button */}
-          {clearable && selectedOption && !isLoading && (
-            <button
-              type="button"
-              className="form-select-clear-button"
-              onClick={handleClear}
-              aria-label="Limpar seleção"
-            >
-              <Icon name="X" className="form-select-icon" />
-            </button>
-          )}
-          
-          {/* Loading Spinner */}
-          {isLoading && (
-            <Icon name="Loader" className="form-select-icon form-select-spinner" />
-          )}
-          
-          {/* Dropdown Arrow */}
-          {!isLoading && (
-            <Icon 
-              name={isOpen ? "ChevronUp" : "ChevronDown"} 
-              className="form-select-icon form-select-arrow" 
-            />
-          )}
-        </div>
-      </button>
-      
-      {/* Dropdown Menu */}
-      {isOpen && (
-        <div 
-          id={`${fieldId}-listbox`}
-          className="form-select-dropdown"
-          style={{ maxHeight: `${maxHeight}px` }}
-          role="listbox"
-          aria-multiselectable="false"
+        <Dropdown 
+          placement="bottom-start"
+          isOpen={isOpen}
+          onOpenChange={setIsOpen}
+          shouldFlip={true}
+          shouldCloseOnBlur={true}
+          classNames={{
+            content: `min-w-[200px] max-h-[${maxHeight}px] bg-white border border-default-200 shadow-lg overflow-y-auto scrollbar-branded`,
+          }}
         >
-          {/* Search Input */}
-          {searchable && (
-            <div className="form-select-search">
-              <Icon name="Search" className="form-select-search-icon" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Pesquisar..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="form-select-search-input"
-                autoComplete="off"
-              />
-            </div>
-          )}
-          
-          {/* Options */}
-          <div ref={optionsRef} className="form-select-options">
-            {isLoading ? (
-              <div className="form-select-empty-state">
-                <Icon name="Loader" className="form-select-empty-icon animate-spin" />
-                <span>{loadingText}</span>
-              </div>
-            ) : filteredOptions.length === 0 ? (
-              <div className="form-select-empty-state">
-                <Icon name="Search" className="form-select-empty-icon" />
-                <span>{searchQuery ? emptyText : noOptionsText}</span>
-              </div>
+          <DropdownTrigger>
+            <Button
+              variant="bordered"
+              size={getButtonSize()}
+              className={`
+                h-auto justify-start font-normal
+                ${fullWidth ? 'w-full' : 'min-w-[200px]'}
+                ${isInvalid ? 'border-danger' : 'border-default-300'}
+                ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+                ${variant === 'filled' ? 'bg-default-100' : ''}
+                ${variant === 'underline' ? 'rounded-none border-t-0 border-l-0 border-r-0' : ''}
+              `}
+              disabled={disabled || isLoading}
+              endContent={
+                <div className="flex items-center gap-1">
+                  {/* Clear Button */}
+                  {clearable && selectedOption && !isLoading && (
+                    <button
+                      type="button"
+                      className="text-default-400 hover:text-default-600 transition-colors"
+                      onClick={handleClear}
+                      aria-label="Limpar seleção"
+                    >
+                      <Icon name="X" className="h-4 w-4" />
+                    </button>
+                  )}
+                  
+                  {/* Loading Spinner */}
+                  {isLoading && (
+                    <Spinner size="sm" />
+                  )}
+                  
+                  {/* Dropdown Arrow */}
+                  {!isLoading && (
+                    <Icon 
+                      name={isOpen ? "chevron-up" : "chevron-down"} 
+                      className="h-4 w-4 transition-transform text-default-400" 
+                    />
+                  )}
+                </div>
+              }
+            >
+              <span className="text-left truncate">
+                {isLoading ? (
+                  <span className="text-default-500">{loadingText}</span>
+                ) : selectedOption ? (
+                  <span className="text-default-900">
+                    {selectedOption.label}
+                    {selectedOption.description && (
+                      <span className="text-default-500 text-sm ml-2">
+                        {selectedOption.description}
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="text-default-400">{placeholder}</span>
+                )}
+              </span>
+            </Button>
+          </DropdownTrigger>
+
+          <DropdownMenu
+            aria-label={props['aria-label'] || 'Selecionar opção'}
+            className="p-1 max-h-[70vh] overflow-y-auto scrollbar-branded"
+            disabledKeys={options.filter(opt => opt.disabled).map(opt => opt.value)}
+            itemClasses={{
+              base: [
+                "rounded-md",
+                "text-default-700",
+                "transition-colors",
+                "data-[hover=true]:bg-primary",
+                "data-[hover=true]:text-white",
+                "data-[selectable=true]:focus:bg-primary", 
+                "data-[selectable=true]:focus:text-white",
+              ],
+            }}
+          >
+            {/* Search Input */}
+            {searchable && filteredOptions.length > 0 && (
+              <DropdownItem
+                key="search"
+                className="p-0 mb-1"
+                isReadOnly
+                textValue="search"
+              >
+                <div className="flex items-center gap-2 p-2 border-b border-default-200">
+                  <Icon name="search" className="h-4 w-4 text-default-400" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Pesquisar..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    className="flex-1 outline-none text-sm bg-transparent"
+                    autoComplete="off"
+                  />
+                </div>
+              </DropdownItem>
+            )}
+            
+            {/* Options or Empty State */}
+            {filteredOptions.length === 0 ? (
+              <DropdownItem key="empty" isReadOnly textValue="empty">
+                <div className="flex flex-col items-center justify-center py-4 text-default-400">
+                  <Icon name="search" className="h-6 w-6 mb-2" />
+                  <span className="text-sm">
+                    {searchQuery ? emptyText : noOptionsText}
+                  </span>
+                </div>
+              </DropdownItem>
             ) : (
               <>
                 {/* Ungrouped Options */}
-                {groupedOptions.ungrouped.map((option, index) => (
-                  <button
+                {groupedOptions.ungrouped.map((option) => (
+                  <DropdownItem
                     key={option.value}
-                    type="button"
-                    className={`form-select-option ${
-                      highlightedIndex === index ? 'form-select-option-highlighted' : ''
-                    } ${
-                      option.value === value ? 'form-select-option-selected' : ''
-                    } ${
-                      option.disabled ? 'form-select-option-disabled' : ''
-                    }`}
-                    onClick={() => handleOptionSelect(option)}
-                    disabled={option.disabled}
-                    role="option"
-                    aria-selected={option.value === value}
+                    className={option.value === value ? 'bg-primary/10' : ''}
+                    onPress={() => handleOptionSelect(option)}
+                    textValue={option.label}
                   >
-                    <span className="form-select-option-content">
-                      <span className="form-select-option-label">{option.label}</span>
+                    <div className="flex flex-col">
+                      <span className="truncate">{option.label}</span>
                       {option.description && (
-                        <span className="form-select-option-description">
+                        <span className="text-xs text-default-400 truncate">
                           {option.description}
                         </span>
                       )}
-                    </span>
-                    {option.value === value && (
-                      <Icon name="Check" className="form-select-check-icon" />
-                    )}
-                  </button>
+                    </div>
+                  </DropdownItem>
                 ))}
                 
                 {/* Grouped Options */}
                 {Object.entries(groupedOptions.groups).map(([groupName, groupOptions]) => (
-                  <div key={groupName} className="form-select-group">
-                    <div className="form-select-group-label">{groupName}</div>
-                    {groupOptions.map((option, groupIndex) => {
-                      const globalIndex = groupedOptions.ungrouped.length + 
-                        Object.entries(groupedOptions.groups)
-                          .slice(0, Object.keys(groupedOptions.groups).indexOf(groupName))
-                          .reduce((acc, [, opts]) => acc + opts.length, 0) + 
-                        groupIndex;
-                        
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          className={`form-select-option form-select-option-grouped ${
-                            highlightedIndex === globalIndex ? 'form-select-option-highlighted' : ''
-                          } ${
-                            option.value === value ? 'form-select-option-selected' : ''
-                          } ${
-                            option.disabled ? 'form-select-option-disabled' : ''
-                          }`}
-                          onClick={() => handleOptionSelect(option)}
-                          disabled={option.disabled}
-                          role="option"
-                          aria-selected={option.value === value}
-                        >
-                          <span className="form-select-option-content">
-                            <span className="form-select-option-label">{option.label}</span>
-                            {option.description && (
-                              <span className="form-select-option-description">
-                                {option.description}
-                              </span>
-                            )}
-                          </span>
-                          {option.value === value && (
-                            <Icon name="Check" className="form-select-check-icon" />
+                  <div key={groupName}>
+                    {/* Group Header */}
+                    <DropdownItem
+                      key={`group-header-${groupName}`}
+                      className="font-medium text-xs text-default-500 px-2 py-1 cursor-default"
+                      isReadOnly
+                      textValue={groupName}
+                    >
+                      {groupName}
+                    </DropdownItem>
+                    
+                    {/* Group Options */}
+                    {groupOptions.map((option) => (
+                      <DropdownItem
+                        key={option.value}
+                        className={`ml-2 ${option.value === value ? 'bg-primary/10' : ''}`}
+                        onPress={() => handleOptionSelect(option)}
+                        textValue={option.label}
+                      >
+                        <div className="flex flex-col">
+                          <span className="truncate">{option.label}</span>
+                          {option.description && (
+                            <span className="text-xs text-default-400 truncate">
+                              {option.description}
+                            </span>
                           )}
-                        </button>
-                      );
-                    })}
+                        </div>
+                      </DropdownItem>
+                    ))}
                   </div>
                 ))}
               </>
             )}
-          </div>
-        </div>
-      )}
+          </DropdownMenu>
+        </Dropdown>
+      </div>
     </div>
   );
 });

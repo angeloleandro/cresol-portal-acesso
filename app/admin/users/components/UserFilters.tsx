@@ -1,3 +1,13 @@
+import React, { useCallback, useMemo } from 'react';
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Button
+} from '@nextui-org/react';
+import { Icon } from '@/app/components/icons/Icon';
+
 interface WorkLocation {
   id: string;
   name: string;
@@ -26,6 +36,43 @@ export default function UserFilters({
   totalUsers,
   filteredCount
 }: UserFiltersProps) {
+  
+  // Role options with labels
+  const roleOptions = useMemo(() => [
+    { value: 'all', label: 'Todos' },
+    { value: 'admin', label: 'Administrador' },
+    { value: 'sector_admin', label: 'Admin. Setorial' },
+    { value: 'subsector_admin', label: 'Admin. Subsetorial' },
+    { value: 'user', label: 'Usuário' }
+  ], []);
+  
+  // Location options with "all" option
+  const locationOptions = useMemo(() => [
+    { id: 'all', name: 'Todos os locais' },
+    ...workLocations
+  ], [workLocations]);
+  
+  // Get selected role label
+  const selectedRoleLabel = useMemo(() =>
+    roleOptions.find(role => role.value === roleFilter)?.label || 'Todos',
+    [roleFilter, roleOptions]
+  );
+  
+  // Get selected location label
+  const selectedLocationLabel = useMemo(() =>
+    locationOptions.find(loc => loc.id === locationFilter)?.name || 'Todos os locais',
+    [locationFilter, locationOptions]
+  );
+  
+  // Handle role selection
+  const handleRoleSelect = useCallback((role: string) => {
+    setRoleFilter(role);
+  }, [setRoleFilter]);
+  
+  // Handle location selection
+  const handleLocationSelect = useCallback((location: string) => {
+    setLocationFilter(location);
+  }, [setLocationFilter]);
   return (
     <div className="bg-white rounded-lg border border-cresol-gray-light p-4 mb-6">
       <div className="flex flex-col md:flex-row gap-4">
@@ -51,38 +98,95 @@ export default function UserFilters({
         </div>
         
         <div className="w-full md:w-48">
-          <label htmlFor="roleFilter" className="block text-xs font-medium text-cresol-gray mb-1">
+          <label className="block text-xs font-medium text-cresol-gray mb-1">
             Filtrar por papel
           </label>
-          <select
-            id="roleFilter"
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-          >
-            <option value="all">Todos</option>
-            <option value="admin">Administrador</option>
-            <option value="sector_admin">Admin. Setorial</option>
-            <option value="subsector_admin">Admin. Subsetorial</option>
-            <option value="user">Usuário</option>
-          </select>
+          <Dropdown placement="bottom-start">
+            <DropdownTrigger>
+              <Button
+                variant="bordered"
+                className="w-full justify-between font-normal border-cresol-gray-light hover:border-primary focus:border-primary"
+                endContent={
+                  <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
+                }
+              >
+                <span className="truncate text-left">{selectedRoleLabel}</span>
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Filtrar por papel"
+              className="min-w-[200px]"
+              selectedKeys={[roleFilter]}
+              selectionMode="single"
+              onSelectionChange={(keys) => {
+                const selected = Array.from(keys)[0] as string;
+                if (selected) handleRoleSelect(selected);
+              }}
+              itemClasses={{
+                base: [
+                  "rounded-md",
+                  "text-default-700",
+                  "transition-colors",
+                  "data-[hover=true]:bg-primary",
+                  "data-[hover=true]:text-white",
+                  "data-[selectable=true]:focus:bg-primary",
+                  "data-[selectable=true]:focus:text-white",
+                ]
+              }}
+            >
+              {roleOptions.map((role) => (
+                <DropdownItem key={role.value} textValue={role.label}>
+                  <span>{role.label}</span>
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
         </div>
         
         <div className="w-full md:w-48">
-          <label htmlFor="locationFilter" className="block text-xs font-medium text-cresol-gray mb-1">
+          <label className="block text-xs font-medium text-cresol-gray mb-1">
             Filtrar por local
           </label>
-          <select
-            id="locationFilter"
-            value={locationFilter}
-            onChange={(e) => setLocationFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-          >
-            <option value="all">Todos os locais</option>
-            {workLocations.map(loc => (
-              <option key={loc.id} value={loc.id}>{loc.name}</option>
-            ))}
-          </select>
+          <Dropdown placement="bottom-start">
+            <DropdownTrigger>
+              <Button
+                variant="bordered"
+                className="w-full justify-between font-normal border-cresol-gray-light hover:border-primary focus:border-primary"
+                endContent={
+                  <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
+                }
+              >
+                <span className="truncate text-left">{selectedLocationLabel}</span>
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Filtrar por local"
+              className="min-w-[250px] max-h-[300px] overflow-y-auto scrollbar-branded"
+              selectedKeys={[locationFilter]}
+              selectionMode="single"
+              onSelectionChange={(keys) => {
+                const selected = Array.from(keys)[0] as string;
+                if (selected) handleLocationSelect(selected);
+              }}
+              itemClasses={{
+                base: [
+                  "rounded-md",
+                  "text-default-700",
+                  "transition-colors",
+                  "data-[hover=true]:bg-primary",
+                  "data-[hover=true]:text-white",
+                  "data-[selectable=true]:focus:bg-primary",
+                  "data-[selectable=true]:focus:text-white",
+                ]
+              }}
+            >
+              {locationOptions.map((location) => (
+                <DropdownItem key={location.id} textValue={location.name}>
+                  <span className="truncate">{location.name}</span>
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
         </div>
       </div>
       

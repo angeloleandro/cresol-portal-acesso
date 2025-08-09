@@ -111,7 +111,7 @@ export default function UserList({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {users.map(user => (
-          <div key={user.id} className="bg-white rounded-lg border border-gray-200/40 hover:border-gray-200/70 overflow-hidden transition-colors duration-150">
+          <div key={user.id} className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 overflow-hidden transition-colors duration-150">
             <div className="p-4">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="relative h-12 w-12 rounded-full overflow-hidden bg-cresol-gray-light flex-shrink-0">
@@ -170,7 +170,7 @@ export default function UserList({
               </div>
             </div>
             
-            <div className="p-4 bg-gray-50 border-t border-gray-200/40 flex items-center justify-between">
+            <div className="p-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
               <div className="flex space-x-2">
                 <button
                   type="button"
