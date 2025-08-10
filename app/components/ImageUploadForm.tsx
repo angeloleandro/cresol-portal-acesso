@@ -188,7 +188,7 @@ export default function ImageUploadForm({ initialData, onSave, onCancel }: Image
               src={imageUrl} 
               alt="Preview" 
               fill 
-              className="object-contain rounded border"
+              className="object-contain rounded-sm border"
               sizes="(max-width: 768px) 100vw, 50vw"
               quality={80}
               fallbackText="Preview"

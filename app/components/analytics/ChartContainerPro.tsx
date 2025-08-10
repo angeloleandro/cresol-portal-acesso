@@ -296,13 +296,13 @@ const ChartContainerPro = memo(function ChartContainerPro({
           <div className="animate-pulse">
             <div className="flex justify-between items-center">
               <div className="space-y-2">
-                <div className="h-6 bg-gray-200 rounded w-48"></div>
-                <div className="h-4 bg-gray-200 rounded w-32"></div>
+                <div className="h-6 bg-gray-200 rounded-sm w-48"></div>
+                <div className="h-4 bg-gray-200 rounded-sm w-32"></div>
               </div>
               <div className="flex space-x-2">
-                <div className="h-9 w-9 bg-gray-200 rounded-lg"></div>
-                <div className="h-9 w-9 bg-gray-200 rounded-lg"></div>
-                <div className="h-9 w-9 bg-gray-200 rounded-lg"></div>
+                <div className="h-9 w-9 bg-gray-200 rounded-sm-lg"></div>
+                <div className="h-9 w-9 bg-gray-200 rounded-sm-lg"></div>
+                <div className="h-9 w-9 bg-gray-200 rounded-sm-lg"></div>
               </div>
             </div>
           </div>
@@ -310,11 +310,11 @@ const ChartContainerPro = memo(function ChartContainerPro({
         
         <div className={sizeStyles.padding}>
           <div className="animate-pulse space-y-4">
-            <div className="h-64 bg-gray-200 rounded-lg"></div>
+            <div className="h-64 bg-gray-200 rounded-sm-lg"></div>
             <div className="flex justify-center space-x-4">
-              <div className="h-4 bg-gray-200 rounded w-16"></div>
-              <div className="h-4 bg-gray-200 rounded w-20"></div>
-              <div className="h-4 bg-gray-200 rounded w-14"></div>
+              <div className="h-4 bg-gray-200 rounded-sm w-16"></div>
+              <div className="h-4 bg-gray-200 rounded-sm w-20"></div>
+              <div className="h-4 bg-gray-200 rounded-sm w-14"></div>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import Breadcrumb from '@/app/components/Breadcrumb';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Cropper from 'react-easy-crop';
+import StandardizedButton from '@/app/components/admin/StandardizedButton';
 
 interface Sector {
   id: string;
@@ -1135,12 +1136,13 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Notícias do Setor</h2>
-              <button
+              <StandardizedButton
                 onClick={() => handleOpenNewsModal()}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                variant="primary"
+                size="md"
               >
                 + Nova Notícia
-              </button>
+              </StandardizedButton>
             </div>
 
             {news.length === 0 ? (
@@ -1210,12 +1212,13 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Eventos do Setor</h2>
-              <button
+              <StandardizedButton
                 onClick={() => handleOpenEventModal()}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                variant="primary"
+                size="md"
               >
                 + Novo Evento
-              </button>
+              </StandardizedButton>
             </div>
 
             {events.length === 0 ? (
@@ -1286,12 +1289,13 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Subsetores</h2>
-              <button 
+              <StandardizedButton 
                 onClick={() => handleOpenSubsectorModal()}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                variant="primary"
+                size="md"
               >
                 + Novo Subsetor
-              </button>
+              </StandardizedButton>
             </div>
 
             {subsectors.length === 0 ? (
@@ -1358,12 +1362,13 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Grupos de Notificação</h2>
-              <button 
+              <StandardizedButton 
                 onClick={handleOpenGroupModal}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                variant="primary"
+                size="md"
               >
                 + Criar Grupo
-              </button>
+              </StandardizedButton>
             </div>
 
             {groups.length === 0 && automaticGroups.length === 0 ? (
@@ -1462,12 +1467,13 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Enviar Mensagem</h2>
-              <button 
+              <StandardizedButton 
                 onClick={handleOpenMessageModal}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                variant="primary"
+                size="md"
               >
                 + Nova Mensagem
-              </button>
+              </StandardizedButton>
             </div>
 
             <div className="bg-white rounded-md p-12 text-center border border-gray-100">
@@ -1478,12 +1484,13 @@ export default function SectorDashboard() {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Envio de Notificações</h3>
               <p className="text-gray-500 mb-4">Envie mensagens para grupos ou usuários específicos.</p>
-              <button 
+              <StandardizedButton 
                 onClick={handleOpenMessageModal}
-                className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                variant="primary"
+                size="lg"
               >
                 Enviar Nova Mensagem
-              </button>
+              </StandardizedButton>
             </div>
           </div>
         )}
@@ -1530,12 +1537,13 @@ export default function SectorDashboard() {
                 >
                   Cancelar
                 </button>
-                <button
+                <StandardizedButton
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  variant="primary"
+                  size="md"
                 >
                   {isEditing ? 'Salvar' : 'Criar'}
-                </button>
+                </StandardizedButton>
               </div>
             </form>
           </div>
@@ -1602,7 +1610,7 @@ export default function SectorDashboard() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                     >
                       {uploadingImage ? 'Carregando...' : 'Selecionar Imagem'}
                     </button>
@@ -1647,12 +1655,13 @@ export default function SectorDashboard() {
                 >
                   Cancelar
                 </button>
-                <button
+                <StandardizedButton
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  variant="primary"
+                  size="md"
                 >
                   {isEditing ? 'Salvar' : 'Criar'}
-                </button>
+                </StandardizedButton>
               </div>
             </form>
           </div>
@@ -1755,12 +1764,13 @@ export default function SectorDashboard() {
                 >
                   Cancelar
                 </button>
-                <button
+                <StandardizedButton
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  variant="primary"
+                  size="md"
                 >
                   {isEditing ? 'Salvar' : 'Criar'}
-                </button>
+                </StandardizedButton>
               </div>
             </form>
           </div>
@@ -1807,12 +1817,13 @@ export default function SectorDashboard() {
                 >
                   Cancelar
                 </button>
-                <button
+                <StandardizedButton
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  variant="primary"
+                  size="md"
                 >
                   {isEditing ? 'Salvar' : 'Criar'}
-                </button>
+                </StandardizedButton>
               </div>
             </form>
           </div>
@@ -2011,7 +2022,7 @@ export default function SectorDashboard() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                 >
                   Criar Grupo
                 </button>
@@ -2198,7 +2209,7 @@ export default function SectorDashboard() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                 >
                   Enviar Mensagem
                 </button>

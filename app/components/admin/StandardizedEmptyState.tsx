@@ -3,6 +3,7 @@
 import { ReactNode } from 'react';
 import { Icon, IconName } from '../icons';
 import { StandardizedButton } from './index';
+import { CRESOL_UI_CONFIG } from '@/lib/design-tokens';
 
 interface StandardizedEmptyStateProps {
   title: string;
@@ -36,7 +37,7 @@ export default function StandardizedEmptyState({
   className = ''
 }: StandardizedEmptyStateProps) {
   return (
-    <div className={`text-center py-12 ${className}`}>
+    <div className={`text-center ${CRESOL_UI_CONFIG.card.padding.xl} ${className}`}>
       <Icon name={icon} className="mx-auto h-12 w-12 text-gray-400 mb-4" />
       
       <h3 className="text-lg font-medium text-gray-900 mb-2">

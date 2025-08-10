@@ -96,7 +96,7 @@ export default function NotificationsAdminStandardized() {
           title="Total de Grupos"
           value={groups.length}
           icon="user-group"
-          color="secondary"
+          color="primary"
           trend={{ value: 12, isPositive: true, period: 'vs. mês anterior' }}
           description="Grupos ativos de usuários"
         />
@@ -105,7 +105,7 @@ export default function NotificationsAdminStandardized() {
           title="Usuários Ativos"
           value={availableUsers.length}
           icon="user-circle"
-          color="secondary"
+          color="primary"
           trend={{ value: 8, isPositive: true, period: 'vs. mês anterior' }}
           description="Usuários com acesso ao sistema"
         />
@@ -114,7 +114,7 @@ export default function NotificationsAdminStandardized() {
           title="Mensagens Hoje"
           value={mockNotificationsToday}
           icon="mail"
-          color="secondary"
+          color="primary"
           trend={{ value: 0, isPositive: true, period: 'vs. ontem' }}
           description="Notificações enviadas hoje"
         />
@@ -126,7 +126,7 @@ export default function NotificationsAdminStandardized() {
           title="Total de Mensagens Enviadas"
           value={mockTotalSent}
           icon="mail"
-          color="secondary"
+          color="primary"
           size="sm"
           trend={{ value: 15, isPositive: true, period: 'últimos 30 dias' }}
           description="Histórico completo de notificações"
@@ -136,7 +136,7 @@ export default function NotificationsAdminStandardized() {
           title="Taxa de Entrega"
           value={`${mockDeliveryRate}%`}
           icon="check-circle"
-          color="secondary"
+          color="primary"
           size="sm"
           trend={{ value: 2.1, isPositive: true, period: 'vs. média anterior' }}
           description="Sucesso na entrega das mensagens"

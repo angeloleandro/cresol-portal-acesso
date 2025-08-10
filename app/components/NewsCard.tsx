@@ -165,7 +165,7 @@ export const CompactNewsCard = memo(({
       className={clsx(
         'group block p-3',
         'bg-white border border-gray-200/40 hover:border-gray-200/70',
-        'rounded-lg transition-colors duration-150',
+        'rounded-md transition-colors duration-150',
         className
       )}
     >

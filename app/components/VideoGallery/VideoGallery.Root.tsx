@@ -439,7 +439,7 @@ export const CompactVideoGallery = memo(function CompactVideoGallery({
                 showDuration={false}
                 sizes="64px"
                 quality={75}
-                className="w-16 h-12 rounded"
+                className="w-16 h-12 rounded-sm"
                 placeholder={{
                   variant: 'solid',
                   icon: {

@@ -229,7 +229,7 @@ const AnimatedChart = memo(function AnimatedChart({
                 className="absolute transform -translate-x-1/2 -translate-y-8 opacity-0 hover:opacity-100 transition-opacity"
                 style={{ left: point.x, top: point.y }}
               >
-                <div className="bg-gray-900 text-white px-2 py-1 rounded text-xs font-medium">
+                <div className="bg-gray-900 text-white px-2 py-1 rounded-sm text-xs font-medium">
                   {formatValue(point.value)}
                 </div>
               </div>

@@ -82,7 +82,7 @@ export const VideoUploadFormAsyncThumbnailStatus = memo(({
                   sizes="128px"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 py-0.5 rounded">
+                <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 py-0.5 rounded-sm">
                   Auto
                 </div>
               </div>

@@ -176,7 +176,7 @@ export default function RoleModal({
                 setSelectedSubsectors([]);
                 setSelectedSectorForSubs('');
               }}
-              className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="w-full px-3 py-2 border border-cresol-gray-light rounded-sm-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             >
               <option value="user">Usuário</option>
               <option value="sector_admin">Administrador de Setor</option>
@@ -214,7 +214,7 @@ export default function RoleModal({
                               setSelectedSectors(prev => prev.filter(id => id !== sector.id));
                             }
                           }}
-                          className="h-4 w-4 text-primary border-cresol-gray-light rounded focus:ring-primary"
+                          className="h-4 w-4 text-primary border-cresol-gray-light rounded-sm focus:ring-primary"
                         />
                         <label 
                           htmlFor={`modal-sector-${sector.id}`}
@@ -259,7 +259,7 @@ export default function RoleModal({
                       fetchSubsectors();
                     }
                   }}
-                  className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                  className="w-full px-3 py-2 border border-cresol-gray-light rounded-sm-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
                 >
                   <option value="">Todos os setores</option>
                   {sectors.map(sector => (
@@ -303,7 +303,7 @@ export default function RoleModal({
                                   setSelectedSubsectors(prev => prev.filter(id => id !== subsector.id));
                                 }
                               }}
-                              className="h-4 w-4 text-primary border-cresol-gray-light rounded focus:ring-primary"
+                              className="h-4 w-4 text-primary border-cresol-gray-light rounded-sm focus:ring-primary"
                             />
                             <label 
                               htmlFor={`modal-subsector-${subsector.id}`}
@@ -344,7 +344,7 @@ export default function RoleModal({
           <div className="flex justify-end space-x-3">
             <button
               type="button"
-              className="px-4 py-2 border border-cresol-gray-light rounded-md text-cresol-gray hover:bg-gray-50"
+              className="px-4 py-2 border border-cresol-gray-light rounded-sm-md text-cresol-gray hover:bg-gray-50"
               onClick={onClose}
             >
               Cancelar

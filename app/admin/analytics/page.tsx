@@ -6,14 +6,13 @@ import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { Icon } from '@/app/components/icons/Icon';
-import { MinimalistButton } from '@/app/components/ui/MinimalistButton';
 // Professional Analytics Components
 import MetricCards from '@/app/components/analytics/MetricCards';
 import AnimatedChart from '@/app/components/analytics/AnimatedChart';
 import { ResponsiveContainer } from '@/app/components/analytics/GridLayoutResponsivo';
 import { DashboardShimmer } from '@/app/components/analytics/ShimmerLoading';
 import { Tabs } from "@chakra-ui/react";
-import { StandardizedTabsList } from '@/app/components/admin';
+import { StandardizedTabsList, StandardizedButton } from '@/app/components/admin';
 
 interface AnalyticsData {
   users: {
@@ -413,7 +412,7 @@ export default function AnalyticsPage() {
                       </div>
                       <button
                         onClick={() => fetchAnalyticsData()}
-                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-sm transition-colors"
                       >
                         <Icon name="refresh" className="h-3.5 w-3.5" />
                       </button>
@@ -563,45 +562,45 @@ export default function AnalyticsPage() {
                 <p className="text-xs text-gray-500">Acesso rápido às funcionalidades</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <MinimalistButton
+                <StandardizedButton
                   variant="primary"
                   size="sm"
-                  icon="user-group"
+                  icon={<Icon name="user-group" className="h-4 w-4" />}
                   onClick={() => router.push('/admin/users')}
                   className="min-w-0"
                 >
                   Usuários
-                </MinimalistButton>
+                </StandardizedButton>
                 
-                <MinimalistButton
+                <StandardizedButton
                   variant="primary"
                   size="sm"
-                  icon="monitor"
+                  icon={<Icon name="monitor" className="h-4 w-4" />}
                   onClick={() => router.push('/admin/systems')}
                   className="min-w-0"
                 >
                   Sistemas
-                </MinimalistButton>
+                </StandardizedButton>
                 
-                <MinimalistButton
+                <StandardizedButton
                   variant="primary"
                   size="sm"
-                  icon="bell"
+                  icon={<Icon name="bell" className="h-4 w-4" />}
                   onClick={() => router.push('/admin/notifications')}
                   className="min-w-0"
                 >
                   Notificações
-                </MinimalistButton>
+                </StandardizedButton>
                 
-                <MinimalistButton
+                <StandardizedButton
                   variant="secondary"
                   size="sm"
-                  icon="save"
+                  icon={<Icon name="save" className="h-4 w-4" />}
                   onClick={() => window.print()}
                   className="min-w-0"
                 >
                   Relatório
-                </MinimalistButton>
+                </StandardizedButton>
               </div>
             </div>
           </>

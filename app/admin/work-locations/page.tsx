@@ -380,7 +380,7 @@ export default function WorkLocationsAdmin() {
                         type="checkbox"
                         checked={createGroup}
                         onChange={(e) => setCreateGroup(e.target.checked)}
-                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded-sm"
                       />
                       <label htmlFor="createGroup" className="ml-2 block text-sm text-cresol-gray">
                         Criar grupo automático para este local

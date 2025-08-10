@@ -88,14 +88,14 @@ export default function SubsectorCard({
       <div className="flex gap-2">
         <Link
           href={`/admin-subsetor/subsetores/${subsector.id}`}
-          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-primary/10 text-primary text-sm font-medium rounded-md hover:bg-primary/20 transition-colors"
         >
           <Icon name="settings" className="h-4 w-4" />
           Gerenciar
         </Link>
         <Link
           href={`/subsetores/${subsector.id}/equipe`}
-          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors"
         >
           <Icon name="user-group" className="h-4 w-4" />
           Equipe

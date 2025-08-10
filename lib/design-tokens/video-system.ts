@@ -3,42 +3,32 @@
  * Enterprise-grade design system for video upload components
  * Based on Chakra UI v3 and Ant Design patterns
  */
+import { CRESOL_COLORS } from './design-tokens';
 
 export const videoSystemTokens = {
-  // Colors - Based on existing Cresol brand
+  // Colors - Using centralized Cresol design tokens
   colors: {
-    primary: '#F58220',
-    primaryHover: '#E6740F',
-    primaryActive: '#D96B00',
+    primary: CRESOL_COLORS.primary.DEFAULT,
+    primaryHover: CRESOL_COLORS.primary[600],
+    primaryActive: CRESOL_COLORS.primary[700],
     
-    success: '#10B981',
-    successLight: '#D1FAE5',
-    successDark: '#047857',
+    success: CRESOL_COLORS.success.DEFAULT,
+    successLight: CRESOL_COLORS.success[50],
+    successDark: CRESOL_COLORS.success[700],
     
-    error: '#EF4444',
-    errorLight: '#FEE2E2',
-    errorDark: '#DC2626',
+    error: CRESOL_COLORS.error.DEFAULT,
+    errorLight: CRESOL_COLORS.error[50],
+    errorDark: CRESOL_COLORS.error[700],
     
-    warning: '#F59E0B',
-    warningLight: '#FEF3C7',
-    warningDark: '#D97706',
+    warning: CRESOL_COLORS.warning.DEFAULT,
+    warningLight: CRESOL_COLORS.warning[50],
+    warningDark: CRESOL_COLORS.warning[700],
     
-    info: '#3B82F6',
-    infoLight: '#DBEAFE',
-    infoDark: '#1D4ED8',
+    info: CRESOL_COLORS.info.DEFAULT,
+    infoLight: CRESOL_COLORS.info[50],
+    infoDark: CRESOL_COLORS.info[700],
     
-    neutral: {
-      50: '#F9FAFB',
-      100: '#F3F4F6',
-      200: '#E5E7EB',
-      300: '#D1D5DB',
-      400: '#9CA3AF',
-      500: '#6B7280',
-      600: '#4B5563',
-      700: '#374151',
-      800: '#1F2937',
-      900: '#111827',
-    },
+    neutral: CRESOL_COLORS.gray,
   },
   
   // Spacing system (8px base)

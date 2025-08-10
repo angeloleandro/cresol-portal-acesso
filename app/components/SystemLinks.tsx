@@ -84,7 +84,7 @@ export default function SystemLinks() {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center justify-center gap-1 px-2 py-3 bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-lg transition-colors duration-150 text-center"
+            className="group flex items-center justify-center gap-1 px-2 py-3 bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-md transition-colors duration-150 text-center"
             title={link.description || `Acessar ${link.name}`}
           >
             {/* Nome do sistema - estilo Figma */}

@@ -358,7 +358,7 @@ export default function SubsectorTeamPage() {
             <div className="flex items-center">
               <button
                 onClick={() => router.back()}
-                className="mr-4 p-2 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                className="mr-4 p-2 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-sm-lg transition-colors"
               >
                 <Icon name="arrow-left" className="h-5 w-5" />
               </button>
@@ -375,7 +375,7 @@ export default function SubsectorTeamPage() {
             {canEdit && (
               <button
                 onClick={() => setShowAddModal(true)}
-                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+                className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors flex items-center gap-2"
               >
                 <Icon name="user-add" className="h-4 w-4" />
                 Adicionar Membro
@@ -467,7 +467,7 @@ export default function SubsectorTeamPage() {
                 {canEdit && (
                   <button
                     onClick={() => setShowAddModal(true)}
-                    className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"
+                    className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors"
                   >
                     Adicionar Primeiro Membro
                   </button>
@@ -507,14 +507,14 @@ export default function SubsectorTeamPage() {
                         <div className="flex gap-1">
                           <button
                             onClick={() => openEditModal(member)}
-                            className="p-1 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded transition-colors"
+                            className="p-1 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-sm transition-colors"
                             title="Editar cargo"
                           >
                             <Icon name="pencil" className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleRemoveMemberClick(member)}
-                            className="p-1 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                            className="p-1 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded-sm transition-colors"
                             title="Remover da equipe"
                           >
                             <Icon name="close" className="h-4 w-4" />
@@ -643,14 +643,14 @@ export default function SubsectorTeamPage() {
                     setMemberPositionId('');
                     setSearchTerm('');
                   }}
-                  className="flex-1 px-4 py-2 border border-cresol-gray-light text-cresol-gray hover:bg-cresol-gray-light/50 rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 border border-cresol-gray-light text-cresol-gray hover:bg-cresol-gray-light/50 rounded-md transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleAddMember}
                   disabled={!selectedUserId}
-                  className="flex-1 px-4 py-2 bg-primary text-white hover:bg-primary-dark rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-primary text-white hover:bg-primary-dark rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Adicionar
                 </button>
@@ -702,13 +702,13 @@ export default function SubsectorTeamPage() {
                     setEditingMember(null);
                     setMemberPositionId('');
                   }}
-                  className="flex-1 px-4 py-2 border border-cresol-gray-light text-cresol-gray hover:bg-cresol-gray-light/50 rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 border border-cresol-gray-light text-cresol-gray hover:bg-cresol-gray-light/50 rounded-md transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleUpdateMember}
-                  className="flex-1 px-4 py-2 bg-primary text-white hover:bg-primary-dark rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 bg-primary text-white hover:bg-primary-dark rounded-md transition-colors"
                 >
                   Salvar
                 </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode, ElementType, createElement } from 'react';
+import { CRESOL_UI_CONFIG, CRESOL_DESIGN_TOKENS } from '@/lib/design-tokens';
 
 interface StandardizedButtonProps {
   children: ReactNode;
@@ -71,8 +72,8 @@ export default function StandardizedButton(props: StandardizedButtonProps) {
     as: As,
     ...rest
   } = props;
-  // Classes base com arredondamento padronizado
-  const baseClasses = 'font-medium rounded-md transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 relative overflow-hidden';
+  // Classes base usando design tokens centralizados (eliminando hardcode)
+  const baseClasses = `${CRESOL_UI_CONFIG.button.base} ${CRESOL_DESIGN_TOKENS.utilities.flex.center} ${CRESOL_DESIGN_TOKENS.utilities.gap[2]} relative overflow-hidden`;
   
   // Classes de variante
   const variantClasses = {
@@ -87,25 +88,25 @@ export default function StandardizedButton(props: StandardizedButtonProps) {
     info: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500/20 shadow-sm'
   };
   
-  // Classes de tamanho
+  // Classes de tamanho usando design tokens (eliminando magic numbers)
   const sizeClasses = {
-    xs: 'px-2 py-1 text-xs',
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
-    xl: 'px-8 py-4 text-lg'
+    xs: CRESOL_UI_CONFIG.button.sizes.xs.classes,
+    sm: CRESOL_UI_CONFIG.button.sizes.sm.classes,
+    md: CRESOL_UI_CONFIG.button.sizes.md.classes,
+    lg: CRESOL_UI_CONFIG.button.sizes.lg.classes,
+    xl: CRESOL_UI_CONFIG.button.sizes.xl.classes,
   };
 
   // Classes de largura
   const widthClasses = fullWidth ? 'w-full' : '';
 
-  // Tamanho do spinner baseado no tamanho do botão
+  // Tamanho do spinner usando design tokens (eliminando magic numbers)
   const spinnerSizes = {
-    xs: 'w-3 h-3',
-    sm: 'w-4 h-4', 
-    md: 'w-4 h-4',
-    lg: 'w-5 h-5',
-    xl: 'w-6 h-6'
+    xs: CRESOL_UI_CONFIG.button.sizes.xs.spinnerSize,
+    sm: CRESOL_UI_CONFIG.button.sizes.sm.spinnerSize,
+    md: CRESOL_UI_CONFIG.button.sizes.md.spinnerSize,
+    lg: CRESOL_UI_CONFIG.button.sizes.lg.spinnerSize,
+    xl: CRESOL_UI_CONFIG.button.sizes.xl.spinnerSize,
   };
 
   const buttonClasses = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClasses} ${className}`;
@@ -125,7 +126,7 @@ export default function StandardizedButton(props: StandardizedButtonProps) {
       },
       <>
         {loading && (
-          <div className={`${spinnerSizes[size]} border-2 border-current border-t-transparent rounded-full animate-spin`} />
+          <div className={`${spinnerSizes[size]} ${CRESOL_UI_CONFIG.spinner.inline.classes}`} />
         )}
         {!loading && icon && iconPosition === 'left' && icon}
         {children}
@@ -164,7 +165,7 @@ export default function StandardizedButton(props: StandardizedButtonProps) {
       className={buttonClasses}
     >
       {loading && (
-        <div className={`${spinnerSizes[size]} border-2 border-current border-t-transparent rounded-full animate-spin`} />
+        <div className={`${spinnerSizes[size]} ${CRESOL_UI_CONFIG.spinner.inline.classes}`} />
       )}
       {!loading && icon && iconPosition === 'left' && icon}
       {children}

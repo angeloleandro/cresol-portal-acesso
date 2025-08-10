@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { CRESOL_UI_CONFIG, CRESOL_SPACING_SYSTEM } from '@/lib/design-tokens';
 
 interface Filter {
   id: string;
@@ -40,13 +41,13 @@ export default function StandardizedFilters({
   className = ''
 }: StandardizedFiltersProps) {
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 p-4 mb-6 ${className}`}>
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className={`${CRESOL_UI_CONFIG.card.base} ${CRESOL_SPACING_SYSTEM.card.standard} ${CRESOL_SPACING_SYSTEM.config.margin.xl} ${className}`}>
+      <div className={`flex flex-col lg:flex-row lg:items-center lg:justify-between ${CRESOL_SPACING_SYSTEM.config.gap.lg}`}>
         {/* Filtros */}
-        <div className="flex flex-col sm:flex-row gap-3 flex-1">
+        <div className={`flex flex-col sm:flex-row ${CRESOL_SPACING_SYSTEM.config.gap.md} flex-1`}>
           {filters.map((filter) => (
             <div key={filter.id} className="flex-1 min-w-0">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className={CRESOL_UI_CONFIG.input.label.default}>
                 {filter.label}
               </label>
               
@@ -72,14 +73,14 @@ export default function StandardizedFilters({
                     value={filter.value}
                     onChange={(e) => filter.onChange(e.target.value)}
                     placeholder={filter.placeholder || 'Buscar...'}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                    className={`${CRESOL_UI_CONFIG.input.base} ${CRESOL_UI_CONFIG.input.states.default} ${CRESOL_UI_CONFIG.input.types.search}`}
                   />
                 </div>
               ) : (
                 <select
                   value={filter.value}
                   onChange={(e) => filter.onChange(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm bg-white"
+                  className={`${CRESOL_UI_CONFIG.input.base} ${CRESOL_UI_CONFIG.input.states.default}`}
                 >
                   {filter.options?.map((option) => (
                     <option key={option.value} value={option.value}>

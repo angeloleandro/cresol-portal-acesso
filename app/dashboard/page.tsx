@@ -221,7 +221,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="card-status">
             <div className="flex items-center">
-              <div className="p-2 rounded-lg bg-primary/10 mr-3">
+              <div className="p-2 rounded-md bg-primary/10 mr-3">
                 <Icon name="monitor" className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -233,7 +233,7 @@ export default function Dashboard() {
           
           <div className="card-status">
             <div className="flex items-center">
-              <div className="p-2 rounded-lg bg-primary/10 mr-3">
+              <div className="p-2 rounded-md bg-primary/10 mr-3">
                 <Icon name="clock" className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -245,7 +245,7 @@ export default function Dashboard() {
           
           <div className="card-status">
             <div className="flex items-center">
-              <div className="p-2 rounded-lg bg-primary/10 mr-3">
+              <div className="p-2 rounded-md bg-primary/10 mr-3">
                 <Icon name="bell-notification" className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -257,7 +257,7 @@ export default function Dashboard() {
           
           <div className="card-status">
             <div className="flex items-center">
-              <div className="p-2 rounded-lg bg-primary/10 mr-3">
+              <div className="p-2 rounded-md bg-primary/10 mr-3">
                 <Icon name="suitcase" className="w-5 h-5 text-primary" />
               </div>
               <div>

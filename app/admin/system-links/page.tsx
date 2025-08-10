@@ -325,7 +325,7 @@ export default function SystemLinksAdmin() {
                       type="checkbox"
                       checked={formData.is_active}
                       onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded-sm"
                     />
                     <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">
                       Link ativo

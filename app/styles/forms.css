@@ -131,7 +131,7 @@
 
 /* Input Variants */
 .form-input-outline {
-  @apply border border-gray-300 rounded-lg;
+  @apply border border-gray-300 rounded-md;
 }
 
 .form-input-outline:hover:not(:disabled):not(:focus) {
@@ -144,7 +144,7 @@
 }
 
 .form-input-filled {
-  @apply bg-gray-50 border border-transparent rounded-lg;
+  @apply bg-gray-50 border border-transparent rounded-md;
 }
 
 .form-input-filled:hover:not(:disabled):not(:focus) {
@@ -290,7 +290,7 @@
 
 /* Select Variants */
 .form-select-outline {
-  @apply border border-gray-300 rounded-lg;
+  @apply border border-gray-300 rounded-md;
 }
 
 .form-select-outline:hover:not(:disabled):not(.form-select-focused) {
@@ -303,7 +303,7 @@
 }
 
 .form-select-filled {
-  @apply bg-gray-50 border border-transparent rounded-lg;
+  @apply bg-gray-50 border border-transparent rounded-md;
 }
 
 .form-select-filled:hover:not(:disabled):not(.form-select-focused) {
@@ -408,7 +408,7 @@
 
 /* Dropdown Menu */
 .form-select-dropdown {
-  @apply absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50;
+  @apply absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50;
   @apply overflow-hidden;
 }
 

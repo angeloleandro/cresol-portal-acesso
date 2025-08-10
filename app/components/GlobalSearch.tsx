@@ -7,6 +7,7 @@ import Link from 'next/link';
 import AdvancedSearch from './AdvancedSearch';
 import { Icon } from './icons/Icon';
 import { Spinner } from '@chakra-ui/react';
+import { CRESOL_COLORS } from '@/lib/design-tokens';
 
 interface QuickResult {
   id: string;
@@ -324,7 +325,7 @@ export default function GlobalSearch({
           onChange={handleInputChange}
           onFocus={handleInputFocus}
           placeholder={compact ? 'Buscar...' : placeholder}
-          className={`block w-full pl-9 pr-3 text-sm bg-white border border-gray-200/40 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-gray-400 transition-all duration-150 ${
+          className={`block w-full pl-9 pr-3 text-sm bg-white border border-gray-200/40 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-gray-400 transition-all duration-150 ${
             compact ? 'py-2 w-48' : 'py-2.5'
           }`}
         />
@@ -334,11 +335,11 @@ export default function GlobalSearch({
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
             <Spinner
               size="sm"
-              color={pathname?.startsWith('/admin') ? '#727176' : '#F58220'}
+              color={pathname?.startsWith('/admin') ? CRESOL_COLORS.gray.DEFAULT : CRESOL_COLORS.primary.DEFAULT}
               css={{
                 "--spinner-track-color": pathname?.startsWith('/admin') 
-                  ? 'rgba(114, 113, 118, 0.2)' 
-                  : 'rgba(245, 130, 32, 0.2)'
+                  ? `${CRESOL_COLORS.gray.DEFAULT}33` 
+                  : `${CRESOL_COLORS.primary.DEFAULT}33`
               }}
             />
           </div>
@@ -347,7 +348,7 @@ export default function GlobalSearch({
 
       {/* Resultados da busca */}
       {showResults && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200/40 rounded-lg max-h-96 overflow-y-auto z-50">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200/40 rounded-md max-h-96 overflow-y-auto z-50">
           {/* Sugestões de pesquisa recente */}
           {query.length === 0 && recentSearches.length > 0 && (
             <div className="p-3 border-b border-gray-100">

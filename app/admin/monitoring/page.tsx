@@ -208,7 +208,7 @@ export default function MonitoringPage() {
                       {activity.ip_address}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-medium rounded ${
+                      <span className={`px-2 py-1 text-xs font-medium rounded-sm ${
                         activity.success ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'
                       }`}>
                         {activity.success ? 'Sucesso' : 'Falha'}

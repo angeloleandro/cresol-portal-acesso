@@ -114,7 +114,7 @@ export const VideoUploadFormYouTubeInput = memo(({
               sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            <div className="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
+            <div className="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-2 py-1 rounded-sm">
               YouTube
             </div>
           </div>

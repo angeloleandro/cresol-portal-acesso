@@ -158,12 +158,12 @@ export const StandardizedMetricsCard: React.FC<StandardizedMetricsCardProps> = (
       <div className={cardClasses}>
         <div className="animate-pulse">
           <div className="flex items-center justify-between mb-4">
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className={`${sizes.iconSize} bg-gray-200 rounded-lg`}></div>
+            <div className="h-4 bg-gray-200 rounded-sm w-1/2"></div>
+            <div className={`${sizes.iconSize} bg-gray-200 rounded-sm-lg`}></div>
           </div>
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+          <div className="h-8 bg-gray-200 rounded-sm w-1/3 mb-2"></div>
           {trend && (
-            <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-3 bg-gray-200 rounded-sm w-1/4"></div>
           )}
         </div>
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { Spinner, Box, Text, VStack } from "@chakra-ui/react";
+import { CRESOL_UI_CONFIG, CRESOL_TEXT_CONSTANTS } from '@/lib/design-tokens';
 
 interface StandardizedSpinnerProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -10,14 +11,15 @@ interface StandardizedSpinnerProps {
   className?: string;
 }
 
+// Configuração usando design tokens centralizados (eliminando hardcode)
 const colorConfig = {
   home: {
-    color: '#F58220', // Cresol Orange
-    trackColor: 'rgba(245, 130, 32, 0.2)' // Orange with transparency
+    color: CRESOL_UI_CONFIG.spinner.contexts.home.color,
+    trackColor: CRESOL_UI_CONFIG.spinner.contexts.home.trackColor,
   },
   admin: {
-    color: '#727176', // Cresol Gray
-    trackColor: 'rgba(114, 113, 118, 0.2)' // Gray with transparency
+    color: CRESOL_UI_CONFIG.spinner.contexts.admin.color,
+    trackColor: CRESOL_UI_CONFIG.spinner.contexts.admin.trackColor,
   }
 };
 
@@ -97,10 +99,10 @@ export default function StandardizedSpinner({
         minHeight="100vh"
         alignItems="center"
         justifyContent="center"
-        bg="rgba(208, 208, 206, 0.3)" // cresol-gray-light with transparency
+        bg={CRESOL_UI_CONFIG.spinner.overlay.background}
         role="status"
         aria-live="polite"
-        aria-label={message || 'Carregando conteúdo'}
+        aria-label={message || CRESOL_TEXT_CONSTANTS.system.loading}
       >
         {spinnerContent}
       </Box>
@@ -115,7 +117,7 @@ export default function StandardizedSpinner({
       py={8}
       role="status"
       aria-live="polite"
-      aria-label={message || 'Carregando'}
+      aria-label={message || CRESOL_TEXT_CONSTANTS.system.loading}
     >
       {spinnerContent}
     </Box>

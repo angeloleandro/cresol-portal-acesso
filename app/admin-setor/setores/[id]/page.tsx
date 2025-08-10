@@ -545,7 +545,7 @@ export default function SectorContentManagement() {
                         id="title"
                         value={newsForm.title}
                         onChange={(e) => setNewsForm({...newsForm, title: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
                         required
                       />
                     </div>
@@ -611,7 +611,7 @@ export default function SectorContentManagement() {
                           id="is_published"
                           checked={newsForm.is_published}
                           onChange={(e) => setNewsForm({...newsForm, is_published: e.target.checked})}
-                          className="h-4 w-4 text-primary border-gray-300 rounded"
+                          className="h-4 w-4 text-primary border-gray-300 rounded-sm"
                         />
                         <label htmlFor="is_published" className="ml-2 text-sm text-gray-700">
                           Publicar imediatamente
@@ -653,7 +653,7 @@ export default function SectorContentManagement() {
                               src={item.image_url}
                               alt={item.title}
                               fill
-                              className="object-cover rounded"
+                              className="object-cover rounded-md"
                             />
                           </div>
                         </div>
@@ -732,7 +732,7 @@ export default function SectorContentManagement() {
                         id="event_title"
                         value={eventForm.title}
                         onChange={(e) => setEventForm({...eventForm, title: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
                         required
                       />
                     </div>
@@ -759,7 +759,7 @@ export default function SectorContentManagement() {
                         id="event_date"
                         value={eventForm.event_date}
                         onChange={(e) => setEventForm({...eventForm, event_date: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
                         required
                       />
                     </div>
@@ -773,7 +773,7 @@ export default function SectorContentManagement() {
                         id="event_location"
                         value={eventForm.location}
                         onChange={(e) => setEventForm({...eventForm, location: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
                       />
                     </div>
                     
@@ -784,7 +784,7 @@ export default function SectorContentManagement() {
                           id="event_is_published"
                           checked={eventForm.is_published}
                           onChange={(e) => setEventForm({...eventForm, is_published: e.target.checked})}
-                          className="h-4 w-4 text-primary border-gray-300 rounded"
+                          className="h-4 w-4 text-primary border-gray-300 rounded-sm"
                         />
                         <label htmlFor="event_is_published" className="ml-2 text-sm text-gray-700">
                           Publicar imediatamente

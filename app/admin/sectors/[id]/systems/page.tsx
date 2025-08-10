@@ -324,7 +324,7 @@ export default function SectorSystemsManagement() {
                         src={system.icon || '/icons/default-app.svg'} 
                         alt={system.name} 
                         fill
-                        className="rounded object-contain"
+                        className="rounded-md object-contain"
                       />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-800">{system.name}</h3>
@@ -452,7 +452,7 @@ export default function SectorSystemsManagement() {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-300 rounded-sm-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
@@ -546,7 +546,7 @@ export default function SectorSystemsManagement() {
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-300 rounded-sm-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>

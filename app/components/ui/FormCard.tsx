@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { CRESOL_UI_CONFIG, CRESOL_DESIGN_TOKENS } from '@/lib/design-tokens';
 
 interface FormCardProps {
   title: string;
@@ -18,9 +19,9 @@ const FormCard: React.FC<FormCardProps> = ({
   onSubmit
 }) => {
   const cardContent = (
-    <div className={`bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-8 ${className}`}>
+    <div className={`${CRESOL_UI_CONFIG.card.base} ${CRESOL_UI_CONFIG.card.variants.hover} ${CRESOL_UI_CONFIG.card.padding.lg} ${className}`}>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className={`${CRESOL_DESIGN_TOKENS.utilities.flex.start} ${CRESOL_DESIGN_TOKENS.utilities.gap[3]} mb-8`}>
         {icon && (
           <div className="bg-primary/10 p-3 rounded-md">
             {icon}
@@ -41,7 +42,7 @@ const FormCard: React.FC<FormCardProps> = ({
 
   if (onSubmit) {
     return (
-      <form onSubmit={onSubmit} className="space-y-8">
+      <form onSubmit={onSubmit} className={CRESOL_DESIGN_TOKENS.utilities.space[8]}>
         {cardContent}
       </form>
     );

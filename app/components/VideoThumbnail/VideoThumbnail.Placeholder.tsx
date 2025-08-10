@@ -293,8 +293,8 @@ function SkeletonPlaceholder({
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="space-y-2 w-full max-w-[80%]">
           <div className="h-8 bg-neutral-300 rounded-md mx-auto w-3/4 animate-pulse" />
-          <div className="h-4 bg-neutral-300 rounded mx-auto w-1/2 animate-pulse" />
-          <div className="h-4 bg-neutral-300 rounded mx-auto w-2/3 animate-pulse" />
+          <div className="h-4 bg-neutral-300 rounded-sm mx-auto w-1/2 animate-pulse" />
+          <div className="h-4 bg-neutral-300 rounded-sm mx-auto w-2/3 animate-pulse" />
         </div>
       </div>
     </div>

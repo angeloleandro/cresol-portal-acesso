@@ -80,7 +80,7 @@ export const GroupsManager: React.FC<{ variant?: 'default' | 'minimal' }> = ({ v
                   required
                   value={groupForm.name}
                   onChange={(e) => updateGroupForm({ name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-sm-md focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary"
                   placeholder="Ex: Gerentes Regionais, Equipe Vendas"
                 />
               </div>
@@ -92,7 +92,7 @@ export const GroupsManager: React.FC<{ variant?: 'default' | 'minimal' }> = ({ v
                 <select
                   value={groupForm.sectorId}
                   onChange={(e) => updateGroupForm({ sectorId: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-sm-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 >
                   <option value="">Todos os Setores</option>
                   {sectors.map(sector => (
@@ -112,7 +112,7 @@ export const GroupsManager: React.FC<{ variant?: 'default' | 'minimal' }> = ({ v
                 rows={2}
                 value={groupForm.description}
                 onChange={(e) => updateGroupForm({ description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-sm-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
                 placeholder="Descrição do grupo..."
               />
             </div>
@@ -126,14 +126,14 @@ export const GroupsManager: React.FC<{ variant?: 'default' | 'minimal' }> = ({ v
                   </span>
                 )}
               </label>
-              <div className="bg-white border border-gray-300 rounded-md max-h-32 overflow-y-auto">
+              <div className="bg-white border border-gray-300 rounded-sm-md max-h-32 overflow-y-auto">
                 {availableUsers.map(user => (
                   <label key={user.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0">
                     <input
                       type="checkbox"
                       checked={groupForm.members.includes(user.id)}
                       onChange={(e) => handleMemberToggle(user.id, e.target.checked)}
-                      className="h-4 w-4 text-secondary focus:ring-secondary border-gray-300 rounded"
+                      className="h-4 w-4 text-secondary focus:ring-secondary border-gray-300 rounded-sm"
                     />
                     <div className="flex-1">
                       <div className="font-medium text-sm text-gray-900">{user.full_name || user.email}</div>
@@ -177,7 +177,7 @@ export const GroupsManager: React.FC<{ variant?: 'default' | 'minimal' }> = ({ v
       ) : (
         <div className="text-center py-12">
           <div className="max-w-md mx-auto">
-            <div className="bg-gray-100 rounded-full p-6 w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+            <div className="bg-gray-100 rounded-sm-full p-6 w-24 h-24 mx-auto mb-4 flex items-center justify-center">
               <Icon name="user-group" className="w-12 h-12 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum grupo encontrado</h3>
@@ -204,7 +204,7 @@ const GroupCard: React.FC<{ group: NotificationGroup }> = ({ group }) => (
     <div className="flex items-start justify-between mb-3">
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
-          <div className="bg-secondary/10 p-1.5 rounded">
+          <div className="bg-secondary/10 p-1.5 rounded-md">
             <Icon name="user-group" className="w-4 h-4 text-secondary" />
           </div>
           <h3 className="font-semibold text-gray-900 text-sm group-hover:text-secondary transition-colors">
@@ -249,7 +249,7 @@ const GroupCard: React.FC<{ group: NotificationGroup }> = ({ group }) => (
     </div>
     
     <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
-      <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">
+      <code className="text-xs bg-gray-100 px-2 py-1 rounded-sm text-gray-600">
         {group.id.slice(0, 8)}...
       </code>
       <span className="text-xs bg-secondary/10 text-secondary px-2 py-1 rounded-full font-medium">

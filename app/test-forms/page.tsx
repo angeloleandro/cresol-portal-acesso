@@ -382,11 +382,11 @@ export default function TestFormsPage() {
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Navegação por Teclado</h3>
               <ul className="text-sm text-gray-600 space-y-2">
-                <li>• <kbd className="px-2 py-1 bg-gray-100 rounded">Tab</kbd> - Navegar entre campos</li>
-                <li>• <kbd className="px-2 py-1 bg-gray-100 rounded">↑/↓</kbd> - Navegar nas opções do select</li>
-                <li>• <kbd className="px-2 py-1 bg-gray-100 rounded">Enter</kbd> - Selecionar opção</li>
-                <li>• <kbd className="px-2 py-1 bg-gray-100 rounded">Esc</kbd> - Fechar dropdown</li>
-                <li>• <kbd className="px-2 py-1 bg-gray-100 rounded">Space</kbd> - Abrir select</li>
+                <li>• <kbd className="px-2 py-1 bg-gray-100 rounded-sm">Tab</kbd> - Navegar entre campos</li>
+                <li>• <kbd className="px-2 py-1 bg-gray-100 rounded-sm">↑/↓</kbd> - Navegar nas opções do select</li>
+                <li>• <kbd className="px-2 py-1 bg-gray-100 rounded-sm">Enter</kbd> - Selecionar opção</li>
+                <li>• <kbd className="px-2 py-1 bg-gray-100 rounded-sm">Esc</kbd> - Fechar dropdown</li>
+                <li>• <kbd className="px-2 py-1 bg-gray-100 rounded-sm">Space</kbd> - Abrir select</li>
               </ul>
             </div>
             

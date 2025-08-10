@@ -61,10 +61,10 @@ export default function SubsectorTeam({
     return (
       <div className="bg-white rounded-lg border border-cresol-gray-light p-4">
         <div className="animate-pulse">
-          <div className="h-4 bg-cresol-gray-light rounded w-1/3 mb-3"></div>
+          <div className="h-4 bg-cresol-gray-light rounded-sm w-1/3 mb-3"></div>
           <div className="space-y-2">
-            <div className="h-3 bg-cresol-gray-light rounded w-1/2"></div>
-            <div className="h-3 bg-cresol-gray-light rounded w-1/4"></div>
+            <div className="h-3 bg-cresol-gray-light rounded-sm w-1/2"></div>
+            <div className="h-3 bg-cresol-gray-light rounded-sm w-1/4"></div>
           </div>
         </div>
       </div>

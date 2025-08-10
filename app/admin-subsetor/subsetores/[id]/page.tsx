@@ -841,7 +841,7 @@ export default function SubsectorManagePage() {
               <h2 className="text-xl font-semibold text-gray-900">Eventos do Subsetor</h2>
                           <button 
               onClick={() => handleOpenEventModal()}
-              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
             >
               + Novo Evento
             </button>
@@ -916,7 +916,7 @@ export default function SubsectorManagePage() {
               <h2 className="text-xl font-semibold text-gray-900">Notícias do Subsetor</h2>
               <button 
                 onClick={() => handleOpenNewsModal()}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
               >
                 + Nova Notícia
               </button>
@@ -1059,7 +1059,7 @@ export default function SubsectorManagePage() {
               <h2 className="text-xl font-semibold text-gray-900">Grupos de Notificação</h2>
               <button 
                 onClick={handleOpenGroupModal}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
               >
                 + Criar Grupo
               </button>
@@ -1105,7 +1105,7 @@ export default function SubsectorManagePage() {
               <h2 className="text-xl font-semibold text-gray-900">Enviar Mensagem</h2>
               <button 
                 onClick={handleOpenMessageModal}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
               >
                 + Nova Mensagem
               </button>
@@ -1121,7 +1121,7 @@ export default function SubsectorManagePage() {
               <p className="text-gray-500 mb-4">Envie mensagens para grupos ou usuários específicos.</p>
               <button 
                 onClick={handleOpenMessageModal}
-                className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-md font-medium transition-colors"
               >
                 Enviar Nova Mensagem
               </button>
@@ -1204,7 +1204,7 @@ export default function SubsectorManagePage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                 >
                   {isEditing ? 'Salvar' : 'Criar'}
                 </button>
@@ -1276,7 +1276,7 @@ export default function SubsectorManagePage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                 >
                   {isEditing ? 'Salvar' : 'Criar'}
                 </button>
@@ -1422,7 +1422,7 @@ export default function SubsectorManagePage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                 >
                   Criar Grupo
                 </button>
@@ -1564,7 +1564,7 @@ export default function SubsectorManagePage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                 >
                   Enviar Mensagem
                 </button>

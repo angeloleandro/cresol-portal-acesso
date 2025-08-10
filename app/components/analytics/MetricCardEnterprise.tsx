@@ -246,15 +246,15 @@ export default function MetricCardEnterprise({
         <div className="animate-pulse">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className={`${sizeStyles.iconSize.replace('h-', 'w-').replace('w-', 'h-')} bg-gray-200 rounded-lg`}></div>
+              <div className={`${sizeStyles.iconSize.replace('h-', 'w-').replace('w-', 'h-')} bg-gray-200 rounded-sm-lg`}></div>
               <div>
-                <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-                <div className="h-6 bg-gray-200 rounded w-16"></div>
+                <div className="h-4 bg-gray-200 rounded-sm w-24 mb-2"></div>
+                <div className="h-6 bg-gray-200 rounded-sm w-16"></div>
               </div>
             </div>
           </div>
-          <div className="h-8 bg-gray-200 rounded w-20 mb-2"></div>
-          <div className="h-3 bg-gray-200 rounded w-32"></div>
+          <div className="h-8 bg-gray-200 rounded-sm w-20 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded-sm w-32"></div>
         </div>
         
         {/* Shimmer Effect */}

@@ -339,7 +339,7 @@ export default function AccessibleChartContainer({
                     type="button"
                     className="
                       px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 
-                      hover:bg-gray-200 rounded-lg transition-colors duration-200
+                      hover:bg-gray-200 rounded-sm-lg transition-colors duration-200
                       focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-opacity-50
                     "
                     onClick={() => setShowExportModal(false)}
@@ -455,7 +455,7 @@ export default function AccessibleChartContainer({
                     type="button"
                     className="
                       px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 
-                      hover:bg-gray-200 rounded-lg transition-colors duration-200
+                      hover:bg-gray-200 rounded-sm-lg transition-colors duration-200
                       focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-opacity-50
                     "
                     onClick={() => setShowDataTableModal(false)}
@@ -483,13 +483,13 @@ export default function AccessibleChartContainer({
           <div className="animate-pulse">
             <div className="flex justify-between items-center">
               <div className="space-y-2">
-                <div className="h-6 bg-gray-200 rounded w-48"></div>
-                <div className="h-4 bg-gray-200 rounded w-32"></div>
+                <div className="h-6 bg-gray-200 rounded-sm w-48"></div>
+                <div className="h-4 bg-gray-200 rounded-sm w-32"></div>
               </div>
               <div className="flex space-x-2">
-                <div className="h-9 w-9 bg-gray-200 rounded-lg"></div>
-                <div className="h-9 w-9 bg-gray-200 rounded-lg"></div>
-                <div className="h-9 w-9 bg-gray-200 rounded-lg"></div>
+                <div className="h-9 w-9 bg-gray-200 rounded-sm-lg"></div>
+                <div className="h-9 w-9 bg-gray-200 rounded-sm-lg"></div>
+                <div className="h-9 w-9 bg-gray-200 rounded-sm-lg"></div>
               </div>
             </div>
           </div>
@@ -497,11 +497,11 @@ export default function AccessibleChartContainer({
         
         <div className={sizeStyles.padding}>
           <div className="animate-pulse space-y-4">
-            <div className="h-64 bg-gray-200 rounded-lg"></div>
+            <div className="h-64 bg-gray-200 rounded-sm-lg"></div>
             <div className="flex justify-center space-x-4">
-              <div className="h-4 bg-gray-200 rounded w-16"></div>
-              <div className="h-4 bg-gray-200 rounded w-20"></div>
-              <div className="h-4 bg-gray-200 rounded w-14"></div>
+              <div className="h-4 bg-gray-200 rounded-sm w-16"></div>
+              <div className="h-4 bg-gray-200 rounded-sm w-20"></div>
+              <div className="h-4 bg-gray-200 rounded-sm w-14"></div>
             </div>
           </div>
         </div>

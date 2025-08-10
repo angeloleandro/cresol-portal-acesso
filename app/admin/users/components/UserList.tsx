@@ -154,7 +154,7 @@ export default function UserList({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-cresol-gray">Role:</span>
-                  <span className="text-xs px-2 py-1 bg-cresol-gray-light text-cresol-gray-dark rounded">
+                  <span className="text-xs px-2 py-1 bg-cresol-gray-light text-cresol-gray-dark rounded-sm">
                     {user.role}
                   </span>
                 </div>

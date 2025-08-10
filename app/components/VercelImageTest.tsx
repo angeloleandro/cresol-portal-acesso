@@ -36,12 +36,12 @@ export default function VercelImageTest({ testUrl, title }: VercelImageTestProps
       <div className="flex justify-between items-start">
         <h3 className="font-medium text-sm">{title}</h3>
         <div className="flex gap-2">
-          <span className={`px-2 py-1 text-xs rounded ${
+          <span className={`px-2 py-1 text-xs rounded-sm ${
             isVercel ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
           }`}>
             {isVercel ? 'Vercel' : 'Local'}
           </span>
-          <span className={`px-2 py-1 text-xs rounded ${
+          <span className={`px-2 py-1 text-xs rounded-sm ${
             environment === 'production' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
           }`}>
             {environment}
@@ -49,12 +49,12 @@ export default function VercelImageTest({ testUrl, title }: VercelImageTestProps
         </div>
       </div>
 
-      <div className="text-xs text-gray-600 break-all bg-gray-50 p-2 rounded">
+      <div className="text-xs text-gray-600 break-all bg-gray-50 p-2 rounded-md">
         {testUrl}
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="relative w-24 h-16 bg-gray-100 rounded overflow-hidden">
+        <div className="relative w-24 h-16 bg-gray-100 rounded-md overflow-hidden">
           {testUrl && (
             <Image
               src={testUrl}

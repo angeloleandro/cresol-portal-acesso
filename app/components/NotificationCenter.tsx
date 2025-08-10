@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { StandardizedButton } from '@/app/components/admin';
 import { supabase } from '@/lib/supabase';
 
 interface Notification {
@@ -349,22 +350,27 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
               
               <div className="flex items-center space-x-2">
                 {unreadCount > 0 && (
-                  <button
+                  <StandardizedButton
+                    variant="link"
+                    size="sm"
                     onClick={markAllAsRead}
-                    className="text-sm text-primary hover:text-primary-dark"
                   >
                     Marcar todas como lidas
-                  </button>
+                  </StandardizedButton>
                 )}
                 
-                <button
+                <StandardizedButton
+                  variant="ghost"
+                  size="sm"
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600"
+                  icon={
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  }
                 >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                  Fechar
+                </StandardizedButton>
               </div>
             </div>
 
@@ -372,18 +378,15 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
             <div className="mt-4 space-y-3">
               <div className="flex space-x-2">
                 {['all', 'unread', 'read'].map((filterOption) => (
-                  <button
+                  <StandardizedButton
                     key={filterOption}
+                    variant={filter === filterOption ? 'primary' : 'secondary'}
+                    size="xs"
                     onClick={() => setFilter(filterOption as any)}
-                    className={`px-3 py-1 rounded-md text-sm font-medium ${
-                      filter === filterOption
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
                   >
                     {filterOption === 'all' ? 'Todas' : 
                      filterOption === 'unread' ? 'Não lidas' : 'Lidas'}
-                  </button>
+                  </StandardizedButton>
                 ))}
               </div>
 
@@ -410,24 +413,27 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
                   </span>
                   
                   <div className="flex space-x-2">
-                    <button
+                    <StandardizedButton
+                      variant="outline"
+                      size="xs"
                       onClick={() => handleBulkAction('read')}
-                      className="text-xs px-2 py-1 text-primary hover:bg-primary hover:text-white rounded-sm"
                     >
                       Marcar como lidas
-                    </button>
-                    <button
+                    </StandardizedButton>
+                    <StandardizedButton
+                      variant="secondary"
+                      size="xs"
                       onClick={() => handleBulkAction('unread')}
-                      className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-600 hover:text-white rounded-sm"
                     >
                       Marcar como não lidas
-                    </button>
-                    <button
+                    </StandardizedButton>
+                    <StandardizedButton
+                      variant="danger"
+                      size="xs"
                       onClick={() => handleBulkAction('delete')}
-                      className="text-xs px-2 py-1 text-red-600 hover:bg-red-600 hover:text-white rounded-sm"
                     >
                       Excluir
-                    </button>
+                    </StandardizedButton>
                   </div>
                 </div>
                 
@@ -570,12 +576,13 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
                 {filteredNotifications.length} de {notifications.length} notificações
               </span>
               
-              <button
+              <StandardizedButton
+                variant="link"
+                size="xs"
                 onClick={fetchNotifications}
-                className="text-primary hover:text-primary-dark"
               >
                 Atualizar
-              </button>
+              </StandardizedButton>
             </div>
           </div>
         </div>

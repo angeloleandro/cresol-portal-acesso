@@ -57,10 +57,10 @@ export default function SistemasLateral({ limit = 6 }: SistemasLateralProps) {
   if (loading) {
     return (
       <div className="card animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+        <div className="h-6 bg-gray-200 rounded-sm w-1/2 mb-4"></div>
         <div className="space-y-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-12 bg-gray-200 rounded"></div>
+            <div key={i} className="h-12 bg-gray-200 rounded-sm"></div>
           ))}
         </div>
       </div>
@@ -115,7 +115,7 @@ export default function SistemasLateral({ limit = 6 }: SistemasLateralProps) {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center justify-between p-3 bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-lg transition-colors duration-150"
+              className="group flex items-center justify-between p-3 bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-md transition-colors duration-150"
               title={link.description || `Acessar ${link.name}`}
             >
               <div className="flex-1 min-w-0">

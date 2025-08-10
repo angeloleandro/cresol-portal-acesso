@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { CRESOL_UI_CONFIG, CRESOL_DESIGN_TOKENS } from '@/lib/design-tokens';
 
 interface EmptyStateProps {
   icon?: ReactNode;
@@ -26,7 +27,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   );
 
   return (
-    <div className={`bg-white rounded-md border border-cresol-gray-light p-12 text-center ${className}`}>
+    <div className={`${CRESOL_UI_CONFIG.card.base} ${CRESOL_UI_CONFIG.card.padding.xl} text-center ${className}`}>
       <div className="max-w-md mx-auto">
         {/* Icon */}
         <div className="bg-cresol-gray-light/30 rounded-full p-6 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
@@ -41,7 +42,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         {action && (
           <button
             onClick={action.onClick}
-            className={`flex items-center gap-2 mx-auto ${
+            className={`${CRESOL_DESIGN_TOKENS.utilities.flex.center} ${CRESOL_DESIGN_TOKENS.utilities.gap[2]} mx-auto ${
               action.variant === 'secondary' 
                 ? 'btn-secondary' 
                 : 'btn-primary'

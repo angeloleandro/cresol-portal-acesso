@@ -94,7 +94,7 @@ export default function ChartComponentAdvanced({
     return (
       <div className={`bg-white border border-gray-200 rounded-md p-6 ${className}`}>
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded-sm w-1/3 mb-4"></div>
           <div className={`bg-gray-100 rounded-lg`} style={{ height: height }}>
             <div className="flex items-end justify-center h-full space-x-2 p-4">
               {Array.from({ length: data.length || 5 }).map((_, i) => (
@@ -370,21 +370,21 @@ export default function ChartComponentAdvanced({
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleExport('png')}
-              className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-sm-lg transition-colors"
               title="Exportar como PNG"
             >
               PNG
             </button>
             <button
               onClick={() => handleExport('svg')}
-              className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-sm-lg transition-colors"
               title="Exportar como SVG"
             >
               SVG
             </button>
             <button
               onClick={() => handleExport('pdf')}
-              className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-sm-lg transition-colors"
               title="Exportar como PDF"
             >
               PDF

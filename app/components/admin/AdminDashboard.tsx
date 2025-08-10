@@ -140,7 +140,7 @@ export default function AdminDashboard({ initialUser, initialStats }: AdminDashb
 
         {/* Header Section */}
         <div className="mb-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="bg-white border border-gray-200 rounded-md p-4">
             <h1 className="text-3xl font-bold text-primary mb-1">
               Painel Administrativo
             </h1>

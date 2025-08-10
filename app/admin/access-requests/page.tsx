@@ -345,7 +345,7 @@ export default function AccessRequests() {
                     <td className="px-6 py-4">
                       <input
                         type="text"
-                        className="w-full border border-cresol-gray-light rounded px-2 py-1 text-sm"
+                        className="w-full border border-cresol-gray-light rounded-md px-2 py-1 text-sm"
                         value={editData[request.id]?.full_name || ''}
                         onChange={e => handleEditChange(request.id, 'full_name', e.target.value)}
                         disabled={request.status !== 'pending'}
@@ -357,7 +357,7 @@ export default function AccessRequests() {
                     <td className="px-6 py-4">
                       <input
                         type="text"
-                        className="w-full border border-cresol-gray-light rounded px-2 py-1 text-sm min-w-[150px]"
+                        className="w-full border border-cresol-gray-light rounded-md px-2 py-1 text-sm min-w-[150px]"
                         value={editData[request.id]?.position || ''}
                         onChange={e => handleEditChange(request.id, 'position', e.target.value)}
                         disabled={request.status !== 'pending'}
@@ -365,7 +365,7 @@ export default function AccessRequests() {
                     </td>
                     <td className="px-6 py-4">
                       <select
-                        className="w-full border border-cresol-gray-light rounded px-2 py-1 text-sm min-w-[180px]"
+                        className="w-full border border-cresol-gray-light rounded-md px-2 py-1 text-sm min-w-[180px]"
                         value={editData[request.id]?.work_location_id || ''}
                         onChange={e => handleEditChange(request.id, 'work_location_id', e.target.value)}
                         disabled={request.status !== 'pending'}

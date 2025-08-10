@@ -53,11 +53,11 @@ const NavbarSkeleton = memo(() => (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <div className="h-8 w-24 bg-white/20 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-white/20 rounded-sm animate-pulse" />
         </div>
         <div className="hidden md:flex items-center space-x-4">
-          <div className="h-4 w-32 bg-white/20 rounded animate-pulse" />
-          <div className="h-4 w-24 bg-white/20 rounded animate-pulse" />
+          <div className="h-4 w-32 bg-white/20 rounded-sm animate-pulse" />
+          <div className="h-4 w-24 bg-white/20 rounded-sm animate-pulse" />
         </div>
       </div>
     </div>

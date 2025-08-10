@@ -128,14 +128,14 @@ export default function SectorCard({
       <div className="flex gap-2">
         <Link
           href={`/admin/sectors/${sector.id}`}
-          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-primary/10 text-primary text-sm font-medium rounded-md hover:bg-primary/20 transition-colors"
         >
           <Icon name="settings" className="h-4 w-4" />
           Gerenciar
         </Link>
         <Link
           href={`/admin/sectors/${sector.id}/systems`}
-          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors"
         >
           <Icon name="monitor-play" className="h-4 w-4" />
           Sistemas

@@ -183,7 +183,7 @@ function DirectVideoPlayer({
           </p>
           <a 
             href={video.video_url} 
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
             download
           >
             <Icon name="download" className="w-4 h-4" />
@@ -262,7 +262,7 @@ function VideoInfo({ video }: { video: DashboardVideo }) {
             {video.upload_type === 'direct' && video.original_filename && (
               <div className="flex items-center gap-2 text-sm text-neutral-600">
                 <Icon name="folder" className="w-4 h-4 text-neutral-400" />
-                <span className="font-mono text-xs bg-neutral-100 px-2 py-1 rounded">
+                <span className="font-mono text-xs bg-neutral-100 px-2 py-1 rounded-sm">
                   {video.original_filename}
                 </span>
               </div>

@@ -111,11 +111,11 @@ export default function NotificationsAndMessages() {
   if (loading) {
     return (
       <div className="card animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+        <div className="h-6 bg-gray-200 rounded-sm-md w-1/2 mb-4"></div>
         <div className="space-y-3">
-          <div className="h-12 bg-gray-200 rounded"></div>
-          <div className="h-12 bg-gray-200 rounded"></div>
-          <div className="h-12 bg-gray-200 rounded"></div>
+          <div className="h-12 bg-gray-200 rounded-sm"></div>
+          <div className="h-12 bg-gray-200 rounded-sm"></div>
+          <div className="h-12 bg-gray-200 rounded-sm"></div>
         </div>
       </div>
     );
@@ -185,7 +185,7 @@ export default function NotificationsAndMessages() {
             notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-3 rounded-lg border transition-colors duration-150 ${
+                className={`p-3 rounded-md border transition-colors duration-150 ${
                   notification.is_read ? 'bg-white border-gray-200/40 hover:border-gray-200/70' : 'bg-blue-50 border-blue-200/40 hover:border-blue-200/70'
                 }`}
               >
@@ -220,7 +220,7 @@ export default function NotificationsAndMessages() {
             messages.map((message) => (
               <div
                 key={message.id}
-                className={`p-3 rounded-lg border transition-colors duration-150 cursor-pointer ${
+                className={`p-3 rounded-md border transition-colors duration-150 cursor-pointer ${
                   message.is_read ? 'bg-white border-gray-200/40 hover:border-gray-200/70' : 'bg-blue-50 border-blue-200/40 hover:border-blue-200/70'
                 }`}
               >

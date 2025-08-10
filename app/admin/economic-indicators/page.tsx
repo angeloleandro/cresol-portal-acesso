@@ -312,7 +312,7 @@ export default function EconomicIndicatorsAdmin() {
                       required
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       placeholder="Ex: Cooperados"
                     />
                   </div>
@@ -327,7 +327,7 @@ export default function EconomicIndicatorsAdmin() {
                       required
                       value={formData.value}
                       onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       placeholder="Ex: 36.7 mil"
                     />
                   </div>
@@ -341,7 +341,7 @@ export default function EconomicIndicatorsAdmin() {
                       required
                       value={formData.icon}
                       onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                     >
                       {AVAILABLE_ICONS.map((icon) => (
                         <option key={icon.value} value={icon.value}>
@@ -360,7 +360,7 @@ export default function EconomicIndicatorsAdmin() {
                       id="display_order"
                       value={formData.display_order}
                       onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
-                      className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       min="0"
                     />
                   </div>
@@ -374,7 +374,7 @@ export default function EconomicIndicatorsAdmin() {
                       id="issue_date"
                       value={formData.issue_date}
                       onChange={(e) => setFormData({ ...formData, issue_date: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                      className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       placeholder="MM/AAAA (ex: 05/2025)"
                       pattern="^(0[1-9]|1[0-2])\/[0-9]{4}$"
                       title="Formato: MM/AAAA (ex: 05/2025)"
@@ -391,7 +391,7 @@ export default function EconomicIndicatorsAdmin() {
                     rows={3}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                    className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                     placeholder="Descrição opcional do indicador"
                   />
                 </div>
@@ -402,7 +402,7 @@ export default function EconomicIndicatorsAdmin() {
                     type="checkbox"
                     checked={formData.is_active}
                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                    className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded-sm"
                   />
                   <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">
                     Indicador ativo
@@ -413,7 +413,7 @@ export default function EconomicIndicatorsAdmin() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="px-4 py-2 border border-gray-300 rounded-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                    className="px-4 py-2 border border-gray-300 rounded-sm-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                   >
                     Cancelar
                   </button>

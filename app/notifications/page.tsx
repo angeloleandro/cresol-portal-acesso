@@ -465,7 +465,7 @@ export default function NotificationsPage() {
                   <button
                     key={filterOption}
                     onClick={() => setFilter(filterOption as any)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                       filter === filterOption
                         ? 'bg-primary text-white'
                         : 'bg-gray-100 text-cresol-gray hover:bg-gray-200'
@@ -578,7 +578,7 @@ export default function NotificationsPage() {
                       type="checkbox"
                       checked={selectedNotifications.has(notification.id)}
                       onChange={() => toggleNotificationSelection(notification.id)}
-                      className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded-sm"
                     />
 
                     {/* Ícone do tipo */}
@@ -626,7 +626,7 @@ export default function NotificationsPage() {
                         <div className="flex items-center space-x-2 ml-4">
                           <button
                             onClick={() => markAsRead(notification.id, !notification.read)}
-                            className="p-2 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                            className="p-2 text-cresol-gray hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
                             title={notification.read ? 'Marcar como não lida' : 'Marcar como lida'}
                           >
                             <Icon name="mail" className="h-4 w-4" />
@@ -634,7 +634,7 @@ export default function NotificationsPage() {
                           
                           <button
                             onClick={() => handleDeleteClick(notification)}
-                            className="p-2 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-cresol-gray hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                             title="Excluir notificação"
                           >
                             <Icon name="trash" className="h-4 w-4" />

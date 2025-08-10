@@ -1,23 +1,13 @@
 // Constantes de design system para páginas administrativas
+import { CRESOL_COLORS } from '@/lib/design-tokens';
 
 export const DESIGN_TOKENS = {
-  // Cores Cresol
+  // Cores Cresol - Usando design tokens centralizados
   colors: {
-    primary: '#F58220', // Laranja Cresol
-    primaryDark: '#E6761D',
-    secondary: '#005C46', // Verde Cresol
-    gray: {
-      50: '#F9FAFB',
-      100: '#F3F4F6',
-      200: '#E5E7EB',
-      300: '#D1D5DB',
-      400: '#9CA3AF',
-      500: '#6B7280',
-      600: '#4B5563',
-      700: '#374151',
-      800: '#1F2937',
-      900: '#111827'
-    }
+    primary: CRESOL_COLORS.primary.DEFAULT,
+    primaryDark: CRESOL_COLORS.primary.dark,
+    secondary: CRESOL_COLORS.secondary.DEFAULT,
+    gray: CRESOL_COLORS.gray
   },
 
   // Espaçamentos

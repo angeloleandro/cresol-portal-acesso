@@ -53,7 +53,7 @@ export const RecipientsSelector: React.FC<RecipientsSelectorProps> = ({
             id="isGlobal"
             checked={isGlobal}
             onChange={(e) => onGlobalToggle(e.target.checked)}
-            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded-sm"
           />
           <label htmlFor="isGlobal" className="text-sm font-medium text-gray-900">
             Envio Global
@@ -84,7 +84,7 @@ export const RecipientsSelector: React.FC<RecipientsSelectorProps> = ({
                     type="checkbox"
                     checked={selectedGroups.includes(group.id)}
                     onChange={(e) => handleGroupChange(group.id, e.target.checked)}
-                    className="h-4 w-4 text-secondary focus:ring-secondary border-gray-300 rounded"
+                    className="h-4 w-4 text-secondary focus:ring-secondary border-gray-300 rounded-sm"
                   />
                   <div>
                     <div className="font-medium text-sm text-gray-900">{group.name}</div>
@@ -122,7 +122,7 @@ export const RecipientsSelector: React.FC<RecipientsSelectorProps> = ({
                     type="checkbox"
                     checked={selectedUsers.includes(user.id)}
                     onChange={(e) => handleUserChange(user.id, e.target.checked)}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded-sm"
                   />
                   <div className="flex-1">
                     <div className="font-medium text-sm text-gray-900">

@@ -197,7 +197,7 @@ export default function SubsectorDetailsPage() {
               <div className="space-y-2">
                 <button
                   onClick={reloadData}
-                  className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                  className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
                   aria-label="Tentar carregar novamente"
                 >
                   Tentar Novamente
@@ -233,7 +233,7 @@ export default function SubsectorDetailsPage() {
               </p>
               <Link
                 href="/home"
-                className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors"
+                className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors"
                 aria-label="Voltar para a página inicial"
               >
                 Voltar para Home

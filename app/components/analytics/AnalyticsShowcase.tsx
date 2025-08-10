@@ -395,11 +395,11 @@ export default function AnalyticsShowcase() {
           <h4 className="font-semibold text-orange-800 mb-2">Cores da Marca Cresol</h4>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-orange-500 rounded"></div>
+              <div className="w-4 h-4 bg-orange-500 rounded-sm"></div>
               <span className="text-sm text-gray-700">#F58220 (Laranja Principal)</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-600 rounded"></div>
+              <div className="w-4 h-4 bg-green-600 rounded-sm"></div>
               <span className="text-sm text-gray-700">#005C46 (Verde Secundário)</span>
             </div>
           </div>

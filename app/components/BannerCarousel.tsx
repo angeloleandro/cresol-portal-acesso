@@ -65,7 +65,7 @@ export default function BannerCarousel() {
   const next = () => setCurrent((prev) => (prev + 1) % banners.length);
 
   return (
-    <div className="relative w-full h-56 sm:h-72 md:h-80 rounded-lg overflow-hidden mb-8">
+    <div className="relative w-full h-56 sm:h-72 md:h-80 rounded-md overflow-hidden mb-8">
       {banners.map((banner, idx) => (
         <div
           key={banner.id}
@@ -78,7 +78,7 @@ export default function BannerCarousel() {
                 alt={banner.title || "Banner"} 
                 fill 
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px" 
-                className="object-cover w-full h-full rounded-lg" 
+                className="object-cover w-full h-full rounded-md" 
                 priority={idx === current}
                 quality={85}
                 fallbackText="Banner indisponível"
@@ -90,7 +90,7 @@ export default function BannerCarousel() {
               alt={banner.title || "Banner"} 
               fill 
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px" 
-              className="object-cover w-full h-full rounded-lg" 
+              className="object-cover w-full h-full rounded-md" 
               priority={idx === current}
               quality={85}
               fallbackText="Banner indisponível"

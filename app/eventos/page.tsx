@@ -358,7 +358,7 @@ function EventosPageContent() {
                         type="checkbox"
                         checked={showFeaturedOnly}
                         onChange={(e) => setShowFeaturedOnly(e.target.checked)}
-                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded-sm"
                       />
                       <span className="ml-2 text-sm text-gray-700">Apenas eventos em destaque</span>
                     </label>

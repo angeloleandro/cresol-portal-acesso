@@ -5,6 +5,7 @@ export { default as StandardizedAdminLayout } from './StandardizedAdminLayout';
 export { default as StandardizedPageHeader } from './StandardizedPageHeader';
 export { default as StandardizedButton } from './StandardizedButton';
 export { default as StandardizedCard } from './StandardizedCard';
+export { default as StandardizedInput, StandardizedTextarea, useInputState } from './StandardizedInput';
 export { default as StandardizedSection } from './StandardizedSection';
 export { default as StandardizedFilters } from './StandardizedFilters';
 export { default as StandardizedEmptyState } from './StandardizedEmptyState';

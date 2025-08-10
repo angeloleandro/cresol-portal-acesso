@@ -31,6 +31,17 @@ export default function EconomicIndicatorCard({
 }: EconomicIndicatorCardProps) {
   const iconName = iconMap[icon] || 'suitcase';
 
+  // Alguns indicadores principais devem sempre aparecer em laranja
+  // Normaliza acentos e compara títulos conhecidos: COOPERADOS, ATIVOS, AGÊNCIAS
+  const normalize = (s: string) => s
+    .normalize('NFD')
+    // Remove marcas diacríticas (faixa Unicode de combinadores)
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .trim();
+  const highlightedTitles = new Set(['COOPERADOS', 'ATIVOS', 'AGENCIAS']);
+  const isHighlighted = highlightedTitles.has(normalize(title));
+
   return (
     <article
       className="economic-indicator-card"
@@ -47,7 +58,8 @@ export default function EconomicIndicatorCard({
         
         {/* Value */}
         <div 
-          className="economic-indicator-value"
+          className={`economic-indicator-value ${isHighlighted ? 'text-primary' : ''}`}
+          style={isHighlighted ? { color: 'var(--color-primary)' } : undefined}
           aria-label={`Valor: ${value}`}
         >
           {value}

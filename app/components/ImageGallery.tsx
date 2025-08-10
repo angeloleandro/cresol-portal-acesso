@@ -93,7 +93,7 @@ export default function ImageGallery({ limit = 6 }: ImageGalleryProps) {
           const maxLen = 35;
           const shortTitle = img.title && img.title.length > maxLen ? img.title.slice(0, maxLen) + '...' : img.title;
           return (
-            <div key={img.id} className="bg-white rounded-lg border border-gray-200/40 cursor-pointer hover:border-gray-200/70 transition-colors duration-150 overflow-hidden group" onClick={() => handleOpenModal(img)}>
+            <div key={img.id} className="bg-white rounded-md border border-gray-200/40 cursor-pointer hover:border-gray-200/70 transition-colors duration-150 overflow-hidden group" onClick={() => handleOpenModal(img)}>
               <div className="relative w-full aspect-[4/3] bg-gray-100">
                 <OptimizedImage 
                   src={img.image_url} 
@@ -123,7 +123,7 @@ export default function ImageGallery({ limit = 6 }: ImageGalleryProps) {
       )}
       {modalOpen && selectedImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-white rounded-lg border border-gray-300 max-w-2xl w-full mx-4 relative">
+          <div className="bg-white rounded-md border border-gray-300 max-w-2xl w-full mx-4 relative">
             <button
               className="absolute top-6 right-6 bg-white border border-cresol-gray-light rounded-full w-14 h-14 flex items-center justify-center z-20 transition hover:bg-primary/10 group"
               onClick={handleCloseModal}
@@ -134,7 +134,7 @@ export default function ImageGallery({ limit = 6 }: ImageGalleryProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M6 18L18 6" />
               </svg>
             </button>
-            <div className="aspect-[4/3] w-full rounded-t-lg overflow-hidden bg-black flex items-center justify-center">
+            <div className="aspect-[4/3] w-full rounded-t-md overflow-hidden bg-black flex items-center justify-center">
               <OptimizedImage 
                 src={selectedImage.image_url} 
                 alt={selectedImage.title || "Imagem da galeria"} 

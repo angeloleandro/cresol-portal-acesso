@@ -214,7 +214,7 @@ const MetricCard = memo(function MetricCard({
         {/* Valor principal */}
         <div className="flex items-baseline space-x-2">
           {isLoading ? (
-            <div className={`${sizeStyles.value.includes('2xl') ? 'h-8' : sizeStyles.value.includes('3xl') ? 'h-10' : 'h-12'} bg-gray-200 rounded w-24 animate-pulse`} />
+            <div className={`${sizeStyles.value.includes('2xl') ? 'h-8' : sizeStyles.value.includes('3xl') ? 'h-10' : 'h-12'} bg-gray-200 rounded-sm w-24 animate-pulse`} />
           ) : (
             <>
               <span className={`${sizeStyles.value} font-bold ${colorStyles.value}`}>
@@ -262,15 +262,15 @@ const MetricCardSkeleton = memo(function MetricCardSkeleton({ size = 'md' }: { s
       <div className={sizeStyles.spacing}>
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className={`h-4 bg-gray-200 rounded w-3/4 mb-2`} />
-            <div className={`h-3 bg-gray-200 rounded w-1/2`} />
+            <div className={`h-4 bg-gray-200 rounded-sm w-3/4 mb-2`} />
+            <div className={`h-3 bg-gray-200 rounded-sm w-1/2`} />
           </div>
-          <div className={`${sizeStyles.icon} bg-gray-200 rounded`} />
+          <div className={`${sizeStyles.icon} bg-gray-200 rounded-sm`} />
         </div>
-        <div className={`${sizeStyles.value.includes('2xl') ? 'h-8' : sizeStyles.value.includes('3xl') ? 'h-10' : 'h-12'} bg-gray-200 rounded w-20`} />
+        <div className={`${sizeStyles.value.includes('2xl') ? 'h-8' : sizeStyles.value.includes('3xl') ? 'h-10' : 'h-12'} bg-gray-200 rounded-sm w-20`} />
         <div className="flex space-x-2">
-          <div className="h-3 bg-gray-200 rounded w-12" />
-          <div className="h-3 bg-gray-200 rounded w-24" />
+          <div className="h-3 bg-gray-200 rounded-sm w-12" />
+          <div className="h-3 bg-gray-200 rounded-sm w-24" />
         </div>
       </div>
     </div>
