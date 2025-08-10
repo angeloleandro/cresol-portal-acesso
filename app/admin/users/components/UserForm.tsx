@@ -348,6 +348,14 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                   setNewUserPositionId(selected || '');
                   setPositionSearch('');
                 }}
+                items={[
+                  { id: 'header', type: 'header' },
+                  { id: 'empty-option', type: 'empty-option', name: 'Nenhum cargo' },
+                  ...(filteredPositions.length === 0 && positionSearch 
+                    ? [{ id: 'no-results', type: 'no-results', name: 'Nenhum cargo encontrado' }]
+                    : filteredPositions.map(position => ({ ...position, type: 'position' }))
+                  )
+                ]}
                 itemClasses={{
                   base: [
                     "rounded-md",
@@ -360,54 +368,71 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                   ]
                 }}
               >
-                <DropdownItem key="header" isReadOnly className="h-14 gap-2">
-                  <Input
-                    autoFocus
-                    placeholder="Buscar cargo..."
-                    startContent={<Icon name="search" className="h-4 w-4" />}
-                    value={positionSearch}
-                    onValueChange={setPositionSearch}
-                    variant="bordered"
-                    className="w-full dropdown-search-override"
-                    classNames={{
-                      input: "text-sm bg-white",
-                      inputWrapper: [
-                        "h-10",
-                        "bg-white",
-                        "border-gray-300",
-                        "border",
-                        "rounded-md",
-                        "hover:border-gray-300",
-                        "focus-within:border-primary",
-                        "focus-within:ring-1",
-                        "focus-within:ring-primary/20",
-                        "data-[hover=true]:border-gray-300",
-                        "data-[focus=true]:border-primary",
-                        "data-[focus=true]:ring-1",
-                        "data-[focus=true]:ring-primary/20"
-                      ]
-                    }}
-                  />
-                </DropdownItem>
-                <DropdownItem key="empty-option" textValue="Nenhum cargo">
-                  <span className="text-gray-500">Nenhum cargo</span>
-                </DropdownItem>
-                {filteredPositions.length === 0 && positionSearch ? (
-                  <DropdownItem key="no-results" isReadOnly>
-                    <span className="text-gray-500 italic">Nenhum cargo encontrado</span>
-                  </DropdownItem>
-                ) : (
-                  filteredPositions.map((position) => (
-                    <DropdownItem key={position.id} textValue={`${position.name} ${position.department || ''}`}>
+                {(item) => {
+                  if (item.type === 'header') {
+                    return (
+                      <DropdownItem key="header" isReadOnly className="h-14 gap-2">
+                        <Input
+                          autoFocus
+                          placeholder="Buscar cargo..."
+                          startContent={<Icon name="search" className="h-4 w-4" />}
+                          value={positionSearch}
+                          onValueChange={setPositionSearch}
+                          variant="bordered"
+                          className="w-full dropdown-search-override"
+                          classNames={{
+                            input: "text-sm bg-white",
+                            inputWrapper: [
+                              "h-10",
+                              "bg-white",
+                              "border-gray-300",
+                              "border",
+                              "rounded-md",
+                              "hover:border-gray-300",
+                              "focus-within:border-primary",
+                              "focus-within:ring-1",
+                              "focus-within:ring-primary/20",
+                              "data-[hover=true]:border-gray-300",
+                              "data-[focus=true]:border-primary",
+                              "data-[focus=true]:ring-1",
+                              "data-[focus=true]:ring-primary/20"
+                            ]
+                          }}
+                        />
+                      </DropdownItem>
+                    );
+                  }
+                  
+                  if (item.type === 'empty-option') {
+                    return (
+                      <DropdownItem key="empty-option" textValue="Nenhum cargo">
+                        <span className="text-gray-500">Nenhum cargo</span>
+                      </DropdownItem>
+                    );
+                  }
+                  
+                  if (item.type === 'no-results') {
+                    return (
+                      <DropdownItem key="no-results" isReadOnly>
+                        <span className="text-gray-500 italic">Nenhum cargo encontrado</span>
+                      </DropdownItem>
+                    );
+                  }
+                  
+                  return (
+                    <DropdownItem 
+                      key={item.id} 
+                      textValue={`${'name' in item ? item.name : ''} ${'department' in item && item.department ? item.department : ''}`}
+                    >
                       <div>
-                        <span className="font-medium">{position.name}</span>
-                        {position.department && (
-                          <span className="text-gray-500 text-sm ml-2">- {position.department}</span>
+                        <span className="font-medium">{'name' in item ? item.name : ''}</span>
+                        {'department' in item && item.department && (
+                          <span className="text-gray-500 text-sm ml-2">- {item.department}</span>
                         )}
                       </div>
                     </DropdownItem>
-                  ))
-                )}
+                  );
+                }}
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -438,6 +463,13 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                   setNewUserWorkLocationId(selected || '');
                   setLocationSearch('');
                 }}
+                items={[
+                  { id: 'header', type: 'header' },
+                  ...(filteredLocations.length === 0 && locationSearch 
+                    ? [{ id: 'no-results', type: 'no-results', name: 'Nenhum local encontrado' }]
+                    : filteredLocations.map(location => ({ ...location, type: 'location' }))
+                  )
+                ]}
                 itemClasses={{
                   base: [
                     "rounded-md",
@@ -450,46 +482,55 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                   ]
                 }}
               >
-                <DropdownItem key="header" isReadOnly className="h-14 gap-2">
-                  <Input
-                    autoFocus
-                    placeholder="Buscar local..."
-                    startContent={<Icon name="search" className="h-4 w-4" />}
-                    value={locationSearch}
-                    onValueChange={setLocationSearch}
-                    variant="bordered"
-                    className="w-full dropdown-search-override"
-                    classNames={{
-                      input: "text-sm bg-white",
-                      inputWrapper: [
-                        "h-10",
-                        "bg-white",
-                        "border-gray-300",
-                        "border",
-                        "rounded-md",
-                        "hover:border-gray-300",
-                        "focus-within:border-primary",
-                        "focus-within:ring-1",
-                        "focus-within:ring-primary/20",
-                        "data-[hover=true]:border-gray-300",
-                        "data-[focus=true]:border-primary",
-                        "data-[focus=true]:ring-1",
-                        "data-[focus=true]:ring-primary/20"
-                      ]
-                    }}
-                  />
-                </DropdownItem>
-                {filteredLocations.length === 0 && locationSearch ? (
-                  <DropdownItem key="no-results" isReadOnly>
-                    <span className="text-gray-500 italic">Nenhum local encontrado</span>
-                  </DropdownItem>
-                ) : (
-                  filteredLocations.map((location) => (
-                    <DropdownItem key={location.id} textValue={location.name}>
-                      <span className="truncate">{location.name}</span>
+                {(item) => {
+                  if (item.type === 'header') {
+                    return (
+                      <DropdownItem key="header" isReadOnly className="h-14 gap-2">
+                        <Input
+                          autoFocus
+                          placeholder="Buscar local..."
+                          startContent={<Icon name="search" className="h-4 w-4" />}
+                          value={locationSearch}
+                          onValueChange={setLocationSearch}
+                          variant="bordered"
+                          className="w-full dropdown-search-override"
+                          classNames={{
+                            input: "text-sm bg-white",
+                            inputWrapper: [
+                              "h-10",
+                              "bg-white",
+                              "border-gray-300",
+                              "border",
+                              "rounded-md",
+                              "hover:border-gray-300",
+                              "focus-within:border-primary",
+                              "focus-within:ring-1",
+                              "focus-within:ring-primary/20",
+                              "data-[hover=true]:border-gray-300",
+                              "data-[focus=true]:border-primary",
+                              "data-[focus=true]:ring-1",
+                              "data-[focus=true]:ring-primary/20"
+                            ]
+                          }}
+                        />
+                      </DropdownItem>
+                    );
+                  }
+                  
+                  if (item.type === 'no-results') {
+                    return (
+                      <DropdownItem key="no-results" isReadOnly>
+                        <span className="text-gray-500 italic">Nenhum local encontrado</span>
+                      </DropdownItem>
+                    );
+                  }
+                  
+                  return (
+                    <DropdownItem key={item.id} textValue={'name' in item ? item.name : ''}>
+                      <span className="truncate">{'name' in item ? item.name : ''}</span>
                     </DropdownItem>
-                  ))
-                )}
+                  );
+                }}
               </DropdownMenu>
             </Dropdown>
           </div>

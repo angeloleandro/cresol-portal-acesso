@@ -4,11 +4,18 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import OptimizedImage from "@/app/components/OptimizedImage";
 import { supabase } from "@/lib/supabase";
-import AdminHeader from "@/app/components/AdminHeader";
-import Breadcrumb from "@/app/components/Breadcrumb";
+import { 
+  StandardizedAdminLayout, 
+  StandardizedPageHeader, 
+  StandardizedButton,
+  StandardizedCard,
+  StandardizedEmptyState,
+  type BreadcrumbItem
+} from '@/app/components/admin';
 import BannerUploadForm from '@/app/components/BannerUploadForm';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import { Icon } from '@/app/components/icons';
 
 interface Banner {
   id: string;
@@ -111,35 +118,28 @@ export default function AdminBanners() {
     return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
   }
 
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Home', href: '/home', icon: 'house' },
+    { label: 'Administração', href: '/admin' },
+    { label: 'Banners' }
+  ];
+
   return (
-    <div className="min-h-screen bg-cresol-gray-light/30">
-      <AdminHeader user={user} />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <div className="mb-6">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', href: '/home', icon: 'house' },
-              { label: 'Administração', href: '/admin' },
-              { label: 'Banners' }
-            ]} 
-          />
-        </div>
-
-        {/* Header Section */}
-        <div className="mb-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <h1 className="text-3xl font-bold text-primary mb-1">
-              Gerenciar Banners
-            </h1>
-            <p className="text-sm text-gray-600">Adicione, edite ou remova banners exibidos na página inicial do portal</p>
-          </div>
-        </div>
-
-        {/* Actions Section */}
-        <div className="mb-6">
-          <button className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors duration-150" onClick={() => setShowForm(true)}>+ Novo Banner</button>
-        </div>
+    <>
+      <StandardizedAdminLayout user={user} breadcrumbs={breadcrumbs}>
+        <StandardizedPageHeader
+          title="Gerenciar Banners"
+          subtitle="Adicione, edite ou remova banners exibidos na página inicial do portal"
+          action={
+            <StandardizedButton
+              onClick={() => setShowForm(true)}
+              variant="primary"
+            >
+              <Icon name="plus" className="h-4 w-4" />
+              Novo Banner
+            </StandardizedButton>
+          }
+        />
         {showForm && !editBanner && (
           <BannerUploadForm onSave={() => { setShowForm(false); fetchBanners(); }} onCancel={() => setShowForm(false)} />
         )}
@@ -158,39 +158,70 @@ export default function AdminBanners() {
           />
         )}
         {error && <div className="text-red-500 mb-4">Erro: {error}</div>}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {banners.map((banner) => (
-            <div key={banner.id} className="bg-white rounded-lg border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 overflow-hidden flex flex-col">
-              <div className="relative w-full h-48 bg-cresol-gray-light">
-                {banner.image_url ? (
-                  <OptimizedImage 
-                    src={banner.image_url} 
-                    alt={banner.title || "Banner"} 
-                    fill 
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    quality={80}
-                    fallbackText="Banner indisponível"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-cresol-gray">Sem imagem</div>
-                )}
-              </div>
-              <div className="p-4 flex-1 flex flex-col">
-                <h3 className="text-lg font-semibold text-cresol-gray mb-1">{banner.title || "(Sem título)"}</h3>
-                {banner.link && <a href={banner.link} className="text-primary text-sm underline break-all" target="_blank" rel="noopener noreferrer">{banner.link}</a>}
-                <div className="mt-auto flex gap-2 pt-4">
-                  <button className="text-primary hover:underline" onClick={() => setEditBanner(banner)}>Editar</button>
-                  <button className="text-red-500 hover:underline" onClick={() => handleDeleteClick(banner)}>Remover</button>
+        
+        {banners.length === 0 && !showForm ? (
+          <StandardizedEmptyState
+            title="Nenhum banner cadastrado"
+            description="Comece criando o primeiro banner para exibir na página inicial."
+            icon="image"
+            action={{
+              label: 'Criar primeiro banner',
+              onClick: () => setShowForm(true)
+            }}
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {banners.map((banner) => (
+              <StandardizedCard key={banner.id} hover className="overflow-hidden flex flex-col">
+                <div className="relative w-full h-48 bg-gray-100">
+                  {banner.image_url ? (
+                    <OptimizedImage 
+                      src={banner.image_url} 
+                      alt={banner.title || "Banner"} 
+                      fill 
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      quality={80}
+                      fallbackText="Banner indisponível"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-400">
+                      <Icon name="image" className="h-12 w-12" />
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        {banners.length === 0 && !showForm && (
-          <div className="text-cresol-gray text-center mt-12">Nenhum banner cadastrado ainda.</div>
+                <div className="p-4 flex-1 flex flex-col">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{banner.title || "(Sem título)"}</h3>
+                  {banner.link && (
+                    <a href={banner.link} className="text-primary text-sm underline break-all hover:text-primary-dark" target="_blank" rel="noopener noreferrer">
+                      {banner.link}
+                    </a>
+                  )}
+                  <div className="mt-auto flex gap-2 pt-4">
+                    <StandardizedButton
+                      onClick={() => setEditBanner(banner)}
+                      variant="secondary"
+                      size="sm"
+                      className="text-primary border-primary hover:bg-primary hover:text-white"
+                    >
+                      <Icon name="pencil" className="h-4 w-4" />
+                      Editar
+                    </StandardizedButton>
+                    <StandardizedButton
+                      onClick={() => handleDeleteClick(banner)}
+                      variant="danger"
+                      size="sm"
+                    >
+                      <Icon name="trash" className="h-4 w-4" />
+                      Remover
+                    </StandardizedButton>
+                  </div>
+                </div>
+              </StandardizedCard>
+            ))}
+          </div>
         )}
-      </main>
+      </StandardizedAdminLayout>
       
       <ConfirmationModal
         isOpen={showDeleteModal}
@@ -202,6 +233,6 @@ export default function AdminBanners() {
         confirmButtonText="Excluir Banner"
         cancelButtonText="Cancelar"
       />
-    </div>
+    </>
   );
 } 

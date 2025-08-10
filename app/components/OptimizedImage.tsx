@@ -19,6 +19,7 @@ interface OptimizedImageProps {
   fallbackSrc?: string;
   fallbackText?: string;
   unoptimized?: boolean;
+  context?: 'avatar' | 'gallery' | 'banner' | 'thumbnail' | 'default';
 }
 
 export default function OptimizedImage({
@@ -37,10 +38,35 @@ export default function OptimizedImage({
   fallbackSrc,
   fallbackText,
   unoptimized = false,
+  context = 'default',
   ...props
 }: OptimizedImageProps) {
   const [imageError, setImageError] = useState(false);
   const [imageSrc, setImageSrc] = useState(src);
+
+  // ✅ QUALITY AUTOMÁTICA baseada no contexto e tamanho
+  const getOptimalQuality = () => {
+    if (quality !== 75) return quality; // Respeitar quality explícita
+    
+    const contextQuality = {
+      avatar: width && width <= 48 ? 60 : width && width <= 96 ? 70 : 80,
+      thumbnail: 65,
+      gallery: 80,
+      banner: 90,
+      default: 75
+    };
+    
+    return contextQuality[context] || contextQuality.default;
+  };
+
+  // ✅ PLACEHOLDER BLUR automático para contextos específicos
+  const getBlurDataURL = () => {
+    if (blurDataURL) return blurDataURL;
+    if (context === 'avatar') {
+      return "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=";
+    }
+    return undefined;
+  };
 
   // ESTRATÉGIA DEFINITIVA: Usar <img> tag para SVGs (recomendação oficial Vercel)
   // Next.js Image Component não é adequado para SVGs, mesmo com unoptimized=true
@@ -175,9 +201,9 @@ export default function OptimizedImage({
     onError: handleImageError,
     priority,
     sizes,
-    quality,
-    placeholder,
-    blurDataURL,
+    quality: getOptimalQuality(), // ✅ Quality dinâmica baseada no contexto
+    placeholder: context === 'avatar' ? 'blur' : placeholder, // ✅ Blur automático para avatares
+    blurDataURL: getBlurDataURL(), // ✅ Placeholder blur específico
     unoptimized: shouldForceUnoptimized || unoptimized, // Apenas para Supabase
     ...props
   };

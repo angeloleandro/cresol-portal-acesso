@@ -4,8 +4,18 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import AdminHeader from '@/app/components/AdminHeader';
-import Breadcrumb from '@/app/components/Breadcrumb';
+import { 
+  StandardizedAdminLayout, 
+  StandardizedPageHeader, 
+  StandardizedButton,
+  StandardizedTabsList,
+  StandardizedTabContent,
+  StandardizedCard,
+  StandardizedEmptyState,
+  type BreadcrumbItem
+} from '@/app/components/admin';
+import { Tabs } from "@chakra-ui/react";
+import { LuFolder } from "react-icons/lu";
 import SectorCard from '@/app/components/admin/SectorCard';
 import SubsectorCard from '@/app/components/admin/SubsectorCard';
 import { Icon } from '../../components/icons';
@@ -315,156 +325,137 @@ export default function SectorsManagement() {
     return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
   }
 
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Home', href: '/home', icon: 'house' },
+    { label: 'Administração', href: '/admin' },
+    { label: 'Setores' }
+  ];
+
+  const tabs = [
+    {
+      value: 'sectors',
+      label: 'Setores',
+      icon: <LuFolder />
+    },
+    {
+      value: 'subsectors',
+      label: 'Sub-setores',
+      icon: <LuFolder />
+    }
+  ];
+
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
-        <AdminHeader user={user} />
-
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Breadcrumb */}
-          <div className="mb-6">
-            <Breadcrumb 
-              items={[
-                { label: 'Home', href: '/home', icon: 'house' },
-                { label: 'Administração', href: '/admin' },
-                { label: 'Setores' }
-              ]} 
-            />
-          </div>
-
-          {/* Header */}
-          <div className="mb-6">
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-                <div>
-                  <h1 className="text-3xl font-bold text-primary mb-1">
-                    Gerenciamento de Setores
-                  </h1>
-                  <p className="text-sm text-gray-600">
-                    Gerencie os setores da Cresol e seus sub-setores
-                  </p>
-                </div>
-                
-                <div className="flex gap-3 mt-3 md:mt-0">
-                  <button
-                    onClick={() => setShowSectorModal(true)}
-                    className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
-                  >
-                    <Icon name="plus" className="h-4 w-4" />
-                    Novo Setor
-                  </button>
-                  <button
-                    onClick={() => setShowSubsectorModal(true)}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
-                  >
-                    <Icon name="folder-plus" className="h-4 w-4" />
-                    Novo Sub-setor
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="mb-6">
-            <div className="border-b border-gray-200">
-              <nav className="-mb-px flex space-x-8">
-                <button
-                  onClick={() => setActiveTab('sectors')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'sectors'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Icon name="building-1" className="inline mr-2 h-4 w-4" />
-                  Setores ({sectors.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab('subsectors')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'subsectors'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Icon name="folder" className="inline mr-2 h-4 w-4" />
-                  Sub-setores ({subsectors.length})
-                </button>
-              </nav>
-            </div>
-          </div>
-
-          {/* Content */}
-          {activeTab === 'sectors' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {sectors.map(sector => {
-                const sectorSubsectors = subsectors.filter(s => s.sector_id === sector.id);
-                const admins = sectorAdmins.filter(admin => admin.sector_id === sector.id);
-                
-                return (
-                  <SectorCard
-                    key={sector.id}
-                    sector={sector}
-                    subsectorsCount={sectorSubsectors.length}
-                    adminsCount={admins.length}
-                    subsectors={sectorSubsectors}
-                    onEdit={() => openEditSector(sector)}
-                    onDelete={() => openDeleteModal(sector, 'sector')}
-                  />
-                );
-              })}
-            </div>
-          )}
-
-          {activeTab === 'subsectors' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {subsectors.map(subsector => (
-                <SubsectorCard
-                  key={subsector.id}
-                  subsector={subsector}
-                  onEdit={() => openEditSubsector(subsector)}
-                  onDelete={() => openDeleteModal(subsector, 'subsector')}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Empty States */}
-          {activeTab === 'sectors' && sectors.length === 0 && (
-            <div className="text-center py-12">
-              <Icon name="building-1" className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium text-gray-900">Nenhum setor cadastrado</h3>
-              <p className="mt-2 text-gray-500">Comece criando o primeiro setor da organização.</p>
-              <button
+      <StandardizedAdminLayout user={user} breadcrumbs={breadcrumbs}>
+        <StandardizedPageHeader
+          title="Gerenciamento de Setores"
+          subtitle="Gerencie os setores da Cresol e seus sub-setores"
+          action={
+            <div className="flex gap-3">
+              <StandardizedButton
                 onClick={() => setShowSectorModal(true)}
-                className="mt-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"
+                variant="primary"
               >
-                Criar Primeiro Setor
-              </button>
+                <Icon name="plus" className="h-4 w-4" />
+                Novo Setor
+              </StandardizedButton>
+              <StandardizedButton
+                onClick={() => setShowSubsectorModal(true)}
+                variant="secondary"
+              >
+                <Icon name="folder-plus" className="h-4 w-4" />
+                Novo Sub-setor
+              </StandardizedButton>
             </div>
-          )}
+          }
+        />
 
-          {activeTab === 'subsectors' && subsectors.length === 0 && (
-            <div className="text-center py-12">
-              <Icon name="folder" className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium text-gray-900">Nenhum sub-setor cadastrado</h3>
-              <p className="mt-2 text-gray-500">
-                {sectors.length === 0 
-                  ? 'Primeiro crie um setor, depois adicione sub-setores a ele.'
-                  : 'Comece criando o primeiro sub-setor.'}
-              </p>
-              {sectors.length > 0 && (
-                <button
-                  onClick={() => setShowSubsectorModal(true)}
-                  className="mt-4 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  Criar Primeiro Sub-setor
-                </button>
-              )}
-            </div>
-          )}
-        </main>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="p-6">
+            <Tabs.Root 
+              value={activeTab} 
+              onValueChange={(details) => setActiveTab(details.value as 'sectors' | 'subsectors')}
+              variant="plain"
+            >
+              <StandardizedTabsList
+                tabs={tabs}
+                className="mb-6"
+              />
+
+              {/* Content das tabs */}
+              <div className="mt-6">
+                <StandardizedTabContent value="sectors">
+                  <div className="space-y-6">
+                    {sectors.length > 0 ? (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {sectors.map(sector => {
+                          const sectorSubsectors = subsectors.filter(s => s.sector_id === sector.id);
+                          const admins = sectorAdmins.filter(admin => admin.sector_id === sector.id);
+                          
+                          return (
+                            <SectorCard
+                              key={sector.id}
+                              sector={sector}
+                              subsectorsCount={sectorSubsectors.length}
+                              adminsCount={admins.length}
+                              subsectors={sectorSubsectors}
+                              onEdit={() => openEditSector(sector)}
+                              onDelete={() => openDeleteModal(sector, 'sector')}
+                            />
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <StandardizedEmptyState
+                        title="Nenhum setor cadastrado"
+                        description="Comece criando o primeiro setor da organização."
+                        icon="building-1"
+                        action={{
+                          label: 'Criar Primeiro Setor',
+                          onClick: () => setShowSectorModal(true)
+                        }}
+                      />
+                    )}
+                  </div>
+                </StandardizedTabContent>
+
+                <StandardizedTabContent value="subsectors">
+                  <div className="space-y-6">
+                    {subsectors.length > 0 ? (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {subsectors.map(subsector => (
+                          <SubsectorCard
+                            key={subsector.id}
+                            subsector={subsector}
+                            onEdit={() => openEditSubsector(subsector)}
+                            onDelete={() => openDeleteModal(subsector, 'subsector')}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <StandardizedEmptyState
+                        title="Nenhum sub-setor cadastrado"
+                        description={
+                          sectors.length === 0 
+                            ? 'Primeiro crie um setor, depois adicione sub-setores a ele.'
+                            : 'Comece criando o primeiro sub-setor.'
+                        }
+                        icon="folder"
+                        action={
+                          sectors.length > 0 ? {
+                            label: 'Criar Primeiro Sub-setor',
+                            onClick: () => setShowSubsectorModal(true)
+                          } : undefined
+                        }
+                      />
+                    )}
+                  </div>
+                </StandardizedTabContent>
+              </div>
+            </Tabs.Root>
+          </div>
+        </div>
+      </StandardizedAdminLayout>
 
         {/* Modal Setor */}
         {showSectorModal && (
@@ -504,19 +495,21 @@ export default function SectorsManagement() {
                   </div>
                   
                   <div className="flex gap-3 pt-4">
-                    <button
+                    <StandardizedButton
                       type="button"
                       onClick={resetSectorForm}
-                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      variant="secondary"
+                      className="flex-1 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                     >
                       Cancelar
-                    </button>
-                    <button
+                    </StandardizedButton>
+                    <StandardizedButton
                       type="submit"
-                      className="flex-1 px-4 py-2 bg-primary text-white hover:bg-primary-dark rounded-lg transition-colors"
+                      variant="primary"
+                      className="flex-1"
                     >
                       {editingSector ? 'Atualizar' : 'Criar'}
-                    </button>
+                    </StandardizedButton>
                   </div>
                 </form>
               </div>
@@ -581,26 +574,28 @@ export default function SectorsManagement() {
                   </div>
                   
                   <div className="flex gap-3 pt-4">
-                    <button
+                    <StandardizedButton
                       type="button"
                       onClick={resetSubsectorForm}
-                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      variant="secondary"
+                      className="flex-1 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                     >
                       Cancelar
-                    </button>
-                    <button
+                    </StandardizedButton>
+                    <StandardizedButton
                       type="submit"
-                      className="flex-1 px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded-lg transition-colors"
+                      variant="secondary"
+                      className="flex-1"
                     >
                       {editingSubsector ? 'Atualizar' : 'Criar'}
-                    </button>
+                    </StandardizedButton>
                   </div>
                 </form>
               </div>
             </div>
           </div>
         )}
-      </div>
+
       {itemToDelete && (
         <ConfirmationModal
           isOpen={isDeleteModalOpen}

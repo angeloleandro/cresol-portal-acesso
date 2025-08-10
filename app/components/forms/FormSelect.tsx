@@ -79,6 +79,9 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
   placeholder = 'Selecione uma opção...',
   ...props
 }, ref) => {
+  // Destructure props for useCallback dependencies
+  const { onChange, name } = props;
+  
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -162,17 +165,17 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
     
     // Create synthetic change event for React Hook Form compatibility
     const syntheticEvent = {
-      target: { value: option.value, name: props.name },
-      currentTarget: { value: option.value, name: props.name }
+      target: { value: option.value, name },
+      currentTarget: { value: option.value, name }
     } as React.ChangeEvent<HTMLSelectElement>;
     
-    if (props.onChange) {
-      props.onChange(syntheticEvent);
+    if (onChange) {
+      onChange(syntheticEvent);
     }
     
     setIsOpen(false);
     setSearchQuery('');
-  }, [props.onChange, props.name, isLoading]);
+  }, [isLoading, onChange, name]);
 
   // Handle search input
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -194,16 +197,16 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
     
     // Create synthetic clear event
     const syntheticEvent = {
-      target: { value: '', name: props.name },
-      currentTarget: { value: '', name: props.name }
+      target: { value: '', name },
+      currentTarget: { value: '', name }
     } as React.ChangeEvent<HTMLSelectElement>;
     
-    if (props.onChange) {
-      props.onChange(syntheticEvent);
+    if (onChange) {
+      onChange(syntheticEvent);
     }
     
     setSearchQuery('');
-  }, [onClear, props.onChange, props.name]);
+  }, [onClear, onChange, name]);
 
   // Size mapping for HeroUI
   const getButtonSize = () => {
@@ -368,7 +371,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
             }}
           >
             {/* Search Input */}
-            {searchable && filteredOptions.length > 0 && (
+            {searchable && filteredOptions.length > 0 ? (
               <DropdownItem
                 key="search"
                 className="p-0 mb-1"
@@ -388,7 +391,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
                   />
                 </div>
               </DropdownItem>
-            )}
+            ) : null}
             
             {/* Options or Empty State */}
             {filteredOptions.length === 0 ? (

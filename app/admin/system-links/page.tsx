@@ -3,12 +3,19 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import AdminHeader from '@/app/components/AdminHeader';
-import Breadcrumb from '@/app/components/Breadcrumb';
+import { 
+  StandardizedAdminLayout, 
+  StandardizedPageHeader, 
+  StandardizedButton,
+  StandardizedCard,
+  StandardizedEmptyState,
+  type BreadcrumbItem
+} from '@/app/components/admin';
 import { handleComponentError, devLog } from '@/lib/error-handler';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import { Icon } from '@/app/components/icons';
 
 interface SystemLink {
   id?: string;
@@ -205,87 +212,63 @@ export default function SystemLinksAdmin() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <AdminHeader user={user} />
-        <LoadingSpinner fullScreen message="Carregando links de sistemas..." />
-      </div>
-    );
+    return <LoadingSpinner fullScreen message="Carregando links de sistemas..." />;
   }
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Home', href: '/home', icon: 'house' },
+    { label: 'Administração', href: '/admin' },
+    { label: 'Links de Sistemas' }
+  ];
 
   if (error && !links.length) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <AdminHeader user={user} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ErrorMessage
-            title="Erro ao Carregar Links"
-            message={error}
-            type="error"
-            showRetry
-            onRetry={fetchLinks}
-            fullScreen
-          />
-        </div>
-      </div>
+      <StandardizedAdminLayout user={user} breadcrumbs={breadcrumbs}>
+        <ErrorMessage
+          title="Erro ao Carregar Links"
+          message={error}
+          type="error"
+          showRetry
+          onRetry={fetchLinks}
+          fullScreen
+        />
+      </StandardizedAdminLayout>
     );
   }
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
-        <AdminHeader user={user} />
-        
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Breadcrumb */}
+      <StandardizedAdminLayout user={user} breadcrumbs={breadcrumbs}>
+        <StandardizedPageHeader
+          title="Links de Sistemas"
+          subtitle="Gerencie os links de acesso aos sistemas exibidos na página inicial"
+          action={
+            <StandardizedButton
+              onClick={() => setShowForm(true)}
+              variant="primary"
+            >
+              <Icon name="plus" className="h-4 w-4" />
+              Adicionar Link
+            </StandardizedButton>
+          }
+        />
+
+        {error && (
           <div className="mb-6">
-            <Breadcrumb 
-              items={[
-                { label: 'Home', href: '/home', icon: 'house' },
-                { label: 'Administração', href: '/admin' },
-                { label: 'Links de Sistemas' }
-              ]} 
+            <ErrorMessage
+              title="Erro"
+              message={error}
+              type="error"
             />
           </div>
-          {/* Header Section */}
-          <div className="mb-6">
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h1 className="text-3xl font-bold text-primary mb-1">
-                Links de Sistemas
-              </h1>
-              <p className="text-sm text-gray-600">Gerencie os links de acesso aos sistemas exibidos na página inicial</p>
-            </div>
-          </div>
+        )}
 
-          {error && (
-            <div className="mb-6">
-              <ErrorMessage
-                title="Erro"
-                message={error}
-                type="error"
-              />
-            </div>
-          )}
-
-          {/* Botão Adicionar */}
-          <div className="mb-6">
-            <button
-              onClick={() => setShowForm(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md  text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-            >
-              <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Adicionar Link
-            </button>
-          </div>
-
-          {/* Formulário */}
-          {showForm && (
-            <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                {editingLink ? 'Editar Link' : 'Novo Link'}
-              </h2>
+        {/* Formulário */}
+        {showForm && (
+          <StandardizedCard className="mb-6" padding="lg">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">
+              {editingLink ? 'Editar Link' : 'Novo Link'}
+            </h2>
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -365,43 +348,43 @@ export default function SystemLinksAdmin() {
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">
-                  <button
+                  <StandardizedButton
                     type="button"
                     onClick={handleCancel}
-                    className="px-4 py-2 border border-gray-300 rounded-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                    variant="secondary"
+                    className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
                     Cancelar
-                  </button>
-                  <button
+                  </StandardizedButton>
+                  <StandardizedButton
                     type="submit"
+                    variant="primary"
                     disabled={formLoading || (formData.url !== '' && !validateUrl(formData.url))}
-                    className="px-4 py-2 border border-transparent rounded-md  text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
+                    loading={formLoading}
                   >
-                    {formLoading ? 'Salvando...' : (editingLink ? 'Atualizar' : 'Criar')}
-                  </button>
+                    {editingLink ? 'Atualizar' : 'Criar'}
+                  </StandardizedButton>
                 </div>
               </form>
-            </div>
-          )}
+          </StandardizedCard>
+        )}
 
-          {/* Lista de Links */}
-          <div className="bg-white border border-gray-200 overflow-hidden sm:rounded-md">
+        {/* Lista de Links */}
+        {links.length === 0 ? (
+          <StandardizedEmptyState
+            title="Nenhum link encontrado"
+            description="Comece criando o primeiro link de sistema."
+            icon="link"
+            action={{
+              label: 'Criar primeiro link',
+              onClick: () => setShowForm(true)
+            }}
+          />
+        ) : (
+          <StandardizedCard className="overflow-hidden">
             <ul className="divide-y divide-gray-200">
-              {links.length === 0 ? (
-                <li className="px-6 py-8 text-center">
-                  <div className="text-gray-500">
-                    <p>Nenhum link encontrado.</p>
-                    <button
-                      onClick={() => setShowForm(true)}
-                      className="mt-2 text-orange-600 hover:text-orange-500"
-                    >
-                      Criar primeiro link
-                    </button>
-                  </div>
-                </li>
-              ) : (
-                links.map((link) => (
-                  <li key={link.id} className="px-6 py-4">
+              {links.map((link) => (
+                <li key={link.id} className="px-6 py-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
@@ -457,12 +440,12 @@ export default function SystemLinksAdmin() {
                       </div>
                     </div>
                   </li>
-                ))
-              )}
+                ))}
+              
             </ul>
-          </div>
-        </main>
-      </div>
+          </StandardizedCard>
+        )}
+      </StandardizedAdminLayout>
       {linkToDelete && (
         <ConfirmationModal
           isOpen={isDeleteModalOpen}

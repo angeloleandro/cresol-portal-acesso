@@ -12,6 +12,8 @@ import MetricCards from '@/app/components/analytics/MetricCards';
 import AnimatedChart from '@/app/components/analytics/AnimatedChart';
 import { ResponsiveContainer } from '@/app/components/analytics/GridLayoutResponsivo';
 import { DashboardShimmer } from '@/app/components/analytics/ShimmerLoading';
+import { Tabs } from "@chakra-ui/react";
+import { StandardizedTabsList } from '@/app/components/admin';
 
 interface AnalyticsData {
   users: {
@@ -305,28 +307,23 @@ export default function AnalyticsPage() {
               {/* Left - Period Selector */}
               <div className="flex items-center space-x-3">
                 <span className="text-sm font-medium text-gray-700">Período:</span>
-                <div className="flex bg-gray-50 rounded-lg p-1">
-                  {[
-                    { label: '7d', value: '7d' },
-                    { label: '30d', value: '30d' },
-                    { label: '90d', value: '90d' },
-                    { label: '1a', value: '1y' }
-                  ].map((period) => (
-                    <button
-                      key={period.value}
-                      onClick={() => setSelectedPeriod(period.value as any)}
-                      className={`
-                        px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200
-                        ${selectedPeriod === period.value
-                          ? 'bg-orange-500 text-white shadow-sm'
-                          : 'text-gray-600 hover:bg-white hover:text-gray-900'
-                        }
-                      `}
-                    >
-                      {period.label}
-                    </button>
-                  ))}
-                </div>
+                <Tabs.Root
+                  value={selectedPeriod}
+                  onValueChange={(details) => setSelectedPeriod(details.value as '7d' | '30d' | '90d' | '1y')}
+                  variant="plain"
+                  size="sm"
+                  colorPalette="orange"
+                >
+                  <StandardizedTabsList
+                    tabs={[
+                      { value: '7d', label: '7d' },
+                      { value: '30d', label: '30d' },
+                      { value: '90d', label: '90d' },
+                      { value: '1y', label: '1a' },
+                    ]}
+                    className="mb-0"
+                  />
+                </Tabs.Root>
               </div>
 
               {/* Right - Actions */}
@@ -425,29 +422,22 @@ export default function AnalyticsPage() {
                   
                   {/* Compact Chart Toggle */}
                   <div className="px-4 py-2 bg-gray-50">
-                    <div className="flex space-x-1">
-                      {[
-                        { key: 'users', label: 'Usuários', icon: 'user-group' },
-                        { key: 'systems', label: 'Sistemas', icon: 'monitor' },
-                        { key: 'activity', label: 'Atividade', icon: 'trending-up' }
-                      ].map((option) => (
-                        <button
-                          key={option.key}
-                          onClick={() => setActiveChart(option.key as any)}
-                          className={`
-                            px-2.5 py-1.5 text-xs font-medium rounded transition-all duration-200 
-                            flex items-center space-x-1.5
-                            ${activeChart === option.key
-                              ? 'bg-orange-500 text-white'
-                              : 'bg-white text-gray-600 hover:bg-gray-100'
-                            }
-                          `}
-                        >
-                          <Icon name={option.icon as any} className="h-3 w-3" />
-                          <span>{option.label}</span>
-                        </button>
-                      ))}
-                    </div>
+                    <Tabs.Root
+                      value={activeChart}
+                      onValueChange={(details) => setActiveChart(details.value as 'users' | 'systems' | 'activity')}
+                      variant="plain"
+                      size="sm"
+                      colorPalette="orange"
+                    >
+                      <StandardizedTabsList
+                        tabs={[
+                          { value: 'users', label: 'Usuários', icon: <Icon name="user-group" className="h-3 w-3" /> },
+                          { value: 'systems', label: 'Sistemas', icon: <Icon name="monitor" className="h-3 w-3" /> },
+                          { value: 'activity', label: 'Atividade', icon: <Icon name="trending-up" className="h-3 w-3" /> },
+                        ]}
+                        className="mb-0"
+                      />
+                    </Tabs.Root>
                   </div>
                   
                   {/* Chart Content - More Compact */}
