@@ -13,6 +13,8 @@ import { User, NotificationGroup, NotificationType, PriorityType } from '../../t
 interface NotificationFormEnhancedProps {
   availableUsers: User[];
   availableGroups: NotificationGroup[];
+  /** Visual mais limpo e compacto, sem ícones grandes e com menos texto auxiliar */
+  variant?: 'default' | 'minimal';
 }
 
 const notificationTypeOptions = [
@@ -24,40 +26,55 @@ const notificationTypeOptions = [
 
 export const NotificationFormEnhanced: React.FC<NotificationFormEnhancedProps> = ({
   availableUsers,
-  availableGroups
+  availableGroups,
+  variant = 'default'
 }) => {
   const { notificationForm, loading, errors, updateForm, resetForm, handleSubmit } = useNotificationForm();
+  const isMinimal = variant === 'minimal';
 
   const handleFormChange = (field: string, value: any) => {
     updateForm({ [field]: value });
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
-      {/* Mobile-First Header */}
-      <div className="text-center space-y-2 px-2">
-        <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-xl sm:rounded-2xl mb-2 sm:mb-4">
-          <Icon name="mail" className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-primary" />
+    <div className={`max-w-4xl mx-auto ${isMinimal ? 'space-y-4' : 'space-y-4 sm:space-y-6 lg:space-y-8'}`}>
+      {/* Header */}
+      {isMinimal ? (
+        <div className="px-1">
+          <h2 className="text-base font-semibold text-gray-900">Nova notificação</h2>
+          <p className="text-xs text-gray-500 mt-1">Preencha os campos essenciais e envie.</p>
         </div>
-        <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900">
-          Nova Notificação
-        </h1>
-        <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Configure e envie mensagens personalizadas para grupos ou usuários específicos da plataforma
-        </p>
-      </div>
+      ) : (
+        <div className="text-center space-y-2 px-2">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-lg mb-2 sm:mb-4">
+            <Icon name="mail" className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-primary" />
+          </div>
+          <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900">
+            Nova Notificação
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Configure e envie mensagens personalizadas para grupos ou usuários específicos da plataforma
+          </p>
+        </div>
+      )}
 
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 lg:space-y-8">
+      <form onSubmit={handleSubmit} className={isMinimal ? 'space-y-4' : 'space-y-4 sm:space-y-6 lg:space-y-8'}>
         {/* Mobile-Optimized Informações Básicas */}
-        <Card padding="sm" className="sm:p-6">
-          <div className="space-y-4 sm:space-y-6">
-            <div className="flex items-center gap-2 sm:gap-3 pb-3 sm:pb-4 border-b border-gray-100">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                <Icon name="info" className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
-              </div>
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                Informações Básicas
-              </h2>
+  <Card padding={'sm'} className={isMinimal ? 'p-4' : 'sm:p-6'}>
+          <div className={isMinimal ? 'space-y-4' : 'space-y-4 sm:space-y-6'}>
+            <div className={isMinimal ? 'pb-2 border-b border-gray-100' : 'flex items-center gap-2 sm:gap-3 pb-3 sm:pb-4 border-b border-gray-100'}>
+              {isMinimal ? (
+                <h3 className="text-sm font-medium text-gray-900">Informações básicas</h3>
+              ) : (
+                <>
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <Icon name="info" className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+                  </div>
+                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
+                    Informações Básicas
+                  </h2>
+                </>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -86,15 +103,21 @@ export const NotificationFormEnhanced: React.FC<NotificationFormEnhancedProps> =
         </Card>
 
         {/* Mobile-Optimized Prioridade e Configurações */}
-        <Card padding="sm" className="sm:p-6">
-          <div className="space-y-4 sm:space-y-6">
-            <div className="flex items-center gap-2 sm:gap-3 pb-3 sm:pb-4 border-b border-gray-100">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-50 rounded-lg flex items-center justify-center">
-                <Icon name="star" className="w-3 h-3 sm:w-4 sm:h-4 text-orange-600" />
-              </div>
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                Prioridade e Configurações
-              </h2>
+  <Card padding={'sm'} className={isMinimal ? 'p-4' : 'sm:p-6'}>
+          <div className={isMinimal ? 'space-y-4' : 'space-y-4 sm:space-y-6'}>
+            <div className={isMinimal ? 'pb-2 border-b border-gray-100' : 'flex items-center gap-2 sm:gap-3 pb-3 sm:pb-4 border-b border-gray-100'}>
+              {isMinimal ? (
+                <h3 className="text-sm font-medium text-gray-900">Prioridade e configurações</h3>
+              ) : (
+                <>
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                    <Icon name="star" className="w-3 h-3 sm:w-4 sm:h-4 text-orange-600" />
+                  </div>
+                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
+                    Prioridade e Configurações
+                  </h2>
+                </>
+              )}
             </div>
 
             <div className="space-y-4 sm:space-y-6">
@@ -120,13 +143,19 @@ export const NotificationFormEnhanced: React.FC<NotificationFormEnhancedProps> =
         </Card>
 
         {/* Conteúdo da Mensagem */}
-        <Card>
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-              <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-                <Icon name="pencil" className="w-4 h-4 text-blue-600" />
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900">Conteúdo da Mensagem</h2>
+        <Card className={isMinimal ? 'p-4' : ''}>
+          <div className={isMinimal ? 'space-y-4' : 'space-y-6'}>
+            <div className={isMinimal ? 'pb-2 border-b border-gray-100' : 'flex items-center gap-3 pb-4 border-b border-gray-100'}>
+              {isMinimal ? (
+                <h3 className="text-sm font-medium text-gray-900">Conteúdo</h3>
+              ) : (
+                <>
+                  <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <Icon name="pencil" className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900">Conteúdo da Mensagem</h2>
+                </>
+              )}
             </div>
 
             <Textarea
@@ -144,13 +173,19 @@ export const NotificationFormEnhanced: React.FC<NotificationFormEnhancedProps> =
         </Card>
 
         {/* Destinatários */}
-        <Card>
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-              <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
-                <Icon name="user-group" className="w-4 h-4 text-green-600" />
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900">Destinatários</h2>
+        <Card className={isMinimal ? 'p-4' : ''}>
+          <div className={isMinimal ? 'space-y-4' : 'space-y-6'}>
+            <div className={isMinimal ? 'pb-2 border-b border-gray-100' : 'flex items-center gap-3 pb-4 border-b border-gray-100'}>
+              {isMinimal ? (
+                <h3 className="text-sm font-medium text-gray-900">Destinatários</h3>
+              ) : (
+                <>
+                  <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+                    <Icon name="user-group" className="w-4 h-4 text-green-600" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900">Destinatários</h2>
+                </>
+              )}
             </div>
 
             <RecipientsSelector
@@ -167,13 +202,15 @@ export const NotificationFormEnhanced: React.FC<NotificationFormEnhancedProps> =
         </Card>
 
         {/* Actions */}
-        <Card variant="outlined" className="bg-gray-50/50">
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-            <div className="text-sm text-gray-600 order-2 sm:order-1">
-              <p>Revise todas as informações antes de enviar a notificação.</p>
-            </div>
-            
-            <div className="flex gap-3 order-1 sm:order-2">
+        <Card variant="outlined" className={isMinimal ? 'bg-white' : 'bg-gray-50/50'}>
+          <div className="flex flex-col sm:flex-row gap-3 justify-between items-center">
+            {!isMinimal && (
+              <div className="text-sm text-gray-600 order-2 sm:order-1">
+                <p>Revise todas as informações antes de enviar a notificação.</p>
+              </div>
+            )}
+
+            <div className="flex gap-2 order-1 sm:order-2">
               <Button
                 variant="secondary"
                 onClick={resetForm}

@@ -73,7 +73,7 @@ export const VideoUploadFormAsyncThumbnailStatus = memo(({
           
           {asyncThumb.isComplete && asyncThumb.thumbnailUrl && (
             <div className="mt-3">
-              <div className="relative w-32 h-18 bg-neutral-100 rounded overflow-hidden">
+              <div className="relative w-32 h-18 bg-neutral-100 rounded-md overflow-hidden">
                 <Image
                   src={asyncThumb.thumbnailUrl}
                   alt="Thumbnail gerada"
@@ -94,7 +94,7 @@ export const VideoUploadFormAsyncThumbnailStatus = memo(({
           <button
             type="button"
             onClick={() => asyncThumb.generateThumbnail()}
-            className="flex-shrink-0 px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+            className="flex-shrink-0 px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
           >
             Tentar Novamente
           </button>

@@ -66,7 +66,7 @@ export const Button: React.FC<ButtonProps> = ({
         items-center
         justify-center
         gap-2
-        rounded-lg sm:rounded-xl
+        rounded-lg sm:rounded-md
         transition-colors
         duration-200
         focus:outline-none

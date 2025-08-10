@@ -34,7 +34,7 @@ export class AnalyticsErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="flex items-center justify-center min-h-[200px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+        <div className="flex items-center justify-center min-h-[200px] bg-gray-50 rounded-md border-2 border-dashed border-gray-200">
           <div className="text-center p-8">
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
               <Icon name="triangle-alert" className="h-6 w-6 text-red-600" />

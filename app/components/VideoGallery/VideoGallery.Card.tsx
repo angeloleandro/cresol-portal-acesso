@@ -79,7 +79,7 @@ export function EnhancedVideoCard({
       variants={cardAnimations}
       className={clsx(
         'group cursor-pointer',
-        'bg-white rounded-xl border border-gray-200/40',
+        'bg-white rounded-md border border-gray-200/40',
         'hover:border-gray-200/70 transition-colors duration-150',
         'overflow-hidden',
         'flex flex-col h-full',
@@ -94,7 +94,7 @@ export function EnhancedVideoCard({
       onHoverEnd={() => setIsHovered(false)}
     >
       {/* Enhanced Thumbnail with Advanced System */}
-      <div className="rounded-t-xl overflow-hidden">
+      <div className="rounded-t-lg overflow-hidden">
         <VideoThumbnail
           video={video}
           variant="card"
@@ -249,7 +249,7 @@ export function AdminVideoCard({
       variants={cardAnimations}
       className={clsx(
         'group cursor-pointer',
-        'bg-white rounded-xl border border-gray-200/40',
+        'bg-white rounded-md border border-gray-200/40',
         'hover:border-gray-200/70 transition-colors duration-150',
         'overflow-hidden',
         'flex flex-col h-full',
@@ -262,7 +262,7 @@ export function AdminVideoCard({
       aria-label={`Reproduzir vídeo: ${video.title}`}
     >
       {/* Enhanced Thumbnail with Advanced System */}
-      <div className="rounded-t-xl overflow-hidden">
+      <div className="rounded-t-lg overflow-hidden">
         <VideoThumbnail
           video={video}
           variant="card"
@@ -439,14 +439,14 @@ function VideoBadge({ uploadType, className }: VideoBadgeProps) {
  */
 export function SkeletonVideoCard() {
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-pulse">
+    <div className="bg-white rounded-md border border-neutral-200 overflow-hidden animate-pulse">
       <div className="aspect-video bg-neutral-200" />
       <div className="p-4 space-y-3">
-        <div className="h-4 bg-neutral-200 rounded w-3/4" />
-        <div className="h-3 bg-neutral-200 rounded w-1/2" />
+        <div className="h-4 bg-neutral-200 rounded-sm w-3/4" />
+        <div className="h-3 bg-neutral-200 rounded-sm w-1/2" />
         <div className="flex justify-between items-center pt-2 border-t border-neutral-100">
-          <div className="h-3 bg-neutral-200 rounded w-1/4" />
-          <div className="h-6 bg-neutral-200 rounded w-16" />
+          <div className="h-3 bg-neutral-200 rounded-sm w-1/4" />
+          <div className="h-6 bg-neutral-200 rounded-sm w-16" />
         </div>
       </div>
     </div>
@@ -458,7 +458,7 @@ export function SkeletonVideoCard() {
  */
 export function EmptyVideoCard() {
   return (
-    <div className="bg-neutral-50 border-2 border-dashed border-neutral-300 rounded-xl p-8 text-center">
+    <div className="bg-neutral-50 border-2 border-dashed border-neutral-300 rounded-md p-8 text-center">
       <Icon name="video" className="w-12 h-12 mx-auto text-neutral-400 mb-4" />
       <h3 className="font-medium text-neutral-700 mb-2">
         Nenhum vídeo encontrado

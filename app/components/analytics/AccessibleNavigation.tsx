@@ -179,23 +179,23 @@ export default function AccessibleNavigation({
         };
       case 'bordered':
         return {
-          container: `bg-white border-2 ${colors.primary.split(' ')[0]} rounded-xl shadow-sm`,
+          container: `bg-white border-2 ${colors.primary.split(' ')[0]} rounded-md shadow-sm`,
           colors
         };
       case 'glass':
         return {
-          container: 'bg-white/80 backdrop-blur-md border border-white/20 rounded-xl shadow-lg',
+          container: 'bg-white/80 backdrop-blur-md border border-white/20 rounded-md shadow-lg',
           colors
         };
       case 'elevated':
         return {
-          container: 'bg-white border border-gray-200 rounded-xl shadow-lg',
+          container: 'bg-white border border-gray-200 rounded-md shadow-lg',
           colors
         };
       case 'default':
       default:
         return {
-          container: 'bg-white border border-gray-200 rounded-xl shadow-sm',
+          container: 'bg-white border border-gray-200 rounded-md shadow-sm',
           colors
         };
     }

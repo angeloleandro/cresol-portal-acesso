@@ -162,7 +162,7 @@ export default function AccessibilityShowcase({ className = '' }: AccessibilityS
   return (
     <div 
       ref={divContainerRef}
-      className={`space-y-8 p-6 bg-gray-50/30 rounded-2xl border border-gray-200 ${className}`}
+      className={`space-y-8 p-6 bg-gray-50/30 rounded-lg border border-gray-200 ${className}`}
       role="region"
       aria-label="Demonstração de componentes acessíveis"
     >
@@ -191,7 +191,7 @@ export default function AccessibilityShowcase({ className = '' }: AccessibilityS
         
         {/* Accessibility Features Badge */}
         <div className="flex justify-center mt-6">
-          <div className="inline-flex items-center space-x-6 bg-white px-6 py-3 rounded-xl border border-gray-200 shadow-sm">
+          <div className="inline-flex items-center space-x-6 bg-white px-6 py-3 rounded-md border border-gray-200 shadow-sm">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <span className="text-sm font-medium text-gray-700">WCAG 2.1 AA</span>
@@ -314,7 +314,7 @@ export default function AccessibilityShowcase({ className = '' }: AccessibilityS
       </main>
 
       {/* Keyboard Navigation Instructions */}
-      <section aria-labelledby="instructions-heading" className="bg-white rounded-xl p-6 border border-gray-200">
+      <section aria-labelledby="instructions-heading" className="bg-white rounded-md p-6 border border-gray-200">
         <h2 id="instructions-heading" className="text-lg font-semibold text-gray-900 mb-4">
           Instruções de Navegação por Teclado
         </h2>
@@ -323,30 +323,30 @@ export default function AccessibilityShowcase({ className = '' }: AccessibilityS
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Navegação Geral</h3>
             <ul className="text-sm text-gray-700 space-y-1">
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">Tab</kbd> - Próximo elemento</li>
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">Shift+Tab</kbd> - Elemento anterior</li>
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">Enter/Space</kbd> - Ativar elemento</li>
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">Esc</kbd> - Fechar modais</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">Tab</kbd> - Próximo elemento</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">Shift+Tab</kbd> - Elemento anterior</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">Enter/Space</kbd> - Ativar elemento</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">Esc</kbd> - Fechar modais</li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Abas e Menus</h3>
             <ul className="text-sm text-gray-700 space-y-1">
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">←→</kbd> - Navegar entre abas</li>
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">↑↓</kbd> - Navegar em menus</li>
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">Home/End</kbd> - Primeira/última opção</li>
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">Digite</kbd> - Busca em combobox</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">←→</kbd> - Navegar entre abas</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">↑↓</kbd> - Navegar em menus</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">Home/End</kbd> - Primeira/última opção</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">Digite</kbd> - Busca em combobox</li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Cartões e Gráficos</h3>
             <ul className="text-sm text-gray-700 space-y-1">
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">Enter</kbd> - Expandir/colapsar</li>
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">Space</kbd> - Ativar ação</li>
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">T</kbd> - Visualizar tabela de dados</li>
-              <li><kbd className="bg-gray-100 px-2 py-1 rounded text-xs">E</kbd> - Exportar dados</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">Enter</kbd> - Expandir/colapsar</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">Space</kbd> - Ativar ação</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">T</kbd> - Visualizar tabela de dados</li>
+              <li><kbd className="bg-gray-100 px-2 py-1 rounded-sm text-xs">E</kbd> - Exportar dados</li>
             </ul>
           </div>
         </div>

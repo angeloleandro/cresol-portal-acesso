@@ -289,7 +289,7 @@ const ChartContainerPro = memo(function ChartContainerPro({
   if (isLoading) {
     return (
       <div className={`
-        ${styles.container} rounded-2xl ${sizeStyles.minHeight} overflow-hidden
+        ${styles.container} rounded-lg ${sizeStyles.minHeight} overflow-hidden
         ${className}
       `}>
         <div className={`${styles.header} ${sizeStyles.headerPadding}`}>
@@ -328,7 +328,7 @@ const ChartContainerPro = memo(function ChartContainerPro({
   return (
     <div 
       className={`
-        relative ${styles.container} rounded-2xl overflow-hidden
+        relative ${styles.container} rounded-lg overflow-hidden
         ${hoverEffectStyles}
         ${isFullscreen ? 'fixed inset-4 z-50' : sizeStyles.minHeight}
         ${className}
@@ -426,7 +426,7 @@ const ChartContainerPro = memo(function ChartContainerPro({
             </div>
 
             {/* Chart Container */}
-            <div className="relative bg-gradient-to-br from-gray-50/30 to-white rounded-xl border border-gray-100 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-gray-50/30 to-white rounded-md border border-gray-100 overflow-hidden">
               {children}
             </div>
           </div>
@@ -443,7 +443,7 @@ const ChartContainerPro = memo(function ChartContainerPro({
       {/* Hover Glow Effect */}
       {hoverEffect === 'glow' && (
         <div className={`
-          absolute inset-0 rounded-2xl 
+          absolute inset-0 rounded-lg 
           bg-gradient-to-br from-${brandColor}-50/0 to-${brandColor}-100/0
           ${isHovered ? `from-${brandColor}-50/10 to-${brandColor}-100/5` : ''}
           transition-all duration-500 pointer-events-none
@@ -452,7 +452,7 @@ const ChartContainerPro = memo(function ChartContainerPro({
 
       {/* Professional Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-2xl">
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
           <div className="flex flex-col items-center space-y-4">
             <div className={`
               h-8 w-8 border-2 border-gray-300 border-t-${brandColor}-500 

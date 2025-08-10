@@ -40,7 +40,7 @@ export const Card: React.FC<CardProps> = ({
       className={`
         ${getVariantClasses()}
         ${getPaddingClasses()}
-        rounded-lg sm:rounded-xl
+        rounded-lg sm:rounded-md
         transition-colors duration-150
         ${className}
       `}

@@ -536,7 +536,7 @@ export default function AdvancedSearch({
                                 }));
                               }
                             }}
-                            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded-sm"
                           />
                           <span className="ml-2 text-sm text-gray-700">
                             {getTypeLabel(type as SearchResult['type'])}
@@ -557,7 +557,7 @@ export default function AdvancedSearch({
                           ...prev,
                           dateRange: { ...prev.dateRange, start: e.target.value }
                         }))}
-                        className="w-full px-3 py-1 border border-gray-300 rounded text-sm"
+                        className="w-full px-3 py-1 border border-gray-300 rounded-md text-sm"
                         placeholder="Data inicial"
                       />
                       <input
@@ -567,7 +567,7 @@ export default function AdvancedSearch({
                           ...prev,
                           dateRange: { ...prev.dateRange, end: e.target.value }
                         }))}
-                        className="w-full px-3 py-1 border border-gray-300 rounded text-sm"
+                        className="w-full px-3 py-1 border border-gray-300 rounded-md text-sm"
                         placeholder="Data final"
                       />
                     </div>
@@ -704,7 +704,7 @@ export default function AdvancedSearch({
                           setSelectedFilter(historyItem.filters);
                           setShowHistory(false);
                         }}
-                        className="flex items-center justify-between w-full p-2 text-left text-sm bg-white rounded border hover:bg-gray-50"
+                        className="flex items-center justify-between w-full p-2 text-left text-sm bg-white rounded-md border hover:bg-gray-50"
                       >
                         <div>
                           <span className="text-gray-900">{historyItem.query}</span>
@@ -772,10 +772,10 @@ export default function AdvancedSearch({
                             alt={result.title}
                             width={48}
                             height={48}
-                            className="h-12 w-12 object-cover rounded"
+                            className="h-12 w-12 object-cover rounded-md"
                           />
                         ) : (
-                          <div className={`h-12 w-12 flex items-center justify-center rounded ${getTypeColor(result.type)}`}>
+                          <div className={`h-12 w-12 flex items-center justify-center rounded-md ${getTypeColor(result.type)}`}>
                             {getTypeIcon(result.type)}
                           </div>
                         )}
@@ -787,7 +787,7 @@ export default function AdvancedSearch({
                           <h4 className="text-sm font-medium text-gray-900 truncate">
                             {result.title}
                           </h4>
-                          <span className={`px-2 py-0.5 text-xs font-medium rounded ${getTypeColor(result.type)}`}>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-sm ${getTypeColor(result.type)}`}>
                             {getTypeLabel(result.type)}
                           </span>
                         </div>
@@ -839,14 +839,14 @@ export default function AdvancedSearch({
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Anterior
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => prev + 1)}
                   disabled={currentPage * resultsPerPage >= totalResults}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Próxima
                 </button>

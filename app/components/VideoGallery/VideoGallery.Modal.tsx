@@ -62,7 +62,7 @@ export function VideoModal({ isOpen, video, onClose }: VideoModalProps) {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] } }}
             exit={{ opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } }}
-            className="relative w-full max-w-4xl mx-4 bg-white border border-gray-200 rounded-xl overflow-hidden"
+            className="relative w-full max-w-4xl mx-4 bg-white border border-gray-200 rounded-md overflow-hidden"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
@@ -87,7 +87,7 @@ export function VideoModal({ isOpen, video, onClose }: VideoModalProps) {
             </button>
 
             {/* Video Player Container */}
-            <div className="aspect-video bg-black rounded-t-xl overflow-hidden">
+            <div className="aspect-video bg-black rounded-t-lg overflow-hidden">
               <VideoPlayer video={video} />
             </div>
             

@@ -339,13 +339,13 @@ export default function SectorSystemsManagement() {
               <div className="flex space-x-2">
                 <button
                   onClick={() => editSystem(system)}
-                  className="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded text-sm hover:bg-blue-100"
+                  className="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-md text-sm hover:bg-blue-100"
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => deleteSystem(system.id)}
-                  className="flex-1 bg-red-50 text-red-600 px-3 py-2 rounded text-sm hover:bg-red-100"
+                  className="flex-1 bg-red-50 text-red-600 px-3 py-2 rounded-md text-sm hover:bg-red-100"
                 >
                   Excluir
                 </button>
@@ -417,7 +417,7 @@ export default function SectorSystemsManagement() {
                         key={icon}
                         type="button"
                         onClick={() => setSystemForm({ ...systemForm, icon })}
-                        className={`p-2 border rounded ${
+                        className={`p-2 border rounded-md ${
                           systemForm.icon === icon 
                             ? 'border-primary bg-primary bg-opacity-10' 
                             : 'border-gray-300'
@@ -436,13 +436,13 @@ export default function SectorSystemsManagement() {
                       setShowSystemForm(false);
                       setSystemForm({ id: '', name: '', description: '', url: '', icon: '/icons/default-app.svg' });
                     }}
-                    className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+                    className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark"
+                    className="flex-1 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
                   >
                     {systemForm.id ? 'Atualizar' : 'Adicionar'}
                   </button>

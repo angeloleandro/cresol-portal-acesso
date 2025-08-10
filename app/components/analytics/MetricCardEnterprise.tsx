@@ -242,7 +242,7 @@ export default function MetricCardEnterprise({
 
   if (isLoading) {
     return (
-      <div className={`relative bg-white rounded-xl border border-gray-200 ${sizeStyles.padding} overflow-hidden ${className}`}>
+      <div className={`relative bg-white rounded-md border border-gray-200 ${sizeStyles.padding} overflow-hidden ${className}`}>
         <div className="animate-pulse">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
@@ -266,7 +266,7 @@ export default function MetricCardEnterprise({
   return (
     <div 
       className={`
-        relative bg-white rounded-xl border ${styles.border} ${sizeStyles.padding}
+        relative bg-white rounded-md border ${styles.border} ${sizeStyles.padding}
         transition-all duration-300 ease-out
         ${styles.hoverBorder} hover:transform hover:scale-[1.02] hover:-translate-y-1
         hover:shadow-lg ${styles.hoverShadow}
@@ -280,7 +280,7 @@ export default function MetricCardEnterprise({
       {/* Header */}
       <div className={`flex items-start justify-between ${sizeStyles.spacing.split('-')[1] === 'y' ? 'mb-4' : 'mb-6'}`}>
         <div className="flex items-center space-x-3">
-          <div className={`${sizeStyles.iconPadding} rounded-xl ${styles.iconBg} group-hover:scale-110 transition-transform duration-200`}>
+          <div className={`${sizeStyles.iconPadding} rounded-md ${styles.iconBg} group-hover:scale-110 transition-transform duration-200`}>
             <Icon name={icon as any} className={`${sizeStyles.iconSize} ${styles.iconColor}`} />
           </div>
           <div>
@@ -331,7 +331,7 @@ export default function MetricCardEnterprise({
       </div>
 
       {/* Hover Glow Effect */}
-      <div className={`absolute inset-0 rounded-xl bg-gradient-to-br from-${styles.numberColor}-50/0 to-${styles.numberColor}-100/0 group-hover:from-${styles.numberColor}-50/20 group-hover:to-${styles.numberColor}-100/10 transition-all duration-300 pointer-events-none`}></div>
+      <div className={`absolute inset-0 rounded-md bg-gradient-to-br from-${styles.numberColor}-50/0 to-${styles.numberColor}-100/0 group-hover:from-${styles.numberColor}-50/20 group-hover:to-${styles.numberColor}-100/10 transition-all duration-300 pointer-events-none`}></div>
     </div>
   );
 }

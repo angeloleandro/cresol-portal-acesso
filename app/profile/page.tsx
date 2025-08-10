@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import OptimizedImage from '../components/OptimizedImage';
+import { StandardizedButton } from '@/app/components/admin';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import Navbar from '../components/Navbar';
@@ -457,7 +458,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                  <span className={`inline-flex items-center px-3 py-1 rounded-sm text-xs font-medium ${
                     profile?.role === 'admin' ? 'badge-error' :
                     profile?.role === 'sector_admin' ? 'badge-info' :
                     profile?.role === 'subsector_admin' ? 'badge-warning' :
@@ -761,20 +762,20 @@ export default function ProfilePage() {
 
                 {/* Botões */}
                 <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                  <button
+                  <StandardizedButton
                     type="button"
                     onClick={() => router.push('/dashboard')}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    variant="secondary"
                   >
                     Cancelar
-                  </button>
-                  <button
+                  </StandardizedButton>
+                  <StandardizedButton
                     type="submit"
                     disabled={updating}
-                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-70"
+                    variant="primary"
                   >
                     {updating ? 'Salvando...' : 'Salvar Alterações'}
-                  </button>
+                  </StandardizedButton>
                 </div>
               </form>
             )}
@@ -792,13 +793,14 @@ export default function ProfilePage() {
                         <h4 className="text-md font-medium text-gray-900">Alterar Senha</h4>
                         <p className="text-sm text-gray-600">Mantenha sua conta segura com uma senha forte</p>
                       </div>
-                      <button
+                      <StandardizedButton
                         type="button"
                         onClick={() => setShowPasswordForm(!showPasswordForm)}
-                        className="px-4 py-2 text-sm font-medium text-primary border border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
+                        variant="ghost"
+                        size="sm"
                       >
                         {showPasswordForm ? 'Cancelar' : 'Alterar Senha'}
-                      </button>
+                      </StandardizedButton>
                     </div>
 
                     {passwordError && (
@@ -846,13 +848,14 @@ export default function ProfilePage() {
                         </div>
                         
                         <div className="pt-2">
-                          <button
+                          <StandardizedButton
                             type="submit"
                             disabled={changingPassword}
-                            className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-70"
+                            variant="primary"
+                            className="w-full"
                           >
                             {changingPassword ? 'Alterando...' : 'Salvar Nova Senha'}
-                          </button>
+                          </StandardizedButton>
                         </div>
                       </form>
                     )}
@@ -956,12 +959,12 @@ export default function ProfilePage() {
                   </div>
                   
                   <div className="pt-6 border-t border-gray-200">
-                    <button
+                    <StandardizedButton
                       type="button"
-                      className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                      variant="primary"
                     >
                       Salvar Configurações
-                    </button>
+                    </StandardizedButton>
                   </div>
                 </div>
               </div>

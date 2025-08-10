@@ -60,7 +60,7 @@ export const HorizontalNewsCard = memo(({
       className={clsx(
         // Card.Root equivalent - horizontal flex layout
         'group block',
-        'bg-white rounded-xl overflow-hidden',
+        'bg-white rounded-md overflow-hidden',
         'border border-gray-200/40 hover:border-gray-200/70',
         'transition-colors duration-150',
         'flex flex-col md:flex-row',
@@ -213,7 +213,7 @@ export const FeaturedNewsCard = memo(({
       href={`/noticias/${news.id}`}
       className={clsx(
         'group block',
-        'bg-white rounded-xl overflow-hidden',
+        'bg-white rounded-md overflow-hidden',
         'border border-gray-200/40 hover:border-gray-200/70',
         'transition-colors duration-150',
         'shadow-sm hover:shadow-md',

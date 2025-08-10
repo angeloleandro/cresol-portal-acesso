@@ -92,7 +92,7 @@ export default function ChartComponentAdvanced({
 
   if (isLoading) {
     return (
-      <div className={`bg-white border border-gray-200 rounded-xl p-6 ${className}`}>
+      <div className={`bg-white border border-gray-200 rounded-md p-6 ${className}`}>
         <div className="animate-pulse">
           <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className={`bg-gray-100 rounded-lg`} style={{ height: height }}>
@@ -357,7 +357,7 @@ export default function ChartComponentAdvanced({
   };
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow duration-300 ${className}`}>
+    <div className={`bg-white border border-gray-200 rounded-md p-6 hover:shadow-lg transition-shadow duration-300 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

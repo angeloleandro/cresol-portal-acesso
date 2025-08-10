@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
+import { StandardizedButton } from '@/app/components/admin';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export default function Signup() {
@@ -158,12 +159,12 @@ export default function Signup() {
           </p>
         </div>
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">
+          <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">
             {error}
           </div>
         )}
         {success && (
-          <div className="bg-green-50 text-green-600 p-3 rounded mb-4 text-sm">
+          <div className="bg-green-50 text-green-600 p-3 rounded-md mb-4 text-sm">
             {success}
           </div>
         )}
@@ -251,13 +252,14 @@ export default function Signup() {
               Esta senha será usada após a aprovação do administrador.
             </p>
           </div>
-          <button
+          <StandardizedButton
             type="submit"
-            className="btn-primary w-full"
+            variant="primary"
+            className="w-full"
             disabled={loading}
           >
             {loading ? 'Enviando...' : 'Solicitar Acesso'}
-          </button>
+          </StandardizedButton>
         </form>
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">

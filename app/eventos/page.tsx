@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import { StandardizedButton } from '@/app/components/admin';
 import EventCalendar from '../components/EventCalendar';
 import Navbar from '../components/Navbar';
 import Breadcrumbs from '../components/Breadcrumbs';
@@ -384,7 +385,7 @@ function EventosPageContent() {
                     </button>
                     
                     {filteredEvents.length > 0 && (
-                      <button
+                      <StandardizedButton
                         onClick={() => {
                           const csvContent = [
                             ['Título', 'Descrição', 'Local', 'Data Início', 'Data Fim', 'Setor'],
@@ -404,10 +405,11 @@ function EventosPageContent() {
                           link.download = `eventos_${new Date().toISOString().split('T')[0]}.csv`;
                           link.click();
                         }}
-                        className="btn-primary text-sm"
+                        variant="primary"
+                        size="sm"
                       >
                         Exportar CSV
-                      </button>
+                      </StandardizedButton>
                     )}
                   </div>
                 </div>
@@ -475,13 +477,16 @@ function EventosPageContent() {
                             {new Date(event.start_date) > new Date() ? 'Próximo evento' : 'Evento passado'}
                           </div>
                           
-                          <Link
+                          <StandardizedButton
+                            as={Link}
                             href={`/eventos/${event.id}`}
-                            className="btn-primary text-sm inline-flex items-center gap-2"
+                            variant="primary"
+                            size="sm"
+                            className="inline-flex items-center gap-2"
                           >
                             Ver detalhes
                             <Icon name="arrow-left" className="h-4 w-4 rotate-180" />
-                          </Link>
+                          </StandardizedButton>
                         </div>
                       </div>
                     </div>

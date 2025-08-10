@@ -701,7 +701,7 @@ export default function SubsectorManagePage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto" />
+          <div className="animate-spin rounded-sm h-12 w-12 border-t-2 border-b-2 border-primary mx-auto" />
           <p className="mt-4 text-cresol-gray">Carregando...</p>
         </div>
       </div>
@@ -772,7 +772,7 @@ export default function SubsectorManagePage() {
             >
               Eventos ({events.length})
               {activeTab === 'events' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-sm"></div>
               )}
             </button>
             <button
@@ -785,7 +785,7 @@ export default function SubsectorManagePage() {
             >
               Notícias ({news.length})
               {activeTab === 'news' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-sm"></div>
               )}
             </button>
             <button
@@ -798,7 +798,7 @@ export default function SubsectorManagePage() {
             >
               Sistemas ({systems.length})
               {activeTab === 'systems' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-sm"></div>
               )}
             </button>
             <button
@@ -811,7 +811,7 @@ export default function SubsectorManagePage() {
             >
               Grupos
               {activeTab === 'groups' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-sm"></div>
               )}
             </button>
             <button
@@ -824,7 +824,7 @@ export default function SubsectorManagePage() {
             >
               Mensagens
               {activeTab === 'messages' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-sm"></div>
               )}
             </button>
           </div>
@@ -848,8 +848,8 @@ export default function SubsectorManagePage() {
             </div>
 
             {events.length === 0 ? (
-              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-white rounded-md p-12 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-gray-100 rounded-sm flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
@@ -858,7 +858,7 @@ export default function SubsectorManagePage() {
                 <p className="text-gray-500">Crie o primeiro evento para este subsetor.</p>
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+              <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
                 <div className="divide-y divide-gray-100">
                   {events.map((event) => (
                     <div key={event.id} className="p-6 hover:bg-gray-50 transition-colors">
@@ -868,7 +868,7 @@ export default function SubsectorManagePage() {
                           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{event.description}</p>
                           <div className="flex items-center space-x-4 text-xs text-gray-500">
                             <span>{new Date(event.start_date).toLocaleDateString('pt-BR')}</span>
-                            <span className={`px-2 py-1 rounded-full ${
+                            <span className={`px-2 py-1 rounded-sm ${
                               event.is_published 
                                 ? 'bg-green-100 text-green-700' 
                                 : 'bg-yellow-100 text-yellow-700'
@@ -876,7 +876,7 @@ export default function SubsectorManagePage() {
                               {event.is_published ? 'Publicado' : 'Rascunho'}
                             </span>
                             {event.is_featured && (
-                              <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                              <span className="px-2 py-1 rounded-sm bg-blue-100 text-blue-700">
                                 Destaque
                               </span>
                             )}
@@ -923,8 +923,8 @@ export default function SubsectorManagePage() {
             </div>
 
             {news.length === 0 ? (
-              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-white rounded-md p-12 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-gray-100 rounded-sm flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-2-2h-2" />
                   </svg>
@@ -933,7 +933,7 @@ export default function SubsectorManagePage() {
                 <p className="text-gray-500">Crie a primeira notícia para este subsetor.</p>
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+              <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
                 <div className="divide-y divide-gray-100">
                   {news.map((item) => (
                     <div key={item.id} className="p-6 hover:bg-gray-50 transition-colors">
@@ -943,7 +943,7 @@ export default function SubsectorManagePage() {
                           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.summary}</p>
                           <div className="flex items-center space-x-4 text-xs text-gray-500">
                             <span>{new Date(item.created_at).toLocaleDateString('pt-BR')}</span>
-                            <span className={`px-2 py-1 rounded-full ${
+                            <span className={`px-2 py-1 rounded-sm ${
                               item.is_published 
                                 ? 'bg-green-100 text-green-700' 
                                 : 'bg-yellow-100 text-yellow-700'
@@ -951,7 +951,7 @@ export default function SubsectorManagePage() {
                               {item.is_published ? 'Publicado' : 'Rascunho'}
                             </span>
                             {item.is_featured && (
-                              <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                              <span className="px-2 py-1 rounded-sm bg-blue-100 text-blue-700">
                                 Destaque
                               </span>
                             )}
@@ -1066,8 +1066,8 @@ export default function SubsectorManagePage() {
             </div>
 
             {groups.length === 0 ? (
-              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-white rounded-md p-12 text-center border border-gray-100">
+                <div className="w-16 h-16 bg-gray-100 rounded-sm flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                   </svg>
@@ -1078,7 +1078,7 @@ export default function SubsectorManagePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {groups.map((group) => (
-                  <div key={group.id} className="bg-white rounded-xl p-6 border border-gray-100 hover:border-primary/30 transition-all">
+                  <div key={group.id} className="bg-white rounded-md p-6 border border-gray-100 hover:border-primary/30 transition-all">
                     <div className="flex items-start justify-between mb-4">
                       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                         <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1111,8 +1111,8 @@ export default function SubsectorManagePage() {
               </button>
             </div>
 
-            <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-white rounded-md p-12 text-center border border-gray-100">
+              <div className="w-16 h-16 bg-gray-100 rounded-sm flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -1133,7 +1133,7 @@ export default function SubsectorManagePage() {
       {/* Modal para Eventos */}
       {isEventModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-md p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               {isEditing ? 'Editar Evento' : 'Novo Evento'}
             </h3>
@@ -1217,7 +1217,7 @@ export default function SubsectorManagePage() {
       {/* Modal para Notícias */}
       {isNewsModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-md p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               {isEditing ? 'Editar Notícia' : 'Nova Notícia'}
             </h3>
@@ -1289,7 +1289,7 @@ export default function SubsectorManagePage() {
       {/* Modal para Grupos */}
       {isGroupModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-md p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Criar Grupo de Notificação
             </h3>
@@ -1435,7 +1435,7 @@ export default function SubsectorManagePage() {
       {/* Modal para Mensagens */}
       {isMessageModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-md p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Enviar Mensagem
             </h3>

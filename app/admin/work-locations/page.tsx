@@ -313,7 +313,7 @@ export default function WorkLocationsAdmin() {
               setHasGroup(false);
               setGroupAction('keep');
             }}
-            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors"
+            className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors"
           >
             {showForm ? 'Cancelar' : 'Adicionar Local'}
           </button>
@@ -322,10 +322,10 @@ export default function WorkLocationsAdmin() {
           <div className="bg-white rounded-lg border border-cresol-gray-light p-6 mb-6">
             <h3 className="text-lg font-semibold text-primary mb-4">{editing ? 'Editar Local' : 'Cadastrar Novo Local'}</h3>
             {formError && (
-              <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">{formError}</div>
+              <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{formError}</div>
             )}
             {formSuccess && (
-              <div className="bg-green-50 text-green-600 p-3 rounded mb-4 text-sm">{formSuccess}</div>
+              <div className="bg-green-50 text-green-600 p-3 rounded-md mb-4 text-sm">{formSuccess}</div>
             )}
             <form onSubmit={handleCreateOrEdit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -468,7 +468,7 @@ export default function WorkLocationsAdmin() {
               <div className="flex justify-end pt-4">
                 <button
                   type="submit"
-                  className="bg-primary text-white px-6 py-2 rounded hover:bg-primary-dark transition-colors"
+                  className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary-dark transition-colors"
                   disabled={formLoading}
                 >
                   {formLoading ? 'Salvando...' : (editing ? 'Salvar Alterações' : 'Cadastrar Local')}

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { StandardizedButton } from '@/app/components/admin';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ConfirmationModal from '../components/ui/ConfirmationModal';
@@ -429,12 +430,12 @@ export default function NotificationsPage() {
               )}
               
               {unreadCount > 0 && (
-                <button
+                <StandardizedButton
                   onClick={markAllAsRead}
-                  className="btn-outline"
+                  variant="outline"
                 >
                   Marcar todas como lidas
-                </button>
+                </StandardizedButton>
               )}
             </div>
           </div>
@@ -499,24 +500,27 @@ export default function NotificationsPage() {
                   </span>
                   
                   <div className="flex flex-wrap gap-2">
-                    <button
+                    <StandardizedButton
                       onClick={() => handleBulkAction('read')}
-                      className="btn-outline text-sm"
+                      variant="outline"
+                      size="sm"
                     >
                       Marcar como lidas
-                    </button>
-                    <button
+                    </StandardizedButton>
+                    <StandardizedButton
                       onClick={() => handleBulkAction('unread')}
-                      className="btn-outline text-sm"
+                      variant="outline"
+                      size="sm"
                     >
                       Marcar como não lidas
-                    </button>
-                    <button
+                    </StandardizedButton>
+                    <StandardizedButton
                       onClick={() => handleBulkAction('delete')}
-                      className="bg-red-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-700 transition-colors"
+                      variant="danger"
+                      size="sm"
                     >
                       Excluir
-                    </button>
+                    </StandardizedButton>
                     <button
                       onClick={deselectAll}
                       className="text-cresol-gray hover:text-gray-800 text-sm px-2"

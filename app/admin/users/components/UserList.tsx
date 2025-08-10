@@ -191,7 +191,7 @@ export default function UserList({
               
               <button
                 type="button"
-                className="text-xs bg-primary hover:bg-primary-dark text-white px-2 py-1 rounded transition-colors duration-150"
+                className="text-xs bg-primary hover:bg-primary-dark text-white px-2 py-1 rounded-md transition-colors duration-150"
                 onClick={() => onOpenRoleModal(user.id, user.role)}
               >
                 Gerenciar Role

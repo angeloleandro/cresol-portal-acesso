@@ -206,26 +206,26 @@ const NavigationControlsPro = memo(function NavigationControlsPro({
         };
       case 'bordered':
         return {
-          container: `bg-white border-2 ${colors.primary.split(' ')[0]} rounded-xl`,
+          container: `bg-white border-2 ${colors.primary.split(' ')[0]} rounded-md`,
           section: 'bg-transparent',
           colors
         };
       case 'glass':
         return {
-          container: 'bg-white/80 backdrop-blur-md border border-white/20 rounded-xl shadow-lg',
+          container: 'bg-white/80 backdrop-blur-md border border-white/20 rounded-md shadow-lg',
           section: 'bg-white/50',
           colors
         };
       case 'elevated':
         return {
-          container: 'bg-white border border-gray-200 rounded-xl shadow-lg',
+          container: 'bg-white border border-gray-200 rounded-md shadow-lg',
           section: 'bg-gray-50/50',
           colors
         };
       case 'default':
       default:
         return {
-          container: 'bg-white border border-gray-200 rounded-xl shadow-sm',
+          container: 'bg-white border border-gray-200 rounded-md shadow-sm',
           section: 'bg-gray-50/30',
           colors
         };

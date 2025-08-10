@@ -12,6 +12,7 @@ import {
 import { Icon } from '@/app/components/icons/Icon';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
+import { StandardizedButton } from '@/app/components/admin';
 
 interface UserProfile {
   id: string;
@@ -407,15 +408,15 @@ export default function UserEditModal({
       <div className="bg-white rounded-lg border border-gray-300 w-full max-w-2xl mx-4 relative max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-cresol-gray-light">
           <h3 className="heading-4 text-primary">Editar Usuário</h3>
-          <button
+          <StandardizedButton
             type="button"
-            className="text-cresol-gray hover:text-cresol-gray-dark"
+            variant="ghost"
+            size="sm"
             onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            <Icon name="x" className="h-5 w-5" />
+          </StandardizedButton>
         </div>
         
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -455,10 +456,11 @@ export default function UserEditModal({
             </label>
             
             {avatarPreview && (
-              <button
+              <StandardizedButton
                 type="button"
-                className="ml-2 text-sm hover:underline"
-                style={{ color: 'var(--color-error-text)' }}
+                variant="link"
+                size="sm"
+                className="ml-2 text-red-600 hover:text-red-700"
                 onClick={() => {
                   URL.revokeObjectURL(avatarPreview);
                   setAvatarPreview(null);
@@ -466,7 +468,7 @@ export default function UserEditModal({
                 }}
               >
                 Remover
-              </button>
+              </StandardizedButton>
             )}
           </div>
           
@@ -726,7 +728,7 @@ export default function UserEditModal({
                             id={`sector-${user.id}-${sector.id}`}
                             checked={selectedUserSectors.includes(sector.id)}
                             onChange={(e) => handleSectorChange(sector.id, e.target.checked)}
-                            className="h-4 w-4 text-primary border-cresol-gray-light rounded focus:ring-primary"
+                            className="h-4 w-4 text-primary border-cresol-gray-light rounded-md focus:ring-primary"
                           />
                           <label 
                             htmlFor={`sector-${user.id}-${sector.id}`}
@@ -792,7 +794,7 @@ export default function UserEditModal({
                                 id={`subsector-${user.id}-${subsector.id}`}
                                 checked={selectedUserSubsectors.includes(subsector.id)}
                                 onChange={(e) => handleSubsectorChange(subsector.id, e.target.checked)}
-                                className="h-4 w-4 text-primary border-cresol-gray-light rounded focus:ring-primary"
+                                className="h-4 w-4 text-primary border-cresol-gray-light rounded-md focus:ring-primary"
                               />
                               <label 
                                 htmlFor={`subsector-${user.id}-${subsector.id}`}
@@ -823,14 +825,17 @@ export default function UserEditModal({
                 <label className="block text-sm font-medium text-cresol-gray">
                   Senha
                 </label>
-                <button
+                <StandardizedButton
                   type="button"
                   onClick={handleResetPassword}
-                  className="text-xs text-primary hover:underline"
+                  variant="link"
+                  size="xs"
                   disabled={resetPasswordLoading}
+                  loading={resetPasswordLoading}
+                  className="text-primary hover:text-primary-dark"
                 >
                   {resetPasswordLoading ? 'Gerando...' : 'Redefinir senha'}
-                </button>
+                </StandardizedButton>
               </div>
               
               {resetPasswordSuccess && (
@@ -855,20 +860,20 @@ export default function UserEditModal({
         
         <div className="border-t border-cresol-gray-light p-6 bg-gray-50">
           <div className="flex justify-end space-x-3">
-            <button
+            <StandardizedButton
               type="button"
-              className="btn-outline"
+              variant="secondary"
               onClick={onClose}
             >
               Cancelar
-            </button>
-            <button
+            </StandardizedButton>
+            <StandardizedButton
               type="button"
-              className="btn-primary"
+              variant="primary"
               onClick={handleSave}
             >
               Salvar
-            </button>
+            </StandardizedButton>
           </div>
         </div>
       </div>

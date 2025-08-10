@@ -329,7 +329,7 @@ export default function AccessibleMetricCard({
     return (
       <div
         className={`
-          relative bg-white/90 rounded-2xl border-2 ${styles.border}
+          relative bg-white/90 rounded-lg border-2 ${styles.border}
           ${sizeStyles.padding} min-h-[140px] overflow-hidden ${className}
         `}
         role="status"
@@ -339,7 +339,7 @@ export default function AccessibleMetricCard({
         <div className="animate-pulse">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className={`${sizeStyles.iconContainer} bg-gray-200 rounded-xl`}></div>
+              <div className={`${sizeStyles.iconContainer} bg-gray-200 rounded-md`}></div>
               <div className="space-y-2">
                 <div className="h-4 bg-gray-200 rounded w-24"></div>
                 <div className="h-3 bg-gray-200 rounded w-16"></div>
@@ -366,7 +366,7 @@ export default function AccessibleMetricCard({
         {({ open }) => (
           <div
             className={`
-              relative bg-white/90 rounded-2xl border-2 ${styles.border}
+              relative bg-white/90 rounded-lg border-2 ${styles.border}
               transition-all duration-200 ${styles.hoverBorder}
               ${sizeStyles.focusRing} ${styles.focusRing} focus-within:ring-opacity-50
             `}
@@ -399,7 +399,7 @@ export default function AccessibleMetricCard({
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3 flex-1">
                   <div className={`
-                    ${sizeStyles.iconContainer} rounded-xl ${styles.iconBg}
+                    ${sizeStyles.iconContainer} rounded-md ${styles.iconBg}
                     flex items-center justify-center
                   `}>
                     <Icon 
@@ -519,7 +519,7 @@ export default function AccessibleMetricCard({
     <CardElement
       ref={cardRef as any}
       className={`
-        relative bg-white/90 rounded-2xl border-2 ${styles.border}
+        relative bg-white/90 rounded-lg border-2 ${styles.border}
         ${sizeStyles.padding} min-h-[140px] group cursor-pointer overflow-hidden
         transition-all duration-200 hover:transform hover:scale-[1.02] hover:-translate-y-1
         ${onActivate ? `${sizeStyles.focusRing} ${styles.focusRing} focus:outline-none focus:ring-opacity-50 ${sizeStyles.minTouchTarget}` : ''}
@@ -549,7 +549,7 @@ export default function AccessibleMetricCard({
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3 flex-1">
           <div className={`
-            ${sizeStyles.iconContainer} rounded-xl ${styles.iconBg}
+            ${sizeStyles.iconContainer} rounded-md ${styles.iconBg}
             group-hover:scale-110 transition-all duration-300
             flex items-center justify-center
           `}>

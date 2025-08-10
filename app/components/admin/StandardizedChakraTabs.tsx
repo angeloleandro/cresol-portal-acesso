@@ -79,7 +79,7 @@ export const StandardizedChakraTabs: React.FC<StandardizedChakraTabsProps> = ({
           >
             {/* Ícone opcional antes do label, caso fornecido */}
             {tab.icon ? (
-              <span className="inline-flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5">
                 <span aria-hidden>{tab.icon}</span>
                 <span>{tab.label}</span>
               </span>
@@ -116,7 +116,7 @@ export const StandardizedTabsList: React.FC<{
       whiteSpace="nowrap"
         >
           {tab.icon ? (
-            <span className="inline-flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5">
               <span aria-hidden>{tab.icon}</span>
               <span>{tab.label}</span>
             </span>

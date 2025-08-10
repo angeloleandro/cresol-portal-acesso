@@ -84,6 +84,19 @@ module.exports = {
         'smooth': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         'snappy': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
       },
+      // Design System - Border Radius Standardization
+      // Baseado na análise da imagem de referência
+      borderRadius: {
+        'none': '0px',
+        'xs': '2px',     // Para elementos muito pequenos
+        'sm': '4px',     // Para badges, tags
+        'DEFAULT': '6px', // Padrão para botões, cards, inputs
+        'md': '6px',     // Padrão principal do design system
+        'lg': '8px',     // Para containers maiores
+        'xl': '12px',    // Para modais, grandes containers
+        '2xl': '16px',   // Para elementos de destaque
+        'full': '9999px' // Para pills, avatares
+      },
     },
   },
   plugins: [

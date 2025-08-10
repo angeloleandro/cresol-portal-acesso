@@ -357,7 +357,7 @@ export default function GlobalSearch({
                   <button
                     key={index}
                     onClick={() => setQuery(search)}
-                    className="block text-left w-full px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors duration-150"
+                    className="block text-left w-full px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors duration-150"
                   >
                     <Icon name="clock" className="inline h-3 w-3 text-gray-400 mr-2" />
                     {search}
@@ -404,7 +404,7 @@ export default function GlobalSearch({
                 <div className="border-t border-gray-100 p-2">
                   <button
                     onClick={openAdvancedSearch}
-                    className="w-full text-left px-2 py-1.5 text-sm text-primary hover:bg-primary/5 rounded transition-colors duration-150"
+                    className="w-full text-left px-2 py-1.5 text-sm text-primary hover:bg-primary/5 rounded-md transition-colors duration-150"
                   >
                     Ver todos os resultados para &quot;{query}&quot;
                   </button>

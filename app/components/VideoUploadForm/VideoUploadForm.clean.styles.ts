@@ -46,7 +46,7 @@ export const cleanVideoStyles = {
   // Component patterns
   components: {
     // Modal container
-    modal: 'bg-white rounded-xl border border-neutral-200 max-w-3xl mx-auto shadow-lg overflow-hidden max-h-[85vh] flex flex-col',
+    modal: 'bg-white rounded-lg border border-neutral-200 max-w-3xl mx-auto shadow-lg overflow-hidden max-h-[85vh] flex flex-col',
     
     // Header
     header: 'px-6 py-4 border-b border-neutral-200 bg-white flex-shrink-0',

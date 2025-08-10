@@ -36,7 +36,7 @@ export const MinimalistButton: React.FC<MinimalistButtonProps> = ({
   const sizeClasses = {
     sm: 'px-3 py-2 text-sm rounded-lg gap-1.5',
     md: 'px-4 py-2.5 text-sm rounded-lg gap-2',
-    lg: 'px-6 py-3 text-base rounded-xl gap-2.5'
+    lg: 'px-6 py-3 text-base rounded-md gap-2.5'
   };
   
   const iconSizeClasses = {

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { StandardizedButton } from '@/app/components/admin';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -73,20 +74,20 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           </div>
         )}
         <div className="flex justify-end space-x-4">
-          <button
+          <StandardizedButton
             onClick={onClose}
             disabled={isLoading}
-            className="btn-outline disabled:opacity-50"
+            variant="secondary"
           >
             {cancelButtonText}
-          </button>
-          <button
+          </StandardizedButton>
+          <StandardizedButton
             onClick={handleConfirm}
             disabled={isLoading || (requiresConfirmationInput && !isConfirmed)}
-            className="bg-red-600 text-white px-4 py-2 rounded-md border border-red-600 hover:border-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors duration-150 min-h-[44px] inline-flex items-center justify-center font-medium"
+            variant="danger"
           >
             {isLoading ? 'Excluindo...' : confirmButtonText}
-          </button>
+          </StandardizedButton>
         </div>
       </div>
     </div>

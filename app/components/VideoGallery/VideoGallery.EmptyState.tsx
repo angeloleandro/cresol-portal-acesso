@@ -347,7 +347,7 @@ export function CompactEmptyState({
       'flex flex-col items-center justify-center',
       'py-8 px-4 text-center space-y-3',
       'bg-neutral-50 border-2 border-dashed border-neutral-300',
-      'rounded-xl',
+      'rounded-md',
       className
     )}>
       <Icon name="video" className="w-6 h-6 text-neutral-400" />
@@ -412,7 +412,7 @@ export function ErrorRecoveryEmptyState({
       className={clsx(
         'flex flex-col items-center justify-center',
         'py-12 px-6 text-center space-y-4',
-        'bg-red-50 border border-red-200 rounded-xl',
+        'bg-red-50 border border-red-200 rounded-md',
         className
       )}
     >

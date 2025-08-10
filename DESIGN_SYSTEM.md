@@ -47,6 +47,19 @@ The Video System Design System delivers a unified, accessible, and performant vi
 
 ### Latest Enhancements (January 2025)
 
+**Border-Radius Standardization (January 2025)**:
+- **✅ Unified Radius System**: Systematic standardization of all border-radius values across components
+- **✅ Category-Based Consistency**: Different radius values for component categories (buttons, cards, badges, modals)
+- **✅ Design Token Integration**: Proper integration with Tailwind config border-radius tokens
+- **✅ Visual Hierarchy**: Clear differentiation between element types through standardized radii
+
+**Border-Radius Standards**:
+- `rounded-sm` (4px): Badges, status indicators, small tags
+- `rounded-md` (6px): Buttons, cards, containers, inputs (primary standard)
+- `rounded-lg` (8px): Large containers, modals, overlays
+- `rounded-full`: Avatars, pills, circular elements only
+- Eliminated: `rounded-xl`, `rounded-2xl`, `rounded-3xl` for consistency
+
 **Ultra-Minimalist Design**:
 - Migrated from Cresol orange to neutral grays
 - Eliminated decorative elements and unnecessary icons

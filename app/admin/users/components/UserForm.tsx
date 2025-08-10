@@ -12,6 +12,7 @@ import {
 import { Icon } from '@/app/components/icons/Icon';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
+import { StandardizedButton } from '@/app/components/admin';
 
 interface WorkLocation {
   id: string;
@@ -271,10 +272,11 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                 />
               </label>
               {newUserAvatarPreview && (
-                <button
+                <StandardizedButton
                   type="button"
-                  className="ml-2 text-sm hover:underline"
-                  style={{ color: 'var(--color-error-text)' }}
+                  variant="link"
+                  size="sm"
+                  className="ml-2 text-red-600 hover:text-red-700"
                   onClick={() => {
                     URL.revokeObjectURL(newUserAvatarPreview);
                     setNewUserAvatarPreview(null);
@@ -282,7 +284,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                   }}
                 >
                   Remover
-                </button>
+                </StandardizedButton>
               )}
             </div>
             <p className="mt-1 text-xs text-muted">
@@ -555,20 +557,21 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
         </div>
         
         <div className="flex justify-end space-x-3">
-          <button
+          <StandardizedButton
             type="button"
             onClick={onCancel}
-            className="btn-outline"
+            variant="secondary"
           >
             Cancelar
-          </button>
-          <button
+          </StandardizedButton>
+          <StandardizedButton
             type="submit"
-            className="btn-primary"
+            variant="primary"
             disabled={formLoading}
+            loading={formLoading}
           >
             {formLoading ? 'Cadastrando...' : 'Cadastrar Usuário'}
-          </button>
+          </StandardizedButton>
         </div>
       </form>
     </div>

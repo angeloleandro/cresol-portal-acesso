@@ -63,17 +63,17 @@ export default function NotificationsAdminStandardized() {
     {
       value: 'send',
       label: 'Nova Notificação',
-      icon: <LuUser />
+      icon: <LuUser size={16} />
     },
     {
       value: 'groups',
       label: 'Grupos',
-      icon: <LuFolder />
+      icon: <LuFolder size={16} />
     },
     {
       value: 'history',
       label: 'Histórico',
-      icon: <LuSquareCheck />
+      icon: <LuSquareCheck size={16} />
     }
   ];
 
@@ -145,52 +145,35 @@ export default function NotificationsAdminStandardized() {
 
       {/* Tabs Chakra UI v3 padronizadas */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <Tabs.Root 
             value={activeTab} 
             onValueChange={(details) => setActiveTab(details.value as TabType)}
             variant="plain"
-            size="md"
+            size="sm"
             colorPalette="gray"
           >
             <StandardizedTabsList
               tabs={tabs}
-              className="mb-6"
+              className="mb-4"
             />
 
             {/* Conteúdo das tabs */}
-            <div className="mt-6">
+            <div className="mt-4">
               <StandardizedTabContent value="send">
-                <div className="space-y-6">
-                  <div className="text-sm text-gray-600 mb-4">
-                    <h3 className="font-semibold text-gray-900 mb-2">Criar Nova Notificação</h3>
-                    <p>Envie mensagens para usuários específicos ou grupos. Configure prioridade e tipo de notificação.</p>
-                  </div>
-                  <NotificationFormEnhanced 
-                    availableUsers={availableUsers}
-                    availableGroups={groups}
-                  />
-                </div>
+                <NotificationFormEnhanced 
+                  availableUsers={availableUsers}
+                  availableGroups={groups}
+                  variant="minimal"
+                />
               </StandardizedTabContent>
 
               <StandardizedTabContent value="groups">
-                <div className="space-y-6">
-                  <div className="text-sm text-gray-600 mb-4">
-                    <h3 className="font-semibold text-gray-900 mb-2">Gerenciar Grupos</h3>
-                    <p>Crie, edite ou remova grupos de usuários para facilitar o envio de notificações em massa.</p>
-                  </div>
-                  <GroupsManager />
-                </div>
+                <GroupsManager variant="minimal" />
               </StandardizedTabContent>
 
               <StandardizedTabContent value="history">
-                <div className="space-y-6">
-                  <div className="text-sm text-gray-600 mb-4">
-                    <h3 className="font-semibold text-gray-900 mb-2">Histórico de Notificações</h3>
-                    <p>Visualize o histórico completo de notificações enviadas, status de entrega e estatísticas.</p>
-                  </div>
-                  <NotificationHistory />
-                </div>
+                <NotificationHistory variant="minimal" />
               </StandardizedTabContent>
             </div>
           </Tabs.Root>

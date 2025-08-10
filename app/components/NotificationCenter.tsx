@@ -302,11 +302,11 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
   const getPriorityBadge = (priority: Notification['priority']) => {
     switch (priority) {
       case 'urgent':
-        return <span className="px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">Urgente</span>;
+        return <span className="px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded-sm">Urgente</span>;
       case 'high':
-        return <span className="px-1.5 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded">Alta</span>;
+        return <span className="px-1.5 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded-sm">Alta</span>;
       case 'low':
-        return <span className="px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 rounded">Baixa</span>;
+        return <span className="px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 rounded-sm">Baixa</span>;
       default:
         return null;
     }
@@ -412,19 +412,19 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleBulkAction('read')}
-                      className="text-xs px-2 py-1 text-primary hover:bg-primary hover:text-white rounded"
+                      className="text-xs px-2 py-1 text-primary hover:bg-primary hover:text-white rounded-sm"
                     >
                       Marcar como lidas
                     </button>
                     <button
                       onClick={() => handleBulkAction('unread')}
-                      className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-600 hover:text-white rounded"
+                      className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-600 hover:text-white rounded-sm"
                     >
                       Marcar como não lidas
                     </button>
                     <button
                       onClick={() => handleBulkAction('delete')}
-                      className="text-xs px-2 py-1 text-red-600 hover:bg-red-600 hover:text-white rounded"
+                      className="text-xs px-2 py-1 text-red-600 hover:bg-red-600 hover:text-white rounded-sm"
                     >
                       Excluir
                     </button>
@@ -477,7 +477,7 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
                         type="checkbox"
                         checked={selectedNotifications.has(notification.id)}
                         onChange={() => toggleNotificationSelection(notification.id)}
-                        className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                        className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded-sm"
                       />
 
                       {/* Indicador de tipo */}

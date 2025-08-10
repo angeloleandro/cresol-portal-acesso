@@ -9,7 +9,7 @@ import { videoSystemTokens, videoComponentTokens } from '@/lib/design-tokens/vid
 export const videoUploadStyles = {
   // Container styles - Enterprise Professional Modal
   container: cn(
-    'bg-white rounded-xl border border-slate-200 p-0 max-w-3xl mx-auto',
+    'bg-white rounded-lg border border-slate-200 p-0 max-w-3xl mx-auto',
     'shadow-lg shadow-slate-900/10 backdrop-blur-sm',
     'overflow-hidden max-h-[85vh] flex flex-col',
     'scrollbar-modal' // Apply professional scrollbar

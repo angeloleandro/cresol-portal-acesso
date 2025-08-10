@@ -181,23 +181,23 @@ export default function AccessibleChartContainer({
         };
       case 'elevated':
         return {
-          container: `bg-white border ${colors.primary} shadow-lg rounded-2xl`,
+          container: `bg-white border ${colors.primary} shadow-lg rounded-lg`,
           colors
         };
       case 'bordered':
         return {
-          container: `bg-white border-2 ${colors.primary} rounded-2xl shadow-sm`,
+          container: `bg-white border-2 ${colors.primary} rounded-lg shadow-sm`,
           colors
         };
       case 'glass':
         return {
-          container: 'bg-white/80 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg',
+          container: 'bg-white/80 backdrop-blur-md border border-white/20 rounded-lg shadow-lg',
           colors
         };
       case 'default':
       default:
         return {
-          container: `bg-white border ${colors.primary} shadow-sm rounded-2xl`,
+          container: `bg-white border ${colors.primary} shadow-sm rounded-lg`,
           colors
         };
     }
@@ -293,7 +293,7 @@ export default function AccessibleChartContainer({
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel 
-                className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                className="w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all"
               >
                 <Dialog.Title
                   as="h3"
@@ -387,7 +387,7 @@ export default function AccessibleChartContainer({
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel 
-                className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                className="w-full max-w-4xl transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all"
               >
                 <Dialog.Title
                   as="h3"
@@ -605,7 +605,7 @@ export default function AccessibleChartContainer({
                 aria-label={ariaLabel || `Gráfico ${chartType} - ${title}`}
                 aria-describedby={`chart-description-${title.replace(/\s+/g, '-').toLowerCase()}`}
               >
-                <div className="relative bg-gradient-to-br from-gray-50/30 to-white rounded-xl border border-gray-100 overflow-hidden">
+                <div className="relative bg-gradient-to-br from-gray-50/30 to-white rounded-md border border-gray-100 overflow-hidden">
                   {children}
                 </div>
               </div>
@@ -706,7 +706,7 @@ export default function AccessibleChartContainer({
           aria-label={ariaLabel || `Gráfico ${chartType} - ${title}`}
           aria-describedby={`chart-description-${title.replace(/\s+/g, '-').toLowerCase()}`}
         >
-          <div className="relative bg-gradient-to-br from-gray-50/30 to-white rounded-xl border border-gray-100 overflow-hidden">
+          <div className="relative bg-gradient-to-br from-gray-50/30 to-white rounded-md border border-gray-100 overflow-hidden">
             {children}
           </div>
         </div>

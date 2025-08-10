@@ -254,7 +254,7 @@ const AnimatedChart = memo(function AnimatedChart({
   };
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-xl p-6 ${className}`}>
+    <div className={`bg-white border border-gray-200 rounded-md p-6 ${className}`}>
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
         <div className="h-px bg-gradient-to-r from-orange-200 to-transparent"></div>
@@ -267,7 +267,7 @@ const AnimatedChart = memo(function AnimatedChart({
 
       {/* Loading Overlay */}
       {!mounted && (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-xl">
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-md">
           <div className="flex items-center space-x-2">
             <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500 border-t-transparent"></div>
             <span className="text-sm text-gray-600">Carregando gráfico...</span>

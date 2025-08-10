@@ -5,7 +5,7 @@ import { useFormData } from '../hooks/useFormData';
 import { NotificationGroup } from '../types';
 import { InlineActionButton } from './shared/InlineActionButton';
 
-export const GroupsManager: React.FC = () => {
+export const GroupsManager: React.FC<{ variant?: 'default' | 'minimal' }> = ({ variant = 'default' }) => {
   const { 
     groups, 
     showCreateGroup, 
@@ -28,27 +28,37 @@ export const GroupsManager: React.FC = () => {
     }
   };
 
+  const isMinimal = variant === 'minimal';
+
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="bg-secondary/10 p-3 rounded-lg">
-            <Icon name="user-group" className="w-6 h-6 text-secondary" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Grupos de Notificação</h2>
-            <p className="text-sm text-gray-500">Organize usuários em grupos para facilitar o envio de mensagens</p>
-          </div>
+    <div className={isMinimal ? 'p-4' : 'p-6'}>
+      <div className={isMinimal ? 'flex items-center justify-between mb-4' : 'flex items-center justify-between mb-6'}>
+        <div className={isMinimal ? '' : 'flex items-center gap-3'}>
+          {isMinimal ? (
+            <h3 className="text-sm font-medium text-gray-900">Grupos</h3>
+          ) : (
+            <>
+              <div className="bg-secondary/10 p-3 rounded-lg">
+                <Icon name="user-group" className="w-6 h-6 text-secondary" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Grupos de Notificação</h2>
+                <p className="text-sm text-gray-500">Organize usuários em grupos para facilitar o envio de mensagens</p>
+              </div>
+            </>
+          )}
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="text-right">
-            <div className="text-xl font-bold text-secondary">{groups.length}</div>
-            <div className="text-xs text-gray-500">Grupos Ativos</div>
-          </div>
+          {!isMinimal && (
+            <div className="text-right">
+              <div className="text-xl font-bold text-secondary">{groups.length}</div>
+              <div className="text-xs text-gray-500">Grupos Ativos</div>
+            </div>
+          )}
           <button
             onClick={() => setShowCreateGroup(true)}
-            className="px-3 py-2 bg-secondary text-white rounded-md hover:bg-secondary/90 transition-colors text-sm font-medium"
+            className={`px-3 py-2 rounded-md transition-colors text-sm font-medium ${isMinimal ? 'bg-secondary text-white hover:bg-secondary/90' : 'bg-secondary text-white hover:bg-secondary/90'}`}
           >
             Criar Grupo
           </button>
@@ -58,7 +68,7 @@ export const GroupsManager: React.FC = () => {
       {/* Formulário de criação */}
       {showCreateGroup && (
         <div className="mb-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="text-md font-semibold text-gray-900 mb-4">Criar Novo Grupo</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-3">Criar novo grupo</h3>
           <form onSubmit={handleCreateGroup} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

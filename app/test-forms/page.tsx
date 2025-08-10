@@ -121,7 +121,7 @@ export default function TestFormsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Form Test Section */}
           <div className="space-y-8">
-            <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="bg-white rounded-lg shadow-lg p-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">Teste de Funcionalidade</h2>
               
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -239,7 +239,7 @@ export default function TestFormsPage() {
 
           {/* Component Variants Section */}
           <div className="space-y-8">
-            <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="bg-white rounded-lg shadow-lg p-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">Variações dos Componentes</h2>
               
               <div className="space-y-8">
@@ -375,7 +375,7 @@ export default function TestFormsPage() {
         </div>
 
         {/* Accessibility Test Section */}
-        <div className="mt-12 bg-white rounded-xl shadow-lg p-8">
+        <div className="mt-12 bg-white rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Teste de Acessibilidade</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -406,7 +406,7 @@ export default function TestFormsPage() {
         </div>
 
         {/* Responsiveness Test */}
-        <div className="mt-12 bg-white rounded-xl shadow-lg p-8">
+        <div className="mt-12 bg-white rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-semibent text-gray-900 mb-6">Teste Responsivo</h2>
           
           <div className="space-y-6">

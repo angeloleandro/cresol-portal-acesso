@@ -458,14 +458,14 @@ export function FavoritesList({
                 alt={favorite.title}
                 width={compact ? 32 : 40}
                 height={compact ? 32 : 40}
-                className={`${compact ? 'h-8 w-8' : 'h-10 w-10'} object-cover rounded`}
+                className={`${compact ? 'h-8 w-8' : 'h-10 w-10'} object-cover rounded-md`}
               />
             ) : favorite.icon ? (
-              <div className={`${compact ? 'h-8 w-8' : 'h-10 w-10'} flex items-center justify-center bg-gray-100 rounded`}>
+              <div className={`${compact ? 'h-8 w-8' : 'h-10 w-10'} flex items-center justify-center bg-gray-100 rounded-md`}>
                 <span className="text-lg">{favorite.icon}</span>
               </div>
             ) : (
-              <div className={`${compact ? 'h-8 w-8' : 'h-10 w-10'} flex items-center justify-center bg-primary/10 rounded`}>
+              <div className={`${compact ? 'h-8 w-8' : 'h-10 w-10'} flex items-center justify-center bg-primary/10 rounded-md`}>
                 <svg className={`${compact ? 'h-4 w-4' : 'h-5 w-5'} text-primary`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
@@ -488,7 +488,7 @@ export function FavoritesList({
               </h4>
               
               {showType && (
-                <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${getTypeColor(favorite.type)}`}>
+                <span className={`px-1.5 py-0.5 text-xs font-medium rounded-sm ${getTypeColor(favorite.type)}`}>
                   {getTypeLabel(favorite.type)}
                 </span>
               )}

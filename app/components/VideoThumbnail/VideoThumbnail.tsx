@@ -92,8 +92,7 @@ export function VideoThumbnail({
     {
       'hover:border-gray-300': variant !== 'compact',
       'rounded-lg': variant === 'default',
-      'rounded-md': variant === 'compact',
-      'rounded-xl': variant === 'hero',
+      'rounded-md': variant === 'compact' || variant === 'hero',
       'border border-gray-200': variant === 'default' || variant === 'card'
     },
     className

@@ -11,6 +11,7 @@ import UserForm from './components/UserForm';
 import UserList from './components/UserList';
 import RoleModal from './components/RoleModal';
 import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import { StandardizedButton } from '@/app/components/admin';
 
 interface ProfileUser {
   id: string;
@@ -345,13 +346,14 @@ export default function UsersManagement() {
                 <p className="text-sm text-gray-600">Gerencie os usuários do portal.</p>
               </div>
               
-              <button
+              <StandardizedButton
                 type="button"
                 onClick={() => setShowForm(!showForm)}
-                className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors duration-150 mt-3 md:mt-0"
+                variant={showForm ? 'secondary' : 'primary'}
+                className="mt-3 md:mt-0"
               >
                 {showForm ? 'Cancelar' : 'Adicionar Usuário'}
-              </button>
+              </StandardizedButton>
             </div>
           </div>
         </div>

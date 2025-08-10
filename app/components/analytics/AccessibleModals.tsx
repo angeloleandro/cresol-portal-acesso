@@ -233,7 +233,7 @@ export default function AccessibleModal(props: AccessibleModalProps) {
             >
               <Dialog.Panel 
                 className={`
-                  w-full ${sizeStyles.panel} transform overflow-hidden rounded-2xl 
+                  w-full ${sizeStyles.panel} transform overflow-hidden rounded-lg 
                   bg-white ${sizeStyles.padding} text-left align-middle shadow-xl 
                   transition-all border border-gray-200 ${className}
                 `}

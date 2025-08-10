@@ -524,14 +524,14 @@ export default function SectorContentManagement() {
                     setNewsImagePreview(null);
                     setShowNewsForm(true);
                   }}
-                  className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark text-sm"
+                  className="bg-primary text-white px-3 py-1 rounded-md hover:bg-primary-dark text-sm"
                 >
                   Adicionar Notícia
                 </button>
               </div>
               
               {showNewsForm && (
-                <div className="bg-white p-4 rounded border border-gray-200 mb-6">
+                <div className="bg-white p-4 rounded-md border border-gray-200 mb-6">
                   <h4 className="text-lg font-medium mb-3">
                     {newsForm.id ? 'Editar Notícia' : 'Nova Notícia'}
                   </h4>
@@ -558,7 +558,7 @@ export default function SectorContentManagement() {
                         id="content"
                         value={newsForm.content}
                         onChange={(e) => setNewsForm({...newsForm, content: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded h-32"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md h-32"
                         required
                       />
                     </div>
@@ -578,7 +578,7 @@ export default function SectorContentManagement() {
                             />
                           </div>
                         )}
-                        <label className="cursor-pointer bg-white border border-gray-300 px-3 py-2 rounded text-sm hover:bg-gray-50">
+                        <label className="cursor-pointer bg-white border border-gray-300 px-3 py-2 rounded-md text-sm hover:bg-gray-50">
                           Selecionar Imagem
                           <input
                             type="file"
@@ -623,13 +623,13 @@ export default function SectorContentManagement() {
                       <button
                         type="button"
                         onClick={() => setShowNewsForm(false)}
-                        className="px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
+                        className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
                       >
                         Cancelar
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+                        className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
                       >
                         Salvar
                       </button>
@@ -639,13 +639,13 @@ export default function SectorContentManagement() {
               )}
               
               {news.length === 0 ? (
-                <div className="bg-white p-6 rounded border border-gray-200 text-center">
+                <div className="bg-white p-6 rounded-md border border-gray-200 text-center">
                   <p className="text-gray-500">Nenhuma notícia cadastrada para este setor.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {news.map((item) => (
-                    <div key={item.id} className="bg-white p-4 rounded border border-gray-200 flex flex-col sm:flex-row">
+                    <div key={item.id} className="bg-white p-4 rounded-md border border-gray-200 flex flex-col sm:flex-row">
                       {item.image_url && (
                         <div className="sm:w-1/4 mb-3 sm:mb-0 sm:mr-4">
                           <div className="relative h-40 w-full sm:h-full">
@@ -711,14 +711,14 @@ export default function SectorContentManagement() {
                     setEventForm({ id: '', title: '', description: '', event_date: '', location: '', is_published: true });
                     setShowEventForm(true);
                   }}
-                  className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark text-sm"
+                  className="bg-primary text-white px-3 py-1 rounded-md hover:bg-primary-dark text-sm"
                 >
                   Adicionar Evento
                 </button>
               </div>
               
               {showEventForm && (
-                <div className="bg-white p-4 rounded border border-gray-200 mb-6">
+                <div className="bg-white p-4 rounded-md border border-gray-200 mb-6">
                   <h4 className="text-lg font-medium mb-3">
                     {eventForm.id ? 'Editar Evento' : 'Novo Evento'}
                   </h4>
@@ -745,7 +745,7 @@ export default function SectorContentManagement() {
                         id="event_description"
                         value={eventForm.description}
                         onChange={(e) => setEventForm({...eventForm, description: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded h-32"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md h-32"
                         required
                       />
                     </div>
@@ -796,13 +796,13 @@ export default function SectorContentManagement() {
                       <button
                         type="button"
                         onClick={() => setShowEventForm(false)}
-                        className="px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
+                        className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
                       >
                         Cancelar
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+                        className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
                       >
                         Salvar
                       </button>
@@ -812,13 +812,13 @@ export default function SectorContentManagement() {
               )}
               
               {events.length === 0 ? (
-                <div className="bg-white p-6 rounded border border-gray-200 text-center">
+                <div className="bg-white p-6 rounded-md border border-gray-200 text-center">
                   <p className="text-gray-500">Nenhum evento cadastrado para este setor.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {events.map((item) => (
-                    <div key={item.id} className="bg-white p-4 rounded border border-gray-200">
+                    <div key={item.id} className="bg-white p-4 rounded-md border border-gray-200">
                       <div className="flex justify-between mb-2">
                         <h3 className="text-lg font-medium">{item.title}</h3>
                         <div className="flex space-x-2">

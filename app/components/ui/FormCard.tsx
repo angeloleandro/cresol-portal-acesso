@@ -18,11 +18,11 @@ const FormCard: React.FC<FormCardProps> = ({
   onSubmit
 }) => {
   const cardContent = (
-    <div className={`bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-8 ${className}`}>
+    <div className={`bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-8 ${className}`}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         {icon && (
-          <div className="bg-primary/10 p-3 rounded-xl">
+          <div className="bg-primary/10 p-3 rounded-md">
             {icon}
           </div>
         )}

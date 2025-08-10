@@ -223,7 +223,7 @@ export default function VideosPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className={clsx(
-            'bg-white rounded-xl shadow-sm border border-neutral-200',
+            'bg-white rounded-md shadow-sm border border-neutral-200',
             'overflow-hidden min-h-[400px]'
           )}
         >

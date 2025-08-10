@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import OptimizedImage from "@/app/components/OptimizedImage";
+import { StandardizedButton } from "@/app/components/admin";
 import { supabase } from "@/lib/supabase";
 import AdminHeader from "@/app/components/AdminHeader";
 import Breadcrumb from "@/app/components/Breadcrumb";
@@ -137,7 +138,7 @@ export default function AdminGallery() {
 
         {/* Actions Section */}
         <div className="mb-6">
-          <button className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors duration-150" onClick={() => setShowForm(true)}>+ Nova Imagem</button>
+          <StandardizedButton variant="primary" onClick={() => setShowForm(true)}>+ Nova Imagem</StandardizedButton>
         </div>
         {showForm && !editImage && (
           <ImageUploadForm onSave={() => { setShowForm(false); fetchImages(); }} onCancel={() => setShowForm(false)} />

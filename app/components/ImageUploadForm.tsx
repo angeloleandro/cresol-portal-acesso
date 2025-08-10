@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import OptimizedImage from "./OptimizedImage";
+import { StandardizedButton } from "@/app/components/admin";
 import Cropper from "react-easy-crop";
 import { supabase } from "@/lib/supabase";
 import { getCroppedImg } from "./getCroppedImg";
@@ -161,22 +162,22 @@ export default function ImageUploadForm({ initialData, onSave, onCancel }: Image
               />
             </div>
             <div className="flex gap-2 mt-2 justify-end">
-              <button 
+              <StandardizedButton 
                 type="button" 
-                className="px-4 py-2 rounded border" 
+                variant="secondary"
                 onClick={() => setIsCropping(false)} 
                 disabled={loading}
               >
                 Cancelar
-              </button>
-              <button 
+              </StandardizedButton>
+              <StandardizedButton 
                 type="button" 
-                className="px-4 py-2 rounded bg-primary text-white" 
+                variant="primary"
                 onClick={handleApplyCrop} 
                 disabled={loading}
               >
                 Aplicar
-              </button>
+              </StandardizedButton>
             </div>
           </div>
         )}
@@ -217,20 +218,20 @@ export default function ImageUploadForm({ initialData, onSave, onCancel }: Image
       </div>
       
       <div className="flex gap-2 mt-4">
-        <button 
-          className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition" 
+        <StandardizedButton 
+          variant="primary"
           onClick={handleSave} 
           disabled={loading}
         >
           {loading ? "Salvando..." : (initialData ? "Salvar" : "Adicionar")}
-        </button>
-        <button 
-          className="px-4 py-2 rounded border" 
+        </StandardizedButton>
+        <StandardizedButton 
+          variant="secondary"
           onClick={onCancel} 
           disabled={loading}
         >
           Cancelar
-        </button>
+        </StandardizedButton>
       </div>
     </div>
   );

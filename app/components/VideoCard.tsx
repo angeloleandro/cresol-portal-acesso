@@ -43,7 +43,7 @@ export const HomeVideoCard = memo(function HomeVideoCard({
     <motion.article
       className={clsx(
         // Card.Root equivalent - following project's standardized pattern
-        'bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70',
+        'bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70',
         'overflow-hidden cursor-pointer group',
         'transition-colors duration-150',
         'max-w-sm w-full', // maxW="sm" equivalent
@@ -125,7 +125,7 @@ export const HomeVideoCard = memo(function HomeVideoCard({
         {/* Action button - removida tag "Ativo" */}
         <motion.button
           className={clsx(
-            'inline-flex items-center gap-1 px-3 py-1.5 rounded-lg',
+            'inline-flex items-center gap-1 px-3 py-1.5 rounded-md',
             'bg-primary text-white text-sm font-medium',
             'hover:bg-primary/90 transition-colors duration-150',
             'focus:outline-none focus:ring-2 focus:ring-primary/20'

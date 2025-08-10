@@ -164,23 +164,23 @@ const DashboardGridAdvanced = memo(function DashboardGridAdvanced({
         };
       case 'elevated':
         return {
-          container: `bg-white shadow-lg rounded-2xl border ${colors.accent}`,
+          container: `bg-white shadow-lg rounded-lg border ${colors.accent}`,
           item: 'transform transition-all duration-300 hover:scale-[1.01]'
         };
       case 'bordered':
         return {
-          container: `bg-white border-2 ${colors.accent} rounded-2xl`,
-          item: 'border border-gray-100 rounded-xl'
+          container: `bg-white border-2 ${colors.accent} rounded-lg`,
+          item: 'border border-gray-100 rounded-md'
         };
       case 'glass':
         return {
-          container: 'bg-white/80 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg',
-          item: 'bg-white/50 backdrop-blur-sm rounded-xl'
+          container: 'bg-white/80 backdrop-blur-md border border-white/20 rounded-lg shadow-lg',
+          item: 'bg-white/50 backdrop-blur-sm rounded-md'
         };
       case 'default':
       default:
         return {
-          container: 'bg-white border border-gray-200 rounded-2xl shadow-sm',
+          container: 'bg-white border border-gray-200 rounded-lg shadow-sm',
           item: ''
         };
     }
@@ -279,28 +279,28 @@ const DashboardGridAdvanced = memo(function DashboardGridAdvanced({
           return (
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-gray-200 rounded-xl"></div>
+                <div className="h-10 w-10 bg-gray-200 rounded-md"></div>
                 <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-24"></div>
-                  <div className="h-3 bg-gray-200 rounded w-16"></div>
+                  <div className="h-4 bg-gray-200 rounded-sm w-24"></div>
+                  <div className="h-3 bg-gray-200 rounded-sm w-16"></div>
                 </div>
               </div>
-              <div className="h-8 bg-gray-200 rounded w-20"></div>
-              <div className="h-3 bg-gray-200 rounded w-32"></div>
+              <div className="h-8 bg-gray-200 rounded-sm w-20"></div>
+              <div className="h-3 bg-gray-200 rounded-sm w-32"></div>
             </div>
           );
         case 'chart':
           return (
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <div className="h-6 bg-gray-200 rounded w-32"></div>
-                <div className="h-8 w-20 bg-gray-200 rounded"></div>
+                <div className="h-6 bg-gray-200 rounded-sm w-32"></div>
+                <div className="h-8 w-20 bg-gray-200 rounded-sm"></div>
               </div>
               <div className="h-48 bg-gray-200 rounded-lg"></div>
               <div className="flex justify-center space-x-4">
-                <div className="h-3 bg-gray-200 rounded w-16"></div>
-                <div className="h-3 bg-gray-200 rounded w-20"></div>
-                <div className="h-3 bg-gray-200 rounded w-14"></div>
+                <div className="h-3 bg-gray-200 rounded-sm w-16"></div>
+                <div className="h-3 bg-gray-200 rounded-sm w-20"></div>
+                <div className="h-3 bg-gray-200 rounded-sm w-14"></div>
               </div>
             </div>
           );
@@ -310,8 +310,8 @@ const DashboardGridAdvanced = memo(function DashboardGridAdvanced({
             <div className="space-y-4">
               <div className="h-32 bg-gray-200 rounded-lg"></div>
               <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded-sm w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded-sm w-1/2"></div>
               </div>
             </div>
           );
@@ -336,7 +336,7 @@ const DashboardGridAdvanced = memo(function DashboardGridAdvanced({
           <div 
             key={i}
             className={`
-              bg-white rounded-xl border border-gray-200 p-6 overflow-hidden relative
+              bg-white rounded-md border border-gray-200 p-6 overflow-hidden relative
               ${getAspectRatioClass()}
               ${styles.item}
             `}

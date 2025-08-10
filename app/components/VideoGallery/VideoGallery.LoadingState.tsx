@@ -64,7 +64,7 @@ export function VideoGalleryLoadingState({
  */
 export function SkeletonVideoCard() {
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden w-full animate-pulse">
+    <div className="bg-white rounded-md border border-neutral-200 overflow-hidden w-full animate-pulse">
       {/* Thumbnail Skeleton */}
       <div className="aspect-video bg-neutral-200 relative">
         {/* Shimmer Effect */}
@@ -80,17 +80,17 @@ export function SkeletonVideoCard() {
       <div className="p-4 space-y-3">
         {/* Title Lines */}
         <div className="space-y-2">
-          <div className="h-4 bg-neutral-200 rounded w-3/4" />
-          <div className="h-4 bg-neutral-200 rounded w-1/2" />
+          <div className="h-4 bg-neutral-200 rounded-sm w-3/4" />
+          <div className="h-4 bg-neutral-200 rounded-sm w-1/2" />
         </div>
         
         {/* File Size */}
-        <div className="h-3 bg-neutral-200 rounded w-1/3" />
+        <div className="h-3 bg-neutral-200 rounded-sm w-1/3" />
         
         {/* Footer */}
         <div className="flex justify-between items-center pt-2 border-t border-neutral-100">
-          <div className="h-3 bg-neutral-200 rounded w-1/4" />
-          <div className="h-6 bg-neutral-200 rounded w-16" />
+          <div className="h-3 bg-neutral-200 rounded-sm w-1/4" />
+          <div className="h-6 bg-neutral-200 rounded-sm w-16" />
         </div>
       </div>
     </div>
@@ -131,15 +131,15 @@ function SkeletonListItem() {
   return (
     <div className="flex gap-3 p-3 bg-white rounded-lg border border-neutral-200 animate-pulse">
       {/* Thumbnail */}
-      <div className="w-24 h-16 bg-neutral-200 rounded flex-shrink-0 relative overflow-hidden">
+      <div className="w-24 h-16 bg-neutral-200 rounded-sm flex-shrink-0 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
       </div>
       
       {/* Content */}
       <div className="flex-1 space-y-2">
-        <div className="h-4 bg-neutral-200 rounded w-3/4" />
-        <div className="h-3 bg-neutral-200 rounded w-1/2" />
-        <div className="h-3 bg-neutral-200 rounded w-1/3" />
+        <div className="h-4 bg-neutral-200 rounded-sm w-3/4" />
+        <div className="h-3 bg-neutral-200 rounded-sm w-1/2" />
+        <div className="h-3 bg-neutral-200 rounded-sm w-1/3" />
       </div>
     </div>
   );
@@ -180,15 +180,15 @@ function SkeletonCompactCard() {
     <div className="bg-white rounded-lg border border-neutral-200 p-3 animate-pulse">
       <div className="flex gap-3">
         {/* Small Thumbnail */}
-        <div className="w-16 h-12 bg-neutral-200 rounded flex-shrink-0 relative overflow-hidden">
+        <div className="w-16 h-12 bg-neutral-200 rounded-sm flex-shrink-0 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
         </div>
         
         {/* Content */}
         <div className="flex-1 space-y-1">
-          <div className="h-3 bg-neutral-200 rounded w-full" />
-          <div className="h-3 bg-neutral-200 rounded w-2/3" />
-          <div className="h-2 bg-neutral-200 rounded w-1/3" />
+          <div className="h-3 bg-neutral-200 rounded-sm w-full" />
+          <div className="h-3 bg-neutral-200 rounded-sm w-2/3" />
+          <div className="h-2 bg-neutral-200 rounded-sm w-1/3" />
         </div>
       </div>
     </div>
@@ -202,10 +202,10 @@ export function VideoGalleryHeaderSkeleton() {
   return (
     <div className="flex justify-between items-center mb-6 animate-pulse">
       <div className="space-y-2">
-        <div className="h-8 bg-neutral-200 rounded w-64" />
-        <div className="h-4 bg-neutral-200 rounded w-48" />
+        <div className="h-8 bg-neutral-200 rounded-sm w-64" />
+        <div className="h-4 bg-neutral-200 rounded-sm w-48" />
       </div>
-      <div className="h-10 bg-neutral-200 rounded w-24" />
+      <div className="h-10 bg-neutral-200 rounded-sm w-24" />
     </div>
   );
 }
@@ -216,7 +216,7 @@ export function VideoGalleryHeaderSkeleton() {
 export function VideoModalLoadingState() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-white rounded-xl max-w-4xl w-full mx-4 overflow-hidden">
+      <div className="bg-white rounded-md max-w-4xl w-full mx-4 overflow-hidden">
         {/* Video Area */}
         <div className="aspect-video bg-neutral-800 flex items-center justify-center">
           <motion.div
@@ -228,14 +228,14 @@ export function VideoModalLoadingState() {
         
         {/* Info Area */}
         <div className="p-6 space-y-4 animate-pulse">
-          <div className="h-6 bg-neutral-200 rounded w-3/4" />
+          <div className="h-6 bg-neutral-200 rounded-sm w-3/4" />
           <div className="space-y-2">
-            <div className="h-4 bg-neutral-200 rounded w-1/2" />
-            <div className="h-4 bg-neutral-200 rounded w-1/3" />
+            <div className="h-4 bg-neutral-200 rounded-sm w-1/2" />
+            <div className="h-4 bg-neutral-200 rounded-sm w-1/3" />
           </div>
           <div className="flex gap-2">
-            <div className="h-8 bg-neutral-200 rounded w-24" />
-            <div className="h-8 bg-neutral-200 rounded w-20" />
+            <div className="h-8 bg-neutral-200 rounded-sm w-24" />
+            <div className="h-8 bg-neutral-200 rounded-sm w-20" />
           </div>
         </div>
       </div>

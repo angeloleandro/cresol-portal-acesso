@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
+import { StandardizedButton } from '@/app/components/admin';
 import { supabase } from '@/lib/supabase';
 
 function LoginContent() {
@@ -123,13 +124,14 @@ function LoginContent() {
             </Link>
           </div>
           
-          <button
+          <StandardizedButton
             type="submit"
-            className="btn-primary w-full"
+            variant="primary"
+            className="w-full"
             disabled={loading}
           >
             {loading ? 'Entrando...' : 'Entrar'}
-          </button>
+          </StandardizedButton>
         </form>
         
         <div className="mt-6 text-center">

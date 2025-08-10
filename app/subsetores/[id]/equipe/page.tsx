@@ -424,7 +424,7 @@ export default function SubsectorTeamPage() {
 
         {/* Descrição do Sub-setor */}
         {subsector.description && (
-          <div className="bg-white rounded-xl border border-cresol-gray-light p-6 mb-8">
+          <div className="bg-white rounded-lg border border-cresol-gray-light p-6 mb-8">
             <div className="flex items-center mb-3">
               <Icon name="building-2" className="h-5 w-5 text-secondary mr-2" />
               <h2 className="text-lg font-semibold text-cresol-gray-dark">Sobre o Sub-setor</h2>
@@ -434,7 +434,7 @@ export default function SubsectorTeamPage() {
         )}
 
         {/* Equipe */}
-        <div className="bg-white rounded-xl border border-cresol-gray-light">
+        <div className="bg-white rounded-lg border border-cresol-gray-light">
           <div className="p-6 border-b border-cresol-gray-light">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -546,7 +546,7 @@ export default function SubsectorTeamPage() {
       {/* Modal Adicionar Membro */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-cresol-gray-dark mb-4">
                 Adicionar Membro à Equipe
@@ -663,7 +663,7 @@ export default function SubsectorTeamPage() {
       {/* Modal Editar Cargo */}
       {showEditModal && editingMember && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full">
+          <div className="bg-white rounded-lg max-w-md w-full">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-cresol-gray-dark mb-4">
                 Editar Cargo na Equipe

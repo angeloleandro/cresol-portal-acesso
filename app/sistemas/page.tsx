@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { StandardizedButton } from '@/app/components/admin';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
@@ -175,14 +176,14 @@ export default function SistemasPage() {
             </div>
             
             {/* Contador de sistemas */}
-            <div className="bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-4 min-w-[160px]">
+            <div className="bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-4 min-w-[160px]">
               <div className="body-text-small text-muted">Total de sistemas</div>
               <div className="text-2xl font-bold text-primary">{filteredSystems.length}</div>
             </div>
           </div>
 
           {/* Filtros e Busca */}
-          <div className="bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-6">
+          <div className="bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-6">
             {error && (
               <div className="mb-6">
                 <ErrorMessage
@@ -219,13 +220,14 @@ export default function SistemasPage() {
               {/* Limpar busca */}
               <div className="flex items-end">
                 {searchTerm && (
-                  <button
+                  <StandardizedButton
                     onClick={() => setSearchTerm('')}
-                    className="btn-secondary text-sm"
+                    variant="secondary"
+                    size="sm"
                   >
                     <Icon name="x" className="w-4 h-4 mr-1" />
                     Limpar busca
-                  </button>
+                  </StandardizedButton>
                 )}
               </div>
             </div>
@@ -269,7 +271,7 @@ export default function SistemasPage() {
 
         {/* Lista de sistemas */}
         {!error && filteredSystems.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-12 text-center">
+          <div className="bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-12 text-center">
             <div className="max-w-md mx-auto">
               <Icon name="monitor" className="mx-auto h-16 w-16 text-muted mb-4" />
               <h3 className="heading-3 text-title mb-2">Nenhum sistema encontrado</h3>
@@ -280,12 +282,13 @@ export default function SistemasPage() {
                 }
               </p>
               {searchTerm && (
-                <button
+                <StandardizedButton
                   onClick={() => setSearchTerm('')}
-                  className="btn-primary mt-4"
+                  variant="primary"
+                  className="mt-4"
                 >
                   Ver todos os sistemas
-                </button>
+                </StandardizedButton>
               )}
             </div>
           </div>
@@ -296,7 +299,7 @@ export default function SistemasPage() {
               : 'space-y-4'
           }>
             {filteredSystems.map((system) => (
-              <div key={system.id} className="bg-white rounded-xl border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-6 group">
+              <div key={system.id} className="bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-6 group">
                 <div className={`${viewMode === 'list' ? 'flex items-start gap-4' : ''}`}>
                   {/* Ícone do sistema */}
                   <div className={`${viewMode === 'list' ? 'flex-shrink-0' : 'mb-4'}`}>
@@ -334,15 +337,18 @@ export default function SistemasPage() {
                     )}
                     
                     <div className="flex items-center justify-between">
-                      <a
+                      <StandardizedButton
+                        as="a"
                         href={system.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn-primary inline-flex items-center gap-2 text-sm"
+                        variant="primary"
+                        size="sm"
+                        className="inline-flex items-center gap-2"
                       >
                         Acessar Sistema
                         <Icon name="external-link" className="w-4 h-4" />
-                      </a>
+                      </StandardizedButton>
                       
                       {favorites.has(system.id) && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">

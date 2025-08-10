@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { Icon, IconName } from '../icons';
-import StandardizedButton from './StandardizedButton';
+import { StandardizedButton } from './index';
 
 interface StandardizedEmptyStateProps {
   title: string;

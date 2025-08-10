@@ -181,7 +181,7 @@ export const VideoUploadFormSimpleThumbnail = memo(({
           {/* Upload Area */}
           <div
             className={`
-              relative border-2 border-dashed rounded-xl p-8 text-center transition-all
+              relative border-2 border-dashed rounded-md p-8 text-center transition-all
               ${dragActive 
                 ? 'border-primary bg-primary/5 scale-[1.02]' 
                 : 'border-neutral-300 bg-neutral-50 hover:border-neutral-400'

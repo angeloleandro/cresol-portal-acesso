@@ -182,7 +182,7 @@ const MetricCard = memo(function MetricCard({
       onClick={onClick}
       className={`
         ${colorStyles.bg} ${colorStyles.border}
-        border rounded-xl transition-colors duration-200
+        border rounded-md transition-colors duration-200
         ${onClick ? `hover:border-gray-300 cursor-pointer` : ''}
         ${sizeStyles.padding} ${className}
         ${isLoading ? 'animate-pulse' : ''}
@@ -258,7 +258,7 @@ const MetricCardSkeleton = memo(function MetricCardSkeleton({ size = 'md' }: { s
   const sizeStyles = sizeConfig[size];
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-xl ${sizeStyles.padding} animate-pulse`}>
+    <div className={`bg-white border border-gray-200 rounded-md ${sizeStyles.padding} animate-pulse`}>
       <div className={sizeStyles.spacing}>
         <div className="flex items-start justify-between">
           <div className="flex-1">

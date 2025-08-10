@@ -2,6 +2,7 @@
 
 import { useState, ChangeEvent, FormEvent } from "react";
 import OptimizedImage from "./OptimizedImage";
+import { StandardizedButton } from "@/app/components/admin";
 import { supabase } from "@/lib/supabase";
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from './getCroppedImg';
@@ -124,11 +125,11 @@ export default function BannerUploadForm({ initialData, onSave, onCancel }: Bann
       {error && <div className="text-red-500 mb-2">{error}</div>}
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Título</label>
-        <input type="text" className="w-full border rounded px-3 py-2" value={title} onChange={e => setTitle(e.target.value)} />
+        <input type="text" className="w-full border rounded-md px-3 py-2" value={title} onChange={e => setTitle(e.target.value)} />
       </div>
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Link (opcional)</label>
-        <input type="text" className="w-full border rounded px-3 py-2" value={link} onChange={e => setLink(e.target.value)} />
+        <input type="text" className="w-full border rounded-md px-3 py-2" value={link} onChange={e => setLink(e.target.value)} />
       </div>
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Imagem</label>
@@ -155,8 +156,8 @@ export default function BannerUploadForm({ initialData, onSave, onCancel }: Bann
               <input type="range" min={0} max={360} step={1} value={rotation} onChange={e => setRotation(Number(e.target.value))} />
             </div>
             <div className="flex gap-2 mt-2 justify-end">
-              <button type="button" className="px-4 py-2 rounded border" onClick={handleCancelCrop} disabled={isUploading}>Cancelar</button>
-              <button type="button" className="px-4 py-2 rounded bg-primary text-white" onClick={handleApplyCrop} disabled={isUploading}>Aplicar</button>
+              <StandardizedButton type="button" variant="secondary" onClick={handleCancelCrop} disabled={isUploading}>Cancelar</StandardizedButton>
+              <StandardizedButton type="button" variant="primary" onClick={handleApplyCrop} disabled={isUploading}>Aplicar</StandardizedButton>
             </div>
           </div>
         )}
@@ -166,7 +167,7 @@ export default function BannerUploadForm({ initialData, onSave, onCancel }: Bann
               src={imagePreview} 
               alt="Preview" 
               fill 
-              className="object-contain rounded border"
+              className="object-contain rounded-md border"
               sizes="(max-width: 768px) 100vw, 50vw"
               quality={80}
               fallbackText="Preview"
@@ -180,12 +181,12 @@ export default function BannerUploadForm({ initialData, onSave, onCancel }: Bann
         </label>
         <label className="flex items-center gap-2">
           Ordem:
-          <input type="number" className="w-16 border rounded px-2 py-1" value={orderIndex} onChange={e => setOrderIndex(Number(e.target.value))} />
+          <input type="number" className="w-16 border rounded-md px-2 py-1" value={orderIndex} onChange={e => setOrderIndex(Number(e.target.value))} />
         </label>
       </div>
       <div className="flex gap-2 justify-end">
-        <button type="button" className="px-4 py-2 rounded border" onClick={onCancel} disabled={isUploading}>Cancelar</button>
-        <button type="submit" className="px-4 py-2 rounded bg-primary text-white" disabled={isUploading}>{isUploading ? 'Salvando...' : 'Salvar'}</button>
+        <StandardizedButton type="button" variant="secondary" onClick={onCancel} disabled={isUploading}>Cancelar</StandardizedButton>
+        <StandardizedButton type="submit" variant="primary" disabled={isUploading}>{isUploading ? 'Salvando...' : 'Salvar'}</StandardizedButton>
       </div>
     </form>
   );

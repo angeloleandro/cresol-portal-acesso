@@ -118,7 +118,7 @@ export default function ImageGallery({ limit = 6 }: ImageGalleryProps) {
       </div>
       {images.length > limit && (
         <div className="flex justify-center mt-6">
-          <a href="/galeria" className="text-white px-5 py-2.5 rounded text-xs font-medium transition-all duration-200" style={{ backgroundColor: '#F38332' }}>Ver galeria completa</a>
+          <a href="/galeria" className="text-white px-5 py-2.5 rounded-md text-xs font-medium transition-all duration-200" style={{ backgroundColor: '#F38332' }}>Ver galeria completa</a>
         </div>
       )}
       {modalOpen && selectedImage && (

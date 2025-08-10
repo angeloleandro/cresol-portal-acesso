@@ -301,7 +301,7 @@ export default function SetorDetalhesPage() {
                           {formatDate(item.created_at)}
                         </span>
                         {item.is_featured && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">
                             Destaque
                           </span>
                         )}
@@ -341,7 +341,7 @@ export default function SetorDetalhesPage() {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                       <h2 className="text-xl font-semibold text-cresol-gray">{item.title}</h2>
                       {item.is_featured && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary mt-2 md:mt-0">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary mt-2 md:mt-0">
                           Destaque
                         </span>
                       )}

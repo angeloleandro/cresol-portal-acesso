@@ -69,7 +69,7 @@ export default function AnalyticsShowcase() {
       </div>
 
       {/* NumberTicker Showcase */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200">
+      <div className="bg-white rounded-md p-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4">NumberTicker Components</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="text-center space-y-2">
@@ -120,7 +120,7 @@ export default function AnalyticsShowcase() {
       </div>
 
       {/* MetricCards Showcase */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200">
+      <div className="bg-white rounded-md p-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4">Enhanced Metric Cards</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <MetricCardEnterprise
@@ -176,7 +176,7 @@ export default function AnalyticsShowcase() {
       </div>
 
       {/* ProgressRings Showcase */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200">
+      <div className="bg-white rounded-md p-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4">Progress Ring Pro</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center">
           <div className="text-center space-y-2">
@@ -298,7 +298,7 @@ export default function AnalyticsShowcase() {
       />
 
       {/* Button Showcase */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200">
+      <div className="bg-white rounded-md p-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4">Shimmer Buttons</h2>
         <div className="space-y-6">
           <div className="space-y-2">
@@ -365,7 +365,7 @@ export default function AnalyticsShowcase() {
       </div>
 
       {/* Technical Info */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200">
+      <div className="bg-white rounded-md p-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4">Especificações Técnicas</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
