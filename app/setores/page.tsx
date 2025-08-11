@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
 import Breadcrumb from '../components/Breadcrumb';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 interface Sector {
   id: string;
@@ -54,7 +55,10 @@ export default function SetoresPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="loading-spinner"></div>
+<LoadingSpinner 
+            size="md" 
+            message="Carregando setores..."
+          />
           <p className="mt-4 text-muted">Carregando setores...</p>
         </div>
       </div>

@@ -7,6 +7,7 @@ import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import GlobalSearch from '../components/GlobalSearch';
 import Breadcrumbs from '../components/Breadcrumbs';
 import EventosDestaque from '../components/EventosDestaque';
@@ -184,8 +185,11 @@ export default function Dashboard() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="loading-spinner"></div>
-          <p className="mt-4 body-text text-muted">Carregando dashboard...</p>
+<LoadingSpinner 
+            fullScreen={true}
+            size="lg" 
+            message="Carregando dashboard..."
+          />
         </div>
       </div>
     );

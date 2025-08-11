@@ -8,6 +8,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import Navbar from '../components/Navbar';
 import Breadcrumbs from '../components/Breadcrumbs';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import Footer from '../components/Footer';
 
 interface Profile {
@@ -404,7 +405,11 @@ export default function ProfilePage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="loading-spinner"></div>
+<LoadingSpinner 
+            fullScreen={true}
+            size="lg" 
+            message="Carregando perfil..."
+          />
           <p className="mt-4 text-muted">Carregando perfil...</p>
         </div>
       </div>

@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { StandardizedButton } from '@/app/components/admin';
 import EventCalendar from '../components/EventCalendar';
 import Navbar from '../components/Navbar';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import Breadcrumbs from '../components/Breadcrumbs';
 import Footer from '../components/Footer';
 import { Icon } from '../components/icons/Icon';
@@ -225,7 +226,10 @@ function EventosPageContent() {
         <Navbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
-            <div className="loading-spinner mx-auto mb-4"></div>
+<LoadingSpinner 
+              size="md" 
+              message="Carregando eventos..."
+            />
             <p className="body-text text-muted">Carregando eventos...</p>
           </div>
         </div>
@@ -514,7 +518,10 @@ export default function EventosPage() {
         <Navbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
-            <div className="loading-spinner mx-auto mb-4"></div>
+<LoadingSpinner 
+              size="md" 
+              message="Carregando eventos..."
+            />
             <p className="body-text text-muted">Carregando eventos...</p>
           </div>
         </div>

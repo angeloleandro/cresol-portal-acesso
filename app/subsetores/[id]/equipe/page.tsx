@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { Icon } from '../../../components/icons';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import Breadcrumb from '../../../components/Breadcrumb';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 interface User {
   id: string;
@@ -326,7 +327,11 @@ export default function SubsectorTeamPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto" />
+<LoadingSpinner 
+        fullScreen={true}
+        size="lg" 
+        message="Carregando equipe..."
+      />
           <p className="mt-4 text-cresol-gray">Carregando...</p>
         </div>
       </div>

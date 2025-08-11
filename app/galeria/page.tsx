@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 import OptimizedImage from "../components/OptimizedImage";
 import { Icon } from "../components/icons/Icon";
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 interface GalleryImage {
   id: string;
@@ -75,8 +76,10 @@ export default function GalleryPage() {
         <div className="card">
           {loading ? (
             <div className="text-center py-12">
-              <div className="loading-spinner mx-auto"></div>
-              <p className="mt-4 body-text text-muted">Carregando imagens...</p>
+<LoadingSpinner 
+                size="md" 
+                message="Carregando imagens..."
+              />
             </div>
           ) : images.length === 0 ? (
             <div className="text-center py-12">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { Spinner } from "@chakra-ui/react";
 
 interface VercelImageTestProps {
   testUrl: string;
@@ -76,7 +77,7 @@ export default function VercelImageTest({ testUrl, title }: VercelImageTestProps
           }`}>
             {imageStatus === 'loading' && (
               <>
-                <div className="w-4 h-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+                <Spinner size="sm" color="yellow.400" />
                 <span className="text-sm">Carregando...</span>
               </>
             )}

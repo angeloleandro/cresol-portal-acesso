@@ -6,6 +6,7 @@ import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { StandardizedButton } from '@/app/components/admin';
 import { supabase } from '@/lib/supabase';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 function LoginContent() {
   const router = useRouter();
@@ -163,7 +164,10 @@ export default function Login() {
                 className="object-contain"
               />
             </div>
-            <div className="loading-spinner mb-4"></div>
+<LoadingSpinner 
+              size="md" 
+              message="Verificando credenciais..."
+            />
             <p className="body-text-small text-muted">Carregando...</p>
           </div>
         </div>

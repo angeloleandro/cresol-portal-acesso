@@ -7,6 +7,7 @@ import OptimizedImage from '@/app/components/OptimizedImage';
 import { StandardizedButton } from '@/app/components/admin';
 import { supabase } from '@/lib/supabase';
 import Breadcrumb from '../../components/Breadcrumb';
+import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 interface EventItem {
   id: string;
@@ -124,12 +125,11 @@ export default function EventoDetalhePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
-        </div>
-      </div>
+      <LoadingSpinner 
+        fullScreen={true}
+        size="lg" 
+        message="Carregando evento..." 
+      />
     );
   }
 

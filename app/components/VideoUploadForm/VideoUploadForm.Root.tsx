@@ -27,6 +27,7 @@ import { VideoUploadFormSettings } from './VideoUploadForm.Settings'
 import { supabase } from '@/lib/supabase'
 import { getAuthenticatedSession, makeAuthenticatedRequest } from '@/lib/video-utils'
 import { Icon } from '../icons/Icon'
+import { Spinner } from "@chakra-ui/react"
 import {
   VIDEO_API_CONFIG,
   VIDEO_UI_CONFIG,
@@ -532,7 +533,7 @@ export const VideoUploadFormRoot = memo(({
             className="bg-blue-50 border border-blue-200 rounded-lg p-4"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <Spinner size="md" color="orange.500" />
               <div>
                 <p className="font-medium text-blue-800">
                   {state.uploadStatus === 'uploading' ? VIDEO_MESSAGES.INFO.UPLOADING : VIDEO_MESSAGES.INFO.PROCESSING}
@@ -695,7 +696,7 @@ export const VideoUploadFormRoot = memo(({
           >
             {isUploading ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <Spinner size="sm" color="white" />
                 <span>
                   {state.uploadStatus === 'uploading' ? VIDEO_MESSAGES.LABELS.UPLOADING : VIDEO_MESSAGES.LABELS.PROCESSING_ACTION}
                 </span>
