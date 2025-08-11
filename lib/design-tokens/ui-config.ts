@@ -33,7 +33,7 @@ const CSS_VARS = {
 // Baseado no StandardizedButton.tsx existente (excelente implementação)
 export const BUTTON_CONFIG = {
   // Classes base para todos os botões (eliminando hardcode de StandardizedButton)
-  base: `font-medium transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`,
+  base: `font-medium transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-md`,
   
   // Tamanhos (consolidando magic numbers identificados)
   sizes: {

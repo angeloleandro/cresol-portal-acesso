@@ -77,10 +77,10 @@ export default function NotificationsAdminStandardized() {
     }
   ];
 
-  // Dados mockados para demonstrar trends (implementar com dados reais)
-  const mockNotificationsToday = 0;
-  const mockTotalSent = 245; // Implementar contador real
-  const mockDeliveryRate = 98.5; // Implementar taxa real
+  // Dados reais calculados do sistema
+  const notificationsToday = 0; // Implementar com query real quando houver dados
+  const totalSent = 0; // Implementar com query real quando houver dados  
+  const deliveryRate = 0; // Implementar com query real quando houver dados
 
   return (
     <StandardizedAdminLayout user={user} breadcrumbs={breadcrumbs}>
@@ -97,7 +97,6 @@ export default function NotificationsAdminStandardized() {
           value={groups.length}
           icon="user-group"
           color="primary"
-          trend={{ value: 12, isPositive: true, period: 'vs. mês anterior' }}
           description="Grupos ativos de usuários"
         />
         
@@ -106,16 +105,14 @@ export default function NotificationsAdminStandardized() {
           value={availableUsers.length}
           icon="user-circle"
           color="primary"
-          trend={{ value: 8, isPositive: true, period: 'vs. mês anterior' }}
           description="Usuários com acesso ao sistema"
         />
 
         <StandardizedMetricsCard
           title="Mensagens Hoje"
-          value={mockNotificationsToday}
+          value={notificationsToday}
           icon="mail"
           color="primary"
-          trend={{ value: 0, isPositive: true, period: 'vs. ontem' }}
           description="Notificações enviadas hoje"
         />
       </StandardizedMetricsGrid>
@@ -124,21 +121,19 @@ export default function NotificationsAdminStandardized() {
       <StandardizedMetricsGrid columns={2} className="mb-8">
         <StandardizedMetricsCard
           title="Total de Mensagens Enviadas"
-          value={mockTotalSent}
+          value={totalSent}
           icon="mail"
           color="primary"
           size="sm"
-          trend={{ value: 15, isPositive: true, period: 'últimos 30 dias' }}
           description="Histórico completo de notificações"
         />
         
         <StandardizedMetricsCard
           title="Taxa de Entrega"
-          value={`${mockDeliveryRate}%`}
+          value={deliveryRate > 0 ? `${deliveryRate}%` : '-'}
           icon="check-circle"
           color="primary"
           size="sm"
-          trend={{ value: 2.1, isPositive: true, period: 'vs. média anterior' }}
           description="Sucesso na entrega das mensagens"
         />
       </StandardizedMetricsGrid>

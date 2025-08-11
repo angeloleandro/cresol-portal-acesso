@@ -96,7 +96,7 @@ const HeroUIAgenciesDropdown = memo(({ pathname, agencies }: HeroUIAgenciesDropd
         shouldFlip={true}
         shouldCloseOnBlur={true}
         classNames={{
-          content: "min-w-[320px] max-h-[75vh] min-h-[200px] bg-white border border-default-200 shadow-xl overflow-hidden z-50",
+          content: "min-w-[320px] max-h-[75vh] min-h-[200px] bg-white border-0 rounded-md shadow-xl overflow-hidden z-50 p-0",
         }}
       >
       <DropdownTrigger>
@@ -131,6 +131,10 @@ const HeroUIAgenciesDropdown = memo(({ pathname, agencies }: HeroUIAgenciesDropd
             "rounded-md",
             "text-default-700",
             "transition-colors",
+            "border-0",
+            "outline-none",
+            "ring-0",
+            "shadow-none",
             "data-[hover=true]:bg-primary",
             "data-[hover=true]:text-white",
             "data-[selectable=true]:focus:bg-primary", 
@@ -142,6 +146,10 @@ const HeroUIAgenciesDropdown = memo(({ pathname, agencies }: HeroUIAgenciesDropd
             "data-[focus]:border-none",
             "data-[focus-visible]:outline-none",
             "data-[focus-visible]:border-none",
+            "data-[focus-visible]:ring-0",
+            "data-[focus-visible]:shadow-none",
+            "before:hidden",
+            "after:hidden"
           ],
         }}
       >

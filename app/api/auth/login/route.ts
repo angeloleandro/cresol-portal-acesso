@@ -3,6 +3,9 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Force dynamic rendering - this route requires authentication
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const { email, password } = await request.json();
 

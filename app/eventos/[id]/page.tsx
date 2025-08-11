@@ -194,16 +194,16 @@ export default function EventoDetalhePage() {
         {/* Cabeçalho do evento */}
         <div className="mb-6">
           <div className="flex items-center space-x-2 mb-3">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
               Evento
             </span>
             {event.sector_name && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-gray-100 text-gray-800">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200/60">
                 {event.sector_name}
               </span>
             )}
             {event.is_featured && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                 Destaque
               </span>
             )}
@@ -285,7 +285,7 @@ export default function EventoDetalhePage() {
                   className="block bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-primary/30 transition-colors"
                 >
                   <div className="p-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary mb-2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 mb-2">
                       Evento
                     </span>
                     <h3 className="text-base font-semibold text-cresol-gray mb-2 line-clamp-2">{item.title}</h3>

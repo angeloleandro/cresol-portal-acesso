@@ -339,7 +339,7 @@ export default function EventCalendar() {
                       className="block bg-white border border-cresol-gray-light rounded-lg overflow-hidden hover:border-primary/30 transition-colors p-4"
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                           {event.sector_name || 'Evento'}
                         </span>
                         {event.is_featured && (

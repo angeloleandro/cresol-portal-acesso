@@ -357,7 +357,7 @@ export function CompactEmptyState({
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="text-xs text-primary hover:text-primary-dark font-medium transition-colors"
+          className="text-xs text-primary hover:text-primary-dark font-medium transition-colors rounded-md px-2 py-1"
         >
           {actionLabel}
         </button>
@@ -440,7 +440,7 @@ export function ErrorRecoveryEmptyState({
         {onReport && (
           <button
             onClick={onReport}
-            className="px-4 py-2 text-red-600 text-sm font-medium hover:text-red-800 transition-colors"
+            className="px-4 py-2 text-red-600 text-sm font-medium hover:text-red-800 transition-colors rounded-md"
           >
             Reportar problema
           </button>

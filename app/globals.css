@@ -2709,3 +2709,332 @@ button[variant="light"][data-hover="true"] {
   border: none !important;
   box-shadow: none !important;
 }
+
+/* 🚨 SOLUÇÃO DEFINITIVA - REMOVER TODAS AS BORDAS DOS DROPDOWNS */
+/* Target ALL possible dropdown elements with maximum specificity */
+
+/* Remove all borders from dropdown items - NUCLEAR APPROACH */
+.nextui-dropdown [role="menuitem"],
+.nextui-dropdown-content [role="menuitem"],
+.nextui-dropdown-menu [role="menuitem"],
+[data-nextui="dropdown"] [role="menuitem"],
+[role="menu"] [role="menuitem"],
+[role="listbox"] [role="option"],
+[data-slot="item"],
+.nextui-dropdown-item,
+[class*="dropdown"] [role="menuitem"],
+[class*="menu"] [role="menuitem"] {
+  outline: none !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
+  border-image: none !important;
+}
+
+/* Remove borders from ALL states - hover, focus, active, pressed */
+.nextui-dropdown [role="menuitem"]:hover,
+.nextui-dropdown [role="menuitem"]:focus,
+.nextui-dropdown [role="menuitem"]:active,
+.nextui-dropdown [role="menuitem"][data-hover="true"],
+.nextui-dropdown [role="menuitem"][data-focus="true"],
+.nextui-dropdown [role="menuitem"][data-pressed="true"],
+.nextui-dropdown [role="menuitem"][data-focus-visible="true"],
+.nextui-dropdown-content [role="menuitem"]:hover,
+.nextui-dropdown-content [role="menuitem"]:focus,
+.nextui-dropdown-content [role="menuitem"]:active,
+.nextui-dropdown-content [role="menuitem"][data-hover="true"],
+.nextui-dropdown-content [role="menuitem"][data-focus="true"],
+.nextui-dropdown-content [role="menuitem"][data-pressed="true"],
+.nextui-dropdown-content [role="menuitem"][data-focus-visible="true"],
+[data-nextui="dropdown"] [role="menuitem"]:hover,
+[data-nextui="dropdown"] [role="menuitem"]:focus,
+[data-nextui="dropdown"] [role="menuitem"][data-hover="true"],
+[data-nextui="dropdown"] [role="menuitem"][data-focus="true"],
+[data-nextui="dropdown"] [role="menuitem"][data-pressed="true"],
+[role="menu"] [role="menuitem"]:hover,
+[role="menu"] [role="menuitem"]:focus,
+[role="menu"] [role="menuitem"][data-hover="true"],
+[role="menu"] [role="menuitem"][data-focus="true"],
+[role="listbox"] [role="option"]:hover,
+[role="listbox"] [role="option"]:focus,
+[role="listbox"] [role="option"][data-hover="true"],
+[role="listbox"] [role="option"][data-focus="true"] {
+  outline: none !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  box-shadow: none !important;
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+/* Remove pseudo-elements that could create separators/borders */
+.nextui-dropdown [role="menuitem"]::before,
+.nextui-dropdown [role="menuitem"]::after,
+.nextui-dropdown-content [role="menuitem"]::before,
+.nextui-dropdown-content [role="menuitem"]::after,
+.nextui-dropdown-menu [role="menuitem"]::before,
+.nextui-dropdown-menu [role="menuitem"]::after,
+[data-nextui="dropdown"] [role="menuitem"]::before,
+[data-nextui="dropdown"] [role="menuitem"]::after,
+[role="menu"] [role="menuitem"]::before,
+[role="menu"] [role="menuitem"]::after,
+[role="listbox"] [role="option"]::before,
+[role="listbox"] [role="option"]::after,
+[data-slot="item"]::before,
+[data-slot="item"]::after {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
+/* Target any element with NextUI classes that might have borders */
+[class*="nextui-dropdown"] *,
+[class*="nextui-menu"] *,
+[class*="nextui-listbox"] * {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove divider-like elements */
+.nextui-dropdown [class*="divider"],
+.nextui-dropdown [class*="separator"],
+.nextui-dropdown-content [class*="divider"],
+.nextui-dropdown-content [class*="separator"],
+[data-nextui="dropdown"] [class*="divider"],
+[data-nextui="dropdown"] [class*="separator"],
+[role="menu"] [class*="divider"],
+[role="menu"] [class*="separator"],
+[role="menu"] hr,
+.nextui-dropdown hr,
+.nextui-dropdown-content hr {
+  display: none !important;
+  height: 0 !important;
+  border: none !important;
+  background: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Override any inherited border styles */
+.nextui-dropdown * {
+  border-style: none !important;
+  border-width: 0 !important;
+  border-color: transparent !important;
+}
+
+/* Force remove any background gradients that might simulate borders */
+.nextui-dropdown [role="menuitem"],
+.nextui-dropdown-content [role="menuitem"],
+[role="menu"] [role="menuitem"] {
+  background-image: none !important;
+  border-image: none !important;
+  background: transparent !important;
+}
+
+/* NUCLEAR APPROACH - Remove all possible border sources */
+/* Target NextUI Dropdown specific selectors */
+[data-slot="base"][class*="dropdown"],
+[data-slot="content"][class*="dropdown"],
+[data-slot="item"][class*="dropdown"],
+div[class*="dropdown-menu"],
+div[class*="dropdown-item"],
+li[class*="dropdown"],
+li[role="menuitem"],
+button[role="menuitem"],
+a[role="menuitem"] {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-style: none !important;
+  border-width: 0px !important;
+  border-color: transparent !important;
+}
+
+/* Target pseudo-elements that create visual separators */
+[data-slot="base"][class*="dropdown"]:before,
+[data-slot="base"][class*="dropdown"]:after,
+[data-slot="content"][class*="dropdown"]:before,
+[data-slot="content"][class*="dropdown"]:after,
+[data-slot="item"][class*="dropdown"]:before,
+[data-slot="item"][class*="dropdown"]:after,
+div[class*="dropdown-menu"]:before,
+div[class*="dropdown-menu"]:after,
+div[class*="dropdown-item"]:before,
+div[class*="dropdown-item"]:after,
+li[class*="dropdown"]:before,
+li[class*="dropdown"]:after,
+li[role="menuitem"]:before,
+li[role="menuitem"]:after,
+button[role="menuitem"]:before,
+button[role="menuitem"]:after,
+a[role="menuitem"]:before,
+a[role="menuitem"]:after {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  background: none !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
+/* Specific NextUI internal classes that might add borders */
+.nextui-c-PJLV, .nextui-c-PJLV-ijgKvby-css,
+[class*="nextui-dropdown-item"], 
+[class*="nextui-listbox-item"],
+[class*="data-"]:not([class*="data-slot"]) {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Target by data attributes */
+[data-hover="true"], [data-focus="true"], [data-pressed="true"], 
+[data-selected="true"], [data-selectable="true"] {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Comprehensive coverage for all possible dropdown states */
+.dropdown-item, .menu-item, .listbox-item,
+[role="option"], [role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"] {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
+  border-image: none !important;
+}
+
+/* Remove focus rings and outlines */
+*[class*="dropdown"] *:focus,
+*[class*="dropdown"] *:focus-visible,
+*[class*="dropdown"] *:focus-within {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  ring: none !important;
+}
+
+/* Handle any remaining border possibilities */
+div[class*="bg-content1"], div[class*="bg-background"], div[class*="bg-default"],
+ul[class*="bg-content1"], ul[class*="bg-background"], ul[class*="bg-default"] {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Target NextUI's internal divider elements that create visual separations */
+[data-slot*="list"] li + li,
+[data-slot*="list"] li + li::before,
+[data-slot*="list"] li + li::after,
+ul li + li,
+ul li + li::before,
+ul li + li::after {
+  border-top: none !important;
+  border-bottom: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove any inherited border from list items */
+[role="menu"] > *,
+[role="listbox"] > *,
+ul[role="menu"] > *,
+ul[role="listbox"] > *,
+div[role="menu"] > *,
+div[role="listbox"] > * {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* Target specific NextUI classes that might add separators */
+.nextui-listbox-item,
+.nextui-menu-item,
+.nextui-dropdown-item,
+[class*="listbox-item"],
+[class*="menu-item"],
+[class*="dropdown-item"] {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove all possible border-related CSS properties */
+*[class*="nextui-"] *,
+*[data-nextui] *,
+*[data-slot] * {
+  border: none !important;
+  border-style: none !important;
+  border-width: 0 !important;
+  border-color: transparent !important;
+  border-image: none !important;
+  border-radius: inherit !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Specific targeting for list separators */
+li:not(:last-child)::after,
+li:not(:first-child)::before,
+[role="menuitem"]:not(:last-child)::after,
+[role="menuitem"]:not(:first-child)::before {
+  display: none !important;
+  content: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  border: none !important;
+  background: none !important;
+}
+
+/* Force override any library-specific border styles */
+.nextui-c-* {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Target Tailwind divide utilities that might be applied */
+.divide-y > * + *,
+.divide-x > * + *,
+*[class*="divide-"] > * + * {
+  border: none !important;
+  border-top: none !important;
+  border-left: none !important;
+}
+
+/* Final nuclear option - target everything inside dropdowns */
+[data-testid*="dropdown"] *,
+[data-testid*="menu"] *,
+[class*="dropdown"] * {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}

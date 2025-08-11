@@ -128,7 +128,7 @@ const GalleryDropdown = memo(({ pathname }: {
         isOpen={isDropdownOpen}
         onOpenChange={setIsDropdownOpen}
         classNames={{
-          content: "min-w-[200px] max-h-[400px] md:max-h-[60vh] bg-white border border-default-200 shadow-lg overflow-y-auto scrollbar-branded focus:outline-none focus:border-none focus:ring-0",
+          content: "min-w-[200px] max-h-[400px] md:max-h-[60vh] bg-white border border-default-200 rounded-md shadow-lg overflow-y-auto scrollbar-branded focus:outline-none focus:border-none focus:ring-0",
         }}
       >
         <DropdownTrigger>
@@ -425,7 +425,7 @@ const UserMenu = memo(({ user, dropdown, onLogout }: {
     onMouseEnter={dropdown.handleOpen}
     onMouseLeave={dropdown.handleClose}
   >
-    <button className="flex items-center text-sm text-white/80 hover:text-white" type="button">
+    <button className="flex items-center text-sm text-white/80 hover:text-white rounded-md px-2 py-1 transition-colors hover:bg-white/10" type="button">
       <span className="mr-2">
         {user?.user_metadata?.full_name || user?.email || 'Usuário'}
       </span>

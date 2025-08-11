@@ -457,13 +457,13 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
                 <div className="mt-2 flex space-x-2">
                   <button
                     onClick={selectAll}
-                    className="text-xs text-primary hover:underline"
+                    className="text-xs text-primary hover:underline rounded-md px-2 py-1"
                   >
                     Selecionar todas visíveis
                   </button>
                   <button
                     onClick={deselectAll}
-                    className="text-xs text-gray-600 hover:underline"
+                    className="text-xs text-gray-600 hover:underline rounded-md px-2 py-1"
                   >
                     Limpar seleção
                   </button>
@@ -527,7 +527,7 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
                             
                             {/* Menu de ações */}
                             <div className="relative group">
-                              <button className="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100">
+                              <button className="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 rounded-md">
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zM12 13a1 1 0 110-2 1 1 0 010 2zM12 20a1 1 0 110-2 1 1 0 010 2z" />
                                 </svg>
@@ -537,13 +537,13 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
                                 <div className="py-1">
                                   <button
                                     onClick={() => notification.read ? markAsUnread(notification.id) : markAsRead(notification.id)}
-                                    className="w-full px-3 py-1 text-left text-sm text-gray-700 hover:bg-gray-100"
+                                    className="w-full px-3 py-1 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-md"
                                   >
                                     {notification.read ? 'Marcar como não lida' : 'Marcar como lida'}
                                   </button>
                                   <button
                                     onClick={() => deleteNotification(notification.id)}
-                                    className="w-full px-3 py-1 text-left text-sm text-red-600 hover:bg-gray-100"
+                                    className="w-full px-3 py-1 text-left text-sm text-red-600 hover:bg-gray-100 rounded-md"
                                   >
                                     Excluir
                                   </button>

@@ -419,7 +419,7 @@ export default function GlobalSearch({
               {showAdvancedButton && (
                 <button
                   onClick={openAdvancedSearch}
-                  className="text-xs text-primary hover:underline mt-1"
+                  className="text-xs text-primary hover:underline mt-1 rounded-md px-2 py-1"
                 >
                   Tentar busca avançada
                 </button>

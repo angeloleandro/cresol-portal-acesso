@@ -502,7 +502,7 @@ export default function AdvancedSearch({
 
               <button
                 onClick={onClose}
-                className="p-3 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-3 text-gray-400 hover:text-gray-600 transition-colors rounded-md"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -680,7 +680,7 @@ export default function AdvancedSearch({
                       locations: [],
                       tags: []
                     })}
-                    className="text-sm text-gray-600 hover:text-gray-800"
+                    className="text-sm text-gray-600 hover:text-gray-800 rounded-md px-2 py-1"
                   >
                     Limpar filtros
                   </button>
@@ -724,7 +724,7 @@ export default function AdvancedSearch({
                           setSearchHistory([]);
                           localStorage.removeItem('search_history');
                         }}
-                        className="text-xs text-red-600 hover:text-red-800 mt-2"
+                        className="text-xs text-red-600 hover:text-red-800 mt-2 rounded-md px-2 py-1"
                       >
                         Limpar histórico
                       </button>

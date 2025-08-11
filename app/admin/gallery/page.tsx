@@ -178,8 +178,8 @@ export default function AdminGallery() {
               <div className="p-4 flex-1 flex flex-col">
                 <h3 className="text-lg font-semibold text-cresol-gray mb-1">{img.title || "(Sem título)"}</h3>
                 <div className="mt-auto flex gap-2 pt-4">
-                  <button className="text-primary hover:underline" onClick={() => setEditImage(img)}>Editar</button>
-                  <button className="text-red-500 hover:underline" onClick={() => handleDeleteClick(img)}>Remover</button>
+                  <button className="text-primary hover:underline rounded-md px-2 py-1" onClick={() => setEditImage(img)}>Editar</button>
+                  <button className="text-red-500 hover:underline rounded-md px-2 py-1" onClick={() => handleDeleteClick(img)}>Remover</button>
                 </div>
               </div>
             </div>

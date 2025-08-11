@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { StandardizedButton } from '@/app/components/admin';
 import StandardizedTabs from '@/app/components/admin/StandardizedTabs';
+import { 
+  Dropdown, 
+  DropdownTrigger, 
+  DropdownMenu, 
+  DropdownItem, 
+  Button 
+} from '@nextui-org/react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ConfirmationModal from '../components/ui/ConfirmationModal';
@@ -341,16 +348,21 @@ export default function NotificationsPage() {
   };
 
   // Funções auxiliares
-  const getTypeIcon = (type: Notification['type']) => {
-    const iconMap = {
-      success: { icon: 'check' as const, color: 'text-green-500' },
-      warning: { icon: 'triangle-alert' as const, color: 'text-yellow-500' },
-      error: { icon: 'close' as const, color: 'text-red-500' },
-      system: { icon: 'settings' as const, color: 'text-purple-500' },
-      info: { icon: 'bell' as const, color: 'text-blue-500' }
+  const getTypeConfig = (type: Notification['type'] | 'all') => {
+    const configMap = {
+      all: { icon: 'bell' as const, color: 'text-gray-500', label: 'Todos os tipos' },
+      success: { icon: 'check' as const, color: 'text-green-500', label: 'Sucesso' },
+      warning: { icon: 'triangle-alert' as const, color: 'text-yellow-500', label: 'Aviso' },
+      error: { icon: 'close' as const, color: 'text-red-500', label: 'Erro' },
+      system: { icon: 'settings' as const, color: 'text-purple-500', label: 'Sistema' },
+      info: { icon: 'bell' as const, color: 'text-blue-500', label: 'Informação' }
     };
     
-    const config = iconMap[type] || iconMap.info;
+    return configMap[type] || configMap.info;
+  };
+
+  const getTypeIcon = (type: Notification['type']) => {
+    const config = getTypeConfig(type);
     return <Icon name={config.icon} className={`h-5 w-5 ${config.color}`} />;
   };
 
@@ -506,18 +518,72 @@ export default function NotificationsPage() {
 
             {/* Filtros por Tipo */}
             <div className="flex justify-end">
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as any)}
-                className="input max-w-xs"
+              <Dropdown 
+                placement="bottom-end"
+                classNames={{
+                  content: "border-0 shadow-lg bg-white rounded-lg overflow-hidden p-0"
+                }}
               >
-                <option value="all">Todos os tipos</option>
-                <option value="info">Informação</option>
-                <option value="success">Sucesso</option>
-                <option value="warning">Aviso</option>
-                <option value="error">Erro</option>
-                <option value="system">Sistema</option>
-              </select>
+                <DropdownTrigger>
+                  <Button
+                    variant="bordered"
+                    className="max-w-xs justify-between border-gray-200 hover:border-gray-300"
+                    startContent={
+                      <Icon 
+                        name={getTypeConfig(typeFilter).icon} 
+                        className={`h-4 w-4 ${getTypeConfig(typeFilter).color}`} 
+                      />
+                    }
+                    endContent={<Icon name="chevron-down" className="h-4 w-4" />}
+                  >
+                    {getTypeConfig(typeFilter).label}
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="Filtro por tipo de notificação"
+                  selectedKeys={new Set([typeFilter])}
+                  selectionMode="single"
+                  onSelectionChange={(keys) => {
+                    const selectedKey = Array.from(keys)[0] as string;
+                    setTypeFilter(selectedKey as any);
+                  }}
+                  itemClasses={{
+                    base: [
+                      "rounded-none",
+                      "border-0",
+                      "outline-none",
+                      "ring-0",
+                      "shadow-none",
+                      "data-[hover=true]:bg-primary/10",
+                      "data-[selected=true]:bg-primary/20",
+                      "data-[focus=true]:bg-primary/10",
+                      "data-[focus-visible=true]:bg-primary/10",
+                      "data-[focus-visible=true]:outline-none",
+                      "data-[focus-visible=true]:ring-0",
+                      "data-[focus-visible=true]:shadow-none",
+                      "transition-colors",
+                      "first:border-t-0",
+                      "last:border-b-0",
+                      "before:hidden",
+                      "after:hidden"
+                    ]
+                  }}
+                >
+                  {['all', 'info', 'success', 'warning', 'error', 'system'].map((type) => {
+                    const config = getTypeConfig(type as any);
+                    return (
+                      <DropdownItem 
+                        key={type} 
+                        startContent={
+                          <Icon name={config.icon} className={`h-4 w-4 ${config.color}`} />
+                        }
+                      >
+                        {config.label}
+                      </DropdownItem>
+                    );
+                  })}
+                </DropdownMenu>
+              </Dropdown>
             </div>
 
             {/* Ações em lote */}

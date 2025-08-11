@@ -212,7 +212,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
             >
               <div className="flex flex-col">
                 <div className="flex justify-between items-start mb-1.5">
-                  <span className="badge-text text-white" style={{ backgroundColor: 'var(--color-primary)', padding: '0.25rem 0.625rem', borderRadius: 'var(--border-radius-full)' }}>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                     Evento
                   </span>
                   {event.is_featured && (

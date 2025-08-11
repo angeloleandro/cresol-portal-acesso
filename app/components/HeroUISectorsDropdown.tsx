@@ -170,7 +170,7 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
         shouldFlip={true}
         shouldCloseOnBlur={true}
         classNames={{
-          content: "w-[280px] max-h-[75vh] min-h-[200px] bg-white border border-default-200 shadow-xl overflow-hidden z-50",
+          content: "w-[280px] max-h-[75vh] min-h-[200px] bg-white border-0 rounded-md shadow-xl overflow-hidden z-50 p-0",
         }}
       >
       <DropdownTrigger>
@@ -206,10 +206,19 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
             "rounded-md",
             "text-default-700",
             "transition-colors",
+            "border-0",
+            "outline-none",
+            "ring-0",
+            "shadow-none",
             "data-[hover=true]:bg-primary",
             "data-[hover=true]:text-white",
             "data-[selectable=true]:focus:bg-primary", 
             "data-[selectable=true]:focus:text-white",
+            "data-[focus-visible=true]:outline-none",
+            "data-[focus-visible=true]:ring-0",
+            "data-[focus-visible=true]:shadow-none",
+            "before:hidden",
+            "after:hidden"
           ],
         }}
       >

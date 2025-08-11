@@ -750,7 +750,7 @@ export default function SubsectorManagePage() {
               <span className="text-sm text-gray-600">
                 {profile?.full_name || profile?.email}
               </span>
-              <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+              <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors rounded-md hover:bg-gray-50">
                 Sair
               </button>
             </div>
