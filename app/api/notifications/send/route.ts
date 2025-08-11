@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       title,
       message,
       type,
-      sender_id: user.id
+      sent_by: user.id
     };
 
     if (sectorId) {
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     if (recipientIds.length > 0) {
       const recipientData = recipientIds.map(userId => ({
         notification_id: notification.id,
-        user_id: userId
+        recipient_id: userId
       }));
 
       const { error: recipientsError } = await supabase

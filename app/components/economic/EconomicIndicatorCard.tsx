@@ -40,7 +40,8 @@ export default function EconomicIndicatorCard({
     .toUpperCase()
     .trim();
   const highlightedTitles = new Set(['COOPERADOS', 'ATIVOS', 'AGENCIAS']);
-  const isHighlighted = highlightedTitles.has(normalize(title));
+  const normalizedTitle = normalize(title);
+  const isHighlighted = highlightedTitles.has(normalizedTitle);
 
   return (
     <article
@@ -58,8 +59,7 @@ export default function EconomicIndicatorCard({
         
         {/* Value */}
         <div 
-          className={`economic-indicator-value ${isHighlighted ? 'text-primary' : ''}`}
-          style={isHighlighted ? { color: 'var(--color-primary)' } : undefined}
+          className={`economic-indicator-value ${isHighlighted ? 'highlighted-value' : ''}`}
           aria-label={`Valor: ${value}`}
         >
           {value}

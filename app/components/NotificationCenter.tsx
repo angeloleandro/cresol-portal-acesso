@@ -66,13 +66,23 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('notifications')
+        .from('notification_recipients')
         .select(`
-          *,
-          sender:profiles(full_name)
+          read_at,
+          notifications!inner (
+            id,
+            title,
+            message,
+            type,
+            priority,
+            created_at,
+            action_url,
+            sent_by,
+            sender:profiles!notifications_sent_by_fkey(full_name)
+          )
         `)
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
+        .eq('recipient_id', userId)
+        .order('notifications(created_at)', { ascending: false })
         .limit(50);
 
       if (error) {
@@ -121,10 +131,11 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
           }
         ]);
       } else {
-        const formattedNotifications = data?.map(notif => ({
-          ...notif,
-          sender_name: notif.sender?.full_name || 'Sistema',
-          priority: notif.priority || 'normal'
+        const formattedNotifications = data?.map((recipient: any) => ({
+          ...recipient.notifications,
+          read: !!recipient.read_at,
+          sender_name: recipient.notifications.sender?.full_name || 'Sistema',
+          priority: recipient.notifications.priority || 'normal'
         })) || [];
         setNotifications(formattedNotifications);
       }
@@ -161,9 +172,10 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
   const markAsRead = async (notificationId: string) => {
     try {
       await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', notificationId);
+        .from('notification_recipients')
+        .update({ read_at: new Date().toISOString() })
+        .eq('notification_id', notificationId)
+        .eq('recipient_id', userId);
 
       setNotifications(prev => 
         prev.map(notif => 
@@ -178,9 +190,10 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
   const markAsUnread = async (notificationId: string) => {
     try {
       await supabase
-        .from('notifications')
-        .update({ read: false })
-        .eq('id', notificationId);
+        .from('notification_recipients')
+        .update({ read_at: null })
+        .eq('notification_id', notificationId)
+        .eq('recipient_id', userId);
 
       setNotifications(prev => 
         prev.map(notif => 
@@ -195,9 +208,10 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
   const deleteNotification = async (notificationId: string) => {
     try {
       await supabase
-        .from('notifications')
+        .from('notification_recipients')
         .delete()
-        .eq('id', notificationId);
+        .eq('notification_id', notificationId)
+        .eq('recipient_id', userId);
 
       setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
     } catch (error) {
@@ -211,18 +225,21 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
     try {
       if (action === 'delete') {
         await supabase
-          .from('notifications')
+          .from('notification_recipients')
           .delete()
-          .in('id', selectedIds);
+          .in('notification_id', selectedIds)
+          .eq('recipient_id', userId);
         
         setNotifications(prev => prev.filter(notif => !selectedIds.includes(notif.id)));
       } else {
-        const readValue = action === 'read';
+        const readAtValue = action === 'read' ? new Date().toISOString() : null;
         await supabase
-          .from('notifications')
-          .update({ read: readValue })
-          .in('id', selectedIds);
+          .from('notification_recipients')
+          .update({ read_at: readAtValue })
+          .in('notification_id', selectedIds)
+          .eq('recipient_id', userId);
 
+        const readValue = action === 'read';
         setNotifications(prev => 
           prev.map(notif => 
             selectedIds.includes(notif.id) ? { ...notif, read: readValue } : notif
@@ -240,10 +257,10 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
   const markAllAsRead = async () => {
     try {
       await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('user_id', userId)
-        .eq('read', false);
+        .from('notification_recipients')
+        .update({ read_at: new Date().toISOString() })
+        .eq('recipient_id', userId)
+        .is('read_at', null);
 
       setNotifications(prev => 
         prev.map(notif => ({ ...notif, read: true }))

@@ -467,6 +467,63 @@ div *::-webkit-scrollbar-button {
   top: -10000px !important;
 }
 
+/* NextUI Dropdown Overrides - CLEAN TRACK (remove internal line) */
+[data-nextui="dropdown"] .scrollbar-branded,
+.nextui-dropdown-content .scrollbar-branded,
+.nextui-c-dropdown-content .scrollbar-branded {
+  /* Make track invisible while keeping thumb visible */
+  scrollbar-color: var(--scrollbar-brand-thumb) transparent !important;
+}
+
+[data-nextui="dropdown"] .scrollbar-branded::-webkit-scrollbar-track,
+.nextui-dropdown-content .scrollbar-branded::-webkit-scrollbar-track,
+.nextui-c-dropdown-content .scrollbar-branded::-webkit-scrollbar-track {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important; /* avoid gutters that look like a vertical line */
+}
+
+/* Extra webkit pieces that can render a hairline */
+[data-nextui="dropdown"] .scrollbar-branded::-webkit-scrollbar-track-piece,
+.nextui-dropdown-content .scrollbar-branded::-webkit-scrollbar-track-piece,
+.nextui-c-dropdown-content .scrollbar-branded::-webkit-scrollbar-track-piece,
+[data-nextui="dropdown"] .scrollbar-branded::-webkit-scrollbar-corner,
+.nextui-dropdown-content .scrollbar-branded::-webkit-scrollbar-corner,
+.nextui-c-dropdown-content .scrollbar-branded::-webkit-scrollbar-corner {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-nextui="dropdown"] .scrollbar-branded::-webkit-scrollbar,
+.nextui-dropdown-content .scrollbar-branded::-webkit-scrollbar,
+.nextui-c-dropdown-content .scrollbar-branded::-webkit-scrollbar {
+  background: transparent !important;
+}
+
+[data-nextui="dropdown"] .scrollbar-branded::-webkit-scrollbar,
+.nextui-dropdown-content .scrollbar-branded::-webkit-scrollbar,
+.nextui-c-dropdown-content .scrollbar-branded::-webkit-scrollbar {
+  /* Slightly reduce width for dropdowns so the track area is minimal */
+  width: 16px !important;
+}
+
+/* Also target any overflow auto area inside dropdowns (defensive) */
+[data-nextui="dropdown"] [class*="overflow-y-auto"]::-webkit-scrollbar-track,
+[data-nextui="dropdown"] [style*="overflow-y: auto"]::-webkit-scrollbar-track {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+[data-nextui="dropdown"] [class*="overflow-y-auto"]::-webkit-scrollbar,
+[data-nextui="dropdown"] [style*="overflow-y: auto"]::-webkit-scrollbar {
+  background: transparent !important;
+  width: 16px !important;
+}
+
 /* Modal and Dialog Overrides - FORCE NO ARROWS */
 [data-testid*="modal"] ::-webkit-scrollbar-button,
 [role="dialog"] ::-webkit-scrollbar-button,
@@ -1104,6 +1161,11 @@ html {
 
 .btn-outline:hover {
   border-color: rgba(210, 210, 206, 0.7);
+}
+
+/* Inputs com ícone à esquerda (utilitário global) */
+.input-with-left-icon {
+  padding-left: 2.75rem !important; /* 44px - garante espaço para ícone 20px + folga */
 }
 
 /* Elementos de Formulário - Design System */
@@ -1875,8 +1937,19 @@ h1, h2, h3, h4, h5, h6 {
   transition: color 250ms ease-out;
 }
 
+/* Highlighted values (COOPERADOS, ATIVOS, AGÊNCIAS) sempre em laranja */
+.economic-indicator-value.highlighted-value {
+  color: #F58220 !important;
+  font-weight: 700 !important;
+}
+
 .economic-indicator-card:hover .economic-indicator-value {
   color: var(--color-primary);
+}
+
+/* Manter laranja mesmo no hover para valores destacados */
+.economic-indicator-card:hover .economic-indicator-value.highlighted-value {
+  color: #F58220 !important;
 }
 
 .economic-indicator-title {
@@ -2524,5 +2597,115 @@ input[placeholder*="Pesquisar"]:focus-within {
   background-color: white !important;
   border-color: #d1d5db !important;
   outline: none !important;
+  box-shadow: none !important;
+}
+
+/* ========================================
+   NAVBAR & DROPDOWN OUTLINE REMOVAL
+   Remove unwanted outlines from navbar items and dropdowns
+======================================== */
+
+/* Remove outline from Galeria button in navbar */
+button[data-slot="trigger"],
+.nextui-dropdown-trigger,
+button[role="button"]:has([data-slot="trigger"]),
+button[variant="light"] {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove focus states from navbar buttons */
+button[data-slot="trigger"]:focus,
+button[data-slot="trigger"]:focus-visible,
+.nextui-dropdown-trigger:focus,
+.nextui-dropdown-trigger:focus-visible,
+button[role="button"]:focus,
+button[role="button"]:focus-visible,
+button[variant="light"]:focus,
+button[variant="light"]:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+/* Remove hover states from navbar buttons */
+button[data-slot="trigger"]:hover,
+button[data-slot="trigger"][data-hover="true"],
+.nextui-dropdown-trigger:hover,
+.nextui-dropdown-trigger[data-hover="true"],
+button[role="button"]:hover,
+button[role="button"][data-hover="true"],
+button[variant="light"]:hover,
+button[variant="light"][data-hover="true"] {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+/* Remove internal borders from dropdown content */
+[data-slot="content"],
+.nextui-dropdown-content,
+[role="menu"],
+[role="listbox"],
+[data-popper-placement] {
+  border: 1px solid #e5e7eb !important; /* Keep outer border but make it thin */
+}
+
+/* Remove internal borders and outlines from dropdown items */
+[data-slot="content"] [role="menuitem"],
+.nextui-dropdown-content [role="menuitem"], 
+[role="menu"] [role="menuitem"],
+[role="listbox"] [role="option"] {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove focus borders from dropdown items */
+[data-slot="content"] [role="menuitem"]:focus,
+[data-slot="content"] [role="menuitem"]:focus-visible,
+.nextui-dropdown-content [role="menuitem"]:focus,
+.nextui-dropdown-content [role="menuitem"]:focus-visible,
+[role="menu"] [role="menuitem"]:focus,
+[role="menu"] [role="menuitem"]:focus-visible,
+[role="listbox"] [role="option"]:focus,
+[role="listbox"] [role="option"]:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove data-focus and data-pressed borders */
+[data-focus="true"],
+[data-focus-visible="true"],
+[data-pressed="true"],
+[data-hover="true"] {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove any remaining NextUI focus rings */
+.nextui-c-button,
+.nextui-button,
+[class*="nextui"] button,
+[class*="nextui"] [role="button"] {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.nextui-c-button:focus,
+.nextui-c-button:focus-visible,
+.nextui-button:focus,
+.nextui-button:focus-visible,
+[class*="nextui"] button:focus,
+[class*="nextui"] button:focus-visible,
+[class*="nextui"] [role="button"]:focus,
+[class*="nextui"] [role="button"]:focus-visible {
+  outline: none !important;
+  border: none !important;
   box-shadow: none !important;
 }

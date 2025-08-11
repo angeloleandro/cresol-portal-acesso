@@ -66,7 +66,7 @@ const HeroUIAgenciesDropdown = memo(({ pathname, agencies }: HeroUIAgenciesDropd
     type: 'link',
     href: '/setores/5463d1ba-c290-428e-b39e-d7ad9c66eb71',
     label: 'Todas as Agências',
-    className: 'font-medium border-b border-default-200 mb-1'
+    className: 'font-medium'
   });
 
   // Adicionar cada agência
@@ -105,6 +105,9 @@ const HeroUIAgenciesDropdown = memo(({ pathname, agencies }: HeroUIAgenciesDropd
           className={`
             h-auto p-0 min-w-0 data-[hover]:bg-transparent
             text-sm font-medium flex items-center gap-1
+            focus:outline-none focus:ring-0 focus:border-none
+            data-[focus]:outline-none data-[focus]:border-none data-[focus]:ring-0
+            data-[focus-visible]:outline-none data-[focus-visible]:border-none data-[focus-visible]:ring-0
             ${isActive ? 'text-white' : 'text-white/80 hover:text-white'}
           `}
           as={Link}
@@ -122,7 +125,7 @@ const HeroUIAgenciesDropdown = memo(({ pathname, agencies }: HeroUIAgenciesDropd
 
       <DropdownMenu
         aria-label="Menu de Agências"
-        className="p-1 pr-2 max-h-[70vh] overflow-y-auto scrollbar-branded"
+        className="p-1 pr-2 max-h-[70vh] overflow-y-auto scrollbar-branded focus:outline-none"
         itemClasses={{
           base: [
             "rounded-md",
@@ -132,6 +135,13 @@ const HeroUIAgenciesDropdown = memo(({ pathname, agencies }: HeroUIAgenciesDropd
             "data-[hover=true]:text-white",
             "data-[selectable=true]:focus:bg-primary", 
             "data-[selectable=true]:focus:text-white",
+            "focus:outline-none",
+            "focus:border-none",
+            "focus:ring-0",
+            "data-[focus]:outline-none",
+            "data-[focus]:border-none",
+            "data-[focus-visible]:outline-none",
+            "data-[focus-visible]:border-none",
           ],
         }}
       >

@@ -126,7 +126,7 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
     type: 'link',
     href: '/setores',
     label: 'Todos os Setores',
-    className: 'font-medium border-b border-default-200 mb-1'
+    className: 'font-medium'
   });
 
   // Adicionar cada setor
@@ -179,6 +179,9 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
           className={`
             h-auto p-0 min-w-0 data-[hover]:bg-transparent
             text-sm font-medium flex items-center gap-1
+            focus:outline-none focus:ring-0 focus:border-none
+            data-[focus]:outline-none data-[focus]:border-none data-[focus]:ring-0
+            data-[focus-visible]:outline-none data-[focus-visible]:border-none data-[focus-visible]:ring-0
             ${pathname.startsWith('/setores') ? 'text-white' : 'text-white/80 hover:text-white'}
           `}
           as={Link}

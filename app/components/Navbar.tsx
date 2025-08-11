@@ -128,7 +128,7 @@ const GalleryDropdown = memo(({ pathname }: {
         isOpen={isDropdownOpen}
         onOpenChange={setIsDropdownOpen}
         classNames={{
-          content: "min-w-[200px] max-h-[400px] md:max-h-[60vh] bg-white border border-default-200 shadow-lg overflow-y-auto scrollbar-branded",
+          content: "min-w-[200px] max-h-[400px] md:max-h-[60vh] bg-white border border-default-200 shadow-lg overflow-y-auto scrollbar-branded focus:outline-none focus:border-none focus:ring-0",
         }}
       >
         <DropdownTrigger>
@@ -137,6 +137,9 @@ const GalleryDropdown = memo(({ pathname }: {
             className={`
               h-auto p-0 min-w-0 data-[hover]:bg-transparent
               text-sm font-medium flex items-center gap-1
+              focus:outline-none focus:ring-0 focus:border-none
+              data-[focus]:outline-none data-[focus]:border-none data-[focus]:ring-0
+              data-[focus-visible]:outline-none data-[focus-visible]:border-none data-[focus-visible]:ring-0
               ${isActive ? 'text-white' : 'text-white/80 hover:text-white'}
             `}
             endContent={
@@ -152,7 +155,7 @@ const GalleryDropdown = memo(({ pathname }: {
 
         <DropdownMenu
           aria-label="Menu da Galeria"
-          className="p-1"
+          className="p-1 focus:outline-none"
           itemClasses={{
             base: [
               "rounded-md",
@@ -162,6 +165,13 @@ const GalleryDropdown = memo(({ pathname }: {
               "data-[hover=true]:text-white",
               "data-[selectable=true]:focus:bg-primary", 
               "data-[selectable=true]:focus:text-white",
+              "focus:outline-none",
+              "focus:border-none",
+              "focus:ring-0",
+              "data-[focus]:outline-none",
+              "data-[focus]:border-none",
+              "data-[focus-visible]:outline-none",
+              "data-[focus-visible]:border-none",
             ],
           }}
         >

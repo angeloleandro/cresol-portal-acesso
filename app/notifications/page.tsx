@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { StandardizedButton } from '@/app/components/admin';
+import StandardizedTabs from '@/app/components/admin/StandardizedTabs';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ConfirmationModal from '../components/ui/ConfirmationModal';
@@ -67,13 +68,24 @@ export default function NotificationsPage() {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('notifications')
+        .from('notification_recipients')
         .select(`
-          *,
-          sender:profiles(full_name)
+          read_at,
+          notifications!inner (
+            id,
+            title,
+            message,
+            type,
+            priority,
+            created_at,
+            expires_at,
+            action_url,
+            sent_by,
+            sender:profiles!notifications_sent_by_fkey(full_name)
+          )
         `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .eq('recipient_id', user.id)
+        .order('notifications(created_at)', { ascending: false });
 
       if (error) {
         console.error('Erro ao buscar notificações:', error);
@@ -131,10 +143,11 @@ export default function NotificationsPage() {
           }
         ]);
       } else {
-        const formattedNotifications = data?.map(notif => ({
-          ...notif,
-          sender_name: notif.sender?.full_name || 'Sistema',
-          priority: notif.priority || 'normal'
+        const formattedNotifications = data?.map((recipient: any) => ({
+          ...recipient.notifications,
+          read: !!recipient.read_at,
+          sender_name: recipient.notifications.sender?.full_name || 'Sistema',
+          priority: recipient.notifications.priority || 'normal'
         })) || [];
         setNotifications(formattedNotifications);
       }
@@ -186,10 +199,12 @@ export default function NotificationsPage() {
   // Marcar como lida/não lida
   const markAsRead = async (notificationId: string, read: boolean = true) => {
     try {
+      const readAtValue = read ? new Date().toISOString() : null;
       await supabase
-        .from('notifications')
-        .update({ read })
-        .eq('id', notificationId);
+        .from('notification_recipients')
+        .update({ read_at: readAtValue })
+        .eq('notification_id', notificationId)
+        .eq('recipient_id', user?.id);
 
       setNotifications(prev => 
         prev.map(notif => 
@@ -205,10 +220,10 @@ export default function NotificationsPage() {
   const markAllAsRead = async () => {
     try {
       await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('user_id', user?.id)
-        .eq('read', false);
+        .from('notification_recipients')
+        .update({ read_at: new Date().toISOString() })
+        .eq('recipient_id', user?.id)
+        .is('read_at', null);
 
       setNotifications(prev => 
         prev.map(notif => ({ ...notif, read: true }))
@@ -230,9 +245,10 @@ export default function NotificationsPage() {
     setIsDeleting(true);
     try {
       await supabase
-        .from('notifications')
+        .from('notification_recipients')
         .delete()
-        .eq('id', notificationToDelete.id);
+        .eq('notification_id', notificationToDelete.id)
+        .eq('recipient_id', user?.id);
 
       setNotifications(prev => prev.filter(notif => notif.id !== notificationToDelete.id));
       setShowDeleteModal(false);
@@ -260,10 +276,12 @@ export default function NotificationsPage() {
 
     try {
       const readValue = action === 'read';
+      const readAtValue = readValue ? new Date().toISOString() : null;
       await supabase
-        .from('notifications')
-        .update({ read: readValue })
-        .in('id', selectedIds);
+        .from('notification_recipients')
+        .update({ read_at: readAtValue })
+        .in('notification_id', selectedIds)
+        .eq('recipient_id', user?.id);
 
       setNotifications(prev => 
         prev.map(notif => 
@@ -283,9 +301,10 @@ export default function NotificationsPage() {
     setIsBulkDeleting(true);
     try {
       await supabase
-        .from('notifications')
+        .from('notification_recipients')
         .delete()
-        .in('id', selectedIds);
+        .in('notification_id', selectedIds)
+        .eq('recipient_id', user?.id);
       
       setNotifications(prev => prev.filter(notif => !selectedIds.includes(notif.id)));
       setSelectedNotifications(new Set());
@@ -447,36 +466,46 @@ export default function NotificationsPage() {
             {/* Busca */}
             <div className="mb-4">
               <div className="relative">
-                <Icon name="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-cresol-gray" />
+                <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-cresol-gray pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Buscar notificações..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="input pl-10"
+                  className="input input-with-left-icon"
                 />
               </div>
             </div>
 
-            {/* Filtros */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex flex-wrap gap-2">
-                {['all', 'unread', 'read'].map((filterOption) => (
-                  <button
-                    key={filterOption}
-                    onClick={() => setFilter(filterOption as any)}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      filter === filterOption
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-100 text-cresol-gray hover:bg-gray-200'
-                    }`}
-                  >
-                    {filterOption === 'all' ? 'Todas' : 
-                     filterOption === 'unread' ? 'Não lidas' : 'Lidas'}
-                  </button>
-                ))}
-              </div>
+            {/* Filtros por Status */}
+            <StandardizedTabs
+              tabs={[
+                { 
+                  id: 'all', 
+                  label: 'Todas', 
+                  count: notifications.length,
+                  icon: 'bell'
+                },
+                { 
+                  id: 'unread', 
+                  label: 'Não lidas', 
+                  count: notifications.filter(n => !n.read).length,
+                  icon: 'mail'
+                },
+                { 
+                  id: 'read', 
+                  label: 'Lidas', 
+                  count: notifications.filter(n => n.read).length,
+                  icon: 'check'
+                }
+              ]}
+              activeTab={filter}
+              onChange={(tabId) => setFilter(tabId as any)}
+              className="mb-4"
+            />
 
+            {/* Filtros por Tipo */}
+            <div className="flex justify-end">
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value as any)}
