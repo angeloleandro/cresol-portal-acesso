@@ -6,7 +6,9 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Collection } from '@/lib/types/collections';
 import CollectionLoading from '@/app/components/Collections/Collection.Loading';
-import { cn } from '@/lib/utils/collections';
+import { cn } from '@/lib/utils/cn';
+import Icon from '@/app/components/icons/Icon';
+import { createClient } from '@/lib/supabase/client';
 
 // Supported file types
 const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
@@ -60,6 +62,7 @@ interface UploadFile {
   error?: string;
   url?: string;
   thumbnail_url?: string;
+  itemId?: string; // Database ID from upload response
 }
 
 interface BulkUploadProps {
@@ -211,6 +214,14 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
     updateFile(uploadFile.id, { status: 'uploading', progress: 0 });
 
     try {
+      // Get current session for authentication
+      const supabase = createClient();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.access_token) {
+        throw new Error('Sessão não encontrada. Faça login novamente.');
+      }
+
       // Create form data
       const formData = new FormData();
       formData.append('file', uploadFile.file);
@@ -251,7 +262,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                     title: response.title || uploadFile.name.replace(/\.[^/.]+$/, ''),
                     video_url: response.video_url,
                     thumbnail_url: response.thumbnail_url,
-                    upload_type: response.upload_type || 'file',
+                    upload_type: response.upload_type || 'direct',
                   };
 
               updateFile(uploadFile.id, {
@@ -259,6 +270,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                 progress: 100,
                 url: uploadFile.type === 'image' ? response.image_url : response.video_url,
                 thumbnail_url: uploadFile.type === 'video' ? response.thumbnail_url : undefined,
+                itemId: response.id, // Store the actual database ID
               });
 
               resolve();
@@ -270,12 +282,21 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
               reject(error);
             }
           } else {
-            const errorMsg = xhr.responseText ? JSON.parse(xhr.responseText).error : 'Erro no upload';
-            updateFile(uploadFile.id, {
-              status: 'error',
-              error: errorMsg,
-            });
-            reject(new Error(errorMsg));
+            try {
+              const errorResponse = JSON.parse(xhr.responseText);
+              const errorMsg = errorResponse.error || 'Erro no upload';
+              updateFile(uploadFile.id, {
+                status: 'error',
+                error: errorMsg,
+              });
+              reject(new Error(errorMsg));
+            } catch {
+              updateFile(uploadFile.id, {
+                status: 'error',
+                error: `Erro ${xhr.status}: ${xhr.statusText}`,
+              });
+              reject(new Error(`Erro ${xhr.status}: ${xhr.statusText}`));
+            }
           }
         });
 
@@ -287,7 +308,9 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
           reject(new Error('Falha na conexão'));
         });
 
+        // Set up request with authentication
         xhr.open('POST', endpoint);
+        xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
         xhr.send(formData);
       });
 
@@ -346,30 +369,62 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
     }
 
     try {
-      const items = completedFiles.map(file => ({
-        type: file.type,
-        data: file.type === 'image' 
-          ? {
-              item_id: file.id,
-              title: file.name.replace(/\.[^/.]+$/, ''),
-              image_url: file.url,
-              description: '',
-            }
-          : {
-              item_id: file.id,
-              title: file.name.replace(/\.[^/.]+$/, ''),
-              video_url: file.url,
-              thumbnail_url: file.thumbnail_url,
-              upload_type: 'file',
-            }
-      }));
+      // Send requests directly to collection items API
+      const supabase = createClient();
+      const addPromises = completedFiles.map(async (file, index) => {
+        const response = await fetch(`/api/collections/${collection.id}/items`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({
+            item_id: file.itemId, // Use the actual database ID from upload response
+            item_type: file.type, // 'image' or 'video'
+            order_index: index + 1,
+          }),
+        });
 
-      await onFilesUploaded(items);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Erro ao adicionar item à coleção');
+        }
+
+        return response.json();
+      });
+
+      await Promise.all(addPromises);
+      
+      // Close modal and trigger refresh
       onClose();
       
+      // Optional: Call callback if provided (for backward compatibility)
+      if (onFilesUploaded) {
+        const items = completedFiles.map(file => ({
+          type: file.type,
+          data: {
+            item_id: file.itemId,
+            title: file.name.replace(/\.[^/.]+$/, ''),
+            ...(file.type === 'image' 
+              ? { image_url: file.url }
+              : { 
+                  video_url: file.url,
+                  thumbnail_url: file.thumbnail_url,
+                  upload_type: 'direct' 
+                }
+            )
+          }
+        }));
+        
+        await onFilesUploaded(items);
+      }
+      
     } catch (error: any) {
-      console.error('Error adding files to collection:', error);
       // Keep modal open to allow retry
+      updateFile(completedFiles[0]?.id, {
+        status: 'error',
+        error: error.message || 'Erro ao adicionar à coleção',
+      });
     }
   };
 
@@ -456,8 +511,12 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
               onDrop={handleDrop}
             >
               <div className="space-y-4">
-                <div className="text-4xl">
-                  {isDragOver ? '⬇️' : '📁'}
+                <div className="text-gray-400">
+                  {isDragOver ? (
+                    <Icon name="arrow-down" className="w-12 h-12" />
+                  ) : (
+                    <Icon name="folder" className="w-12 h-12" />
+                  )}
                 </div>
                 
                 <div>
@@ -540,8 +599,12 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                     >
                       {/* File Icon */}
                       <div className="flex-shrink-0">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                          {file.type === 'image' ? '🖼️' : '🎥'}
+                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-gray-500">
+                          {file.type === 'image' ? (
+                            <Icon name="image" className="w-6 h-6" />
+                          ) : (
+                            <Icon name="video" className="w-6 h-6" />
+                          )}
                         </div>
                       </div>
 

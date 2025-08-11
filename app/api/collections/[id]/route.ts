@@ -2,10 +2,8 @@
 // CRUD para coleção específica - Portal Cresol
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { ERROR_MESSAGES } from '@/lib/constants/collections';
-import { validateCollection } from '@/lib/utils/collections';
+import { createClient } from '@/lib/supabase/server';
+import { handleApiError, devLog } from '@/lib/error-handler';
 
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
@@ -16,102 +14,37 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 401 }
-      );
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const collectionId = params.id;
-    const { searchParams } = new URL(request.url);
-    const includeItems = searchParams.get('include_items') === 'true';
 
     // Buscar coleção
-    let query = supabase
+    const { data: collection, error } = await supabase
       .from('collections')
-      .select(`
-        *,
-        profiles!collections_created_by_fkey(id, name)
-      `)
+      .select('*')
       .eq('id', collectionId)
       .single();
 
-    const { data: collection, error } = await query;
-
     if (error || !collection) {
       return NextResponse.json(
-        { error: ERROR_MESSAGES.COLLECTION_NOT_FOUND },
+        { error: 'Coleção não encontrada' },
         { status: 404 }
       );
     }
 
-    let result = { ...collection };
+    devLog.info('Coleção encontrada', { collectionId });
+    return NextResponse.json({ collection });
 
-    // Incluir itens se solicitado
-    if (includeItems) {
-      const { data: items } = await supabase
-        .from('collection_items')
-        .select(`
-          *,
-          gallery_images!collection_items_item_id_fkey(
-            id, title, image_url, is_active, order_index, created_at
-          ),
-          dashboard_videos!collection_items_item_id_fkey(
-            id, title, video_url, thumbnail_url, is_active, 
-            order_index, upload_type, created_at
-          )
-        `)
-        .eq('collection_id', collectionId)
-        .order('order_index', { ascending: true });
-
-      // Processar itens com seus dados
-      const processedItems = items?.map(item => {
-        let itemData = null;
-        
-        if (item.item_type === 'image' && item.gallery_images) {
-          itemData = Array.isArray(item.gallery_images) 
-            ? item.gallery_images[0] 
-            : item.gallery_images;
-        } else if (item.item_type === 'video' && item.dashboard_videos) {
-          itemData = Array.isArray(item.dashboard_videos) 
-            ? item.dashboard_videos[0] 
-            : item.dashboard_videos;
-        }
-
-        return {
-          ...item,
-          item_data: itemData,
-        };
-      }) || [];
-
-      result = {
-        ...result,
-        items: processedItems,
-        item_count: processedItems.length,
-      };
-    } else {
-      // Apenas contar itens
-      const { count } = await supabase
-        .from('collection_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('collection_id', collectionId);
-
-      result = {
-        ...result,
-        item_count: count || 0,
-      };
-    }
-
-    return NextResponse.json({ collection: result });
-
-  } catch (error) {
-    console.error('Erro ao buscar coleção:', error);
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'getCollection');
     return NextResponse.json(
-      { error: ERROR_MESSAGES.NETWORK_ERROR },
+      { error: errorDetails.message },
       { status: 500 }
     );
   }
@@ -123,139 +56,66 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 401 }
-      );
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado e é admin
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // Verificar se é admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const collectionId = params.id;
     const body = await request.json();
-    const {
-      name,
-      description,
-      cover_image_url,
-      color_theme,
-      type,
-      is_active,
-      order_index,
-    } = body;
 
-    // Verificar se coleção existe
-    const { data: existingCollection } = await supabase
-      .from('collections')
-      .select('id, name')
-      .eq('id', collectionId)
-      .single();
-
-    if (!existingCollection) {
+    // Validar campos obrigatórios
+    if (body.name && !body.name.trim()) {
       return NextResponse.json(
-        { error: ERROR_MESSAGES.COLLECTION_NOT_FOUND },
-        { status: 404 }
+        { error: 'Nome da coleção não pode estar vazio' },
+        { status: 400 }
       );
     }
 
-    // Validações
-    if (name) {
-      const nameError = validateCollection.name(name);
-      if (nameError) {
-        return NextResponse.json({ error: nameError }, { status: 400 });
-      }
-
-      // Verificar se já existe outra coleção com mesmo nome
-      if (name !== existingCollection.name) {
-        const { data: duplicateCollection } = await supabase
-          .from('collections')
-          .select('id')
-          .eq('name', name)
-          .neq('id', collectionId)
-          .single();
-
-        if (duplicateCollection) {
-          return NextResponse.json(
-            { error: ERROR_MESSAGES.COLLECTION_ALREADY_EXISTS },
-            { status: 409 }
-          );
-        }
-      }
-    }
-
-    if (description) {
-      const descriptionError = validateCollection.description(description);
-      if (descriptionError) {
-        return NextResponse.json({ error: descriptionError }, { status: 400 });
-      }
-    }
-
-    if (color_theme) {
-      const colorError = validateCollection.colorTheme(color_theme);
-      if (colorError) {
-        return NextResponse.json({ error: colorError }, { status: 400 });
-      }
-    }
-
-    // Preparar dados para atualização (apenas campos fornecidos)
-    const updateData: any = {};
-    if (name !== undefined) updateData.name = name;
-    if (description !== undefined) updateData.description = description;
-    if (cover_image_url !== undefined) updateData.cover_image_url = cover_image_url;
-    if (color_theme !== undefined) updateData.color_theme = color_theme;
-    if (type !== undefined) updateData.type = type;
-    if (is_active !== undefined) updateData.is_active = is_active;
-    if (order_index !== undefined) updateData.order_index = order_index;
-
     // Atualizar coleção
-    const { data: updatedCollection, error: updateError } = await supabase
+    const { data: updatedCollection, error } = await supabase
       .from('collections')
-      .update(updateData)
+      .update({
+        name: body.name?.trim() || undefined,
+        description: body.description || null,
+        cover_image_url: body.cover_image_url || null,
+        color_theme: body.color_theme || null,
+        type: body.type || undefined,
+        is_active: body.is_active !== undefined ? body.is_active : undefined,
+        order_index: body.order_index !== undefined ? body.order_index : undefined,
+      })
       .eq('id', collectionId)
       .select()
       .single();
 
-    if (updateError) {
-      console.error('Erro ao atualizar coleção:', updateError);
+    if (error) {
+      devLog.error('Erro ao atualizar coleção', { error, body });
       return NextResponse.json(
-        { error: ERROR_MESSAGES.UNKNOWN_ERROR },
+        { error: 'Erro ao atualizar coleção' },
         { status: 500 }
       );
     }
 
-    // Buscar count de itens
-    const { count } = await supabase
-      .from('collection_items')
-      .select('*', { count: 'exact', head: true })
-      .eq('collection_id', collectionId);
+    devLog.info('Coleção atualizada', { collection: updatedCollection });
+    return NextResponse.json({ collection: updatedCollection });
 
-    return NextResponse.json({
-      collection: {
-        ...updatedCollection,
-        item_count: count || 0,
-      },
-      message: 'Coleção atualizada com sucesso!',
-    });
-
-  } catch (error) {
-    console.error('Erro na atualização de coleção:', error);
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'updateCollection');
     return NextResponse.json(
-      { error: ERROR_MESSAGES.NETWORK_ERROR },
+      { error: errorDetails.message },
       { status: 500 }
     );
   }
@@ -267,89 +127,47 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 401 }
-      );
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado e é admin
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // Verificar se é admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const collectionId = params.id;
 
-    // Verificar se coleção existe
-    const { data: existingCollection } = await supabase
-      .from('collections')
-      .select('id')
-      .eq('id', collectionId)
-      .single();
-
-    if (!existingCollection) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.COLLECTION_NOT_FOUND },
-        { status: 404 }
-      );
-    }
-
-    // Verificar se coleção possui itens
-    const { searchParams } = new URL(request.url);
-    const forceDelete = searchParams.get('force') === 'true';
-
-    if (!forceDelete) {
-      const { count } = await supabase
-        .from('collection_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('collection_id', collectionId);
-
-      if ((count || 0) > 0) {
-        return NextResponse.json(
-          { 
-            error: ERROR_MESSAGES.CANNOT_DELETE_WITH_ITEMS,
-            item_count: count,
-          },
-          { status: 409 }
-        );
-      }
-    }
-
-    // Excluir coleção (cascade vai remover collection_items automaticamente)
-    const { error: deleteError } = await supabase
+    // Excluir coleção
+    const { error } = await supabase
       .from('collections')
       .delete()
       .eq('id', collectionId);
 
-    if (deleteError) {
-      console.error('Erro ao excluir coleção:', deleteError);
+    if (error) {
+      devLog.error('Erro ao excluir coleção', { error, collectionId });
       return NextResponse.json(
-        { error: ERROR_MESSAGES.UNKNOWN_ERROR },
+        { error: 'Erro ao excluir coleção' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({
-      message: 'Coleção excluída com sucesso!',
-    });
+    devLog.info('Coleção excluída', { collectionId });
+    return NextResponse.json({ message: 'Coleção excluída com sucesso' });
 
-  } catch (error) {
-    console.error('Erro na exclusão de coleção:', error);
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'deleteCollection');
     return NextResponse.json(
-      { error: ERROR_MESSAGES.NETWORK_ERROR },
+      { error: errorDetails.message },
       { status: 500 }
     );
   }

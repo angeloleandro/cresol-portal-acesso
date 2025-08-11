@@ -103,32 +103,7 @@ export interface BulkOperation {
   metadata?: Record<string, any>;
 }
 
-// Props dos Componentes
-export interface CollectionListProps {
-  limit?: number;
-  showHeader?: boolean;
-  showFilters?: boolean;
-  showCreateButton?: boolean;
-  className?: string;
-  onCollectionClick?: (collection: Collection) => void;
-}
-
-export interface CollectionCardProps {
-  collection: Collection;
-  showStats?: boolean;
-  onClick?: (collection: Collection) => void;
-  onEdit?: (collection: Collection) => void;
-  onDelete?: (collection: Collection) => void;
-  className?: string;
-}
-
-export interface CollectionDetailProps {
-  collection: Collection | CollectionWithItems;
-  showEditButton?: boolean;
-  showAddItemButton?: boolean;
-  className?: string;
-}
-
+// Form Props (específico para formulários)
 export interface CollectionFormProps {
   collection?: Collection;
   onSubmit: (data: CollectionFormData) => Promise<void>;

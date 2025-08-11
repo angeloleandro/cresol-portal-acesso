@@ -9,7 +9,7 @@ import CollectionEmptyState from './Collection.EmptyState';
 import CollectionLoading from './Collection.Loading';
 import { CollectionListProps } from './Collection.types';
 import { useCollections } from './Collection.hooks';
-import { cn } from '@/lib/utils/collections';
+import { cn } from '@/lib/utils/cn';
 import { 
   COLLECTION_CONFIG, 
   SORT_LABELS, 

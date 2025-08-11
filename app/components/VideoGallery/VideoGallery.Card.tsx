@@ -27,8 +27,10 @@ export interface AdminVideoCardProps extends Omit<VideoCardProps, 'onClick'> {
   onPlay?: (video: DashboardVideo) => void;
   onEdit?: (video: DashboardVideo) => void;
   onDelete?: (video: DashboardVideo) => void;
+  onAddToCollection?: (video: DashboardVideo) => void;
   showEditButton?: boolean;
   showDeleteButton?: boolean;
+  showAddToCollectionButton?: boolean;
 }
 
 /**
@@ -202,10 +204,12 @@ export function AdminVideoCard({
   onPlay,
   onEdit,
   onDelete,
+  onAddToCollection,
   index = 0, 
   priority = false,
   showEditButton = true,
   showDeleteButton = true,
+  showAddToCollectionButton = true,
   className 
 }: AdminVideoCardProps) {
 
@@ -222,6 +226,11 @@ export function AdminVideoCard({
     e.stopPropagation();
     onDelete?.(video);
   }, [video, onDelete]);
+
+  const handleAddToCollectionClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAddToCollection?.(video);
+  }, [video, onAddToCollection]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -353,6 +362,24 @@ export function AdminVideoCard({
                 aria-label={`Editar ${video.title}`}
               >
                 <Icon name="pencil" className="w-3 h-3" />
+              </motion.button>
+            )}
+
+            {showAddToCollectionButton && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={clsx(
+                  'px-2 py-1 rounded text-xs font-medium',
+                  'bg-blue-50 text-blue-600',
+                  'hover:bg-blue-100',
+                  'transition-colors duration-150',
+                  'focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-300/50'
+                )}
+                onClick={handleAddToCollectionClick}
+                aria-label={`Adicionar ${video.title} à coleção`}
+              >
+                <Icon name="folder-plus" className="w-3 h-3" />
               </motion.button>
             )}
             

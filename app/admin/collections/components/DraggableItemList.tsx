@@ -6,7 +6,8 @@
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import { CollectionItem } from '@/lib/types/collections';
-import { cn } from '@/lib/utils/collections';
+import { cn } from '@/lib/utils/cn';
+import Icon from '@/app/components/icons/Icon';
 
 interface DraggableItemListProps {
   items: CollectionItem[];
@@ -154,7 +155,9 @@ const DraggableItemList: React.FC<DraggableItemListProps> = ({
   if (items.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
-        <div className="text-4xl mb-2">📁</div>
+        <div className="mb-2">
+          <Icon name="folder" className="w-12 h-12 mx-auto" />
+        </div>
         <p>Nenhum item na coleção</p>
         <p className="text-sm mt-1">Adicione itens para começar a organizar</p>
       </div>

@@ -5,23 +5,24 @@
 
 import React from 'react';
 import { CollectionEmptyStateProps } from './Collection.types';
-import { cn } from '@/lib/utils/collections';
+import { cn } from '@/lib/utils/cn';
+import Icon from '@/app/components/icons/Icon';
 
 const EmptyStateMessages = {
   no_collections: {
     title: 'Nenhuma coleção encontrada',
     description: 'Crie sua primeira coleção para organizar imagens e vídeos',
-    icon: '📂',
+    getIcon: () => <Icon name="folder" className="w-16 h-16" />,
   },
   no_items: {
     title: 'Coleção vazia',
     description: 'Adicione imagens ou vídeos para começar a organizar o conteúdo',
-    icon: '🗂️',
+    getIcon: () => <Icon name="folder" className="w-16 h-16" />,
   },
   no_results: {
     title: 'Nenhum resultado encontrado',
     description: 'Tente ajustar os filtros de busca ou criar uma nova coleção',
-    icon: '🔍',
+    getIcon: () => <Icon name="search" className="w-16 h-16" />,
   },
 };
 
@@ -41,8 +42,8 @@ const CollectionEmptyState: React.FC<CollectionEmptyStateProps> = ({
       className
     )}>
       {/* Icon */}
-      <div className="text-6xl mb-4 opacity-50">
-        {emptyState.icon}
+      <div className="mb-4 opacity-50 text-gray-400">
+        {emptyState.getIcon()}
       </div>
       
       {/* Title */}

@@ -2,10 +2,8 @@
 // Gerenciamento de itens das coleções - Portal Cresol
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { COLLECTION_CONFIG, ERROR_MESSAGES } from '@/lib/constants/collections';
-import { collectionOperations } from '@/lib/utils/collections';
+import { createClient } from '@/lib/supabase/server';
+import { handleApiError, devLog } from '@/lib/error-handler';
 
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
@@ -16,14 +14,12 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 401 }
-      );
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const collectionId = params.id;
@@ -37,7 +33,7 @@ export async function GET(
 
     if (collectionError || !collection) {
       return NextResponse.json(
-        { error: ERROR_MESSAGES.COLLECTION_NOT_FOUND },
+        { error: 'Coleção não encontrada' },
         { status: 404 }
       );
     }
@@ -52,16 +48,15 @@ export async function GET(
         item_type,
         order_index,
         added_at,
-        added_by,
-        profiles!collection_items_added_by_fkey(id, name)
+        added_by
       `)
       .eq('collection_id', collectionId)
       .order('order_index', { ascending: true });
 
     if (itemsError) {
-      console.error('Erro ao buscar itens da coleção:', itemsError);
+      devLog.error('Erro ao buscar itens da coleção', { itemsError });
       return NextResponse.json(
-        { error: ERROR_MESSAGES.UNKNOWN_ERROR },
+        { error: 'Erro ao buscar itens da coleção' },
         { status: 500 }
       );
     }
@@ -114,10 +109,10 @@ export async function GET(
       total: itemsWithData.length,
     });
 
-  } catch (error) {
-    console.error('Erro ao buscar itens da coleção:', error);
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'getCollectionItems');
     return NextResponse.json(
-      { error: ERROR_MESSAGES.NETWORK_ERROR },
+      { error: errorDetails.message },
       { status: 500 }
     );
   }
@@ -129,34 +124,29 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 401 }
-      );
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado e é admin
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // Verificar permissão admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const collectionId = params.id;
     const body = await request.json();
     const { item_id, item_type, order_index } = body;
 
+    // Validar campos obrigatórios
     if (!item_id || !item_type) {
       return NextResponse.json(
         { error: 'item_id e item_type são obrigatórios' },
@@ -166,7 +156,7 @@ export async function POST(
 
     if (!['image', 'video'].includes(item_type)) {
       return NextResponse.json(
-        { error: ERROR_MESSAGES.INVALID_ITEM_TYPE },
+        { error: 'Tipo de item inválido. Deve ser "image" ou "video"' },
         { status: 400 }
       );
     }
@@ -180,16 +170,8 @@ export async function POST(
 
     if (collectionError || !collection) {
       return NextResponse.json(
-        { error: ERROR_MESSAGES.COLLECTION_NOT_FOUND },
+        { error: 'Coleção não encontrada' },
         { status: 404 }
-      );
-    }
-
-    // Verificar se o item pode ser adicionado ao tipo de coleção
-    if (!collectionOperations.canAddItemToCollection(collection, item_type)) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.INVALID_ITEM_TYPE },
-        { status: 400 }
       );
     }
 
@@ -219,21 +201,8 @@ export async function POST(
 
     if (existingItem) {
       return NextResponse.json(
-        { error: ERROR_MESSAGES.ITEM_ALREADY_IN_COLLECTION },
+        { error: 'Este item já está na coleção' },
         { status: 409 }
-      );
-    }
-
-    // Verificar limite de itens
-    const { count: currentItemCount } = await supabase
-      .from('collection_items')
-      .select('*', { count: 'exact', head: true })
-      .eq('collection_id', collectionId);
-
-    if ((currentItemCount || 0) >= COLLECTION_CONFIG.MAX_ITEMS_PER_COLLECTION) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.MAX_ITEMS_EXCEEDED },
-        { status: 400 }
       );
     }
 
@@ -248,7 +217,7 @@ export async function POST(
         .limit(1)
         .single();
 
-      finalOrderIndex = (lastItem?.order_index || 0) + COLLECTION_CONFIG.DEFAULT_ORDER_INCREMENT;
+      finalOrderIndex = (lastItem?.order_index || 0) + 1;
     }
 
     // Adicionar item à coleção
@@ -259,19 +228,20 @@ export async function POST(
         item_id,
         item_type,
         order_index: finalOrderIndex,
-        added_by: session.user.id,
+        added_by: user.id,
       })
       .select()
       .single();
 
     if (addError) {
-      console.error('Erro ao adicionar item à coleção:', addError);
+      devLog.error('Erro ao adicionar item à coleção', { addError });
       return NextResponse.json(
-        { error: ERROR_MESSAGES.UNKNOWN_ERROR },
+        { error: 'Erro ao adicionar item à coleção' },
         { status: 500 }
       );
     }
 
+    devLog.info('Item adicionado à coleção', { newItem });
     return NextResponse.json(
       {
         item: newItem,
@@ -280,10 +250,10 @@ export async function POST(
       { status: 201 }
     );
 
-  } catch (error) {
-    console.error('Erro ao adicionar item à coleção:', error);
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'addItemToCollection');
     return NextResponse.json(
-      { error: ERROR_MESSAGES.NETWORK_ERROR },
+      { error: errorDetails.message },
       { status: 500 }
     );
   }

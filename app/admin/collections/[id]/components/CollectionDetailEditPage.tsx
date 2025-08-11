@@ -6,13 +6,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Breadcrumb from '@/app/components/Breadcrumb';
+import Icon from '@/app/components/icons/Icon';
 import CollectionForm, { CollectionFormData } from '../../components/CollectionForm';
 import ItemSelector from '../../components/ItemSelector';
 import BulkUpload from '../../components/BulkUpload';
-import AdminCollectionDetail from '../../components/AdminCollectionDetail';
+import CollectionDetail from '@/app/components/Collections/Collection.Detail';
 import { Collection, CollectionWithItems, CollectionItem } from '@/lib/types/collections';
 import { useCollectionItems } from '@/app/components/Collections/Collection.hooks';
+import clsx from 'clsx';
 
 interface CollectionDetailEditPageProps {
   collectionId: string;
@@ -49,7 +53,7 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
       }
       
       const data = await response.json();
-      setCollection(data);
+      setCollection(data.collection);
       
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar coleção');
@@ -88,8 +92,8 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
         throw new Error(errorData.error || 'Erro ao salvar coleção');
       }
       
-      const updatedCollection = await response.json();
-      setCollection(updatedCollection);
+      const data = await response.json();
+      setCollection(data.collection);
       setIsEditing(false);
       toast.success('Coleção atualizada com sucesso!');
       
@@ -143,17 +147,29 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   // Handle items selected from selector
   const handleItemsSelected = async (items: { type: 'image' | 'video'; data: any }[]) => {
     try {
-      const response = await fetch(`/api/collections/${collectionId}/items`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ items }),
-      });
+      // Process items one by one since API expects individual items
+      const results = [];
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Erro ao adicionar itens');
+      for (const item of items) {
+        const response = await fetch(`/api/collections/${collectionId}/items`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            item_id: item.data.item_id,
+            item_type: item.type,
+            order_index: 0, // Let API calculate the order
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Erro ao adicionar item');
+        }
+        
+        const result = await response.json();
+        results.push(result);
       }
       
       // Reload collection data to show new items
@@ -169,17 +185,29 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   // Handle bulk uploaded files
   const handleBulkFilesUploaded = async (items: { type: 'image' | 'video'; data: any }[]) => {
     try {
-      const response = await fetch(`/api/collections/${collectionId}/items`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ items }),
-      });
+      // Process items one by one since API expects individual items
+      const results = [];
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Erro ao adicionar arquivos à coleção');
+      for (const item of items) {
+        const response = await fetch(`/api/collections/${collectionId}/items`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            item_id: item.data.item_id,
+            item_type: item.type,
+            order_index: 0, // Let API calculate the order
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Erro ao adicionar arquivo à coleção');
+        }
+        
+        const result = await response.json();
+        results.push(result);
       }
       
       // Reload collection data to show new items
@@ -248,18 +276,31 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   if (isLoading) {
     return (
       <div className="space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <div className="h-8 bg-gray-200 rounded w-64 animate-pulse" />
-          <div className="h-10 bg-gray-200 rounded w-32 animate-pulse" />
+        {/* Breadcrumb Skeleton */}
+        <div className="h-6 bg-gray-200 rounded w-80 animate-pulse" />
+        
+        {/* Header Skeleton */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-2">
+              <div className="h-8 bg-gray-200 rounded w-64 animate-pulse" />
+              <div className="h-4 bg-gray-200 rounded w-80 animate-pulse" />
+            </div>
+            <div className="flex gap-3">
+              <div className="h-10 bg-gray-200 rounded w-32 animate-pulse" />
+              <div className="h-10 bg-gray-200 rounded w-24 animate-pulse" />
+              <div className="h-10 bg-gray-200 rounded w-24 animate-pulse" />
+            </div>
+          </div>
         </div>
         
-        {/* Content skeleton */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* Content Skeleton */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200/40 p-6">
           <div className="space-y-4">
             <div className="h-6 bg-gray-200 rounded w-48 animate-pulse" />
             <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
             <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
+            <div className="h-32 bg-gray-200 rounded animate-pulse" />
           </div>
         </div>
       </div>
@@ -271,40 +312,40 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
     return (
       <div className="space-y-6">
         {/* Breadcrumb */}
-        <nav className="flex" aria-label="Breadcrumb">
-          <ol className="flex items-center space-x-4">
-            <li>
-              <Link
-                href="/admin/collections"
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                Coleções
-              </Link>
-            </li>
-            <li>
-              <svg className="flex-shrink-0 h-4 w-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-              </svg>
-            </li>
-            <li className="text-gray-500">Erro</li>
-          </ol>
-        </nav>
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <Breadcrumb 
+            items={[
+              { label: 'Home', href: '/home', icon: 'house' },
+              { label: 'Administração', href: '/admin' },
+              { label: 'Coleções', href: '/admin/collections' },
+              { label: 'Erro' }
+            ]} 
+          />
+        </motion.div>
 
         {/* Error message */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-lg shadow-sm border border-gray-200/40 p-6"
+        >
           <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0h-3m21 12c0 7-7 7-7 7s-7 0-7-7 7-7 7-7 7 0 7 7z" />
-            </svg>
+            <Icon name="triangle-alert" className="mx-auto h-12 w-12 text-red-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">Erro ao carregar coleção</h3>
             <p className="mt-1 text-sm text-gray-500">{error}</p>
             <div className="mt-6 flex justify-center gap-3">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={loadCollection}
                 className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 Tentar Novamente
-              </button>
+              </motion.button>
               <Link
                 href="/admin/collections"
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors"
@@ -313,7 +354,7 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
               </Link>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -325,65 +366,119 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <nav className="flex" aria-label="Breadcrumb">
-        <ol className="flex items-center space-x-4">
-          <li>
-            <Link
-              href="/admin/collections"
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              Coleções
-            </Link>
-          </li>
-          <li>
-            <svg className="flex-shrink-0 h-4 w-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          </li>
-          <li className="text-gray-500 truncate max-w-xs">{collection.name}</li>
-        </ol>
-      </nav>
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6"
+      >
+        <Breadcrumb 
+          items={[
+            { label: 'Home', href: '/home', icon: 'house' },
+            { label: 'Administração', href: '/admin' },
+            { label: 'Coleções', href: '/admin/collections' },
+            { label: collection.name }
+          ]} 
+        />
+      </motion.div>
 
-      {/* Header Actions */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isEditing ? 'Editar Coleção' : 'Detalhes da Coleção'}
-          </h1>
-          <p className="text-sm text-gray-600 mt-1">
-            {isEditing ? 'Modifique os detalhes da coleção' : 'Visualize e gerencie a coleção'}
-          </p>
+      {/* Header interno + Ações */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="mb-8"
+      >
+        <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-primary mb-1">
+              {isEditing ? 'Editar Coleção' : 'Detalhes da Coleção'}
+            </h1>
+            <p className="text-sm text-gray-600">
+              {isEditing ? 'Modifique os detalhes da coleção' : `Visualize e gerencie a coleção "${collection.name}"`}
+            </p>
+          </div>
+          <div className="flex gap-3 flex-wrap sm:justify-end">
+            {!isEditing && (
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleEditToggle}
+                  className={clsx(
+                    'inline-flex items-center gap-2 px-5 py-2.5',
+                    'bg-primary text-white rounded-md font-medium',
+                    'hover:bg-primary/90 transition-colors duration-150',
+                    'focus:outline-none focus:ring-2 focus:ring-primary/20',
+                    'shadow-sm'
+                  )}
+                >
+                  <Icon name="pencil" className="h-5 w-5" />
+                  Editar
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/admin/gallery')}
+                  className={clsx(
+                    'inline-flex items-center gap-2 px-5 py-2.5',
+                    'bg-gray-100 text-gray-700 rounded-md font-medium',
+                    'hover:bg-gray-200 transition-colors duration-150',
+                    'focus:outline-none focus:ring-2 focus:ring-gray-300/20',
+                    'shadow-sm'
+                  )}
+                >
+                  <Icon name="image" className="h-5 w-5" />
+                  Galeria
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/admin/videos')}
+                  className={clsx(
+                    'inline-flex items-center gap-2 px-5 py-2.5',
+                    'bg-gray-100 text-gray-700 rounded-md font-medium',
+                    'hover:bg-gray-200 transition-colors duration-150',
+                    'focus:outline-none focus:ring-2 focus:ring-gray-300/20',
+                    'shadow-sm'
+                  )}
+                >
+                  <Icon name="video" className="h-5 w-5" />
+                  Vídeos
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleDelete}
+                  className={clsx(
+                    'inline-flex items-center gap-2 px-5 py-2.5',
+                    'bg-red-500 text-white rounded-md font-medium',
+                    'hover:bg-red-600 transition-colors duration-150',
+                    'focus:outline-none focus:ring-2 focus:ring-red-500/20',
+                    'shadow-sm'
+                  )}
+                >
+                  <Icon name="trash" className="h-5 w-5" />
+                  Excluir
+                </motion.button>
+              </>
+            )}
+          </div>
         </div>
-        
-        <div className="flex items-center gap-3">
-          {!isEditing && (
-            <>
-              <button
-                onClick={handleEditToggle}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
-              >
-                <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                Editar
-              </button>
-              
-              <button
-                onClick={handleDelete}
-                className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition-colors focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-              >
-                <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Excluir
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+      </motion.div>
 
       {/* Main Content */}
-      <div className="bg-white rounded-lg shadow-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className={clsx(
+          'bg-white rounded-md shadow-sm border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150',
+          'overflow-hidden'
+        )}
+      >
         <div className="p-6">
           {isEditing ? (
             /* Edit Mode - Show Form */
@@ -410,20 +505,22 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
             </div>
           ) : (
             /* View Mode - Show Details */
-            <AdminCollectionDetail
+            <CollectionDetail
               collection={collection}
               showEditButton={false}
               showAddItemButton={true}
               showBulkUploadButton={true}
               showItemActions={true}
+              isAdminView={true}
+              enableReordering={true}
               onItemAdd={handleItemAdd}
               onBulkUpload={handleBulkUpload}
               onItemRemove={handleItemRemove}
-              onItemsReorder={handleItemsReorder}
+              onItemReorder={(items) => handleItemsReorder(collection.id, items)}
             />
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Item Selector Modal */}
       {collection && (

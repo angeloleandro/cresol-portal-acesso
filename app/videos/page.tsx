@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -19,9 +19,18 @@ import { VideoGalleryEmptyState } from "../components/VideoGallery/VideoGallery.
 import { EnhancedVideoCard } from "../components/VideoGallery/VideoGallery.Card";
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { DashboardVideo, VideoFilters } from "../types/video";
+import { CollectionSection } from "../components/Collections/CollectionSection";
+import { useSearchParams } from 'next/navigation';
 import clsx from "clsx";
+import { Icon } from "../components/icons/Icon";
 
-export default function VideosPage() {
+interface Collection {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+function VideosContent() {
   const [videos, setVideos] = useState<DashboardVideo[]>([]);
   const [filteredVideos, setFilteredVideos] = useState<DashboardVideo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,41 +38,84 @@ export default function VideosPage() {
   const [selectedVideo, setSelectedVideo] = useState<DashboardVideo | null>(null);
   const [filters, setFilters] = useState<VideoFilters>({ search: '', type: 'all' });
   const [error, setError] = useState<string | null>(null);
+  const [collection, setCollection] = useState<Collection | null>(null);
+  const searchParams = useSearchParams();
+  const collectionId = searchParams.get('collection');
 
   useEffect(() => {
     // Só executar no lado do cliente
     if (typeof window === 'undefined') return;
     
-    const fetchVideos = async () => {
+    const fetchData = async () => {
       try {
         setError(null);
-        const { data, error: fetchError } = await getSupabaseClient()
-          .from("dashboard_videos")
-          .select("*")
-          .eq("is_active", true)
-          .order("order_index", { ascending: true });
         
-        if (fetchError) throw fetchError;
-        
-        // Filter to only show ready videos
-        const readyVideos = (data || []).filter(video => {
-          if (video.upload_type === 'youtube') return true;
-          if (video.upload_type === 'direct') {
-            return video.processing_status === 'ready' && video.upload_progress === 100;
-          }
-          return false; // Filter out vimeo videos
-        });
-        
-        setVideos(readyVideos);
-        setFilteredVideos(readyVideos);
+        // If collection ID is provided, fetch collection details and its items
+        if (collectionId) {
+          // Fetch collection details
+          const { data: collectionData } = await getSupabaseClient()
+            .from("collections")
+            .select("*")
+            .eq("id", collectionId)
+            .single();
+          
+          setCollection(collectionData);
+
+          // Fetch collection items
+          const { data: itemsData } = await getSupabaseClient()
+            .from("collection_items")
+            .select(`
+              *,
+              dashboard_videos!inner(*)
+            `)
+            .eq("collection_id", collectionId)
+            .eq("item_type", "video")
+            .order("order_index", { ascending: true });
+
+          const collectionVideos = itemsData?.map(item => item.dashboard_videos) || [];
+          
+          // Filter to only show ready videos
+          const readyVideos = collectionVideos.filter(video => {
+            if (video.is_active === false) return false;
+            if (video.upload_type === 'youtube') return true;
+            if (video.upload_type === 'direct') {
+              return video.processing_status === 'ready' && video.upload_progress === 100;
+            }
+            return false;
+          });
+          
+          setVideos(readyVideos);
+          setFilteredVideos(readyVideos);
+        } else {
+          // Fetch all videos if no collection specified
+          const { data, error: fetchError } = await getSupabaseClient()
+            .from("dashboard_videos")
+            .select("*")
+            .eq("is_active", true)
+            .order("order_index", { ascending: true });
+          
+          if (fetchError) throw fetchError;
+          
+          // Filter to only show ready videos
+          const readyVideos = (data || []).filter(video => {
+            if (video.upload_type === 'youtube') return true;
+            if (video.upload_type === 'direct') {
+              return video.processing_status === 'ready' && video.upload_progress === 100;
+            }
+            return false; // Filter out vimeo videos
+          });
+          
+          setVideos(readyVideos);
+          setFilteredVideos(readyVideos);
+        }
       } catch (error: any) {
         setError(error.message || 'Erro ao carregar vídeos');
       } finally {
         setLoading(false);
       }
     };
-    fetchVideos();
-  }, []);
+    fetchData();
+  }, [collectionId]);
 
   // Filter videos based on search and type
   useEffect(() => {
@@ -158,7 +210,7 @@ export default function VideosPage() {
     <div className="flex flex-wrap gap-2">
       <TypeFilterButton type="all" label="Todos" count={videoStats.total} />
       <TypeFilterButton type="youtube" label="YouTube" count={videoStats.youtube} />
-      <TypeFilterButton type="direct" label="Internos" count={videoStats.direct} />
+      <TypeFilterButton type="direct" label="Interno" count={videoStats.direct} />
     </div>
   );
 
@@ -196,7 +248,8 @@ export default function VideosPage() {
           <Breadcrumb 
             items={[
               { label: 'Home', href: '/home', icon: 'house' },
-              { label: 'Vídeos' }
+              ...(collection ? [{ label: 'Vídeos', href: '/videos' }] : []),
+              { label: collection ? collection.name : 'Vídeos' }
             ]} 
           />
         </motion.div>
@@ -209,8 +262,8 @@ export default function VideosPage() {
           className="mb-8"
         >
           <AdvancedVideoGalleryHeader
-            title="Galeria de Vídeos"
-            subtitle="Assista aos vídeos institucionais e de treinamento da Cresol"
+            title={collection ? collection.name : "Galeria de Vídeos"}
+            subtitle={collection ? collection.description || "Vídeos desta coleção" : "Assista aos vídeos institucionais e de treinamento da Cresol"}
             videoCount={filteredVideos.length}
             showSeeAll={false}
             showSearch={true}
@@ -218,7 +271,34 @@ export default function VideosPage() {
             searchQuery={filters.search}
             filters={<FilterSection />}
           />
+          
+          {/* Back to collections button if viewing a collection */}
+          {collection && (
+            <a
+              href="/videos"
+              className="inline-flex items-center mt-4 text-primary hover:text-primary-dark transition-colors"
+            >
+              <Icon name="arrow-left" className="h-4 w-4 mr-2" />
+              Voltar para todos os vídeos
+            </a>
+          )}
         </motion.div>
+
+        {/* Collections Section - only show when not viewing a specific collection */}
+        {!collection && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-8"
+          >
+            <CollectionSection 
+              type="videos" 
+              title="Coleções de Vídeos"
+              showEmptyState={false}
+            />
+          </motion.div>
+        )}
 
         {/* Content Area */}
         <motion.div
@@ -282,5 +362,23 @@ export default function VideosPage() {
       
       <Footer />
     </div>
+  );
+}
+
+export default function VideosPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-neutral-50">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="flex flex-col items-center justify-center py-16 space-y-4">
+            <LoadingSpinner size="md" message="Carregando vídeos..." />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <VideosContent />
+    </Suspense>
   );
 }

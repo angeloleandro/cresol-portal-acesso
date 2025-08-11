@@ -2,9 +2,8 @@
 // Operações específicas para item individual da coleção
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { ERROR_MESSAGES } from '@/lib/constants/collections';
+import { createClient } from '@/lib/supabase/server';
+import { handleApiError, devLog } from '@/lib/error-handler';
 
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
@@ -15,48 +14,28 @@ export async function DELETE(
   { params }: { params: { id: string; itemId: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 401 }
-      );
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado e é admin
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // Verificar permissão admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const collectionId = params.id;
     const itemId = params.itemId;
 
-    // Verificar se a coleção existe
-    const { data: collection } = await supabase
-      .from('collections')
-      .select('id')
-      .eq('id', collectionId)
-      .single();
-
-    if (!collection) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.COLLECTION_NOT_FOUND },
-        { status: 404 }
-      );
-    }
-
-    // Verificar se o item está na coleção
+    // Verificar se o item está na coleção antes de remover
     const { data: collectionItem } = await supabase
       .from('collection_items')
       .select('*')
@@ -79,21 +58,23 @@ export async function DELETE(
       .eq('collection_id', collectionId);
 
     if (deleteError) {
-      console.error('Erro ao remover item da coleção:', deleteError);
+      devLog.error('Erro ao remover item da coleção', { deleteError, itemId, collectionId });
       return NextResponse.json(
-        { error: ERROR_MESSAGES.UNKNOWN_ERROR },
+        { error: 'Erro ao remover item da coleção' },
         { status: 500 }
       );
     }
+
+    devLog.info('Item removido da coleção', { itemId, collectionId });
 
     return NextResponse.json({
       message: 'Item removido da coleção com sucesso!',
     });
 
-  } catch (error) {
-    console.error('Erro ao remover item da coleção:', error);
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'deleteCollectionItem');
     return NextResponse.json(
-      { error: ERROR_MESSAGES.NETWORK_ERROR },
+      { error: errorDetails.message },
       { status: 500 }
     );
   }

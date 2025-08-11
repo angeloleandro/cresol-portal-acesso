@@ -3,11 +3,15 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Breadcrumb from "../components/Breadcrumb";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
-import OptimizedImage from "../components/OptimizedImage";
 import { Icon } from "../components/icons/Icon";
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import { CollectionSection } from "../components/Collections/CollectionSection";
+import { useSearchParams } from 'next/navigation';
+import { ImagePreviewWithGrid } from "../components/ImagePreview";
+import { BaseImage, baseImageToGalleryImage } from "../components/ImagePreview/ImagePreview.types";
+import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
 
 interface GalleryImage {
   id: string;
@@ -17,42 +21,89 @@ interface GalleryImage {
   order_index: number;
 }
 
-export default function GalleryPage() {
+interface Collection {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+function GalleryContent() {
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [previewImages, setPreviewImages] = useState<BaseImage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+  const [collection, setCollection] = useState<Collection | null>(null);
+  const searchParams = useSearchParams();
+  const collectionId = searchParams.get('collection');
 
   useEffect(() => {
     // Só executar no lado do cliente
     if (typeof window === 'undefined') return;
     
-    const fetchImages = async () => {
+    const fetchData = async () => {
       try {
-        const { data } = await getSupabaseClient()
-          .from("gallery_images")
-          .select("*")
-          .eq("is_active", true)
-          .order("order_index", { ascending: true });
-        setImages(data || []);
+        // If collection ID is provided, fetch collection details and its items
+        if (collectionId) {
+          // Fetch collection details
+          const { data: collectionData } = await getSupabaseClient()
+            .from("collections")
+            .select("*")
+            .eq("id", collectionId)
+            .single();
+          
+          setCollection(collectionData);
+
+          // Fetch collection items
+          const { data: itemsData } = await getSupabaseClient()
+            .from("collection_items")
+            .select(`
+              *,
+              gallery_images!inner(*)
+            `)
+            .eq("collection_id", collectionId)
+            .eq("item_type", "image")
+            .order("order_index", { ascending: true });
+
+          const collectionImages = itemsData?.map(item => item.gallery_images) || [];
+          const activeImages = collectionImages.filter(img => img.is_active);
+          setImages(activeImages);
+        } else {
+          // Fetch all images if no collection specified
+          const { data } = await getSupabaseClient()
+            .from("gallery_images")
+            .select("*")
+            .eq("is_active", true)
+            .order("order_index", { ascending: true });
+          setImages(data || []);
+        }
       } catch (error) {
         console.error('Erro ao buscar imagens:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchImages();
-  }, []);
+    fetchData();
+  }, [collectionId]);
 
-  const handleOpenModal = (img: GalleryImage) => {
-    setSelectedImage(img);
-    setModalOpen(true);
-  };
-  
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setSelectedImage(null);
-  };
+  // Processar imagens para o componente ImagePreview
+  useEffect(() => {
+    const processedImages = images.map(img => {
+      const processedUrl = processSupabaseImageUrl(img.image_url) || img.image_url;
+      
+      // Debug das URLs em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        debugImageUrl(processedUrl, `Gallery Image: ${img.title}`);
+      }
+      
+      return {
+        id: img.id,
+        url: processedUrl,
+        title: img.title || "Imagem da galeria",
+        alt: img.title || "Imagem da galeria"
+      };
+    });
+    
+    setPreviewImages(processedImages);
+  }, [images]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,20 +114,45 @@ export default function GalleryPage() {
           <Breadcrumb 
             items={[
               { label: 'Home', href: '/home', icon: 'house' },
-              { label: 'Galeria' }
+              ...(collection ? [{ label: 'Galeria', href: '/galeria' }] : []),
+              { label: collection ? collection.name : 'Galeria' }
             ]} 
           />
         </div>
 
         <div className="mb-8">
-          <h1 className="heading-1 text-title mb-2">Galeria de Imagens</h1>
-          <p className="body-text text-muted">Explore nossa coleção de fotos e momentos especiais da Cresol.</p>
+          <h1 className="heading-1 text-title mb-2">
+            {collection ? collection.name : 'Galeria de Imagens'}
+          </h1>
+          <p className="body-text text-muted">
+            {collection ? collection.description : 'Explore nossa coleção de fotos e momentos especiais da Cresol.'}
+          </p>
+          
+          {/* Back to collections button if viewing a collection */}
+          {collection && (
+            <a
+              href="/galeria"
+              className="inline-flex items-center mt-4 text-primary hover:text-primary-dark transition-colors"
+            >
+              <Icon name="arrow-left" className="h-4 w-4 mr-2" />
+              Voltar para todas as galerias
+            </a>
+          )}
         </div>
+
+        {/* Collections Section - only show when not viewing a specific collection */}
+        {!collection && (
+          <CollectionSection 
+            type="images" 
+            title="Coleções de Imagens"
+            showEmptyState={false}
+          />
+        )}
 
         <div className="card">
           {loading ? (
             <div className="text-center py-12">
-<LoadingSpinner 
+              <LoadingSpinner 
                 size="md" 
                 message="Carregando imagens..."
               />
@@ -88,80 +164,37 @@ export default function GalleryPage() {
               <p className="body-text text-muted">A galeria ainda não possui imagens disponíveis.</p>
             </div>
           ) : (
-            <div className="grid-responsive">
-              {images.map((img) => (
-                <div 
-                  key={img.id} 
-                  className="card cursor-pointer transition-all duration-200 group" 
-                  onClick={() => handleOpenModal(img)}
-                >
-                  <div className="relative w-full aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden">
-                    <OptimizedImage 
-                      src={img.image_url} 
-                      alt={img.title || "Imagem da galeria"} 
-                      fill 
-                      className="object-cover"
-                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                      quality={80}
-                      fallbackText="Imagem indisponível"
-                    />
-                    
-                    {/* Overlay de hover */}
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="bg-white/90 rounded-full p-3">
-                        <Icon name="search" className="h-6 w-6 text-primary" />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {img.title && (
-                    <div className="p-3">
-                      <p className="body-text-small text-center truncate text-title">{img.title}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <ImagePreviewWithGrid
+              images={previewImages.map(baseImageToGalleryImage)}
+              columns={{ xs: 2, sm: 3, md: 4, lg: 5, xl: 6 }}
+              aspectRatio="4:3"
+              showNavigation={true}
+              showInfo={true}
+            />
           )}
         </div>
 
-        {/* Modal padronizado */}
-        {modalOpen && selectedImage && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-white rounded-lg border border-gray-300 max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
-              {/* Cabeçalho do modal */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <h3 className="heading-4 text-title">
-                  {selectedImage.title || 'Imagem da galeria'}
-                </h3>
-                <button
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                  onClick={handleCloseModal}
-                  aria-label="Fechar"
-                >
-                  <Icon name="close" className="h-6 w-6 text-muted" />
-                </button>
-              </div>
-              
-              {/* Conteúdo do modal */}
-              <div className="relative max-h-[70vh] bg-black flex items-center justify-center">
-                <OptimizedImage 
-                  src={selectedImage.image_url} 
-                  alt={selectedImage.title || "Imagem da galeria"} 
-                  fill
-                  className="object-contain"
-                  sizes="90vw"
-                  quality={90}
-                  priority
-                  fallbackText="Imagem indisponível"
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </main>
       
       <Footer />
     </div>
+  );
+}
+
+export default function GalleryPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container py-8">
+          <div className="flex items-center justify-center py-16">
+            <LoadingSpinner size="lg" message="Carregando galeria..." fullScreen={false} />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <GalleryContent />
+    </Suspense>
   );
 } 

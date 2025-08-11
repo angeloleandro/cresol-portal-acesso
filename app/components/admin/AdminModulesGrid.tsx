@@ -69,6 +69,12 @@ const ADMIN_MODULES: AdminModule[] = [
     link: '/admin/gallery',
   },
   {
+    title: 'Coleções',
+    description: 'Organize e gerencie coleções de imagens e vídeos',
+    icon: 'folder',
+    link: '/admin/collections',
+  },
+  {
     title: 'Notificações',
     description: 'Gerenciar notificações e comunicações do sistema',
     icon: 'bell',

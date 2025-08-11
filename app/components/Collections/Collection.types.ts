@@ -1,5 +1,5 @@
-// Collection Component Types
-// Types específicos para componentes de coleção
+// Collection Component Props - CONSOLIDATED
+// Única fonte para props de componentes de coleção
 
 import { 
   Collection, 
@@ -9,7 +9,10 @@ import {
   CollectionStats 
 } from '@/lib/types/collections';
 
-// Props dos Componentes Base
+// ========================
+// CORE COMPONENT PROPS
+// ========================
+
 export interface CollectionCardProps {
   collection: Collection;
   showStats?: boolean;
@@ -46,10 +49,17 @@ export interface CollectionDetailProps {
   showEditButton?: boolean;
   showAddItemButton?: boolean;
   showItemActions?: boolean;
+  // Admin-specific props
+  isAdminView?: boolean;
+  enableReordering?: boolean;
+  showAnalytics?: boolean;
+  showBulkUploadButton?: boolean;
   className?: string;
   onEdit?: (collection: Collection) => void;
   onItemAdd?: (collection: Collection) => void;
   onItemRemove?: (item: CollectionItem) => void;
+  onItemReorder?: (items: CollectionItem[]) => void;
+  onBulkUpload?: (collection: Collection) => void;
 }
 
 export interface CollectionEmptyStateProps {
@@ -100,7 +110,10 @@ export interface DraggableCollectionCardProps extends CollectionCardProps {
   isDragDisabled?: boolean;
 }
 
-// Estados dos Componentes
+// ========================
+// COMPONENT STATES
+// ========================
+
 export interface CollectionGridState {
   selectedCollections: string[];
   draggedItem: string | null;
@@ -116,4 +129,5 @@ export interface CollectionDetailState {
   activeTab: 'items' | 'settings' | 'analytics';
   selectedItems: string[];
   isReordering: boolean;
+  viewMode: 'grid' | 'list';
 }

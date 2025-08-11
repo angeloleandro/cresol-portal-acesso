@@ -1,5 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
+import { handleApiError, devLog } from '@/lib/error-handler';
+
+// GET /api/admin/gallery - Listar imagens da galeria
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
+    // Verificar se é admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.role !== 'admin') {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get('limit') || '50');
+
+    // Buscar imagens da galeria
+    const { data: images, error } = await supabase
+      .from('gallery_images')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(Math.min(limit, 100));
+
+    if (error) {
+      devLog.error('Erro ao buscar imagens da galeria', { error });
+      return NextResponse.json(
+        { error: 'Erro ao buscar imagens da galeria' },
+        { status: 500 }
+      );
+    }
+
+    devLog.info('Imagens da galeria carregadas', { count: images?.length });
+    return NextResponse.json({ images: images || [] });
+
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'getGalleryImages');
+    return NextResponse.json(
+      { error: errorDetails.message },
+      { status: 500 }
+    );
+  }
+}
 
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,52 +64,44 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    // Get the current user
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // Check if user is admin
-    const { data: profile, error: profileError } = await supabase
+    // Verificar se é admin
+    const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    if (profileError || profile?.role !== 'admin') {
+    if (profile?.role !== 'admin') {
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
-    // Get image details before deletion (for cleanup if needed)
-    const { data: image, error: fetchError } = await supabase
-      .from('gallery_images')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (fetchError) {
-      return NextResponse.json({ error: 'Imagem não encontrada' }, { status: 404 });
-    }
-
-    // Delete the gallery image
-    const { error: deleteError } = await supabase
+    // Excluir imagem da galeria
+    const { error } = await supabase
       .from('gallery_images')
       .delete()
       .eq('id', id);
 
-    if (deleteError) {
-      console.error('Erro ao excluir imagem da galeria:', deleteError);
+    if (error) {
+      devLog.error('Erro ao excluir imagem da galeria', { error, id });
       return NextResponse.json({ error: 'Erro ao excluir imagem' }, { status: 500 });
     }
 
-    // Note: In a real implementation, you might also want to delete the image file from storage
-    // if it's no longer referenced by other records
-
+    devLog.info('Imagem da galeria excluída', { id });
     return NextResponse.json({ message: 'Imagem excluída com sucesso' });
 
-  } catch (error) {
-    console.error('Erro interno:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'deleteGalleryImage');
+    return NextResponse.json(
+      { error: errorDetails.message },
+      { status: 500 }
+    );
   }
 }

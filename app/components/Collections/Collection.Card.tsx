@@ -7,8 +7,9 @@ import React from 'react';
 import Image from 'next/image';
 import { CollectionCardProps } from './Collection.types';
 import { formatCollection } from '@/lib/utils/collections';
-import { cn } from '@/lib/utils/collections';
+import { cn } from '@/lib/utils/cn';
 import { CSS_CLASSES } from '@/lib/constants/collections';
+import Icon from '@/app/components/icons/Icon';
 
 const CollectionCard: React.FC<CollectionCardProps> = ({
   collection,
@@ -62,10 +63,10 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
             <div className="text-center">
-              <div className="text-4xl mb-2">
-                {collection.type === 'images' && '🖼️'}
-                {collection.type === 'videos' && '🎥'}
-                {collection.type === 'mixed' && '📁'}
+              <div className="mb-2 text-gray-400">
+                {collection.type === 'images' && <Icon name="image" className="w-12 h-12" />}
+                {collection.type === 'videos' && <Icon name="video" className="w-12 h-12" />}
+                {collection.type === 'mixed' && <Icon name="folder" className="w-12 h-12" />}
               </div>
               <span className="text-sm font-medium">
                 {formatCollection.typeLabelPortuguese(collection.type)}

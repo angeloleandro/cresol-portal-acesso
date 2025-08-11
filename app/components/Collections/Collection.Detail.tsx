@@ -10,17 +10,33 @@ import { CollectionWithItems } from '@/lib/types/collections';
 import { useCollectionItems } from './Collection.hooks';
 import CollectionLoading from './Collection.Loading';
 import CollectionEmptyState from './Collection.EmptyState';
-import { formatCollection, cn } from '@/lib/utils/collections';
+import { formatCollection } from '@/lib/utils/collections';
+import { cn } from '@/lib/utils/cn';
+import Icon from '@/app/components/icons/Icon';
+
+// Conditional import for admin functionality
+let DraggableItemList: React.ComponentType<any> | null = null;
+try {
+  DraggableItemList = require('../../admin/collections/components/DraggableItemList').default;
+} catch {
+  // DraggableItemList not available in non-admin contexts
+}
 
 const CollectionDetail: React.FC<CollectionDetailProps> = ({
   collection: initialCollection,
   showEditButton = false,
   showAddItemButton = false,
   showItemActions = false,
+  isAdminView = false,
+  enableReordering = false,
+  showAnalytics = false,
+  showBulkUploadButton = false,
   className,
   onEdit,
   onItemAdd,
   onItemRemove,
+  onItemReorder,
+  onBulkUpload,
 }) => {
   // Determine if we need to fetch items
   const needsFetchItems = !('items' in initialCollection);
@@ -47,9 +63,9 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
     };
   }, [initialCollection, fetchedCollection, fetchedItems]);
 
-  // Local state
+  // Local state - conditional based on admin view
   const [activeTab, setActiveTab] = useState<'items' | 'info'>('items');
-  const [selectedView, setSelectedView] = useState<'grid' | 'list'>('grid');
+  const [selectedView, setSelectedView] = useState<'grid' | 'list' | 'reorder'>(isAdminView ? 'list' : 'grid');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   // Memoized filtered items
@@ -70,9 +86,30 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
     );
   };
 
-  // Handle remove item
-  const handleRemoveItem = (itemId: string) => {
-    onItemRemove?.({ id: itemId } as any);
+  // Handle item removal with optional confirmation (admin view)
+  const handleRemoveItem = async (itemId: string) => {
+    const items = collection.items || [];
+    const item = items.find(i => i.id === itemId);
+    if (!item || !onItemRemove) return;
+    
+    if (isAdminView) {
+      const confirmed = window.confirm(
+        'Tem certeza que deseja remover este item da coleção?'
+      );
+      
+      if (!confirmed) return;
+    }
+    
+    await onItemRemove(item);
+  };
+  
+  // Handle item reordering (admin view)
+  const handleReorder = async (reorderedItems: any[]) => {
+    if (!onItemReorder || !isAdminView) {
+      throw new Error('Reordering not available in this view');
+    }
+    
+    await onItemReorder(reorderedItems);
   };
 
   return (
@@ -94,10 +131,10 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                   <div className="text-center">
-                    <div className="text-6xl mb-2">
-                      {collection.type === 'images' && '🖼️'}
-                      {collection.type === 'videos' && '🎥'}
-                      {collection.type === 'mixed' && '📁'}
+                    <div className="mb-2 text-gray-400">
+                      {collection.type === 'images' && <Icon name="image" className="w-16 h-16" />}
+                      {collection.type === 'videos' && <Icon name="video" className="w-16 h-16" />}
+                      {collection.type === 'mixed' && <Icon name="folder" className="w-16 h-16" />}
                     </div>
                     <span className="text-lg font-medium">
                       {formatCollection.typeLabelPortuguese(collection.type)}
@@ -159,6 +196,17 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
                     Adicionar Item
                   </button>
                 )}
+                {showBulkUploadButton && (
+                  <button
+                    onClick={() => onBulkUpload?.(collection)}
+                    className="bg-secondary hover:bg-secondary/90 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    Upload em Lote
+                  </button>
+                )}
                 
                 {showEditButton && (
                   <button
@@ -205,8 +253,12 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
               </div>
               
               <div className="bg-gray-50 rounded-lg p-3">
-                <div className="text-2xl font-bold text-gray-900">
-                  {collection.is_active ? '✓' : '✗'}
+                <div className="text-gray-900">
+                  {collection.is_active ? (
+                    <Icon name="check-circle" className="w-8 h-8 text-green-600" />
+                  ) : (
+                    <Icon name="x" className="w-8 h-8 text-red-600" />
+                  )}
                 </div>
                 <div className="text-sm text-gray-600">
                   {collection.is_active ? 'Ativo' : 'Inativo'}
@@ -291,6 +343,19 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
                     >
                       Lista
                     </button>
+                    {isAdminView && enableReordering && (
+                      <button
+                        onClick={() => setSelectedView('reorder')}
+                        className={cn(
+                          "px-3 py-1 text-sm font-medium rounded transition-colors",
+                          selectedView === 'reorder'
+                            ? "bg-white text-gray-900 shadow-sm"
+                            : "text-gray-600 hover:text-gray-900"
+                        )}
+                      >
+                        Reordenar
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -309,12 +374,19 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
                 )}
               </div>
 
-              {/* Items Grid/List */}
-              <div className={cn(
-                selectedView === 'grid'
-                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-                  : "space-y-4"
-              )}>
+              {/* Items Grid/List/Reorder */}
+              {selectedView === 'reorder' && isAdminView && DraggableItemList ? (
+                <DraggableItemList
+                  items={collection.items || []}
+                  onReorder={handleReorder}
+                  onItemRemove={handleRemoveItem}
+                />
+              ) : (
+                <div className={cn(
+                  selectedView === 'grid'
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                    : "space-y-4"
+                )}>
                 {collection.items?.map((item) => (
                   <div
                     key={item.id}
@@ -350,7 +422,9 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
                                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                                 />
                               ) : (
-                                <div className="text-white text-4xl">🎥</div>
+                                <div className="text-white">
+                                  <Icon name="video" className="w-12 h-12" />
+                                </div>
                               )}
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="bg-black/60 rounded-full p-3">
@@ -417,7 +491,8 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
                     )}
                   </div>
                 ))}
-              </div>
+                </div>
+              )}
             </>
           )}
         </div>

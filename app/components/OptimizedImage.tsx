@@ -16,6 +16,7 @@ interface OptimizedImageProps {
   placeholder?: 'blur' | 'empty';
   blurDataURL?: string;
   onError?: () => void;
+  onLoad?: () => void;
   fallbackSrc?: string;
   fallbackText?: string;
   unoptimized?: boolean;
@@ -35,6 +36,7 @@ export default function OptimizedImage({
   placeholder = 'empty',
   blurDataURL,
   onError,
+  onLoad,
   fallbackSrc,
   fallbackText,
   unoptimized = false,
@@ -179,6 +181,7 @@ export default function OptimizedImage({
       alt,
       className: `${className} ${fill ? 'absolute inset-0 w-full h-full object-contain' : ''}`,
       onError: handleImageError,
+      onLoad: onLoad,
       style: fill ? { 
         position: 'absolute' as const, 
         inset: 0, 
@@ -199,6 +202,7 @@ export default function OptimizedImage({
     alt,
     className,
     onError: handleImageError,
+    onLoad: onLoad,
     priority,
     sizes,
     quality: getOptimalQuality(), // ✅ Quality dinâmica baseada no contexto

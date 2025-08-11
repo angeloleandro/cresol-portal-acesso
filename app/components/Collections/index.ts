@@ -8,18 +8,14 @@ export { default as CollectionList } from './Collection.List';
 export { default as CollectionDetail } from './Collection.Detail';
 export { default as CollectionEmptyState } from './Collection.EmptyState';
 
-// Componentes Admin (types only - componentes não implementados ainda)
-export type {
-  CollectionManagerProps,
-  CollectionItemManagerProps,
-  BulkActionsProps,
-} from './CollectionManager';
+// Loading component
+export { default as CollectionLoading } from './Collection.Loading';
 
 // Hooks
 export { useCollections } from './Collection.hooks';
 export { useCollectionItems } from './Collection.hooks';
 
-// Types (re-export para conveniência)
+// Types from domain and component types
 export type {
   Collection,
   CollectionItem,
@@ -29,8 +25,11 @@ export type {
   CollectionStats,
   CollectionsResponse,
   CollectionItemsResponse,
+  CollectionFormProps,
+} from '@/lib/types/collections';
+
+export type {
   CollectionListProps,
   CollectionCardProps,
   CollectionDetailProps,
-  CollectionFormProps,
-} from '@/lib/types/collections';
+} from './Collection.types';

@@ -2,10 +2,8 @@
 // Upload de capas para coleções usando Supabase Storage
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { COLLECTION_CONFIG, ERROR_MESSAGES, STORAGE_BUCKETS } from '@/lib/constants/collections';
-import { validateCollection } from '@/lib/utils/collections';
+import { createClient } from '@/lib/supabase/server';
+import { handleApiError, devLog } from '@/lib/error-handler';
 
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
@@ -13,28 +11,22 @@ export const dynamic = 'force-dynamic';
 // POST /api/collections/upload/cover - Upload de capa da coleção
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 401 }
-      );
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado e é admin
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // Verificar permissão admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     // Parse form data
@@ -48,11 +40,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar arquivo
-    const fileError = validateCollection.file(file, COLLECTION_CONFIG.ALLOWED_IMAGE_TYPES);
-    if (fileError) {
+    // Validações básicas
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+    if (file.size > maxSize) {
       return NextResponse.json(
-        { error: fileError },
+        { error: 'Arquivo muito grande. Máximo 5MB.' },
+        { status: 400 }
+      );
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Tipo de arquivo não permitido. Use JPG, PNG ou WEBP.' },
         { status: 400 }
       );
     }
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     const randomString = Math.random().toString(36).substring(2, 15);
     const fileExtension = file.name.split('.').pop() || 'jpg';
     const fileName = `cover_${timestamp}_${randomString}.${fileExtension}`;
-    const filePath = `${STORAGE_BUCKETS.COVERS}/${fileName}`;
+    const filePath = `collections/covers/${fileName}`;
 
     // Converter File para ArrayBuffer
     const fileBuffer = await file.arrayBuffer();
@@ -77,9 +78,9 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('Erro no upload:', uploadError);
+      devLog.error('Erro no upload de capa', { uploadError });
       return NextResponse.json(
-        { error: ERROR_MESSAGES.UPLOAD_FAILED },
+        { error: 'Erro ao fazer upload do arquivo' },
         { status: 500 }
       );
     }
@@ -88,6 +89,8 @@ export async function POST(request: NextRequest) {
     const { data: { publicUrl } } = supabase.storage
       .from('images')
       .getPublicUrl(filePath);
+
+    devLog.info('Upload de capa realizado', { fileName, fileSize: file.size });
 
     return NextResponse.json({
       message: 'Upload realizado com sucesso!',
@@ -98,10 +101,10 @@ export async function POST(request: NextRequest) {
       original_name: file.name,
     });
 
-  } catch (error) {
-    console.error('Erro no upload de capa:', error);
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'uploadCollectionCover');
     return NextResponse.json(
-      { error: ERROR_MESSAGES.NETWORK_ERROR },
+      { error: errorDetails.message },
       { status: 500 }
     );
   }
@@ -110,28 +113,22 @@ export async function POST(request: NextRequest) {
 // DELETE /api/collections/upload/cover - Remover capa do storage
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 401 }
-      );
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado e é admin
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // Verificar permissão admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -144,8 +141,8 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Verificar se o arquivo está no bucket correto (segurança)
-    if (!filePath.startsWith(STORAGE_BUCKETS.COVERS)) {
+    // Verificar se o arquivo está no diretório correto (segurança)
+    if (!filePath.startsWith('collections/covers/')) {
       return NextResponse.json(
         { error: 'Caminho de arquivo inválido' },
         { status: 400 }
@@ -158,21 +155,22 @@ export async function DELETE(request: NextRequest) {
       .remove([filePath]);
 
     if (deleteError) {
-      console.error('Erro ao remover arquivo:', deleteError);
+      devLog.error('Erro ao remover capa', { deleteError, filePath });
       return NextResponse.json(
         { error: 'Erro ao remover arquivo' },
         { status: 500 }
       );
     }
 
+    devLog.info('Capa removida', { filePath });
     return NextResponse.json({
       message: 'Arquivo removido com sucesso!',
     });
 
-  } catch (error) {
-    console.error('Erro na remoção de capa:', error);
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'deleteCollectionCover');
     return NextResponse.json(
-      { error: ERROR_MESSAGES.NETWORK_ERROR },
+      { error: errorDetails.message },
       { status: 500 }
     );
   }

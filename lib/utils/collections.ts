@@ -1,8 +1,6 @@
 // Collection Utils - Portal Cresol
 // Funções utilitárias para o sistema de coleções
 
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import { 
   Collection, 
   CollectionItem, 
@@ -15,11 +13,10 @@ import {
   ERROR_MESSAGES, 
   THEME_COLORS 
 } from '@/lib/constants/collections';
+import { cn } from '@/lib/utils/cn';
 
-// Utility function para classes CSS (seguindo padrão do projeto)
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+// Re-export centralized utils for compatibility
+export { cn };
 
 // Validações
 export const validateCollection = {

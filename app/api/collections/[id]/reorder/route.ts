@@ -2,50 +2,43 @@
 // Reordenação de itens nas coleções - Portal Cresol
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { ERROR_MESSAGES, COLLECTION_CONFIG } from '@/lib/constants/collections';
+import { createClient } from '@/lib/supabase/server';
+import { handleApiError, devLog } from '@/lib/error-handler';
 
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
 
-// PATCH /api/collections/[id]/reorder - Reordenar itens da coleção
-export async function PATCH(
+// POST /api/collections/[id]/reorder - Reordenar itens da coleção
+export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 401 }
-      );
+    const supabase = createClient();
+    
+    // Verificar se usuário está autenticado e é admin
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // Verificar permissão admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.PERMISSION_DENIED },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const collectionId = params.id;
     const body = await request.json();
-    const { item_ids } = body;
+    const { items } = body; // Mudando para receber array de objetos com id e order_index
 
-    if (!Array.isArray(item_ids) || item_ids.length === 0) {
+    if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: 'item_ids deve ser um array não vazio' },
+        { error: 'items deve ser um array não vazio com objetos {id, order_index}' },
         { status: 400 }
       );
     }
@@ -59,86 +52,43 @@ export async function PATCH(
 
     if (!collection) {
       return NextResponse.json(
-        { error: ERROR_MESSAGES.COLLECTION_NOT_FOUND },
+        { error: 'Coleção não encontrada' },
         { status: 404 }
       );
     }
 
-    // Verificar se todos os itens pertencem à coleção
-    const { data: existingItems, error: itemsError } = await supabase
-      .from('collection_items')
-      .select('id')
-      .eq('collection_id', collectionId)
-      .in('id', item_ids);
+    // Fazer updates individuais de ordem
+    const updatePromises = items.map(item => 
+      supabase
+        .from('collection_items')
+        .update({ order_index: item.order_index })
+        .eq('id', item.id)
+        .eq('collection_id', collectionId)
+    );
 
-    if (itemsError) {
-      console.error('Erro ao verificar itens:', itemsError);
+    const results = await Promise.all(updatePromises);
+    const hasError = results.some(result => result.error);
+    
+    if (hasError) {
+      const errors = results.filter(r => r.error).map(r => r.error);
+      devLog.error('Erro na reordenação', { errors });
       return NextResponse.json(
-        { error: ERROR_MESSAGES.UNKNOWN_ERROR },
+        { error: 'Erro ao reordenar itens' },
         { status: 500 }
       );
     }
 
-    if (!existingItems || existingItems.length !== item_ids.length) {
-      return NextResponse.json(
-        { error: 'Alguns itens não pertencem a esta coleção' },
-        { status: 400 }
-      );
-    }
-
-    // Preparar updates para reordenação
-    const updates = item_ids.map((itemId, index) => ({
-      id: itemId,
-      collection_id: collectionId,
-      order_index: (index + 1) * COLLECTION_CONFIG.DEFAULT_ORDER_INCREMENT,
-    }));
-
-    // Executar updates em batch (usando transação manual)
-    const { error: updateError } = await supabase.rpc('update_collection_items_order', {
-      collection_id: collectionId,
-      item_updates: updates,
-    });
-
-    // Se a função RPC não existir, fazer updates individuais
-    if (updateError && updateError.message.includes('function') && updateError.message.includes('does not exist')) {
-      console.warn('Função RPC não encontrada, usando updates individuais');
-      
-      // Fazer updates individuais
-      const updatePromises = updates.map(update => 
-        supabase
-          .from('collection_items')
-          .update({ order_index: update.order_index })
-          .eq('id', update.id)
-          .eq('collection_id', collectionId)
-      );
-
-      const results = await Promise.all(updatePromises);
-      const hasError = results.some(result => result.error);
-      
-      if (hasError) {
-        console.error('Erro nos updates individuais:', results.filter(r => r.error));
-        return NextResponse.json(
-          { error: ERROR_MESSAGES.UNKNOWN_ERROR },
-          { status: 500 }
-        );
-      }
-    } else if (updateError) {
-      console.error('Erro na reordenação:', updateError);
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.UNKNOWN_ERROR },
-        { status: 500 }
-      );
-    }
+    devLog.info('Itens reordenados', { collectionId, count: items.length });
 
     return NextResponse.json({
       message: 'Ordem dos itens atualizada com sucesso!',
-      updated_count: item_ids.length,
+      updated_count: items.length,
     });
 
-  } catch (error) {
-    console.error('Erro na reordenação de itens:', error);
+  } catch (error: any) {
+    const errorDetails = handleApiError(error, 'reorderCollectionItems');
     return NextResponse.json(
-      { error: ERROR_MESSAGES.NETWORK_ERROR },
+      { error: errorDetails.message },
       { status: 500 }
     );
   }

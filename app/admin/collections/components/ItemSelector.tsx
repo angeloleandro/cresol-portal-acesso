@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { Collection } from '@/lib/types/collections';
+import Icon from '@/app/components/icons/Icon';
 
 interface GalleryImage {
   id: string;
@@ -342,7 +343,9 @@ const ItemSelector: React.FC<ItemSelectorProps> = ({
                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                           />
                         ) : (
-                          <div className="text-white text-2xl">🎥</div>
+                          <div className="text-white">
+                            <Icon name="video" className="w-8 h-8" />
+                          </div>
                         )}
                         {/* Play icon overlay */}
                         <div className="absolute inset-0 flex items-center justify-center">

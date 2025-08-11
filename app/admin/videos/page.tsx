@@ -15,7 +15,7 @@ import { supabase } from "@/lib/supabase";
 import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
 import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import { VideoGalleryStatsHeader, AdvancedVideoGalleryHeader } from '@/app/components/VideoGallery/VideoGallery.Header';
+import { AdvancedVideoGalleryHeader } from '@/app/components/VideoGallery/VideoGallery.Header';
 import { VideoGalleryGrid } from '@/app/components/VideoGallery/VideoGallery.Grid';
 import { VideoGalleryEmptyState } from '@/app/components/VideoGallery/VideoGallery.EmptyState';
 import { AdminVideoCard } from '@/app/components/VideoGallery/VideoGallery.Card';
@@ -23,6 +23,9 @@ import { VideoModal } from '@/app/components/VideoGallery/VideoGallery.Modal';
 import { DashboardVideo, VideoFilters } from '@/app/types/video';
 import { Icon } from '@/app/components/icons/Icon';
 import clsx from 'clsx';
+import CollectionsManager from '@/app/admin/collections/components/CollectionsManager';
+import { useCollections } from '@/app/components/Collections/Collection.hooks';
+import { Collection } from '@/lib/types/collections';
 
 interface AdminVideoFilters extends VideoFilters {
   status: 'all' | 'active' | 'inactive' | 'processing';
@@ -48,6 +51,12 @@ export default function AdminVideos() {
     type: 'all', 
     status: 'all' 
   });
+  const [showCollectionsManager, setShowCollectionsManager] = useState(false);
+  const [showAddToCollectionModal, setShowAddToCollectionModal] = useState(false);
+  const [selectedVideoForCollection, setSelectedVideoForCollection] = useState<DashboardVideo | null>(null);
+
+  // Collections hook
+  const { collections } = useCollections();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -76,6 +85,21 @@ export default function AdminVideos() {
     if (isAdmin) fetchVideos();
     // eslint-disable-next-line
   }, [isAdmin]);
+
+  // Lock body scroll when create/edit modal is open
+  useEffect(() => {
+    const formModalOpen = showForm || Boolean(editVideo);
+    if (formModalOpen) {
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+      };
+    }
+  }, [showForm, editVideo]);
 
   // Filter videos based on search, type, and status
   useEffect(() => {
@@ -202,6 +226,39 @@ export default function AdminVideos() {
     setFilters(prev => ({ ...prev, status }));
   };
 
+  const handleAddToCollection = (video: DashboardVideo) => {
+    setSelectedVideoForCollection(video);
+    setShowAddToCollectionModal(true);
+  };
+
+  const handleAddToCollectionSubmit = async (collectionId: string) => {
+    if (!selectedVideoForCollection) return;
+    
+    try {
+      const response = await fetch(`/api/collections/${collectionId}/items`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          item_id: selectedVideoForCollection.id,
+          item_type: 'video',
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao adicionar à coleção');
+      }
+      
+      setShowAddToCollectionModal(false);
+      setSelectedVideoForCollection(null);
+      // You could show a success message here
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   // Statistics for header
   const videoStats = {
     total: videos.length,
@@ -270,65 +327,30 @@ export default function AdminVideos() {
 
   const FilterSection = () => (
     <div className="space-y-4">
-      {/* Type Filters */}
+      {/* Tipo - manter apenas este grupo conforme padronização */}
       <div>
         <h4 className="text-sm font-medium text-neutral-700 mb-2">Tipo</h4>
         <div className="flex flex-wrap gap-2">
-          <FilterButton 
-            isActive={filters.type === 'all'} 
+          <FilterButton
+            isActive={filters.type === 'all'}
             onClick={() => handleTypeFilter('all')}
             count={videoStats.total}
           >
             Todos
           </FilterButton>
-          <FilterButton 
-            isActive={filters.type === 'youtube'} 
+          <FilterButton
+            isActive={filters.type === 'youtube'}
             onClick={() => handleTypeFilter('youtube')}
             count={videoStats.youtube}
           >
             YouTube
           </FilterButton>
-          <FilterButton 
-            isActive={filters.type === 'direct'} 
+          <FilterButton
+            isActive={filters.type === 'direct'}
             onClick={() => handleTypeFilter('direct')}
             count={videoStats.direct}
           >
-            Internos
-          </FilterButton>
-        </div>
-      </div>
-      
-      {/* Status Filters */}
-      <div>
-        <h4 className="text-sm font-medium text-neutral-700 mb-2">Status</h4>
-        <div className="flex flex-wrap gap-2">
-          <FilterButton 
-            isActive={filters.status === 'all'} 
-            onClick={() => handleStatusFilter('all')}
-            count={videos.length}
-          >
-            Todos
-          </FilterButton>
-          <FilterButton 
-            isActive={filters.status === 'active'} 
-            onClick={() => handleStatusFilter('active')}
-            count={statusStats.active}
-          >
-            Ativos
-          </FilterButton>
-          <FilterButton 
-            isActive={filters.status === 'inactive'} 
-            onClick={() => handleStatusFilter('inactive')}
-            count={statusStats.inactive}
-          >
-            Inativos
-          </FilterButton>
-          <FilterButton 
-            isActive={filters.status === 'processing'} 
-            onClick={() => handleStatusFilter('processing')}
-            count={statusStats.processing}
-          >
-            Processando
+            Interno
           </FilterButton>
         </div>
       </div>
@@ -374,62 +396,65 @@ export default function AdminVideos() {
 
         <ErrorBanner />
         
-        {/* Header Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-6"
-        >
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <h1 className="text-3xl font-bold text-primary mb-1">
-              Gerenciar Vídeos
-            </h1>
-            <p className="text-sm text-gray-600">Gerencie todos os vídeos do sistema com filtros avançados</p>
-          </div>
-        </motion.div>
-
-        {/* Stats and Actions */}
-        <motion.div 
+        {/* Header + Ações (botões à direita) */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="mb-8"
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
-            <VideoGalleryStatsHeader
-              title=""
-              stats={videoStats}
-            />
-            
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={clsx(
-                'inline-flex items-center gap-2 px-6 py-3',
-                'bg-primary text-white rounded-lg font-medium',
-                'hover:bg-primary/90 transition-colors duration-150',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20',
-                'shadow-sm lg:self-start'
-              )}
-              onClick={() => setShowForm(true)}
-            >
-              <Icon name="plus" className="h-5 w-5" />
-              Novo Vídeo
-            </motion.button>
+          <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-primary mb-1">Gerenciar Vídeos</h1>
+              <p className="text-sm text-gray-600">Gerencie todos os vídeos do sistema com filtros avançados</p>
+            </div>
+            <div className="flex gap-3 flex-wrap sm:justify-end">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={clsx(
+                  'inline-flex items-center gap-2 px-5 py-2.5',
+                  'bg-primary text-white rounded-md font-medium',
+                  'hover:bg-primary/90 transition-colors duration-150',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/20',
+                  'shadow-sm'
+                )}
+                onClick={() => setShowForm(true)}
+              >
+                <Icon name="plus" className="h-5 w-5" />
+                Novo Vídeo
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={clsx(
+                  'inline-flex items-center gap-2 px-5 py-2.5',
+                  'bg-gray-100 text-gray-700 rounded-md font-medium',
+                  'hover:bg-gray-200 transition-colors duration-150',
+                  'focus:outline-none focus:ring-2 focus:ring-gray-300/20',
+                  'shadow-sm'
+                )}
+                onClick={() => setShowCollectionsManager(true)}
+              >
+                <Icon name="folder" className="h-5 w-5" />
+                Gerenciar Coleções
+              </motion.button>
+            </div>
           </div>
-          
-          {/* Advanced Header with Search and Filters */}
-          <AdvancedVideoGalleryHeader
-            title=""
-            subtitle=""
-            videoCount={filteredVideos.length}
-            showSeeAll={false}
-            showSearch={true}
-            onSearch={handleSearch}
-            searchQuery={filters.search}
-            filters={<FilterSection />}
-          />
+
+          {/* Busca e filtros (sem cartões de estatística e sem filtros de status) */}
+          <div className="mt-6">
+            <AdvancedVideoGalleryHeader
+              title=""
+              subtitle=""
+              videoCount={filteredVideos.length}
+              showSeeAll={false}
+              showSearch={true}
+              onSearch={handleSearch}
+              searchQuery={filters.search}
+              filters={<FilterSection />}
+            />
+          </div>
         </motion.div>
 
         {/* Content Area */}
@@ -473,9 +498,11 @@ export default function AdminVideos() {
                       onPlay={handlePlayVideo}
                       onEdit={handleEditVideo}
                       onDelete={handleDeleteClick}
+                      onAddToCollection={handleAddToCollection}
                       index={index}
                       showEditButton={true}
                       showDeleteButton={true}
+                      showAddToCollectionButton={true}
                     />
                   </motion.div>
                 ))}
@@ -503,7 +530,7 @@ export default function AdminVideos() {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-modal"
+                className="max-w-4xl w-full max-h-[85vh] overflow-y-auto scrollbar-modal"
                 onClick={(e) => e.stopPropagation()}
               >
                 <VideoUploadFormRoot
@@ -559,6 +586,94 @@ export default function AdminVideos() {
             />
           )}
         </AnimatePresence>
+
+        {/* Collections Manager Modal */}
+        {showCollectionsManager && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={() => setShowCollectionsManager(false)} />
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl">
+                <div className="bg-white px-6 py-4 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Gerenciar Coleções
+                    </h3>
+                    <button
+                      onClick={() => setShowCollectionsManager(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <Icon name="close" className="w-6 h-6" />
+                    </button>
+                  </div>
+                </div>
+                <div className="max-h-[70vh] overflow-y-auto">
+                  <CollectionsManager />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add to Collection Modal */}
+        {showAddToCollectionModal && selectedVideoForCollection && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={() => setShowAddToCollectionModal(false)} />
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md">
+                <div className="bg-white px-6 py-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Adicionar à Coleção
+                    </h3>
+                    <button
+                      onClick={() => setShowAddToCollectionModal(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <Icon name="close" className="w-6 h-6" />
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Selecione uma coleção para adicionar o vídeo &quot;{selectedVideoForCollection.title}&quot;
+                  </p>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {collections?.map((collection) => (
+                      <button
+                        key={collection.id}
+                        onClick={() => handleAddToCollectionSubmit(collection.id)}
+                        className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        <div className="font-medium text-gray-900">{collection.name}</div>
+                        {collection.description && (
+                          <div className="text-sm text-gray-600 mt-1">{collection.description}</div>
+                        )}
+                        <div className="text-xs text-gray-500 mt-1">
+                          Tipo: {collection.type === 'images' ? 'Imagens' : collection.type === 'videos' ? 'Vídeos' : 'Misto'}
+                          {collection.type === 'images' && (
+                            <span className="text-red-500 ml-2">(Não compatível com vídeos)</span>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  {(!collections || collections.length === 0) && (
+                    <div className="text-center py-6 text-gray-500">
+                      <p>Nenhuma coleção encontrada.</p>
+                      <button
+                        onClick={() => {
+                          setShowAddToCollectionModal(false);
+                          setShowCollectionsManager(true);
+                        }}
+                        className="mt-2 text-primary hover:underline text-sm"
+                      >
+                        Criar nova coleção
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

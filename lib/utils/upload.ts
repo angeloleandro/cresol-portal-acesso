@@ -38,14 +38,25 @@ export async function uploadCollectionCover(
     // Simular progress inicial
     onProgress?.({ loaded: 0, total: file.size, percentage: 0 });
 
+    // Get auth session
+    const { data: { session } } = await supabase.auth.getSession();
+    
     // Preparar FormData
     const formData = new FormData();
     formData.append('file', file);
 
+    const headers: HeadersInit = {};
+    
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
+
     // Fazer upload via API endpoint
     const response = await fetch('/api/collections/upload/cover', {
       method: 'POST',
+      headers,
       body: formData,
+      credentials: 'include',
     });
 
     // Simular progress de 100%
@@ -75,8 +86,20 @@ export async function uploadCollectionCover(
 // Remover arquivo de capa
 export async function removeCollectionCover(filePath: string): Promise<boolean> {
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
+
     const response = await fetch(`/api/collections/upload/cover?file_path=${encodeURIComponent(filePath)}`, {
       method: 'DELETE',
+      headers,
+      credentials: 'include',
     });
 
     return response.ok;

@@ -8,7 +8,7 @@ import NoticiasDestaque from '../components/NoticiasDestaque';
 import EventosDestaque from '../components/EventosDestaque';
 import BannerCarousel from '@/app/components/BannerCarousel';
 import VideoGallery from '@/app/components/VideoGallery';
-import ImageGallery from '../components/ImageGallery';
+import ImageGalleryHome from '../components/ImageGalleryHome';
 import Footer from '../components/Footer';
 import GlobalSearch from '../components/GlobalSearch';
 import SistemasLateral from '../components/SistemasLateral';
@@ -89,7 +89,7 @@ export default function Home() {
             <div className="lg:col-span-2 space-y-6">
               <NoticiasDestaque />
               <VideoGallery />
-              <ImageGallery />
+              <ImageGalleryHome />
               <ParecerSolicitacao />
             </div>
 

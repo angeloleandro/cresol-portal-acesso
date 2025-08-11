@@ -1,312 +1,340 @@
 // Collection Hooks - Portal Cresol
-// Custom hooks para gerenciamento de estado das coleções
+// Simplified hooks following portal patterns with proper auth
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { 
   Collection, 
   CollectionItem, 
   CollectionFilters, 
-  CollectionStats,
-  UseCollectionsState,
-  UseCollectionItemsState 
+  CollectionStats
 } from '@/lib/types/collections';
-import { COLLECTION_CONFIG, PERFORMANCE_CONFIG } from '@/lib/constants/collections';
-import { performanceHelpers } from '@/lib/utils/collections';
+import { COLLECTION_CONFIG } from '@/lib/constants/collections';
 
-// Hook principal para gerenciar coleções
+// Hook principal para gerenciar coleções - Pattern com auth
 export function useCollections(initialFilters?: Partial<CollectionFilters>) {
-  const [state, setState] = useState<UseCollectionsState>({
-    collections: [],
-    loading: false,
-    error: null,
-    filters: {
-      search: '',
-      type: 'all',
-      status: 'all',
-      sort_by: 'order_index',
-      sort_order: 'asc',
-      page: 1,
-      limit: COLLECTION_CONFIG.DEFAULT_PAGE_SIZE,
-      ...initialFilters,
-    },
-    stats: null,
-    hasMore: false,
+  const supabase = createClientComponentClient();
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState<CollectionStats | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  
+  const [filters, setFilters] = useState<CollectionFilters>({
+    search: '',
+    type: 'all',
+    status: 'all',
+    sort_by: 'order_index',
+    sort_order: 'asc',
+    page: 1,
+    limit: COLLECTION_CONFIG.DEFAULT_PAGE_SIZE,
+    ...initialFilters,
   });
 
-  // Fetch collections from API
-  const fetchCollections = useCallback(async (filters?: Partial<CollectionFilters>) => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+  // Fetch collections via API with auth headers
+  const fetchCollections = useCallback(async (newFilters?: Partial<CollectionFilters>) => {
+    setLoading(true);
+    setError(null);
     
     try {
-      const queryParams = new URLSearchParams();
-      const currentFilters = { ...state.filters, ...filters };
+      // Get auth session for headers
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const currentFilters = { ...filters, ...newFilters };
+      const searchParams = new URLSearchParams();
       
       Object.entries(currentFilters).forEach(([key, value]) => {
-        if (value !== undefined && value !== '' && value !== 'all') {
-          queryParams.append(key, value.toString());
+        if (value !== null && value !== undefined && value !== 'all') {
+          searchParams.append(key, value.toString());
         }
       });
       
-      const response = await fetch(`/api/collections?${queryParams.toString()}`);
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(`/api/collections?${searchParams}`, {
+        headers,
+        credentials: 'include',
+      });
       
       if (!response.ok) {
         throw new Error('Erro ao buscar coleções');
       }
       
       const data = await response.json();
-      
-      setState(prev => ({
-        ...prev,
-        collections: data.collections,
-        hasMore: data.has_more,
-        loading: false,
-        filters: currentFilters,
-      }));
+      setCollections(data.collections || []);
+      setHasMore(data.has_more || false);
+      setFilters(currentFilters);
       
     } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: error instanceof Error ? error.message : 'Erro desconhecido',
-        loading: false,
-      }));
+      console.error('Erro ao buscar coleções:', error);
+      setError(error instanceof Error ? error.message : 'Erro desconhecido');
+      setCollections([]);
+    } finally {
+      setLoading(false);
     }
-  }, [state.filters]);
+  }, [filters, supabase]);
 
-  // Fetch stats
+  // Fetch stats via API with auth
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/collections/stats');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch('/api/admin/collections/stats', {
+        headers,
+        credentials: 'include',
+      });
+      
       if (response.ok) {
-        const stats = await response.json();
-        setState(prev => ({ ...prev, stats }));
+        const statsData = await response.json();
+        setStats(statsData);
       }
     } catch (error) {
-      console.error('Erro ao buscar estatísticas:', error);
+      console.info('Stats indisponíveis');
     }
-  }, []);
-
-  // Debounced search
-  const debouncedFetchCollections = useMemo(
-    () => performanceHelpers.debounce(fetchCollections, PERFORMANCE_CONFIG.SEARCH_DEBOUNCE_MS),
-    [fetchCollections]
-  );
+  }, [supabase]);
 
   // Update filters
   const updateFilters = useCallback((newFilters: Partial<CollectionFilters>) => {
-    const updatedFilters = { ...state.filters, ...newFilters, page: 1 };
-    debouncedFetchCollections(updatedFilters);
-  }, [state.filters, debouncedFetchCollections]);
-
-  // Load more (pagination)
-  const loadMore = useCallback(() => {
-    if (!state.loading && state.hasMore) {
-      fetchCollections({ page: state.filters.page + 1 });
-    }
-  }, [state.loading, state.hasMore, state.filters.page, fetchCollections]);
+    fetchCollections({ ...newFilters, page: 1 });
+  }, [fetchCollections]);
 
   // Refresh collections
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
+    await fetchCollections();
+    fetchStats();
+  }, [fetchCollections, fetchStats]);
+
+  // CRUD Operations - With auth
+  const createCollection = useCallback(async (data: any) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
+
+    const response = await fetch('/api/collections', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao criar coleção');
+    }
+
+    await refresh();
+    return response.json();
+  }, [refresh, supabase]);
+
+  const updateCollection = useCallback(async (id: string, data: any) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
+
+    const response = await fetch(`/api/collections/${id}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao atualizar coleção');
+    }
+
+    await refresh();
+    return response.json();
+  }, [refresh, supabase]);
+
+  const deleteCollection = useCallback(async (id: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
+
+    const response = await fetch(`/api/collections/${id}`, { 
+      method: 'DELETE',
+      headers,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao excluir coleção');
+    }
+
+    await refresh();
+  }, [refresh, supabase]);
+
+  const toggleCollectionStatus = useCallback(async (id: string, isActive: boolean) => {
+    await updateCollection(id, { is_active: isActive });
+  }, [updateCollection]);
+
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      fetchCollections({ ...filters, page: filters.page + 1 });
+    }
+  }, [loading, hasMore, filters, fetchCollections]);
+
+  // Initial load
+  useEffect(() => {
     fetchCollections();
     fetchStats();
   }, [fetchCollections, fetchStats]);
 
-  // CRUD Operations
-  const createCollection = useCallback(async (data: any) => {
-    try {
-      const response = await fetch('/api/admin/collections', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro ao criar coleção');
-      }
-
-      await refresh();
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
-  }, [refresh]);
-
-  const updateCollection = useCallback(async (id: string, data: any) => {
-    try {
-      const response = await fetch(`/api/admin/collections/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro ao atualizar coleção');
-      }
-
-      await refresh();
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
-  }, [refresh]);
-
-  const deleteCollection = useCallback(async (id: string) => {
-    try {
-      const response = await fetch(`/api/admin/collections/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro ao excluir coleção');
-      }
-
-      await refresh();
-    } catch (error) {
-      throw error;
-    }
-  }, [refresh]);
-
-  const toggleCollectionStatus = useCallback(async (id: string, isActive: boolean) => {
-    try {
-      await updateCollection(id, { is_active: isActive });
-    } catch (error) {
-      throw error;
-    }
-  }, [updateCollection]);
-
-  // Use ref to track initial load to preserve intended behavior
-  const isInitialLoadRef = useRef(true);
-  
-  // Initial load - using ref pattern to avoid adding functions to deps
-  useEffect(() => {
-    if (isInitialLoadRef.current) {
-      fetchCollections();
-      fetchStats();
-      isInitialLoadRef.current = false;
-    }
-  }, [fetchCollections, fetchStats]);
-
   return {
-    ...state,
+    collections,
+    loading,
+    error,
+    stats,
+    filters,
+    hasMore,
     actions: {
       updateFilters,
-      loadMore,
       refresh,
       createCollection,
       updateCollection,
       deleteCollection,
       toggleCollectionStatus,
+      loadMore,
     },
   };
 }
 
-// Hook para gerenciar itens de uma coleção específica
+// Hook para gerenciar itens de uma coleção with auth
 export function useCollectionItems(collectionId: string | null) {
-  const [state, setState] = useState<UseCollectionItemsState>({
-    items: [],
-    loading: false,
-    error: null,
-    collection: null,
-    hasMore: false,
-  });
+  const supabase = createClientComponentClient();
+  const [items, setItems] = useState<CollectionItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [collection, setCollection] = useState<Collection | null>(null);
 
-  // Fetch collection items
+  // Fetch collection items with auth
   const fetchItems = useCallback(async () => {
     if (!collectionId) return;
 
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setLoading(true);
+    setError(null);
     
     try {
-      const response = await fetch(`/api/collections/${collectionId}/items`);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(`/api/collections/${collectionId}/items`, {
+        headers,
+        credentials: 'include',
+      });
       
       if (!response.ok) {
         throw new Error('Erro ao buscar itens da coleção');
       }
       
       const data = await response.json();
-      
-      setState(prev => ({
-        ...prev,
-        items: data.items,
-        collection: data.collection,
-        loading: false,
-      }));
+      setItems(data.items || []);
+      setCollection(data.collection);
       
     } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: error instanceof Error ? error.message : 'Erro desconhecido',
-        loading: false,
-      }));
+      setError(error instanceof Error ? error.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
     }
-  }, [collectionId]);
+  }, [collectionId, supabase]);
 
-  // Add item to collection
+  // CRUD Operations with auth
   const addItem = useCallback(async (itemId: string, itemType: 'image' | 'video') => {
     if (!collectionId) return;
 
-    try {
-      const response = await fetch(`/api/collections/${collectionId}/items`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_id: itemId, item_type: itemType }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro ao adicionar item');
-      }
-
-      await fetchItems();
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
     }
-  }, [collectionId, fetchItems]);
 
-  // Remove item from collection
+    const response = await fetch(`/api/collections/${collectionId}/items`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ item_id: itemId, item_type: itemType }),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao adicionar item');
+    }
+
+    await fetchItems();
+    return response.json();
+  }, [collectionId, fetchItems, supabase]);
+
   const removeItem = useCallback(async (itemId: string) => {
     if (!collectionId) return;
 
-    try {
-      const response = await fetch(`/api/collections/${collectionId}/items/${itemId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro ao remover item');
-      }
-
-      await fetchItems();
-    } catch (error) {
-      throw error;
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
     }
-  }, [collectionId, fetchItems]);
 
-  // Reorder items
-  const reorderItems = useCallback(async (itemIds: string[]) => {
-    if (!collectionId) return;
+    const response = await fetch(`/api/collections/${collectionId}/items/${itemId}`, {
+      method: 'DELETE',
+      headers,
+      credentials: 'include',
+    });
 
-    try {
-      const response = await fetch(`/api/collections/${collectionId}/reorder`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_ids: itemIds }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro ao reordenar itens');
-      }
-
-      await fetchItems();
-    } catch (error) {
-      throw error;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao remover item');
     }
-  }, [collectionId, fetchItems]);
+
+    await fetchItems();
+  }, [collectionId, fetchItems, supabase]);
 
   // Load items when collectionId changes
   useEffect(() => {
@@ -314,54 +342,66 @@ export function useCollectionItems(collectionId: string | null) {
   }, [collectionId, fetchItems]);
 
   return {
-    ...state,
+    items,
+    loading,
+    error,
+    collection,
     actions: {
       refresh: fetchItems,
       addItem,
       removeItem,
-      reorderItems,
     },
   };
 }
 
-// Hook para upload de arquivos
+// Hook para upload - With auth
 export function useCollectionUpload() {
-  const [uploadState, setUploadState] = useState({
-    isUploading: false,
-    progress: 0,
-    error: null as string | null,
-  });
+  const supabase = createClientComponentClient();
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const uploadCoverImage = useCallback(async (file: File) => {
-    setUploadState({ isUploading: true, progress: 0, error: null });
+    setIsUploading(true);
+    setError(null);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const formData = new FormData();
       formData.append('file', file);
 
+      const headers: HeadersInit = {};
+      
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch('/api/collections/upload/cover', {
         method: 'POST',
+        headers,
         body: formData,
+        credentials: 'include',
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro no upload');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro no upload');
       }
 
-      const result = await response.json();
-      setUploadState({ isUploading: false, progress: 100, error: null });
-      return result;
+      return response.json();
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro no upload';
-      setUploadState({ isUploading: false, progress: 0, error: errorMessage });
+      setError(errorMessage);
       throw error;
+    } finally {
+      setIsUploading(false);
     }
-  }, []);
+  }, [supabase]);
 
   return {
-    ...uploadState,
+    isUploading,
+    error,
     uploadCoverImage,
   };
 }

@@ -4,7 +4,7 @@
 // Componentes de loading/skeleton para sistema de coleções
 
 import React from 'react';
-import { cn } from '@/lib/utils/collections';
+import { cn } from '@/lib/utils/cn';
 import { CSS_CLASSES } from '@/lib/constants/collections';
 
 // Loading Spinner

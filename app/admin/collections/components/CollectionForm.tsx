@@ -7,7 +7,9 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Collection } from '@/lib/types/collections';
 import { COLLECTION_CONFIG, COLLECTION_TYPE_LABELS } from '@/lib/constants/collections';
-import { validateCollection, cn } from '@/lib/utils/collections';
+import { validateCollection } from '@/lib/utils/collections';
+import { cn } from '@/lib/utils/cn';
+import { useCollectionUpload } from '@/app/components/Collections/Collection.hooks';
 
 export interface CollectionFormData {
   name: string;
@@ -67,8 +69,10 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
   // Internal state
   const [internalErrors, setInternalErrors] = useState<Record<string, string>>({});
   const [coverPreview, setCoverPreview] = useState<string>('');
-  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
+  // Upload hook
+  const { isUploading: isUploadingCover, uploadCoverImage } = useCollectionUpload();
 
   // Combine external and internal errors
   const allErrors = { ...internalErrors, ...externalErrors };
@@ -144,38 +148,19 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
     }
   };
 
-  // Handle cover image upload
+  // Handle cover image upload using centralized hook
   const handleCoverUpload = async (file: File) => {
     if (!file) return;
     
-    setIsUploadingCover(true);
-    
     try {
-      // Create form data for upload
-      const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
-      
-      // Upload to API
-      const response = await fetch('/api/collections/upload/cover', {
-        method: 'POST',
-        body: uploadFormData,
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Erro ao fazer upload da imagem');
-      }
-      
-      const { url } = await response.json();
+      const result = await uploadCoverImage(file);
       
       // Update form data and preview
-      handleChange('cover_image_url', url);
-      setCoverPreview(url);
+      handleChange('cover_image_url', result.url || '');
+      setCoverPreview(result.url || '');
       
     } catch (error: any) {
       setInternalErrors(prev => ({ ...prev, cover: error.message }));
-    } finally {
-      setIsUploadingCover(false);
     }
   };
 
