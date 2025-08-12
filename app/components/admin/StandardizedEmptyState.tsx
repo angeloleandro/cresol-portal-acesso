@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { Icon, IconName } from '../icons';
-import { StandardizedButton } from './index';
+import { Button } from '@/app/components/ui/Button';
 import { CRESOL_UI_CONFIG } from '@/lib/design-tokens';
 
 interface StandardizedEmptyStateProps {
@@ -49,12 +49,14 @@ export default function StandardizedEmptyState({
       </p>
       
       {action && (
-        <StandardizedButton
+        <Button
           onClick={action.onClick}
-          variant="primary"
+          variant="solid"
+          colorPalette="orange"
+          size="md"
         >
           {action.label}
-        </StandardizedButton>
+        </Button>
       )}
       
       {children}

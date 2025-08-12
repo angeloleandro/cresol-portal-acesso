@@ -7,6 +7,7 @@ import { memo, useCallback, useState, useEffect } from 'react'
 import Image from 'next/image'
 import { YouTubeInputProps } from './VideoUploadForm.types'
 import { VIDEO_HELPERS } from '@/lib/constants/video-ui'
+import { StandardizedInput } from '@/app/components/ui/StandardizedInput'
 
 // Consolidated YouTube helper functions using VIDEO_HELPERS
 function getYouTubeThumbnail(url: string): string | null {
@@ -53,54 +54,23 @@ export const VideoUploadFormYouTubeInput = memo(({
   
   return (
     <div className="space-y-4">
-      {/* Input Label */}
-      <div>
-        <label 
-          htmlFor="youtube-url-input"
-          className="block text-sm font-medium text-neutral-700"
-        >
-          URL do YouTube
-          <span className="text-red-500 ml-1" aria-label="obrigatório">*</span>
-        </label>
-        
-        {/* URL Input */}
-        <input
-          id="youtube-url-input"
-          type="url"
-          required
-          value={localValue}
-          onChange={handleInputChange}
-          disabled={disabled}
-          placeholder="https://www.youtube.com/watch?v=..."
-          className={`
-            mt-1 w-full border rounded-lg px-4 py-3 text-sm placeholder-neutral-400 bg-white
-            focus:outline-none focus:ring-2 focus:ring-neutral-500/20 focus:border-neutral-500 
-            hover:border-neutral-400 transition-all duration-200
-            disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-neutral-50
-            ${error ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : 'border-neutral-300'}
-          `}
-          aria-describedby={`youtube-url-help ${error ? 'youtube-url-error' : ''}`}
-          aria-invalid={!!error}
-        />
-        
-        {/* Help text */}
-        <div id="youtube-url-help" className="text-xs text-neutral-500 mt-1">
-          Cole o link do vídeo público do YouTube
-        </div>
-      </div>
-      
-      {/* Error message */}
-      {error && (
-        <div 
-          id="youtube-url-error"
-          className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800"
-          role="alert"
-          aria-live="polite"
-        >
-          <div className="font-medium mb-1">URL inválida</div>
-          <div>{error}</div>
-        </div>
-      )}
+      {/* URL Input using StandardizedInput */}
+      <StandardizedInput
+        id="youtube-url-input"
+        label="URL do YouTube"
+        type="url"
+        variant="outline"
+        size="md"
+        required
+        value={localValue}
+        onChange={handleInputChange}
+        isDisabled={disabled}
+        isInvalid={!!error}
+        placeholder="https://www.youtube.com/watch?v=..."
+        startIcon="video"
+        help="Cole o link do vídeo público do YouTube"
+        error={error}
+      />
       
       {/* Simple thumbnail preview */}
       {isValidUrl && thumbnailUrl() && (

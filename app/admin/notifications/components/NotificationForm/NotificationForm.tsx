@@ -4,6 +4,7 @@ import { RecipientsSelector } from './RecipientsSelector';
 import { FormFieldGroup } from '../shared/FormFieldGroup';
 import { useNotificationForm } from '../../hooks/useNotificationForm';
 import { User, NotificationGroup, NotificationType, PriorityType } from '../../types';
+import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 
 interface NotificationFormProps {
   availableUsers: User[];
@@ -43,13 +44,15 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Título da Notificação *
                 </label>
-                <input
+                <StandardizedInput
                   type="text"
                   required
                   value={notificationForm.title}
                   onChange={(e) => handleFormChange('title', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   placeholder="Ex: Reunião Geral de Cooperados"
+                  startIcon="file-text"
+                  variant="outline"
+                  size="md"
                 />
               </div>
 
@@ -82,11 +85,13 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Data de Expiração <span className="text-xs text-gray-500">(Opcional)</span>
                 </label>
-                <input
+                <StandardizedInput
                   type="datetime-local"
                   value={notificationForm.expiresAt}
                   onChange={(e) => handleFormChange('expiresAt', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                  startIcon="calendar"
+                  variant="outline"
+                  size="md"
                 />
                 <p className="text-xs text-gray-500 mt-1">Deixe vazio para notificação permanente</p>
               </div>
@@ -101,13 +106,15 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
               Conteúdo da Mensagem *
             </label>
             <div className="relative">
-              <textarea
+              <StandardizedTextarea
                 required
                 rows={5}
                 value={notificationForm.message}
                 onChange={(e) => handleFormChange('message', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
                 placeholder="Digite aqui o conteúdo completo da notificação que será enviada aos usuários..."
+                variant="outline"
+                size="md"
+                resize="none"
               />
               <div className="absolute bottom-3 right-3 text-xs text-gray-400">
                 {notificationForm.message.length} caracteres

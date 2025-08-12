@@ -9,6 +9,7 @@ import { handleComponentError, devLog } from '@/lib/error-handler';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 
 interface EconomicIndicator {
   id?: string;
@@ -306,14 +307,16 @@ export default function EconomicIndicatorsAdmin() {
                     <label htmlFor="title" className="block text-sm font-medium text-gray-700">
                       Título *
                     </label>
-                    <input
+                    <StandardizedInput
                       type="text"
                       id="title"
                       required
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       placeholder="Ex: Cooperados"
+                      startIcon="pencil"
+                      variant="outline"
+                      size="md"
                     />
                   </div>
 
@@ -321,14 +324,16 @@ export default function EconomicIndicatorsAdmin() {
                     <label htmlFor="value" className="block text-sm font-medium text-gray-700">
                       Valor *
                     </label>
-                    <input
+                    <StandardizedInput
                       type="text"
                       id="value"
                       required
                       value={formData.value}
                       onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       placeholder="Ex: 36.7 mil"
+                      startIcon="chart-bar-vertical"
+                      variant="outline"
+                      size="md"
                     />
                   </div>
 
@@ -355,13 +360,15 @@ export default function EconomicIndicatorsAdmin() {
                     <label htmlFor="display_order" className="block text-sm font-medium text-gray-700">
                       Ordem de Exibição
                     </label>
-                    <input
+                    <StandardizedInput
                       type="number"
                       id="display_order"
                       value={formData.display_order}
                       onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
-                      className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       min="0"
+                      startIcon="sort"
+                      variant="outline"
+                      size="md"
                     />
                   </div>
 
@@ -369,15 +376,17 @@ export default function EconomicIndicatorsAdmin() {
                     <label htmlFor="issue_date" className="block text-sm font-medium text-gray-700">
                       Data de Emissão
                     </label>
-                    <input
+                    <StandardizedInput
                       type="text"
                       id="issue_date"
                       value={formData.issue_date}
                       onChange={(e) => setFormData({ ...formData, issue_date: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                       placeholder="MM/AAAA (ex: 05/2025)"
                       pattern="^(0[1-9]|1[0-2])\/[0-9]{4}$"
                       title="Formato: MM/AAAA (ex: 05/2025)"
+                      startIcon="calendar"
+                      variant="outline"
+                      size="md"
                     />
                   </div>
                 </div>
@@ -386,13 +395,14 @@ export default function EconomicIndicatorsAdmin() {
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                     Descrição
                   </label>
-                  <textarea
+                  <StandardizedTextarea
                     id="description"
                     rows={3}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                     placeholder="Descrição opcional do indicador"
+                    variant="outline"
+                    size="md"
                   />
                 </div>
 

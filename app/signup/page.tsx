@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { StandardizedButton } from '@/app/components/admin';
+import { Button } from '@/app/components/ui/Button';
+import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export default function Signup() {
@@ -169,44 +170,43 @@ export default function Signup() {
           </div>
         )}
         <form onSubmit={handleSignUp} className="space-y-4">
+          <StandardizedInput
+            id="fullName"
+            label="Nome Completo"
+            type="text"
+            variant="outline"
+            size="md"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+            placeholder="Seu nome completo"
+            startIcon="user"
+          />
+          
+          <StandardizedInput
+            id="email"
+            label="E-mail Corporativo"
+            type="email"
+            variant="outline"
+            size="md"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="seu.email@cresol.com.br"
+            startIcon="mail"
+            help="Use seu e-mail corporativo @cresol.com.br"
+          />
           <div>
-            <label htmlFor="fullName" className="form-label">
-              Nome Completo
-            </label>
-            <input
-              id="fullName"
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-              className="input"
-              placeholder="Seu nome completo"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="form-label">
-              E-mail Corporativo
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="input"
-              placeholder="seu.email@cresol.com.br"
-            />
-          </div>
-          <div>
-            <label htmlFor="position" className="form-label">
+            <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-1">
               Cargo
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <select
               id="position"
               value={positionId}
               onChange={e => setPositionId(e.target.value)}
               required
-              className="input"
+              className="w-full border rounded-md px-3 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 border-gray-300 focus:border-primary focus:ring-primary/20"
             >
               <option value="">Selecione o cargo</option>
               {positions.map(position => (
@@ -218,15 +218,16 @@ export default function Signup() {
             </select>
           </div>
           <div>
-            <label htmlFor="workLocation" className="form-label">
+            <label htmlFor="workLocation" className="block text-sm font-medium text-gray-700 mb-1">
               Local de Atuação
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <select
               id="workLocation"
               value={workLocationId}
               onChange={e => setWorkLocationId(e.target.value)}
               required
-              className="input"
+              className="w-full border rounded-md px-3 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 border-gray-300 focus:border-primary focus:ring-primary/20"
             >
               <option value="">Selecione o local de atuação</option>
               {workLocations.map(loc => (
@@ -234,32 +235,32 @@ export default function Signup() {
               ))}
             </select>
           </div>
-          <div>
-            <label htmlFor="password" className="form-label">
-              Senha Inicial
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="input"
-              placeholder="Define a senha para uso após aprovação"
-              minLength={8}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Esta senha será usada após a aprovação do administrador.
-            </p>
-          </div>
-          <StandardizedButton
+          <StandardizedInput
+            id="password"
+            label="Senha Inicial"
+            type="password"
+            variant="outline"
+            size="md"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Define a senha para uso após aprovação"
+            minLength={8}
+            showPasswordToggle
+            help="Esta senha será usada após a aprovação do administrador. Mínimo 8 caracteres."
+          />
+          <Button
             type="submit"
-            variant="primary"
-            className="w-full"
+            variant="solid"
+            colorPalette="orange"
+            size="md"
+            fullWidth
+            loading={loading}
+            loadingText="Enviando..."
             disabled={loading}
           >
-            {loading ? 'Enviando...' : 'Solicitar Acesso'}
-          </StandardizedButton>
+            Solicitar Acesso
+          </Button>
         </form>
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">

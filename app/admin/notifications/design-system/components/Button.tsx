@@ -1,7 +1,15 @@
-import React from 'react';
+// =============================================================================
+// NOTIFICATIONS DESIGN SYSTEM - BUTTON COMPONENT
+// =============================================================================
+// This component has been migrated to use the unified Chakra UI v3 Button
+// from @/app/components/ui/Button for consistency across the application
+// =============================================================================
 
-interface ButtonProps {
-  children: React.ReactNode;
+import { Button as UnifiedButton, ButtonProps } from '@/app/components/ui/Button';
+import { ReactNode, forwardRef } from 'react';
+
+interface NotificationButtonProps {
+  children: ReactNode;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
@@ -9,79 +17,72 @@ interface ButtonProps {
   type?: 'button' | 'submit' | 'reset';
   onClick?: () => void;
   className?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   fullWidth?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  children,
-  variant = 'primary',
-  size = 'md',
-  disabled = false,
-  loading = false,
-  type = 'button',
-  onClick,
-  className = '',
-  icon,
-  fullWidth = false,
-}) => {
-  const getVariantClasses = () => {
-    switch (variant) {
-      case 'secondary':
-        return 'bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 focus:ring-gray-500/20';
-      case 'outline':
-        return 'bg-transparent text-primary border-2 border-primary hover:bg-primary/5 focus:ring-primary/20';
-      case 'ghost':
-        return 'bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-500/20 border-0';
-      case 'danger':
-        return 'bg-red-500 text-white border border-red-500 hover:bg-red-600 focus:ring-red-500/20';
-      default:
-        return 'bg-primary text-white border border-primary hover:bg-primary/90 focus:ring-primary/20';
-    }
-  };
-
-  const getSizeClasses = () => {
-    switch (size) {
-      case 'sm':
-        return 'px-3 py-2 sm:px-3 sm:py-1.5 text-xs font-medium min-h-[36px]';
-      case 'lg':
-        return 'px-6 py-3 sm:px-6 sm:py-3 text-sm sm:text-base font-semibold min-h-[48px]';
-      default:
-        return 'px-4 py-2.5 sm:px-4 sm:py-2 text-sm font-medium min-h-[44px]';
-    }
-  };
-
-  const isDisabled = disabled || loading;
-
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={isDisabled}
-      className={`
-        ${getVariantClasses()}
-        ${getSizeClasses()}
-        ${fullWidth ? 'w-full' : ''}
-        inline-flex
-        items-center
-        justify-center
-        gap-2
-        rounded-lg sm:rounded-md
-        transition-colors
-        duration-200
-        focus:outline-none
-        focus:ring-2
-        focus:ring-offset-2
-        touch-manipulation
-        ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-        ${className}
-      `}
-    >
-      {loading && (
-        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-      )}
-      {icon && !loading && icon}
-      {children}
-    </button>
-  );
+// Map notifications variants to Chakra UI v3 Button
+const mapNotificationVariant = (variant: NotificationButtonProps['variant']): { variant: ButtonProps['variant']; colorPalette: ButtonProps['colorPalette'] } => {
+  switch (variant) {
+    case 'primary':
+      return { variant: 'solid', colorPalette: 'orange' };
+    case 'secondary':
+      return { variant: 'subtle', colorPalette: 'gray' };
+    case 'outline':
+      return { variant: 'outline', colorPalette: 'orange' };
+    case 'ghost':
+      return { variant: 'ghost', colorPalette: 'gray' };
+    case 'danger':
+      return { variant: 'solid', colorPalette: 'red' };
+    default:
+      return { variant: 'solid', colorPalette: 'orange' };
+  }
 };
+
+/**
+ * Notifications Design System Button Component
+ * 
+ * @deprecated Use Button from '@/app/components/ui/Button' directly
+ * 
+ * This wrapper provides backwards compatibility for the notifications system
+ * while using the unified Chakra UI v3 Button implementation.
+ */
+export const Button = forwardRef<HTMLButtonElement, NotificationButtonProps>(
+  (
+    {
+      children,
+      variant = 'primary',
+      size = 'md',
+      disabled = false,
+      loading = false,
+      type = 'button',
+      onClick,
+      className = '',
+      icon,
+      fullWidth = false,
+    },
+    ref
+  ) => {
+    const { variant: newVariant, colorPalette } = mapNotificationVariant(variant);
+
+    return (
+      <UnifiedButton
+        ref={ref}
+        variant={newVariant}
+        colorPalette={colorPalette}
+        size={size}
+        disabled={disabled}
+        loading={loading}
+        type={type}
+        onClick={onClick}
+        className={className}
+        fullWidth={fullWidth}
+        startElement={icon}
+      >
+        {children}
+      </UnifiedButton>
+    );
+  }
+);
+
+Button.displayName = 'NotificationButton';

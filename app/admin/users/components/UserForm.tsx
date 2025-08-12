@@ -12,7 +12,8 @@ import {
 import { Icon } from '@/app/components/icons/Icon';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
-import { StandardizedButton } from '@/app/components/admin';
+import { Button as CButton } from '@/app/components/ui/Button';
+import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
 
 interface WorkLocation {
   id: string;
@@ -272,11 +273,12 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                 />
               </label>
               {newUserAvatarPreview && (
-                <StandardizedButton
+                <CButton
                   type="button"
-                  variant="link"
+                  variant="plain"
+                  colorPalette="red"
                   size="sm"
-                  className="ml-2 text-red-600 hover:text-red-700"
+                  className="ml-2"
                   onClick={() => {
                     URL.revokeObjectURL(newUserAvatarPreview);
                     setNewUserAvatarPreview(null);
@@ -284,7 +286,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                   }}
                 >
                   Remover
-                </StandardizedButton>
+                </CButton>
               )}
             </div>
             <p className="mt-1 text-xs text-muted">
@@ -298,14 +300,16 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
             <label htmlFor="newUserName" className="form-label">
               Nome Completo
             </label>
-            <input
+            <StandardizedInput
               id="newUserName"
               type="text"
               value={newUserName}
               onChange={(e) => setNewUserName(e.target.value)}
               required
-              className="input"
               placeholder="Nome completo do usuário"
+              startIcon="user"
+              variant="outline"
+              size="md"
             />
           </div>
           
@@ -313,14 +317,16 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
             <label htmlFor="newUserEmail" className="form-label">
               E-mail Corporativo
             </label>
-            <input
+            <StandardizedInput
               id="newUserEmail"
               type="email"
               value={newUserEmail}
               onChange={(e) => setNewUserEmail(e.target.value)}
               required
-              className="input"
               placeholder="email@cresol.com.br"
+              startIcon="mail"
+              variant="outline"
+              size="md"
             />
           </div>
           
@@ -546,7 +552,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
               value={newUserRole}
               onChange={(e) => setNewUserRole(e.target.value as 'user' | 'sector_admin' | 'subsector_admin' | 'admin')}
               required
-              className="input"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             >
               <option value="user">Usuário</option>
               <option value="sector_admin">Administrador de Setor</option>
@@ -557,21 +563,26 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
         </div>
         
         <div className="flex justify-end space-x-3">
-          <StandardizedButton
+          <CButton
             type="button"
             onClick={onCancel}
-            variant="secondary"
+            variant="outline"
+            colorPalette="gray"
+            size="md"
           >
             Cancelar
-          </StandardizedButton>
-          <StandardizedButton
+          </CButton>
+          <CButton
             type="submit"
-            variant="primary"
+            variant="solid"
+            colorPalette="orange"
+            size="md"
             disabled={formLoading}
             loading={formLoading}
+            loadingText="Cadastrando..."
           >
-            {formLoading ? 'Cadastrando...' : 'Cadastrar Usuário'}
-          </StandardizedButton>
+            Cadastrar Usuário
+          </CButton>
         </div>
       </form>
     </div>

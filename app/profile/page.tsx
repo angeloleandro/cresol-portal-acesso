@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import OptimizedImage from '../components/OptimizedImage';
-import { StandardizedButton } from '@/app/components/admin';
+import { Button } from '@/app/components/ui/Button';
+import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import Navbar from '../components/Navbar';
@@ -767,20 +768,20 @@ export default function ProfilePage() {
 
                 {/* Botões */}
                 <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                  <StandardizedButton
+                  <Button
                     type="button"
                     onClick={() => router.push('/dashboard')}
                     variant="secondary"
                   >
                     Cancelar
-                  </StandardizedButton>
-                  <StandardizedButton
+                  </Button>
+                  <Button
                     type="submit"
                     disabled={updating}
                     variant="primary"
                   >
                     {updating ? 'Salvando...' : 'Salvar Alterações'}
-                  </StandardizedButton>
+                  </Button>
                 </div>
               </form>
             )}
@@ -798,14 +799,14 @@ export default function ProfilePage() {
                         <h4 className="text-md font-medium text-gray-900">Alterar Senha</h4>
                         <p className="text-sm text-gray-600">Mantenha sua conta segura com uma senha forte</p>
                       </div>
-                      <StandardizedButton
+                      <Button
                         type="button"
                         onClick={() => setShowPasswordForm(!showPasswordForm)}
                         variant="ghost"
                         size="sm"
                       >
                         {showPasswordForm ? 'Cancelar' : 'Alterar Senha'}
-                      </StandardizedButton>
+                      </Button>
                     </div>
 
                     {passwordError && (
@@ -853,14 +854,14 @@ export default function ProfilePage() {
                         </div>
                         
                         <div className="pt-2">
-                          <StandardizedButton
+                          <Button
                             type="submit"
                             disabled={changingPassword}
                             variant="primary"
                             className="w-full"
                           >
                             {changingPassword ? 'Alterando...' : 'Salvar Nova Senha'}
-                          </StandardizedButton>
+                          </Button>
                         </div>
                       </form>
                     )}
@@ -964,12 +965,12 @@ export default function ProfilePage() {
                   </div>
                   
                   <div className="pt-6 border-t border-gray-200">
-                    <StandardizedButton
+                    <Button
                       type="button"
                       variant="primary"
                     >
                       Salvar Configurações
-                    </StandardizedButton>
+                    </Button>
                   </div>
                 </div>
               </div>

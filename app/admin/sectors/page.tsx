@@ -7,13 +7,13 @@ import { supabase } from '@/lib/supabase';
 import { 
   StandardizedAdminLayout, 
   StandardizedPageHeader, 
-  StandardizedButton,
   StandardizedTabsList,
   StandardizedTabContent,
   StandardizedCard,
   StandardizedEmptyState,
   type BreadcrumbItem
 } from '@/app/components/admin';
+import { Button } from '@/app/components/ui/Button';
 import { Tabs } from "@chakra-ui/react";
 import { LuFolder } from "react-icons/lu";
 import SectorCard from '@/app/components/admin/SectorCard';
@@ -21,6 +21,7 @@ import SubsectorCard from '@/app/components/admin/SubsectorCard';
 import { Icon } from '../../components/icons';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 
 interface Sector {
   id: string;
@@ -352,20 +353,24 @@ export default function SectorsManagement() {
           subtitle="Gerencie os setores da Cresol e seus sub-setores"
           action={
             <div className="flex gap-3">
-              <StandardizedButton
+              <Button
                 onClick={() => setShowSectorModal(true)}
-                variant="primary"
+                variant="solid"
+                colorPalette="orange"
+                size="md"
+                startElement={<Icon name="plus" className="h-4 w-4" />}
               >
-                <Icon name="plus" className="h-4 w-4" />
                 Novo Setor
-              </StandardizedButton>
-              <StandardizedButton
+              </Button>
+              <Button
                 onClick={() => setShowSubsectorModal(true)}
-                variant="secondary"
+                variant="outline"
+                colorPalette="gray"
+                size="md"
+                startElement={<Icon name="folder-plus" className="h-4 w-4" />}
               >
-                <Icon name="folder-plus" className="h-4 w-4" />
                 Novo Sub-setor
-              </StandardizedButton>
+              </Button>
             </div>
           }
         />
@@ -471,13 +476,15 @@ export default function SectorsManagement() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nome do Setor *
                     </label>
-                    <input
+                    <StandardizedInput
                       type="text"
                       value={sectorForm.name}
                       onChange={(e) => setSectorForm({ ...sectorForm, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       placeholder="Ex: Tecnologia da Informação"
                       required
+                      startIcon="building-1"
+                      variant="outline"
+                      size="md"
                     />
                   </div>
                   
@@ -485,31 +492,36 @@ export default function SectorsManagement() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Descrição
                     </label>
-                    <textarea
+                    <StandardizedTextarea
                       value={sectorForm.description}
                       onChange={(e) => setSectorForm({ ...sectorForm, description: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       placeholder="Descrição opcional do setor..."
                       rows={3}
+                      variant="outline"
+                      size="md"
                     />
                   </div>
                   
                   <div className="flex gap-3 pt-4">
-                    <StandardizedButton
+                    <Button
                       type="button"
                       onClick={resetSectorForm}
-                      variant="secondary"
-                      className="flex-1 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                      variant="outline"
+                      colorPalette="gray"
+                      size="md"
+                      className="flex-1"
                     >
                       Cancelar
-                    </StandardizedButton>
-                    <StandardizedButton
+                    </Button>
+                    <Button
                       type="submit"
-                      variant="primary"
+                      variant="solid"
+                      colorPalette="orange"
+                      size="md"
                       className="flex-1"
                     >
                       {editingSector ? 'Atualizar' : 'Criar'}
-                    </StandardizedButton>
+                    </Button>
                   </div>
                 </form>
               </div>
@@ -550,13 +562,15 @@ export default function SectorsManagement() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nome do Sub-setor *
                     </label>
-                    <input
+                    <StandardizedInput
                       type="text"
                       value={subsectorForm.name}
                       onChange={(e) => setSubsectorForm({ ...subsectorForm, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       placeholder="Ex: Desenvolvimento de Software"
                       required
+                      startIcon="folder"
+                      variant="outline"
+                      size="md"
                     />
                   </div>
                   
@@ -564,31 +578,36 @@ export default function SectorsManagement() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Descrição
                     </label>
-                    <textarea
+                    <StandardizedTextarea
                       value={subsectorForm.description}
                       onChange={(e) => setSubsectorForm({ ...subsectorForm, description: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       placeholder="Descrição opcional do sub-setor..."
                       rows={3}
+                      variant="outline"
+                      size="md"
                     />
                   </div>
                   
                   <div className="flex gap-3 pt-4">
-                    <StandardizedButton
+                    <Button
                       type="button"
                       onClick={resetSubsectorForm}
-                      variant="secondary"
-                      className="flex-1 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                      variant="outline"
+                      colorPalette="gray"
+                      size="md"
+                      className="flex-1"
                     >
                       Cancelar
-                    </StandardizedButton>
-                    <StandardizedButton
+                    </Button>
+                    <Button
                       type="submit"
-                      variant="secondary"
+                      variant="solid"
+                      colorPalette="orange"
+                      size="md"
                       className="flex-1"
                     >
                       {editingSubsector ? 'Atualizar' : 'Criar'}
-                    </StandardizedButton>
+                    </Button>
                   </div>
                 </form>
               </div>

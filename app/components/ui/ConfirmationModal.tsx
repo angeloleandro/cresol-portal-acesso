@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { StandardizedButton } from '@/app/components/admin';
+import { Button } from '@/app/components/ui/Button';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -74,20 +74,26 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           </div>
         )}
         <div className="flex justify-end space-x-4">
-          <StandardizedButton
+          <Button
             onClick={onClose}
             disabled={isLoading}
-            variant="secondary"
+            variant="outline"
+            colorPalette="gray"
+            size="md"
           >
             {cancelButtonText}
-          </StandardizedButton>
-          <StandardizedButton
+          </Button>
+          <Button
             onClick={handleConfirm}
             disabled={isLoading || (requiresConfirmationInput && !isConfirmed)}
-            variant="danger"
+            variant="solid"
+            colorPalette="red"
+            size="md"
+            loading={isLoading}
+            loadingText="Excluindo..."
           >
-            {isLoading ? 'Excluindo...' : confirmButtonText}
-          </StandardizedButton>
+            {confirmButtonText}
+          </Button>
         </div>
       </div>
     </div>

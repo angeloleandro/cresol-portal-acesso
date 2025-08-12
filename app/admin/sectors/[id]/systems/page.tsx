@@ -6,6 +6,7 @@ import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 import type { User } from '@supabase/supabase-js';
 
 interface System {
@@ -383,36 +384,41 @@ export default function SectorSystemsManagement() {
             <form onSubmit={handleAddSystem}>
               <div className="mb-4">
                 <label htmlFor="name" className="form-label">Nome do Sistema</label>
-                <input
+                <StandardizedInput
                   id="name"
                   type="text"
                   value={newSystem.name}
                   onChange={(e) => setNewSystem({...newSystem, name: e.target.value})}
-                  className="input"
                   required
+                  startIcon="layers"
+                  variant="outline"
+                  size="md"
                 />
               </div>
               
               <div className="mb-4">
                 <label htmlFor="description" className="form-label">Descrição</label>
-                <textarea
+                <StandardizedTextarea
                   id="description"
                   value={newSystem.description}
                   onChange={(e) => setNewSystem({...newSystem, description: e.target.value})}
-                  className="input"
                   rows={3}
+                  variant="outline"
+                  size="md"
                 />
               </div>
               
               <div className="mb-4">
                 <label htmlFor="url" className="form-label">URL do Sistema</label>
-                <input
+                <StandardizedInput
                   id="url"
                   type="text"
                   value={newSystem.url}
                   onChange={(e) => setNewSystem({...newSystem, url: e.target.value})}
-                  className="input"
                   placeholder="https://exemplo.com"
+                  startIcon="link"
+                  variant="outline"
+                  size="md"
                 />
               </div>
               
@@ -477,36 +483,41 @@ export default function SectorSystemsManagement() {
             <form onSubmit={handleEditSystem}>
               <div className="mb-4">
                 <label htmlFor="edit-name" className="form-label">Nome do Sistema</label>
-                <input
+                <StandardizedInput
                   id="edit-name"
                   type="text"
                   value={editingSystem.name}
                   onChange={(e) => setEditingSystem({...editingSystem, name: e.target.value})}
-                  className="input"
                   required
+                  startIcon="layers"
+                  variant="outline"
+                  size="md"
                 />
               </div>
               
               <div className="mb-4">
                 <label htmlFor="edit-description" className="form-label">Descrição</label>
-                <textarea
+                <StandardizedTextarea
                   id="edit-description"
                   value={editingSystem.description || ''}
                   onChange={(e) => setEditingSystem({...editingSystem, description: e.target.value})}
-                  className="input"
                   rows={3}
+                  variant="outline"
+                  size="md"
                 />
               </div>
               
               <div className="mb-4">
                 <label htmlFor="edit-url" className="form-label">URL do Sistema</label>
-                <input
+                <StandardizedInput
                   id="edit-url"
                   type="text"
                   value={editingSystem.url || ''}
                   onChange={(e) => setEditingSystem({...editingSystem, url: e.target.value})}
-                  className="input"
                   placeholder="https://exemplo.com"
+                  startIcon="link"
+                  variant="outline"
+                  size="md"
                 />
               </div>
               

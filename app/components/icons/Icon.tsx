@@ -153,7 +153,10 @@ export type IconName =
   | 'ChevronUp'
   | 'Check'
   | 'Search'
-  | 'Mail';
+  | 'Mail'
+  // Missing icons needed for admin components
+  | 'layers'
+  | 'file-text';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   name: IconName;
@@ -288,6 +291,10 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   'Check': CheckIcon,
   'Search': MagnifyingGlassIcon,
   'Mail': EnvelopeIcon,
+  
+  // Missing icons needed for admin components
+  'layers': Squares2X2Icon,
+  'file-text': DocumentIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, ...props }) => {

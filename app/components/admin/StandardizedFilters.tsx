@@ -73,14 +73,14 @@ export default function StandardizedFilters({
                     value={filter.value}
                     onChange={(e) => filter.onChange(e.target.value)}
                     placeholder={filter.placeholder || 'Buscar...'}
-                    className={`${CRESOL_UI_CONFIG.input.base} ${CRESOL_UI_CONFIG.input.states.default} ${CRESOL_UI_CONFIG.input.types.search}`}
+                    className={`${CRESOL_UI_CONFIG.input.base} ${CRESOL_UI_CONFIG.input.variants.outline.classes} ${CRESOL_UI_CONFIG.input.variants.outline.states.default} ${CRESOL_UI_CONFIG.input.sizes.md.classes}`}
                   />
                 </div>
               ) : (
                 <select
                   value={filter.value}
                   onChange={(e) => filter.onChange(e.target.value)}
-                  className={`${CRESOL_UI_CONFIG.input.base} ${CRESOL_UI_CONFIG.input.states.default}`}
+                  className={`${CRESOL_UI_CONFIG.input.base} ${CRESOL_UI_CONFIG.input.variants.outline.classes} ${CRESOL_UI_CONFIG.input.variants.outline.states.default} ${CRESOL_UI_CONFIG.input.sizes.md.classes}`}
                 >
                   {filter.options?.map((option) => (
                     <option key={option.value} value={option.value}>

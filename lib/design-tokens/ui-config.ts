@@ -196,31 +196,98 @@ export const CARD_CONFIG = {
   },
 } as const;
 
-// === CONFIGURAÇÕES DE INPUT ===
-// Criando padrão para eliminar inputs inconsistentes encontrados
+// === CONFIGURAÇÕES DE INPUT (CHAKRA UI V3) ===
+// Padrão baseado no Chakra UI v3 para eliminação de inputs inconsistentes
 export const INPUT_CONFIG = {
   // Classes base (consolidando "w-full border rounded-md px-3 py-2")
-  base: 'w-full border rounded-md px-3 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1',
+  base: 'w-full transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1',
   
-  // Estados (baseado em ConfirmationModal que pode usar classes inexistentes)
-  states: {
-    default: 'border-gray-300 focus:border-primary focus:ring-primary/20',
-    error: 'border-red-300 focus:border-red-500 focus:ring-red-100',
-    success: 'border-green-300 focus:border-green-500 focus:ring-green-100',
-    disabled: 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed',
+  // Variantes Chakra UI v3
+  variants: {
+    outline: {
+      classes: 'border rounded-md bg-transparent',
+      states: {
+        default: 'border-gray-300 focus:border-primary focus:ring-primary/20',
+        error: 'border-red-300 focus:border-red-500 focus:ring-red-100',
+        success: 'border-green-300 focus:border-green-500 focus:ring-green-100',
+        disabled: 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed',
+      },
+    },
+    filled: {
+      classes: 'border-0 rounded-md bg-gray-100',
+      states: {
+        default: 'focus:bg-gray-50 focus:ring-primary/20',
+        error: 'bg-red-50 focus:bg-red-50 focus:ring-red-100',
+        success: 'bg-green-50 focus:bg-green-50 focus:ring-green-100',
+        disabled: 'bg-gray-100 text-gray-500 cursor-not-allowed',
+      },
+    },
+    flushed: {
+      classes: 'border-0 border-b-2 rounded-none bg-transparent px-0',
+      states: {
+        default: 'border-b-gray-300 focus:border-b-primary focus:ring-0',
+        error: 'border-b-red-300 focus:border-b-red-500 focus:ring-0',
+        success: 'border-b-green-300 focus:border-b-green-500 focus:ring-0',
+        disabled: 'border-b-gray-200 text-gray-500 cursor-not-allowed',
+      },
+    },
+    unstyled: {
+      classes: 'border-0 rounded-none bg-transparent px-0 focus:ring-0',
+      states: {
+        default: '',
+        error: '',
+        success: '',
+        disabled: 'text-gray-500 cursor-not-allowed',
+      },
+    },
   },
   
-  // Tamanhos
+  // Tamanhos Chakra UI v3
   sizes: {
-    sm: 'px-2 py-1 text-xs',
-    md: 'px-3 py-2 text-sm',    // Padrão
-    lg: 'px-4 py-3 text-base',
+    xs: {
+      classes: 'px-2 py-1 text-xs h-6',
+      iconSize: 'w-3 h-3',
+    },
+    sm: {
+      classes: 'px-3 py-1.5 text-sm h-8',
+      iconSize: 'w-4 h-4',
+    },
+    md: {
+      classes: 'px-3 py-2 text-sm h-10',    // Padrão
+      iconSize: 'w-5 h-5',
+    },
+    lg: {
+      classes: 'px-4 py-3 text-base h-12',
+      iconSize: 'w-6 h-6',
+    },
+  },
+  
+  // InputGroup configuration
+  group: {
+    base: 'relative flex items-stretch',
+    addon: {
+      base: 'inline-flex items-center px-3 border border-gray-300 bg-gray-50 text-gray-500 text-sm',
+      left: 'rounded-l-md border-r-0',
+      right: 'rounded-r-md border-l-0',
+    },
+    element: {
+      base: 'absolute flex items-center justify-center pointer-events-none',
+      left: 'left-0 pl-3',
+      right: 'right-0 pr-3',
+      interactive: 'pointer-events-auto cursor-pointer',
+    },
   },
   
   // Tipos especiais
   types: {
-    search: 'pl-10 pr-4', // Espaço para ícone de lupa
-    password: 'pr-10',    // Espaço para ícone de olho
+    search: {
+      paddingLeft: 'pl-10',
+      iconPosition: 'left',
+    },
+    password: {
+      paddingRight: 'pr-10',
+      iconPosition: 'right',
+    },
   },
   
   // Labels (eliminando hardcode de "text-sm font-medium text-neutral-700")
@@ -235,6 +302,15 @@ export const INPUT_CONFIG = {
     default: 'mt-1 text-xs text-gray-500',
     error: 'mt-1 text-xs text-red-600',
     success: 'mt-1 text-xs text-green-600',
+  },
+  
+  // Field wrapper (Chakra UI v3 Field component)
+  field: {
+    base: 'space-y-1',
+    label: 'block text-sm font-medium text-gray-700',
+    helpText: 'text-xs text-gray-500',
+    errorText: 'text-xs text-red-600',
+    requiredIndicator: 'text-red-500 ml-1',
   },
 } as const;
 

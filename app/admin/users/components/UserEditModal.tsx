@@ -12,7 +12,8 @@ import {
 import { Icon } from '@/app/components/icons/Icon';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
-import { StandardizedButton } from '@/app/components/admin';
+import { Button as CButton } from '@/app/components/ui/Button';
+import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
 
 interface UserProfile {
   id: string;
@@ -408,15 +409,17 @@ export default function UserEditModal({
       <div className="bg-white rounded-lg border border-gray-300 w-full max-w-2xl mx-4 relative max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-cresol-gray-light">
           <h3 className="heading-4 text-primary">Editar Usuário</h3>
-          <StandardizedButton
+          <CButton
             type="button"
             variant="ghost"
+            colorPalette="gray"
             size="sm"
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
+            startElement={<Icon name="x" className="h-5 w-5" />}
           >
-            <Icon name="x" className="h-5 w-5" />
-          </StandardizedButton>
+            <span className="sr-only">Fechar</span>
+          </CButton>
         </div>
         
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -456,11 +459,12 @@ export default function UserEditModal({
             </label>
             
             {avatarPreview && (
-              <StandardizedButton
+              <CButton
                 type="button"
-                variant="link"
+                variant="plain"
+                colorPalette="red"
                 size="sm"
-                className="ml-2 text-red-600 hover:text-red-700"
+                className="ml-2"
                 onClick={() => {
                   URL.revokeObjectURL(avatarPreview);
                   setAvatarPreview(null);
@@ -468,7 +472,7 @@ export default function UserEditModal({
                 }}
               >
                 Remover
-              </StandardizedButton>
+              </CButton>
             )}
           </div>
           
@@ -477,12 +481,14 @@ export default function UserEditModal({
               <label htmlFor={`name-${user.id}`} className="form-label">
                 Nome Completo
               </label>
-              <input
+              <StandardizedInput
                 id={`name-${user.id}`}
                 type="text"
-                className="input"
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
+                startIcon="user"
+                variant="outline"
+                size="md"
               />
             </div>
             
@@ -490,12 +496,14 @@ export default function UserEditModal({
               <label htmlFor={`email-${user.id}`} className="form-label">
                 E-mail
               </label>
-              <input
+              <StandardizedInput
                 id={`email-${user.id}`}
                 type="email"
-                className="input"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                startIcon="mail"
+                variant="outline"
+                size="md"
               />
             </div>
             
@@ -825,17 +833,18 @@ export default function UserEditModal({
                 <label className="block text-sm font-medium text-cresol-gray">
                   Senha
                 </label>
-                <StandardizedButton
+                <CButton
                   type="button"
                   onClick={handleResetPassword}
-                  variant="link"
+                  variant="plain"
+                  colorPalette="orange"
                   size="xs"
                   disabled={resetPasswordLoading}
                   loading={resetPasswordLoading}
-                  className="text-primary hover:text-primary-dark"
+                  loadingText="Gerando..."
                 >
-                  {resetPasswordLoading ? 'Gerando...' : 'Redefinir senha'}
-                </StandardizedButton>
+                  Redefinir senha
+                </CButton>
               </div>
               
               {resetPasswordSuccess && (
@@ -860,20 +869,24 @@ export default function UserEditModal({
         
         <div className="border-t border-cresol-gray-light p-6 bg-gray-50">
           <div className="flex justify-end space-x-3">
-            <StandardizedButton
+            <CButton
               type="button"
-              variant="secondary"
+              variant="outline"
+              colorPalette="gray"
+              size="md"
               onClick={onClose}
             >
               Cancelar
-            </StandardizedButton>
-            <StandardizedButton
+            </CButton>
+            <CButton
               type="button"
-              variant="primary"
+              variant="solid"
+              colorPalette="orange"
+              size="md"
               onClick={handleSave}
             >
               Salvar
-            </StandardizedButton>
+            </CButton>
           </div>
         </div>
       </div>

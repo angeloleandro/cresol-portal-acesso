@@ -4,7 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { StandardizedButton } from '@/app/components/admin';
+import { Button } from '@/app/components/ui/Button';
+import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
 import { supabase } from '@/lib/supabase';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
@@ -89,35 +90,31 @@ function LoginContent() {
         )}
         
         <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="form-label">
-              E-mail
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="input"
-              placeholder="seu.email@cresol.com.br"
-            />
-          </div>
+          <StandardizedInput
+            id="email"
+            label="E-mail"
+            type="email"
+            variant="outline"
+            size="md"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="seu.email@cresol.com.br"
+            startIcon="mail"
+          />
           
-          <div>
-            <label htmlFor="password" className="form-label">
-              Senha
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="input"
-              placeholder="Sua senha"
-            />
-          </div>
+          <StandardizedInput
+            id="password"
+            label="Senha"
+            type="password"
+            variant="outline"
+            size="md"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Sua senha"
+            showPasswordToggle
+          />
           
           <div className="text-right">
             <Link href="/reset-password" className="text-sm text-primary hover:underline">
@@ -125,14 +122,18 @@ function LoginContent() {
             </Link>
           </div>
           
-          <StandardizedButton
+          <Button
             type="submit"
-            variant="primary"
-            className="w-full"
+            variant="solid"
+            colorPalette="orange"
+            size="md"
+            fullWidth
+            loading={loading}
+            loadingText="Entrando..."
             disabled={loading}
           >
-            {loading ? 'Entrando...' : 'Entrar'}
-          </StandardizedButton>
+            Entrar
+          </Button>
         </form>
         
         <div className="mt-6 text-center">

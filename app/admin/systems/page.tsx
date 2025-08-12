@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { Icon } from '@/app/components/icons/Icon';
 import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 
 interface System {
   id: string;
@@ -286,7 +287,7 @@ export default function SystemsManagement() {
                 <select
                   value={sectorFilter}
                   onChange={(e) => setSectorFilter(e.target.value)}
-                  className="input"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 >
                   <option value="all">Todos os setores</option>
                   {sectors.map(sector => (
@@ -383,49 +384,56 @@ export default function SystemsManagement() {
               <form onSubmit={handleAddSystem}>
                 <div className="mb-4">
                   <label htmlFor="name" className="form-label">Nome do Sistema</label>
-                  <input
+                  <StandardizedInput
                     id="name"
                     type="text"
                     value={newSystem.name}
                     onChange={(e) => setNewSystem({...newSystem, name: e.target.value})}
-                    className="input"
                     required
+                    startIcon="layers"
+                    variant="outline"
+                    size="md"
                   />
                 </div>
                 
                 <div className="mb-4">
                   <label htmlFor="description" className="form-label">Descrição</label>
-                  <textarea
+                  <StandardizedTextarea
                     id="description"
                     value={newSystem.description}
                     onChange={(e) => setNewSystem({...newSystem, description: e.target.value})}
-                    className="input"
                     rows={2}
+                    variant="outline"
+                    size="md"
                   />
                 </div>
                 
                 <div className="mb-4">
                   <label htmlFor="url" className="form-label">URL</label>
-                  <input
+                  <StandardizedInput
                     id="url"
                     type="url"
                     value={newSystem.url}
                     onChange={(e) => setNewSystem({...newSystem, url: e.target.value})}
-                    className="input"
                     placeholder="https://"
                     required
+                    startIcon="link"
+                    variant="outline"
+                    size="md"
                   />
                 </div>
                 
                 <div className="mb-4">
                   <label htmlFor="icon" className="form-label">Ícone (caminho)</label>
-                  <input
+                  <StandardizedInput
                     id="icon"
                     type="text"
                     value={newSystem.icon}
                     onChange={(e) => setNewSystem({...newSystem, icon: e.target.value})}
-                    className="input"
                     placeholder="/icons/nome-do-icone.svg"
+                    startIcon="image"
+                    variant="outline"
+                    size="md"
                   />
                 </div>
                 
@@ -435,7 +443,7 @@ export default function SystemsManagement() {
                     id="sector"
                     value={newSystem.sector_id}
                     onChange={(e) => setNewSystem({...newSystem, sector_id: e.target.value})}
-                    className="input"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   >
                     <option value="">Nenhum</option>
                     {sectors.map(sector => (
@@ -475,49 +483,56 @@ export default function SystemsManagement() {
               <form onSubmit={handleEditSystem}>
                 <div className="mb-4">
                   <label htmlFor="edit-name" className="form-label">Nome do Sistema</label>
-                  <input
+                  <StandardizedInput
                     id="edit-name"
                     type="text"
                     value={editingSystem.name}
                     onChange={(e) => setEditingSystem({...editingSystem, name: e.target.value})}
-                    className="input"
                     required
+                    startIcon="layers"
+                    variant="outline"
+                    size="md"
                   />
                 </div>
                 
                 <div className="mb-4">
                   <label htmlFor="edit-description" className="form-label">Descrição</label>
-                  <textarea
+                  <StandardizedTextarea
                     id="edit-description"
                     value={editingSystem.description}
                     onChange={(e) => setEditingSystem({...editingSystem, description: e.target.value})}
-                    className="input"
                     rows={2}
+                    variant="outline"
+                    size="md"
                   />
                 </div>
                 
                 <div className="mb-4">
                   <label htmlFor="edit-url" className="form-label">URL</label>
-                  <input
+                  <StandardizedInput
                     id="edit-url"
                     type="url"
                     value={editingSystem.url}
                     onChange={(e) => setEditingSystem({...editingSystem, url: e.target.value})}
-                    className="input"
                     placeholder="https://"
                     required
+                    startIcon="link"
+                    variant="outline"
+                    size="md"
                   />
                 </div>
                 
                 <div className="mb-4">
                   <label htmlFor="edit-icon" className="form-label">Ícone (caminho)</label>
-                  <input
+                  <StandardizedInput
                     id="edit-icon"
                     type="text"
                     value={editingSystem.icon}
                     onChange={(e) => setEditingSystem({...editingSystem, icon: e.target.value})}
-                    className="input"
                     placeholder="/icons/nome-do-icone.svg"
+                    startIcon="image"
+                    variant="outline"
+                    size="md"
                   />
                 </div>
                 
@@ -527,7 +542,7 @@ export default function SystemsManagement() {
                     id="edit-sector"
                     value={editingSystem.sector_id || ''}
                     onChange={(e) => setEditingSystem({...editingSystem, sector_id: e.target.value || null})}
-                    className="input"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   >
                     <option value="">Nenhum</option>
                     {sectors.map(sector => (

@@ -7,7 +7,7 @@ import Breadcrumb from '@/app/components/Breadcrumb';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Cropper from 'react-easy-crop';
-import StandardizedButton from '@/app/components/admin/StandardizedButton';
+import { Button } from '@/app/components/ui/Button';
 
 interface Sector {
   id: string;
@@ -1136,13 +1136,13 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Notícias do Setor</h2>
-              <StandardizedButton
+              <Button
                 onClick={() => handleOpenNewsModal()}
                 variant="primary"
                 size="md"
               >
                 + Nova Notícia
-              </StandardizedButton>
+              </Button>
             </div>
 
             {news.length === 0 ? (
@@ -1212,13 +1212,13 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Eventos do Setor</h2>
-              <StandardizedButton
+              <Button
                 onClick={() => handleOpenEventModal()}
                 variant="primary"
                 size="md"
               >
                 + Novo Evento
-              </StandardizedButton>
+              </Button>
             </div>
 
             {events.length === 0 ? (
@@ -1289,13 +1289,13 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Subsetores</h2>
-              <StandardizedButton 
+              <Button 
                 onClick={() => handleOpenSubsectorModal()}
                 variant="primary"
                 size="md"
               >
                 + Novo Subsetor
-              </StandardizedButton>
+              </Button>
             </div>
 
             {subsectors.length === 0 ? (
@@ -1362,13 +1362,13 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Grupos de Notificação</h2>
-              <StandardizedButton 
+              <Button 
                 onClick={handleOpenGroupModal}
                 variant="primary"
                 size="md"
               >
                 + Criar Grupo
-              </StandardizedButton>
+              </Button>
             </div>
 
             {groups.length === 0 && automaticGroups.length === 0 ? (
@@ -1467,13 +1467,13 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Enviar Mensagem</h2>
-              <StandardizedButton 
+              <Button 
                 onClick={handleOpenMessageModal}
                 variant="primary"
                 size="md"
               >
                 + Nova Mensagem
-              </StandardizedButton>
+              </Button>
             </div>
 
             <div className="bg-white rounded-md p-12 text-center border border-gray-100">
@@ -1484,13 +1484,13 @@ export default function SectorDashboard() {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Envio de Notificações</h3>
               <p className="text-gray-500 mb-4">Envie mensagens para grupos ou usuários específicos.</p>
-              <StandardizedButton 
+              <Button 
                 onClick={handleOpenMessageModal}
                 variant="primary"
                 size="lg"
               >
                 Enviar Nova Mensagem
-              </StandardizedButton>
+              </Button>
             </div>
           </div>
         )}
@@ -1537,13 +1537,13 @@ export default function SectorDashboard() {
                 >
                   Cancelar
                 </button>
-                <StandardizedButton
+                <Button
                   type="submit"
                   variant="primary"
                   size="md"
                 >
                   {isEditing ? 'Salvar' : 'Criar'}
-                </StandardizedButton>
+                </Button>
               </div>
             </form>
           </div>
@@ -1655,13 +1655,13 @@ export default function SectorDashboard() {
                 >
                   Cancelar
                 </button>
-                <StandardizedButton
+                <Button
                   type="submit"
                   variant="primary"
                   size="md"
                 >
                   {isEditing ? 'Salvar' : 'Criar'}
-                </StandardizedButton>
+                </Button>
               </div>
             </form>
           </div>
@@ -1764,13 +1764,13 @@ export default function SectorDashboard() {
                 >
                   Cancelar
                 </button>
-                <StandardizedButton
+                <Button
                   type="submit"
                   variant="primary"
                   size="md"
                 >
                   {isEditing ? 'Salvar' : 'Criar'}
-                </StandardizedButton>
+                </Button>
               </div>
             </form>
           </div>
@@ -1817,13 +1817,13 @@ export default function SectorDashboard() {
                 >
                   Cancelar
                 </button>
-                <StandardizedButton
+                <Button
                   type="submit"
                   variant="primary"
                   size="md"
                 >
                   {isEditing ? 'Salvar' : 'Criar'}
-                </StandardizedButton>
+                </Button>
               </div>
             </form>
           </div>
