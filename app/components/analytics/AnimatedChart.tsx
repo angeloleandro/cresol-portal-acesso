@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, memo, useCallback, useMemo } from 'react';
+import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface ChartData {
   label: string;
@@ -269,7 +270,7 @@ const AnimatedChart = memo(function AnimatedChart({
       {!mounted && (
         <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-md">
           <div className="flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500 border-t-transparent"></div>
+            <InlineSpinner size="md" variant="home" />
             <span className="text-sm text-gray-600">Carregando gráfico...</span>
           </div>
         </div>

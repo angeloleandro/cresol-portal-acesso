@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
+import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
 import type { User } from '@supabase/supabase-js';
 
 interface System {
@@ -230,7 +231,7 @@ export default function SectorSystemsManagement() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto" />
+          <InlineSpinner size="xl" variant="admin" />
           <p className="mt-4 text-gray-600">Carregando...</p>
         </div>
       </div>

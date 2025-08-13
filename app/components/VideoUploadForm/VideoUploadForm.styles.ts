@@ -301,7 +301,7 @@ export const videoUploadStyles = {
   // Loading and status indicators
   loading: {
     spinner: cn(
-      'animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full',
+      'w-4 h-4', // Use InlineSpinner component instead
       'sm:w-5 sm:h-5'
     ),
     

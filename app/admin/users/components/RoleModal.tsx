@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
+import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface Sector {
   id: string;
@@ -271,7 +272,7 @@ export default function RoleModal({
               <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-md p-3">
                 {loadingSubsectors ? (
                   <div className="text-center py-4">
-                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary mx-auto"></div>
+                    <InlineSpinner size="md" variant="admin" />
                     <p className="text-sm text-cresol-gray mt-2">Carregando sub-setores...</p>
                   </div>
                 ) : subsectors.length === 0 ? (

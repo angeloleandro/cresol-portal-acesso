@@ -6,6 +6,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils/cn';
 import { CSS_CLASSES } from '@/lib/constants/collections';
+import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 // Loading Spinner
 export const CollectionSpinner: React.FC<{ className?: string }> = ({ className }) => (
@@ -78,7 +79,7 @@ export const CollectionInlineLoading: React.FC<{
 // Button Loading
 export const CollectionButtonLoading: React.FC<{ className?: string }> = ({ className }) => (
   <div className={cn("inline-flex items-center", className)}>
-    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+    <InlineSpinner size="sm" variant="light" className="mr-2" />
     <span>Processando...</span>
   </div>
 );

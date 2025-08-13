@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Cropper from 'react-easy-crop';
 import { Button } from '@/app/components/ui/Button';
+import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface Sector {
   id: string;
@@ -753,7 +754,7 @@ export default function SectorDashboard() {
                   disabled
                   className="px-3 py-1.5 text-sm bg-primary text-white rounded-md opacity-70 flex items-center"
                 >
-                  <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
+                  <InlineSpinner size="sm" variant="light" className="mr-2" />
                   Processando...
                 </button>
               ) : (
@@ -986,7 +987,7 @@ export default function SectorDashboard() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+          <InlineSpinner size="xl" variant="admin" />
           <p className="mt-4 text-gray-600">Carregando...</p>
         </div>
       </div>

@@ -8,6 +8,7 @@ import { Collection } from '@/lib/types/collections';
 import CollectionLoading from '@/app/components/Collections/Collection.Loading';
 import { cn } from '@/lib/utils/cn';
 import Icon from '@/app/components/icons/Icon';
+import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
 import { createClient } from '@/lib/supabase/client';
 
 // Supported file types
@@ -719,7 +720,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
               
               {isUploading && (
                 <div className="flex items-center px-4 py-2 text-sm font-medium text-gray-700">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" />
+                  <InlineSpinner size="sm" variant="home" className="mr-2" />
                   Fazendo Upload...
                 </div>
               )}

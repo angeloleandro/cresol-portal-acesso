@@ -10,6 +10,7 @@ import { COLLECTION_CONFIG, COLLECTION_TYPE_LABELS } from '@/lib/constants/colle
 import { validateCollection } from '@/lib/utils/collections';
 import { cn } from '@/lib/utils/cn';
 import { useCollectionUpload } from '@/app/components/Collections/Collection.hooks';
+import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 export interface CollectionFormData {
   name: string;
@@ -274,7 +275,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
             >
               {isUploadingCover ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2" />
+                  <InlineSpinner size="sm" variant="admin" className="mr-2" />
                   Enviando...
                 </>
               ) : (
@@ -448,7 +449,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
         >
           {isSubmitting ? (
             <div className="flex items-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+              <InlineSpinner size="sm" variant="light" className="mr-2" />
               {mode === 'create' ? 'Criando...' : 'Salvando...'}
             </div>
           ) : (

@@ -7,6 +7,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { Collection } from '@/lib/types/collections';
 import Icon from '@/app/components/icons/Icon';
+import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface GalleryImage {
   id: string;
@@ -402,7 +403,7 @@ const ItemSelector: React.FC<ItemSelectorProps> = ({
             >
               {isSubmitting ? (
                 <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  <InlineSpinner size="sm" variant="light" className="mr-2" />
                   Adicionando...
                 </div>
               ) : (

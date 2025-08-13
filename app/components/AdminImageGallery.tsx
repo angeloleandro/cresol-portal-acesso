@@ -5,6 +5,7 @@ import { ImagePreviewGrid } from "./ImagePreview";
 import { BaseImage, baseImageToGalleryImage } from "./ImagePreview/ImagePreview.types";
 import OptimizedImage from "./OptimizedImage";
 import { Icon } from "./icons/Icon";
+import { InlineSpinner } from "./ui/StandardizedSpinner";
 import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
 
 interface GalleryImage {
@@ -57,7 +58,7 @@ export default function AdminImageGallery({
   if (loading) {
     return (
       <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <InlineSpinner size="lg" variant="home" />
         <p className="mt-2 text-sm text-gray-500">Carregando imagens...</p>
       </div>
     );

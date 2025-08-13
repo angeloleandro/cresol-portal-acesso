@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { Collection } from '@/lib/types/collections';
 import { formatCollection } from '@/lib/utils/collections';
+import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -183,7 +184,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             >
               {isDeleting ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  <InlineSpinner size="sm" variant="light" className="mr-2" />
                   Excluindo...
                 </div>
               ) : (
