@@ -53,6 +53,11 @@ export interface VideoFormProps {
   initialData?: Partial<VideoUploadFormData>
   onSave: () => void
   onCancel: () => void
+  customContext?: {
+    collectionId?: string
+    collectionName?: string
+    [key: string]: any
+  }
 }
 
 export interface ValidationResult {

@@ -60,6 +60,7 @@ export interface CollectionDetailProps {
   onItemRemove?: (item: CollectionItem) => void;
   onItemReorder?: (items: CollectionItem[]) => void;
   onBulkUpload?: (collection: Collection) => void;
+  onVideoUpload?: (collection: Collection) => void;
 }
 
 export interface CollectionEmptyStateProps {

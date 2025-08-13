@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils/cn';
 import Icon from '@/app/components/icons/Icon';
 import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
 import { createClient } from '@/lib/supabase/client';
+import VideoUploadAdvanced from './VideoUploadAdvanced';
 
 // Supported file types
 const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
@@ -440,7 +441,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
+      <div className="fixed inset-0 bg-gray-900/50 transition-opacity" />
       
       {/* Modal */}
       <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -473,12 +474,12 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
           <div className="bg-white px-6 py-4">
             
             {/* File Type Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+            <div className="bg-info-50 border border-info-200 rounded-md p-3 mb-4">
               <div className="flex items-start">
-                <svg className="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-info-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <div className="text-sm text-blue-800">
+                <div className="text-sm text-info-800">
                   <p className="font-medium">Tipos de arquivo aceitos nesta coleção:</p>
                   <div className="mt-1">
                     {collection.type === 'mixed' && (
@@ -498,6 +499,51 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
               </div>
             </div>
 
+            {/* Advanced Video Upload Section */}
+            {(collection.type === 'videos' || collection.type === 'mixed') && (
+              <div className="bg-gray-50 border border-gray-200 rounded-md p-4 mb-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-medium text-gray-900">Upload de Vídeos YouTube</h4>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-3">
+                      Para vídeos do YouTube com geração de thumbnail personalizada
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                      <span className="bg-white px-2 py-1 rounded border border-gray-200">YouTube</span>
+                      <span className="bg-white px-2 py-1 rounded border border-gray-200">Thumbnail personalizada</span>
+                    </div>
+                  </div>
+                  <div className="ml-4 flex-shrink-0">
+                    <VideoUploadAdvanced
+                      collection={collection}
+                      onVideoAdded={(videoData) => {
+                        // Opcional: callback para atualizar lista local
+                        console.log('Vídeo adicionado via upload avançado:', videoData);
+                        // Aqui poderia atualizar o estado local se necessário
+                        onClose(); // Fechar modal após sucesso
+                      }}
+                      buttonText="YouTube"
+                      className="shadow-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Separator */}
+            {(collection.type === 'videos' || collection.type === 'mixed') && (
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-3 bg-white text-gray-600">ou faça upload direto de arquivos</span>
+                </div>
+              </div>
+            )}
+
             {/* Drop Zone */}
             <div
               className={cn(
@@ -512,7 +558,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
               onDrop={handleDrop}
             >
               <div className="space-y-4">
-                <div className="text-gray-400">
+                <div className="text-gray-500">
                   {isDragOver ? (
                     <Icon name="arrow-down" className="w-12 h-12" />
                   ) : (
@@ -524,7 +570,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                   <h4 className="text-lg font-medium text-gray-900 mb-2">
                     {isDragOver ? 'Solte os arquivos aqui' : 'Arraste arquivos aqui'}
                   </h4>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-gray-700 mb-4">
                     ou clique no botão abaixo para selecionar arquivos
                   </p>
                 </div>
@@ -561,15 +607,15 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                 
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-blue-600">{files.filter(f => f.status === 'pending').length}</div>
+                    <div className="text-2xl font-bold text-info">{files.filter(f => f.status === 'pending').length}</div>
                     <div className="text-xs text-gray-600">Pendentes</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-green-600">{uploadStats.completed}</div>
+                    <div className="text-2xl font-bold text-success">{uploadStats.completed}</div>
                     <div className="text-xs text-gray-600">Concluídos</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-red-600">{uploadStats.failed}</div>
+                    <div className="text-2xl font-bold text-error">{uploadStats.failed}</div>
                     <div className="text-xs text-gray-600">Falharam</div>
                   </div>
                 </div>
@@ -586,7 +632,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                   <button
                     onClick={clearFiles}
                     disabled={isUploading}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50"
+                    className="text-error hover:text-error-700 text-sm font-medium disabled:opacity-50"
                   >
                     Limpar Todos
                   </button>
@@ -600,7 +646,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                     >
                       {/* File Icon */}
                       <div className="flex-shrink-0">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-gray-500">
+                        <div className="w-10 h-10 bg-white rounded-md flex items-center justify-center text-gray-600">
                           {file.type === 'image' ? (
                             <Icon name="image" className="w-6 h-6" />
                           ) : (
@@ -621,10 +667,10 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                           <span>•</span>
                           <span className={cn(
                             "font-medium",
-                            file.status === 'completed' && 'text-green-600',
-                            file.status === 'error' && 'text-red-600',
-                            file.status === 'uploading' && 'text-blue-600',
-                            file.status === 'processing' && 'text-yellow-600'
+                            file.status === 'completed' && 'text-success',
+                            file.status === 'error' && 'text-error',
+                            file.status === 'uploading' && 'text-info',
+                            file.status === 'processing' && 'text-warning'
                           )}>
                             {file.status === 'pending' && 'Pendente'}
                             {file.status === 'uploading' && 'Enviando...'}
@@ -635,7 +681,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                         </div>
                         
                         {file.error && (
-                          <p className="text-xs text-red-600 mt-1">{file.error}</p>
+                          <p className="text-xs text-error mt-1">{file.error}</p>
                         )}
                       </div>
 
@@ -645,7 +691,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                           <button
                             onClick={() => removeFile(file.id)}
                             disabled={isUploading}
-                            className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50"
+                            className="text-error hover:text-error-700 p-1 disabled:opacity-50"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -663,7 +709,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                         )}
                         
                         {file.status === 'completed' && (
-                          <div className="text-green-500">
+                          <div className="text-success">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
@@ -671,7 +717,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                         )}
                         
                         {file.status === 'error' && (
-                          <div className="text-red-500">
+                          <div className="text-error">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -687,7 +733,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
 
           {/* Footer */}
           <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-700">
               {files.length > 0 && `${files.length} arquivo${files.length !== 1 ? 's' : ''} selecionado${files.length !== 1 ? 's' : ''}`}
             </div>
             
@@ -695,7 +741,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
               <button
                 onClick={onClose}
                 disabled={isUploading}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {uploadStats.completed > 0 ? 'Fechar' : 'Cancelar'}
               </button>
@@ -703,7 +749,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
               {files.some(f => f.status === 'pending') && !isUploading && (
                 <button
                   onClick={startUpload}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-md focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
                 >
                   Iniciar Upload
                 </button>
@@ -712,14 +758,14 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
               {uploadStats.completed > 0 && !isUploading && (
                 <button
                   onClick={addToCollection}
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-success hover:bg-success-600 rounded-md focus:ring-2 focus:ring-success focus:ring-offset-2 transition-colors"
                 >
                   Adicionar à Coleção ({uploadStats.completed})
                 </button>
               )}
               
               {isUploading && (
-                <div className="flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+                <div className="flex items-center px-4 py-2 text-sm font-medium text-gray-800">
                   <InlineSpinner size="sm" variant="home" className="mr-2" />
                   Fazendo Upload...
                 </div>

@@ -38,7 +38,8 @@ import {
 export const VideoUploadFormRoot = memo(({ 
   initialData, 
   onSave, 
-  onCancel 
+  onCancel,
+  customContext
 }: VideoFormProps) => {
   
   // State management with useReducer
@@ -241,6 +242,10 @@ export const VideoUploadFormRoot = memo(({
     if (thumbnailTimestamp !== null) {
       formData.append('thumbnailTimestamp', thumbnailTimestamp.toString())
     }
+    // Add collection_id for automatic collection integration
+    if (customContext?.collectionId) {
+      formData.append('collection_id', customContext.collectionId)
+    }
 
     const session = await getAuthenticatedSession()
     
@@ -262,7 +267,7 @@ export const VideoUploadFormRoot = memo(({
       id: result.video.id,
       url: result.video.url
     }
-  }, [state.formData.title, state.formData.is_active, state.formData.order_index, thumbnailTimestamp])
+  }, [state.formData.title, state.formData.is_active, state.formData.order_index, thumbnailTimestamp, customContext?.collectionId])
   
   // Upload thumbnail helper
   const uploadThumbnail = useCallback(async (videoId?: string): Promise<string> => {

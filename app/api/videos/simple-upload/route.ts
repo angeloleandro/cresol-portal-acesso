@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
     const isActive = formData.get('isActive') === 'true';
     const orderIndex = parseInt(formData.get('orderIndex') as string) || 0;
     const thumbnailTimestamp = formData.get('thumbnailTimestamp') ? parseFloat(formData.get('thumbnailTimestamp') as string) : null;
+    const collectionId = formData.get('collection_id') as string | null; // Optional collection integration
 
     console.log('📊 [UPLOAD] Dados recebidos:', {
       fileName: videoFile?.name || 'N/A',
@@ -65,7 +66,8 @@ export async function POST(request: NextRequest) {
       title: title || 'N/A',
       isActive,
       orderIndex,
-      thumbnailTimestamp
+      thumbnailTimestamp,
+      collectionId: collectionId || 'N/A'
     });
 
     if (!videoFile || !title) {
@@ -248,6 +250,65 @@ export async function POST(request: NextRequest) {
     }
 
     const parsedRecord = typeof videoRecord === 'string' ? JSON.parse(videoRecord) : videoRecord;
+    
+    // Se collection_id foi fornecido, adicionar vídeo à coleção
+    if (collectionId) {
+      try {
+        // Verificar se a coleção existe e suporta vídeos
+        const { data: collection, error: collectionError } = await serviceClient
+          .from('collections')
+          .select('id, type')
+          .eq('id', collectionId)
+          .single();
+
+        if (collectionError || !collection) {
+          console.log('⚠️ [UPLOAD] Coleção não encontrada para adicionar vídeo:', collectionId);
+          // Continue sem adicionar à coleção, mas não falhe o upload
+        } else if (collection.type === 'images') {
+          console.log('⚠️ [UPLOAD] Tentativa de adicionar vídeo a coleção de imagens:', collectionId);
+          // Continue sem adicionar à coleção
+        } else {
+          // Buscar próximo order_index na coleção
+          const { data: lastItem } = await serviceClient
+            .from('collection_items')
+            .select('order_index')
+            .eq('collection_id', collectionId)
+            .order('order_index', { ascending: false })
+            .limit(1)
+            .single();
+
+          const nextOrder = (lastItem?.order_index || 0) + 1;
+
+          // Adicionar vídeo à coleção
+          const { error: collectionItemError } = await serviceClient
+            .from('collection_items')
+            .insert({
+              collection_id: collectionId,
+              item_id: parsedRecord.id,
+              item_type: 'video',
+              order_index: nextOrder,
+            });
+
+          if (collectionItemError) {
+            console.error('❌ [UPLOAD] Erro ao adicionar vídeo à coleção:', { 
+              collectionId, 
+              videoId: parsedRecord.id,
+              error: collectionItemError 
+            });
+            // Continue sem falhar o upload
+          } else {
+            console.log('✅ [UPLOAD] Vídeo adicionado à coleção com sucesso:', {
+              collectionId,
+              videoId: parsedRecord.id,
+              order: nextOrder
+            });
+          }
+        }
+      } catch (error) {
+        console.error('❌ [UPLOAD] Erro na integração com coleção:', error);
+        // Continue sem falhar o upload
+      }
+    }
     
     uploadMetrics.success = true;
     uploadMetrics.uploadDuration = Date.now() - startTime;

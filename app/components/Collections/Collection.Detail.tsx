@@ -37,6 +37,7 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
   onItemRemove,
   onItemReorder,
   onBulkUpload,
+  onVideoUpload,
 }) => {
   // Determine if we need to fetch items
   const needsFetchItems = !('items' in initialCollection);
@@ -205,6 +206,16 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     Upload em Lote
+                  </button>
+                )}
+                {onVideoUpload && (collection.type === 'videos' || collection.type === 'mixed') && (
+                  <button
+                    onClick={() => onVideoUpload(collection)}
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium px-4 py-2 rounded-lg transition-colors shadow-sm"
+                  >
+                    <Icon name="video" className="w-4 h-4 mr-2 inline" />
+                    Upload Avançado
+                    <span className="ml-2 bg-white/20 px-1.5 py-0.5 rounded text-xs">YouTube • Vimeo</span>
                   </button>
                 )}
                 

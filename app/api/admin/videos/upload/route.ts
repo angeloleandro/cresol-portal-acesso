@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     // Parse form data
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const collectionId = formData.get('collection_id') as string | null; // Optional collection integration
 
     if (!file) {
       return NextResponse.json(
@@ -143,8 +144,68 @@ export async function POST(request: NextRequest) {
       id: videoRecord.id,
       title,
       fileName, 
-      fileSize: file.size 
+      fileSize: file.size,
+      collectionId: collectionId || 'none'
     });
+
+    // Se collection_id foi fornecido, adicionar vídeo à coleção
+    if (collectionId) {
+      try {
+        // Verificar se a coleção existe e suporta vídeos
+        const { data: collection, error: collectionError } = await supabase
+          .from('collections')
+          .select('id, type')
+          .eq('id', collectionId)
+          .single();
+
+        if (collectionError || !collection) {
+          devLog.warn('Coleção não encontrada para adicionar vídeo', { collectionId });
+          // Continue sem adicionar à coleção, mas não falhe o upload
+        } else if (collection.type === 'images') {
+          devLog.warn('Tentativa de adicionar vídeo a coleção de imagens', { collectionId });
+          // Continue sem adicionar à coleção
+        } else {
+          // Buscar próximo order_index na coleção
+          const { data: lastItem } = await supabase
+            .from('collection_items')
+            .select('order_index')
+            .eq('collection_id', collectionId)
+            .order('order_index', { ascending: false })
+            .limit(1)
+            .single();
+
+          const nextOrder = (lastItem?.order_index || 0) + 1;
+
+          // Adicionar vídeo à coleção
+          const { error: collectionItemError } = await supabase
+            .from('collection_items')
+            .insert({
+              collection_id: collectionId,
+              item_id: videoRecord.id,
+              item_type: 'video',
+              order_index: nextOrder,
+            });
+
+          if (collectionItemError) {
+            devLog.error('Erro ao adicionar vídeo à coleção', { 
+              collectionId, 
+              videoId: videoRecord.id,
+              error: collectionItemError 
+            });
+            // Continue sem falhar o upload
+          } else {
+            devLog.info('Vídeo adicionado à coleção com sucesso', {
+              collectionId,
+              videoId: videoRecord.id,
+              order: nextOrder
+            });
+          }
+        }
+      } catch (collectionError) {
+        devLog.error('Erro ao processar adição à coleção', { collectionId, collectionError });
+        // Continue sem falhar o upload
+      }
+    }
 
     // Retornar dados no formato esperado pelo BulkUpload
     return NextResponse.json({
@@ -162,6 +223,8 @@ export async function POST(request: NextRequest) {
       file_size: file.size,
       file_type: file.type,
       original_name: file.name,
+      // Indica se foi adicionado a uma coleção
+      collection_id: collectionId,
     });
 
   } catch (error: any) {

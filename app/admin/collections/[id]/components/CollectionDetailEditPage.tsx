@@ -13,6 +13,7 @@ import Icon from '@/app/components/icons/Icon';
 import CollectionForm, { CollectionFormData } from '../../components/CollectionForm';
 import ItemSelector from '../../components/ItemSelector';
 import BulkUpload from '../../components/BulkUpload';
+import VideoUploadModal from '../../components/VideoUploadModal';
 import CollectionDetail from '@/app/components/Collections/Collection.Detail';
 import { Collection, CollectionWithItems, CollectionItem } from '@/lib/types/collections';
 import { useCollectionItems } from '@/app/components/Collections/Collection.hooks';
@@ -36,6 +37,7 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const [isItemSelectorOpen, setIsItemSelectorOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+  const [isVideoUploadOpen, setIsVideoUploadOpen] = useState(false);
 
   const loadCollection = useCallback(async () => {
     setIsLoading(true);
@@ -142,6 +144,22 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   // Handle bulk upload
   const handleBulkUpload = (collection: Collection) => {
     setIsBulkUploadOpen(true);
+  };
+
+  // Handle advanced video upload
+  const handleVideoUpload = (collection: Collection) => {
+    setIsVideoUploadOpen(true);
+  };
+
+  // Handle video added through advanced upload
+  const handleVideoAdded = async (videoData: any) => {
+    try {
+      await loadCollection(); // Reload collection to show new video
+      toast.success(`Vídeo "${videoData.title}" adicionado com sucesso!`);
+      setIsVideoUploadOpen(false);
+    } catch (error) {
+      toast.error('Erro ao recarregar coleção');
+    }
   };
 
   // Handle items selected from selector
@@ -515,6 +533,7 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
               enableReordering={true}
               onItemAdd={handleItemAdd}
               onBulkUpload={handleBulkUpload}
+              onVideoUpload={handleVideoUpload}
               onItemRemove={handleItemRemove}
               onItemReorder={(items) => handleItemsReorder(collection.id, items)}
             />
@@ -539,6 +558,16 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
           onClose={() => setIsBulkUploadOpen(false)}
           collection={collection}
           onFilesUploaded={handleBulkFilesUploaded}
+        />
+      )}
+
+      {/* Video Upload Advanced Modal */}
+      {collection && (
+        <VideoUploadModal
+          isOpen={isVideoUploadOpen}
+          onClose={() => setIsVideoUploadOpen(false)}
+          collection={collection}
+          onVideoAdded={handleVideoAdded}
         />
       )}
     </div>
