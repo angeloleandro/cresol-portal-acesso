@@ -66,7 +66,7 @@ export default function BannerUploadForm({ initialData, onSave, onCancel }: Bann
     };
 
     fetchPositionInfo();
-  }, []);
+  }, [initialData?.id, orderIndex]);
 
   // Verificar conflitos de posição quando orderIndex muda
   useEffect(() => {

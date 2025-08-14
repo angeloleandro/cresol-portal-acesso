@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface Profile {
   id: string;
@@ -140,11 +141,10 @@ export default function AdminSubsectorPage() {
 
   if (loading) {
     return (
-      <LoadingSpinner 
+      <UnifiedLoadingSpinner 
         fullScreen={true}
-        size="lg" 
-        message="Carregando subsetores..."
-        variant="admin"
+        size="large" 
+        message={LOADING_MESSAGES.subsectors}
       />
     );
   }

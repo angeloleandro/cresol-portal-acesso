@@ -9,7 +9,8 @@ import Navbar from '../../components/Navbar';
 import SubsectorTeam from '../../components/SubsectorTeam';
 import { Icon } from '../../components/icons';
 import Breadcrumb from '../../components/Breadcrumb';
-import { HomeSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface Subsector {
   id: string;
@@ -177,7 +178,7 @@ export default function SubsectorDetailsPage() {
     return (
       <div className="min-h-screen bg-cresol-gray-light/30">
         <Navbar />
-        <HomeSpinner message="Carregando informações do sub-setor..." size="lg" />
+        <UnifiedLoadingSpinner message={LOADING_MESSAGES.subsectors} size="large" />
       </div>
     );
   }

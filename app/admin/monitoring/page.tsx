@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { Icon } from '../../components/icons/Icon';
-import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface UserActivity {
   id: string;
@@ -122,7 +123,7 @@ export default function MonitoringPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <InlineSpinner size="xl" variant="admin" />
+          <UnifiedLoadingSpinner size="large" />
           <p className="mt-4 text-gray-600">Carregando monitoramento...</p>
         </div>
       </div>

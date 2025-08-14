@@ -1,7 +1,8 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import StandardizedSpinner from './StandardizedSpinner';
+import UnifiedLoadingSpinner from './UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface LoadingSpinnerProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -66,17 +67,11 @@ export default function LoadingSpinner({
   const spinnerColor = getSpinnerColor();
   
   return (
-    <StandardizedSpinner
-      size={size}
-      variant={selectedVariant}
-      type={type}
+    <UnifiedLoadingSpinner
+      size={size === 'xs' ? 'small' : size === 'sm' ? 'small' : size === 'md' ? 'default' : size === 'lg' ? 'large' : 'large'}
       message={message}
       fullScreen={fullScreen}
-      overlay={overlay}
-      centered={centered}
-      color={spinnerColor}
       className={className}
-      ariaLabel={ariaLabel}
     />
   );
 } 

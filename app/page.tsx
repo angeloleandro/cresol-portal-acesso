@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import Image from 'next/image';
-import { HomeSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 export default function RootPage() {
   const router = useRouter();
@@ -26,6 +27,6 @@ export default function RootPage() {
     checkAuthAndRedirect();
   }, [router]);
 
-  return <HomeSpinner fullScreen message="Redirecionando..." size="lg" />;
+  return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.checkingSession} fullScreen />;
 }
 

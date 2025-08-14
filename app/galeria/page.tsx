@@ -6,7 +6,8 @@ import Breadcrumb from "../components/Breadcrumb";
 import { useEffect, useState, Suspense } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 import { Icon } from "../components/icons/Icon";
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { CollectionSection } from "../components/Collections/CollectionSection";
 import { useSearchParams } from 'next/navigation';
 import { ImagePreviewWithGrid } from "../components/ImagePreview";
@@ -152,9 +153,9 @@ function GalleryContent() {
         <div className="card">
           {loading ? (
             <div className="text-center py-12">
-              <LoadingSpinner 
-                size="md" 
-                message="Carregando imagens..."
+              <UnifiedLoadingSpinner 
+                size="default" 
+                message={LOADING_MESSAGES.gallery}
               />
             </div>
           ) : images.length === 0 ? (
@@ -188,7 +189,7 @@ export default function GalleryPage() {
         <Navbar />
         <main className="container py-8">
           <div className="flex items-center justify-center py-16">
-            <LoadingSpinner size="lg" message="Carregando galeria..." fullScreen={false} />
+            <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.gallery} fullScreen={false} />
           </div>
         </main>
         <Footer />

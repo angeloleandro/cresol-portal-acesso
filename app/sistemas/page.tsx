@@ -7,7 +7,8 @@ import { StandardizedButton } from '@/app/components/admin';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import ErrorMessage from '../components/ui/ErrorMessage';
 import { Icon } from '../components/icons';
 import { handleComponentError, devLog } from '@/lib/error-handler';
@@ -144,7 +145,7 @@ export default function SistemasPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <LoadingSpinner fullScreen message="Carregando sistemas..." />
+        <UnifiedLoadingSpinner fullScreen message={LOADING_MESSAGES.systems} />
         <Footer />
       </div>
     );

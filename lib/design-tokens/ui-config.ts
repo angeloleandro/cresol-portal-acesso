@@ -355,7 +355,7 @@ export const MODAL_CONFIG = {
 } as const;
 
 // === CONFIGURAÇÕES DE SPINNER ===
-// Baseado no StandardizedSpinner.tsx (eliminando cores hardcoded)
+// Baseado no UnifiedLoadingSpinner.tsx (eliminando cores hardcoded)
 export const SPINNER_CONFIG = {
   // Tamanhos (consolidando w-4 h-4, w-5 h-5, etc.)
   sizes: {
@@ -366,7 +366,7 @@ export const SPINNER_CONFIG = {
     xl: 'w-12 h-12',
   },
   
-  // Configurações de cor por contexto (eliminando hardcode do StandardizedSpinner)
+  // Configurações de cor por contexto (eliminando hardcode do antigo StandardizedSpinner)
   contexts: {
     home: {
       color: CSS_VARS.primary,

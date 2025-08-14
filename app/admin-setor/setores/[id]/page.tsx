@@ -95,7 +95,7 @@ export default function SectorContentManagement() {
     }
     
     setSector(data);
-  }, [sectorId]);
+  }, [sectorId, supabase]);
 
   const fetchNews = useCallback(async () => {
     const { data, error } = await supabase
@@ -110,7 +110,7 @@ export default function SectorContentManagement() {
     }
     
     setNews(data || []);
-  }, [sectorId]);
+  }, [sectorId, supabase]);
 
   const fetchEvents = useCallback(async () => {
     const { data, error } = await supabase
@@ -125,7 +125,7 @@ export default function SectorContentManagement() {
     }
     
     setEvents(data || []);
-  }, [sectorId]);
+  }, [sectorId, supabase]);
 
   // Verificação de autenticação com novo hook
   useEffect(() => {
@@ -173,7 +173,7 @@ export default function SectorContentManagement() {
     };
 
     checkAuthAndLoadData();
-  }, [isAuthenticated, authLoading, profile, user, sectorId, router, fetchEvents, fetchNews, fetchSector]);
+  }, [isAuthenticated, authLoading, profile, user, sectorId, router, fetchEvents, fetchNews, fetchSector, supabase]);
 
   const handleNewsImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {

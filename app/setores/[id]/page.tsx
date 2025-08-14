@@ -8,7 +8,8 @@ import { supabase } from '@/lib/supabase';
 import Navbar from '../../components/Navbar';
 import SubsectorTeam from '../../components/SubsectorTeam';
 import Breadcrumb from '../../components/Breadcrumb';
-import { HomeSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface Sector {
   id: string;
@@ -163,7 +164,7 @@ export default function SetorDetalhesPage() {
   };
 
   if (loading) {
-    return <HomeSpinner fullScreen message="Carregando..." size="lg" />;
+    return <UnifiedLoadingSpinner fullScreen message={LOADING_MESSAGES.sectors} size="large" />;
   }
 
   if (!sector) {

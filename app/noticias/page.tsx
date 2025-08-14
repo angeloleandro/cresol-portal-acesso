@@ -7,7 +7,8 @@ import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface NewsItem {
   id: string;
@@ -95,9 +96,9 @@ export default function NoticiasPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-<LoadingSpinner 
-            size="md" 
-            message="Carregando notícias..."
+<UnifiedLoadingSpinner 
+            size="default" 
+            message={LOADING_MESSAGES.news}
           />
           <p className="mt-4 text-muted">Carregando notícias...</p>
         </div>

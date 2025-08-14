@@ -6,7 +6,8 @@
 import React, { useState } from 'react';
 import { Collection } from '@/lib/types/collections';
 import { formatCollection } from '@/lib/utils/collections';
-import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -184,7 +185,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             >
               {isDeleting ? (
                 <div className="flex items-center justify-center">
-                  <InlineSpinner size="sm" variant="light" className="mr-2" />
+                  <UnifiedLoadingSpinner size="small" className="inline-flex items-center mr-2" />
                   Excluindo...
                 </div>
               ) : (

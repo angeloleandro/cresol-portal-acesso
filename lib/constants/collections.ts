@@ -188,7 +188,7 @@ export const CSS_CLASSES = {
   GRID_RESPONSIVE_LARGE: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6',
   
   // Loading
-  LOADING_SPINNER: 'w-6 h-6', // Legacy constant - use InlineSpinner component instead
+  LOADING_SPINNER: 'w-6 h-6', // Legacy constant - use UnifiedLoadingSpinner component instead
   SKELETON: 'animate-pulse bg-gray-200 rounded',
 } as const;
 

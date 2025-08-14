@@ -12,7 +12,8 @@ import {
   DropdownItem, 
   Button 
 } from '@nextui-org/react';
-import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ConfirmationModal from '../components/ui/ConfirmationModal';
@@ -421,7 +422,7 @@ export default function NotificationsPage() {
         <Navbar />
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <InlineSpinner size="xl" variant="home" />
+            <UnifiedLoadingSpinner size="large" />
             <p className="mt-4 text-cresol-gray">Carregando notificações...</p>
           </div>
         </div>

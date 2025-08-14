@@ -6,7 +6,8 @@ import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import Breadcrumb from '../../components/Breadcrumb';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface NewsItem {
   id: string;
@@ -114,10 +115,10 @@ export default function NoticiaDetalhePage() {
 
   if (loading) {
     return (
-      <LoadingSpinner 
+      <UnifiedLoadingSpinner 
         fullScreen={true}
-        size="lg" 
-        message="Carregando notícia..." 
+        size="large" 
+        message={LOADING_MESSAGES.news} 
       />
     );
   }

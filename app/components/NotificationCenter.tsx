@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { StandardizedButton } from '@/app/components/admin';
-import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { supabase } from '@/lib/supabase';
 
 interface Notification {
@@ -477,7 +478,7 @@ export default function NotificationCenter({ isOpen, onClose, userId }: Notifica
           <div className="flex-1 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center h-32">
-                <InlineSpinner size="lg" variant="home" />
+                <UnifiedLoadingSpinner size="large" />
               </div>
             ) : filteredNotifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-gray-500">

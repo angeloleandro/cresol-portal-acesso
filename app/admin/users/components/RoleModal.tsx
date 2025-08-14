@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
-import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface Sector {
   id: string;
@@ -272,7 +273,7 @@ export default function RoleModal({
               <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-md p-3">
                 {loadingSubsectors ? (
                   <div className="text-center py-4">
-                    <InlineSpinner size="md" variant="admin" />
+                    <UnifiedLoadingSpinner size="default" className="inline-flex items-center" />
                     <p className="text-sm text-cresol-gray mt-2">Carregando sub-setores...</p>
                   </div>
                 ) : subsectors.length === 0 ? (

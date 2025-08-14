@@ -10,7 +10,8 @@ import { COLLECTION_CONFIG, COLLECTION_TYPE_LABELS } from '@/lib/constants/colle
 import { validateCollection } from '@/lib/utils/collections';
 import { cn } from '@/lib/utils/cn';
 import { useCollectionUpload } from '@/app/components/Collections/Collection.hooks';
-import { InlineSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 export interface CollectionFormData {
   name: string;
@@ -275,7 +276,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
             >
               {isUploadingCover ? (
                 <>
-                  <InlineSpinner size="sm" variant="admin" className="mr-2" />
+                  <UnifiedLoadingSpinner size="small" className="inline-flex items-center mr-2" />
                   Enviando...
                 </>
               ) : (
@@ -449,7 +450,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
         >
           {isSubmitting ? (
             <div className="flex items-center">
-              <InlineSpinner size="sm" variant="light" className="mr-2" />
+              <UnifiedLoadingSpinner size="small" className="inline-flex items-center mr-2" />
               {mode === 'create' ? 'Criando...' : 'Salvando...'}
             </div>
           ) : (

@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface Sector {
   id: string;
@@ -132,11 +133,10 @@ export default function AdminSetorDashboard() {
 
   if (loading) {
     return (
-      <LoadingSpinner 
+      <UnifiedLoadingSpinner 
         fullScreen={true}
-        size="lg" 
-        message="Carregando setores..."
-        variant="admin"
+        size="large" 
+        message={LOADING_MESSAGES.sectors}
       />
     );
   }

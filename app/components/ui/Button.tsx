@@ -248,14 +248,25 @@ const getSizeClasses = (size: ButtonSize): { classes: string; iconSize: string; 
 };
 
 // =============================================================================
-// SPINNER COMPONENT (CHAKRA UI PATTERN)
+// SPINNER COMPONENT (UNIFIED LOADING SPINNER)
 // =============================================================================
-const ButtonSpinner: React.FC<{ size: string; className?: string }> = ({ size, className = '' }) => (
-  <div 
-    className={`${size} ${CRESOL_UI_CONFIG.spinner.inline.classes} ${className}`}
-    aria-hidden="true"
-  />
-);
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+
+const ButtonSpinner: React.FC<{ size: string; className?: string }> = ({ size, className = '' }) => {
+  // Map size to UnifiedLoadingSpinner size
+  const spinnerSize = size.includes('w-3') ? 'small' : 
+                     size.includes('w-4') ? 'default' : 
+                     size.includes('w-5') ? 'default' : 
+                     size.includes('w-6') ? 'large' : 
+                     size.includes('w-8') ? 'large' : 'default';
+  
+  return (
+    <UnifiedLoadingSpinner 
+      size={spinnerSize as 'small' | 'default' | 'large'}
+      className={`${className} inline-flex items-center`}
+    />
+  );
+};
 
 // =============================================================================
 // MAIN BUTTON COMPONENT

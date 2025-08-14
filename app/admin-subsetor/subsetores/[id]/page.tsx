@@ -212,7 +212,7 @@ export default function SubsectorManagePage() {
       console.error('Erro ao buscar perfil:', error);
       setError('Erro ao carregar perfil do usuário');
     }
-  }, [router]);
+  }, [router, supabase]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -226,7 +226,7 @@ export default function SubsectorManagePage() {
     };
 
     checkUser();
-  }, [router, fetchProfile]);
+  }, [router, fetchProfile, supabase]);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -241,7 +241,7 @@ export default function SubsectorManagePage() {
     } catch (error) {
       console.error('Erro ao buscar eventos:', error);
     }
-  }, [subsectorId]);
+  }, [subsectorId, supabase]);
 
   const fetchNews = useCallback(async () => {
     try {
@@ -256,7 +256,7 @@ export default function SubsectorManagePage() {
     } catch (error) {
       console.error('Erro ao buscar notícias:', error);
     }
-  }, [subsectorId]);
+  }, [subsectorId, supabase]);
 
   const fetchSystems = useCallback(async () => {
     try {
@@ -271,7 +271,7 @@ export default function SubsectorManagePage() {
     } catch (error) {
       console.error('Erro ao buscar sistemas:', error);
     }
-  }, [subsectorId]);
+  }, [subsectorId, supabase]);
 
   const fetchGroups = useCallback(async () => {
     try {
@@ -285,6 +285,42 @@ export default function SubsectorManagePage() {
       console.error('Erro ao buscar grupos:', error);
     }
   }, [subsectorId]);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, work_location_id')
+        .order('full_name');
+        
+      if (error) {
+        console.error('Erro ao buscar usuários:', error);
+        return;
+      }
+      
+      setAllUsers(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error);
+    }
+  }, [supabase]);
+
+  const fetchWorkLocations = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('work_locations')
+        .select('id, name')
+        .order('name');
+
+      if (error) {
+        console.error('Erro ao buscar locais de trabalho:', error);
+        return;
+      }
+
+      setWorkLocations(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar locais de trabalho:', error);
+    }
+  }, [supabase]);
 
   const fetchSubsectorData = useCallback(async () => {
     try {
@@ -336,7 +372,7 @@ export default function SubsectorManagePage() {
     } finally {
       setLoading(false);
     }
-  }, [subsectorId, fetchEvents, fetchNews, fetchSystems, fetchGroups]);
+  }, [subsectorId, fetchEvents, fetchNews, fetchSystems, fetchGroups, fetchUsers, fetchWorkLocations, supabase]);
 
   useEffect(() => {
     if (profile && subsectorId) {
@@ -344,41 +380,6 @@ export default function SubsectorManagePage() {
     }
   }, [profile, subsectorId, fetchSubsectorData]);
 
-  const fetchUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, work_location_id')
-        .order('full_name');
-        
-      if (error) {
-        console.error('Erro ao buscar usuários:', error);
-        return;
-      }
-      
-      setAllUsers(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
-    }
-  };
-
-  const fetchWorkLocations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('work_locations')
-        .select('id, name')
-        .order('name');
-
-      if (error) {
-        console.error('Erro ao buscar locais de trabalho:', error);
-        return;
-      }
-
-      setWorkLocations(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar locais de trabalho:', error);
-    }
-  };
 
   const toggleEventPublished = async (eventId: string, currentStatus: boolean) => {
     try {
