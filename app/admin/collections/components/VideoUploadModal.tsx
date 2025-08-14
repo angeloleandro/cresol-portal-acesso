@@ -137,7 +137,7 @@ export const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">Upload YouTube</h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  Adicionando vídeo à coleção "{collection.name}"
+                  Adicionando vídeo à coleção &ldquo;{collection.name}&rdquo;
                 </p>
               </div>
               <button
@@ -191,7 +191,7 @@ export const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
               <div className="flex items-center gap-2">
                 <Icon name="folder" className="w-4 h-4 text-gray-600" />
                 <span className="text-sm font-medium text-gray-900">
-                  Destino: Coleção "{collection.name}"
+                  Destino: Coleção &ldquo;{collection.name}&rdquo;
                 </span>
               </div>
               <p className="text-xs text-gray-600 mt-1">

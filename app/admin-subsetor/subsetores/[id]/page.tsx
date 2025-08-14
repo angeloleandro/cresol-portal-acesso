@@ -6,7 +6,8 @@ import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import Cropper from 'react-easy-crop';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import { supabase } from '@/lib/supabase';
+import { useSupabaseClient } from '@/hooks/useSupabaseClient';
+import { useAuth } from '@/app/providers/AuthProvider';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 interface Profile {
@@ -37,6 +38,7 @@ interface SubsectorNews {
   id: string;
   title: string;
   summary: string;
+  content?: string;
   is_published: boolean;
   is_featured: boolean;
   created_at: string;
@@ -115,6 +117,10 @@ export default function SubsectorManagePage() {
   const router = useRouter();
   const params = useParams();
   const subsectorId = params?.id as string;
+  
+  // Cliente Supabase autenticado
+  const supabase = useSupabaseClient();
+  const { user, profile: authProfile, isAuthenticated } = useAuth();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [subsector, setSubsector] = useState<Subsector | null>(null);
@@ -429,31 +435,51 @@ export default function SubsectorManagePage() {
     
     try {
       if (isEditing && currentEvent.id) {
-        const { error } = await supabase
-          .from('subsector_events')
-          .update({
-            title: currentEvent.title,
-            description: currentEvent.description,
-            start_date: currentEvent.start_date,
-            is_featured: currentEvent.is_featured,
-            is_published: currentEvent.is_published
+        const response = await fetch('/api/admin/sector-content', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'subsector_events',
+            id: currentEvent.id,
+            data: {
+              title: currentEvent.title,
+              description: currentEvent.description,
+              start_date: currentEvent.start_date,
+              is_featured: currentEvent.is_featured,
+              is_published: currentEvent.is_published
+            }
           })
-          .eq('id', currentEvent.id);
+        });
 
-        if (error) throw error;
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao atualizar evento');
+        }
       } else {
-        const { error } = await supabase
-          .from('subsector_events')
-          .insert([{
-            subsector_id: subsectorId,
-            title: currentEvent.title,
-            description: currentEvent.description,
-            start_date: currentEvent.start_date,
-            is_featured: currentEvent.is_featured,
-            is_published: currentEvent.is_published
-          }]);
+        const response = await fetch('/api/admin/sector-content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'subsector_events',
+            data: {
+              subsector_id: subsectorId,
+              title: currentEvent.title,
+              description: currentEvent.description,
+              start_date: currentEvent.start_date,
+              is_featured: currentEvent.is_featured,
+              is_published: currentEvent.is_published
+            }
+          })
+        });
 
-        if (error) throw error;
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao criar evento');
+        }
       }
 
       setIsEventModalOpen(false);
@@ -506,6 +532,7 @@ export default function SubsectorManagePage() {
       setCurrentNews({
         title: '',
         summary: '',
+        content: '',
         is_featured: false,
         is_published: false
       });
@@ -524,29 +551,51 @@ export default function SubsectorManagePage() {
     
     try {
       if (isEditing && currentNews.id) {
-        const { error } = await supabase
-          .from('subsector_news')
-          .update({
-            title: currentNews.title,
-            summary: currentNews.summary,
-            is_featured: currentNews.is_featured,
-            is_published: currentNews.is_published
+        const response = await fetch('/api/admin/sector-content', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'subsector_news',
+            id: currentNews.id,
+            data: {
+              title: currentNews.title,
+              summary: currentNews.summary,
+              content: currentNews.content || '',
+              is_featured: currentNews.is_featured,
+              is_published: currentNews.is_published
+            }
           })
-          .eq('id', currentNews.id);
+        });
 
-        if (error) throw error;
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao atualizar notícia');
+        }
       } else {
-        const { error } = await supabase
-          .from('subsector_news')
-          .insert([{
-            subsector_id: subsectorId,
-            title: currentNews.title,
-            summary: currentNews.summary,
-            is_featured: currentNews.is_featured,
-            is_published: currentNews.is_published
-          }]);
+        const response = await fetch('/api/admin/sector-content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'subsector_news',
+            data: {
+              subsector_id: subsectorId,
+              title: currentNews.title,
+              summary: currentNews.summary,
+              content: currentNews.content || '',
+              is_featured: currentNews.is_featured,
+              is_published: currentNews.is_published
+            }
+          })
+        });
 
-        if (error) throw error;
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao criar notícia');
+        }
       }
 
       setIsNewsModalOpen(false);

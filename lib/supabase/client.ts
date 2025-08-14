@@ -1,28 +1,69 @@
 import { createBrowserClient } from '@supabase/ssr'
+import type { Database } from '../../types/supabase'
 
-// Obter as variáveis de ambiente com fallbacks para o build
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+// Obter as variáveis de ambiente
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Verificar se as variáveis são reais (não placeholders) apenas em tempo de execução
-const isValidConfig = supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey !== 'placeholder-key';
+// Verificar configuração
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('As variáveis NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY são obrigatórias')
+}
 
-// Função para verificar configuração em tempo de execução
-export const checkSupabaseConfig = () => {
-  if (!isValidConfig) {
-    throw new Error('As variáveis de ambiente NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY precisam ser definidas');
-  }
-};
+// Singleton para o cliente
+let clientInstance: ReturnType<typeof createBrowserClient<Database>> | null = null
 
-// Função para criar cliente Supabase para uso client-side
+// Função para criar cliente Supabase unificado
 export const createClient = () => {
-  if (typeof window !== 'undefined') {
-    // Só verificar a configuração no lado do cliente
-    checkSupabaseConfig();
+  // Usar singleton para evitar múltiplas instâncias
+  if (!clientInstance) {
+    clientInstance = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce'
+      },
+      cookies: {
+        get(name: string) {
+          if (typeof document !== 'undefined') {
+            const value = document.cookie
+              .split('; ')
+              .find(row => row.startsWith(`${name}=`))
+              ?.split('=')[1]
+            return value ? decodeURIComponent(value) : undefined
+          }
+          return undefined
+        },
+        set(name: string, value: string, options: any) {
+          if (typeof document !== 'undefined') {
+            let cookieStr = `${name}=${encodeURIComponent(value)}`
+            
+            if (options?.maxAge) cookieStr += `; max-age=${options.maxAge}`
+            if (options?.expires) cookieStr += `; expires=${options.expires.toUTCString()}`
+            if (options?.path) cookieStr += `; path=${options.path}`
+            if (options?.domain) cookieStr += `; domain=${options.domain}`
+            if (options?.secure) cookieStr += '; secure'
+            if (options?.httpOnly) cookieStr += '; httponly'
+            if (options?.sameSite) cookieStr += `; samesite=${options.sameSite}`
+            
+            document.cookie = cookieStr
+          }
+        },
+        remove(name: string, options: any) {
+          if (typeof document !== 'undefined') {
+            let cookieStr = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+            if (options?.path) cookieStr += `; path=${options.path}`
+            if (options?.domain) cookieStr += `; domain=${options.domain}`
+            document.cookie = cookieStr
+          }
+        }
+      }
+    })
   }
   
-  return createBrowserClient(supabaseUrl, supabaseAnonKey);
-};
+  return clientInstance
+}
 
-// Exportar uma instância padrão para compatibilidade
-export const supabase = createClient();
+// Exportar instância padrão
+export const supabase = createClient()

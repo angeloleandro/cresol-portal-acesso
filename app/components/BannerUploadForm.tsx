@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import OptimizedImage from "./OptimizedImage";
 import { StandardizedButton } from "@/app/components/admin";
 import { supabase } from "@/lib/supabase";
@@ -29,12 +29,83 @@ export default function BannerUploadForm({ initialData, onSave, onCancel }: Bann
   const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image_url || null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [positionInfo, setPositionInfo] = useState<{
+    nextAvailable: number;
+    usedPositions: number[];
+    gaps: number[];
+  } | null>(null);
+  const [positionWarning, setPositionWarning] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [isCropping, setIsCropping] = useState(false);
+
+  // Buscar informações de posicionamento quando o componente carrega
+  useEffect(() => {
+    const fetchPositionInfo = async () => {
+      try {
+        const response = await fetch('/api/admin/banners/positions');
+        if (response.ok) {
+          const data = await response.json();
+          setPositionInfo({
+            nextAvailable: data.data.positioning.nextAvailablePosition,
+            usedPositions: data.data.positioning.usedPositions,
+            gaps: data.data.positioning.availableGaps
+          });
+          
+          // Se for um novo banner e não tem posição definida, usar a próxima disponível
+          if (!initialData?.id && orderIndex === 0) {
+            setOrderIndex(data.data.positioning.nextAvailablePosition);
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao buscar informações de posicionamento:', err);
+      }
+    };
+
+    fetchPositionInfo();
+  }, []);
+
+  // Verificar conflitos de posição quando orderIndex muda
+  useEffect(() => {
+    if (!positionInfo) return;
+
+    // Não verificar para banners existentes na sua posição atual
+    if (initialData?.id && orderIndex === initialData.order_index) {
+      setPositionWarning(null);
+      return;
+    }
+
+    if (positionInfo.usedPositions.includes(orderIndex)) {
+      if (positionInfo.gaps.length > 0) {
+        setPositionWarning(
+          `⚠️ Posição ${orderIndex} está ocupada. Posições disponíveis: ${positionInfo.gaps.join(', ')} ou ${positionInfo.nextAvailable}`
+        );
+      } else {
+        setPositionWarning(
+          `⚠️ Posição ${orderIndex} está ocupada. Próxima disponível: ${positionInfo.nextAvailable}`
+        );
+      }
+    } else {
+      setPositionWarning(null);
+    }
+  }, [orderIndex, positionInfo, initialData]);
+
+  const handleOrderIndexChange = (newValue: number) => {
+    setOrderIndex(newValue);
+  };
+
+  const useSuggestedPosition = () => {
+    if (positionInfo) {
+      if (positionInfo.gaps.length > 0) {
+        setOrderIndex(positionInfo.gaps[0]);
+      } else {
+        setOrderIndex(positionInfo.nextAvailable);
+      }
+    }
+  };
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -175,14 +246,52 @@ export default function BannerUploadForm({ initialData, onSave, onCancel }: Bann
           </div>
         )}
       </div>
-      <div className="mb-4 flex gap-4 items-center">
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} /> Ativo
-        </label>
-        <label className="flex items-center gap-2">
-          Ordem:
-          <input type="number" className="w-16 border rounded-md px-2 py-1" value={orderIndex} onChange={e => setOrderIndex(Number(e.target.value))} />
-        </label>
+      <div className="mb-4">
+        <div className="flex gap-4 items-center mb-2">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} /> Ativo
+          </label>
+        </div>
+        
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Posição do Banner</label>
+          <div className="flex items-center gap-2">
+            <input 
+              type="number" 
+              className={`w-20 border rounded-md px-2 py-1 ${positionWarning ? 'border-orange-400' : 'border-gray-300'}`}
+              value={orderIndex} 
+              onChange={e => handleOrderIndexChange(Number(e.target.value))}
+              min="0"
+            />
+            {positionWarning && (
+              <StandardizedButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={useSuggestedPosition}
+                className="text-xs"
+              >
+                Usar Sugerida
+              </StandardizedButton>
+            )}
+          </div>
+          
+          {positionWarning && (
+            <div className="text-sm text-orange-600 bg-orange-50 p-2 rounded-md">
+              {positionWarning}
+            </div>
+          )}
+          
+          {positionInfo && (
+            <div className="text-xs text-gray-500">
+              Posições ocupadas: {positionInfo.usedPositions.join(', ')}
+              {positionInfo.gaps.length > 0 && (
+                <span> • Lacunas: {positionInfo.gaps.join(', ')}</span>
+              )}
+              <span> • Próxima: {positionInfo.nextAvailable}</span>
+            </div>
+          )}
+        </div>
       </div>
       <div className="flex gap-2 justify-end">
         <StandardizedButton type="button" variant="secondary" onClick={onCancel} disabled={isUploading}>Cancelar</StandardizedButton>

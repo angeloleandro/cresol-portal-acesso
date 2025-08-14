@@ -6,29 +6,26 @@ import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { Button } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/app/providers/AuthProvider';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirectedFrom') || '/home';
+  const { user, signIn, loading: authLoading, initialized } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   
-  // Verificar se o usuário já está autenticado ao carregar a página
+  // Verificar se o usuário já está autenticado
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        router.push('/home');
-      }
-    };
-    checkUser();
-  }, [router]);
+    if (initialized && user) {
+      router.push('/home');
+    }
+  }, [initialized, user, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,10 +33,7 @@ function LoginContent() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await signIn(email, password);
 
       if (error) {
         if (error.message.includes('Email not confirmed')) {
@@ -52,8 +46,14 @@ function LoginContent() {
         setLoading(false);
         return;
       }
+
+      // Sucesso - o useAuth hook já gerencia o estado
+      console.log('✅ Login realizado com sucesso');
       
-      // Redirecionar imediatamente após login bem-sucedido
+      // Aguardar um pouco mais para garantir que a sessão seja estabelecida
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Redirecionar (será interceptado pelo useEffect se user estiver definido)
       router.push(redirectPath);
       
     } catch (error) {
@@ -62,6 +62,32 @@ function LoginContent() {
       setLoading(false);
     }
   };
+
+  // Mostrar loading durante inicialização da autenticação
+  if (!initialized || authLoading) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
+        <div className="card max-w-md w-full">
+          <div className="flex flex-col items-center mb-6">
+            <div className="relative w-48 h-24 mb-4">
+              <OptimizedImage 
+                src="/logo-horizontal-laranja.svg" 
+                alt="Logo Cresol" 
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 192px"
+                className="object-contain"
+              />
+            </div>
+            <LoadingSpinner 
+              size="md" 
+              message="Verificando autenticação..."
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">

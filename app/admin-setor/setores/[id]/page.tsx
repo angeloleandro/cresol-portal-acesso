@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import OptimizedImage from '@/app/components/OptimizedImage';
+import AuthDebugPanel from '@/app/components/AuthDebugPanel';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { useSupabaseClient } from '@/hooks/useSupabaseClient';
+import { useAuth } from '@/app/providers/AuthProvider';
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 
 interface Sector {
@@ -18,6 +20,7 @@ interface SectorNews {
   id: string;
   sector_id: string;
   title: string;
+  summary: string;
   content: string;
   created_at: string;
   is_published: boolean;
@@ -29,7 +32,8 @@ interface SectorEvent {
   sector_id: string;
   title: string;
   description: string;
-  event_date: string;
+  start_date: string;
+  end_date?: string;
   created_at: string;
   is_published: boolean;
   location?: string;
@@ -40,19 +44,24 @@ export default function SectorContentManagement() {
   const params = useParams();
   const sectorId = params.id as string;
   
-  const [user, setUser] = useState<any>(null);
+  const { user, profile, isAuthenticated, isSectorAdmin, loading: authLoading, signOut: authSignOut } = useAuth();
   const [loading, setLoading] = useState(true);
   const [sector, setSector] = useState<Sector | null>(null);
   const [news, setNews] = useState<SectorNews[]>([]);
+  const [showDebug, setShowDebug] = useState(true); // Debug panel visibility
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [activeTab, setActiveTab] = useState('news');
   const [isAuthorized, setIsAuthorized] = useState(false);
+  
+  // Cliente Supabase autenticado
+  const supabase = useSupabaseClient();
 
   // Estados para o formulário de notícias
   const [showNewsForm, setShowNewsForm] = useState(false);
   const [newsForm, setNewsForm] = useState({
     id: '',
     title: '',
+    summary: '',
     content: '',
     is_published: true,
     image_url: ''
@@ -66,7 +75,8 @@ export default function SectorContentManagement() {
     id: '',
     title: '',
     description: '',
-    event_date: '',
+    start_date: '',
+    end_date: '',
     location: '',
     is_published: true
   });
@@ -106,7 +116,7 @@ export default function SectorContentManagement() {
       .from('sector_events')
       .select('*')
       .eq('sector_id', sectorId)
-      .order('event_date', { ascending: true });
+      .order('start_date', { ascending: true });
     
     if (error) {
       console.error('Erro ao buscar eventos:', error);
@@ -116,24 +126,18 @@ export default function SectorContentManagement() {
     setEvents(data || []);
   }, [sectorId]);
 
+  // Verificação de autenticação com novo hook
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
+    const checkAuthAndLoadData = async () => {
+      // Aguardar autenticação ser inicializada
+      if (authLoading) return;
       
-      if (!userData.user) {
+      if (!isAuthenticated) {
         router.replace('/login');
         return;
       }
 
-      setUser(userData.user);
-
-      // Verificar se o usuário é admin ou admin do setor
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
+      // Verificar autorização usando o profile do contexto
       if (profile?.role === 'admin') {
         setIsAuthorized(true);
       } else if (profile?.role === 'sector_admin') {
@@ -141,7 +145,7 @@ export default function SectorContentManagement() {
         const { data: sectorAdmin } = await supabase
           .from('sector_admins')
           .select('*')
-          .eq('user_id', userData.user.id)
+          .eq('user_id', user!.id)
           .eq('sector_id', sectorId);
         
         if (sectorAdmin && sectorAdmin.length > 0) {
@@ -157,6 +161,7 @@ export default function SectorContentManagement() {
         return;
       }
 
+      // Carregar dados se autorizado
       await Promise.all([
         fetchSector(),
         fetchNews(),
@@ -166,16 +171,17 @@ export default function SectorContentManagement() {
       setLoading(false);
     };
 
-    checkUser();
-  }, [sectorId, router, fetchEvents, fetchNews, fetchSector]);
+    checkAuthAndLoadData();
+  }, [isAuthenticated, authLoading, profile, user, sectorId, router, fetchEvents, fetchNews, fetchSector]);
 
   const handleNewsImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       
-      // Verificar o tipo de arquivo
-      if (!file.type.startsWith('image/')) {
-        alert('Por favor, selecione apenas arquivos de imagem.');
+      // Verificar o tipo de arquivo - apenas formatos otimizados para web
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Por favor, selecione apenas arquivos PNG, JPG ou WebP.');
         return;
       }
       
@@ -185,11 +191,29 @@ export default function SectorContentManagement() {
         return;
       }
       
-      setNewsImageFile(file);
+      // Verificar dimensões mínimas recomendadas para notícias
+      const img = new Image();
+      img.onload = () => {
+        // Limpar URL anterior se existir
+        if (newsImagePreview && newsImagePreview.startsWith('blob:')) {
+          URL.revokeObjectURL(newsImagePreview);
+        }
+        
+        // Verificar dimensões mínimas (recomendado: pelo menos 300x200)
+        if (img.width < 300 || img.height < 200) {
+          alert('Para melhor qualidade, recomendamos imagens com pelo menos 300x200 pixels.');
+        }
+        
+        setNewsImageFile(file);
+        
+        // Criar URL temporária para preview
+        const previewUrl = URL.createObjectURL(file);
+        setNewsImagePreview(previewUrl);
+        
+        URL.revokeObjectURL(img.src); // Limpar URL temporária
+      };
       
-      // Criar URL temporária para preview
-      const previewUrl = URL.createObjectURL(file);
-      setNewsImagePreview(previewUrl);
+      img.src = URL.createObjectURL(file);
     }
   };
 
@@ -197,16 +221,20 @@ export default function SectorContentManagement() {
     if (!newsImageFile || !user) return null;
     
     try {
-      // Gerar um nome único para o arquivo
-      const fileExt = newsImageFile.name.split('.').pop();
-      const fileName = `sector-news/${sectorId}/${Date.now()}.${fileExt}`;
+      // Gerar um nome único e otimizado para o arquivo
+      const fileExt = newsImageFile.name.split('.').pop()?.toLowerCase();
+      const timestamp = Date.now();
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      const fileName = `sector-news/${sectorId}/${timestamp}_${randomSuffix}.${fileExt}`;
       
       // Fazer upload para o bucket 'images' no Supabase Storage
+      // Configurações otimizadas para Vercel/Next.js
       const { error: uploadError } = await supabase.storage
         .from('images')
         .upload(fileName, newsImageFile, {
-          cacheControl: '3600',
-          upsert: true
+          cacheControl: '31536000', // 1 ano para cache (imagens raramente mudam)
+          upsert: false, // Não sobrescrever para evitar problemas de cache
+          contentType: newsImageFile.type, // Definir tipo MIME correto
         });
       
       if (uploadError) {
@@ -218,7 +246,11 @@ export default function SectorContentManagement() {
         .from('images')
         .getPublicUrl(fileName);
       
-      return publicUrl;
+      // Adicionar parâmetros de transformação do Supabase para otimização
+      // Isso funciona bem com a otimização de imagens do Vercel
+      const optimizedUrl = `${publicUrl}?quality=85&format=webp`;
+      
+      return optimizedUrl;
     } catch (error) {
       console.error('Erro ao fazer upload da imagem:', error);
       throw error;
@@ -227,6 +259,11 @@ export default function SectorContentManagement() {
 
   const handleNewsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('🚀 [handleNewsSubmit] Iniciando submissão de notícia');
+    console.log('📋 [handleNewsSubmit] Dados do formulário:', newsForm);
+    console.log('👤 [handleNewsSubmit] Usuário atual:', user);
+    console.log('🆔 [handleNewsSubmit] Setor ID:', sectorId);
     
     try {
       let imageUrl = newsForm.image_url;
@@ -239,30 +276,69 @@ export default function SectorContentManagement() {
       const newsData = {
         sector_id: sectorId,
         title: newsForm.title,
+        summary: newsForm.summary,
         content: newsForm.content,
         is_published: newsForm.is_published,
         image_url: imageUrl
       };
       
+      console.log('📦 [handleNewsSubmit] Dados preparados para envio:', newsData);
+      console.log('🔍 [handleNewsSubmit] Modo:', newsForm.id ? 'UPDATE' : 'CREATE');
+      
       if (newsForm.id) {
-        // Atualizar notícia existente
-        const { error } = await supabase
-          .from('sector_news')
-          .update(newsData)
-          .eq('id', newsForm.id);
+        // Atualizar notícia existente via API
+        const response = await fetch('/api/admin/sector-content', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'sector_news',
+            id: newsForm.id,
+            data: newsData
+          })
+        });
         
-        if (error) throw error;
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao atualizar notícia');
+        }
       } else {
-        // Criar nova notícia
-        const { error } = await supabase
-          .from('sector_news')
-          .insert([newsData]);
+        // Criar nova notícia via API
+        console.log('📡 [handleNewsSubmit] Enviando POST para /api/admin/sector-content');
+        const requestBody = {
+          type: 'sector_news',
+          data: newsData
+        };
+        console.log('📤 [handleNewsSubmit] Body da requisição:', requestBody);
         
-        if (error) throw error;
+        const response = await fetch('/api/admin/sector-content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody)
+        });
+        
+        console.log('📥 [handleNewsSubmit] Resposta recebida:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          console.error('❌ [handleNewsSubmit] Erro na resposta:', error);
+          console.error('❌ [handleNewsSubmit] Status:', response.status);
+          throw new Error(error.error || 'Erro ao criar notícia');
+        }
+        
+        const result = await response.json();
+        console.log('✅ [handleNewsSubmit] Notícia criada com sucesso:', result);
       }
       
       // Limpar formulário e atualizar lista
-      setNewsForm({ id: '', title: '', content: '', is_published: true, image_url: '' });
+      setNewsForm({ id: '', title: '', summary: '', content: '', is_published: true, image_url: '' });
       setNewsImageFile(null);
       if (newsImagePreview) {
         URL.revokeObjectURL(newsImagePreview);
@@ -270,9 +346,11 @@ export default function SectorContentManagement() {
       }
       setShowNewsForm(false);
       fetchNews();
-    } catch (error) {
-      console.error('Erro ao salvar notícia:', error);
-      alert('Erro ao salvar notícia. Tente novamente.');
+      console.log('🔄 [handleNewsSubmit] Lista de notícias atualizada');
+    } catch (error: any) {
+      console.error('💥 [handleNewsSubmit] Erro geral ao salvar notícia:', error);
+      console.error('💥 [handleNewsSubmit] Stack trace:', error.stack);
+      alert(`Erro ao salvar notícia: ${error.message}`);
     }
   };
 
@@ -284,30 +362,51 @@ export default function SectorContentManagement() {
         sector_id: sectorId,
         title: eventForm.title,
         description: eventForm.description,
-        event_date: eventForm.event_date,
+        start_date: eventForm.start_date,
+        end_date: eventForm.end_date || null,
         location: eventForm.location || null,
         is_published: eventForm.is_published
       };
       
       if (eventForm.id) {
-        // Atualizar evento existente
-        const { error } = await supabase
-          .from('sector_events')
-          .update(eventData)
-          .eq('id', eventForm.id);
+        // Atualizar evento existente via API
+        const response = await fetch('/api/admin/sector-content', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'sector_events',
+            id: eventForm.id,
+            data: eventData
+          })
+        });
         
-        if (error) throw error;
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao atualizar evento');
+        }
       } else {
-        // Criar novo evento
-        const { error } = await supabase
-          .from('sector_events')
-          .insert([eventData]);
+        // Criar novo evento via API
+        const response = await fetch('/api/admin/sector-content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'sector_events',
+            data: eventData
+          })
+        });
         
-        if (error) throw error;
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao criar evento');
+        }
       }
       
       // Limpar formulário e atualizar lista
-      setEventForm({ id: '', title: '', description: '', event_date: '', location: '', is_published: true });
+      setEventForm({ id: '', title: '', description: '', start_date: '', end_date: '', location: '', is_published: true });
       setShowEventForm(false);
       fetchEvents();
     } catch (error) {
@@ -320,6 +419,7 @@ export default function SectorContentManagement() {
     setNewsForm({
       id: item.id,
       title: item.title,
+      summary: item.summary,
       content: item.content,
       is_published: item.is_published,
       image_url: item.image_url || ''
@@ -337,14 +437,16 @@ export default function SectorContentManagement() {
 
   const editEvent = (item: SectorEvent) => {
     // Formatando a data para o formato esperado pelo input type="datetime-local"
-    const eventDate = new Date(item.event_date);
-    const formattedDate = eventDate.toISOString().slice(0, 16);
+    const startDate = new Date(item.start_date);
+    const formattedStartDate = startDate.toISOString().slice(0, 16);
+    const formattedEndDate = item.end_date ? new Date(item.end_date).toISOString().slice(0, 16) : '';
     
     setEventForm({
       id: item.id,
       title: item.title,
       description: item.description,
-      event_date: formattedDate,
+      start_date: formattedStartDate,
+      end_date: formattedEndDate,
       location: item.location || '',
       is_published: item.is_published
     });
@@ -357,12 +459,14 @@ export default function SectorContentManagement() {
     if (!confirm('Tem certeza que deseja excluir esta notícia?')) return;
     
     try {
-      const { error } = await supabase
-        .from('sector_news')
-        .delete()
-        .eq('id', id);
+      const response = await fetch(`/api/admin/sector-content?type=sector_news&id=${id}`, {
+        method: 'DELETE',
+      });
       
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erro ao excluir notícia');
+      }
       
       fetchNews();
     } catch (error) {
@@ -375,12 +479,14 @@ export default function SectorContentManagement() {
     if (!confirm('Tem certeza que deseja excluir este evento?')) return;
     
     try {
-      const { error } = await supabase
-        .from('sector_events')
-        .delete()
-        .eq('id', id);
+      const response = await fetch(`/api/admin/sector-content?type=sector_events&id=${id}`, {
+        method: 'DELETE',
+      });
       
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erro ao excluir evento');
+      }
       
       fetchEvents();
     } catch (error) {
@@ -390,7 +496,7 @@ export default function SectorContentManagement() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await authSignOut();
     router.replace('/login');
   };
 
@@ -525,7 +631,7 @@ export default function SectorContentManagement() {
                 <h3 className="text-lg font-semibold text-gray-800">Notícias do Setor</h3>
                 <button
                   onClick={() => {
-                    setNewsForm({ id: '', title: '', content: '', is_published: true, image_url: '' });
+                    setNewsForm({ id: '', title: '', summary: '', content: '', is_published: true, image_url: '' });
                     setNewsImageFile(null);
                     setNewsImagePreview(null);
                     setShowNewsForm(true);
@@ -557,55 +663,97 @@ export default function SectorContentManagement() {
                     </div>
                     
                     <div className="mb-4">
+                      <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-1">
+                        Resumo
+                      </label>
+                      <textarea
+                        id="summary"
+                        value={newsForm.summary}
+                        onChange={(e) => setNewsForm({...newsForm, summary: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md h-20"
+                        placeholder="Breve resumo da notícia"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="mb-4">
                       <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
-                        Conteúdo
+                        Conteúdo Completo
                       </label>
                       <textarea
                         id="content"
                         value={newsForm.content}
                         onChange={(e) => setNewsForm({...newsForm, content: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md h-32"
+                        placeholder="Conteúdo detalhado da notícia"
                         required
                       />
                     </div>
                     
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Imagem
+                        Imagem da Notícia *
                       </label>
-                      <div className="flex items-center">
+                      <div className="space-y-3">
                         {newsImagePreview && (
-                          <div className="relative h-24 w-24 mr-4 border border-gray-300">
+                          <div className="relative h-32 w-full max-w-sm mx-auto border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                             <OptimizedImage
                               src={newsImagePreview}
-                              alt="Preview"
+                              alt="Preview da imagem da notícia"
                               fill
                               className="object-cover"
+                              context="thumbnail"
+                              priority={false}
+                              sizes="(max-width: 384px) 100vw, 384px"
+                              placeholder="blur"
+                              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAhEQACAQIHAQAAAAAAAAAAAAABAgADBBEFITEUIkFRkf/aAAwDAQACEQMRAD8A0XYOBbY5jqTH9W/D2vCfVNKqVMYjV0YKTcL5EkCy/9k="
                             />
+                            <div className="absolute top-2 right-2">
+                              <button
+                                type="button"
+                                className="bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-sm transition-colors"
+                                onClick={() => {
+                                  if (newsImagePreview && newsImagePreview.startsWith('blob:')) {
+                                    URL.revokeObjectURL(newsImagePreview);
+                                  }
+                                  setNewsImagePreview(null);
+                                  setNewsImageFile(null);
+                                  setNewsForm({...newsForm, image_url: ''});
+                                }}
+                                title="Remover imagem"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
                           </div>
                         )}
-                        <label className="cursor-pointer bg-white border border-gray-300 px-3 py-2 rounded-md text-sm hover:bg-gray-50">
-                          Selecionar Imagem
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleNewsImageChange}
-                          />
-                        </label>
+                        
+                        <div className="flex items-center justify-center w-full">
+                          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <svg className="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                              </svg>
+                              <p className="mb-2 text-sm text-gray-500">
+                                <span className="font-semibold">Clique para enviar</span> ou arraste e solte
+                              </p>
+                              <p className="text-xs text-gray-500">PNG, JPG, WebP até 2MB</p>
+                            </div>
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/png,image/jpeg,image/jpg,image/webp"
+                              onChange={handleNewsImageChange}
+                            />
+                          </label>
+                        </div>
+                        
                         {newsImagePreview && (
-                          <button
-                            type="button"
-                            className="ml-2 text-red-500 text-sm hover:text-red-700"
-                            onClick={() => {
-                              if (newsImagePreview) URL.revokeObjectURL(newsImagePreview);
-                              setNewsImagePreview(null);
-                              setNewsImageFile(null);
-                              setNewsForm({...newsForm, image_url: ''});
-                            }}
-                          >
-                            Remover
-                          </button>
+                          <p className="text-xs text-gray-500 text-center">
+                            Imagem selecionada. Use o botão ✕ para remover.
+                          </p>
                         )}
                       </div>
                     </div>
@@ -686,6 +834,7 @@ export default function SectorContentManagement() {
                             </button>
                           </div>
                         </div>
+                        <p className="text-gray-600 mb-1 font-medium">{item.summary}</p>
                         <p className="text-gray-600 mb-2">{item.content}</p>
                         <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
                           <span>
@@ -714,7 +863,7 @@ export default function SectorContentManagement() {
                 <h3 className="text-lg font-semibold text-gray-800">Eventos do Setor</h3>
                 <button
                   onClick={() => {
-                    setEventForm({ id: '', title: '', description: '', event_date: '', location: '', is_published: true });
+                    setEventForm({ id: '', title: '', description: '', start_date: '', end_date: '', location: '', is_published: true });
                     setShowEventForm(true);
                   }}
                   className="bg-primary text-white px-3 py-1 rounded-md hover:bg-primary-dark text-sm"
@@ -757,16 +906,29 @@ export default function SectorContentManagement() {
                     </div>
                     
                     <div className="mb-4">
-                      <label htmlFor="event_date" className="block text-sm font-medium text-gray-700 mb-1">
-                        Data e Hora
+                      <label htmlFor="start_date" className="block text-sm font-medium text-gray-700 mb-1">
+                        Data e Hora de Início
                       </label>
                       <input
                         type="datetime-local"
-                        id="event_date"
-                        value={eventForm.event_date}
-                        onChange={(e) => setEventForm({...eventForm, event_date: e.target.value})}
+                        id="start_date"
+                        value={eventForm.start_date}
+                        onChange={(e) => setEventForm({...eventForm, start_date: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
                         required
+                      />
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label htmlFor="end_date" className="block text-sm font-medium text-gray-700 mb-1">
+                        Data e Hora de Término (opcional)
+                      </label>
+                      <input
+                        type="datetime-local"
+                        id="end_date"
+                        value={eventForm.end_date}
+                        onChange={(e) => setEventForm({...eventForm, end_date: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
                       />
                     </div>
                     
@@ -855,7 +1017,13 @@ export default function SectorContentManagement() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                           <span>
-                            {new Date(item.event_date).toLocaleDateString('pt-BR')} às {new Date(item.event_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(item.start_date).toLocaleDateString('pt-BR')} às {new Date(item.start_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            {item.end_date && (
+                              <>
+                                {' até '}
+                                {new Date(item.end_date).toLocaleDateString('pt-BR')} às {new Date(item.end_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              </>
+                            )}
                           </span>
                         </div>
                         
@@ -887,6 +1055,21 @@ export default function SectorContentManagement() {
           )}
         </div>
       </main>
+      
+      {/* Componente de Debug de Autenticação */}
+      {showDebug && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <button
+            onClick={() => setShowDebug(false)}
+            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <AuthDebugPanel />
+        </div>
+      )}
     </div>
   );
 } 
