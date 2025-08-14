@@ -142,7 +142,7 @@ export default function SectorDashboard() {
     content: '',
     image_url: '',
     is_featured: false,
-    is_published: false
+    is_published: true  // Por padrão, publicar imediatamente para admin
   });
   
   // Evento que está sendo editado/criado
@@ -153,7 +153,7 @@ export default function SectorDashboard() {
     start_date: new Date().toISOString(),
     end_date: null,
     is_featured: false,
-    is_published: false
+    is_published: true  // Por padrão, publicar imediatamente para admin
   });
 
   const [currentSubsector, setCurrentSubsector] = useState<Partial<Subsector>>({
@@ -238,6 +238,7 @@ export default function SectorDashboard() {
   }, [sectorId]);
 
   const fetchNews = useCallback(async () => {
+    console.log('🔄 Buscando notícias do setor:', sectorId);
     const { data, error } = await supabase
       .from('sector_news')
       .select('*')
@@ -245,10 +246,12 @@ export default function SectorDashboard() {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error('Erro ao buscar notícias:', error);
+      console.error('❌ Erro ao buscar notícias:', error);
       return;
     }
     
+    console.log('✅ Notícias encontradas:', data?.length || 0);
+    console.log('📄 Notícias:', data);
     setNews(data || []);
   }, [sectorId]);
 
@@ -514,7 +517,7 @@ export default function SectorDashboard() {
         content: '',
         image_url: '',
         is_featured: false,
-        is_published: false
+        is_published: true  // Por padrão, publicar imediatamente para admin
       });
       setIsEditing(false);
       setImagePreview(null);
@@ -525,35 +528,84 @@ export default function SectorDashboard() {
   const handleSaveNews = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('\n🔷🔷🔷 INÍCIO DO PROCESSO DE CRIAÇÃO DE NOTÍCIA (VIA API) 🔷🔷🔷');
+    console.log('⏰ Timestamp:', new Date().toISOString());
+    console.log('📋 Dados do formulário:', {
+      title: currentNews.title,
+      summary: currentNews.summary,
+      content: currentNews.content?.substring(0, 100) + '...',
+      is_published: currentNews.is_published,
+      is_featured: currentNews.is_featured
+    });
+    
     if (!currentNews.title || !currentNews.summary || !currentNews.content) {
+      console.error('❌ Campos obrigatórios faltando:', {
+        title: !currentNews.title,
+        summary: !currentNews.summary,
+        content: !currentNews.content
+      });
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
     
+    console.log('✅ Validação de campos OK');
+    console.log('👤 Usuário atual:', {
+      id: user?.id,
+      email: user?.email,
+      role: user?.user_metadata?.role
+    });
+    console.log('🏢 Setor ID:', sectorId);
+    
     try {
-      if (isEditing && currentNews.id) {
-        await supabase
-          .from('sector_news')
-          .update({ 
+      console.log('🚀 Chamando API para salvar notícia...');
+      
+      const response = await fetch('/api/admin/sector-content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: isEditing && currentNews.id ? 'update_news' : 'create_news',
+          data: isEditing && currentNews.id ? {
+            id: currentNews.id,
             ...currentNews,
             updated_at: new Date().toISOString()
-          })
-          .eq('id', currentNews.id);
-      } else {
-        await supabase
-          .from('sector_news')
-          .insert([{ 
+          } : {
             ...currentNews,
             sector_id: sectorId,
             created_by: user.id
-          }]);
+          }
+        }),
+      });
+
+      const result = await response.json();
+      
+      console.log('📡 Resposta da API:', {
+        status: response.status,
+        ok: response.ok,
+        result
+      });
+
+      if (!response.ok) {
+        console.error('❌❌❌ ERRO DA API:', result);
+        throw new Error(result.error || 'Erro ao salvar notícia');
       }
+
+      console.log('✅✅✅ NOTÍCIA SALVA COM SUCESSO:', result.data);
+      console.log('🔷🔷🔷 FIM DO PROCESSO - SUCESSO 🔷🔷🔷\n');
       
       setIsNewsModalOpen(false);
-      fetchNews();
-    } catch (error) {
-      console.error('Erro ao salvar notícia:', error);
-      alert('Ocorreu um erro ao salvar a notícia.');
+      // Forçar recarregamento imediato e depois de um delay
+      fetchNews(); // Busca imediata
+      setTimeout(() => {
+        console.log('🔄 Recarregando lista de notícias novamente...');
+        fetchNews(); // Segunda busca para garantir
+      }, 1000);
+    } catch (error: any) {
+      console.error('💥💥💥 ERRO CRÍTICO:', error);
+      console.error('Stack:', error?.stack);
+      console.log('🔷🔷🔷 FIM DO PROCESSO - ERRO 🔷🔷🔷\n');
+      alert(error.message || 'Ocorreu um erro ao salvar a notícia.');
     }
   };
   
@@ -587,7 +639,7 @@ export default function SectorDashboard() {
         start_date: new Date().toISOString(),
         end_date: null,
         is_featured: false,
-        is_published: false
+        is_published: true  // Por padrão, publicar imediatamente para admin
       });
       setIsEditing(false);
     }
@@ -597,35 +649,81 @@ export default function SectorDashboard() {
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('\n🎯🎯🎯 INÍCIO DO PROCESSO DE CRIAÇÃO DE EVENTO (VIA API) 🎯🎯🎯');
+    console.log('⏰ Timestamp:', new Date().toISOString());
+    console.log('📋 Dados do formulário:', {
+      title: currentEvent.title,
+      description: currentEvent.description?.substring(0, 100) + '...',
+      start_date: currentEvent.start_date,
+      end_date: currentEvent.end_date,
+      location: currentEvent.location,
+      is_published: currentEvent.is_published,
+      is_featured: currentEvent.is_featured
+    });
+    
     if (!currentEvent.title || !currentEvent.description || !currentEvent.start_date) {
+      console.error('❌ Campos obrigatórios faltando:', {
+        title: !currentEvent.title,
+        description: !currentEvent.description,
+        start_date: !currentEvent.start_date
+      });
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
     
+    console.log('✅ Validação de campos OK');
+    console.log('👤 Usuário atual:', {
+      id: user?.id,
+      email: user?.email,
+      role: user?.user_metadata?.role
+    });
+    console.log('🏢 Setor ID:', sectorId);
+    
     try {
-      if (isEditing && currentEvent.id) {
-        await supabase
-          .from('sector_events')
-          .update({ 
+      console.log('🚀 Chamando API para salvar evento...');
+      
+      const response = await fetch('/api/admin/sector-content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: isEditing && currentEvent.id ? 'update_event' : 'create_event',
+          data: isEditing && currentEvent.id ? {
+            id: currentEvent.id,
             ...currentEvent,
             updated_at: new Date().toISOString()
-          })
-          .eq('id', currentEvent.id);
-      } else {
-        await supabase
-          .from('sector_events')
-          .insert([{ 
+          } : {
             ...currentEvent,
             sector_id: sectorId,
             created_by: user.id
-          }]);
+          }
+        }),
+      });
+
+      const result = await response.json();
+      
+      console.log('📡 Resposta da API:', {
+        status: response.status,
+        ok: response.ok,
+        result
+      });
+
+      if (!response.ok) {
+        console.error('❌❌❌ ERRO DA API:', result);
+        throw new Error(result.error || 'Erro ao salvar evento');
       }
+
+      console.log('✅✅✅ EVENTO SALVO COM SUCESSO:', result.data);
+      console.log('🎯🎯🎯 FIM DO PROCESSO - SUCESSO 🎯🎯🎯\n');
       
       setIsEventModalOpen(false);
       fetchEvents();
-    } catch (error) {
-      console.error('Erro ao salvar evento:', error);
-      alert('Ocorreu um erro ao salvar o evento.');
+    } catch (error: any) {
+      console.error('💥💥💥 ERRO CRÍTICO:', error);
+      console.error('Stack:', error?.stack);
+      console.log('🎯🎯🎯 FIM DO PROCESSO - ERRO 🎯🎯🎯\n');
+      alert(error.message || 'Ocorreu um erro ao salvar o evento.');
     }
   };
   
@@ -1630,25 +1728,43 @@ export default function SectorDashboard() {
                 </div>
               </div>
               <div className="flex space-x-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={currentNews.is_featured || false}
-                    onChange={(e) => setCurrentNews({...currentNews, is_featured: e.target.checked})}
-                    className="mr-2"
-                  />
+                <label className="flex items-center cursor-pointer">
+                  <div className="relative mr-2">
+                    <input
+                      type="checkbox"
+                      checked={currentNews.is_featured || false}
+                      onChange={(e) => setCurrentNews({...currentNews, is_featured: e.target.checked})}
+                      className="sr-only"
+                    />
+                    <div className={`w-4 h-4 border-2 rounded flex items-center justify-center ${currentNews.is_featured ? 'bg-primary border-primary' : 'bg-white border-gray-300'}`}>
+                      {currentNews.is_featured && (
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
                   <span className="text-sm text-gray-700">Destacar</span>
-                  </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={currentNews.is_published || false}
-                    onChange={(e) => setCurrentNews({...currentNews, is_published: e.target.checked})}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700">Publicar</span>
-                  </label>
-                </div>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <div className="relative mr-2">
+                    <input
+                      type="checkbox"
+                      checked={currentNews.is_published || false}
+                      onChange={(e) => setCurrentNews({...currentNews, is_published: e.target.checked})}
+                      className="sr-only"
+                    />
+                    <div className={`w-4 h-4 border-2 rounded flex items-center justify-center ${currentNews.is_published ? 'bg-primary border-primary' : 'bg-white border-gray-300'}`}>
+                      {currentNews.is_published && (
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-700">Publicar imediatamente</span>
+                </label>
+              </div>
               <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"
@@ -1739,25 +1855,43 @@ export default function SectorDashboard() {
                 </div>
               </div>
               <div className="flex space-x-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={currentEvent.is_featured || false}
-                    onChange={(e) => setCurrentEvent({...currentEvent, is_featured: e.target.checked})}
-                    className="mr-2"
-                  />
+                <label className="flex items-center cursor-pointer">
+                  <div className="relative mr-2">
+                    <input
+                      type="checkbox"
+                      checked={currentEvent.is_featured || false}
+                      onChange={(e) => setCurrentEvent({...currentEvent, is_featured: e.target.checked})}
+                      className="sr-only"
+                    />
+                    <div className={`w-4 h-4 border-2 rounded flex items-center justify-center ${currentEvent.is_featured ? 'bg-primary border-primary' : 'bg-white border-gray-300'}`}>
+                      {currentEvent.is_featured && (
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
                   <span className="text-sm text-gray-700">Destacar</span>
                 </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={currentEvent.is_published || false}
-                    onChange={(e) => setCurrentEvent({...currentEvent, is_published: e.target.checked})}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700">Publicar</span>
-                  </label>
-                </div>
+                <label className="flex items-center cursor-pointer">
+                  <div className="relative mr-2">
+                    <input
+                      type="checkbox"
+                      checked={currentEvent.is_published || false}
+                      onChange={(e) => setCurrentEvent({...currentEvent, is_published: e.target.checked})}
+                      className="sr-only"
+                    />
+                    <div className={`w-4 h-4 border-2 rounded flex items-center justify-center ${currentEvent.is_published ? 'bg-primary border-primary' : 'bg-white border-gray-300'}`}>
+                      {currentEvent.is_published && (
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-700">Publicar imediatamente</span>
+                </label>
+              </div>
               <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"

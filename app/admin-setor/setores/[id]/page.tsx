@@ -261,17 +261,33 @@ export default function SectorContentManagement() {
   const handleNewsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('🚀 [handleNewsSubmit] Iniciando submissão de notícia');
-    console.log('📋 [handleNewsSubmit] Dados do formulário:', newsForm);
-    console.log('👤 [handleNewsSubmit] Usuário atual:', user);
-    console.log('🆔 [handleNewsSubmit] Setor ID:', sectorId);
+    console.log('\n🔷🔷🔷 INÍCIO DO PROCESSO DE CRIAÇÃO DE NOTÍCIA 🔷🔷🔷');
+    console.log('⏰ Timestamp:', new Date().toISOString());
+    console.log('📋 [FRONTEND] Dados do formulário:', JSON.stringify(newsForm, null, 2));
+    console.log('👤 [FRONTEND] Usuário atual:', {
+      id: user?.id,
+      email: user?.email,
+      metadata: user?.user_metadata
+    });
+    console.log('👤 [FRONTEND] Profile:', {
+      id: profile?.id,
+      role: profile?.role,
+      full_name: profile?.full_name
+    });
+    console.log('🆔 [FRONTEND] Setor ID:', sectorId);
+    console.log('🔐 [FRONTEND] isAuthenticated:', isAuthenticated);
+    console.log('🔐 [FRONTEND] isSectorAdmin:', isSectorAdmin);
+    console.log('🔐 [FRONTEND] isAuthorized:', isAuthorized);
     
+
     try {
       let imageUrl = newsForm.image_url;
       
       // Se houver uma nova imagem, fazer o upload
       if (newsImageFile) {
+        console.log('🖼️ [FRONTEND] Fazendo upload de imagem...');
         imageUrl = await uploadNewsImage() || '';
+        console.log('🖼️ [FRONTEND] URL da imagem:', imageUrl);
       }
       
       const newsData = {
@@ -283,11 +299,12 @@ export default function SectorContentManagement() {
         image_url: imageUrl
       };
       
-      console.log('📦 [handleNewsSubmit] Dados preparados para envio:', newsData);
-      console.log('🔍 [handleNewsSubmit] Modo:', newsForm.id ? 'UPDATE' : 'CREATE');
+      console.log('📦 [FRONTEND] Dados preparados para envio:', JSON.stringify(newsData, null, 2));
+      console.log('🔍 [FRONTEND] Modo:', newsForm.id ? 'UPDATE' : 'CREATE');
       
       if (newsForm.id) {
         // Atualizar notícia existente via API
+        console.log('🔄 [FRONTEND] Atualizando notícia existente...');
         const response = await fetch('/api/admin/sector-content', {
           method: 'PUT',
           headers: {
@@ -300,42 +317,70 @@ export default function SectorContentManagement() {
           })
         });
         
+        console.log('📥 [FRONTEND] Resposta do UPDATE:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+        
         if (!response.ok) {
           const error = await response.json();
+          console.error('❌ [FRONTEND] Erro no UPDATE:', JSON.stringify(error, null, 2));
           throw new Error(error.error || 'Erro ao atualizar notícia');
         }
       } else {
         // Criar nova notícia via API
-        console.log('📡 [handleNewsSubmit] Enviando POST para /api/admin/sector-content');
+        console.log('➕ [FRONTEND] Criando nova notícia...');
+        console.log('📡 [FRONTEND] Enviando POST para /api/admin/sector-content');
+        
         const requestBody = {
           type: 'sector_news',
           data: newsData
         };
-        console.log('📤 [handleNewsSubmit] Body da requisição:', requestBody);
+        
+        console.log('📤 [FRONTEND] Body completo da requisição:', JSON.stringify(requestBody, null, 2));
+        console.log('📤 [FRONTEND] Headers da requisição:', {
+          'Content-Type': 'application/json'
+        });
         
         const response = await fetch('/api/admin/sector-content', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include', // Garante envio de cookies
           body: JSON.stringify(requestBody)
         });
         
-        console.log('📥 [handleNewsSubmit] Resposta recebida:', {
-          status: response.status,
-          statusText: response.statusText,
-          ok: response.ok
-        });
+        console.log('📥 [FRONTEND] Resposta recebida do servidor:');
+        console.log('  Status:', response.status);
+        console.log('  StatusText:', response.statusText);
+        console.log('  OK:', response.ok);
+        console.log('  Headers:', Object.fromEntries(response.headers.entries()));
         
-        if (!response.ok) {
-          const error = await response.json();
-          console.error('❌ [handleNewsSubmit] Erro na resposta:', error);
-          console.error('❌ [handleNewsSubmit] Status:', response.status);
-          throw new Error(error.error || 'Erro ao criar notícia');
+        const responseText = await response.text();
+        console.log('📥 [FRONTEND] Response body (raw):', responseText);
+        
+        let result;
+        try {
+          result = JSON.parse(responseText);
+          console.log('📥 [FRONTEND] Response body (parsed):', JSON.stringify(result, null, 2));
+        } catch (parseError) {
+          console.error('❌ [FRONTEND] Erro ao fazer parse da resposta:', parseError);
+          console.error('❌ [FRONTEND] Resposta raw:', responseText);
+          throw new Error('Resposta inválida do servidor');
         }
         
-        const result = await response.json();
-        console.log('✅ [handleNewsSubmit] Notícia criada com sucesso:', result);
+        if (!response.ok) {
+          console.error('❌❌❌ [FRONTEND] ERRO NA CRIAÇÃO:');
+          console.error('  Status:', response.status);
+          console.error('  Erro:', JSON.stringify(result, null, 2));
+          throw new Error(result.error || 'Erro ao criar notícia');
+        }
+        
+        console.log('✅✅✅ [FRONTEND] NOTÍCIA CRIADA COM SUCESSO!');
+        console.log('  Resultado:', JSON.stringify(result, null, 2));
       }
       
       // Limpar formulário e atualizar lista
@@ -347,10 +392,15 @@ export default function SectorContentManagement() {
       }
       setShowNewsForm(false);
       fetchNews();
-      console.log('🔄 [handleNewsSubmit] Lista de notícias atualizada');
+      console.log('🔄 [FRONTEND] Lista de notícias atualizada');
+      console.log('🔷🔷🔷 FIM DO PROCESSO - SUCESSO 🔷🔷🔷\n');
     } catch (error: any) {
-      console.error('💥 [handleNewsSubmit] Erro geral ao salvar notícia:', error);
-      console.error('💥 [handleNewsSubmit] Stack trace:', error.stack);
+      console.error('\n💥💥💥 [FRONTEND] ERRO FATAL AO SALVAR NOTÍCIA:');
+      console.error('  Mensagem:', error.message);
+      console.error('  Tipo:', error.constructor.name);
+      console.error('  Stack:', error.stack);
+      console.error('  Objeto completo:', error);
+      console.error('🔷🔷🔷 FIM DO PROCESSO - ERRO 🔷🔷🔷\n');
       alert(`Erro ao salvar notícia: ${error.message}`);
     }
   };

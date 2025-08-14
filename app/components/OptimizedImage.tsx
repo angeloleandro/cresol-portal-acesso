@@ -75,7 +75,10 @@ export default function OptimizedImage({
   const isVercel = process.env.VERCEL_ENV !== undefined || process.env.VERCEL === '1';
   const isSupabaseImage = imageSrc?.includes('supabase.co');
   const isSvg = imageSrc?.toLowerCase().endsWith('.svg');
-  const shouldForceUnoptimized = false; // Supabase funciona com Vercel Optimization
+  const isBlobUrl = imageSrc?.startsWith('blob:');
+  const isDataUrl = imageSrc?.startsWith('data:');
+  // Forçar unoptimized para blob URLs e data URLs (não podem ser otimizadas pelo Vercel)
+  const shouldForceUnoptimized = isBlobUrl || isDataUrl;
 
   // Log de debug apenas em desenvolvimento
   if (process.env.NODE_ENV === 'development') {
@@ -119,14 +122,30 @@ export default function OptimizedImage({
       return true;
     }
 
+    // CORREÇÃO: Permitir blob URLs (usadas em upload de imagens)
+    if (url.startsWith('blob:')) {
+      // Blob URLs são válidas mas devem usar unoptimized=true
+      return true;
+    }
+
+    // CORREÇÃO: Permitir data URLs (base64)
+    if (url.startsWith('data:')) {
+      return true;
+    }
+
     // Para URLs externas, fazer validações mais rigorosas
     try {
       const parsedUrl = new URL(url);
       
-      // Para Vercel, verificar se é HTTPS e se o domínio está permitido
-      if (parsedUrl.protocol !== 'https:') {
+      // Para Vercel em produção, verificar se é HTTPS
+      if (isVercel && process.env.NODE_ENV === 'production' && parsedUrl.protocol !== 'https:') {
         console.warn('OptimizedImage: URL externa deve usar HTTPS para Vercel Image Optimization', url);
         return false;
+      }
+      
+      // Em desenvolvimento, permitir HTTP
+      if (process.env.NODE_ENV === 'development' && (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:')) {
+        return true;
       }
       
       // Verificar se é um domínio Supabase permitido
@@ -135,7 +154,7 @@ export default function OptimizedImage({
       }
       
       // Outros domínios externos permitidos
-      const allowedDomains = ['img.youtube.com', 'cresol.com.br'];
+      const allowedDomains = ['img.youtube.com', 'cresol.com.br', 'localhost'];
       return allowedDomains.some(domain => parsedUrl.hostname.includes(domain));
       
     } catch {
