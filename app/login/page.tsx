@@ -7,7 +7,8 @@ import OptimizedImage from '@/app/components/OptimizedImage';
 import { Button } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
 import { useAuth } from '@/app/providers/AuthProvider';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 function LoginContent() {
   const router = useRouter();
@@ -79,9 +80,9 @@ function LoginContent() {
                 className="object-contain"
               />
             </div>
-            <LoadingSpinner 
-              size="md" 
-              message="Verificando autenticação..."
+            <UnifiedLoadingSpinner 
+              size="default" 
+              message={LOADING_MESSAGES.checkingSession}
             />
           </div>
         </div>
@@ -191,11 +192,10 @@ export default function Login() {
                 className="object-contain"
               />
             </div>
-<LoadingSpinner 
-              size="md" 
-              message="Verificando credenciais..."
+<UnifiedLoadingSpinner 
+              size="default" 
+              message={LOADING_MESSAGES.authenticating}
             />
-            <p className="body-text-small text-muted">Carregando...</p>
           </div>
         </div>
       </div>

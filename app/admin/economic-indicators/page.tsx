@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { handleComponentError, devLog } from '@/lib/error-handler';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
@@ -222,7 +223,7 @@ export default function EconomicIndicatorsAdmin() {
     return (
       <div className="min-h-screen bg-gray-50">
         <AdminHeader user={user} />
-        <LoadingSpinner fullScreen message="Carregando indicadores econômicos..." />
+        <UnifiedLoadingSpinner size="default" message={LOADING_MESSAGES.loading} />
       </div>
     );
   }

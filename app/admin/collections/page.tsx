@@ -9,7 +9,8 @@ import { motion } from 'framer-motion';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { supabase } from '@/lib/supabase';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import CollectionsManager from './components/CollectionsManager';
 import { useCollections } from '@/app/components/Collections/Collection.hooks';
 import Icon from '@/app/components/icons/Icon';
@@ -51,7 +52,7 @@ export default function AdminCollectionsPage() {
 
   // Loading state
   if (loading) {
-    return <AdminSpinner fullScreen message="Carregando painel administrativo..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.loading} />;
   }
 
   // Access control

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { ImagePreviewWithGrid } from "./ImagePreview";
 import { BaseImage, baseImageToGalleryImage } from "./ImagePreview/ImagePreview.types";
-import LoadingSpinner from "./ui/LoadingSpinner";
+import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { Icon } from "./icons/Icon";
 import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
 
@@ -77,7 +78,7 @@ export default function ImageGalleryHome({ limit = 6 }: ImageGalleryHomeProps) {
     return (
       <section className="card">
         <div className="flex justify-center py-8">
-          <LoadingSpinner size="md" message="Carregando galeria..." />
+          <UnifiedLoadingSpinner size="default" message={LOADING_MESSAGES.gallery} />
         </div>
       </section>
     );

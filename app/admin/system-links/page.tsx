@@ -12,7 +12,8 @@ import {
   type BreadcrumbItem
 } from '@/app/components/admin';
 import { handleComponentError, devLog } from '@/lib/error-handler';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { Icon } from '@/app/components/icons';
@@ -212,7 +213,7 @@ export default function SystemLinksAdmin() {
   };
 
   if (loading) {
-    return <LoadingSpinner fullScreen message="Carregando links de sistemas..." />;
+    return <UnifiedLoadingSpinner size="default" message={LOADING_MESSAGES.systems} />;
   }
 
   const breadcrumbs: BreadcrumbItem[] = [

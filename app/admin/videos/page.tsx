@@ -12,7 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import AdminHeader from "@/app/components/AdminHeader";
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { supabase } from "@/lib/supabase";
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { AdvancedVideoGalleryHeader } from '@/app/components/VideoGallery/VideoGallery.Header';
@@ -274,7 +275,7 @@ export default function AdminVideos() {
 
   // Loading state
   if (loading) {
-    return <AdminSpinner fullScreen message="Carregando painel administrativo..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.videos} />;
   }
 
   // Access control

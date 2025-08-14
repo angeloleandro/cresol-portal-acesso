@@ -7,7 +7,8 @@ import AdminHeader from '../AdminHeader';
 import Breadcrumb from '../Breadcrumb';
 import StatisticsGrid from './StatisticsGrid';
 import AdminModulesGrid from './AdminModulesGrid';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface DashboardStats {
   totalUsers: number;
@@ -109,16 +110,11 @@ export default function AdminDashboard({ initialUser, initialStats }: AdminDashb
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-<LoadingSpinner 
-            size="md" 
-            message="Carregando dashboard..."
-            variant="admin"
-          />
-          <p className="body-text text-muted">Carregando...</p>
-        </div>
-      </div>
+      <UnifiedLoadingSpinner 
+        fullScreen
+        size="large" 
+        message={LOADING_MESSAGES.dashboard}
+      />
     );
   }
 

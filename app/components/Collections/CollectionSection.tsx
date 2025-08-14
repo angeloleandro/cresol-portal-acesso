@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Collection } from '@/lib/types/collections';
 import { getSupabaseClient } from '@/lib/supabase';
 import { Icon } from '../icons/Icon';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import OptimizedImage from '../OptimizedImage';
 
 interface CollectionSectionProps {
@@ -64,7 +65,7 @@ export function CollectionSection({
     return (
       <div className="mb-8">
         <div className="flex items-center justify-center py-8">
-          <LoadingSpinner size="md" message="Carregando coleções..." />
+          <UnifiedLoadingSpinner size="default" message={LOADING_MESSAGES.default} />
         </div>
       </div>
     );

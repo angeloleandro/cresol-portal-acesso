@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
+import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface EventItem {
   id: string;
@@ -123,9 +125,8 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
 
   if (isLoading) {
     return (
-      <div className="card animate-pulse">
-        <div className="h-6 bg-gray-200 rounded-sm w-1/3 mb-6"></div>
-        <div className="h-64 bg-gray-200 rounded-sm mb-4"></div>
+      <div className="card">
+        <UnifiedLoadingSpinner message={LOADING_MESSAGES.events} />
       </div>
     );
   }

@@ -14,7 +14,8 @@ import {
 } from '@/app/components/admin';
 import BannerUploadForm from '@/app/components/BannerUploadForm';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { Icon } from '@/app/components/icons';
 
 interface Banner {
@@ -115,7 +116,7 @@ export default function AdminBanners() {
   };
 
   if (loading) {
-    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.banners} />;
   }
 
   const breadcrumbs: BreadcrumbItem[] = [

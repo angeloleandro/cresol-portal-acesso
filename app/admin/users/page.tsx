@@ -10,7 +10,8 @@ import UserFilters from './components/UserFilters';
 import UserForm from './components/UserForm';
 import UserList from './components/UserList';
 import RoleModal from './components/RoleModal';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { StandardizedButton } from '@/app/components/admin';
 
 interface ProfileUser {
@@ -319,7 +320,7 @@ export default function UsersManagement() {
   });
 
   if (loading && !users.length) {
-    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.users} />;
   }
 
   return (

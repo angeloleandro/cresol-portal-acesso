@@ -17,7 +17,8 @@ import { VideoGalleryGrid } from "../components/VideoGallery/VideoGallery.Grid";
 import { VideoCleanModal } from "../components/VideoGallery/VideoGallery.CleanModal";
 import { VideoGalleryEmptyState } from "../components/VideoGallery/VideoGallery.EmptyState";
 import { EnhancedVideoCard } from "../components/VideoGallery/VideoGallery.Card";
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { DashboardVideo, VideoFilters } from "../types/video";
 import { CollectionSection } from "../components/Collections/CollectionSection";
 import { useSearchParams } from 'next/navigation';
@@ -173,9 +174,9 @@ function VideosContent() {
             animate={{ opacity: 1 }}
             className="flex flex-col items-center justify-center py-16 space-y-4"
           >
-<LoadingSpinner 
-              size="md" 
-              message="Carregando vídeos..."
+<UnifiedLoadingSpinner 
+              size="default" 
+              message={LOADING_MESSAGES.videos}
             />
           </motion.div>
         </main>
@@ -372,7 +373,7 @@ export default function VideosPage() {
         <Navbar />
         <main className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="flex flex-col items-center justify-center py-16 space-y-4">
-            <LoadingSpinner size="md" message="Carregando vídeos..." />
+            <UnifiedLoadingSpinner size="default" message={LOADING_MESSAGES.videos} />
           </div>
         </main>
         <Footer />

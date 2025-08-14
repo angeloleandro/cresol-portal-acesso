@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
     "@chakra-ui/react": "^3.24.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -21,6 +22,7 @@
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-virtual": "^3.13.12",
     "@tus/server": "^2.3.0",
+    "antd": "^5.27.0",
     "autoprefixer": "^10.4.16",
     "axios": "^1.11.0",
     "clsx": "^2.1.1",

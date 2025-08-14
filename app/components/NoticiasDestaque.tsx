@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { NewsCard, CompactNewsCard, FeaturedNewsCard } from './NewsCard';
 import type { NewsItem } from './NewsCard';
+import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface NoticiasDestaqueProps {
   compact?: boolean;
@@ -97,9 +99,8 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
 
   if (isLoading) {
     return (
-      <div className="card animate-pulse">
-        <div className="h-6 bg-gray-200 rounded-sm w-1/3 mb-6"></div>
-        <div className="h-64 bg-gray-200 rounded-sm mb-4"></div>
+      <div className="card">
+        <UnifiedLoadingSpinner message={LOADING_MESSAGES.news} />
       </div>
     );
   }

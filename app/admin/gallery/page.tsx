@@ -8,7 +8,8 @@ import AdminHeader from "@/app/components/AdminHeader";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import ImageUploadForm from "@/app/components/ImageUploadForm";
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import CollectionsManager from '@/app/admin/collections/components/CollectionsManager';
 import { useCollections } from '@/app/components/Collections/Collection.hooks';
 import Icon from '@/app/components/icons/Icon';
@@ -150,7 +151,7 @@ export default function AdminGallery() {
   };
 
   if (loading) {
-    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.gallery} />;
   }
 
   return (

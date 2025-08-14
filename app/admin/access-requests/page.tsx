@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface AccessRequest {
   id: string;
@@ -273,7 +274,7 @@ export default function AccessRequests() {
   };
 
   if (loading && !requests.length) {
-    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.loading} />;
   }
 
   return (
@@ -319,7 +320,7 @@ export default function AccessRequests() {
         
         {loading ? (
           <div className="flex justify-center my-12">
-            <AdminSpinner message="Carregando mais dados..." size="md" />
+            <UnifiedLoadingSpinner message={LOADING_MESSAGES.loading} size="default" />
           </div>
         ) : requests.length === 0 ? (
           <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">

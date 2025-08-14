@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { handleComponentError, devLog } from '@/lib/error-handler';
-import LoadingSpinner from './ui/LoadingSpinner';
+import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import ErrorMessage from './ui/ErrorMessage';
 import { Icon } from './icons';
 
@@ -49,7 +50,7 @@ export default function SystemLinks() {
   };
 
   if (loading) {
-    return <LoadingSpinner size="sm" message="Carregando sistemas..." />;
+    return <UnifiedLoadingSpinner size="small" message={LOADING_MESSAGES.systems} />;
   }
 
   if (error) {

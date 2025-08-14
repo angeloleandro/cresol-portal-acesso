@@ -20,7 +20,8 @@ import SectorCard from '@/app/components/admin/SectorCard';
 import SubsectorCard from '@/app/components/admin/SubsectorCard';
 import { Icon } from '../../components/icons';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 
 interface Sector {
@@ -323,7 +324,7 @@ export default function SectorsManagement() {
   };
 
   if (loading) {
-    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.sectors} />;
   }
 
   const breadcrumbs: BreadcrumbItem[] = [

@@ -7,7 +7,8 @@ import Breadcrumb from '@/app/components/Breadcrumb';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/app/components/icons/Icon';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface Position {
   id: string;
@@ -281,7 +282,7 @@ export default function PositionsAdmin() {
   };
 
   if (loading) {
-    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.loading} />;
   }
 
   return (

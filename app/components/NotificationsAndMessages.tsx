@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Icon } from './icons/Icon';
+import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface Notification {
   id: string;
@@ -110,13 +112,8 @@ export default function NotificationsAndMessages() {
 
   if (loading) {
     return (
-      <div className="card animate-pulse">
-        <div className="h-6 bg-gray-200 rounded-sm-md w-1/2 mb-4"></div>
-        <div className="space-y-3">
-          <div className="h-12 bg-gray-200 rounded-sm"></div>
-          <div className="h-12 bg-gray-200 rounded-sm"></div>
-          <div className="h-12 bg-gray-200 rounded-sm"></div>
-        </div>
+      <div className="card">
+        <UnifiedLoadingSpinner message={LOADING_MESSAGES.notifications} />
       </div>
     );
   }

@@ -8,7 +8,8 @@ import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import AdminHeader from '@/app/components/AdminHeader';
 import { supabase } from '@/lib/supabase';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import CollectionDetailEditPage from './components/CollectionDetailEditPage';
 
 interface PageProps {
@@ -55,7 +56,7 @@ export default function CollectionDetailPage({ params }: PageProps) {
 
   // Loading state
   if (loading) {
-    return <AdminSpinner fullScreen message="Carregando detalhes da coleção..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.loading} />;
   }
 
   // Access control

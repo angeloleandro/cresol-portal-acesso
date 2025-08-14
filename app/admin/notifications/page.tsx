@@ -16,7 +16,8 @@ import { NotificationFormEnhanced } from './components/enhanced/NotificationForm
 import { GroupsManager } from './components/GroupsManager';
 import { NotificationHistory } from './components/NotificationHistory';
 import { useAuth, useFormData, useGroups } from './hooks';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 /**
  * PÁGINA DE NOTIFICAÇÕES PADRONIZADA
@@ -44,7 +45,7 @@ export default function NotificationsAdminStandardized() {
   const [activeTab, setActiveTab] = useState<TabType>('send');
 
   if (loading) {
-    return <AdminSpinner fullScreen message="Carregando painel administrativo..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.notifications} />;
   }
 
   if (!user) {

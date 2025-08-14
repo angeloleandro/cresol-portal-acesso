@@ -6,7 +6,8 @@ import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { useRouter } from 'next/navigation';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface WorkLocation {
   id: string;
@@ -280,7 +281,7 @@ export default function WorkLocationsAdmin() {
   };
 
   if (loading) {
-    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.loading} />;
   }
 
   return (

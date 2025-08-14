@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import AdvancedSearch from './AdvancedSearch';
 import { Icon } from './icons/Icon';
-import { Spinner } from '@chakra-ui/react';
+import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { CRESOL_COLORS } from '@/lib/design-tokens';
 
 interface QuickResult {
@@ -333,15 +334,7 @@ export default function GlobalSearch({
         {/* Indicador de carregamento */}
         {loading && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            <Spinner
-              size="sm"
-              color={pathname?.startsWith('/admin') ? CRESOL_COLORS.gray.DEFAULT : CRESOL_COLORS.primary.DEFAULT}
-              css={{
-                "--spinner-track-color": pathname?.startsWith('/admin') 
-                  ? `${CRESOL_COLORS.gray.DEFAULT}33` 
-                  : `${CRESOL_COLORS.primary.DEFAULT}33`
-              }}
-            />
+            <UnifiedLoadingSpinner size="small" />
           </div>
         )}
       </div>

@@ -7,7 +7,8 @@ import AuthDebugPanel from '@/app/components/AuthDebugPanel';
 import Link from 'next/link';
 import { useSupabaseClient } from '@/hooks/useSupabaseClient';
 import { useAuth } from '@/app/providers/AuthProvider';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface Sector {
   id: string;
@@ -504,13 +505,11 @@ export default function SectorContentManagement() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-  <LoadingSpinner 
-        fullScreen={true}
-        size="lg" 
-        message="Carregando setor..."
-        variant="admin"
+  <UnifiedLoadingSpinner 
+        fullScreen
+        size="large" 
+        message={LOADING_MESSAGES.sectors}
       />
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
         </div>
       </div>
     );

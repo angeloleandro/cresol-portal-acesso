@@ -8,7 +8,8 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { Icon } from '@/app/components/icons/Icon';
-import { AdminSpinner } from '@/app/components/ui/StandardizedSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 
 interface System {
@@ -223,7 +224,7 @@ export default function SystemsManagement() {
     : systems.filter(system => system.sector_id === sectorFilter);
 
   if (loading && systems.length === 0) {
-    return <AdminSpinner fullScreen message="Carregando..." size="lg" />;
+    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.systems} />;
   }
 
   return (

@@ -15,7 +15,8 @@ import SistemasLateral from '../components/SistemasLateral';
 import ParecerSolicitacao from '../components/ParecerSolicitacao';
 import NotificationsAndMessages from '../components/NotificationsAndMessages';
 import { handleComponentError, devLog } from '@/lib/error-handler';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { Icon } from '../components/icons';
 
 interface QuickStats {
@@ -67,7 +68,7 @@ export default function Home() {
   }, [checkUser]);
 
   if (loading) {
-    return <LoadingSpinner fullScreen message="Carregando página inicial..." />;
+    return <UnifiedLoadingSpinner fullScreen message={LOADING_MESSAGES.home} />;
   }
 
   return (

@@ -8,7 +8,8 @@ import { supabase } from '@/lib/supabase';
 import { StandardizedButton } from '@/app/components/admin';
 import EventCalendar from '../components/EventCalendar';
 import Navbar from '../components/Navbar';
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import Breadcrumbs from '../components/Breadcrumbs';
 import Footer from '../components/Footer';
 import { Icon } from '../components/icons/Icon';
@@ -226,11 +227,10 @@ function EventosPageContent() {
         <Navbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
-<LoadingSpinner 
-              size="md" 
-              message="Carregando eventos..."
+<UnifiedLoadingSpinner 
+              size="default" 
+              message={LOADING_MESSAGES.events}
             />
-            <p className="body-text text-muted">Carregando eventos...</p>
           </div>
         </div>
         <Footer />
@@ -518,11 +518,10 @@ export default function EventosPage() {
         <Navbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
-<LoadingSpinner 
-              size="md" 
-              message="Carregando eventos..."
+<UnifiedLoadingSpinner 
+              size="default" 
+              message={LOADING_MESSAGES.events}
             />
-            <p className="body-text text-muted">Carregando eventos...</p>
           </div>
         </div>
         <Footer />
