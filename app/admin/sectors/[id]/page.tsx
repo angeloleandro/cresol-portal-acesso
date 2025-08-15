@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase';
 import Cropper from 'react-easy-crop';
 import { Button } from '@/app/components/ui/Button';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { useSectorContent, ToggleDraftsButton } from './SectorContentManager';
 
 interface Sector {
   id: string;
@@ -130,10 +130,23 @@ export default function SectorDashboard() {
   const [loading, setLoading] = useState(true);
   const [sector, setSector] = useState<Sector | null>(null);
   const [subsectors, setSubsectors] = useState<Subsector[]>([]);
-  const [news, setNews] = useState<SectorNews[]>([]);
-  const [events, setEvents] = useState<SectorEvent[]>([]);
   const [activeTab, setActiveTab] = useState<'news' | 'events' | 'subsectors' | 'groups' | 'messages'>('news');
   const [isAuthorized, setIsAuthorized] = useState(false);
+  
+  // Usar o hook unificado para gerenciar notícias e eventos
+  const {
+    news,
+    events,
+    showDrafts,
+    isLoading: contentLoading,
+    error: contentError,
+    totalDraftNewsCount,
+    totalDraftEventsCount,
+    toggleDrafts,
+    refreshContent,
+    deleteNews: deleteNewsItem,
+    deleteEvent: deleteEventItem
+  } = useSectorContent(sectorId as string | undefined);
 
   // Notícia que está sendo editada/criada
   const [currentNews, setCurrentNews] = useState<Partial<SectorNews>>({
@@ -237,38 +250,7 @@ export default function SectorDashboard() {
     }
   }, [sectorId]);
 
-  const fetchNews = useCallback(async () => {
-    console.log('🔄 Buscando notícias do setor:', sectorId);
-    const { data, error } = await supabase
-      .from('sector_news')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('❌ Erro ao buscar notícias:', error);
-      return;
-    }
-    
-    console.log('✅ Notícias encontradas:', data?.length || 0);
-    console.log('📄 Notícias:', data);
-    setNews(data || []);
-  }, [sectorId]);
-
-  const fetchEvents = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('sector_events')
-      .select('*')
-      .eq('sector_id', sectorId)
-      .order('start_date', { ascending: false });
-    
-    if (error) {
-      console.error('Erro ao buscar eventos:', error);
-      return;
-    }
-    
-    setEvents(data || []);
-  }, [sectorId]);
+  // REMOVIDO: fetchNews e fetchEvents - agora gerenciados pelo hook useSectorContent
 
   const fetchGroups = useCallback(async () => {
     try {
@@ -364,12 +346,15 @@ export default function SectorDashboard() {
         }
       }
 
+      console.log('🚀 [checkUser] Iniciando carregamento de dados...');
+      
       await Promise.all([
         fetchSector(),
-        fetchSubsectors(),
-        fetchNews(),
-        fetchEvents()
+        fetchSubsectors()
+        // fetchNews e fetchEvents agora são gerenciados pelo hook useSectorContent
       ]);
+      
+      console.log('✅ [checkUser] Dados carregados');
       
       // Buscar grupos, usuários e locais de trabalho
       await fetchGroups();
@@ -380,8 +365,10 @@ export default function SectorDashboard() {
     };
 
     checkUser();
-  }, [sectorId, router, fetchSector, fetchSubsectors, fetchNews, fetchEvents, fetchGroups, fetchUsers, fetchWorkLocations]);
+  }, [sectorId, router, fetchSector, fetchSubsectors, fetchGroups, fetchUsers, fetchWorkLocations]);
 
+  // REMOVIDO: useEffects problemáticos que causavam race conditions
+  // Agora o gerenciamento de estado é feito pelo hook useSectorContent
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -560,14 +547,14 @@ export default function SectorDashboard() {
       console.log('🚀 Chamando API para salvar notícia...');
       
       const response = await fetch('/api/admin/sector-content', {
-        method: 'POST',
+        method: isEditing && currentNews.id ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: isEditing && currentNews.id ? 'update_news' : 'create_news',
+          type: 'sector_news',
+          id: isEditing && currentNews.id ? currentNews.id : undefined,
           data: isEditing && currentNews.id ? {
-            id: currentNews.id,
             ...currentNews,
             updated_at: new Date().toISOString()
           } : {
@@ -595,12 +582,8 @@ export default function SectorDashboard() {
       console.log('🔷🔷🔷 FIM DO PROCESSO - SUCESSO 🔷🔷🔷\n');
       
       setIsNewsModalOpen(false);
-      // Forçar recarregamento imediato e depois de um delay
-      fetchNews(); // Busca imediata
-      setTimeout(() => {
-        console.log('🔄 Recarregando lista de notícias novamente...');
-        fetchNews(); // Segunda busca para garantir
-      }, 1000);
+      // Atualizar lista usando o hook
+      await refreshContent();
     } catch (error: any) {
       console.error('💥💥💥 ERRO CRÍTICO:', error);
       console.error('Stack:', error?.stack);
@@ -614,16 +597,8 @@ export default function SectorDashboard() {
       return;
     }
     
-    try {
-      await supabase
-        .from('sector_news')
-        .delete()
-        .eq('id', id);
-      
-      fetchNews();
-    } catch (error) {
-      console.error('Erro ao excluir notícia:', error);
-    }
+    // Usar o método do hook que já atualiza o estado automaticamente
+    await deleteNewsItem(id);
   };
   
   // Funções para eventos
@@ -683,14 +658,14 @@ export default function SectorDashboard() {
       console.log('🚀 Chamando API para salvar evento...');
       
       const response = await fetch('/api/admin/sector-content', {
-        method: 'POST',
+        method: isEditing && currentEvent.id ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: isEditing && currentEvent.id ? 'update_event' : 'create_event',
+          type: 'sector_events',
+          id: isEditing && currentEvent.id ? currentEvent.id : undefined,
           data: isEditing && currentEvent.id ? {
-            id: currentEvent.id,
             ...currentEvent,
             updated_at: new Date().toISOString()
           } : {
@@ -718,7 +693,7 @@ export default function SectorDashboard() {
       console.log('🎯🎯🎯 FIM DO PROCESSO - SUCESSO 🎯🎯🎯\n');
       
       setIsEventModalOpen(false);
-      fetchEvents();
+      await refreshContent();
     } catch (error: any) {
       console.error('💥💥💥 ERRO CRÍTICO:', error);
       console.error('Stack:', error?.stack);
@@ -732,16 +707,8 @@ export default function SectorDashboard() {
       return;
     }
     
-    try {
-      await supabase
-        .from('sector_events')
-        .delete()
-        .eq('id', id);
-      
-      fetchEvents();
-    } catch (error) {
-      console.error('Erro ao excluir evento:', error);
-    }
+    // Usar o método do hook que já atualiza o estado automaticamente
+    await deleteEventItem(id);
   };
 
   const formatDate = (dateStr: string) => {
@@ -1236,13 +1203,24 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Notícias do Setor</h2>
-              <Button
-                onClick={() => handleOpenNewsModal()}
-                variant="primary"
-                size="md"
-              >
-                + Nova Notícia
-              </Button>
+              <div className="flex items-center space-x-4">
+                {/* Botão toggle limpo e eficiente */}
+                <ToggleDraftsButton
+                  showDrafts={showDrafts}
+                  draftCount={totalDraftNewsCount}
+                  onToggle={toggleDrafts}
+                  isLoading={contentLoading}
+                  type="news"
+                />
+                
+                <Button
+                  onClick={() => handleOpenNewsModal()}
+                  variant="primary"
+                  size="md"
+                >
+                  + Nova Notícia
+                </Button>
+              </div>
             </div>
 
             {news.length === 0 ? (
@@ -1252,8 +1230,14 @@ export default function SectorDashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-2-2h-2" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma notícia cadastrada</h3>
-                <p className="text-gray-500">Crie a primeira notícia para este setor.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {showDrafts ? 'Nenhuma notícia cadastrada' : 'Nenhuma notícia publicada'}
+                </h3>
+                <p className="text-gray-500">
+                  {showDrafts 
+                    ? 'Crie a primeira notícia para este setor.' 
+                    : 'Não há notícias publicadas para este setor.'}
+                </p>
               </div>
             ) : (
               <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
@@ -1312,13 +1296,23 @@ export default function SectorDashboard() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Eventos do Setor</h2>
-              <Button
-                onClick={() => handleOpenEventModal()}
-                variant="primary"
-                size="md"
-              >
-                + Novo Evento
-              </Button>
+              <div className="flex items-center space-x-4">
+                {/* Botão toggle limpo e eficiente para eventos */}
+                <ToggleDraftsButton
+                  showDrafts={showDrafts}
+                  draftCount={totalDraftEventsCount}
+                  onToggle={toggleDrafts}
+                  isLoading={contentLoading}
+                  type="events"
+                />
+                <Button
+                  onClick={() => handleOpenEventModal()}
+                  variant="primary"
+                  size="md"
+                >
+                  + Novo Evento
+                </Button>
+              </div>
             </div>
 
             {events.length === 0 ? (
@@ -1328,8 +1322,14 @@ export default function SectorDashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum evento cadastrado</h3>
-                <p className="text-gray-500">Crie o primeiro evento para este setor.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {showDrafts ? 'Nenhum evento cadastrado' : 'Nenhum evento publicado'}
+                </h3>
+                <p className="text-gray-500">
+                  {showDrafts 
+                    ? 'Crie o primeiro evento para este setor.' 
+                    : 'Não há eventos publicados para este setor.'}
+                </p>
               </div>
             ) : (
               <div className="bg-white rounded-md border border-gray-100 overflow-hidden">

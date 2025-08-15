@@ -33,6 +33,7 @@ interface SubsectorNews {
   title: string;
   summary: string;
   created_at: string;
+  is_published?: boolean;
 }
 
 interface SubsectorEvent {
@@ -42,6 +43,7 @@ interface SubsectorEvent {
   location?: string;
   start_date: string;
   end_date?: string;
+  is_published?: boolean;
 }
 
 interface ErrorState {
@@ -59,6 +61,8 @@ export default function SubsectorDetailsPage() {
   const [events, setEvents] = useState<SubsectorEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<ErrorState>({ hasError: false, message: '' });
+  const [showDrafts, setShowDrafts] = useState(true); // Mostrar rascunhos por padrão para admins
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const fetchSubsector = useCallback(async () => {
     const { data, error } = await supabase
@@ -89,11 +93,19 @@ export default function SubsectorDetailsPage() {
   }, [subsectorId]);
 
   const fetchNews = useCallback(async () => {
-    const { data, error } = await supabase
+    // Construir query base
+    let query = supabase
       .from('subsector_news')
-      .select('id, title, summary, created_at')
-      .eq('subsector_id', subsectorId)
-      .eq('is_published', true)
+      .select('id, title, summary, created_at, is_published')
+      .eq('subsector_id', subsectorId);
+    
+    // Aplicar filtro de publicação baseado em isAdmin e showDrafts
+    if (!isAdmin || !showDrafts) {
+      query = query.eq('is_published', true);
+    }
+    
+    // Executar query com ordenação e limite
+    const { data, error } = await query
       .order('created_at', { ascending: false })
       .limit(3);
 
@@ -102,14 +114,22 @@ export default function SubsectorDetailsPage() {
     }
     
     setNews(data || []);
-  }, [subsectorId]);
+  }, [subsectorId, isAdmin, showDrafts]);
 
   const fetchEvents = useCallback(async () => {
-    const { data, error } = await supabase
+    // Construir query base
+    let query = supabase
       .from('subsector_events')
-      .select('id, title, description, location, start_date, end_date')
-      .eq('subsector_id', subsectorId)
-      .eq('is_published', true)
+      .select('id, title, description, location, start_date, end_date, is_published')
+      .eq('subsector_id', subsectorId);
+    
+    // Aplicar filtro de publicação baseado em isAdmin e showDrafts
+    if (!isAdmin || !showDrafts) {
+      query = query.eq('is_published', true);
+    }
+    
+    // Aplicar filtro de data futura e ordenação
+    const { data, error } = await query
       .gte('start_date', new Date().toISOString())
       .order('start_date', { ascending: true })
       .limit(3);
@@ -119,7 +139,7 @@ export default function SubsectorDetailsPage() {
     }
     
     setEvents(data || []);
-  }, [subsectorId]);
+  }, [subsectorId, isAdmin, showDrafts]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -127,6 +147,20 @@ export default function SubsectorDetailsPage() {
       
       try {
         setError({ hasError: false, message: '' });
+        
+        // Verificar se o usuário é admin
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', userData.user.id)
+            .single();
+          
+          const userIsAdmin = profileData?.role === 'admin' || profileData?.role === 'sector_admin';
+          setIsAdmin(userIsAdmin);
+        }
+        
         await Promise.all([
           fetchSubsector(),
           fetchNews(),
@@ -324,15 +358,37 @@ export default function SubsectorDetailsPage() {
               aria-labelledby="recent-news-heading"
             >
               <div className="p-6 border-b border-cresol-gray-light">
-                <h2 id="recent-news-heading" className="text-xl font-semibold text-cresol-gray-dark">
-                  Notícias Recentes
-                </h2>
+                <div className="flex justify-between items-center">
+                  <h2 id="recent-news-heading" className="text-xl font-semibold text-cresol-gray-dark">
+                    Notícias Recentes
+                  </h2>
+                  
+                  {/* Toggle para mostrar/ocultar rascunhos - apenas para admins */}
+                  {isAdmin && (
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showDrafts}
+                        onChange={(e) => setShowDrafts(e.target.checked)}
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-cresol-gray">
+                        Mostrar rascunhos
+                      </span>
+                      <span className="ml-2 text-xs text-cresol-gray-light">
+                        ({news.filter(n => !n.is_published).length} rascunhos)
+                      </span>
+                    </label>
+                  )}
+                </div>
               </div>
               <div className="p-6">
                 {news.length === 0 ? (
                   <div className="text-center py-8" role="status">
                     <p className="text-cresol-gray">
-                      Nenhuma notícia publicada ainda.
+                      {isAdmin && showDrafts 
+                        ? 'Nenhuma notícia cadastrada para este sub-setor.'
+                        : 'Nenhuma notícia publicada ainda.'}
                     </p>
                   </div>
                 ) : (
@@ -344,12 +400,19 @@ export default function SubsectorDetailsPage() {
                         role="listitem"
                         aria-labelledby={`news-title-${index}`}
                       >
-                        <h3 
-                          id={`news-title-${index}`}
-                          className="font-semibold text-cresol-gray-dark mb-2"
-                        >
-                          {article.title}
-                        </h3>
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 
+                            id={`news-title-${index}`}
+                            className="font-semibold text-cresol-gray-dark"
+                          >
+                            {article.title}
+                          </h3>
+                          {article.is_published === false && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800 ml-2">
+                              Rascunho
+                            </span>
+                          )}
+                        </div>
                         <p className="text-cresol-gray text-sm mb-2">
                           {article.summary}
                         </p>
@@ -372,15 +435,37 @@ export default function SubsectorDetailsPage() {
               aria-labelledby="upcoming-events-heading"
             >
               <div className="p-6 border-b border-cresol-gray-light">
-                <h2 id="upcoming-events-heading" className="text-xl font-semibold text-cresol-gray-dark">
-                  Próximos Eventos
-                </h2>
+                <div className="flex justify-between items-center">
+                  <h2 id="upcoming-events-heading" className="text-xl font-semibold text-cresol-gray-dark">
+                    Próximos Eventos
+                  </h2>
+                  
+                  {/* Toggle para mostrar/ocultar rascunhos - apenas para admins */}
+                  {isAdmin && (
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showDrafts}
+                        onChange={(e) => setShowDrafts(e.target.checked)}
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-cresol-gray">
+                        Mostrar rascunhos
+                      </span>
+                      <span className="ml-2 text-xs text-cresol-gray-light">
+                        ({events.filter(e => !e.is_published).length} rascunhos)
+                      </span>
+                    </label>
+                  )}
+                </div>
               </div>
               <div className="p-6">
                 {events.length === 0 ? (
                   <div className="text-center py-8" role="status">
                     <p className="text-cresol-gray">
-                      Nenhum evento programado.
+                      {isAdmin && showDrafts 
+                        ? 'Nenhum evento cadastrado para este sub-setor.'
+                        : 'Nenhum evento programado.'}
                     </p>
                   </div>
                 ) : (
@@ -392,12 +477,19 @@ export default function SubsectorDetailsPage() {
                         role="listitem"
                         aria-labelledby={`event-title-${index}`}
                       >
-                        <h3 
-                          id={`event-title-${index}`}
-                          className="font-semibold text-cresol-gray-dark mb-2"
-                        >
-                          {event.title}
-                        </h3>
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 
+                            id={`event-title-${index}`}
+                            className="font-semibold text-cresol-gray-dark"
+                          >
+                            {event.title}
+                          </h3>
+                          {event.is_published === false && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800 ml-2">
+                              Rascunho
+                            </span>
+                          )}
+                        </div>
                         <p className="text-cresol-gray text-sm mb-3">
                           {event.description}
                         </p>

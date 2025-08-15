@@ -53,6 +53,9 @@ export default function SectorContentManagement() {
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [activeTab, setActiveTab] = useState('news');
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [showDrafts, setShowDrafts] = useState(true); // Mostrar rascunhos por padrão para admins
+  const [totalDraftNewsCount, setTotalDraftNewsCount] = useState(0); // Contador total de rascunhos de notícias
+  const [totalDraftEventsCount, setTotalDraftEventsCount] = useState(0); // Contador total de rascunhos de eventos
   
   // Cliente Supabase autenticado
   const supabase = useSupabaseClient();
@@ -98,10 +101,30 @@ export default function SectorContentManagement() {
   }, [sectorId, supabase]);
 
   const fetchNews = useCallback(async () => {
-    const { data, error } = await supabase
+    // Primeiro, buscar TODAS as notícias para contar os rascunhos totais
+    const { data: allNews } = await supabase
       .from('sector_news')
       .select('*')
-      .eq('sector_id', sectorId)
+      .eq('sector_id', sectorId);
+    
+    if (allNews) {
+      const totalDrafts = allNews.filter(n => !n.is_published).length;
+      setTotalDraftNewsCount(totalDrafts);
+    }
+    
+    // Construir query base
+    let query = supabase
+      .from('sector_news')
+      .select('*')
+      .eq('sector_id', sectorId);
+    
+    // Aplicar filtro de publicação baseado em showDrafts
+    if (!showDrafts) {
+      query = query.eq('is_published', true);
+    }
+    
+    // Executar query com ordenação
+    const { data, error } = await query
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -110,13 +133,33 @@ export default function SectorContentManagement() {
     }
     
     setNews(data || []);
-  }, [sectorId, supabase]);
+  }, [sectorId, supabase, showDrafts]);
 
   const fetchEvents = useCallback(async () => {
-    const { data, error } = await supabase
+    // Primeiro, buscar TODOS os eventos para contar os rascunhos totais
+    const { data: allEvents } = await supabase
       .from('sector_events')
       .select('*')
-      .eq('sector_id', sectorId)
+      .eq('sector_id', sectorId);
+    
+    if (allEvents) {
+      const totalDrafts = allEvents.filter(e => !e.is_published).length;
+      setTotalDraftEventsCount(totalDrafts);
+    }
+    
+    // Construir query base
+    let query = supabase
+      .from('sector_events')
+      .select('*')
+      .eq('sector_id', sectorId);
+    
+    // Aplicar filtro de publicação baseado em showDrafts
+    if (!showDrafts) {
+      query = query.eq('is_published', true);
+    }
+    
+    // Executar query com ordenação
+    const { data, error } = await query
       .order('start_date', { ascending: true });
     
     if (error) {
@@ -125,7 +168,7 @@ export default function SectorContentManagement() {
     }
     
     setEvents(data || []);
-  }, [sectorId, supabase]);
+  }, [sectorId, supabase, showDrafts]);
 
   // Verificação de autenticação com novo hook
   useEffect(() => {
@@ -174,6 +217,16 @@ export default function SectorContentManagement() {
 
     checkAuthAndLoadData();
   }, [isAuthenticated, authLoading, profile, user, sectorId, router, fetchEvents, fetchNews, fetchSector, supabase]);
+
+  // useEffect adicional para monitorar mudanças em showDrafts
+  useEffect(() => {
+    // Só executar se já estivermos autorizados e tivermos um sectorId
+    if (isAuthorized && sectorId && !loading) {
+      console.log('🔄 showDrafts mudou para:', showDrafts);
+      fetchNews();
+      fetchEvents();
+    }
+  }, [showDrafts, isAuthorized, sectorId, loading, fetchNews, fetchEvents]);
 
   const handleNewsImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -678,17 +731,35 @@ export default function SectorContentManagement() {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Notícias do Setor</h3>
-                <button
-                  onClick={() => {
-                    setNewsForm({ id: '', title: '', summary: '', content: '', is_published: true, image_url: '' });
-                    setNewsImageFile(null);
-                    setNewsImagePreview(null);
-                    setShowNewsForm(true);
-                  }}
-                  className="bg-primary text-white px-3 py-1 rounded-md hover:bg-primary-dark text-sm"
-                >
-                  Adicionar Notícia
-                </button>
+                <div className="flex items-center space-x-4">
+                  {/* Botão funcional para mostrar/ocultar rascunhos */}
+                  <button
+                    onClick={async () => {
+                      const newShowDrafts = !showDrafts;
+                      console.log(`🔄 Alternando para: ${newShowDrafts ? 'Mostrar' : 'Ocultar'} rascunhos`);
+                      setShowDrafts(newShowDrafts);
+                    }}
+                    className="flex items-center space-x-2 bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
+                  >
+                    <span>
+                      {showDrafts ? 'Ocultar Rascunhos' : 'Mostrar Rascunhos'}
+                    </span>
+                    <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded font-medium">
+                      {totalDraftNewsCount} {totalDraftNewsCount === 1 ? 'rascunho' : 'rascunhos'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setNewsForm({ id: '', title: '', summary: '', content: '', is_published: true, image_url: '' });
+                      setNewsImageFile(null);
+                      setNewsImagePreview(null);
+                      setShowNewsForm(true);
+                    }}
+                    className="bg-primary text-white px-3 py-1 rounded-md hover:bg-primary-dark text-sm"
+                  >
+                    Adicionar Notícia
+                  </button>
+                </div>
               </div>
               
               {showNewsForm && (
@@ -737,6 +808,26 @@ export default function SectorContentManagement() {
                         placeholder="Conteúdo detalhado da notícia"
                         required
                       />
+                    </div>
+                    
+                    <div className="mb-4">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="is_published_news"
+                          checked={newsForm.is_published}
+                          onChange={(e) => setNewsForm({ ...newsForm, is_published: e.target.checked })}
+                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                        />
+                        <label htmlFor="is_published_news" className="text-sm text-gray-700">
+                          Publicar imediatamente
+                        </label>
+                        {!newsForm.is_published && (
+                          <span className="text-xs text-yellow-600 ml-2">
+                            (Será salvo como rascunho)
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
                     <div className="mb-4">
@@ -804,21 +895,6 @@ export default function SectorContentManagement() {
                             Imagem selecionada. Use o botão ✕ para remover.
                           </p>
                         )}
-                      </div>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="is_published"
-                          checked={newsForm.is_published}
-                          onChange={(e) => setNewsForm({...newsForm, is_published: e.target.checked})}
-                          className="h-4 w-4 text-primary border-gray-300 rounded-sm"
-                        />
-                        <label htmlFor="is_published" className="ml-2 text-sm text-gray-700">
-                          Publicar imediatamente
-                        </label>
                       </div>
                     </div>
                     
@@ -910,15 +986,57 @@ export default function SectorContentManagement() {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Eventos do Setor</h3>
-                <button
-                  onClick={() => {
-                    setEventForm({ id: '', title: '', description: '', start_date: '', end_date: '', location: '', is_published: true });
-                    setShowEventForm(true);
-                  }}
-                  className="bg-primary text-white px-3 py-1 rounded-md hover:bg-primary-dark text-sm"
-                >
-                  Adicionar Evento
-                </button>
+                <div className="flex items-center space-x-4">
+                  {/* Botão funcional para mostrar/ocultar rascunhos de eventos */}
+                  <button
+                    onClick={async () => {
+                      const newShowDrafts = !showDrafts;
+                      console.log(`🔄 [Eventos] Alternando para: ${newShowDrafts ? 'Mostrar' : 'Ocultar'} rascunhos`);
+                      
+                      try {
+                        // Buscar eventos diretamente via Supabase
+                        let query = supabase
+                          .from('sector_events')
+                          .select('*')
+                          .eq('sector_id', sectorId);
+                        
+                        if (!newShowDrafts) {
+                          query = query.eq('is_published', true);
+                        }
+                        
+                        const { data, error } = await query.order('start_date', { ascending: true });
+                        
+                        if (error) {
+                          console.error('❌ Erro ao buscar eventos:', error);
+                          return;
+                        }
+                        
+                        console.log(`✅ Carregando ${data?.length || 0} eventos`);
+                        setEvents(data || []);
+                        setShowDrafts(newShowDrafts);
+                      } catch (error) {
+                        console.error('❌ Erro:', error);
+                      }
+                    }}
+                    className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-sm transition-colors"
+                  >
+                    <span>
+                      {showDrafts ? 'Ocultar Rascunhos' : 'Mostrar Rascunhos'}
+                    </span>
+                    <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded font-medium">
+                      {totalDraftEventsCount} {totalDraftEventsCount === 1 ? 'rascunho' : 'rascunhos'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEventForm({ id: '', title: '', description: '', start_date: '', end_date: '', location: '', is_published: true });
+                      setShowEventForm(true);
+                    }}
+                    className="bg-primary text-white px-3 py-1 rounded-md hover:bg-primary-dark text-sm"
+                  >
+                    Adicionar Evento
+                  </button>
+                </div>
               </div>
               
               {showEventForm && (
@@ -995,17 +1113,22 @@ export default function SectorContentManagement() {
                     </div>
                     
                     <div className="mb-4">
-                      <div className="flex items-center">
+                      <div className="flex items-center space-x-2">
                         <input
                           type="checkbox"
                           id="event_is_published"
                           checked={eventForm.is_published}
                           onChange={(e) => setEventForm({...eventForm, is_published: e.target.checked})}
-                          className="h-4 w-4 text-primary border-gray-300 rounded-sm"
+                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                         />
-                        <label htmlFor="event_is_published" className="ml-2 text-sm text-gray-700">
+                        <label htmlFor="event_is_published" className="text-sm text-gray-700">
                           Publicar imediatamente
                         </label>
+                        {!eventForm.is_published && (
+                          <span className="text-xs text-yellow-600 ml-2">
+                            (Será salvo como rascunho)
+                          </span>
+                        )}
                       </div>
                     </div>
                     

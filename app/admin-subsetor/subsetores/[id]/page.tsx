@@ -131,6 +131,9 @@ export default function SubsectorManagePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'events' | 'news' | 'systems' | 'groups' | 'messages'>('events');
+  const [showDrafts, setShowDrafts] = useState(true); // Mostrar rascunhos por padrão para admins
+  const [totalDraftNewsCount, setTotalDraftNewsCount] = useState(0); // Contador total de rascunhos de notícias
+  const [totalDraftEventsCount, setTotalDraftEventsCount] = useState(0); // Contador total de rascunhos de eventos
 
   // Estados para criação de novos itens
   const [showEventForm, setShowEventForm] = useState(false);
@@ -230,10 +233,30 @@ export default function SubsectorManagePage() {
 
   const fetchEvents = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      // Primeiro, buscar TODOS os eventos para contar os rascunhos totais
+      const { data: allEvents } = await supabase
+        .from('subsector_events')
+        .select('*')
+        .eq('subsector_id', subsectorId);
+      
+      if (allEvents) {
+        const totalDrafts = allEvents.filter(e => !e.is_published).length;
+        setTotalDraftEventsCount(totalDrafts);
+      }
+      
+      // Construir query base
+      let query = supabase
         .from('subsector_events')
         .select('id, title, description, start_date, is_published, is_featured')
-        .eq('subsector_id', subsectorId)
+        .eq('subsector_id', subsectorId);
+      
+      // Aplicar filtro de publicação baseado em showDrafts
+      if (!showDrafts) {
+        query = query.eq('is_published', true);
+      }
+      
+      // Executar query com ordenação
+      const { data, error } = await query
         .order('start_date', { ascending: false });
 
       if (error) throw error;
@@ -241,14 +264,34 @@ export default function SubsectorManagePage() {
     } catch (error) {
       console.error('Erro ao buscar eventos:', error);
     }
-  }, [subsectorId, supabase]);
+  }, [subsectorId, supabase, showDrafts]);
 
   const fetchNews = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      // Primeiro, buscar TODAS as notícias para contar os rascunhos totais
+      const { data: allNews } = await supabase
+        .from('subsector_news')
+        .select('*')
+        .eq('subsector_id', subsectorId);
+      
+      if (allNews) {
+        const totalDrafts = allNews.filter(n => !n.is_published).length;
+        setTotalDraftNewsCount(totalDrafts);
+      }
+      
+      // Construir query base
+      let query = supabase
         .from('subsector_news')
         .select('id, title, summary, is_published, is_featured, created_at')
-        .eq('subsector_id', subsectorId)
+        .eq('subsector_id', subsectorId);
+      
+      // Aplicar filtro de publicação baseado em showDrafts
+      if (!showDrafts) {
+        query = query.eq('is_published', true);
+      }
+      
+      // Executar query com ordenação
+      const { data, error } = await query
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -256,7 +299,7 @@ export default function SubsectorManagePage() {
     } catch (error) {
       console.error('Erro ao buscar notícias:', error);
     }
-  }, [subsectorId, supabase]);
+  }, [subsectorId, supabase, showDrafts]);
 
   const fetchSystems = useCallback(async () => {
     try {
@@ -380,6 +423,15 @@ export default function SubsectorManagePage() {
     }
   }, [profile, subsectorId, fetchSubsectorData]);
 
+  // useEffect adicional para monitorar mudanças em showDrafts
+  useEffect(() => {
+    // Só executar se já tivermos perfil e subsectorId
+    if (profile && subsectorId && !loading) {
+      console.log('🔄 showDrafts mudou para:', showDrafts);
+      fetchNews();
+      fetchEvents();
+    }
+  }, [showDrafts, profile, subsectorId, loading, fetchNews, fetchEvents]);
 
   const toggleEventPublished = async (eventId: string, currentStatus: boolean) => {
     try {
@@ -641,6 +693,44 @@ export default function SubsectorManagePage() {
     setNewsToDelete(null);
   };
 
+  const togglePublishStatusNews = async (id: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('subsector_news')
+        .update({ is_published: !currentStatus })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Erro ao alterar status de publicação:', error);
+        alert('Erro ao alterar status de publicação');
+      } else {
+        await fetchNews();
+      }
+    } catch (error) {
+      console.error('Erro ao alterar status:', error);
+      alert('Erro ao alterar status de publicação');
+    }
+  };
+
+  const togglePublishStatusEvent = async (id: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('subsector_events')
+        .update({ is_published: !currentStatus })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Erro ao alterar status de publicação:', error);
+        alert('Erro ao alterar status de publicação');
+      } else {
+        await fetchEvents();
+      }
+    } catch (error) {
+      console.error('Erro ao alterar status:', error);
+      alert('Erro ao alterar status de publicação');
+    }
+  };
+
   // Funções para grupos
   const handleOpenGroupModal = () => {
     setCurrentGroup({
@@ -894,12 +984,54 @@ export default function SubsectorManagePage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Eventos do Subsetor</h2>
-                          <button 
-              onClick={() => handleOpenEventModal()}
-              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
-            >
-              + Novo Evento
-            </button>
+              <div className="flex items-center space-x-4">
+                {/* Botão funcional para mostrar/ocultar rascunhos de eventos */}
+                <button
+                  onClick={async () => {
+                    const newShowDrafts = !showDrafts;
+                    console.log(`🔄 [Eventos] Alternando para: ${newShowDrafts ? 'Mostrar' : 'Ocultar'} rascunhos`);
+                    
+                    try {
+                      // Buscar eventos diretamente via Supabase
+                      let query = supabase
+                        .from('subsector_events')
+                        .select('id, title, description, start_date, is_published, is_featured')
+                        .eq('subsector_id', subsectorId);
+                      
+                      if (!newShowDrafts) {
+                        query = query.eq('is_published', true);
+                      }
+                      
+                      const { data, error } = await query.order('start_date', { ascending: false });
+                      
+                      if (error) {
+                        console.error('❌ Erro ao buscar eventos:', error);
+                        return;
+                      }
+                      
+                      console.log(`✅ Carregando ${data?.length || 0} eventos`);
+                      setEvents(data || []);
+                      setShowDrafts(newShowDrafts);
+                    } catch (error) {
+                      console.error('❌ Erro:', error);
+                    }
+                  }}
+                  className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-sm transition-colors"
+                >
+                  <span>
+                    {showDrafts ? 'Ocultar Rascunhos' : 'Mostrar Rascunhos'}
+                  </span>
+                  <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded font-medium">
+                    {totalDraftEventsCount} {totalDraftEventsCount === 1 ? 'rascunho' : 'rascunhos'}
+                  </span>
+                </button>
+                <button 
+                  onClick={() => handleOpenEventModal()}
+                  className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
+                >
+                  + Novo Evento
+                </button>
+              </div>
             </div>
 
             {events.length === 0 ? (
@@ -969,12 +1101,54 @@ export default function SubsectorManagePage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Notícias do Subsetor</h2>
-              <button 
-                onClick={() => handleOpenNewsModal()}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
-              >
-                + Nova Notícia
-              </button>
+              <div className="flex items-center space-x-4">
+                {/* Botão funcional para mostrar/ocultar rascunhos de notícias */}
+                <button
+                  onClick={async () => {
+                    const newShowDrafts = !showDrafts;
+                    console.log(`🔄 [Notícias] Alternando para: ${newShowDrafts ? 'Mostrar' : 'Ocultar'} rascunhos`);
+                    
+                    try {
+                      // Buscar notícias diretamente via Supabase
+                      let query = supabase
+                        .from('subsector_news')
+                        .select('id, title, summary, is_published, is_featured, created_at')
+                        .eq('subsector_id', subsectorId);
+                      
+                      if (!newShowDrafts) {
+                        query = query.eq('is_published', true);
+                      }
+                      
+                      const { data, error } = await query.order('created_at', { ascending: false });
+                      
+                      if (error) {
+                        console.error('❌ Erro ao buscar notícias:', error);
+                        return;
+                      }
+                      
+                      console.log(`✅ Carregando ${data?.length || 0} notícias`);
+                      setNews(data || []);
+                      setShowDrafts(newShowDrafts);
+                    } catch (error) {
+                      console.error('❌ Erro:', error);
+                    }
+                  }}
+                  className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-sm transition-colors"
+                >
+                  <span>
+                    {showDrafts ? 'Ocultar Rascunhos' : 'Mostrar Rascunhos'}
+                  </span>
+                  <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded font-medium">
+                    {totalDraftNewsCount} {totalDraftNewsCount === 1 ? 'rascunho' : 'rascunhos'}
+                  </span>
+                </button>
+                <button 
+                  onClick={() => handleOpenNewsModal()}
+                  className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
+                >
+                  + Nova Notícia
+                </button>
+              </div>
             </div>
 
             {news.length === 0 ? (
@@ -1013,6 +1187,23 @@ export default function SubsectorManagePage() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2 ml-4">
+                          <button 
+                            onClick={() => toggleNewsPublished(item.id, item.is_published)}
+                            className={`p-2 transition-colors ${
+                              item.is_published 
+                                ? 'text-gray-400 hover:text-yellow-600' 
+                                : 'text-gray-400 hover:text-green-600'
+                            }`}
+                            title={item.is_published ? 'Despublicar' : 'Publicar'}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              {item.is_published ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                              ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              )}
+                            </svg>
+                          </button>
                           <button 
                             onClick={() => handleOpenNewsModal(item)}
                             className="p-2 text-gray-400 hover:text-primary transition-colors"
@@ -1244,9 +1435,14 @@ export default function SubsectorManagePage() {
                     type="checkbox"
                     checked={currentEvent.is_published || false}
                     onChange={(e) => setCurrentEvent({...currentEvent, is_published: e.target.checked})}
-                    className="mr-2"
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mr-2"
                   />
-                  <span className="text-sm text-gray-700">Publicar</span>
+                  <span className="text-sm text-gray-700">Publicar imediatamente</span>
+                  {!currentEvent.is_published && (
+                    <span className="text-xs text-yellow-600 ml-2">
+                      (Será salvo como rascunho)
+                    </span>
+                  )}
                 </label>
               </div>
               <div className="flex justify-end space-x-3 pt-4">
@@ -1316,9 +1512,14 @@ export default function SubsectorManagePage() {
                     type="checkbox"
                     checked={currentNews.is_published || false}
                     onChange={(e) => setCurrentNews({...currentNews, is_published: e.target.checked})}
-                    className="mr-2"
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mr-2"
                   />
-                  <span className="text-sm text-gray-700">Publicar</span>
+                  <span className="text-sm text-gray-700">Publicar imediatamente</span>
+                  {!currentNews.is_published && (
+                    <span className="text-xs text-yellow-600 ml-2">
+                      (Será salvo como rascunho)
+                    </span>
+                  )}
                 </label>
               </div>
               <div className="flex justify-end space-x-3 pt-4">

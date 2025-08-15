@@ -26,6 +26,14 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - **Image Handling**: `react-easy-crop` for image cropping
 - **Date Handling**: `date-fns` for date formatting
 
+### Additional Key Dependencies
+- **Animation**: `framer-motion` for advanced animations and micro-interactions
+- **Virtualization**: `@tanstack/react-virtual` for efficient large list rendering 
+- **File Upload**: `tus-js-client` and `@tus/server` for resumable file uploads
+- **Image Processing**: Custom cropping utilities in `lib/imageUtils.ts`
+- **Date Handling**: `date-fns` for consistent date formatting across components
+- **HTTP Client**: `axios` for API requests with custom error handling
+
 ### Key Architecture Patterns
 
 #### Authentication & Authorization
@@ -96,6 +104,9 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
   - Custom gray scale and aliases
 - Responsive design with mobile-first approach
 - Component-specific styling patterns
+- Border radius standardization (primary: 6px/md)
+- Custom scrollbar utilities for consistent UX
+- Enhanced animation utilities (shimmer, pulse-slow, fade-in, slide-up, scale-in)
 
 ### Environment Configuration
 - Development runs on port 4000 (not default 3000)
@@ -138,24 +149,6 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - Verify RLS policies work correctly with different user roles
 - Test file upload functionality with proper error handling
 
-## Design Guidelines
-
-### UI/UX Principles
-- Não usar emogi nos componentes, e usar icones somente quando realmente necessario
-
-## Development Best Practices
-
-### Environment Management
-- sempre fechar a porta de desenvolvimento que for usada para teste
-
-### Additional Key Dependencies
-- **Animation**: `framer-motion` for advanced animations and micro-interactions
-- **Virtualization**: `@tanstack/react-virtual` for efficient large list rendering 
-- **File Upload**: `tus-js-client` and `@tus/server` for resumable file uploads
-- **Image Processing**: Custom cropping utilities in `lib/imageUtils.ts`
-- **Date Handling**: `date-fns` for consistent date formatting across components
-- **HTTP Client**: `axios` for API requests with custom error handling
-
 ### Video System Architecture
 - **Upload Types**: YouTube, Vimeo, and direct file uploads supported
 - **File Processing**: Thumbnail generation with `lib/thumbnail-generator.ts`
@@ -168,3 +161,30 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - **Virtual Scrolling**: For large datasets using `@tanstack/react-virtual`
 - **Caching**: Strategic caching for video thumbnails and economic indicators
 - **Bundle Optimization**: SWC minification enabled in `next.config.js`
+
+## Design Guidelines
+
+### UI/UX Principles
+- Não usar emoji nos componentes, e usar ícones somente quando realmente necessário
+- Manter consistência com o design system existente usando componentes padronizados
+- Priorizar simplicidade e clareza na interface
+
+## Development Best Practices
+
+### Environment Management
+- Sempre fechar a porta de desenvolvimento que for usada para teste
+- Usar porta 4000 para desenvolvimento local
+- Manter variáveis sensíveis fora do código-fonte
+
+### Code Organization
+- Componentes de página co-localizados com as páginas
+- Componentes compartilhados em `/app/components/`
+- Utilitários e helpers em `/lib/`
+- Tipos TypeScript em `/types/`
+- Constantes de design em `/lib/design-tokens/`
+
+# Important Instruction Reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.

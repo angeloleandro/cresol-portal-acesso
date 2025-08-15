@@ -64,6 +64,8 @@ export default function SetorDetalhesPage() {
   const [news, setNews] = useState<SectorNews[]>([]);
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [activeTab, setActiveTab] = useState('news');
+  const [showDrafts, setShowDrafts] = useState(true); // Mostrar rascunhos por padrão para admins
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const fetchSector = useCallback(async () => {
     const { data, error } = await supabase
@@ -97,11 +99,19 @@ export default function SetorDetalhesPage() {
   }, [sectorId]);
 
   const fetchNews = useCallback(async () => {
-    const { data, error } = await supabase
+    // Construir query base
+    let query = supabase
       .from('sector_news')
       .select('*')
-      .eq('sector_id', sectorId)
-      .eq('is_published', true)
+      .eq('sector_id', sectorId);
+    
+    // Aplicar filtro de publicação baseado em isAdmin e showDrafts
+    if (!isAdmin || !showDrafts) {
+      query = query.eq('is_published', true);
+    }
+    
+    // Executar query com ordenação
+    const { data, error } = await query
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -110,14 +120,22 @@ export default function SetorDetalhesPage() {
     }
     
     setNews(data || []);
-  }, [sectorId]);
+  }, [sectorId, isAdmin, showDrafts]);
 
   const fetchEvents = useCallback(async () => {
-    const { data, error } = await supabase
+    // Construir query base
+    let query = supabase
       .from('sector_events')
       .select('*')
-      .eq('sector_id', sectorId)
-      .eq('is_published', true)
+      .eq('sector_id', sectorId);
+    
+    // Aplicar filtro de publicação baseado em isAdmin e showDrafts
+    if (!isAdmin || !showDrafts) {
+      query = query.eq('is_published', true);
+    }
+    
+    // Executar query com ordenação
+    const { data, error } = await query
       .order('start_date', { ascending: true });
     
     if (error) {
@@ -126,7 +144,7 @@ export default function SetorDetalhesPage() {
     }
     
     setEvents(data || []);
-  }, [sectorId]);
+  }, [sectorId, isAdmin, showDrafts]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -138,6 +156,16 @@ export default function SetorDetalhesPage() {
       }
 
       setUser(userData.user);
+      
+      // Verificar se o usuário é admin
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userData.user.id)
+        .single();
+      
+      const userIsAdmin = profileData?.role === 'admin' || profileData?.role === 'sector_admin';
+      setIsAdmin(userIsAdmin);
 
       await Promise.all([
         fetchSector(),
@@ -275,9 +303,33 @@ export default function SetorDetalhesPage() {
         {/* Conteúdo da aba de Notícias */}
         {activeTab === 'news' && (
           <div id="news-panel" role="tabpanel" aria-labelledby="news-tab">
+            {/* Toggle para mostrar/ocultar rascunhos - apenas para admins */}
+            {isAdmin && (
+              <div className="mb-4 flex justify-end">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showDrafts}
+                    onChange={(e) => setShowDrafts(e.target.checked)}
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-cresol-gray">
+                    Mostrar rascunhos
+                  </span>
+                  <span className="ml-2 text-xs text-cresol-gray-light">
+                    ({news.filter(n => !n.is_published).length} rascunhos)
+                  </span>
+                </label>
+              </div>
+            )}
+            
             {news.length === 0 ? (
               <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
-                <p className="text-cresol-gray">Nenhuma notícia publicada para este setor.</p>
+                <p className="text-cresol-gray">
+                  {isAdmin && showDrafts 
+                    ? 'Nenhuma notícia cadastrada para este setor.'
+                    : 'Nenhuma notícia publicada para este setor.'}
+                </p>
               </div>
             ) : (
               <div className="space-y-6">
@@ -301,11 +353,18 @@ export default function SetorDetalhesPage() {
                         <span className="text-xs text-cresol-gray">
                           {formatDate(item.created_at)}
                         </span>
-                        {item.is_featured && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">
-                            Destaque
-                          </span>
-                        )}
+                        <div className="flex gap-2">
+                          {!item.is_published && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800">
+                              Rascunho
+                            </span>
+                          )}
+                          {item.is_featured && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">
+                              Destaque
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <h2 className="text-xl font-semibold text-cresol-gray mb-2">{item.title}</h2>
                       <p className="text-cresol-gray mb-4">{item.summary}</p>
@@ -328,9 +387,33 @@ export default function SetorDetalhesPage() {
         {/* Conteúdo da aba de Eventos */}
         {activeTab === 'events' && (
           <div id="events-panel" role="tabpanel" aria-labelledby="events-tab">
+            {/* Toggle para mostrar/ocultar rascunhos - apenas para admins */}
+            {isAdmin && (
+              <div className="mb-4 flex justify-end">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showDrafts}
+                    onChange={(e) => setShowDrafts(e.target.checked)}
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-cresol-gray">
+                    Mostrar rascunhos
+                  </span>
+                  <span className="ml-2 text-xs text-cresol-gray-light">
+                    ({events.filter(e => !e.is_published).length} rascunhos)
+                  </span>
+                </label>
+              </div>
+            )}
+            
             {events.length === 0 ? (
               <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
-                <p className="text-cresol-gray">Nenhum evento publicado para este setor.</p>
+                <p className="text-cresol-gray">
+                  {isAdmin && showDrafts 
+                    ? 'Nenhum evento cadastrado para este setor.'
+                    : 'Nenhum evento publicado para este setor.'}
+                </p>
               </div>
             ) : (
               <div className="space-y-6">
@@ -341,11 +424,18 @@ export default function SetorDetalhesPage() {
                   >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                       <h2 className="text-xl font-semibold text-cresol-gray">{item.title}</h2>
-                      {item.is_featured && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary mt-2 md:mt-0">
-                          Destaque
-                        </span>
-                      )}
+                      <div className="flex gap-2 mt-2 md:mt-0">
+                        {!item.is_published && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Rascunho
+                          </span>
+                        )}
+                        {item.is_featured && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">
+                            Destaque
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
                     <div className="flex flex-col md:flex-row md:items-center mb-4 text-sm text-cresol-gray">

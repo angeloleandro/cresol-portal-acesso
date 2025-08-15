@@ -321,10 +321,68 @@ export async function POST(request: NextRequest) {
         });
         break;
         
+      case 'update_news':
+        console.log('\n📨 [API] Caso: UPDATE_NEWS (fallback para compatibilidade)');
+        console.log('📨 [API] Tabela alvo: sector_news');
+        console.log('📨 [API] ID para atualização:', enrichedData.id);
+        
+        if (!enrichedData.id) {
+          return NextResponse.json(
+            { error: 'ID é obrigatório para atualização' },
+            { status: 400 }
+          );
+        }
+        
+        const { id: newsId, created_by: newsCreatedBy, created_at: newsCreatedAt, ...newsUpdateData } = enrichedData;
+        newsUpdateData.updated_at = new Date().toISOString();
+        
+        ({ data: result, error } = await adminClient
+          .from('sector_news')
+          .update(newsUpdateData)
+          .eq('id', newsId)
+          .select()
+          .single());
+          
+        if (error) {
+          console.error('\n❌❌❌ [API] ERRO NA ATUALIZAÇÃO SECTOR_NEWS:', error);
+        } else {
+          console.log('\n✅✅✅ [API] ATUALIZAÇÃO SECTOR_NEWS BEM-SUCEDIDA!');
+        }
+        break;
+        
+      case 'update_event':
+        console.log('\n📅 [API] Caso: UPDATE_EVENT (fallback para compatibilidade)');
+        console.log('📅 [API] Tabela alvo: sector_events');
+        console.log('📅 [API] ID para atualização:', enrichedData.id);
+        
+        if (!enrichedData.id) {
+          return NextResponse.json(
+            { error: 'ID é obrigatório para atualização' },
+            { status: 400 }
+          );
+        }
+        
+        const { id: eventId, created_by: eventCreatedBy, created_at: eventCreatedAt, ...eventUpdateData } = enrichedData;
+        eventUpdateData.updated_at = new Date().toISOString();
+        
+        ({ data: result, error } = await adminClient
+          .from('sector_events')
+          .update(eventUpdateData)
+          .eq('id', eventId)
+          .select()
+          .single());
+          
+        if (error) {
+          console.error('\n❌❌❌ [API] ERRO NA ATUALIZAÇÃO SECTOR_EVENTS:', error);
+        } else {
+          console.log('\n✅✅✅ [API] ATUALIZAÇÃO SECTOR_EVENTS BEM-SUCEDIDA!');
+        }
+        break;
+        
       default:
-        console.error('❌ [API POST] Tipo inválido:', type);
+        console.error('❌ [API POST] Tipo inválido:', operationType);
         return NextResponse.json(
-          { error: 'Tipo inválido', receivedType: type },
+          { error: 'Tipo inválido', receivedType: operationType },
           { status: 400 }
         );
     }
@@ -421,12 +479,15 @@ export async function PUT(request: NextRequest) {
     let result;
     let error;
     
-    // CORREÇÃO: Usar o cliente autenticado em vez do service role
-    console.log('🔑 [API PUT] Usando cliente autenticado com contexto do usuário...');
+    // CORREÇÃO: Usar o adminClient (SERVICE ROLE) para evitar problemas de RLS ao despublicar
+    console.log('🔑 [API PUT] Usando adminClient (SERVICE ROLE) para operação de UPDATE...');
+    
+    // Criar cliente admin para bypassar RLS (necessário para despublicação)
+    const adminClient = createAdminSupabaseClient();
     
     switch (type) {
       case 'sector_news':
-        ({ data: result, error } = await supabase
+        ({ data: result, error } = await adminClient
           .from('sector_news')
           .update(data)
           .eq('id', id)
@@ -435,7 +496,7 @@ export async function PUT(request: NextRequest) {
         break;
         
       case 'sector_events':
-        ({ data: result, error } = await supabase
+        ({ data: result, error } = await adminClient
           .from('sector_events')
           .update(data)
           .eq('id', id)
@@ -444,7 +505,7 @@ export async function PUT(request: NextRequest) {
         break;
         
       case 'subsector_news':
-        ({ data: result, error } = await supabase
+        ({ data: result, error } = await adminClient
           .from('subsector_news')
           .update(data)
           .eq('id', id)
@@ -453,7 +514,7 @@ export async function PUT(request: NextRequest) {
         break;
         
       case 'subsector_events':
-        ({ data: result, error } = await supabase
+        ({ data: result, error } = await adminClient
           .from('subsector_events')
           .update(data)
           .eq('id', id)
@@ -537,33 +598,36 @@ export async function DELETE(request: NextRequest) {
     
     let error;
     
-    // CORREÇÃO: Usar o cliente autenticado em vez do service role
-    console.log('🔑 [API DELETE] Usando cliente autenticado com contexto do usuário...');
+    // CORREÇÃO: Usar o adminClient (SERVICE ROLE) para operações de DELETE
+    console.log('🔑 [API DELETE] Usando adminClient (SERVICE ROLE) para operação de DELETE...');
+    
+    // Criar cliente admin para bypassar RLS
+    const adminClient = createAdminSupabaseClient();
     
     switch (type) {
       case 'sector_news':
-        ({ error } = await supabase
+        ({ error } = await adminClient
           .from('sector_news')
           .delete()
           .eq('id', id));
         break;
         
       case 'sector_events':
-        ({ error } = await supabase
+        ({ error } = await adminClient
           .from('sector_events')
           .delete()
           .eq('id', id));
         break;
         
       case 'subsector_news':
-        ({ error } = await supabase
+        ({ error } = await adminClient
           .from('subsector_news')
           .delete()
           .eq('id', id));
         break;
         
       case 'subsector_events':
-        ({ error } = await supabase
+        ({ error } = await adminClient
           .from('subsector_events')
           .delete()
           .eq('id', id));
