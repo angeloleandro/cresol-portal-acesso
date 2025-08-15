@@ -3,7 +3,7 @@
 // Delete Confirmation Modal Component
 // Modal de confirmação de exclusão de coleções - Portal Cresol
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Collection } from '@/lib/types/collections';
 import { formatCollection } from '@/lib/utils/collections';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
@@ -26,7 +26,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   const [confirmText, setConfirmText] = useState('');
 
   // Reset state when modal closes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isOpen) {
       setIsDeleting(false);
       setConfirmText('');

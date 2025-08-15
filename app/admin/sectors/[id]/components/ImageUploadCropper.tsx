@@ -1,6 +1,5 @@
 // Componente de upload e recorte de imagens
 
-import React from 'react';
 import Image from 'next/image';
 import Cropper from 'react-easy-crop';
 import { CropArea } from '../types/sector.types';

@@ -3,7 +3,6 @@
 // Collection Loading Components
 // Componentes de loading/skeleton para sistema de coleções
 
-import React from 'react';
 import { cn } from '@/lib/utils/cn';
 import { CSS_CLASSES } from '@/lib/constants/collections';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';

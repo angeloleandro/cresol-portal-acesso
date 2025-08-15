@@ -1,4 +1,3 @@
-import React from 'react';
 import { PriorityType, PriorityOption } from '../../types';
 
 interface PrioritySelectorProps {

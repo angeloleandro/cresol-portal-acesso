@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Icon, type IconName } from '@/app/components/icons';
 
 /**

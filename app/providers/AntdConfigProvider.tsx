@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { ConfigProvider } from 'antd';
 import type { ThemeConfig } from 'antd';
 import ptBR from 'antd/locale/pt_BR';

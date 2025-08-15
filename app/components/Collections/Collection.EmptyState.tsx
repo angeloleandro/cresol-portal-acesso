@@ -3,7 +3,6 @@
 // Collection Empty State Component
 // Estado vazio para diferentes contextos do sistema de coleções
 
-import React from 'react';
 import { CollectionEmptyStateProps } from './Collection.types';
 import { cn } from '@/lib/utils/cn';
 import Icon from '@/app/components/icons/Icon';

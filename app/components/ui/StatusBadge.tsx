@@ -1,4 +1,3 @@
-import React from 'react';
 
 interface StatusBadgeProps {
   type: 'priority' | 'notification-type' | 'status';

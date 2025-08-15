@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Flex, Spin, ConfigProvider } from 'antd';
 import type { SpinProps } from 'antd';
 

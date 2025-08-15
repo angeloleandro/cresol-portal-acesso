@@ -304,7 +304,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
               id="newUserName"
               type="text"
               value={newUserName}
-              onChange={(e) => setNewUserName(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewUserName(e.target.value)}
               required
               placeholder="Nome completo do usuário"
               startIcon="user"
@@ -321,7 +321,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
               id="newUserEmail"
               type="email"
               value={newUserEmail}
-              onChange={(e) => setNewUserEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewUserEmail(e.target.value)}
               required
               placeholder="email@cresol.com.br"
               startIcon="mail"

@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const NotificationHistory: React.FC<{ variant?: 'default' | 'minimal' }> = ({ variant = 'default' }) => {
   const isMinimal = variant === 'minimal';

@@ -3,7 +3,6 @@
 // Collection Card Component
 // Card individual para exibição de coleção - Portal Cresol
 
-import React from 'react';
 import Image from 'next/image';
 import { CollectionCardProps } from './Collection.types';
 import { formatCollection } from '@/lib/utils/collections';

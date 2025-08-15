@@ -6,7 +6,7 @@
  * Replica funcionalidade completa da galeria de vídeos para coleções
  */
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
 import { Collection } from '@/lib/types/collections';

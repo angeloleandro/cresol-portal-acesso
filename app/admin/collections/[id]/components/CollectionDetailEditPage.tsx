@@ -3,7 +3,7 @@
 // Collection Detail Edit Page Component
 // Interface completa para visualizar e editar coleções individuais
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';

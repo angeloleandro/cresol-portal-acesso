@@ -1,4 +1,3 @@
-import React from 'react';
 import { User, NotificationGroup } from '../../types';
 
 interface RecipientsSelectorProps {

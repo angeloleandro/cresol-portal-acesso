@@ -1,4 +1,3 @@
-import React from 'react';
 // Heroicons imports
 import {
   ArrowLeftIcon,

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card } from '../../design-system/components/Card';
 import { PriorityBadge } from '../../design-system/components/PriorityBadge';
 import { PriorityType } from '../../types';

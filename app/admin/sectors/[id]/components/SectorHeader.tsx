@@ -1,6 +1,5 @@
 // Componente de cabeçalho do setor com breadcrumb e ações
 
-import React from 'react';
 import Link from 'next/link';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { Sector } from '../types/sector.types';

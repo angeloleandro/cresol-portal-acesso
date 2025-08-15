@@ -48,7 +48,7 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
                   type="text"
                   required
                   value={notificationForm.title}
-                  onChange={(e) => handleFormChange('title', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFormChange('title', e.target.value)}
                   placeholder="Ex: Reunião Geral de Cooperados"
                   startIcon="file-text"
                   variant="outline"
@@ -62,7 +62,7 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
                 </label>
                 <select
                   value={notificationForm.type}
-                  onChange={(e) => handleFormChange('type', e.target.value as NotificationType)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleFormChange('type', e.target.value as NotificationType)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary"
                 >
                   <option value="message">📝 Mensagem</option>
@@ -88,7 +88,7 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
                 <StandardizedInput
                   type="datetime-local"
                   value={notificationForm.expiresAt}
-                  onChange={(e) => handleFormChange('expiresAt', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFormChange('expiresAt', e.target.value)}
                   startIcon="calendar"
                   variant="outline"
                   size="md"
@@ -110,7 +110,7 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
                 required
                 rows={5}
                 value={notificationForm.message}
-                onChange={(e) => handleFormChange('message', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleFormChange('message', e.target.value)}
                 placeholder="Digite aqui o conteúdo completo da notificação que será enviada aos usuários..."
                 variant="outline"
                 size="md"

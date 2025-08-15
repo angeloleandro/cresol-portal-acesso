@@ -3,7 +3,7 @@
 // Collection Detail Component
 // Visualização detalhada de coleção com itens - Portal Cresol
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { CollectionDetailProps } from './Collection.types';
 import { CollectionWithItems } from '@/lib/types/collections';

@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo } from 'react';
+import type { FC, ReactNode } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   Dropdown,
   DropdownTrigger,
@@ -11,7 +12,7 @@ import { Icon } from '@/app/components/icons/Icon';
 interface SelectOption {
   value: string;
   label: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
 }
 
 interface SelectProps {
@@ -27,7 +28,7 @@ interface SelectProps {
   className?: string;
 }
 
-export const Select: React.FC<SelectProps> = ({
+export const Select: FC<SelectProps> = ({
   label,
   value,
   onChange,

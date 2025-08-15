@@ -3,7 +3,7 @@
 // Bulk Upload Component
 // Upload múltiplo de arquivos com drag & drop e progress tracking - Portal Cresol
 
-import React, { useState, useRef, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Collection } from '@/lib/types/collections';
 import CollectionLoading from '@/app/components/Collections/Collection.Loading';
 import { cn } from '@/lib/utils/cn';
@@ -99,7 +99,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
   const allSupportedTypes = [...imageTypes, ...videoTypes];
 
   // Reset state when modal opens/closes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isOpen) {
       setFiles([]);
       setIsUploading(false);

@@ -3,7 +3,8 @@
 // Collections Admin Manager
 // Interface administrativa principal para coleções - Portal Cresol
 
-import React, { useState, useEffect } from 'react';
+import type React from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import CollectionList from '@/app/components/Collections/Collection.List';
 import CollectionModal from './CollectionModal';

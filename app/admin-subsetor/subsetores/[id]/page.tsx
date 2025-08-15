@@ -1,1849 +1,266 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import OptimizedImage from '@/app/components/OptimizedImage';
-import Link from 'next/link';
-import Cropper from 'react-easy-crop';
-import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import { useSupabaseClient } from '@/hooks/useSupabaseClient';
 import { useAuth } from '@/app/providers/AuthProvider';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
-interface Profile {
-  id: string;
-  role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
-  full_name: string;
-  email: string;
-}
+// Types
+import { TabType } from './types/subsector.types';
 
-interface Subsector {
-  id: string;
-  name: string;
-  description?: string;
-  sector_id: string;
-  sector_name?: string;
-}
+// Hooks
+import { useSubsectorData } from './hooks/useSubsectorData';
+import { useEventManagement } from './hooks/useEventManagement';
+import { useNewsManagement } from './hooks/useNewsManagement';
+import { useGroupManagement } from './hooks/useGroupManagement';
+import { useMessageManagement } from './hooks/useMessageManagement';
 
-interface SubsectorEvent {
-  id: string;
-  title: string;
-  description: string;
-  start_date: string;
-  is_published: boolean;
-  is_featured: boolean;
-}
+// Components
+import { SubsectorHeader } from './components/SubsectorHeader';
+import { TabNavigation } from './components/TabNavigation';
 
-interface SubsectorNews {
-  id: string;
-  title: string;
-  summary: string;
-  content?: string;
-  is_published: boolean;
-  is_featured: boolean;
-  created_at: string;
-}
+// Tab Components
+import { EventsTab } from './components/tabs/EventsTab';
+import { NewsTab } from './components/tabs/NewsTab';
+import { SystemsTab } from './components/tabs/SystemsTab';
+import { GroupsTab } from './components/tabs/GroupsTab';
+import { MessagesTab } from './components/tabs/MessagesTab';
 
-interface System {
-  id: string;
-  name: string;
-  description?: string;
-  url: string;
-  icon?: string;
-}
+// Modal Components
+import { EventModal } from './components/modals/EventModal';
+import { NewsModal } from './components/modals/NewsModal';
+import { GroupModal } from './components/modals/GroupModal';
+import { MessageModal } from './components/modals/MessageModal';
 
-// Função auxiliar para criar imagem
-const createImage = (url: string): Promise<HTMLImageElement> =>
-  new Promise((resolve, reject) => {
-    const image = new HTMLImageElement();
-    image.addEventListener('load', () => resolve(image));
-    image.addEventListener('error', (error: any) => reject(error));
-    image.setAttribute('crossOrigin', 'anonymous');
-    image.src = url;
-  });
-
-// Função para obter o recorte final da imagem
-async function getCroppedImg(
-  imageSrc: string,
-  pixelCrop: { x: number; y: number; width: number; height: number },
-  rotation = 0
-): Promise<{ file: Blob; url: string }> {
-  const image = await createImage(imageSrc);
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-
-  if (!ctx) {
-    throw new Error('No 2d context');
-  }
-
-  const maxSize = Math.max(image.width, image.height);
-  const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
-
-  // Definir as dimensões do canvas para a área de recorte
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
-
-  // Translação para permitir rotação da imagem
-  ctx.translate(canvas.width / 2, canvas.height / 2);
-  ctx.rotate((rotation * Math.PI) / 180);
-  ctx.translate(-canvas.width / 2, -canvas.height / 2);
-
-  // Desenhar a imagem recortada no canvas
-  ctx.drawImage(
-    image,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    pixelCrop.width,
-    pixelCrop.height
-  );
-
-  // Criar um blob do canvas
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        throw new Error('Canvas is empty');
-      }
-      const url = URL.createObjectURL(blob);
-      resolve({ file: blob, url });
-    }, 'image/jpeg', 0.95);
-  });
-}
-
-export default function SubsectorManagePage() {
+export default function SubsectorManagement() {
   const router = useRouter();
   const params = useParams();
+  const { profile } = useAuth();
   const subsectorId = params?.id as string;
-  
-  // Cliente Supabase autenticado
-  const supabase = useSupabaseClient();
-  const { user, profile: authProfile, isAuthenticated } = useAuth();
 
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [subsector, setSubsector] = useState<Subsector | null>(null);
-  const [events, setEvents] = useState<SubsectorEvent[]>([]);
-  const [news, setNews] = useState<SubsectorNews[]>([]);
-  const [systems, setSystems] = useState<System[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'events' | 'news' | 'systems' | 'groups' | 'messages'>('events');
-  const [showDrafts, setShowDrafts] = useState(true); // Mostrar rascunhos por padrão para admins
-  const [totalDraftNewsCount, setTotalDraftNewsCount] = useState(0); // Contador total de rascunhos de notícias
-  const [totalDraftEventsCount, setTotalDraftEventsCount] = useState(0); // Contador total de rascunhos de eventos
-
-  // Estados para criação de novos itens
-  const [showEventForm, setShowEventForm] = useState(false);
-  const [showNewsForm, setShowNewsForm] = useState(false);
-  const [showSystemForm, setShowSystemForm] = useState(false);
-
-  // Estados para modais
-  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
-  const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDeleteEventConfirmOpen, setIsDeleteEventConfirmOpen] = useState(false);
-  const [isDeleteNewsConfirmOpen, setIsDeleteNewsConfirmOpen] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState<SubsectorEvent | null>(null);
-  const [newsToDelete, setNewsToDelete] = useState<SubsectorNews | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  
-  // Estados para dados dos modais
-  const [currentEvent, setCurrentEvent] = useState<Partial<SubsectorEvent>>({});
-  const [currentNews, setCurrentNews] = useState<Partial<SubsectorNews>>({});
-
-  // Estados para upload de imagens
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [originalImage, setOriginalImage] = useState<string | null>(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [rotation, setRotation] = useState(0);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
-  const [isEditingImage, setIsEditingImage] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Estados para grupos
-  const [groups, setGroups] = useState<any[]>([]);
-  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
-  const [currentGroup, setCurrentGroup] = useState({
-    name: '',
-    description: '',
-    members: [] as string[]
-  });
-
-  // Estados para mensagens
-  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-  const [currentMessage, setCurrentMessage] = useState({
-    title: '',
-    message: '',
-    type: 'general',
-    groups: [] as string[],
-    users: [] as string[]
-  });
-
-  // Estados para seleção de usuários
-  const [allUsers, setAllUsers] = useState<any[]>([]);
-  const [workLocations, setWorkLocations] = useState<any[]>([]);
-  
-  // Estados para filtros de usuários
-  const [userSearchTerm, setUserSearchTerm] = useState('');
-  const [userLocationFilter, setUserLocationFilter] = useState('all');
-
-  const fetchProfile = useCallback(async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, role, full_name, email')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        setProfile(data);
-        
-        // Verificar se o usuário tem permissão para acessar esta página
-        if (data.role !== 'subsector_admin' && data.role !== 'admin' && data.role !== 'sector_admin') {
-          router.replace('/home');
-          return;
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao buscar perfil:', error);
-      setError('Erro ao carregar perfil do usuário');
-    }
-  }, [router, supabase]);
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-
-      await fetchProfile(data.user.id);
-    };
-
-    checkUser();
-  }, [router, fetchProfile, supabase]);
-
-  const fetchEvents = useCallback(async () => {
-    try {
-      // Primeiro, buscar TODOS os eventos para contar os rascunhos totais
-      const { data: allEvents } = await supabase
-        .from('subsector_events')
-        .select('*')
-        .eq('subsector_id', subsectorId);
-      
-      if (allEvents) {
-        const totalDrafts = allEvents.filter(e => !e.is_published).length;
-        setTotalDraftEventsCount(totalDrafts);
-      }
-      
-      // Construir query base
-      let query = supabase
-        .from('subsector_events')
-        .select('id, title, description, start_date, is_published, is_featured')
-        .eq('subsector_id', subsectorId);
-      
-      // Aplicar filtro de publicação baseado em showDrafts
-      if (!showDrafts) {
-        query = query.eq('is_published', true);
-      }
-      
-      // Executar query com ordenação
-      const { data, error } = await query
-        .order('start_date', { ascending: false });
-
-      if (error) throw error;
-      setEvents(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar eventos:', error);
-    }
-  }, [subsectorId, supabase, showDrafts]);
-
-  const fetchNews = useCallback(async () => {
-    try {
-      // Primeiro, buscar TODAS as notícias para contar os rascunhos totais
-      const { data: allNews } = await supabase
-        .from('subsector_news')
-        .select('*')
-        .eq('subsector_id', subsectorId);
-      
-      if (allNews) {
-        const totalDrafts = allNews.filter(n => !n.is_published).length;
-        setTotalDraftNewsCount(totalDrafts);
-      }
-      
-      // Construir query base
-      let query = supabase
-        .from('subsector_news')
-        .select('id, title, summary, is_published, is_featured, created_at')
-        .eq('subsector_id', subsectorId);
-      
-      // Aplicar filtro de publicação baseado em showDrafts
-      if (!showDrafts) {
-        query = query.eq('is_published', true);
-      }
-      
-      // Executar query com ordenação
-      const { data, error } = await query
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setNews(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar notícias:', error);
-    }
-  }, [subsectorId, supabase, showDrafts]);
-
-  const fetchSystems = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('systems')
-        .select('id, name, description, url, icon')
-        .eq('subsector_id', subsectorId)
-        .order('name');
-
-      if (error) throw error;
-      setSystems(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar sistemas:', error);
-    }
-  }, [subsectorId, supabase]);
-
-  const fetchGroups = useCallback(async () => {
-    try {
-      const response = await fetch('/api/notifications/groups');
-      const result = await response.json();
-      
-      if (result.groups) {
-        setGroups(result.groups.filter((group: any) => group.subsector_id === subsectorId));
-      }
-    } catch (error) {
-      console.error('Erro ao buscar grupos:', error);
-    }
-  }, [subsectorId]);
-
-  const fetchUsers = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, work_location_id')
-        .order('full_name');
-        
-      if (error) {
-        console.error('Erro ao buscar usuários:', error);
-        return;
-      }
-      
-      setAllUsers(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
-    }
-  }, [supabase]);
-
-  const fetchWorkLocations = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('work_locations')
-        .select('id, name')
-        .order('name');
-
-      if (error) {
-        console.error('Erro ao buscar locais de trabalho:', error);
-        return;
-      }
-
-      setWorkLocations(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar locais de trabalho:', error);
-    }
-  }, [supabase]);
-
-  const fetchSubsectorData = useCallback(async () => {
-    try {
-      // Buscar dados do sub-setor
-      const { data: subsectorData, error: subsectorError } = await supabase
-        .from('subsectors')
-        .select(`
-          id,
-          name,
-          description,
-          sector_id,
-          sectors!inner(name)
-        `)
-        .eq('id', subsectorId)
-        .single();
-
-      if (subsectorError) throw subsectorError;
-
-      if (subsectorData) {
-        // O sectors pode vir como array ou objeto dependendo da query
-        const sectorName = (subsectorData as any).sectors?.name || 
-                          ((subsectorData as any).sectors && Array.isArray((subsectorData as any).sectors) 
-                            ? (subsectorData as any).sectors[0]?.name 
-                            : undefined);
-                            
-        setSubsector({
-          ...subsectorData,
-          sector_name: sectorName
-        });
-      }
-
-      // Buscar eventos
-      await fetchEvents();
-      
-      // Buscar notícias
-      await fetchNews();
-      
-      // Buscar sistemas
-      await fetchSystems();
-
-      // Buscar grupos, usuários e locais de trabalho
-      await fetchGroups();
-      await fetchUsers();
-      await fetchWorkLocations();
-
-    } catch (error) {
-      console.error('Erro ao buscar dados do sub-setor:', error);
-      setError('Erro ao carregar dados do sub-setor');
-    } finally {
-      setLoading(false);
-    }
-  }, [subsectorId, fetchEvents, fetchNews, fetchSystems, fetchGroups, fetchUsers, fetchWorkLocations, supabase]);
-
-  useEffect(() => {
-    if (profile && subsectorId) {
-      fetchSubsectorData();
-    }
-  }, [profile, subsectorId, fetchSubsectorData]);
-
-
-  const toggleEventPublished = async (eventId: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('subsector_events')
-        .update({ is_published: !currentStatus })
-        .eq('id', eventId);
-
-      if (error) throw error;
-      await fetchEvents();
-    } catch (error) {
-      console.error('Erro ao atualizar evento:', error);
-    }
-  };
-
-  const toggleNewsPublished = async (newsId: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('subsector_news')
-        .update({ is_published: !currentStatus })
-        .eq('id', newsId);
-
-      if (error) throw error;
-      await fetchNews();
-    } catch (error) {
-      console.error('Erro ao atualizar notícia:', error);
-    }
-  };
-
-  // Funções para modais de eventos
-  const handleOpenEventModal = (event?: SubsectorEvent) => {
-    if (event) {
-      setCurrentEvent(event);
-      setIsEditing(true);
-    } else {
-      setCurrentEvent({
-        title: '',
-        description: '',
-        start_date: new Date().toISOString(),
-        is_featured: false,
-        is_published: false
-      });
-      setIsEditing(false);
-    }
-    setIsEventModalOpen(true);
-  };
-
-  const handleSaveEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!currentEvent.title || !currentEvent.description || !currentEvent.start_date) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
-    
-    try {
-      if (isEditing && currentEvent.id) {
-        const response = await fetch('/api/admin/sector-content', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'subsector_events',
-            id: currentEvent.id,
-            data: {
-              title: currentEvent.title,
-              description: currentEvent.description,
-              start_date: currentEvent.start_date,
-              is_featured: currentEvent.is_featured,
-              is_published: currentEvent.is_published
-            }
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Erro ao atualizar evento');
-        }
-      } else {
-        const response = await fetch('/api/admin/sector-content', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'subsector_events',
-            data: {
-              subsector_id: subsectorId,
-              title: currentEvent.title,
-              description: currentEvent.description,
-              start_date: currentEvent.start_date,
-              is_featured: currentEvent.is_featured,
-              is_published: currentEvent.is_published
-            }
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Erro ao criar evento');
-        }
-      }
-
-      setIsEventModalOpen(false);
-      await fetchEvents();
-    } catch (error) {
-      console.error('Erro ao salvar evento:', error);
-      alert('Erro ao salvar evento. Tente novamente.');
-    }
-  };
-
-  const handleDeleteEventClick = (event: SubsectorEvent) => {
-    setEventToDelete(event);
-    setIsDeleteEventConfirmOpen(true);
-  };
-
-  const handleDeleteEventConfirm = async () => {
-    if (!eventToDelete) return;
-
-    setIsDeleting(true);
-    try {
-      const { error } = await supabase
-        .from('subsector_events')
-        .delete()
-        .eq('id', eventToDelete.id);
-
-      if (error) throw error;
-
-      await fetchEvents();
-      setIsDeleteEventConfirmOpen(false);
-      setEventToDelete(null);
-    } catch (error) {
-      console.error('Erro ao excluir evento:', error);
-      alert('Erro ao excluir evento. Tente novamente.');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleDeleteEventCancel = () => {
-    setIsDeleteEventConfirmOpen(false);
-    setEventToDelete(null);
-  };
-
-  // Funções para modais de notícias
-  const handleOpenNewsModal = (news?: SubsectorNews) => {
-    if (news) {
-      setCurrentNews(news);
-      setIsEditing(true);
-    } else {
-      setCurrentNews({
-        title: '',
-        summary: '',
-        content: '',
-        is_featured: false,
-        is_published: false
-      });
-      setIsEditing(false);
-    }
-    setIsNewsModalOpen(true);
-  };
-
-  const handleSaveNews = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!currentNews.title || !currentNews.summary) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
-    
-    try {
-      if (isEditing && currentNews.id) {
-        const response = await fetch('/api/admin/sector-content', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'subsector_news',
-            id: currentNews.id,
-            data: {
-              title: currentNews.title,
-              summary: currentNews.summary,
-              content: currentNews.content || '',
-              is_featured: currentNews.is_featured,
-              is_published: currentNews.is_published
-            }
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Erro ao atualizar notícia');
-        }
-      } else {
-        const response = await fetch('/api/admin/sector-content', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'subsector_news',
-            data: {
-              subsector_id: subsectorId,
-              title: currentNews.title,
-              summary: currentNews.summary,
-              content: currentNews.content || '',
-              is_featured: currentNews.is_featured,
-              is_published: currentNews.is_published
-            }
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Erro ao criar notícia');
-        }
-      }
-
-      setIsNewsModalOpen(false);
-      await fetchNews();
-    } catch (error) {
-      console.error('Erro ao salvar notícia:', error);
-      alert('Erro ao salvar notícia. Tente novamente.');
-    }
-  };
-
-  const handleDeleteNewsClick = (newsItem: SubsectorNews) => {
-    setNewsToDelete(newsItem);
-    setIsDeleteNewsConfirmOpen(true);
-  };
-
-  const handleDeleteNewsConfirm = async () => {
-    if (!newsToDelete) return;
-
-    setIsDeleting(true);
-    try {
-      const { error } = await supabase
-        .from('subsector_news')
-        .delete()
-        .eq('id', newsToDelete.id);
-
-      if (error) throw error;
-
-      await fetchNews();
-      setIsDeleteNewsConfirmOpen(false);
-      setNewsToDelete(null);
-    } catch (error) {
-      console.error('Erro ao excluir notícia:', error);
-      alert('Erro ao excluir notícia. Tente novamente.');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleDeleteNewsCancel = () => {
-    setIsDeleteNewsConfirmOpen(false);
-    setNewsToDelete(null);
-  };
-
-  const togglePublishStatusNews = async (id: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('subsector_news')
-        .update({ is_published: !currentStatus })
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Erro ao alterar status de publicação:', error);
-        alert('Erro ao alterar status de publicação');
-      } else {
-        await fetchNews();
-      }
-    } catch (error) {
-      console.error('Erro ao alterar status:', error);
-      alert('Erro ao alterar status de publicação');
-    }
-  };
-
-  const togglePublishStatusEvent = async (id: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('subsector_events')
-        .update({ is_published: !currentStatus })
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Erro ao alterar status de publicação:', error);
-        alert('Erro ao alterar status de publicação');
-      } else {
-        await fetchEvents();
-      }
-    } catch (error) {
-      console.error('Erro ao alterar status:', error);
-      alert('Erro ao alterar status de publicação');
-    }
-  };
-
-  // Funções para grupos
-  const handleOpenGroupModal = () => {
-    setCurrentGroup({
-      name: '',
-      description: '',
-      members: []
-    });
-    setUserSearchTerm('');
-    setUserLocationFilter('all');
-    setIsGroupModalOpen(true);
-  };
-
-  const handleSaveGroup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!currentGroup.name.trim()) {
-      alert('Por favor, informe o nome do grupo.');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/notifications/groups', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: currentGroup.name,
-          description: currentGroup.description,
-          subsector_id: subsectorId,
-          members: currentGroup.members
-        }),
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Erro ao criar grupo');
-      }
-
-      setIsGroupModalOpen(false);
-      await fetchGroups();
-      alert('Grupo criado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao salvar grupo:', error);
-      alert('Erro ao salvar grupo. Tente novamente.');
-    }
-  };
-
-  // Funções para mensagens
-  const handleOpenMessageModal = () => {
-    setCurrentMessage({
-      title: '',
-      message: '',
-      type: 'general',
-      groups: [],
-      users: []
-    });
-    setUserSearchTerm('');
-    setUserLocationFilter('all');
-    setIsMessageModalOpen(true);
-  };
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!currentMessage.title.trim() || !currentMessage.message.trim()) {
-      alert('Por favor, preencha o título e a mensagem.');
-      return;
-    }
-
-    if (currentMessage.groups.length === 0 && currentMessage.users.length === 0) {
-      alert('Por favor, selecione pelo menos um grupo ou usuário para enviar a mensagem.');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/notifications/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: currentMessage.title,
-          message: currentMessage.message,
-          type: currentMessage.type,
-          priority: currentMessage.type === 'urgent' ? 'urgent' : 'normal',
-          groups: currentMessage.groups,
-          users: currentMessage.users,
-          context_type: 'subsector',
-          context_id: subsectorId
-        }),
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Erro ao enviar mensagem');
-      }
-
-      setIsMessageModalOpen(false);
-      alert('Mensagem enviada com sucesso!');
-    } catch (error) {
-      console.error('Erro ao enviar mensagem:', error);
-      alert('Erro ao enviar mensagem. Tente novamente.');
-    }
-  };
-
+  // State
+  const [activeTab, setActiveTab] = useState<TabType>('events');
+
+  // Data Management
+  const {
+    subsector,
+    events,
+    news,
+    systems,
+    users,
+    workLocations,
+    loading,
+    error,
+    showDrafts,
+    totalDraftEventsCount,
+    totalDraftNewsCount,
+    setShowDrafts,
+    refreshData
+  } = useSubsectorData(subsectorId);
+
+  // Feature Management Hooks
+  const eventManagement = useEventManagement(refreshData);
+  const newsManagement = useNewsManagement(refreshData);
+  const groupManagement = useGroupManagement(subsectorId);
+  const messageManagement = useMessageManagement();
+
+  // Loading state
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-<UnifiedLoadingSpinner 
-        fullScreen
-        size="large" 
-        message={LOADING_MESSAGES.subsectors}
+      <UnifiedLoadingSpinner 
+        message={LOADING_MESSAGES.loading} 
       />
-        </div>
-      </div>
     );
   }
 
-  if (error || !subsector) {
+  // Error state
+  if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">{error || 'Sub-setor não encontrado'}</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg p-6 shadow-sm max-w-md w-full text-center">
+          <div className="text-red-500 mb-4">
+            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Erro ao carregar dados</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => router.push('/admin-subsetor')}
-            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+            onClick={() => window.location.reload()}
+            className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors"
           >
-            Voltar para Admin Sub-setores
+            Tentar novamente
           </button>
         </div>
       </div>
     );
   }
 
+  // Permission check
+  if (!profile || (profile.role !== 'admin' && profile.role !== 'sector_admin')) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg p-6 shadow-sm max-w-md w-full text-center">
+          <div className="text-red-500 mb-4">
+            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Acesso negado</h2>
+          <p className="text-gray-600">Você não tem permissão para acessar esta página.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!subsector) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg p-6 shadow-sm max-w-md w-full text-center">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Subsetor não encontrado</h2>
+          <p className="text-gray-600">O subsetor solicitado não existe ou foi removido.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleToggleDrafts = async () => {
+    setShowDrafts(!showDrafts);
+  };
+
+  const handleNewSystem = () => {
+    // System creation modal implementation pending
+    alert('Criação de sistemas será implementada em versão futura');
+  };
+
+  const handleEventSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await eventManagement.handleSaveEvent(eventManagement.eventModal.currentItem, subsectorId);
+  };
+
+  const handleNewsSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await newsManagement.handleSaveNews(newsManagement.newsModal.currentItem, subsectorId);
+  };
+
+  const handleGroupSave = async () => {
+    await groupManagement.handleSaveGroup(subsectorId);
+  };
+
+  const handleMessageSend = async () => {
+    await messageManagement.handleSendMessage(subsectorId);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Minimalista */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-6">
-              <Link 
-                href="/admin-subsetor" 
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </Link>
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900">{subsector?.name}</h1>
-                <p className="text-sm text-gray-500 mt-1">
-                  Setor: {subsector?.sector_name} • {subsector?.description}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-600">
-                {profile?.full_name || profile?.email}
-              </span>
-              <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors rounded-md hover:bg-gray-50">
-                Sair
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Header */}
+      <SubsectorHeader 
+        subsector={subsector}
+        profile={profile as any}
+        onLogout={() => router.push('/login')}
+      />
 
-      {/* Navegação por Abas - Design Minimalista */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex space-x-12">
-            <button
-              onClick={() => setActiveTab('events')}
-              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
-                activeTab === 'events'
-                  ? 'text-primary'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Eventos ({events.length})
-              {activeTab === 'events' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-sm"></div>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('news')}
-              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
-                activeTab === 'news'
-                  ? 'text-primary'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Notícias ({news.length})
-              {activeTab === 'news' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-sm"></div>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('systems')}
-              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
-                activeTab === 'systems'
-                  ? 'text-primary'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Sistemas ({systems.length})
-              {activeTab === 'systems' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-sm"></div>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('groups')}
-              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
-                activeTab === 'groups'
-                  ? 'text-primary'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Grupos
-              {activeTab === 'groups' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-sm"></div>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('messages')}
-              className={`py-4 text-sm font-medium transition-all duration-200 relative ${
-                activeTab === 'messages'
-                  ? 'text-primary'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Mensagens
-              {activeTab === 'messages' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-sm"></div>
-              )}
-            </button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-lg shadow-sm">
+          {/* Tab Navigation */}
+          <div className="border-b border-gray-200 px-6 py-4">
+            <TabNavigation
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              counts={{
+                events: events.length,
+                news: news.length,
+                systems: systems.length
+              }}
+            />
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {activeTab === 'events' && (
+              <EventsTab
+                events={events}
+                showDrafts={showDrafts}
+                totalDraftEventsCount={totalDraftEventsCount}
+                onToggleDrafts={handleToggleDrafts}
+                onOpenModal={eventManagement.handleOpenEventModal}
+                onDeleteEvent={(event) => eventManagement.handleDeleteEvent(event.id)}
+              />
+            )}
+
+            {activeTab === 'news' && (
+              <NewsTab
+                news={news}
+                showDrafts={showDrafts}
+                totalDraftNewsCount={totalDraftNewsCount}
+                onToggleDrafts={handleToggleDrafts}
+                onOpenModal={newsManagement.handleOpenNewsModal}
+                onDeleteNews={(news) => newsManagement.handleDeleteNews(news.id)}
+                onTogglePublished={newsManagement.toggleNewsPublished}
+              />
+            )}
+
+            {activeTab === 'systems' && (
+              <SystemsTab
+                systems={systems}
+                onNewSystem={handleNewSystem}
+              />
+            )}
+
+            {activeTab === 'groups' && (
+              <GroupsTab
+                groups={groupManagement.groups}
+                onOpenGroupModal={groupManagement.handleOpenGroupModal}
+              />
+            )}
+
+            {activeTab === 'messages' && (
+              <MessagesTab
+                onOpenMessageModal={messageManagement.handleOpenMessageModal}
+              />
+            )}
           </div>
         </div>
       </div>
 
-      {/* Conteúdo Principal */}
-      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-
-        {/* Aba de Eventos */}
-        {activeTab === 'events' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Eventos do Subsetor</h2>
-              <div className="flex items-center space-x-4">
-                {/* Botão funcional para mostrar/ocultar rascunhos de eventos */}
-                <button
-                  onClick={async () => {
-                    const newShowDrafts = !showDrafts;
-                    console.log(`🔄 [Eventos] Alternando para: ${newShowDrafts ? 'Mostrar' : 'Ocultar'} rascunhos`);
-                    
-                    try {
-                      // Buscar eventos diretamente via Supabase
-                      let query = supabase
-                        .from('subsector_events')
-                        .select('id, title, description, start_date, is_published, is_featured')
-                        .eq('subsector_id', subsectorId);
-                      
-                      if (!newShowDrafts) {
-                        query = query.eq('is_published', true);
-                      }
-                      
-                      const { data, error } = await query.order('start_date', { ascending: false });
-                      
-                      if (error) {
-                        console.error('❌ Erro ao buscar eventos:', error);
-                        return;
-                      }
-                      
-                      console.log(`✅ Carregando ${data?.length || 0} eventos`);
-                      setEvents(data || []);
-                      setShowDrafts(newShowDrafts);
-                    } catch (error) {
-                      console.error('❌ Erro:', error);
-                    }
-                  }}
-                  className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-sm transition-colors"
-                >
-                  <span>
-                    {showDrafts ? 'Ocultar Rascunhos' : 'Mostrar Rascunhos'}
-                  </span>
-                  <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded font-medium">
-                    {totalDraftEventsCount} {totalDraftEventsCount === 1 ? 'rascunho' : 'rascunhos'}
-                  </span>
-                </button>
-                <button 
-                  onClick={() => handleOpenEventModal()}
-                  className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
-                >
-                  + Novo Evento
-                </button>
-              </div>
-            </div>
-
-            {events.length === 0 ? (
-              <div className="bg-white rounded-md p-12 text-center border border-gray-100">
-                <div className="w-16 h-16 bg-gray-100 rounded-sm flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum evento cadastrado</h3>
-                <p className="text-gray-500">Crie o primeiro evento para este subsetor.</p>
-              </div>
-            ) : (
-              <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
-                <div className="divide-y divide-gray-100">
-                  {events.map((event) => (
-                    <div key={event.id} className="p-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-medium text-gray-900 mb-2">{event.title}</h3>
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{event.description}</p>
-                          <div className="flex items-center space-x-4 text-xs text-gray-500">
-                            <span>{new Date(event.start_date).toLocaleDateString('pt-BR')}</span>
-                            <span className={`px-2 py-1 rounded-sm ${
-                              event.is_published 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-yellow-100 text-yellow-700'
-                            }`}>
-                              {event.is_published ? 'Publicado' : 'Rascunho'}
-                            </span>
-                            {event.is_featured && (
-                              <span className="px-2 py-1 rounded-sm bg-blue-100 text-blue-700">
-                                Destaque
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                          <button 
-                            onClick={() => handleOpenEventModal(event)}
-                            className="p-2 text-gray-400 hover:text-primary transition-colors"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteEventClick(event)}
-                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Aba de Notícias */}
-        {activeTab === 'news' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Notícias do Subsetor</h2>
-              <div className="flex items-center space-x-4">
-                {/* Botão funcional para mostrar/ocultar rascunhos de notícias */}
-                <button
-                  onClick={async () => {
-                    const newShowDrafts = !showDrafts;
-                    console.log(`🔄 [Notícias] Alternando para: ${newShowDrafts ? 'Mostrar' : 'Ocultar'} rascunhos`);
-                    
-                    try {
-                      // Buscar notícias diretamente via Supabase
-                      let query = supabase
-                        .from('subsector_news')
-                        .select('id, title, summary, is_published, is_featured, created_at')
-                        .eq('subsector_id', subsectorId);
-                      
-                      if (!newShowDrafts) {
-                        query = query.eq('is_published', true);
-                      }
-                      
-                      const { data, error } = await query.order('created_at', { ascending: false });
-                      
-                      if (error) {
-                        console.error('❌ Erro ao buscar notícias:', error);
-                        return;
-                      }
-                      
-                      console.log(`✅ Carregando ${data?.length || 0} notícias`);
-                      setNews(data || []);
-                      setShowDrafts(newShowDrafts);
-                    } catch (error) {
-                      console.error('❌ Erro:', error);
-                    }
-                  }}
-                  className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-sm transition-colors"
-                >
-                  <span>
-                    {showDrafts ? 'Ocultar Rascunhos' : 'Mostrar Rascunhos'}
-                  </span>
-                  <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded font-medium">
-                    {totalDraftNewsCount} {totalDraftNewsCount === 1 ? 'rascunho' : 'rascunhos'}
-                  </span>
-                </button>
-                <button 
-                  onClick={() => handleOpenNewsModal()}
-                  className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
-                >
-                  + Nova Notícia
-                </button>
-              </div>
-            </div>
-
-            {news.length === 0 ? (
-              <div className="bg-white rounded-md p-12 text-center border border-gray-100">
-                <div className="w-16 h-16 bg-gray-100 rounded-sm flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-2-2h-2" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma notícia cadastrada</h3>
-                <p className="text-gray-500">Crie a primeira notícia para este subsetor.</p>
-              </div>
-            ) : (
-              <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
-                <div className="divide-y divide-gray-100">
-                  {news.map((item) => (
-                    <div key={item.id} className="p-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-medium text-gray-900 mb-2">{item.title}</h3>
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.summary}</p>
-                          <div className="flex items-center space-x-4 text-xs text-gray-500">
-                            <span>{new Date(item.created_at).toLocaleDateString('pt-BR')}</span>
-                            <span className={`px-2 py-1 rounded-sm ${
-                              item.is_published 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-yellow-100 text-yellow-700'
-                            }`}>
-                              {item.is_published ? 'Publicado' : 'Rascunho'}
-                            </span>
-                            {item.is_featured && (
-                              <span className="px-2 py-1 rounded-sm bg-blue-100 text-blue-700">
-                                Destaque
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                          <button 
-                            onClick={() => toggleNewsPublished(item.id, item.is_published)}
-                            className={`p-2 transition-colors ${
-                              item.is_published 
-                                ? 'text-gray-400 hover:text-yellow-600' 
-                                : 'text-gray-400 hover:text-green-600'
-                            }`}
-                            title={item.is_published ? 'Despublicar' : 'Publicar'}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              {item.is_published ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                              ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              )}
-                            </svg>
-                          </button>
-                          <button 
-                            onClick={() => handleOpenNewsModal(item)}
-                            className="p-2 text-gray-400 hover:text-primary transition-colors"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteNewsClick(item)}
-                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'systems' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-cresol-gray">Sistemas do Sub-setor</h3>
-              <button
-                onClick={() => setShowSystemForm(true)}
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-              >
-                Novo Sistema
-              </button>
-            </div>
-
-            {systems.length === 0 ? (
-              <div className="bg-white rounded-lg  p-8 text-center">
-                <div className="text-6xl text-gray-300 mb-4">🖥️</div>
-                <h4 className="text-lg font-semibold text-cresol-gray mb-2">
-                  Nenhum sistema encontrado
-                </h4>
-                <p className="text-cresol-gray">
-                  Adicione o primeiro sistema para este sub-setor.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {systems.map((system) => (
-                  <div key={system.id} className="bg-white rounded-lg  p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-semibold text-cresol-gray">
-                        {system.name}
-                      </h4>
-                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                        {system.icon ? (
-                          <OptimizedImage
-                            src={system.icon}
-                            alt={system.name}
-                            width={24}
-                            height={24}
-                          />
-                        ) : (
-                          <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {system.description && (
-                      <p className="text-sm text-gray-600 mb-4">{system.description}</p>
-                    )}
-
-                    <a
-                      href={system.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors text-sm"
-                    >
-                      Acessar Sistema
-                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Aba de Grupos */}
-        {activeTab === 'groups' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Grupos de Notificação</h2>
-              <button 
-                onClick={handleOpenGroupModal}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
-              >
-                + Criar Grupo
-              </button>
-            </div>
-
-            {groups.length === 0 ? (
-              <div className="bg-white rounded-md p-12 text-center border border-gray-100">
-                <div className="w-16 h-16 bg-gray-100 rounded-sm flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum grupo cadastrado</h3>
-                <p className="text-gray-500">Crie o primeiro grupo de notificação para este subsetor.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {groups.map((group) => (
-                  <div key={group.id} className="bg-white rounded-md p-6 border border-gray-100 hover:border-primary/30 transition-all">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                        </svg>
-                      </div>
-                    </div>
-                    <h3 className="font-semibold text-gray-900 mb-2">{group.name}</h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{group.description}</p>
-                    <div className="text-xs text-gray-500">
-                      Criado em {new Date(group.created_at).toLocaleDateString('pt-BR')}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Aba de Mensagens */}
-        {activeTab === 'messages' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Enviar Mensagem</h2>
-              <button 
-                onClick={handleOpenMessageModal}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition-colors"
-              >
-                + Nova Mensagem
-              </button>
-            </div>
-
-            <div className="bg-white rounded-md p-12 text-center border border-gray-100">
-              <div className="w-16 h-16 bg-gray-100 rounded-sm flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Envio de Notificações</h3>
-              <p className="text-gray-500 mb-4">Envie mensagens para grupos ou usuários específicos.</p>
-              <button 
-                onClick={handleOpenMessageModal}
-                className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-md font-medium transition-colors"
-              >
-                Enviar Nova Mensagem
-              </button>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Modal para Eventos */}
-      {isEventModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-md p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {isEditing ? 'Editar Evento' : 'Novo Evento'}
-            </h3>
-            <form onSubmit={handleSaveEvent} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Título *
-                </label>
-                <input
-                  type="text"
-                  value={currentEvent.title || ''}
-                  onChange={(e) => setCurrentEvent({...currentEvent, title: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrição *
-                </label>
-                <textarea
-                  value={currentEvent.description || ''}
-                  onChange={(e) => setCurrentEvent({...currentEvent, description: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                  rows={4}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Data/Hora *
-                </label>
-                <input
-                  type="datetime-local"
-                  value={currentEvent.start_date ? new Date(currentEvent.start_date).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => setCurrentEvent({...currentEvent, start_date: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                  required
-                />
-              </div>
-              <div className="flex space-x-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={currentEvent.is_featured || false}
-                    onChange={(e) => setCurrentEvent({...currentEvent, is_featured: e.target.checked})}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700">Destacar</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={currentEvent.is_published || false}
-                    onChange={(e) => setCurrentEvent({...currentEvent, is_published: e.target.checked})}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mr-2"
-                  />
-                  <span className="text-sm text-gray-700">Publicar imediatamente</span>
-                  {!currentEvent.is_published && (
-                    <span className="text-xs text-yellow-600 ml-2">
-                      (Será salvo como rascunho)
-                    </span>
-                  )}
-                </label>
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsEventModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
-                >
-                  {isEditing ? 'Salvar' : 'Criar'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal para Notícias */}
-      {isNewsModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-md p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {isEditing ? 'Editar Notícia' : 'Nova Notícia'}
-            </h3>
-            <form onSubmit={handleSaveNews} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Título *
-                </label>
-                <input
-                  type="text"
-                  value={currentNews.title || ''}
-                  onChange={(e) => setCurrentNews({...currentNews, title: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Resumo *
-                </label>
-                <textarea
-                  value={currentNews.summary || ''}
-                  onChange={(e) => setCurrentNews({...currentNews, summary: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                  rows={4}
-                  required
-                />
-              </div>
-              <div className="flex space-x-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={currentNews.is_featured || false}
-                    onChange={(e) => setCurrentNews({...currentNews, is_featured: e.target.checked})}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700">Destacar</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={currentNews.is_published || false}
-                    onChange={(e) => setCurrentNews({...currentNews, is_published: e.target.checked})}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mr-2"
-                  />
-                  <span className="text-sm text-gray-700">Publicar imediatamente</span>
-                  {!currentNews.is_published && (
-                    <span className="text-xs text-yellow-600 ml-2">
-                      (Será salvo como rascunho)
-                    </span>
-                  )}
-                </label>
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsNewsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
-                >
-                  {isEditing ? 'Salvar' : 'Criar'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal para Grupos */}
-      {isGroupModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-md p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Criar Grupo de Notificação
-            </h3>
-            <form onSubmit={handleSaveGroup} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome do Grupo *
-                </label>
-                <input
-                  type="text"
-                  value={currentGroup.name}
-                  onChange={(e) => setCurrentGroup({...currentGroup, name: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrição
-                </label>
-                <textarea
-                  value={currentGroup.description}
-                  onChange={(e) => setCurrentGroup({...currentGroup, description: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                  rows={3}
-                  placeholder="Descrição opcional do grupo"
-                />
-              </div>
-              {/* Filtros de usuários */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Buscar Usuários
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                    <input
-                      type="text"
-                      value={userSearchTerm}
-                      onChange={(e) => setUserSearchTerm(e.target.value)}
-                      placeholder="Nome ou e-mail"
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Filtrar por Local
-                  </label>
-                  <select
-                    value={userLocationFilter}
-                    onChange={(e) => setUserLocationFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                  >
-                    <option value="all">Todos os locais</option>
-                    {workLocations.map(loc => (
-                      <option key={loc.id} value={loc.id}>{loc.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Selecionar Membros
-                </label>
-                <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
-                  {allUsers
-                    .filter(user => {
-                      const matchesSearch = userSearchTerm === '' || 
-                        user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-                        user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
-                      const matchesLocation = userLocationFilter === 'all' || user.work_location_id === userLocationFilter;
-                      return matchesSearch && matchesLocation;
-                    })
-                    .map((user) => (
-                    <label key={user.id} className="flex items-center py-1">
-                      <input
-                        type="checkbox"
-                        checked={currentGroup.members.includes(user.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setCurrentGroup({
-                              ...currentGroup,
-                              members: [...currentGroup.members, user.id]
-                            });
-                          } else {
-                            setCurrentGroup({
-                              ...currentGroup,
-                              members: currentGroup.members.filter(id => id !== user.id)
-                            });
-                          }
-                        }}
-                        className="mr-2"
-                      />
-                      <div className="flex-1">
-                        <span className="text-sm font-medium">{user.full_name}</span>
-                        <div className="text-xs text-gray-500">{user.email}</div>
-                        {user.work_location_id && (
-                          <div className="text-xs text-gray-400">
-                            {workLocations.find(loc => loc.id === user.work_location_id)?.name}
-                          </div>
-                        )}
-                      </div>
-                    </label>
-                  ))}
-                  {allUsers.filter(user => {
-                    const matchesSearch = userSearchTerm === '' || 
-                      user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-                      user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
-                    const matchesLocation = userLocationFilter === 'all' || user.work_location_id === userLocationFilter;
-                    return matchesSearch && matchesLocation;
-                  }).length === 0 && (
-                    <div className="text-sm text-gray-500 text-center py-4">
-                      Nenhum usuário encontrado com os filtros aplicados
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsGroupModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
-                >
-                  Criar Grupo
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal para Mensagens */}
-      {isMessageModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-md p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Enviar Mensagem
-            </h3>
-            <form onSubmit={handleSendMessage} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Título da Mensagem *
-                </label>
-                <input
-                  type="text"
-                  value={currentMessage.title}
-                  onChange={(e) => setCurrentMessage({...currentMessage, title: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mensagem *
-                </label>
-                <textarea
-                  value={currentMessage.message}
-                  onChange={(e) => setCurrentMessage({...currentMessage, message: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                  rows={4}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo
-                </label>
-                <select
-                  value={currentMessage.type}
-                  onChange={(e) => setCurrentMessage({...currentMessage, type: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                >
-                  <option value="general">Geral</option>
-                  <option value="important">Importante</option>
-                  <option value="urgent">Urgente</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Enviar para Grupos
-                </label>
-                <div className="border border-gray-300 rounded-lg p-3 max-h-32 overflow-y-auto">
-                  {groups.map((group) => (
-                    <label key={group.id} className="flex items-center py-1">
-                      <input
-                        type="checkbox"
-                        checked={currentMessage.groups.includes(group.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setCurrentMessage({
-                              ...currentMessage,
-                              groups: [...currentMessage.groups, group.id]
-                            });
-                          } else {
-                            setCurrentMessage({
-                              ...currentMessage,
-                              groups: currentMessage.groups.filter(id => id !== group.id)
-                            });
-                          }
-                        }}
-                        className="mr-2"
-                      />
-                      <span className="text-sm">{group.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Enviar para Usuários Específicos
-                </label>
-                <div className="border border-gray-300 rounded-lg p-3 max-h-32 overflow-y-auto">
-                  {allUsers
-                    .filter(user => {
-                      const matchesSearch = userSearchTerm === '' || 
-                        user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-                        user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
-                      const matchesLocation = userLocationFilter === 'all' || user.work_location_id === userLocationFilter;
-                      return matchesSearch && matchesLocation;
-                    })
-                    .map((user) => (
-                    <label key={user.id} className="flex items-center py-1">
-                      <input
-                        type="checkbox"
-                        checked={currentMessage.users.includes(user.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setCurrentMessage({
-                              ...currentMessage,
-                              users: [...currentMessage.users, user.id]
-                            });
-                          } else {
-                            setCurrentMessage({
-                              ...currentMessage,
-                              users: currentMessage.users.filter(id => id !== user.id)
-                            });
-                          }
-                        }}
-                        className="mr-2"
-                      />
-                      <div className="flex-1">
-                        <span className="text-sm font-medium">{user.full_name}</span>
-                        <div className="text-xs text-gray-500">{user.email}</div>
-                        {user.work_location_id && (
-                          <div className="text-xs text-gray-400">
-                            {workLocations.find(loc => loc.id === user.work_location_id)?.name}
-                          </div>
-                        )}
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsMessageModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
-                >
-                  Enviar Mensagem
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de confirmação para excluir evento */}
-      <ConfirmationModal
-        isOpen={isDeleteEventConfirmOpen}
-        onClose={handleDeleteEventCancel}
-        onConfirm={handleDeleteEventConfirm}
-        title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir o evento <strong>"${eventToDelete?.title}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá o evento permanentemente.`}
-        isLoading={isDeleting}
-        confirmButtonText="Excluir Evento"
-        cancelButtonText="Cancelar"
+      {/* Modals */}
+      <EventModal
+        isOpen={eventManagement.eventModal.isOpen}
+        isEditing={eventManagement.eventModal.isEditing}
+        currentEvent={eventManagement.eventModal.currentItem}
+        onClose={() => eventManagement.setEventModal(prev => ({...prev, isOpen: false}))}
+        onSave={handleEventSave}
+        onChange={(event) => eventManagement.setEventModal(prev => ({...prev, currentItem: event}))}
       />
 
-      {/* Modal de confirmação para excluir notícia */}
-      <ConfirmationModal
-        isOpen={isDeleteNewsConfirmOpen}
-        onClose={handleDeleteNewsCancel}
-        onConfirm={handleDeleteNewsConfirm}
-        title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir a notícia <strong>"${newsToDelete?.title}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá a notícia permanentemente.`}
-        isLoading={isDeleting}
-        confirmButtonText="Excluir Notícia"
-        cancelButtonText="Cancelar"
+      <NewsModal
+        isOpen={newsManagement.newsModal.isOpen}
+        isEditing={newsManagement.newsModal.isEditing}
+        currentNews={newsManagement.newsModal.currentItem}
+        onClose={() => newsManagement.setNewsModal(prev => ({...prev, isOpen: false}))}
+        onSave={handleNewsSave}
+        onChange={(news) => newsManagement.setNewsModal(prev => ({...prev, currentItem: news}))}
+      />
+
+      <GroupModal
+        isOpen={groupManagement.isGroupModalOpen}
+        currentGroup={groupManagement.currentGroup}
+        onClose={() => groupManagement.setIsGroupModalOpen(false)}
+        onSave={handleGroupSave}
+        onChange={groupManagement.setCurrentGroup}
+        users={users}
+      />
+
+      <MessageModal
+        isOpen={messageManagement.isMessageModalOpen}
+        currentMessage={messageManagement.currentMessage}
+        onClose={() => messageManagement.setIsMessageModalOpen(false)}
+        onSend={handleMessageSend}
+        onChange={messageManagement.setCurrentMessage}
+        groups={groupManagement.groups}
+        users={users}
       />
     </div>
   );
-} 
+}

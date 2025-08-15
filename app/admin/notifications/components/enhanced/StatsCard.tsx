@@ -1,4 +1,3 @@
-import React from 'react';
 import Icon from '@/app/components/icons/Icon';
 import { Card } from '../../design-system/components/Card';
 

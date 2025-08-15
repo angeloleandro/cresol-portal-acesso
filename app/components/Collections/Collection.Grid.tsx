@@ -3,7 +3,6 @@
 // Collection Grid Component
 // Grid responsivo para exibição de múltiplas coleções
 
-import React from 'react';
 import CollectionCard from './Collection.Card';
 import CollectionEmptyState from './Collection.EmptyState';
 import CollectionLoading from './Collection.Loading';

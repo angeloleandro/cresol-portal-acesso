@@ -1,6 +1,5 @@
 // Componente de navegação por abas
 
-import React from 'react';
 import { TabType } from '../types/sector.types';
 
 interface TabNavigationProps {

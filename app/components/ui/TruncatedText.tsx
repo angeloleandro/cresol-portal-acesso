@@ -2,6 +2,8 @@
  * Utilitários para formatação de texto
  */
 
+import React, { useState } from 'react';
+
 /**
  * Trunca texto longo e adiciona tooltip
  * @param text - Texto a ser truncado
@@ -40,7 +42,6 @@ export const smartTruncate = (text: string, maxLength: number = 25): string => {
 /**
  * Componente para exibir texto truncado com tooltip
  */
-import React, { useState } from 'react';
 
 interface TruncatedTextProps {
   text: string;

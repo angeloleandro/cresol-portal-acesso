@@ -313,7 +313,7 @@ export default function EconomicIndicatorsAdmin() {
                       id="title"
                       required
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Ex: Cooperados"
                       startIcon="pencil"
                       variant="outline"
@@ -330,7 +330,7 @@ export default function EconomicIndicatorsAdmin() {
                       id="value"
                       required
                       value={formData.value}
-                      onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, value: e.target.value })}
                       placeholder="Ex: 36.7 mil"
                       startIcon="chart-bar-vertical"
                       variant="outline"
@@ -346,7 +346,7 @@ export default function EconomicIndicatorsAdmin() {
                       id="icon"
                       required
                       value={formData.icon}
-                      onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, icon: e.target.value })}
                       className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                     >
                       {AVAILABLE_ICONS.map((icon) => (
@@ -365,7 +365,7 @@ export default function EconomicIndicatorsAdmin() {
                       type="number"
                       id="display_order"
                       value={formData.display_order}
-                      onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
                       min="0"
                       startIcon="sort"
                       variant="outline"
@@ -381,7 +381,7 @@ export default function EconomicIndicatorsAdmin() {
                       type="text"
                       id="issue_date"
                       value={formData.issue_date}
-                      onChange={(e) => setFormData({ ...formData, issue_date: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, issue_date: e.target.value })}
                       placeholder="MM/AAAA (ex: 05/2025)"
                       pattern="^(0[1-9]|1[0-2])\/[0-9]{4}$"
                       title="Formato: MM/AAAA (ex: 05/2025)"
@@ -400,7 +400,7 @@ export default function EconomicIndicatorsAdmin() {
                     id="description"
                     rows={3}
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Descrição opcional do indicador"
                     variant="outline"
                     size="md"
@@ -412,7 +412,7 @@ export default function EconomicIndicatorsAdmin() {
                     id="is_active"
                     type="checkbox"
                     checked={formData.is_active}
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, is_active: e.target.checked })}
                     className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded-sm"
                   />
                   <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">

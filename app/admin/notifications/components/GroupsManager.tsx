@@ -1,4 +1,3 @@
-import React from 'react';
 import Icon from '@/app/components/icons/Icon';
 import { useGroups } from '../hooks/useGroups';
 import { useFormData } from '../hooks/useFormData';
@@ -221,12 +220,12 @@ const GroupCard: React.FC<{ group: NotificationGroup }> = ({ group }) => (
       
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <InlineActionButton
-          onClick={() => {/* TODO: Implementar editar */}}
+          onClick={() => alert('Edição de grupos será implementada em versão futura')}
           icon={<Icon name="pencil" className="w-4 h-4" />}
           tooltip="Editar grupo"
         />
         <InlineActionButton
-          onClick={() => {/* TODO: Implementar excluir */}}
+          onClick={() => alert('Exclusão de grupos será implementada em versão futura')}
           icon={<Icon name="trash" className="w-4 h-4" />}
           tooltip="Excluir grupo"
           variant="danger"

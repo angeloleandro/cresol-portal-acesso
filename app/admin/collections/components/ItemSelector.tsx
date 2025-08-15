@@ -3,7 +3,8 @@
 // Item Selector Component
 // Seletor de itens (imagens/vídeos) para adicionar em coleções - Portal Cresol
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import type React from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { Collection } from '@/lib/types/collections';
 import Icon from '@/app/components/icons/Icon';

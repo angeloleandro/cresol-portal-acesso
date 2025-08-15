@@ -6,7 +6,8 @@
  * Integração entre BulkUpload e VideoUploadModal
  */
 
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 import { Collection } from '@/lib/types/collections';
 import VideoUploadModal from './VideoUploadModal';
 import { Icon } from '@/app/components/icons/Icon';

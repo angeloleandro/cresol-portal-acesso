@@ -480,7 +480,7 @@ export default function SectorsManagement() {
                     <StandardizedInput
                       type="text"
                       value={sectorForm.name}
-                      onChange={(e) => setSectorForm({ ...sectorForm, name: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSectorForm({ ...sectorForm, name: e.target.value })}
                       placeholder="Ex: Tecnologia da Informação"
                       required
                       startIcon="building-1"
@@ -495,7 +495,7 @@ export default function SectorsManagement() {
                     </label>
                     <StandardizedTextarea
                       value={sectorForm.description}
-                      onChange={(e) => setSectorForm({ ...sectorForm, description: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setSectorForm({ ...sectorForm, description: e.target.value })}
                       placeholder="Descrição opcional do setor..."
                       rows={3}
                       variant="outline"
@@ -566,7 +566,7 @@ export default function SectorsManagement() {
                     <StandardizedInput
                       type="text"
                       value={subsectorForm.name}
-                      onChange={(e) => setSubsectorForm({ ...subsectorForm, name: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSubsectorForm({ ...subsectorForm, name: e.target.value })}
                       placeholder="Ex: Desenvolvimento de Software"
                       required
                       startIcon="folder"
@@ -581,7 +581,7 @@ export default function SectorsManagement() {
                     </label>
                     <StandardizedTextarea
                       value={subsectorForm.description}
-                      onChange={(e) => setSubsectorForm({ ...subsectorForm, description: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setSubsectorForm({ ...subsectorForm, description: e.target.value })}
                       placeholder="Descrição opcional do sub-setor..."
                       rows={3}
                       variant="outline"

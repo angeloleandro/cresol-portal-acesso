@@ -389,7 +389,7 @@ export default function SystemsManagement() {
                     id="name"
                     type="text"
                     value={newSystem.name}
-                    onChange={(e) => setNewSystem({...newSystem, name: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSystem({...newSystem, name: e.target.value})}
                     required
                     startIcon="layers"
                     variant="outline"
@@ -402,7 +402,7 @@ export default function SystemsManagement() {
                   <StandardizedTextarea
                     id="description"
                     value={newSystem.description}
-                    onChange={(e) => setNewSystem({...newSystem, description: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewSystem({...newSystem, description: e.target.value})}
                     rows={2}
                     variant="outline"
                     size="md"
@@ -415,7 +415,7 @@ export default function SystemsManagement() {
                     id="url"
                     type="url"
                     value={newSystem.url}
-                    onChange={(e) => setNewSystem({...newSystem, url: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSystem({...newSystem, url: e.target.value})}
                     placeholder="https://"
                     required
                     startIcon="link"
@@ -430,7 +430,7 @@ export default function SystemsManagement() {
                     id="icon"
                     type="text"
                     value={newSystem.icon}
-                    onChange={(e) => setNewSystem({...newSystem, icon: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSystem({...newSystem, icon: e.target.value})}
                     placeholder="/icons/nome-do-icone.svg"
                     startIcon="image"
                     variant="outline"
@@ -488,7 +488,7 @@ export default function SystemsManagement() {
                     id="edit-name"
                     type="text"
                     value={editingSystem.name}
-                    onChange={(e) => setEditingSystem({...editingSystem, name: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingSystem({...editingSystem, name: e.target.value})}
                     required
                     startIcon="layers"
                     variant="outline"
@@ -501,7 +501,7 @@ export default function SystemsManagement() {
                   <StandardizedTextarea
                     id="edit-description"
                     value={editingSystem.description}
-                    onChange={(e) => setEditingSystem({...editingSystem, description: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditingSystem({...editingSystem, description: e.target.value})}
                     rows={2}
                     variant="outline"
                     size="md"
@@ -514,7 +514,7 @@ export default function SystemsManagement() {
                     id="edit-url"
                     type="url"
                     value={editingSystem.url}
-                    onChange={(e) => setEditingSystem({...editingSystem, url: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingSystem({...editingSystem, url: e.target.value})}
                     placeholder="https://"
                     required
                     startIcon="link"
@@ -529,7 +529,7 @@ export default function SystemsManagement() {
                     id="edit-icon"
                     type="text"
                     value={editingSystem.icon}
-                    onChange={(e) => setEditingSystem({...editingSystem, icon: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingSystem({...editingSystem, icon: e.target.value})}
                     placeholder="/icons/nome-do-icone.svg"
                     startIcon="image"
                     variant="outline"

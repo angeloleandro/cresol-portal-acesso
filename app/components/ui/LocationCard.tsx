@@ -1,4 +1,3 @@
-import React from 'react';
 import { TruncatedText } from './TruncatedText';
 
 interface LocationCardProps {

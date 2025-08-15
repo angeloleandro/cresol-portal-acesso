@@ -390,7 +390,7 @@ export default function SectorSystemsManagement() {
                   id="name"
                   type="text"
                   value={newSystem.name}
-                  onChange={(e) => setNewSystem({...newSystem, name: e.target.value})}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSystem({...newSystem, name: e.target.value})}
                   required
                   startIcon="layers"
                   variant="outline"
@@ -403,7 +403,7 @@ export default function SectorSystemsManagement() {
                 <StandardizedTextarea
                   id="description"
                   value={newSystem.description}
-                  onChange={(e) => setNewSystem({...newSystem, description: e.target.value})}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewSystem({...newSystem, description: e.target.value})}
                   rows={3}
                   variant="outline"
                   size="md"
@@ -416,7 +416,7 @@ export default function SectorSystemsManagement() {
                   id="url"
                   type="text"
                   value={newSystem.url}
-                  onChange={(e) => setNewSystem({...newSystem, url: e.target.value})}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSystem({...newSystem, url: e.target.value})}
                   placeholder="https://exemplo.com"
                   startIcon="link"
                   variant="outline"
@@ -489,7 +489,7 @@ export default function SectorSystemsManagement() {
                   id="edit-name"
                   type="text"
                   value={editingSystem.name}
-                  onChange={(e) => setEditingSystem({...editingSystem, name: e.target.value})}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingSystem({...editingSystem, name: e.target.value})}
                   required
                   startIcon="layers"
                   variant="outline"
@@ -502,7 +502,7 @@ export default function SectorSystemsManagement() {
                 <StandardizedTextarea
                   id="edit-description"
                   value={editingSystem.description || ''}
-                  onChange={(e) => setEditingSystem({...editingSystem, description: e.target.value})}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditingSystem({...editingSystem, description: e.target.value})}
                   rows={3}
                   variant="outline"
                   size="md"
@@ -515,7 +515,7 @@ export default function SectorSystemsManagement() {
                   id="edit-url"
                   type="text"
                   value={editingSystem.url || ''}
-                  onChange={(e) => setEditingSystem({...editingSystem, url: e.target.value})}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingSystem({...editingSystem, url: e.target.value})}
                   placeholder="https://exemplo.com"
                   startIcon="link"
                   variant="outline"

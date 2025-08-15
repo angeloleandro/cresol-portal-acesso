@@ -485,7 +485,7 @@ export default function UserEditModal({
                 id={`name-${user.id}`}
                 type="text"
                 value={fullName}
-                onChange={e => setFullName(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)}
                 startIcon="user"
                 variant="outline"
                 size="md"
@@ -500,7 +500,7 @@ export default function UserEditModal({
                 id={`email-${user.id}`}
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 startIcon="mail"
                 variant="outline"
                 size="md"

@@ -1,4 +1,3 @@
-import React from 'react';
 import { CompactStatsCard } from './shared/CompactStatsCard';
 
 interface StatsCardsProps {

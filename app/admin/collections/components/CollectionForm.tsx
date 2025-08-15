@@ -3,7 +3,7 @@
 // Collection Form Component
 // Formulário reutilizável para CRUD de coleções - Portal Cresol
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Collection } from '@/lib/types/collections';
 import { COLLECTION_CONFIG, COLLECTION_TYPE_LABELS } from '@/lib/constants/collections';

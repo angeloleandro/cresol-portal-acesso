@@ -306,7 +306,7 @@ export function useOptimizedInView(options: IntersectionObserverInit = {}) {
     rootMargin: '200px',
     threshold: 0.1,
     ...options
-  }), [options.rootMargin, options.threshold, options.root]);
+  }), [options]);
 
   useEffect(() => {
     const element = elementRef.current;

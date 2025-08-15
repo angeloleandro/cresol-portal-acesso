@@ -3,7 +3,8 @@
 // Draggable Item List Component
 // Lista de itens com funcionalidade de drag & drop para reordenação - Portal Cresol
 
-import React, { useState, useRef } from 'react';
+import type React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { CollectionItem } from '@/lib/types/collections';
 import { cn } from '@/lib/utils/cn';

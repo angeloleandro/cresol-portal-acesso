@@ -3,7 +3,8 @@
 // Collection Modal Component
 // Modal de criação e edição de coleções - Portal Cresol
 
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 import { Collection } from '@/lib/types/collections';
 import CollectionForm, { CollectionFormData } from './CollectionForm';
 
