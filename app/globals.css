@@ -2165,6 +2165,49 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-line-clamp: 3;
 }
 
+/* ========================================
+   CHECKBOX STYLES - Garantir visibilidade
+======================================== */
+
+/* Estilos para checkboxes nativos - garantir sempre visíveis */
+input[type="checkbox"] {
+  -webkit-appearance: checkbox !important;
+  -moz-appearance: checkbox !important;
+  appearance: checkbox !important;
+  width: 16px !important;
+  height: 16px !important;
+  cursor: pointer !important;
+  accent-color: var(--color-primary, #F58220) !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 4px !important;
+  background-color: white !important;
+}
+
+/* Checkbox checado */
+input[type="checkbox"]:checked {
+  accent-color: var(--color-primary, #F58220) !important;
+  background-color: var(--color-primary, #F58220) !important;
+  border-color: var(--color-primary, #F58220) !important;
+}
+
+/* Focus state */
+input[type="checkbox"]:focus {
+  outline: 2px solid rgba(245, 130, 32, 0.2) !important;
+  outline-offset: 2px !important;
+}
+
+/* Hover state */
+input[type="checkbox"]:hover {
+  border-color: var(--color-primary, #F58220) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Label com checkbox */
+label:has(input[type="checkbox"]) {
+  cursor: pointer !important;
+  user-select: none !important;
+}
+
 /* Dropdown scrolling enhancement - Fix para rolagem cortada */
 [data-dropdown] [role="menu"] {
   max-height: 70vh !important;

@@ -350,6 +350,35 @@ export async function POST(request: NextRequest) {
         }
         break;
         
+      case 'update_subsector_news':
+        console.log('\n📨 [API] Caso: UPDATE_SUBSECTOR_NEWS');
+        console.log('📨 [API] Tabela alvo: subsector_news');
+        console.log('📨 [API] ID para atualização:', enrichedData.id);
+        
+        if (!enrichedData.id) {
+          return NextResponse.json(
+            { error: 'ID é obrigatório para atualização' },
+            { status: 400 }
+          );
+        }
+        
+        const { id: subsectorNewsId, created_by: subsectorNewsCreatedBy, created_at: subsectorNewsCreatedAt, ...subsectorNewsUpdateData } = enrichedData;
+        subsectorNewsUpdateData.updated_at = new Date().toISOString();
+        
+        ({ data: result, error } = await adminClient
+          .from('subsector_news')
+          .update(subsectorNewsUpdateData)
+          .eq('id', subsectorNewsId)
+          .select()
+          .single());
+          
+        if (error) {
+          console.error('\n❌❌❌ [API] ERRO NA ATUALIZAÇÃO SUBSECTOR_NEWS:', error);
+        } else {
+          console.log('\n✅✅✅ [API] ATUALIZAÇÃO SUBSECTOR_NEWS BEM-SUCEDIDA!');
+        }
+        break;
+        
       case 'update_event':
         console.log('\n📅 [API] Caso: UPDATE_EVENT (fallback para compatibilidade)');
         console.log('📅 [API] Tabela alvo: sector_events');

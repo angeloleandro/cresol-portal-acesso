@@ -423,15 +423,6 @@ export default function SubsectorManagePage() {
     }
   }, [profile, subsectorId, fetchSubsectorData]);
 
-  // useEffect adicional para monitorar mudanças em showDrafts
-  useEffect(() => {
-    // Só executar se já tivermos perfil e subsectorId
-    if (profile && subsectorId && !loading) {
-      console.log('🔄 showDrafts mudou para:', showDrafts);
-      fetchNews();
-      fetchEvents();
-    }
-  }, [showDrafts, profile, subsectorId, loading, fetchNews, fetchEvents]);
 
   const toggleEventPublished = async (eventId: string, currentStatus: boolean) => {
     try {

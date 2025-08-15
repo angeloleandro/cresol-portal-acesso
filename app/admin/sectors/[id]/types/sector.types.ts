@@ -1,0 +1,90 @@
+// Types centralizados para o módulo de gerenciamento de setores
+
+export interface Sector {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+}
+
+export interface Subsector {
+  id: string;
+  name: string;
+  description: string;
+  sector_id: string;
+  created_at: string;
+}
+
+export interface SectorNews {
+  id: string;
+  sector_id: string;
+  title: string;
+  summary: string;
+  content: string;
+  image_url: string | null;
+  is_featured: boolean;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SectorEvent {
+  id: string;
+  sector_id: string;
+  title: string;
+  description: string;
+  location: string;
+  start_date: string;
+  end_date: string | null;
+  is_featured: boolean;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  description: string;
+  sector_id: string | null;
+  is_automatic: boolean;
+  members: string[];
+  created_at: string;
+}
+
+export interface Message {
+  group_id: string;
+  title: string;
+  content: string;
+  type: 'info' | 'warning' | 'success' | 'error';
+  expire_at: string;
+  links: Array<{
+    url: string;
+    text: string;
+  }>;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  work_location_id: string | null;
+  sector_id: string | null;
+  role: string;
+}
+
+export interface WorkLocation {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+}
+
+export interface CropArea {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export type TabType = 'news' | 'events' | 'subsectors' | 'groups' | 'messages';

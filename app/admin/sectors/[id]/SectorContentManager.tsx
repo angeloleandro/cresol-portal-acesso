@@ -207,11 +207,20 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
 
   // Carregar inicial - ÚNICO useEffect
   useEffect(() => {
-    if (sectorId) {
-      fetchContent(showDrafts);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sectorId, fetchContent]); // Removido showDrafts das dependências para evitar loops
+    let mounted = true;
+
+    const loadContent = async () => {
+      if (sectorId && mounted) {
+        await fetchContent(showDrafts);
+      }
+    };
+
+    loadContent();
+
+    return () => {
+      mounted = false;
+    };
+  }, [sectorId, fetchContent, showDrafts]);
 
   return {
     news,
