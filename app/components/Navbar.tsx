@@ -530,8 +530,9 @@ function Navbar() {
           <div className="h-6 w-px bg-white/30 mx-4"></div>
           
           {/* Texto HUB */}
-          <div className="hidden sm:flex items-center">
+          <div className="hidden sm:flex items-baseline">
             <span className="text-white font-bold text-lg tracking-wide">HUB</span>
+            <span className="text-white/60 font-light text-sm ml-1">2.0</span>
           </div>
         </div>
         

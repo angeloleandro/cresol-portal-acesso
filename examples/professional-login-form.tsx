@@ -125,15 +125,22 @@ function ProfessionalLoginForm() {
     <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
       <div className="card max-w-md w-full">
         <div className="flex flex-col items-center mb-6">
-          <div className="relative w-48 h-24 mb-4">
-            <OptimizedImage 
-              src="/logo-horizontal-laranja.svg" 
-              alt="Logo Cresol" 
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 192px"
-              className="object-contain"
-            />
+          <div className="flex items-baseline justify-center mb-4">
+            <div className="relative w-48 h-24">
+              <OptimizedImage 
+                src="/logo-horizontal-laranja.svg" 
+                alt="Logo Cresol" 
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 192px"
+                className="object-contain"
+              />
+            </div>
+            <div className="flex items-baseline ml-3">
+              <div className="h-6 w-px bg-primary/30 mx-2"></div>
+              <span className="text-primary font-bold text-lg tracking-wide">HUB</span>
+              <span className="text-primary/60 font-light text-sm ml-1">2.0</span>
+            </div>
           </div>
           <h1 className="heading-2 text-title">Login</h1>
           <p className="body-text-small text-muted mt-1">

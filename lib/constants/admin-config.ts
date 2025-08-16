@@ -182,7 +182,7 @@ export const ADMIN_NAVIGATION = {
 export const ADMIN_MEDIA = {
   logo: {
     src: '/logo-horizontal-laranja.svg',
-    alt: 'Logo Cresol',
+    alt: 'Logo Cresol HUB 2.0',
     sizes: '(max-width: 768px) 100vw, 96px'
   },
   images: {

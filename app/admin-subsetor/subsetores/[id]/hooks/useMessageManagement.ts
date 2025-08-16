@@ -1,7 +1,7 @@
 // Hook para gerenciamento de envio de mensagens
 
 import { useState } from 'react';
-import { Message } from '../types/subsector.types';
+import { Message, MessageType } from '../types/subsector.types';
 import { messagesApi } from '../utils/apiClient';
 
 interface UseMessageManagementReturn {
@@ -54,7 +54,7 @@ export function useMessageManagement(): UseMessageManagementReturn {
       await messagesApi.send({
         title: currentMessage.title,
         message: currentMessage.message,
-        type: currentMessage.type,
+        type: currentMessage.type as MessageType,
         priority: currentMessage.type === 'urgent' ? 'urgent' : 'normal',
         groups: currentMessage.groups,
         users: currentMessage.users,

@@ -52,10 +52,12 @@ export interface Group {
   created_at: string;
 }
 
+export type MessageType = 'general' | 'urgent' | 'announcement';
+
 export interface Message {
   title: string;
   message: string;
-  type: string;
+  type: MessageType;
   groups: string[];
   users: string[];
 }

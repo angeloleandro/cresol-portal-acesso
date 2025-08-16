@@ -26,6 +26,8 @@ export function EventsManagement({
 }: EventsManagementProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [currentEvent, setCurrentEvent] = useState<Partial<SectorEvent>>({
     title: '',
     description: '',
@@ -70,35 +72,161 @@ export function EventsManagement({
 
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Reset error state
+    setSaveError(null);
+
+    // Validação detalhada dos campos obrigatórios
+    const validationErrors: string[] = [];
+    
+    if (!currentEvent.title?.trim()) {
+      validationErrors.push('Título é obrigatório');
+    } else if (currentEvent.title.length < 3) {
+      validationErrors.push('Título deve ter pelo menos 3 caracteres');
+    } else if (currentEvent.title.length > 255) {
+      validationErrors.push('Título deve ter no máximo 255 caracteres');
+    }
+    
+    if (!currentEvent.description?.trim()) {
+      validationErrors.push('Descrição é obrigatória');
+    } else if (currentEvent.description.length < 10) {
+      validationErrors.push('Descrição deve ter pelo menos 10 caracteres');
+    } else if (currentEvent.description.length > 2000) {
+      validationErrors.push('Descrição deve ter no máximo 2.000 caracteres');
+    }
+    
+    if (!currentEvent.start_date) {
+      validationErrors.push('Data de início é obrigatória');
+    } else {
+      const startDate = new Date(currentEvent.start_date);
+      if (isNaN(startDate.getTime())) {
+        validationErrors.push('Data de início inválida');
+      }
+    }
+    
+    if (!currentEvent.location?.trim()) {
+      validationErrors.push('Local é obrigatório');
+    } else if (currentEvent.location.length > 255) {
+      validationErrors.push('Local deve ter no máximo 255 caracteres');
+    }
+    
+    // Validar data de término se fornecida
+    if (currentEvent.end_date && currentEvent.start_date) {
+      const endDate = new Date(currentEvent.end_date);
+      const startDate = new Date(currentEvent.start_date);
+      
+      if (isNaN(endDate.getTime())) {
+        validationErrors.push('Data de término inválida');
+      } else if (endDate <= startDate) {
+        validationErrors.push('Data de término deve ser posterior à data de início');
+      }
+    }
+    
+    if (validationErrors.length > 0) {
+      setSaveError('Erros de validação:\n\n' + validationErrors.join('\n'));
+      return;
+    }
+
+    setIsSaving(true);
 
     try {
+      console.log('🔥 [FRONTEND] Iniciando salvamento de evento');
+      console.log('🔥 [FRONTEND] Dados a serem enviados:', {
+        type: 'event',
+        sectorId,
+        isEditing,
+        hasEndDate: !!currentEvent.end_date
+      });
+      
       const method = isEditing ? 'PUT' : 'POST';
       const endpoint = '/api/admin/sector-content';
       
-      const body = {
+      const requestData = {
         type: 'event',
         sectorId,
         data: {
           ...currentEvent,
-          sector_id: sectorId
+          sector_id: sectorId,
+          title: currentEvent.title?.trim(),
+          description: currentEvent.description?.trim(),
+          location: currentEvent.location?.trim()
         }
       };
+      
+      // Log detalhado dos dados sendo enviados
+      console.log('📤 [FRONTEND] Dados da requisição:');
+      console.log('  Método:', method);
+      console.log('  Endpoint:', endpoint);
+      console.log('  Payload:', JSON.stringify(requestData, null, 2));
 
       const response = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(requestData)
       });
+      
+      console.log('📥 [FRONTEND] Resposta da API:');
+      console.log('  Status:', response.status);
+      console.log('  Status Text:', response.statusText);
+      console.log('  OK:', response.ok);
+
+      const responseData = await response.json();
+      console.log('📥 [FRONTEND] Dados da resposta:', responseData);
 
       if (!response.ok) {
-        throw new Error('Erro ao salvar evento');
+        console.error('❌ [FRONTEND] Erro na resposta da API:', {
+          status: response.status,
+          statusText: response.statusText,
+          responseData
+        });
+        
+        // Tratamento específico de erros
+        let errorMessage = 'Erro ao salvar evento';
+        
+        if (responseData?.error) {
+          errorMessage = responseData.error;
+        } else if (responseData?.message) {
+          errorMessage = responseData.message;
+        }
+        
+        if (responseData?.missing) {
+          const missingFields = Object.entries(responseData.missing)
+            .filter(([_, missing]) => missing)
+            .map(([field, _]) => field);
+          
+          if (missingFields.length > 0) {
+            errorMessage += '\n\nCampos obrigatórios faltando: ' + missingFields.join(', ');
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
-
+      
+      console.log('✅ [FRONTEND] Evento salvo com sucesso:', responseData);
+      
+      // Show success message briefly
+      console.log('🎉 [FRONTEND] Operação realizada com sucesso - atualizando dados...');
+      
+      // Refresh data to ensure consistency
       await onRefresh();
+      
+      // Close modal only after success
       handleCloseModal();
-    } catch (error) {
-      console.error('Erro ao salvar evento:', error);
-      alert('Erro ao salvar evento. Tente novamente.');
+      
+    } catch (error: any) {
+      console.error('💥 [FRONTEND] Erro crítico ao salvar evento:');
+      console.error('  Tipo:', error.constructor?.name || 'Unknown');
+      console.error('  Mensagem:', error.message);
+      console.error('  Stack:', error.stack);
+      
+      // Show user-friendly error message
+      const userMessage = error.message.includes('fetch')
+        ? 'Erro de conexão. Verifique sua internet e tente novamente.'
+        : error.message || 'Erro desconhecido ao salvar evento. Tente novamente.';
+        
+      setSaveError(userMessage);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -203,51 +331,120 @@ export function EventsManagement({
                 {isEditing ? 'Editar Evento' : 'Novo Evento'}
               </h2>
               
+              {/* Error display */}
+              {saveError && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800 whitespace-pre-line">{saveError}</p>
+                    </div>
+                    <div className="ml-auto pl-3">
+                      <button
+                        type="button"
+                        onClick={() => setSaveError(null)}
+                        className="inline-flex text-red-400 hover:text-red-600"
+                      >
+                        <span className="sr-only">Fechar</span>
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <form onSubmit={handleSaveEvent} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Título
+                    Título <span className="text-red-500">*</span>
+                    <span className="text-xs text-gray-500 ml-1">
+                      ({currentEvent.title?.length || 0}/255)
+                    </span>
                   </label>
                   <input
                     type="text"
                     value={currentEvent.title || ''}
                     onChange={(e) => setCurrentEvent({ ...currentEvent, title: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary"
+                    className={`w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary ${
+                      currentEvent.title && (currentEvent.title.length < 3 || currentEvent.title.length > 255)
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-300'
+                    }`}
+                    placeholder="Digite o título do evento..."
+                    maxLength={255}
                     required
                   />
+                  {currentEvent.title && currentEvent.title.length < 3 && (
+                    <p className="text-xs text-red-600 mt-1">Mínimo de 3 caracteres</p>
+                  )}
+                  {currentEvent.title && currentEvent.title.length > 255 && (
+                    <p className="text-xs text-red-600 mt-1">Máximo de 255 caracteres</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Descrição
+                    Descrição <span className="text-red-500">*</span>
+                    <span className="text-xs text-gray-500 ml-1">
+                      ({currentEvent.description?.length || 0}/2000)
+                    </span>
                   </label>
                   <textarea
                     value={currentEvent.description || ''}
                     onChange={(e) => setCurrentEvent({ ...currentEvent, description: e.target.value })}
                     rows={4}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary"
+                    className={`w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary ${
+                      currentEvent.description && (currentEvent.description.length < 10 || currentEvent.description.length > 2000)
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-300'
+                    }`}
+                    placeholder="Digite a descrição do evento..."
+                    maxLength={2000}
                     required
                   />
+                  {currentEvent.description && currentEvent.description.length < 10 && (
+                    <p className="text-xs text-red-600 mt-1">Mínimo de 10 caracteres</p>
+                  )}
+                  {currentEvent.description && currentEvent.description.length > 2000 && (
+                    <p className="text-xs text-red-600 mt-1">Máximo de 2.000 caracteres</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Local
+                    Local <span className="text-red-500">*</span>
+                    <span className="text-xs text-gray-500 ml-1">
+                      ({currentEvent.location?.length || 0}/255)
+                    </span>
                   </label>
                   <input
                     type="text"
                     value={currentEvent.location || ''}
                     onChange={(e) => setCurrentEvent({ ...currentEvent, location: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary"
+                    className={`w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary ${
+                      currentEvent.location && currentEvent.location.length > 255
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-300'
+                    }`}
                     placeholder="Ex: Sala de reuniões, Auditório, Online"
+                    maxLength={255}
                     required
                   />
+                  {currentEvent.location && currentEvent.location.length > 255 && (
+                    <p className="text-xs text-red-600 mt-1">Máximo de 255 caracteres</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Data/Hora de Início
+                      Data/Hora de Início <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="datetime-local"
@@ -256,7 +453,7 @@ export function EventsManagement({
                         ...currentEvent, 
                         start_date: new Date(e.target.value).toISOString() 
                       })}
-                      className="w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                       required
                     />
                   </div>
@@ -307,15 +504,27 @@ export function EventsManagement({
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                    disabled={isSaving}
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                    disabled={isSaving}
+                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center space-x-2"
                   >
-                    Salvar
+                    {isSaving ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        <span>Salvando...</span>
+                      </>
+                    ) : (
+                      <span>Salvar</span>
+                    )}
                   </button>
                 </div>
               </form>

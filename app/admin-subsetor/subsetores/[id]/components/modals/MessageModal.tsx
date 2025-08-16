@@ -1,7 +1,7 @@
 // Modal para envio de mensagens e notificações
 
 import { useState } from 'react';
-import { Message, Group, User } from '../../types/subsector.types';
+import { Message, MessageType, Group, User } from '../../types/subsector.types';
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -82,7 +82,7 @@ export function MessageModal({
               </label>
               <select
                 value={currentMessage.type}
-                onChange={(e) => onChange(prev => ({...prev, type: e.target.value}))}
+                onChange={(e) => onChange(prev => ({...prev, type: e.target.value as MessageType}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
               >
                 <option value="general">Geral</option>

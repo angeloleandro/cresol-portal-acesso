@@ -28,47 +28,6 @@ export function NewsManagement({
   onDelete
 }: NewsManagementProps) {
   
-  // LOGS DETALHADOS PARA DEBUG DE RASCUNHOS
-  console.log('\n📰📰📰 [NEWSMANAGEMENT] COMPONENTE RENDERIZADO 📰📰📰');
-  console.log('📰 [NEWSMANAGEMENT] Props recebidas:');
-  console.log('  sectorId:', sectorId);
-  console.log('  showDrafts:', showDrafts);
-  console.log('  totalDraftNewsCount:', totalDraftNewsCount);
-  console.log('  news.length:', news.length);
-  
-  // Análise das notícias
-  if (news.length > 0) {
-    const newsAnalysis = {
-      total: news.length,
-      published: news.filter(n => n.is_published === true).length,
-      drafts: news.filter(n => n.is_published === false).length,
-      null_published: news.filter(n => n.is_published === null || n.is_published === undefined).length
-    };
-    
-    console.log('📰 [NEWSMANAGEMENT] Análise das notícias recebidas:');
-    console.log('  Total:', newsAnalysis.total);
-    console.log('  Publicadas (is_published = true):', newsAnalysis.published);
-    console.log('  Rascunhos (is_published = false):', newsAnalysis.drafts);
-    console.log('  is_published = null/undefined:', newsAnalysis.null_published);
-    
-    console.log('📰 [NEWSMANAGEMENT] Amostra dos primeiros 3 itens:');
-    news.slice(0, 3).forEach((item, index) => {
-      console.log(`  [${index + 1}] ID: ${item.id}`);
-      console.log(`       Title: "${item.title}"`);
-      console.log(`       is_published: ${item.is_published} (tipo: ${typeof item.is_published})`);
-      console.log(`       is_featured: ${item.is_featured}`);
-    });
-  } else {
-    console.log('📰 [NEWSMANAGEMENT] ❌ NENHUMA NOTÍCIA RECEBIDA - Array vazio!');
-  }
-  
-  console.log('📰 [NEWSMANAGEMENT] Estado showDrafts:', showDrafts);
-  console.log('📰 [NEWSMANAGEMENT] Mensagem que será exibida:', showDrafts 
-    ? 'Nenhum rascunho de notícia encontrado'
-    : 'Nenhuma notícia publicada ainda'
-  );
-  console.log('📰📰📰 [NEWSMANAGEMENT] FIM DOS LOGS 📰📰📰\n');
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentNews, setCurrentNews] = useState<Partial<SectorNews>>({
@@ -117,8 +76,48 @@ export function NewsManagement({
     imageUpload.handleRemoveImage();
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   const handleSaveNews = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Reset error state
+    setSaveError(null);
+
+    // Validação detalhada dos campos obrigatórios
+    const validationErrors: string[] = [];
+    
+    if (!currentNews.title?.trim()) {
+      validationErrors.push('Título é obrigatório');
+    } else if (currentNews.title.length < 3) {
+      validationErrors.push('Título deve ter pelo menos 3 caracteres');
+    } else if (currentNews.title.length > 255) {
+      validationErrors.push('Título deve ter no máximo 255 caracteres');
+    }
+    
+    if (!currentNews.summary?.trim()) {
+      validationErrors.push('Resumo é obrigatório');
+    } else if (currentNews.summary.length < 10) {
+      validationErrors.push('Resumo deve ter pelo menos 10 caracteres');
+    } else if (currentNews.summary.length > 500) {
+      validationErrors.push('Resumo deve ter no máximo 500 caracteres');
+    }
+    
+    if (!currentNews.content?.trim()) {
+      validationErrors.push('Conteúdo é obrigatório');
+    } else if (currentNews.content.length < 20) {
+      validationErrors.push('Conteúdo deve ter pelo menos 20 caracteres');
+    } else if (currentNews.content.length > 10000) {
+      validationErrors.push('Conteúdo deve ter no máximo 10.000 caracteres');
+    }
+    
+    if (validationErrors.length > 0) {
+      setSaveError('Erros de validação:\n\n' + validationErrors.join('\n'));
+      return;
+    }
+
+    setIsSaving(true);
 
     try {
       // Se há uma imagem para recortar
@@ -135,31 +134,65 @@ export function NewsManagement({
       const method = isEditing ? 'PUT' : 'POST';
       const endpoint = '/api/admin/sector-content';
       
-      const body = {
+      const requestData = {
         type: 'news',
         sectorId,
         data: {
           ...currentNews,
           image_url: finalImageUrl,
-          sector_id: sectorId
+          sector_id: sectorId,
+          title: currentNews.title?.trim(),
+          summary: currentNews.summary?.trim(),
+          content: currentNews.content?.trim()
         }
       };
-
+      
       const response = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(requestData)
       });
+      
+      const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error('Erro ao salvar notícia');
+        // Tratamento específico de erros
+        let errorMessage = 'Erro ao salvar notícia';
+        
+        if (responseData?.error) {
+          errorMessage = responseData.error;
+        } else if (responseData?.message) {
+          errorMessage = responseData.message;
+        }
+        
+        if (responseData?.missing) {
+          const missingFields = Object.entries(responseData.missing)
+            .filter(([_, missing]) => missing)
+            .map(([field, _]) => field);
+          
+          if (missingFields.length > 0) {
+            errorMessage += '\n\nCampos obrigatórios faltando: ' + missingFields.join(', ');
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
-
+      
+      // Refresh data to ensure consistency
       await onRefresh();
+      
+      // Close modal only after success
       handleCloseModal();
-    } catch (error) {
-      console.error('Erro ao salvar notícia:', error);
-      alert('Erro ao salvar notícia. Tente novamente.');
+      
+    } catch (error: any) {
+      
+      const userMessage = error.message.includes('fetch')
+        ? 'Erro de conexão. Verifique sua internet e tente novamente.'
+        : error.message || 'Erro desconhecido ao salvar notícia. Tente novamente.';
+        
+      setSaveError(userMessage);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -261,44 +294,117 @@ export function NewsManagement({
                 {isEditing ? 'Editar Notícia' : 'Nova Notícia'}
               </h2>
               
+              {/* Error display */}
+              {saveError && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800 whitespace-pre-line">{saveError}</p>
+                    </div>
+                    <div className="ml-auto pl-3">
+                      <button
+                        type="button"
+                        onClick={() => setSaveError(null)}
+                        className="inline-flex text-red-400 hover:text-red-600"
+                      >
+                        <span className="sr-only">Fechar</span>
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <form onSubmit={handleSaveNews} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Título
+                    Título <span className="text-red-500">*</span>
+                    <span className="text-xs text-gray-500 ml-1">
+                      ({currentNews.title?.length || 0}/255)
+                    </span>
                   </label>
                   <input
                     type="text"
                     value={currentNews.title || ''}
                     onChange={(e) => setCurrentNews({ ...currentNews, title: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary"
+                    className={`w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary ${
+                      currentNews.title && (currentNews.title.length < 3 || currentNews.title.length > 255)
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-300'
+                    }`}
+                    placeholder="Digite o título da notícia..."
+                    maxLength={255}
                     required
                   />
+                  {currentNews.title && currentNews.title.length < 3 && (
+                    <p className="text-xs text-red-600 mt-1">Mínimo de 3 caracteres</p>
+                  )}
+                  {currentNews.title && currentNews.title.length > 255 && (
+                    <p className="text-xs text-red-600 mt-1">Máximo de 255 caracteres</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Resumo
+                    Resumo <span className="text-red-500">*</span>
+                    <span className="text-xs text-gray-500 ml-1">
+                      ({currentNews.summary?.length || 0}/500)
+                    </span>
                   </label>
                   <textarea
                     value={currentNews.summary || ''}
                     onChange={(e) => setCurrentNews({ ...currentNews, summary: e.target.value })}
                     rows={2}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary"
+                    className={`w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary ${
+                      currentNews.summary && (currentNews.summary.length < 10 || currentNews.summary.length > 500)
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-300'
+                    }`}
+                    placeholder="Digite um resumo breve da notícia..."
+                    maxLength={500}
                     required
                   />
+                  {currentNews.summary && currentNews.summary.length < 10 && (
+                    <p className="text-xs text-red-600 mt-1">Mínimo de 10 caracteres</p>
+                  )}
+                  {currentNews.summary && currentNews.summary.length > 500 && (
+                    <p className="text-xs text-red-600 mt-1">Máximo de 500 caracteres</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Conteúdo
+                    Conteúdo <span className="text-red-500">*</span>
+                    <span className="text-xs text-gray-500 ml-1">
+                      ({currentNews.content?.length || 0}/10000)
+                    </span>
                   </label>
                   <textarea
                     value={currentNews.content || ''}
                     onChange={(e) => setCurrentNews({ ...currentNews, content: e.target.value })}
                     rows={6}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary"
+                    className={`w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary ${
+                      currentNews.content && (currentNews.content.length < 20 || currentNews.content.length > 10000)
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-300'
+                    }`}
+                    placeholder="Digite o conteúdo completo da notícia..."
+                    maxLength={10000}
                     required
                   />
+                  {currentNews.content && currentNews.content.length < 20 && (
+                    <p className="text-xs text-red-600 mt-1">Mínimo de 20 caracteres</p>
+                  )}
+                  {currentNews.content && currentNews.content.length > 10000 && (
+                    <p className="text-xs text-red-600 mt-1">Máximo de 10.000 caracteres</p>
+                  )}
                 </div>
 
                 <div>
@@ -359,16 +465,35 @@ export function NewsManagement({
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                    disabled={isSaving}
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    disabled={imageUpload.uploadingImage}
-                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    disabled={isSaving || imageUpload.uploadingImage}
+                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center space-x-2"
                   >
-                    {imageUpload.uploadingImage ? 'Salvando...' : 'Salvar'}
+                    {isSaving ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        <span>Salvando...</span>
+                      </>
+                    ) : imageUpload.uploadingImage ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        <span>Processando imagem...</span>
+                      </>
+                    ) : (
+                      <span>Salvar</span>
+                    )}
                   </button>
                 </div>
               </form>
