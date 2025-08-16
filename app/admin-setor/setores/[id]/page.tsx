@@ -93,7 +93,6 @@ export default function SectorContentManagement() {
       .single();
     
     if (error) {
-      console.error('Erro ao buscar setor:', error);
       return;
     }
     
@@ -128,7 +127,6 @@ export default function SectorContentManagement() {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error('Erro ao buscar notícias:', error);
       return;
     }
     
@@ -163,7 +161,6 @@ export default function SectorContentManagement() {
       .order('start_date', { ascending: true });
     
     if (error) {
-      console.error('Erro ao buscar eventos:', error);
       return;
     }
     
@@ -222,7 +219,6 @@ export default function SectorContentManagement() {
   useEffect(() => {
     // Só executar se já estivermos autorizados e tivermos um sectorId
     if (isAuthorized && sectorId && !loading) {
-      console.log('🔄 showDrafts mudou para:', showDrafts);
       fetchNews();
       fetchEvents();
     }
@@ -306,7 +302,6 @@ export default function SectorContentManagement() {
       
       return optimizedUrl;
     } catch (error) {
-      console.error('Erro ao fazer upload da imagem:', error);
       throw error;
     }
   };
@@ -314,23 +309,7 @@ export default function SectorContentManagement() {
   const handleNewsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('\n🔷🔷🔷 INÍCIO DO PROCESSO DE CRIAÇÃO DE NOTÍCIA 🔷🔷🔷');
-    console.log('⏰ Timestamp:', new Date().toISOString());
-    console.log('📋 [FRONTEND] Dados do formulário:', JSON.stringify(newsForm, null, 2));
-    console.log('👤 [FRONTEND] Usuário atual:', {
-      id: user?.id,
-      email: user?.email,
-      metadata: user?.user_metadata
-    });
-    console.log('👤 [FRONTEND] Profile:', {
-      id: profile?.id,
-      role: profile?.role,
-      full_name: profile?.full_name
-    });
-    console.log('🆔 [FRONTEND] Setor ID:', sectorId);
-    console.log('🔐 [FRONTEND] isAuthenticated:', isAuthenticated);
-    console.log('🔐 [FRONTEND] isSectorAdmin:', isSectorAdmin);
-    console.log('🔐 [FRONTEND] isAuthorized:', isAuthorized);
+    // Authentication info available in user and profile objects
     
 
     try {
@@ -338,9 +317,7 @@ export default function SectorContentManagement() {
       
       // Se houver uma nova imagem, fazer o upload
       if (newsImageFile) {
-        console.log('🖼️ [FRONTEND] Fazendo upload de imagem...');
         imageUrl = await uploadNewsImage() || '';
-        console.log('🖼️ [FRONTEND] URL da imagem:', imageUrl);
       }
       
       const newsData = {
@@ -352,12 +329,9 @@ export default function SectorContentManagement() {
         image_url: imageUrl
       };
       
-      console.log('📦 [FRONTEND] Dados preparados para envio:', JSON.stringify(newsData, null, 2));
-      console.log('🔍 [FRONTEND] Modo:', newsForm.id ? 'UPDATE' : 'CREATE');
       
       if (newsForm.id) {
         // Atualizar notícia existente via API
-        console.log('🔄 [FRONTEND] Atualizando notícia existente...');
         const response = await fetch('/api/admin/sector-content', {
           method: 'PUT',
           headers: {
@@ -370,32 +344,19 @@ export default function SectorContentManagement() {
           })
         });
         
-        console.log('📥 [FRONTEND] Resposta do UPDATE:', {
-          status: response.status,
-          statusText: response.statusText,
-          ok: response.ok,
-          headers: Object.fromEntries(response.headers.entries())
-        });
+        // Response status available for debugging if needed
         
         if (!response.ok) {
           const error = await response.json();
-          console.error('❌ [FRONTEND] Erro no UPDATE:', JSON.stringify(error, null, 2));
           throw new Error(error.error || 'Erro ao atualizar notícia');
         }
       } else {
         // Criar nova notícia via API
-        console.log('➕ [FRONTEND] Criando nova notícia...');
-        console.log('📡 [FRONTEND] Enviando POST para /api/admin/sector-content');
         
         const requestBody = {
           type: 'sector_news',
           data: newsData
         };
-        
-        console.log('📤 [FRONTEND] Body completo da requisição:', JSON.stringify(requestBody, null, 2));
-        console.log('📤 [FRONTEND] Headers da requisição:', {
-          'Content-Type': 'application/json'
-        });
         
         const response = await fetch('/api/admin/sector-content', {
           method: 'POST',
@@ -406,34 +367,20 @@ export default function SectorContentManagement() {
           body: JSON.stringify(requestBody)
         });
         
-        console.log('📥 [FRONTEND] Resposta recebida do servidor:');
-        console.log('  Status:', response.status);
-        console.log('  StatusText:', response.statusText);
-        console.log('  OK:', response.ok);
-        console.log('  Headers:', Object.fromEntries(response.headers.entries()));
         
         const responseText = await response.text();
-        console.log('📥 [FRONTEND] Response body (raw):', responseText);
         
         let result;
         try {
           result = JSON.parse(responseText);
-          console.log('📥 [FRONTEND] Response body (parsed):', JSON.stringify(result, null, 2));
         } catch (parseError) {
-          console.error('❌ [FRONTEND] Erro ao fazer parse da resposta:', parseError);
-          console.error('❌ [FRONTEND] Resposta raw:', responseText);
           throw new Error('Resposta inválida do servidor');
         }
         
         if (!response.ok) {
-          console.error('❌❌❌ [FRONTEND] ERRO NA CRIAÇÃO:');
-          console.error('  Status:', response.status);
-          console.error('  Erro:', JSON.stringify(result, null, 2));
           throw new Error(result.error || 'Erro ao criar notícia');
         }
         
-        console.log('✅✅✅ [FRONTEND] NOTÍCIA CRIADA COM SUCESSO!');
-        console.log('  Resultado:', JSON.stringify(result, null, 2));
       }
       
       // Limpar formulário e atualizar lista
@@ -445,15 +392,7 @@ export default function SectorContentManagement() {
       }
       setShowNewsForm(false);
       fetchNews();
-      console.log('🔄 [FRONTEND] Lista de notícias atualizada');
-      console.log('🔷🔷🔷 FIM DO PROCESSO - SUCESSO 🔷🔷🔷\n');
     } catch (error: any) {
-      console.error('\n💥💥💥 [FRONTEND] ERRO FATAL AO SALVAR NOTÍCIA:');
-      console.error('  Mensagem:', error.message);
-      console.error('  Tipo:', error.constructor.name);
-      console.error('  Stack:', error.stack);
-      console.error('  Objeto completo:', error);
-      console.error('🔷🔷🔷 FIM DO PROCESSO - ERRO 🔷🔷🔷\n');
       alert(`Erro ao salvar notícia: ${error.message}`);
     }
   };
@@ -514,7 +453,6 @@ export default function SectorContentManagement() {
       setShowEventForm(false);
       fetchEvents();
     } catch (error) {
-      console.error('Erro ao salvar evento:', error);
       alert('Erro ao salvar evento. Tente novamente.');
     }
   };
@@ -574,7 +512,6 @@ export default function SectorContentManagement() {
       
       fetchNews();
     } catch (error) {
-      console.error('Erro ao excluir notícia:', error);
       alert('Erro ao excluir notícia. Tente novamente.');
     }
   };
@@ -594,7 +531,6 @@ export default function SectorContentManagement() {
       
       fetchEvents();
     } catch (error) {
-      console.error('Erro ao excluir evento:', error);
       alert('Erro ao excluir evento. Tente novamente.');
     }
   };
@@ -736,7 +672,6 @@ export default function SectorContentManagement() {
                   <button
                     onClick={async () => {
                       const newShowDrafts = !showDrafts;
-                      console.log(`🔄 Alternando para: ${newShowDrafts ? 'Mostrar' : 'Ocultar'} rascunhos`);
                       setShowDrafts(newShowDrafts);
                     }}
                     className="flex items-center space-x-2 bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
@@ -991,7 +926,6 @@ export default function SectorContentManagement() {
                   <button
                     onClick={async () => {
                       const newShowDrafts = !showDrafts;
-                      console.log(`🔄 [Eventos] Alternando para: ${newShowDrafts ? 'Mostrar' : 'Ocultar'} rascunhos`);
                       
                       try {
                         // Buscar eventos diretamente via Supabase
@@ -1007,15 +941,12 @@ export default function SectorContentManagement() {
                         const { data, error } = await query.order('start_date', { ascending: true });
                         
                         if (error) {
-                          console.error('❌ Erro ao buscar eventos:', error);
                           return;
                         }
                         
-                        console.log(`✅ Carregando ${data?.length || 0} eventos`);
                         setEvents(data || []);
                         setShowDrafts(newShowDrafts);
                       } catch (error) {
-                        console.error('❌ Erro:', error);
                       }
                     }}
                     className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-sm transition-colors"

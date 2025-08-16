@@ -215,31 +215,13 @@ export default function SubsectorManagement() {
       <main className="max-w-7xl mx-auto">
         {activeTab === 'events' && (
           <SubsectorEventsManagement
-            sectorId={subsectorId}
-            events={events.map(event => adaptSubsectorEventToSector(event))}
-            showDrafts={showDrafts}
-            totalDraftEventsCount={totalDraftEventsCount}
-            onToggleDrafts={handleToggleDrafts}
-            onRefresh={refreshData}
-            onDelete={async (id) => {
-              // The SubsectorEventsManagement component will handle the deletion
-              await refreshData();
-            }}
+            subsectorId={subsectorId}
           />
         )}
 
         {activeTab === 'news' && (
           <SubsectorNewsManagement
             sectorId={subsectorId}
-            news={news.map(newsItem => adaptSubsectorNewsToSector(newsItem))}
-            showDrafts={showDrafts}
-            totalDraftNewsCount={totalDraftNewsCount}
-            onToggleDrafts={handleToggleDrafts}
-            onRefresh={refreshData}
-            onDelete={async (id) => {
-              // The SubsectorNewsManagement component will handle the deletion
-              await refreshData();
-            }}
           />
         )}
 

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { ADMIN_LAYOUT, ADMIN_TYPOGRAPHY, ADMIN_COLORS, ADMIN_BUTTONS, ADMIN_FORMS, ADMIN_MODALS, ADMIN_CARDS, ADMIN_NAVIGATION, ADMIN_MEDIA, ADMIN_STATES, ADMIN_ICONS, ADMIN_VALIDATION, ADMIN_DIMENSIONS } from '@/lib/constants/admin-config';
 
 interface Sector {
   id: string;
@@ -42,18 +43,11 @@ export default function SectorSystemsManagement() {
     name: '',
     description: '',
     url: '',
-    icon: '/icons/default-app.svg'
+    icon: ADMIN_ICONS.system.default as string
   });
   
   // Lista de ícones disponíveis
-  const availableIcons = [
-    '/icons/default-app.svg',
-    '/icons/app-1.svg',
-    '/icons/app-2.svg',
-    '/icons/app-3.svg',
-    '/icons/app-4.svg',
-    '/icons/app-5.svg'
-  ];
+  const availableIcons = ADMIN_ICONS.system.available;
 
   const fetchSector = useCallback(async () => {
     const { data, error } = await supabase
@@ -63,7 +57,7 @@ export default function SectorSystemsManagement() {
       .single();
     
     if (error) {
-      console.error('Erro ao buscar setor:', error);
+      // Debug log removed
       return;
     }
     
@@ -78,7 +72,7 @@ export default function SectorSystemsManagement() {
       .order('name', { ascending: true });
     
     if (error) {
-      console.error('Erro ao buscar sistemas:', error);
+      // Debug log removed
       return;
     }
     
@@ -167,11 +161,11 @@ export default function SectorSystemsManagement() {
       }
       
       // Limpar formulário e atualizar lista
-      setSystemForm({ id: '', name: '', description: '', url: '', icon: '/icons/default-app.svg' });
+      setSystemForm({ id: '', name: '', description: '', url: '', icon: ADMIN_ICONS.system.default as string });
       setShowSystemForm(false);
       fetchSystems();
     } catch (error) {
-      console.error('Erro ao salvar sistema:', error);
+      // Debug log removed
       alert('Erro ao salvar sistema. Tente novamente.');
     }
   };
@@ -182,14 +176,14 @@ export default function SectorSystemsManagement() {
       name: system.name,
       description: system.description || '',
       url: system.url,
-      icon: system.icon
+      icon: system.icon || (ADMIN_ICONS.system.default as string)
     });
     
     setShowSystemForm(true);
   };
 
   const deleteSystem = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este sistema?')) return;
+    if (!confirm(ADMIN_VALIDATION.confirm.deleteSystem)) return;
     
     try {
       const { error } = await supabase
@@ -201,7 +195,7 @@ export default function SectorSystemsManagement() {
       
       fetchSystems();
     } catch (error) {
-      console.error('Erro ao excluir sistema:', error);
+      // Debug log removed
       alert('Erro ao excluir sistema. Tente novamente.');
     }
   };
@@ -213,8 +207,8 @@ export default function SectorSystemsManagement() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
+      <div className={ADMIN_STATES.loading.container}>
+        <div className={ADMIN_STATES.loading.content}>
 <UnifiedLoadingSpinner 
         fullScreen
         size="large" 
@@ -227,10 +221,10 @@ export default function SectorSystemsManagement() {
 
   if (!sector) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">Setor não encontrado.</p>
-          <Link href="/admin-setor" className="mt-4 text-primary hover:underline block">
+      <div className={ADMIN_STATES.error.container}>
+        <div className={ADMIN_STATES.error.content}>
+          <p className={ADMIN_STATES.error.message}>Setor não encontrado.</p>
+          <Link href="/admin-setor" className={`mt-4 ${ADMIN_BUTTONS.link} block`}>
             Voltar para o Painel
           </Link>
         </div>
@@ -240,10 +234,10 @@ export default function SectorSystemsManagement() {
 
   if (!isAuthorized) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">Você não tem autorização para acessar esta página.</p>
-          <Link href="/admin-setor" className="mt-4 text-primary hover:underline block">
+      <div className={ADMIN_STATES.error.container}>
+        <div className={ADMIN_STATES.error.content}>
+          <p className={ADMIN_STATES.error.message}>Você não tem autorização para acessar esta página.</p>
+          <Link href="/admin-setor" className={`mt-4 ${ADMIN_BUTTONS.link} block`}>
             Voltar para o Painel
           </Link>
         </div>
@@ -252,38 +246,38 @@ export default function SectorSystemsManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`${ADMIN_LAYOUT.container.fullHeight} ${ADMIN_COLORS.backgrounds.page}`}>
       {/* Header */}
-      <header className="bg-white border border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <header className={`${ADMIN_COLORS.backgrounds.card} ${ADMIN_COLORS.borders.default}`}>
+        <div className={`${ADMIN_LAYOUT.container.maxWidth} ${ADMIN_LAYOUT.container.margin} ${ADMIN_LAYOUT.header.padding.container} flex items-center justify-between`}>
           <div className="flex items-center">
-            <div className="relative h-10 w-24 mr-4">
+            <div className={`relative ${ADMIN_LAYOUT.header.logoHeight} ${ADMIN_LAYOUT.header.logoWidth} ${ADMIN_LAYOUT.header.margin}`}>
               <OptimizedImage 
-                src="/logo-horizontal-laranja.svg" 
-                alt="Logo Cresol" 
+                src={ADMIN_MEDIA.logo.src}
+                alt={ADMIN_MEDIA.logo.alt}
                 fill
                 className="object-contain"
               />
             </div>
-            <h1 className="text-xl font-semibold text-gray-800">Painel Admin Setorial</h1>
+            <h1 className={`${ADMIN_TYPOGRAPHY.headings.section} text-gray-800`}>Painel Admin Setorial</h1>
           </div>
           
           <div className="flex items-center">
-            <Link href="/admin-setor" className="text-sm text-gray-600 mr-4 hover:text-primary">
+            <Link href="/admin-setor" className={ADMIN_NAVIGATION.links.header}>
               Painel
             </Link>
-            <Link href={`/admin-setor/setores/${sectorId}`} className="text-sm text-gray-600 mr-4 hover:text-primary">
+            <Link href={`/admin-setor/setores/${sectorId}`} className={ADMIN_NAVIGATION.links.header}>
               Conteúdo
             </Link>
-            <Link href="/dashboard" className="text-sm text-gray-600 mr-4 hover:text-primary">
+            <Link href="/dashboard" className={ADMIN_NAVIGATION.links.header}>
               Dashboard
             </Link>
-            <span className="text-sm text-gray-600 mr-4">
+            <span className={`${ADMIN_TYPOGRAPHY.sizes.small} text-gray-600 mr-4`}>
               Olá, {user?.user_metadata?.full_name || user?.email}
             </span>
             <button 
               onClick={handleLogout}
-              className="text-sm text-primary hover:text-primary-dark"
+              className={`${ADMIN_TYPOGRAPHY.sizes.small} ${ADMIN_COLORS.primary.main} ${ADMIN_COLORS.primary.hover}`}
             >
               Sair
             </button>
@@ -292,41 +286,41 @@ export default function SectorSystemsManagement() {
       </header>
 
       {/* Conteúdo principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
+      <main className={`${ADMIN_LAYOUT.container.maxWidth} ${ADMIN_LAYOUT.container.margin} ${ADMIN_LAYOUT.header.padding.content}`}>
+        <div className={ADMIN_LAYOUT.spacing.subsection}>
           <Link 
             href="/admin-setor" 
-            className="inline-flex items-center text-sm text-cresol-gray hover:text-primary mb-4"
+            className={ADMIN_NAVIGATION.links.back}
           >
-            <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <svg className={`${ADMIN_DIMENSIONS.icon.medium} mr-1`} fill="none" stroke="currentColor" viewBox={ADMIN_ICONS.svg.back.viewBox}>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={ADMIN_ICONS.svg.back.path} />
             </svg>
             Voltar para o Painel
           </Link>
           
-          <h2 className="text-2xl font-bold text-primary">{sector.name}</h2>
-          <p className="text-cresol-gray">Gerenciar sistemas do setor</p>
+          <h2 className={ADMIN_TYPOGRAPHY.headings.page}>{sector.name}</h2>
+          <p className={ADMIN_TYPOGRAPHY.text.body}>Gerenciar sistemas do setor</p>
         </div>
 
-        <div className="mb-6 flex justify-between items-center">
+        <div className={`${ADMIN_LAYOUT.spacing.subsection} flex justify-between items-center`}>
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">Sistemas</h3>
-            <p className="text-sm text-gray-600">Gerencie os sistemas associados a este setor</p>
+            <h3 className={`${ADMIN_TYPOGRAPHY.headings.subsection} text-gray-800`}>Sistemas</h3>
+            <p className={`${ADMIN_TYPOGRAPHY.text.help} text-gray-600`}>Gerencie os sistemas associados a este setor</p>
           </div>
           <button
             onClick={() => setShowSystemForm(true)}
-            className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
+            className={ADMIN_BUTTONS.primary}
           >
             Adicionar Sistema
           </button>
         </div>
 
         {/* Lista de sistemas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className={`${ADMIN_LAYOUT.grid.responsive} ${ADMIN_LAYOUT.spacing.section}`}>
           {systems.map((system) => (
-            <div key={system.id} className="bg-white rounded-lg  p-6 border border-gray-200">
-              <div className="flex items-center mb-4">
-                <div className="h-12 w-12 mr-4">
+            <div key={system.id} className={`${ADMIN_CARDS.base} ${ADMIN_LAYOUT.header.padding.card}`}>
+              <div className={`flex items-center ${ADMIN_LAYOUT.spacing.item}`}>
+                <div className={`${ADMIN_DIMENSIONS.icon.xlarge} mr-4`}>
                   <OptimizedImage 
                     src={system.icon} 
                     alt={system.name}
@@ -336,21 +330,21 @@ export default function SectorSystemsManagement() {
                   />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-800">{system.name}</h4>
-                  <p className="text-sm text-gray-600">{system.description}</p>
+                  <h4 className={`font-semibold text-gray-800`}>{system.name}</h4>
+                  <p className={`${ADMIN_TYPOGRAPHY.sizes.small} text-gray-600`}>{system.description}</p>
                 </div>
               </div>
               
-              <div className="flex space-x-2">
+              <div className={ADMIN_CARDS.actions}>
                 <button
                   onClick={() => editSystem(system)}
-                  className="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-md text-sm hover:bg-blue-100"
+                  className={`flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-md ${ADMIN_TYPOGRAPHY.sizes.small} hover:bg-blue-100`}
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => deleteSystem(system.id)}
-                  className="flex-1 bg-red-50 text-red-600 px-3 py-2 rounded-md text-sm hover:bg-red-100"
+                  className={`flex-1 bg-red-50 text-red-600 px-3 py-2 rounded-md ${ADMIN_TYPOGRAPHY.sizes.small} hover:bg-red-100`}
                 >
                   Excluir
                 </button>
@@ -360,72 +354,72 @@ export default function SectorSystemsManagement() {
         </div>
 
         {systems.length === 0 && (
-          <div className="bg-white rounded-lg  p-8 text-center">
-            <p className="text-gray-600">Nenhum sistema cadastrado para este setor.</p>
+          <div className={ADMIN_STATES.empty.container}>
+            <p className={ADMIN_STATES.empty.message}>Nenhum sistema cadastrado para este setor.</p>
           </div>
         )}
 
         {/* Modal do formulário de sistema */}
         {showSystemForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">
+          <div className={ADMIN_MODALS.overlay}>
+            <div className={`${ADMIN_MODALS.container} ${ADMIN_MODALS.content}`}>
+              <h3 className={ADMIN_MODALS.header}>
                 {systemForm.id ? 'Editar Sistema' : 'Adicionar Sistema'}
               </h3>
               
-              <form onSubmit={handleSystemSubmit} className="space-y-4">
+              <form onSubmit={handleSystemSubmit} className={ADMIN_FORMS.fieldset}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={ADMIN_FORMS.label.base}>
                     Nome
                   </label>
                   <input
                     type="text"
                     value={systemForm.name}
                     onChange={(e) => setSystemForm({ ...systemForm, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    className={ADMIN_FORMS.input.base}
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={ADMIN_FORMS.label.base}>
                     Descrição
                   </label>
                   <textarea
                     value={systemForm.description}
                     onChange={(e) => setSystemForm({ ...systemForm, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    className={ADMIN_FORMS.input.textarea.small}
                     rows={3}
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={ADMIN_FORMS.label.base}>
                     URL
                   </label>
                   <input
                     type="url"
                     value={systemForm.url}
                     onChange={(e) => setSystemForm({ ...systemForm, url: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    className={ADMIN_FORMS.input.base}
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={ADMIN_FORMS.label.base}>
                     Ícone
                   </label>
-                  <div className="grid grid-cols-6 gap-2">
+                  <div className={ADMIN_LAYOUT.grid.iconGrid}>
                     {availableIcons.map((icon) => (
                       <button
                         key={icon}
                         type="button"
-                        onClick={() => setSystemForm({ ...systemForm, icon })}
+                        onClick={() => setSystemForm({ ...systemForm, icon: icon as string })}
                         className={`p-2 border rounded-md ${
                           systemForm.icon === icon 
-                            ? 'border-primary bg-primary bg-opacity-10' 
-                            : 'border-gray-300'
+                            ? `${ADMIN_COLORS.borders.focused} ${ADMIN_COLORS.primary.bg} bg-opacity-10` 
+                            : ADMIN_COLORS.borders.light
                         }`}
                       >
                         <OptimizedImage src={icon} alt="Ícone" width={24} height={24} />
@@ -434,20 +428,20 @@ export default function SectorSystemsManagement() {
                   </div>
                 </div>
                 
-                <div className="flex space-x-3 pt-4">
+                <div className={ADMIN_MODALS.footer}>
                   <button
                     type="button"
                     onClick={() => {
                       setShowSystemForm(false);
-                      setSystemForm({ id: '', name: '', description: '', url: '', icon: '/icons/default-app.svg' });
+                      setSystemForm({ id: '', name: '', description: '', url: '', icon: ADMIN_ICONS.system.default });
                     }}
-                    className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300"
+                    className={`flex-1 ${ADMIN_BUTTONS.secondary}`}
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
+                    className={`flex-1 ${ADMIN_BUTTONS.primary}`}
                   >
                     {systemForm.id ? 'Atualizar' : 'Adicionar'}
                   </button>

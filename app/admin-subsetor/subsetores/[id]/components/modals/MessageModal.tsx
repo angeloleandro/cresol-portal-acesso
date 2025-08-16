@@ -31,7 +31,7 @@ export function MessageModal({
     try {
       await onSend();
     } catch (error) {
-      console.error('Erro ao enviar mensagem:', error);
+      // Debug log removed
     }
   };
 

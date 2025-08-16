@@ -31,7 +31,7 @@ export function GroupModal({
     try {
       await onSave();
     } catch (error) {
-      console.error('Erro ao salvar grupo:', error);
+      // Debug log removed
     }
   };
 

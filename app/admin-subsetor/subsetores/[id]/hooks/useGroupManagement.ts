@@ -43,12 +43,12 @@ export function useGroupManagement(subsectorId: string): UseGroupManagementRetur
         );
         setGroups(filteredGroups);
       } else {
-        console.warn('Resposta da API de grupos inválida:', result);
+        // Warning handled silently
         setGroups([]);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      console.error('Erro ao buscar grupos:', errorMessage, { subsectorId, error });
+      // Error handled silently
       setGroups([]);
     }
   }, [subsectorId]);
@@ -85,7 +85,7 @@ export function useGroupManagement(subsectorId: string): UseGroupManagementRetur
       await fetchGroups();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar grupo';
-      console.error('Erro ao salvar grupo:', errorMessage, { subsectorId, currentGroup, error });
+      // Error handled silently
       throw error;
     }
   };

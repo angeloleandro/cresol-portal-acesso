@@ -68,7 +68,6 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
         });
       }
     } catch (err) {
-      console.error('Erro ao buscar subsetor:', err);
       setError('Erro ao carregar dados do subsetor');
     }
   }, [subsectorId, supabase]);
@@ -100,7 +99,7 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
         setTotalDraftEventsCount(0);
       }
     } catch (error) {
-      console.error('Erro ao buscar eventos:', error);
+      // Error handled silently
     }
   }, [subsectorId, supabase, showDrafts]);
 
@@ -131,7 +130,7 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
         setTotalDraftNewsCount(0);
       }
     } catch (error) {
-      console.error('Erro ao buscar notícias:', error);
+      // Error handled silently
     }
   }, [subsectorId, supabase, showDrafts]);
 
@@ -146,7 +145,7 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
       if (error) throw error;
       setSystems(data || []);
     } catch (error) {
-      console.error('Erro ao buscar sistemas:', error);
+      // Error handled silently
     }
   }, [subsectorId, supabase]);
 
@@ -158,13 +157,12 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
         .order('full_name');
         
       if (error) {
-        console.error('Erro ao buscar usuários:', error);
         return;
       }
       
       setUsers(data || []);
     } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
+      // Error handled silently
     }
   }, [supabase]);
 
@@ -176,13 +174,12 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
         .order('name');
 
       if (error) {
-        console.error('Erro ao buscar locais de trabalho:', error);
         return;
       }
 
       setWorkLocations(data || []);
     } catch (error) {
-      console.error('Erro ao buscar locais de trabalho:', error);
+      // Error handled silently
     }
   }, [supabase]);
 

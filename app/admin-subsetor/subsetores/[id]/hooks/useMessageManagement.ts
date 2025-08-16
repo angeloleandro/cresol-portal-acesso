@@ -64,9 +64,11 @@ export function useMessageManagement(): UseMessageManagementReturn {
 
       setIsMessageModalOpen(false);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao enviar mensagem';
-      console.error('Erro ao enviar mensagem:', errorMessage, { subsectorId, currentMessage, error });
-      throw error;
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error((error as Error)?.message || 'Erro ao enviar mensagem');
+      }
     }
   };
 

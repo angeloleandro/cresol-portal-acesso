@@ -7,10 +7,12 @@ import { supabase } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { SUBSECTOR_ROLES, SUBSECTOR_CARD_LAYOUT, SUBSECTOR_EMPTY_STATE, SUBSECTOR_PAGE_CONFIG, SUBSECTOR_ACTIONS, SUBSECTOR_ERRORS, SUBSECTOR_STATS, SUBSECTOR_PERMISSIONS } from '@/lib/constants/subsector-config';
+import { ADMIN_LAYOUT, ADMIN_TYPOGRAPHY, ADMIN_COLORS, ADMIN_BUTTONS, ADMIN_MEDIA, ADMIN_STATES, ADMIN_DIMENSIONS } from '@/lib/constants/admin-config';
 
 interface Profile {
   id: string;
-  role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
+  role: keyof typeof SUBSECTOR_ROLES;
   full_name: string;
   email: string;
 }
@@ -65,7 +67,7 @@ export default function AdminSubsectorPage() {
         }
       }
     } catch (error) {
-      console.error('Erro ao buscar sub-setores:', error);
+      // Debug log removed
       setError('Erro ao carregar sub-setores');
     }
   }, []);
@@ -84,7 +86,7 @@ export default function AdminSubsectorPage() {
         setProfile(data);
         
         // Verificar se o usuário tem permissão para acessar esta página
-        if (data.role !== 'subsector_admin' && data.role !== 'admin' && data.role !== 'sector_admin') {
+        if (!SUBSECTOR_PERMISSIONS.actions.canView(data.role)) {
           router.replace('/home');
           return;
         }
@@ -92,7 +94,7 @@ export default function AdminSubsectorPage() {
         await fetchUserSubsectors(userId);
       }
     } catch (error) {
-      console.error('Erro ao buscar perfil:', error);
+      // Debug log removed
       setError('Erro ao carregar perfil do usuário');
     } finally {
       setLoading(false);
@@ -126,16 +128,16 @@ export default function AdminSubsectorPage() {
         setStats(prev => ({
           ...prev,
           [subsectorId]: {
-            total_events: data[0].total_events || 0,
-            published_events: data[0].published_events || 0,
-            total_news: data[0].total_news || 0,
-            published_news: data[0].published_news || 0,
-            total_systems: data[0].total_systems || 0
+            total_events: data[0].total_events || SUBSECTOR_STATS.defaultStats.totalEvents,
+            published_events: data[0].published_events || SUBSECTOR_STATS.defaultStats.publishedEvents,
+            total_news: data[0].total_news || SUBSECTOR_STATS.defaultStats.totalNews,
+            published_news: data[0].published_news || SUBSECTOR_STATS.defaultStats.publishedNews,
+            total_systems: data[0].total_systems || SUBSECTOR_STATS.defaultStats.totalSystems
           }
         }));
       }
     } catch (error) {
-      console.error('Erro ao buscar estatísticas do sub-setor:', error);
+      // Debug log removed
     }
   };
 
@@ -152,13 +154,13 @@ export default function AdminSubsectorPage() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">{error}</p>
+        <div className={ADMIN_STATES.error.content}>
+          <p className={ADMIN_STATES.error.message}>{error}</p>
           <button
             onClick={() => router.push('/home')}
-            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+            className={`mt-4 ${ADMIN_BUTTONS.primary}`}
           >
-            Voltar para Home
+            {SUBSECTOR_ERRORS.actions.goHome}
           </button>
         </div>
       </div>
@@ -166,39 +168,39 @@ export default function AdminSubsectorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`${ADMIN_LAYOUT.container.fullHeight} ${ADMIN_COLORS.backgrounds.page}`}>
       {/* Header */}
-      <header className="bg-white border-b border-cresol-gray-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <header className={`${ADMIN_COLORS.backgrounds.card} border-b border-cresol-gray-light`}>
+        <div className={`${ADMIN_LAYOUT.container.maxWidth} ${ADMIN_LAYOUT.container.margin} ${ADMIN_LAYOUT.header.padding.container} flex items-center justify-between`}>
           <div className="flex items-center">
             <button
               onClick={() => router.push('/home')}
               className="flex items-center"
               type="button"
             >
-              <div className="relative h-10 w-24 mr-3">
+              <div className={`relative ${ADMIN_LAYOUT.header.logoHeight} ${ADMIN_LAYOUT.header.logoWidth} mr-3`}>
                 <OptimizedImage 
-                  src="/logo-horizontal-laranja.svg" 
-                  alt="Logo Cresol" 
+                  src={ADMIN_MEDIA.logo.src}
+                  alt={ADMIN_MEDIA.logo.alt}
                   fill
-                  sizes="(max-width: 768px) 100vw, 96px"
+                  sizes={ADMIN_MEDIA.logo.sizes}
                   className="object-contain"
                 />
               </div>
-              <h1 className="text-xl font-semibold text-cresol-gray">Portal Cresol</h1>
+              <h1 className={`${ADMIN_TYPOGRAPHY.headings.section} text-cresol-gray`}>Portal Cresol</h1>
             </button>
           </div>
           
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-cresol-gray">
+            <span className={`${ADMIN_TYPOGRAPHY.sizes.small} text-cresol-gray`}>
               Bem-vindo, {profile?.full_name}
             </span>
             <button
               onClick={() => router.push('/home')}
-              className="inline-flex items-center text-sm text-cresol-gray hover:text-primary"
+              className={`inline-flex items-center ${ADMIN_TYPOGRAPHY.sizes.small} ${ADMIN_COLORS.secondary.main} ${ADMIN_COLORS.secondary.hover}`}
               type="button"
             >
-              <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <svg className={`${ADMIN_DIMENSIONS.icon.medium} mr-1`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
               Voltar para Home
@@ -208,75 +210,69 @@ export default function AdminSubsectorPage() {
       </header>
 
       {/* Conteúdo principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-primary">Administração de Sub-setores</h2>
-          <p className="text-cresol-gray mt-2">
-            Gerencie os sub-setores sob sua responsabilidade
+      <main className={`${ADMIN_LAYOUT.container.maxWidth} ${ADMIN_LAYOUT.container.margin} ${ADMIN_LAYOUT.header.padding.content}`}>
+        <div className={SUBSECTOR_PAGE_CONFIG.header.container}>
+          <h2 className={`${SUBSECTOR_PAGE_CONFIG.header.title}`}>{SUBSECTOR_PAGE_CONFIG.title}</h2>
+          <p className={`${SUBSECTOR_PAGE_CONFIG.header.subtitle} mt-2`}>
+            {SUBSECTOR_PAGE_CONFIG.subtitle}
           </p>
         </div>
 
         {subsectors.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-            <div className="text-6xl text-gray-300 mb-4">📂</div>
-            <h3 className="text-lg font-semibold text-cresol-gray mb-2">
+          <div className={SUBSECTOR_EMPTY_STATE.noSubsectors.container}>
+            <div className={SUBSECTOR_EMPTY_STATE.noSubsectors.iconSize}>📂</div>
+            <h3 className={SUBSECTOR_EMPTY_STATE.noSubsectors.title}>
               Nenhum sub-setor encontrado
             </h3>
-            <p className="text-cresol-gray">
+            <p className={SUBSECTOR_EMPTY_STATE.noSubsectors.message}>
               Você não possui sub-setores atribuídos no momento.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={SUBSECTOR_CARD_LAYOUT.grid}>
             {subsectors.map((subsector) => {
-              const subsectorStats = stats[subsector.id] || {
-                total_events: 0,
-                published_events: 0,
-                total_news: 0,
-                published_news: 0,
-                total_systems: 0
-              };
+              const subsectorStats = stats[subsector.id] || SUBSECTOR_STATS.defaultStats;
 
               return (
-                <div key={subsector.id} className="bg-white rounded-lg border border-gray-200 hover:border-primary/30 transition-colors">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-cresol-gray">
+                <div key={subsector.id} className={SUBSECTOR_CARD_LAYOUT.card.base}>
+                  <div className={SUBSECTOR_CARD_LAYOUT.card.content}>
+                    <div className={SUBSECTOR_CARD_LAYOUT.card.header}>
+                      <h3 className={SUBSECTOR_CARD_LAYOUT.card.title}>
                         {subsector.name}
                       </h3>
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <div className={SUBSECTOR_CARD_LAYOUT.icon.container}>
+                        <svg className={SUBSECTOR_CARD_LAYOUT.icon.svg} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-gray-500 mb-4">
+                    <p className={SUBSECTOR_CARD_LAYOUT.card.subtitle}>
                       Setor: {subsector.sector_name}
                     </p>
 
                     {/* Estatísticas */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">
+                    <div className={SUBSECTOR_CARD_LAYOUT.card.stats}>
+                      <div className={SUBSECTOR_CARD_LAYOUT.stat.container}>
+                        <div className={`${SUBSECTOR_CARD_LAYOUT.stat.value} ${SUBSECTOR_STATS.colors.events}`}>
                           {subsectorStats.published_events}
                         </div>
-                        <div className="text-xs text-cresol-gray">Eventos</div>
+                        <div className={SUBSECTOR_CARD_LAYOUT.stat.label}>Eventos</div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">
+                      <div className={SUBSECTOR_CARD_LAYOUT.stat.container}>
+                        <div className={`${SUBSECTOR_CARD_LAYOUT.stat.value} ${SUBSECTOR_STATS.colors.news}`}>
                           {subsectorStats.published_news}
                         </div>
-                        <div className="text-xs text-cresol-gray">Notícias</div>
+                        <div className={SUBSECTOR_CARD_LAYOUT.stat.label}>Notícias</div>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className={SUBSECTOR_CARD_LAYOUT.card.actions}>
                       <button
                         onClick={() => router.push(`/admin-subsetor/subsetores/${subsector.id}`)}
-                        className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors text-sm"
+                        className={SUBSECTOR_ACTIONS.manage.classes}
                       >
-                        Gerenciar Sub-setor
+                        {SUBSECTOR_ACTIONS.manage.label}
                       </button>
                     </div>
                   </div>

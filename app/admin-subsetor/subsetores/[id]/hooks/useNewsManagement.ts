@@ -81,7 +81,7 @@ export function useNewsManagement(onRefresh: () => Promise<void>): UseNewsManage
       setNewsModal({ isOpen: false, isEditing: false, currentItem: {} });
       await onRefresh();
     } catch (error) {
-      console.error('Erro ao salvar notícia:', error);
+      // Error handled silently
       throw error;
     }
   };
@@ -100,7 +100,7 @@ export function useNewsManagement(onRefresh: () => Promise<void>): UseNewsManage
       await onRefresh();
       setDeleteConfirmation({ isOpen: false, itemToDelete: null, isDeleting: false });
     } catch (error) {
-      console.error('Erro ao excluir notícia:', error);
+      // Error handled silently
       throw error;
     } finally {
       setDeleteConfirmation(prev => ({ ...prev, isDeleting: false }));
@@ -117,7 +117,7 @@ export function useNewsManagement(onRefresh: () => Promise<void>): UseNewsManage
       if (error) throw error;
       await onRefresh();
     } catch (error) {
-      console.error('Erro ao atualizar status da notícia:', error);
+      // Error handled silently
       throw error;
     }
   };

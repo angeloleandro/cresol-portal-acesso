@@ -77,7 +77,7 @@ export default function AdminSetorDashboard() {
       
       setManagedSectors(sectors || []);
     } catch (error) {
-      console.error('Erro ao buscar setores:', error);
+      // Error handled silently
     }
   }, [user?.role]);
 
@@ -88,7 +88,7 @@ export default function AdminSetorDashboard() {
         const { data: userData, error: userError } = await supabase.auth.getUser();
         
         if (userError || !userData.user) {
-          console.error('Erro ao obter usuário:', userError);
+          // Error handled silently
           router.replace('/login');
           return;
         }
@@ -101,14 +101,14 @@ export default function AdminSetorDashboard() {
           .single();
         
         if (profileError || !profileData) {
-          console.error('Erro ao obter perfil:', profileError);
+          // Error handled silently
           router.replace('/login');
           return;
         }
 
         // Garantir que o usuário é um administrador de setor
         if (profileData.role !== 'sector_admin' && profileData.role !== 'admin') {
-          console.warn('Usuário não é administrador de setor:', profileData.role);
+          // Warning handled silently
           router.replace('/dashboard');
           return;
         }
@@ -116,7 +116,7 @@ export default function AdminSetorDashboard() {
         setUser(profileData as AdminUser);
         await fetchManagedSectors(userData.user.id);
       } catch (error) {
-        console.error('Erro ao verificar usuário:', error);
+        // Error handled silently
         router.replace('/login');
       } finally {
         setLoading(false);

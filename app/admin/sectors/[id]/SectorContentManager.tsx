@@ -382,7 +382,7 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
       console.log('🎬 [USEEFFECT] Cleanup executado');
       mounted = false;
     };
-  }, [sectorId]); // CORREÇÃO: Removendo fetchContent das dependências para evitar loops infinitos - usando useCallback estável
+  }, [sectorId, showDrafts, fetchContent]);
 
   return {
     news,

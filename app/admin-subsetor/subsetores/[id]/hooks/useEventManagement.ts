@@ -81,7 +81,7 @@ export function useEventManagement(onRefresh: () => Promise<void>): UseEventMana
       setEventModal({ isOpen: false, isEditing: false, currentItem: {} });
       await onRefresh();
     } catch (error) {
-      console.error('Erro ao salvar evento:', error);
+      // Error handled silently
       throw error;
     }
   };
@@ -100,7 +100,7 @@ export function useEventManagement(onRefresh: () => Promise<void>): UseEventMana
       await onRefresh();
       setDeleteConfirmation({ isOpen: false, itemToDelete: null, isDeleting: false });
     } catch (error) {
-      console.error('Erro ao excluir evento:', error);
+      // Error handled silently
       throw error;
     } finally {
       setDeleteConfirmation(prev => ({ ...prev, isDeleting: false }));
@@ -117,7 +117,7 @@ export function useEventManagement(onRefresh: () => Promise<void>): UseEventMana
       if (error) throw error;
       await onRefresh();
     } catch (error) {
-      console.error('Erro ao atualizar status do evento:', error);
+      // Error handled silently
       throw error;
     }
   };
