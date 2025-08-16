@@ -63,11 +63,17 @@ export function useMessageManagement(): UseMessageManagementReturn {
       });
 
       setIsMessageModalOpen(false);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw error;
       } else {
-        throw new Error((error as Error)?.message || 'Erro ao enviar mensagem');
+        const message =
+          typeof error === 'string'
+            ? error
+            : error && typeof error === 'object' && 'message' in error && typeof (error as any).message === 'string'
+            ? (error as any).message
+            : 'Erro ao enviar mensagem';
+        throw new Error(message);
       }
     }
   };
