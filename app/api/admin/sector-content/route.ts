@@ -503,23 +503,83 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     console.log('📦 [API PUT] Body recebido:', body);
     
-    const { type, id, data } = body;
+    const { type, id, data, sectorId, subsectorId } = body;
+    
+    // Determinar o ID real e o tipo correto
+    let realId = id || data?.id;
+    let realType = type;
+    
+    // Determinar o tipo correto baseado no contexto
+    if (type === 'news') {
+      if (sectorId) {
+        realType = 'sector_news';
+      } else if (subsectorId) {
+        realType = 'subsector_news';
+      }
+    } else if (type === 'events') {
+      if (sectorId) {
+        realType = 'sector_events';
+      } else if (subsectorId) {
+        realType = 'subsector_events';
+      }
+    }
+    
+    // Validações
+    if (!realId) {
+      return NextResponse.json(
+        { 
+          error: 'ID é obrigatório para atualização',
+          received: { type, id, hasData: !!data, dataId: data?.id }
+        },
+        { status: 400 }
+      );
+    }
+    
+    if (!realType) {
+      return NextResponse.json(
+        { 
+          error: 'Tipo é obrigatório',
+          received: { type, sectorId, subsectorId }
+        },
+        { status: 400 }
+      );
+    }
+    
+    if (!data || typeof data !== 'object') {
+      return NextResponse.json(
+        { 
+          error: 'Dados de atualização são obrigatórios',
+          received: { hasData: !!data, dataType: typeof data }
+        },
+        { status: 400 }
+      );
+    }
+    
+    // Preparar dados para atualização
+    const { 
+      id: dataId, 
+      created_by, 
+      created_at, 
+      ...updateData 
+    } = data;
+    
+    // Adicionar timestamp de atualização
+    updateData.updated_at = new Date().toISOString();
     
     let result;
     let error;
     
-    // CORREÇÃO: Usar o adminClient (SERVICE ROLE) para evitar problemas de RLS ao despublicar
+    // Usar adminClient (SERVICE ROLE) para operações de UPDATE
     console.log('🔑 [API PUT] Usando adminClient (SERVICE ROLE) para operação de UPDATE...');
     
-    // Criar cliente admin para bypassar RLS (necessário para despublicação)
     const adminClient = createAdminSupabaseClient();
     
-    switch (type) {
+    switch (realType) {
       case 'sector_news':
         ({ data: result, error } = await adminClient
           .from('sector_news')
-          .update(data)
-          .eq('id', id)
+          .update(updateData)
+          .eq('id', realId)
           .select()
           .single());
         break;
@@ -527,8 +587,8 @@ export async function PUT(request: NextRequest) {
       case 'sector_events':
         ({ data: result, error } = await adminClient
           .from('sector_events')
-          .update(data)
-          .eq('id', id)
+          .update(updateData)
+          .eq('id', realId)
           .select()
           .single());
         break;
@@ -536,8 +596,8 @@ export async function PUT(request: NextRequest) {
       case 'subsector_news':
         ({ data: result, error } = await adminClient
           .from('subsector_news')
-          .update(data)
-          .eq('id', id)
+          .update(updateData)
+          .eq('id', realId)
           .select()
           .single());
         break;
@@ -545,15 +605,19 @@ export async function PUT(request: NextRequest) {
       case 'subsector_events':
         ({ data: result, error } = await adminClient
           .from('subsector_events')
-          .update(data)
-          .eq('id', id)
+          .update(updateData)
+          .eq('id', realId)
           .select()
           .single());
         break;
         
       default:
         return NextResponse.json(
-          { error: 'Tipo inválido' },
+          { 
+            error: 'Tipo inválido',
+            received: realType,
+            supported: ['sector_news', 'sector_events', 'subsector_news', 'subsector_events']
+          },
           { status: 400 }
         );
     }

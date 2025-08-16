@@ -1,15 +1,16 @@
-// Componente de gerenciamento de notícias do setor
+// Adapter for NewsManagement component to work with subsector data
+// This component wraps the sector NewsManagement component and adapts the API calls
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { SectorNews } from '../types/sector.types';
-import { formatDate } from '../utils/dateFormatters';
-import { useImageUpload } from '../hooks/useImageUpload';
-import { ImageUploadCropper } from './ImageUploadCropper';
-import { ToggleDraftsButton } from './ToggleDraftsButton';
+import { SectorNews } from '@/app/admin/sectors/[id]/types/sector.types';
+import { formatDate } from '@/app/admin/sectors/[id]/utils/dateFormatters';
+import { useImageUpload } from '@/app/admin/sectors/[id]/hooks/useImageUpload';
+import { ImageUploadCropper } from '@/app/admin/sectors/[id]/components/ImageUploadCropper';
+import { ToggleDraftsButton } from '@/app/admin/sectors/[id]/components/ToggleDraftsButton';
 
-interface NewsManagementProps {
-  sectorId: string;
+interface SubsectorNewsManagementProps {
+  sectorId: string; // This is actually the subsectorId
   news: SectorNews[];
   showDrafts: boolean;
   totalDraftNewsCount: number;
@@ -18,56 +19,23 @@ interface NewsManagementProps {
   onDelete: (id: string) => Promise<void>;
 }
 
-export function NewsManagement({
-  sectorId,
+export function SubsectorNewsManagement({
+  sectorId: subsectorId, // Rename for clarity
   news,
   showDrafts,
   totalDraftNewsCount,
   onToggleDrafts,
   onRefresh,
   onDelete
-}: NewsManagementProps) {
+}: SubsectorNewsManagementProps) {
   
   // LOGS DETALHADOS PARA DEBUG DE RASCUNHOS
-  console.log('\n📰📰📰 [NEWSMANAGEMENT] COMPONENTE RENDERIZADO 📰📰📰');
-  console.log('📰 [NEWSMANAGEMENT] Props recebidas:');
-  console.log('  sectorId:', sectorId);
+  console.log('\n📰📰📰 [SUBSETORNEWSMANAGEMENT] COMPONENTE RENDERIZADO 📰📰📰');
+  console.log('📰 [SUBSETORNEWSMANAGEMENT] Props recebidas:');
+  console.log('  subsectorId:', subsectorId);
   console.log('  showDrafts:', showDrafts);
   console.log('  totalDraftNewsCount:', totalDraftNewsCount);
   console.log('  news.length:', news.length);
-  
-  // Análise das notícias
-  if (news.length > 0) {
-    const newsAnalysis = {
-      total: news.length,
-      published: news.filter(n => n.is_published === true).length,
-      drafts: news.filter(n => n.is_published === false).length,
-      null_published: news.filter(n => n.is_published === null || n.is_published === undefined).length
-    };
-    
-    console.log('📰 [NEWSMANAGEMENT] Análise das notícias recebidas:');
-    console.log('  Total:', newsAnalysis.total);
-    console.log('  Publicadas (is_published = true):', newsAnalysis.published);
-    console.log('  Rascunhos (is_published = false):', newsAnalysis.drafts);
-    console.log('  is_published = null/undefined:', newsAnalysis.null_published);
-    
-    console.log('📰 [NEWSMANAGEMENT] Amostra dos primeiros 3 itens:');
-    news.slice(0, 3).forEach((item, index) => {
-      console.log(`  [${index + 1}] ID: ${item.id}`);
-      console.log(`       Title: "${item.title}"`);
-      console.log(`       is_published: ${item.is_published} (tipo: ${typeof item.is_published})`);
-      console.log(`       is_featured: ${item.is_featured}`);
-    });
-  } else {
-    console.log('📰 [NEWSMANAGEMENT] ❌ NENHUMA NOTÍCIA RECEBIDA - Array vazio!');
-  }
-  
-  console.log('📰 [NEWSMANAGEMENT] Estado showDrafts:', showDrafts);
-  console.log('📰 [NEWSMANAGEMENT] Mensagem que será exibida:', showDrafts 
-    ? 'Nenhum rascunho de notícia encontrado'
-    : 'Nenhuma notícia publicada ainda'
-  );
-  console.log('📰📰📰 [NEWSMANAGEMENT] FIM DOS LOGS 📰📰📰\n');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -135,13 +103,14 @@ export function NewsManagement({
       const method = isEditing ? 'PUT' : 'POST';
       const endpoint = '/api/admin/sector-content';
       
+      // ADAPTED FOR SUBSECTOR: Use subsectorId instead of sectorId
       const body = {
         type: 'news',
-        sectorId,
+        subsectorId, // Use subsectorId instead of sectorId
         data: {
           ...currentNews,
           image_url: finalImageUrl,
-          sector_id: sectorId
+          subsector_id: subsectorId // Use subsector_id instead of sector_id
         }
       };
 
@@ -165,7 +134,22 @@ export function NewsManagement({
 
   const handleDeleteNews = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta notícia?')) return;
-    await onDelete(id);
+    
+    try {
+      // ADAPTED FOR SUBSECTOR: Use subsector_news type
+      const response = await fetch(`/api/admin/sector-content?type=subsector_news&id=${id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao excluir notícia');
+      }
+
+      await onDelete(id);
+    } catch (error) {
+      console.error('Erro ao excluir notícia:', error);
+      alert('Erro ao excluir notícia. Tente novamente.');
+    }
   };
 
   return (

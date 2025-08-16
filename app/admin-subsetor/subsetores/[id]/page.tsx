@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/app/providers/AuthProvider';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import AdminHeader from '@/app/components/AdminHeader';
+import Breadcrumb from '@/app/components/Breadcrumb';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 // Types
@@ -11,27 +13,54 @@ import { TabType } from './types/subsector.types';
 
 // Hooks
 import { useSubsectorData } from './hooks/useSubsectorData';
-import { useEventManagement } from './hooks/useEventManagement';
-import { useNewsManagement } from './hooks/useNewsManagement';
 import { useGroupManagement } from './hooks/useGroupManagement';
 import { useMessageManagement } from './hooks/useMessageManagement';
 
 // Components
-import { SubsectorHeader } from './components/SubsectorHeader';
 import { TabNavigation } from './components/TabNavigation';
 
 // Tab Components
-import { EventsTab } from './components/tabs/EventsTab';
-import { NewsTab } from './components/tabs/NewsTab';
 import { SystemsTab } from './components/tabs/SystemsTab';
 import { GroupsTab } from './components/tabs/GroupsTab';
 import { MessagesTab } from './components/tabs/MessagesTab';
 
-// Modal Components
-import { EventModal } from './components/modals/EventModal';
-import { NewsModal } from './components/modals/NewsModal';
+// Modal Components - Using adapted sector standard modals for subsector
+import { SubsectorEventsManagement } from './components/adapters/SubsectorEventsManagement';
+import { SubsectorNewsManagement } from './components/adapters/SubsectorNewsManagement';
 import { GroupModal } from './components/modals/GroupModal';
 import { MessageModal } from './components/modals/MessageModal';
+
+// Import sector types for the adapted components
+import { SectorEvent, SectorNews } from '@/app/admin/sectors/[id]/types/sector.types';
+import { SubsectorEvent, SubsectorNews } from './types/subsector.types';
+
+// Adapter functions to transform subsector data to sector format for display
+const adaptSubsectorEventToSector = (event: SubsectorEvent): SectorEvent => ({
+  id: event.id,
+  sector_id: '', // Will be handled by the adapter component
+  title: event.title,
+  description: event.description,
+  location: '', // Default empty, events don't have location in subsector
+  start_date: event.start_date,
+  end_date: null, // Default null, events don't have end_date in subsector
+  is_featured: event.is_featured,
+  is_published: event.is_published,
+  created_at: new Date().toISOString(), // Default current time
+  updated_at: new Date().toISOString() // Default current time
+});
+
+const adaptSubsectorNewsToSector = (news: SubsectorNews): SectorNews => ({
+  id: news.id,
+  sector_id: '', // Will be handled by the adapter component
+  title: news.title,
+  summary: news.summary,
+  content: news.content || '', // Default empty if missing
+  image_url: null, // Default null, news don't have images in subsector
+  is_featured: news.is_featured,
+  is_published: news.is_published,
+  created_at: news.created_at,
+  updated_at: new Date().toISOString() // Default current time
+});
 
 export default function SubsectorManagement() {
   const router = useRouter();
@@ -59,9 +88,7 @@ export default function SubsectorManagement() {
     refreshData
   } = useSubsectorData(subsectorId);
 
-  // Feature Management Hooks
-  const eventManagement = useEventManagement(refreshData);
-  const newsManagement = useNewsManagement(refreshData);
+  // Feature Management Hooks - Only for components not using sector standard
   const groupManagement = useGroupManagement(subsectorId);
   const messageManagement = useMessageManagement();
 
@@ -134,15 +161,6 @@ export default function SubsectorManagement() {
     alert('Criação de sistemas será implementada em versão futura');
   };
 
-  const handleEventSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await eventManagement.handleSaveEvent(eventManagement.eventModal.currentItem, subsectorId);
-  };
-
-  const handleNewsSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await newsManagement.handleSaveNews(newsManagement.newsModal.currentItem, subsectorId);
-  };
 
   const handleGroupSave = async () => {
     await groupManagement.handleSaveGroup(subsectorId);
@@ -152,97 +170,101 @@ export default function SubsectorManagement() {
     await messageManagement.handleSendMessage(subsectorId);
   };
 
+  const breadcrumbItems = [
+    { label: 'Admin', href: '/admin' },
+    { label: 'Subsetores', href: '/admin-subsetor' },
+    { label: subsector?.name || 'Carregando...', href: '#' }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <SubsectorHeader 
-        subsector={subsector}
-        profile={profile as any}
-        onLogout={() => router.push('/login')}
-      />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-sm">
-          {/* Tab Navigation */}
-          <div className="border-b border-gray-200 px-6 py-4">
-            <TabNavigation
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              counts={{
-                events: events.length,
-                news: news.length,
-                systems: systems.length
-              }}
-            />
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-6">
-            {activeTab === 'events' && (
-              <EventsTab
-                events={events}
-                showDrafts={showDrafts}
-                totalDraftEventsCount={totalDraftEventsCount}
-                onToggleDrafts={handleToggleDrafts}
-                onOpenModal={eventManagement.handleOpenEventModal}
-                onDeleteEvent={(event) => eventManagement.handleDeleteEvent(event.id)}
-              />
-            )}
-
-            {activeTab === 'news' && (
-              <NewsTab
-                news={news}
-                showDrafts={showDrafts}
-                totalDraftNewsCount={totalDraftNewsCount}
-                onToggleDrafts={handleToggleDrafts}
-                onOpenModal={newsManagement.handleOpenNewsModal}
-                onDeleteNews={(news) => newsManagement.handleDeleteNews(news.id)}
-                onTogglePublished={newsManagement.toggleNewsPublished}
-              />
-            )}
-
-            {activeTab === 'systems' && (
-              <SystemsTab
-                systems={systems}
-                onNewSystem={handleNewSystem}
-              />
-            )}
-
-            {activeTab === 'groups' && (
-              <GroupsTab
-                groups={groupManagement.groups}
-                onOpenGroupModal={groupManagement.handleOpenGroupModal}
-              />
-            )}
-
-            {activeTab === 'messages' && (
-              <MessagesTab
-                onOpenMessageModal={messageManagement.handleOpenMessageModal}
-              />
-            )}
-          </div>
+      {/* Admin Header padrão */}
+      <AdminHeader user={profile as any} />
+      
+      {/* Breadcrumb */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Breadcrumb items={breadcrumbItems} />
         </div>
       </div>
 
-      {/* Modals */}
-      <EventModal
-        isOpen={eventManagement.eventModal.isOpen}
-        isEditing={eventManagement.eventModal.isEditing}
-        currentEvent={eventManagement.eventModal.currentItem}
-        onClose={() => eventManagement.setEventModal(prev => ({...prev, isOpen: false}))}
-        onSave={handleEventSave}
-        onChange={(event) => eventManagement.setEventModal(prev => ({...prev, currentItem: event}))}
+      {/* Cabeçalho do subsetor */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Gerenciar Subsetor: {subsector?.name}
+          </h1>
+          {subsector?.description && (
+            <p className="mt-2 text-gray-600">{subsector.description}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Navegação por abas */}
+      <TabNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        counts={{
+          events: events.length,
+          news: news.length,
+          systems: systems.length
+        }}
       />
 
-      <NewsModal
-        isOpen={newsManagement.newsModal.isOpen}
-        isEditing={newsManagement.newsModal.isEditing}
-        currentNews={newsManagement.newsModal.currentItem}
-        onClose={() => newsManagement.setNewsModal(prev => ({...prev, isOpen: false}))}
-        onSave={handleNewsSave}
-        onChange={(news) => newsManagement.setNewsModal(prev => ({...prev, currentItem: news}))}
-      />
+      {/* Conteúdo da aba ativa */}
+      <main className="max-w-7xl mx-auto">
+        {activeTab === 'events' && (
+          <SubsectorEventsManagement
+            sectorId={subsectorId}
+            events={events.map(event => adaptSubsectorEventToSector(event))}
+            showDrafts={showDrafts}
+            totalDraftEventsCount={totalDraftEventsCount}
+            onToggleDrafts={handleToggleDrafts}
+            onRefresh={refreshData}
+            onDelete={async (id) => {
+              // The SubsectorEventsManagement component will handle the deletion
+              await refreshData();
+            }}
+          />
+        )}
 
+        {activeTab === 'news' && (
+          <SubsectorNewsManagement
+            sectorId={subsectorId}
+            news={news.map(newsItem => adaptSubsectorNewsToSector(newsItem))}
+            showDrafts={showDrafts}
+            totalDraftNewsCount={totalDraftNewsCount}
+            onToggleDrafts={handleToggleDrafts}
+            onRefresh={refreshData}
+            onDelete={async (id) => {
+              // The SubsectorNewsManagement component will handle the deletion
+              await refreshData();
+            }}
+          />
+        )}
+
+        {activeTab === 'systems' && (
+          <SystemsTab
+            systems={systems}
+            onNewSystem={handleNewSystem}
+          />
+        )}
+
+        {activeTab === 'groups' && (
+          <GroupsTab
+            groups={groupManagement.groups}
+            onOpenGroupModal={groupManagement.handleOpenGroupModal}
+          />
+        )}
+
+        {activeTab === 'messages' && (
+          <MessagesTab
+            onOpenMessageModal={messageManagement.handleOpenMessageModal}
+          />
+        )}
+      </main>
+
+      {/* Modals - Only for groups and messages since events/news now use management components */}
       <GroupModal
         isOpen={groupManagement.isGroupModalOpen}
         currentGroup={groupManagement.currentGroup}

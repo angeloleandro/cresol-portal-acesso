@@ -1,7 +1,7 @@
 // Componente da aba de eventos
 
 import { SubsectorEvent } from '../../types/subsector.types';
-import { ToggleDraftsButton } from '../ToggleDraftsButton';
+import { ToggleDraftsButton } from '@/app/admin/sectors/[id]/components/ToggleDraftsButton';
 
 interface EventsTabProps {
   events: SubsectorEvent[];

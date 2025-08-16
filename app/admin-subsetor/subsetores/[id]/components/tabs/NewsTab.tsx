@@ -1,7 +1,7 @@
 // Componente da aba de notícias
 
 import { SubsectorNews } from '../../types/subsector.types';
-import { ToggleDraftsButton } from '../ToggleDraftsButton';
+import { ToggleDraftsButton } from '@/app/admin/sectors/[id]/components/ToggleDraftsButton';
 
 interface NewsTabProps {
   news: SubsectorNews[];

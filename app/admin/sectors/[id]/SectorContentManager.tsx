@@ -50,6 +50,10 @@ interface UseSectorContentReturn {
 }
 
 export function useSectorContent(sectorId: string | undefined): UseSectorContentReturn {
+  console.log('🚀🚀🚀 [HOOK] useSectorContent INICIALIZADO 🚀🚀🚀');
+  console.log('🚀 [HOOK] sectorId recebido:', sectorId);
+  console.log('🚀 [HOOK] Timestamp:', new Date().toISOString());
+  
   const [news, setNews] = useState<SectorNews[]>([]);
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [showDrafts, setShowDrafts] = useState(true);
@@ -57,6 +61,14 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
   const [error, setError] = useState<string | null>(null);
   const [totalDraftNewsCount, setTotalDraftNewsCount] = useState(0);
   const [totalDraftEventsCount, setTotalDraftEventsCount] = useState(0);
+  
+  console.log('🚀 [HOOK] Estados iniciais:');
+  console.log('  news.length:', news.length);
+  console.log('  events.length:', events.length);
+  console.log('  showDrafts:', showDrafts);
+  console.log('  totalDraftNewsCount:', totalDraftNewsCount);
+  console.log('  totalDraftEventsCount:', totalDraftEventsCount);
+  console.log('🚀🚀🚀 [HOOK] FIM DA INICIALIZAÇÃO 🚀🚀🚀');
 
   // Criar client uma vez para evitar warnings de dependência
   const supabase = useMemo(() => createClient(), []);
@@ -68,99 +80,223 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
       return;
     }
 
-    console.log(`🔄 Buscando conteúdo - sectorId: ${sectorId}, includesDrafts: ${includesDrafts}`);
+    console.log('\n🗞️🗞️🗞️ [RASCUNHOS] INÍCIO DA BUSCA DE CONTEÚDO 🗞️🗞️🗞️');
+    console.log(`🔄 [RASCUNHOS] Parâmetros de busca:`);
+    console.log(`  sectorId: ${sectorId}`);
+    console.log(`  includesDrafts: ${includesDrafts}`);
+    console.log(`  showDrafts atual: ${showDrafts}`);
+    
     setIsLoading(true);
     setError(null);
 
     try {
+      console.log('\n📊 [RASCUNHOS] ETAPA 1: CONTANDO RASCUNHOS TOTAIS...');
+      
       // Buscar contadores de rascunhos (sempre buscar todos para mostrar o contador)
-      const { data: allNews } = await supabase
+      const { data: allNews, error: allNewsError } = await supabase
         .from('sector_news')
         .select('is_published')
         .eq('sector_id', sectorId);
       
-      const { data: allEvents } = await supabase
+      if (allNewsError) {
+        console.error('❌ [RASCUNHOS] Erro ao buscar todas as notícias:', allNewsError);
+      } else {
+        console.log(`📰 [RASCUNHOS] Total de registros em sector_news: ${allNews?.length || 0}`);
+      }
+      
+      const { data: allEvents, error: allEventsError } = await supabase
         .from('sector_events')
         .select('is_published')
         .eq('sector_id', sectorId);
+      
+      if (allEventsError) {
+        console.error('❌ [RASCUNHOS] Erro ao buscar todos os eventos:', allEventsError);
+      } else {
+        console.log(`📅 [RASCUNHOS] Total de registros em sector_events: ${allEvents?.length || 0}`);
+      }
 
-      // Contar rascunhos
-      const draftNewsCount = allNews?.filter(n => !n.is_published).length || 0;
-      const draftEventsCount = allEvents?.filter(e => !e.is_published).length || 0;
+      // Contar rascunhos com logs detalhados
+      console.log('\n🔢 [RASCUNHOS] ETAPA 2: ANÁLISE DE RASCUNHOS...');
+      
+      const newsAnalysis = {
+        total: allNews?.length || 0,
+        published: allNews?.filter(n => n.is_published === true).length || 0,
+        drafts: allNews?.filter(n => n.is_published === false).length || 0,
+        null_published: allNews?.filter(n => n.is_published === null).length || 0
+      };
+      
+      const eventsAnalysis = {
+        total: allEvents?.length || 0,
+        published: allEvents?.filter(e => e.is_published === true).length || 0,
+        drafts: allEvents?.filter(e => e.is_published === false).length || 0,
+        null_published: allEvents?.filter(e => e.is_published === null).length || 0
+      };
+      
+      console.log('📰 [RASCUNHOS] Análise detalhada de NOTÍCIAS:');
+      console.log('  Total:', newsAnalysis.total);
+      console.log('  Publicadas (is_published = true):', newsAnalysis.published);
+      console.log('  Rascunhos (is_published = false):', newsAnalysis.drafts);
+      console.log('  is_published = null:', newsAnalysis.null_published);
+      
+      console.log('📅 [RASCUNHOS] Análise detalhada de EVENTOS:');
+      console.log('  Total:', eventsAnalysis.total);
+      console.log('  Publicados (is_published = true):', eventsAnalysis.published);
+      console.log('  Rascunhos (is_published = false):', eventsAnalysis.drafts);
+      console.log('  is_published = null:', eventsAnalysis.null_published);
+      
+      const draftNewsCount = newsAnalysis.drafts;
+      const draftEventsCount = eventsAnalysis.drafts;
+      
+      console.log(`🎯 [RASCUNHOS] Contadores finais - Notícias: ${draftNewsCount}, Eventos: ${draftEventsCount}`);
+      console.log('🎯 [RASCUNHOS] Chamando setTotalDraftNewsCount com:', draftNewsCount);
+      console.log('🎯 [RASCUNHOS] Chamando setTotalDraftEventsCount com:', draftEventsCount);
       
       setTotalDraftNewsCount(draftNewsCount);
       setTotalDraftEventsCount(draftEventsCount);
 
+      console.log('\n🔍 [RASCUNHOS] ETAPA 3: BUSCANDO NOTÍCIAS COM FILTRO...');
+      
       // Buscar notícias com filtro
       let newsQuery = supabase
         .from('sector_news')
         .select('*')
         .eq('sector_id', sectorId);
       
+      console.log(`📰 [RASCUNHOS] Query base para notícias criada`);
+      console.log(`📰 [RASCUNHOS] includesDrafts = ${includesDrafts}`);
+      
       if (!includesDrafts) {
+        console.log('📰 [RASCUNHOS] Aplicando filtro: .eq("is_published", true)');
         newsQuery = newsQuery.eq('is_published', true);
+      } else {
+        console.log('📰 [RASCUNHOS] SEM filtro de publicação - buscando TODOS (publicados + rascunhos)');
       }
       
       newsQuery = newsQuery.order('created_at', { ascending: false });
       
+      console.log('📰 [RASCUNHOS] Executando query de notícias...');
       const { data: newsData, error: newsError } = await newsQuery;
       
       if (newsError) {
-        console.error('❌ Erro ao buscar notícias:', newsError);
+        console.error('❌ [RASCUNHOS] Erro ao buscar notícias:', newsError);
         throw newsError;
       }
+      
+      console.log(`📰 [RASCUNHOS] Resultado da query: ${newsData?.length || 0} notícias retornadas`);
+      
+      if (newsData && newsData.length > 0) {
+        const resultAnalysis = {
+          total: newsData.length,
+          published: newsData.filter(n => n.is_published === true).length,
+          drafts: newsData.filter(n => n.is_published === false).length,
+          null_published: newsData.filter(n => n.is_published === null).length
+        };
+        console.log('📰 [RASCUNHOS] Análise dos resultados retornados:');
+        console.log('  Total retornado:', resultAnalysis.total);
+        console.log('  Publicadas:', resultAnalysis.published);
+        console.log('  Rascunhos:', resultAnalysis.drafts);
+        console.log('  is_published = null:', resultAnalysis.null_published);
+        
+        // Mostrar algumas amostras dos dados
+        console.log('📰 [RASCUNHOS] Amostra dos primeiros 3 registros:');
+        newsData.slice(0, 3).forEach((news, index) => {
+          console.log(`  [${index + 1}] ID: ${news.id}, Title: "${news.title}", is_published: ${news.is_published}`);
+        });
+      } else {
+        console.log('📰 [RASCUNHOS] Nenhuma notícia retornada pela query');
+      }
 
+      console.log('\n🔍 [RASCUNHOS] ETAPA 4: BUSCANDO EVENTOS COM FILTRO...');
+      
       // Buscar eventos com filtro
       let eventsQuery = supabase
         .from('sector_events')
         .select('*')
         .eq('sector_id', sectorId);
       
+      console.log(`📅 [RASCUNHOS] Query base para eventos criada`);
+      console.log(`📅 [RASCUNHOS] includesDrafts = ${includesDrafts}`);
+      
       if (!includesDrafts) {
+        console.log('📅 [RASCUNHOS] Aplicando filtro: .eq("is_published", true)');
         eventsQuery = eventsQuery.eq('is_published', true);
+      } else {
+        console.log('📅 [RASCUNHOS] SEM filtro de publicação - buscando TODOS (publicados + rascunhos)');
       }
       
       eventsQuery = eventsQuery.order('start_date', { ascending: false });
       
+      console.log('📅 [RASCUNHOS] Executando query de eventos...');
       const { data: eventsData, error: eventsError } = await eventsQuery;
       
       if (eventsError) {
-        console.error('❌ Erro ao buscar eventos:', eventsError);
+        console.error('❌ [RASCUNHOS] Erro ao buscar eventos:', eventsError);
         throw eventsError;
       }
-
-      console.log(`✅ Conteúdo carregado - Notícias: ${newsData?.length || 0}, Eventos: ${eventsData?.length || 0}`);
       
-      // Análise de debug
-      if (newsData && newsData.length > 0) {
-        const analysis = {
-          total: newsData.length,
-          published: newsData.filter(n => n.is_published).length,
-          drafts: newsData.filter(n => !n.is_published).length
+      console.log(`📅 [RASCUNHOS] Resultado da query: ${eventsData?.length || 0} eventos retornados`);
+      
+      if (eventsData && eventsData.length > 0) {
+        const resultAnalysis = {
+          total: eventsData.length,
+          published: eventsData.filter(e => e.is_published === true).length,
+          drafts: eventsData.filter(e => e.is_published === false).length,
+          null_published: eventsData.filter(e => e.is_published === null).length
         };
-        console.log('📊 Análise de notícias:', analysis);
+        console.log('📅 [RASCUNHOS] Análise dos resultados retornados:');
+        console.log('  Total retornado:', resultAnalysis.total);
+        console.log('  Publicados:', resultAnalysis.published);
+        console.log('  Rascunhos:', resultAnalysis.drafts);
+        console.log('  is_published = null:', resultAnalysis.null_published);
+        
+        // Mostrar algumas amostras dos dados
+        console.log('📅 [RASCUNHOS] Amostra dos primeiros 3 registros:');
+        eventsData.slice(0, 3).forEach((event, index) => {
+          console.log(`  [${index + 1}] ID: ${event.id}, Title: "${event.title}", is_published: ${event.is_published}`);
+        });
+      } else {
+        console.log('📅 [RASCUNHOS] Nenhum evento retornado pela query');
       }
 
+      console.log('\n✅ [RASCUNHOS] ETAPA 5: FINALIZANDO...');
+      console.log(`✅ [RASCUNHOS] Conteúdo carregado - Notícias: ${newsData?.length || 0}, Eventos: ${eventsData?.length || 0}`);
+      console.log(`✅ [RASCUNHOS] Estado showDrafts será: ${includesDrafts}`);
+      
       setNews(newsData || []);
       setEvents(eventsData || []);
+      
+      console.log('🗞️🗞️🗞️ [RASCUNHOS] FIM DA BUSCA DE CONTEÚDO 🗞️🗞️🗞️\n');
+      
     } catch (err: any) {
-      console.error('❌ Erro ao buscar conteúdo:', err);
+      console.error('\n💥💥💥 [RASCUNHOS] ERRO CRÍTICO:');
+      console.error('  Tipo:', err.constructor?.name || 'Unknown');
+      console.error('  Mensagem:', err.message);
+      console.error('  Stack:', err.stack);
+      console.error('🗞️🗞️🗞️ [RASCUNHOS] FIM COM ERRO 🗞️🗞️🗞️\n');
+      
       setError(err.message || 'Erro ao carregar conteúdo');
     } finally {
       setIsLoading(false);
     }
-  }, [sectorId, supabase]);
+  }, [sectorId, supabase, showDrafts]);
 
   // Toggle de rascunhos - ÚNICO ponto de controle
   const toggleDrafts = useCallback(async () => {
     const newShowDrafts = !showDrafts;
-    console.log(`🔄 Toggle drafts: ${showDrafts} → ${newShowDrafts}`);
+    
+    console.log('\n🔄🔄🔄 [TOGGLE] ALTERNANDO EXIBIÇÃO DE RASCUNHOS 🔄🔄🔄');
+    console.log(`🔄 [TOGGLE] Estado atual: showDrafts = ${showDrafts}`);
+    console.log(`🔄 [TOGGLE] Novo estado: showDrafts = ${newShowDrafts}`);
+    console.log(`🔄 [TOGGLE] Descrição: ${newShowDrafts ? 'MOSTRAR rascunhos' : 'OCULTAR rascunhos'}`);
     
     // Atualizar estado imediatamente para feedback visual
     setShowDrafts(newShowDrafts);
+    console.log('✅ [TOGGLE] Estado atualizado no React');
     
     // Buscar conteúdo com novo filtro
+    console.log('🔄 [TOGGLE] Chamando fetchContent com includesDrafts =', newShowDrafts);
     await fetchContent(newShowDrafts);
+    console.log('🔄🔄🔄 [TOGGLE] FIM DO TOGGLE 🔄🔄🔄\n');
   }, [showDrafts, fetchContent]);
 
   // Refresh forçado
@@ -205,22 +341,48 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
     }
   }, [refreshContent, supabase]);
 
-  // Carregar inicial - ÚNICO useEffect
+  // Carregar inicial - ÚNICO useEffect - SEM fetchContent como dependência para evitar loops
   useEffect(() => {
+    console.log('\n🎬🎬🎬 [USEEFFECT] USEEFFECT EXECUTANDO 🎬🎬🎬');
+    console.log(`🎬 [USEEFFECT] Timestamp: ${new Date().toISOString()}`);
+    console.log(`🎬 [USEEFFECT] sectorId: ${sectorId}`);
+    console.log(`🎬 [USEEFFECT] showDrafts: ${showDrafts}`);
+    
     let mounted = true;
 
     const loadContent = async () => {
+      console.log('🎬 [USEEFFECT] Entrando em loadContent...');
+      console.log(`🎬 [USEEFFECT] Verificações - sectorId: ${!!sectorId}, mounted: ${mounted}`);
+      
       if (sectorId && mounted) {
-        await fetchContent(showDrafts);
+        console.log('\n🚀🚀🚀 [USEEFFECT] CARREGAMENTO INICIAL 🚀🚀🚀');
+        console.log(`🚀 [USEEFFECT] sectorId: ${sectorId}`);
+        console.log(`🚀 [USEEFFECT] showDrafts inicial: ${showDrafts}`);
+        console.log(`🚀 [USEEFFECT] mounted: ${mounted}`);
+        console.log('🚀 [USEEFFECT] Chamando fetchContent...');
+        
+        try {
+          await fetchContent(showDrafts);
+          console.log('✅ [USEEFFECT] fetchContent executado com sucesso');
+        } catch (error) {
+          console.error('❌ [USEEFFECT] Erro ao executar fetchContent:', error);
+        }
+        
+        console.log('🚀🚀🚀 [USEEFFECT] FIM DO CARREGAMENTO INICIAL 🚀🚀🚀\n');
+      } else {
+        console.log('⚠️ [USEEFFECT] Carregamento ignorado:');
+        console.log(`  sectorId: ${sectorId} (truthy: ${!!sectorId})`);
+        console.log(`  mounted: ${mounted}`);
       }
     };
 
     loadContent();
 
     return () => {
+      console.log('🎬 [USEEFFECT] Cleanup executado');
       mounted = false;
     };
-  }, [sectorId, fetchContent, showDrafts]);
+  }, [sectorId]); // CORREÇÃO: Removendo fetchContent das dependências para evitar loops infinitos - usando useCallback estável
 
   return {
     news,
