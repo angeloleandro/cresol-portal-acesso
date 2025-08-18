@@ -124,12 +124,68 @@ export function useOptimizedUser() {
 
 /**
  * Hook otimizado para gerenciar setores
+ * @param userRole - Role do usuário para filtrar setores (usado para admin)
+ * @param userId - ID do usuário
+ * @param excludeAgencies - Se deve excluir o setor de agências
+ * @param forNavigation - Se true, busca todos os setores para navegação, ignorando role
  */
-export function useOptimizedSectors(userRole?: string, userId?: string, excludeAgencies: boolean = false) {
+export function useOptimizedSectors(
+  userRole?: string, 
+  userId?: string, 
+  excludeAgencies: boolean = false,
+  forNavigation: boolean = false
+) {
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchSectors = useCallback(async () => {
+    // Se for para navegação, sempre buscar todos os setores
+    if (forNavigation) {
+      try {
+        // Verificar cache primeiro (cache de navegação é diferente)
+        const cacheKey = `nav_sectors_all`;
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          // Cache válido por 15 minutos
+          if (Date.now() - timestamp < 900000) {
+            const filteredSectors = excludeAgencies 
+              ? data.filter((sector: Sector) => sector.id !== '5463d1ba-c290-428e-b39e-d7ad9c66eb71')
+              : data;
+            setSectors(filteredSectors);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Buscar todos os setores para navegação
+        const { data, error } = await supabase
+          .from('sectors')
+          .select('id, name, description, subsectors(id, name, description, sector_id)')
+          .order('name', { ascending: true });
+
+        if (!error) {
+          // Salvar no cache
+          localStorage.setItem(cacheKey, JSON.stringify({
+            data: data || [],
+            timestamp: Date.now()
+          }));
+
+          let sectorsData = data || [];
+          if (excludeAgencies) {
+            sectorsData = sectorsData.filter(sector => sector.id !== '5463d1ba-c290-428e-b39e-d7ad9c66eb71');
+          }
+          setSectors(sectorsData);
+        }
+      } catch (error) {
+        console.error('[NavbarHooks] Erro ao buscar setores para navegação:', error);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Lógica original para quando não é navegação (admin panels)
     if (!userRole) return;
 
     try {
@@ -187,7 +243,7 @@ export function useOptimizedSectors(userRole?: string, userId?: string, excludeA
     } finally {
       setLoading(false);
     }
-  }, [userRole, userId, excludeAgencies]);
+  }, [userRole, userId, excludeAgencies, forNavigation]);
 
   useEffect(() => {
     fetchSectors();

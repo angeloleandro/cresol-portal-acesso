@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
 import NoticiasDestaque from '../components/NoticiasDestaque';
 import EventosDestaque from '../components/EventosDestaque';
+import MensagensDestaque from '../components/MensagensDestaque';
 import BannerCarousel from '@/app/components/BannerCarousel';
 import VideoGallery from '@/app/components/VideoGallery';
 import ImageGalleryHome from '../components/ImageGalleryHome';
@@ -113,13 +114,14 @@ export default function Home() {
               <ParecerSolicitacao />
             </div>
 
-            {/* Segunda Coluna - 1/3 do espaço (Busca + Eventos + Notificações) */}
+            {/* Segunda Coluna - 1/3 do espaço (Busca + Eventos + Mensagens + Sistemas) */}
             <div className="lg:col-span-1 space-y-6">
               <div className="card">
                 <h3 className="heading-4 text-title mb-4">Busca Global</h3>
                 <GlobalSearch compact />
               </div>
               <EventosDestaque limit={4} />
+              <MensagensDestaque compact limit={3} />
               <SistemasLateral />
             </div>
           </div>

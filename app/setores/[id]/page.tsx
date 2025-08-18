@@ -52,6 +52,16 @@ interface SectorEvent {
   updated_at: string;
 }
 
+interface SectorMessage {
+  id: string;
+  sector_id: string;
+  title: string;
+  content: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function SetorDetalhesPage() {
   const router = useRouter();
   const params = useParams();
@@ -63,8 +73,8 @@ export default function SetorDetalhesPage() {
   const [subsectors, setSubsectors] = useState<Subsector[]>([]);
   const [news, setNews] = useState<SectorNews[]>([]);
   const [events, setEvents] = useState<SectorEvent[]>([]);
+  const [messages, setMessages] = useState<SectorMessage[]>([]);
   const [activeTab, setActiveTab] = useState('news');
-  const [showDrafts, setShowDrafts] = useState(true); // Mostrar rascunhos por padrão para admins
   const [isAdmin, setIsAdmin] = useState(false);
 
   const fetchSector = useCallback(async () => {
@@ -99,19 +109,12 @@ export default function SetorDetalhesPage() {
   }, [sectorId]);
 
   const fetchNews = useCallback(async () => {
-    // Construir query base
-    let query = supabase
+    // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
+    const { data, error } = await supabase
       .from('sector_news')
       .select('*')
-      .eq('sector_id', sectorId);
-    
-    // Aplicar filtro de publicação baseado em isAdmin e showDrafts
-    if (!isAdmin || !showDrafts) {
-      query = query.eq('is_published', true);
-    }
-    
-    // Executar query com ordenação
-    const { data, error } = await query
+      .eq('sector_id', sectorId)
+      .eq('is_published', true)
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -120,22 +123,15 @@ export default function SetorDetalhesPage() {
     }
     
     setNews(data || []);
-  }, [sectorId, isAdmin, showDrafts]);
+  }, [sectorId]);
 
   const fetchEvents = useCallback(async () => {
-    // Construir query base
-    let query = supabase
+    // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
+    const { data, error } = await supabase
       .from('sector_events')
       .select('*')
-      .eq('sector_id', sectorId);
-    
-    // Aplicar filtro de publicação baseado em isAdmin e showDrafts
-    if (!isAdmin || !showDrafts) {
-      query = query.eq('is_published', true);
-    }
-    
-    // Executar query com ordenação
-    const { data, error } = await query
+      .eq('sector_id', sectorId)
+      .eq('is_published', true)
       .order('start_date', { ascending: true });
     
     if (error) {
@@ -144,7 +140,24 @@ export default function SetorDetalhesPage() {
     }
     
     setEvents(data || []);
-  }, [sectorId, isAdmin, showDrafts]);
+  }, [sectorId]);
+
+  const fetchMessages = useCallback(async () => {
+    // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
+    const { data, error } = await supabase
+      .from('sector_messages')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .eq('is_published', true)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('[SetorDetalhes] Erro ao buscar mensagens:', error.message || error);
+      return;
+    }
+    
+    setMessages(data || []);
+  }, [sectorId]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -166,19 +179,22 @@ export default function SetorDetalhesPage() {
       
       const userIsAdmin = profileData?.role === 'admin' || profileData?.role === 'sector_admin';
       setIsAdmin(userIsAdmin);
+      
+      // Página pública sempre mostra apenas conteúdo publicado
 
       await Promise.all([
         fetchSector(),
         fetchSubsectors(),
         fetchNews(),
-        fetchEvents()
+        fetchEvents(),
+        fetchMessages()
       ]);
       
       setLoading(false);
     };
 
     checkUser();
-  }, [sectorId, router, fetchSector, fetchSubsectors, fetchNews, fetchEvents]);
+  }, [sectorId, router, fetchSector, fetchSubsectors, fetchNews, fetchEvents, fetchMessages]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -283,6 +299,20 @@ export default function SetorDetalhesPage() {
                 Eventos
               </button>
               <button
+                onClick={() => setActiveTab('messages')}
+                className={`${
+                  activeTab === 'messages'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray-light'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                aria-selected={activeTab === 'messages'}
+                role="tab"
+                aria-controls="messages-panel"
+                id="messages-tab"
+              >
+                Mensagens
+              </button>
+              <button
                 onClick={() => setActiveTab('subsectors')}
                 className={`${
                   activeTab === 'subsectors'
@@ -303,32 +333,11 @@ export default function SetorDetalhesPage() {
         {/* Conteúdo da aba de Notícias */}
         {activeTab === 'news' && (
           <div id="news-panel" role="tabpanel" aria-labelledby="news-tab">
-            {/* Toggle para mostrar/ocultar rascunhos - apenas para admins */}
-            {isAdmin && (
-              <div className="mb-4 flex justify-end">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showDrafts}
-                    onChange={(e) => setShowDrafts(e.target.checked)}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
-                  <span className="ml-2 text-sm text-cresol-gray">
-                    Mostrar rascunhos
-                  </span>
-                  <span className="ml-2 text-xs text-cresol-gray-light">
-                    ({news.filter(n => !n.is_published).length} rascunhos)
-                  </span>
-                </label>
-              </div>
-            )}
             
             {news.length === 0 ? (
               <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
                 <p className="text-cresol-gray">
-                  {isAdmin && showDrafts 
-                    ? 'Nenhuma notícia cadastrada para este setor.'
-                    : 'Nenhuma notícia publicada para este setor.'}
+                  Nenhuma notícia publicada para este setor.
                 </p>
               </div>
             ) : (
@@ -387,32 +396,11 @@ export default function SetorDetalhesPage() {
         {/* Conteúdo da aba de Eventos */}
         {activeTab === 'events' && (
           <div id="events-panel" role="tabpanel" aria-labelledby="events-tab">
-            {/* Toggle para mostrar/ocultar rascunhos - apenas para admins */}
-            {isAdmin && (
-              <div className="mb-4 flex justify-end">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showDrafts}
-                    onChange={(e) => setShowDrafts(e.target.checked)}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
-                  <span className="ml-2 text-sm text-cresol-gray">
-                    Mostrar rascunhos
-                  </span>
-                  <span className="ml-2 text-xs text-cresol-gray-light">
-                    ({events.filter(e => !e.is_published).length} rascunhos)
-                  </span>
-                </label>
-              </div>
-            )}
             
             {events.length === 0 ? (
               <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
                 <p className="text-cresol-gray">
-                  {isAdmin && showDrafts 
-                    ? 'Nenhum evento cadastrado para este setor.'
-                    : 'Nenhum evento publicado para este setor.'}
+                  Nenhum evento publicado para este setor.
                 </p>
               </div>
             ) : (
@@ -467,6 +455,48 @@ export default function SetorDetalhesPage() {
                     </div>
                     
                     <p className="text-cresol-gray">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Conteúdo da aba de Mensagens */}
+        {activeTab === 'messages' && (
+          <div id="messages-panel" role="tabpanel" aria-labelledby="messages-tab">
+            
+            {messages.length === 0 ? (
+              <div className="bg-white rounded-lg border border-cresol-gray-light p-8 text-center">
+                <p className="text-cresol-gray">
+                  Nenhuma mensagem publicada para este setor.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {messages.map((item) => (
+                  <div 
+                    key={item.id} 
+                    className="bg-white rounded-lg border border-cresol-gray-light p-6"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                      <h2 className="text-xl font-semibold text-cresol-gray">{item.title}</h2>
+                      <div className="flex gap-2 mt-2 md:mt-0">
+                        {!item.is_published && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Rascunho
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <p className="text-cresol-gray whitespace-pre-line">{item.content}</p>
+                    
+                    <div className="mt-4 pt-4 border-t border-cresol-gray-light">
+                      <span className="text-xs text-cresol-gray">
+                        Publicado em: {formatDate(item.created_at)}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>

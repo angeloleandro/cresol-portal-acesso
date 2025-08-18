@@ -46,6 +46,14 @@ interface SubsectorEvent {
   is_published?: boolean;
 }
 
+interface SubsectorMessage {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  is_published?: boolean;
+}
+
 interface ErrorState {
   hasError: boolean;
   message: string;
@@ -59,9 +67,9 @@ export default function SubsectorDetailsPage() {
   const [subsector, setSubsector] = useState<Subsector | null>(null);
   const [news, setNews] = useState<SubsectorNews[]>([]);
   const [events, setEvents] = useState<SubsectorEvent[]>([]);
+  const [messages, setMessages] = useState<SubsectorMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<ErrorState>({ hasError: false, message: '' });
-  const [showDrafts, setShowDrafts] = useState(true); // Mostrar rascunhos por padrão para admins
   const [isAdmin, setIsAdmin] = useState(false);
 
   const fetchSubsector = useCallback(async () => {
@@ -93,19 +101,12 @@ export default function SubsectorDetailsPage() {
   }, [subsectorId]);
 
   const fetchNews = useCallback(async () => {
-    // Construir query base
-    let query = supabase
+    // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
+    const { data, error } = await supabase
       .from('subsector_news')
       .select('id, title, summary, created_at, is_published')
-      .eq('subsector_id', subsectorId);
-    
-    // Aplicar filtro de publicação baseado em isAdmin e showDrafts
-    if (!isAdmin || !showDrafts) {
-      query = query.eq('is_published', true);
-    }
-    
-    // Executar query com ordenação e limite
-    const { data, error } = await query
+      .eq('subsector_id', subsectorId)
+      .eq('is_published', true)
       .order('created_at', { ascending: false })
       .limit(3);
 
@@ -114,22 +115,15 @@ export default function SubsectorDetailsPage() {
     }
     
     setNews(data || []);
-  }, [subsectorId, isAdmin, showDrafts]);
+  }, [subsectorId]);
 
   const fetchEvents = useCallback(async () => {
-    // Construir query base
-    let query = supabase
+    // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
+    const { data, error } = await supabase
       .from('subsector_events')
       .select('id, title, description, location, start_date, end_date, is_published')
-      .eq('subsector_id', subsectorId);
-    
-    // Aplicar filtro de publicação baseado em isAdmin e showDrafts
-    if (!isAdmin || !showDrafts) {
-      query = query.eq('is_published', true);
-    }
-    
-    // Aplicar filtro de data futura e ordenação
-    const { data, error } = await query
+      .eq('subsector_id', subsectorId)
+      .eq('is_published', true)
       .gte('start_date', new Date().toISOString())
       .order('start_date', { ascending: true })
       .limit(3);
@@ -139,7 +133,24 @@ export default function SubsectorDetailsPage() {
     }
     
     setEvents(data || []);
-  }, [subsectorId, isAdmin, showDrafts]);
+  }, [subsectorId]);
+
+  const fetchMessages = useCallback(async () => {
+    // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
+    const { data, error } = await supabase
+      .from('subsector_messages')
+      .select('id, title, content, created_at, is_published')
+      .eq('subsector_id', subsectorId)
+      .eq('is_published', true)
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    if (error) {
+      throw new Error(`Falha ao buscar mensagens: ${error.message}`);
+    }
+    
+    setMessages(data || []);
+  }, [subsectorId]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -159,12 +170,15 @@ export default function SubsectorDetailsPage() {
           
           const userIsAdmin = profileData?.role === 'admin' || profileData?.role === 'sector_admin';
           setIsAdmin(userIsAdmin);
+          
+          // Página pública sempre mostra apenas conteúdo publicado
         }
         
         await Promise.all([
           fetchSubsector(),
           fetchNews(),
-          fetchEvents()
+          fetchEvents(),
+          fetchMessages()
         ]);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao carregar dados';
@@ -178,7 +192,7 @@ export default function SubsectorDetailsPage() {
     };
 
     fetchData();
-  }, [subsectorId, fetchSubsector, fetchNews, fetchEvents]);
+  }, [subsectorId, fetchSubsector, fetchNews, fetchEvents, fetchMessages]);
 
   const reloadData = () => {
     setLoading(true);
@@ -189,7 +203,8 @@ export default function SubsectorDetailsPage() {
         await Promise.all([
           fetchSubsector(),
           fetchNews(),
-          fetchEvents()
+          fetchEvents(),
+          fetchMessages()
         ]);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao carregar dados';
@@ -363,32 +378,13 @@ export default function SubsectorDetailsPage() {
                     Notícias Recentes
                   </h2>
                   
-                  {/* Toggle para mostrar/ocultar rascunhos - apenas para admins */}
-                  {isAdmin && (
-                    <label className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showDrafts}
-                        onChange={(e) => setShowDrafts(e.target.checked)}
-                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-cresol-gray">
-                        Mostrar rascunhos
-                      </span>
-                      <span className="ml-2 text-xs text-cresol-gray-light">
-                        ({news.filter(n => !n.is_published).length} rascunhos)
-                      </span>
-                    </label>
-                  )}
                 </div>
               </div>
               <div className="p-6">
                 {news.length === 0 ? (
                   <div className="text-center py-8" role="status">
                     <p className="text-cresol-gray">
-                      {isAdmin && showDrafts 
-                        ? 'Nenhuma notícia cadastrada para este sub-setor.'
-                        : 'Nenhuma notícia publicada ainda.'}
+                      Nenhuma notícia publicada ainda.
                     </p>
                   </div>
                 ) : (
@@ -440,32 +436,13 @@ export default function SubsectorDetailsPage() {
                     Próximos Eventos
                   </h2>
                   
-                  {/* Toggle para mostrar/ocultar rascunhos - apenas para admins */}
-                  {isAdmin && (
-                    <label className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showDrafts}
-                        onChange={(e) => setShowDrafts(e.target.checked)}
-                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-cresol-gray">
-                        Mostrar rascunhos
-                      </span>
-                      <span className="ml-2 text-xs text-cresol-gray-light">
-                        ({events.filter(e => !e.is_published).length} rascunhos)
-                      </span>
-                    </label>
-                  )}
                 </div>
               </div>
               <div className="p-6">
                 {events.length === 0 ? (
                   <div className="text-center py-8" role="status">
                     <p className="text-cresol-gray">
-                      {isAdmin && showDrafts 
-                        ? 'Nenhum evento cadastrado para este sub-setor.'
-                        : 'Nenhum evento programado.'}
+                      Nenhum evento programado.
                     </p>
                   </div>
                 ) : (
@@ -514,6 +491,64 @@ export default function SubsectorDetailsPage() {
                               </span>
                             </div>
                           )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Mensagens Recentes */}
+            <section 
+              className="bg-white rounded-md border border-cresol-gray-light"
+              aria-labelledby="recent-messages-heading"
+            >
+              <div className="p-6 border-b border-cresol-gray-light">
+                <div className="flex justify-between items-center">
+                  <h2 id="recent-messages-heading" className="text-xl font-semibold text-cresol-gray-dark">
+                    Mensagens Recentes
+                  </h2>
+                  
+                </div>
+              </div>
+              <div className="p-6">
+                {messages.length === 0 ? (
+                  <div className="text-center py-8" role="status">
+                    <p className="text-cresol-gray">
+                      Nenhuma mensagem publicada ainda.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4" role="list" aria-label="Lista de mensagens recentes">
+                    {messages.map((message, index) => (
+                      <article 
+                        key={message.id}
+                        className="border-b border-cresol-gray-light last:border-b-0 pb-4 last:pb-0"
+                        role="listitem"
+                        aria-labelledby={`message-title-${index}`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 
+                            id={`message-title-${index}`}
+                            className="font-semibold text-cresol-gray-dark"
+                          >
+                            {message.title}
+                          </h3>
+                          {message.is_published === false && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800 ml-2">
+                              Rascunho
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-cresol-gray text-sm mb-2">
+                          {message.content}
+                        </p>
+                        <div className="flex items-center text-xs text-cresol-gray">
+                          <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
+                          <time dateTime={message.created_at}>
+                            {new Date(message.created_at).toLocaleDateString('pt-BR')}
+                          </time>
                         </div>
                       </article>
                     ))}

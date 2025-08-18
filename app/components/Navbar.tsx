@@ -333,7 +333,10 @@ function Navbar() {
   
   // Hooks otimizados
   const { user, profile, loading, handleLogout } = useOptimizedUser();
-  const { sectors } = useOptimizedSectors(profile?.role, user?.id, true); // excludeAgencies = true
+  // Setores para navegação - sempre busca todos os setores
+  const { sectors: navigationSectors } = useOptimizedSectors(undefined, undefined, true, true); // forNavigation = true
+  // Setores para admin - filtrado por role (usado no dropdown de admin)
+  const { sectors: adminSectors } = useOptimizedSectors(profile?.role, user?.id, true, false); // forNavigation = false
   const { agencies } = useOptimizedAgencies();
   
   // Estados de UI - memoizados para evitar re-renders
@@ -411,7 +414,7 @@ function Navbar() {
             
             <HeroUISectorsDropdown 
               pathname={pathname}
-              sectors={sectors}
+              sectors={navigationSectors}
             />
             
             <HeroUIAgenciesDropdown 
@@ -455,7 +458,7 @@ function Navbar() {
             
             {profile?.isSectorAdmin && (
               <AdminSectorDropdown 
-                sectors={sectors}
+                sectors={adminSectors}
                 dropdown={adminSectorDropdown}
               />
             )}
@@ -529,14 +532,14 @@ function Navbar() {
                   pathname.startsWith('/setores') ? 'text-white' : 'text-white/80'
                 }`}
                 onClick={(e) => {
-                  if (sectors.length > 0) {
+                  if (navigationSectors.length > 0) {
                     e.preventDefault();
                   }
                 }}
               >
                 Setores
               </Link>
-              {sectors.length > 0 && (
+              {navigationSectors.length > 0 && (
                 <Icon 
                   name="chevron-down" 
                   className={`h-4 w-4 transition-transform text-white/80 ${
@@ -546,9 +549,9 @@ function Navbar() {
               )}
             </div>
             
-            {isMobileSectorsOpen && sectors.length > 0 && (
+            {isMobileSectorsOpen && navigationSectors.length > 0 && (
               <div className="pl-4 border-l border-white/30 ml-2 mt-1 max-h-60 overflow-y-auto scrollbar-thin">
-                {sectors.map((sector) => (
+                {navigationSectors.map((sector) => (
                   <Link 
                     key={sector.id} 
                     href={`/setores/${sector.id}`}
