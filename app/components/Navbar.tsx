@@ -18,8 +18,6 @@ import {
   useOptimizedUser, 
   useOptimizedSectors, 
   useOptimizedAgencies,
-  useOptimizedNotifications, 
-  useRelativeTime,
   useOptimizedDropdown 
 } from '@/hooks/useOptimizedNavbar';
 
@@ -38,14 +36,6 @@ interface Sector {
   subsectors?: Subsector[];
 }
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  created_at: string;
-  read: boolean;
-  type: 'info' | 'success' | 'warning' | 'error';
-}
 
 // Skeleton loading component
 const NavbarSkeleton = memo(() => (
@@ -291,128 +281,6 @@ const SearchButton = memo(({ isOpen, onToggle, user }: {
 });
   SearchButton.displayName = 'SearchButton';
 
-// Memoized Notifications Component
-const NotificationsButton = memo(({ 
-  notifications, 
-  unreadCount, 
-  isOpen, 
-  onToggle,
-  onMarkAsRead,
-  onMarkAllAsRead,
-  formatRelativeTime,
-  user 
-}: {
-  notifications: Notification[];
-  unreadCount: number;
-  isOpen: boolean;
-  onToggle: () => void;
-  onMarkAsRead: (id: string) => void;
-  onMarkAllAsRead: () => void;
-  formatRelativeTime: (date: string) => string;
-  user: any;
-}) => {
-  if (!user) return null;
-  
-  return (
-    <div className="relative">
-      <button 
-        type="button"
-        onClick={onToggle}
-        className="text-white/80 hover:text-white transition-colors relative p-1.5 rounded-md hover:bg-white/10"
-        title="Notificações"
-      >
-        <Icon name="bell" className="h-5 w-5" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
-      
-      {isOpen && (
-        <>
-          <div 
-            className="fixed inset-0 z-40"
-            onClick={onToggle}
-          />
-          
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg border border-gray-200 z-50 max-h-96 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-900">Notificações</h3>
-              {unreadCount > 0 && (
-                <button
-                  onClick={onMarkAllAsRead}
-                  className="text-xs text-primary hover:text-primary-dark"
-                >
-                  Marcar todas como lidas
-                </button>
-              )}
-            </div>
-            
-            <div className="max-h-80 overflow-y-auto scrollbar-branded">
-              {notifications.length > 0 ? (
-                notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer ${
-                      !notification.read ? 'bg-blue-50/50' : ''
-                    }`}
-                    onClick={() => onMarkAsRead(notification.id)}
-                  >
-                    <div className="flex items-start space-x-3">
-                      <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${
-                        notification.type === 'info' ? 'bg-blue-500' :
-                        notification.type === 'success' ? 'bg-green-500' :
-                        notification.type === 'warning' ? 'bg-yellow-500' :
-                        'bg-red-500'
-                      }`} />
-                      
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium text-gray-900 ${
-                          !notification.read ? 'font-semibold' : ''
-                        }`}>
-                          {notification.title}
-                        </p>
-                        <p className="text-xs text-gray-600 mt-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {formatRelativeTime(notification.created_at)}
-                        </p>
-                      </div>
-                      
-                      {!notification.read && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="px-4 py-6 text-center text-gray-500">
-                  <Icon name="bell" className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-                  <p className="text-sm">Nenhuma notificação</p>
-                </div>
-              )}
-            </div>
-            
-            {notifications.length > 0 && (
-              <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
-                <Link
-                  href="/notifications"
-                  className="text-xs text-primary hover:text-primary-dark text-center block"
-                  onClick={onToggle}
-                >
-                  Ver todas as notificações
-                </Link>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  );
-});
-  NotificationsButton.displayName = 'NotificationsButton';
 
 // Memoized User Menu
 const UserMenu = memo(({ user, dropdown, onLogout }: {
@@ -467,13 +335,10 @@ function Navbar() {
   const { user, profile, loading, handleLogout } = useOptimizedUser();
   const { sectors } = useOptimizedSectors(profile?.role, user?.id, true); // excludeAgencies = true
   const { agencies } = useOptimizedAgencies();
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useOptimizedNotifications(user?.id);
-  const { formatRelativeTime } = useRelativeTime();
   
   // Estados de UI - memoizados para evitar re-renders
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileSectorsOpen, setIsMobileSectorsOpen] = useState(false);
   
   // Dropdowns otimizados
@@ -487,10 +352,6 @@ function Navbar() {
   
   const toggleSearch = useCallback(() => {
     setIsSearchOpen(prev => !prev);
-  }, []);
-  
-  const toggleNotifications = useCallback(() => {
-    setIsNotificationsOpen(prev => !prev);
   }, []);
   
   const toggleMobileSectors = useCallback(() => {
@@ -603,18 +464,6 @@ function Navbar() {
             <SearchButton 
               isOpen={isSearchOpen}
               onToggle={toggleSearch}
-              user={user}
-            />
-            
-            {/* Notifications Button */}
-            <NotificationsButton 
-              notifications={notifications}
-              unreadCount={unreadCount}
-              isOpen={isNotificationsOpen}
-              onToggle={toggleNotifications}
-              onMarkAsRead={markAsRead}
-              onMarkAllAsRead={markAllAsRead}
-              formatRelativeTime={formatRelativeTime}
               user={user}
             />
             

@@ -5,7 +5,6 @@
 
 import { memo, useCallback } from 'react'
 import { VideoActionsProps } from './VideoUploadForm.types'
-import { Spinner } from "@chakra-ui/react"
 import { CRESOL_UI_CONFIG } from '@/lib/design-tokens'
 
 export const VideoUploadFormActions = memo(({ 
@@ -68,12 +67,7 @@ export const VideoUploadFormActions = memo(({
       >
         {/* Loading spinner */}
         {isLoading && (
-          <Spinner
-            size="sm"
-            color={CRESOL_UI_CONFIG.spinner.contexts.admin.color}
-            css={{ "--spinner-track-color": CRESOL_UI_CONFIG.spinner.contexts.admin.trackColor }}
-            aria-hidden="true"
-          />
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" aria-hidden="true"></div>
         )}
         
         {/* Button text */}

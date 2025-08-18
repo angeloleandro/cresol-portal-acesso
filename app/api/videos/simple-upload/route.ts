@@ -11,7 +11,6 @@ function formatFileSize(bytes: number): string {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 [UPLOAD] Iniciando upload de vídeo direto...');
   const startTime = Date.now();
   let uploadMetrics = {
     fileSize: 0,
@@ -50,7 +49,6 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    console.log('📋 [UPLOAD] Extraindo dados do FormData...');
     const formData = await request.formData();
     const videoFile = formData.get('video') as File;
     const title = formData.get('title') as string;
@@ -59,19 +57,8 @@ export async function POST(request: NextRequest) {
     const thumbnailTimestamp = formData.get('thumbnailTimestamp') ? parseFloat(formData.get('thumbnailTimestamp') as string) : null;
     const collectionId = formData.get('collection_id') as string | null; // Optional collection integration
 
-    console.log('📊 [UPLOAD] Dados recebidos:', {
-      fileName: videoFile?.name || 'N/A',
-      fileSize: videoFile?.size || 0,
-      fileType: videoFile?.type || 'N/A',
-      title: title || 'N/A',
-      isActive,
-      orderIndex,
-      thumbnailTimestamp,
-      collectionId: collectionId || 'N/A'
-    });
 
     if (!videoFile || !title) {
-      console.error('❌ [UPLOAD] Dados obrigatórios faltando');
       return NextResponse.json({ error: 'Arquivo de vídeo e título são obrigatórios' }, { status: 400 });
     }
 
@@ -116,8 +103,6 @@ export async function POST(request: NextRequest) {
     const fileName = `${uuid}_${sanitizedOriginalName}`;
     const filePath = `${STORAGE_CONFIG.FOLDERS.VIDEO_UPLOADS}/${timestamp}/${fileName}`;
     
-    console.log('🔄 [UPLOAD] Iniciando upload para Supabase Storage...');
-    console.log('📁 [UPLOAD] Caminho do arquivo:', filePath);
     
     const { data: uploadData, error: uploadError } = await serviceClient.storage
       .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
@@ -126,10 +111,6 @@ export async function POST(request: NextRequest) {
         upsert: false,
         cacheControl: VIDEO_CONFIG.CACHE_CONTROL
       });
-
-    if (uploadData) {
-      console.log('✅ [UPLOAD] Upload para storage concluído:', uploadData.path);
-    }
 
     if (uploadError) {
       return NextResponse.json({ 
@@ -146,7 +127,6 @@ export async function POST(request: NextRequest) {
         error: 'Erro ao gerar URL do vídeo' 
       }, { status: 500 });
     }
-    console.log('🔄 [UPLOAD] Criando registro no banco de dados...');
     let { data: videoRecord, error: dbError } = await serviceClient
       .rpc('create_video_record', {
         p_title: title,
@@ -165,8 +145,6 @@ export async function POST(request: NextRequest) {
       });
 
     if (dbError) {
-      console.error('❌ [UPLOAD] Erro na RPC create_video_record:', dbError);
-      
       // Cleanup do arquivo já uploadado
       await serviceClient.storage
         .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
@@ -174,7 +152,6 @@ export async function POST(request: NextRequest) {
 
       // Tratamento específico para ordem duplicada
       if (dbError.code === '23505' && dbError.message.includes('order_index')) {
-        console.log('🔄 [UPLOAD] Detectado order_index duplicado, tentando próximo valor...');
         
         // Buscar o próximo order_index disponível
         const { data: maxOrder } = await serviceClient
@@ -185,8 +162,6 @@ export async function POST(request: NextRequest) {
           .single();
 
         const nextOrderIndex = (maxOrder?.order_index || 0) + 1;
-        
-        console.log('🔄 [UPLOAD] Tentando com order_index:', nextOrderIndex);
         
         // Nova tentativa de upload
         const { data: uploadData2, error: uploadError2 } = await serviceClient.storage
@@ -245,8 +220,6 @@ export async function POST(request: NextRequest) {
           error: friendlyError
         }, { status: 400 });
       }
-    } else {
-      console.log('✅ [UPLOAD] Registro criado com sucesso:', videoRecord);
     }
 
     const parsedRecord = typeof videoRecord === 'string' ? JSON.parse(videoRecord) : videoRecord;
@@ -262,10 +235,8 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (collectionError || !collection) {
-          console.log('⚠️ [UPLOAD] Coleção não encontrada para adicionar vídeo:', collectionId);
           // Continue sem adicionar à coleção, mas não falhe o upload
         } else if (collection.type === 'images') {
-          console.log('⚠️ [UPLOAD] Tentativa de adicionar vídeo a coleção de imagens:', collectionId);
           // Continue sem adicionar à coleção
         } else {
           // Buscar próximo order_index na coleção
@@ -290,22 +261,12 @@ export async function POST(request: NextRequest) {
             });
 
           if (collectionItemError) {
-            console.error('❌ [UPLOAD] Erro ao adicionar vídeo à coleção:', { 
-              collectionId, 
-              videoId: parsedRecord.id,
-              error: collectionItemError 
-            });
+            console.error('Erro ao adicionar vídeo à coleção:', collectionItemError);
             // Continue sem falhar o upload
-          } else {
-            console.log('✅ [UPLOAD] Vídeo adicionado à coleção com sucesso:', {
-              collectionId,
-              videoId: parsedRecord.id,
-              order: nextOrder
-            });
           }
         }
       } catch (error) {
-        console.error('❌ [UPLOAD] Erro na integração com coleção:', error);
+        console.error('Erro na integração com coleção:', error);
         // Continue sem falhar o upload
       }
     }

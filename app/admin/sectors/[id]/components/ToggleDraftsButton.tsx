@@ -7,7 +7,7 @@ interface ToggleDraftsButtonProps {
   draftCount: number;
   onToggle: () => Promise<void>;
   isLoading?: boolean;
-  type?: 'news' | 'events';
+  type?: 'news' | 'events' | 'messages';
 }
 
 export function ToggleDraftsButton({ 

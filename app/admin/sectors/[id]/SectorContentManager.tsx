@@ -1,5 +1,7 @@
 // Componente unificado para gerenciar conteúdo do setor com lógica limpa
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { CONTENT_DEFAULTS } from '@/lib/constants/content-defaults';
+
 
 interface SectorNews {
   id: string;
@@ -29,10 +31,22 @@ interface SectorEvent {
   sector_id: string;
 }
 
+interface SectorMessage {
+  id: string;
+  title: string;
+  content: string;
+  group_id: string | null;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  sector_id: string;
+}
+
 interface UseSectorContentReturn {
   // Estados
   news: SectorNews[];
   events: SectorEvent[];
+  messages: SectorMessage[];
   showDrafts: boolean;
   isLoading: boolean;
   error: string | null;
@@ -40,113 +54,68 @@ interface UseSectorContentReturn {
   // Contadores
   totalDraftNewsCount: number;
   totalDraftEventsCount: number;
+  totalDraftMessagesCount: number;
   
   // Ações
   toggleDrafts: () => Promise<void>;
   refreshContent: () => Promise<void>;
   deleteNews: (id: string) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
+  deleteMessage: (id: string) => Promise<void>;
 }
 
 export function useSectorContent(sectorId: string | undefined): UseSectorContentReturn {
+
   const [news, setNews] = useState<SectorNews[]>([]);
   const [events, setEvents] = useState<SectorEvent[]>([]);
-  const [showDrafts, setShowDrafts] = useState(true); // Mostra rascunhos por padrão
+  const [messages, setMessages] = useState<SectorMessage[]>([]);
+  const [showDrafts, setShowDrafts] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalDraftNewsCount, setTotalDraftNewsCount] = useState(0);
   const [totalDraftEventsCount, setTotalDraftEventsCount] = useState(0);
-
-
-  // Função unificada para buscar conteúdo via API
+  const [totalDraftMessagesCount, setTotalDraftMessagesCount] = useState(0);
+  
+  const mountedRef = useRef(true);
   const fetchContent = useCallback(async (includesDrafts: boolean) => {
-    if (!sectorId) {
-      return;
-    }
+    if (!sectorId) return;
     
     setIsLoading(true);
     setError(null);
 
     try {
-      // Buscar notícias
-      const newsParams = new URLSearchParams({
-        type: 'sector_news',
-        sectorId: sectorId,
-        includeUnpublished: includesDrafts.toString()
-      });
+      const batchResponse = await fetch(`/api/admin/sector-content-batch?sectorId=${sectorId}&includeUnpublished=${includesDrafts}`);
       
-      const newsResponse = await fetch(`/api/admin/sector-content?${newsParams.toString()}`);
-      
-      if (!newsResponse.ok) {
-        throw new Error(`Erro API notícias: ${newsResponse.status} ${newsResponse.statusText}`);
+      if (!batchResponse.ok) {
+        throw new Error(`Erro API: ${batchResponse.status}`);
       }
       
-      const newsResult = await newsResponse.json();
+      const batchResult = await batchResponse.json();
       
-      // Buscar eventos
-      const eventsParams = new URLSearchParams({
-        type: 'sector_events',
-        sectorId: sectorId,
-        includeUnpublished: includesDrafts.toString()
-      });
-      
-      const eventsResponse = await fetch(`/api/admin/sector-content?${eventsParams.toString()}`);
-      
-      if (!eventsResponse.ok) {
-        throw new Error(`Erro API eventos: ${eventsResponse.status} ${eventsResponse.statusText}`);
+      if (!batchResult.success) {
+        throw new Error(batchResult.error || 'Erro na API');
       }
       
-      const eventsResult = await eventsResponse.json();
+      const { news: newsData, events: eventsData, messages: messagesData, draftNewsCount, draftEventsCount, draftMessagesCount } = batchResult.data;
+      
+      const newsToSet = newsData || [];
+      const eventsToSet = eventsData || [];
+      const messagesToSet = messagesData || [];
+      
+      if (!mountedRef.current) {
+        return;
+      }
 
-      // Contar rascunhos totais
-      const allNewsParams = new URLSearchParams({
-        type: 'sector_news',
-        sectorId: sectorId,
-        includeUnpublished: 'true'
-      });
-      
-      const allEventsParams = new URLSearchParams({
-        type: 'sector_events',
-        sectorId: sectorId,
-        includeUnpublished: 'true'
-      });
-      
-      const [allNewsResponse, allEventsResponse] = await Promise.all([
-        fetch(`/api/admin/sector-content?${allNewsParams.toString()}`),
-        fetch(`/api/admin/sector-content?${allEventsParams.toString()}`)
-      ]);
-      
-      const allNewsResult = allNewsResponse.ok ? await allNewsResponse.json() : { data: [] };
-      const allEventsResult = allEventsResponse.ok ? await allEventsResponse.json() : { data: [] };
-      
-      // Processar dados
-      const newsData = newsResult.data || [];
-      const eventsData = eventsResult.data || [];
-      const allNewsData = allNewsResult.data || [];
-      const allEventsData = allEventsResult.data || [];
-      
-      const newsAnalysis = {
-        total: allNewsData.length,
-        published: allNewsData.filter((n: any) => n.is_published === true).length,
-        drafts: allNewsData.filter((n: any) => n.is_published === false).length,
-        null_published: allNewsData.filter((n: any) => n.is_published === null || n.is_published === undefined).length
-      };
-      
-      const eventsAnalysis = {
-        total: allEventsData.length,
-        published: allEventsData.filter((e: any) => e.is_published === true).length,
-        drafts: allEventsData.filter((e: any) => e.is_published === false).length,
-        null_published: allEventsData.filter((e: any) => e.is_published === null || e.is_published === undefined).length
-      };
-      
-      const draftNewsCount = newsAnalysis.drafts;
-      const draftEventsCount = eventsAnalysis.drafts;
-      
+      if (!Array.isArray(newsToSet) || !Array.isArray(eventsToSet)) {
+        throw new Error('Formato de dados inválido');
+      }
+
+      setNews(newsToSet);
+      setEvents(eventsToSet);
+      setMessages(messagesToSet);
       setTotalDraftNewsCount(draftNewsCount);
       setTotalDraftEventsCount(draftEventsCount);
-
-      setNews(newsData);
-      setEvents(eventsData);
+      setTotalDraftMessagesCount(draftMessagesCount || 0);
       
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar conteúdo');
@@ -155,18 +124,97 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
     }
   }, [sectorId]);
 
-  // Toggle de rascunhos
   const toggleDrafts = useCallback(async () => {
-    const newShowDrafts = !showDrafts;
+    if (!sectorId) return;
     
+    const newShowDrafts = !showDrafts;
     setShowDrafts(newShowDrafts);
-    await fetchContent(newShowDrafts);
-  }, [showDrafts, fetchContent]);
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const batchParams = new URLSearchParams({
+        sectorId: sectorId,
+        includeUnpublished: newShowDrafts.toString()
+      });
+      
+      const batchResponse = await fetch(`/api/admin/sector-content-batch?${batchParams.toString()}`);
+      
+      if (!batchResponse.ok) {
+        throw new Error(`Erro API batch toggle: ${batchResponse.status}`);
+      }
+      
+      const batchResult = await batchResponse.json();
+      
+      if (!batchResult.success) {
+        throw new Error(batchResult.error || 'Erro na API batch toggle');
+      }
+      
+      const { news: newsData, events: eventsData, messages: messagesData } = batchResult.data;
+      
+      if (mountedRef.current) {
+        setNews(newsData);
+        setEvents(eventsData);
+        setMessages(messagesData || []);
+      }
+      
+    } catch (err: any) {
+      if (mountedRef.current) {
+        setError(err.message || 'Erro ao alternar rascunhos');
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [showDrafts, sectorId]);
 
-  // Refresh forçado
   const refreshContent = useCallback(async () => {
-    await fetchContent(showDrafts);
-  }, [showDrafts, fetchContent]);
+    if (!sectorId) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const batchParams = new URLSearchParams({
+        sectorId: sectorId,
+        includeUnpublished: showDrafts.toString()
+      });
+      
+      const batchResponse = await fetch(`/api/admin/sector-content-batch?${batchParams.toString()}`);
+      
+      if (!batchResponse.ok) {
+        throw new Error(`Erro API batch refresh: ${batchResponse.status}`);
+      }
+      
+      const batchResult = await batchResponse.json();
+      
+      if (!batchResult.success) {
+        throw new Error(batchResult.error || 'Erro na API batch refresh');
+      }
+      
+      const { news: newsData, events: eventsData, messages: messagesData, draftNewsCount, draftEventsCount, draftMessagesCount } = batchResult.data;
+      
+      if (mountedRef.current) {
+        setNews(newsData);
+        setEvents(eventsData);
+        setMessages(messagesData || []);
+        setTotalDraftNewsCount(draftNewsCount);
+        setTotalDraftEventsCount(draftEventsCount);
+        setTotalDraftMessagesCount(draftMessagesCount || 0);
+      }
+      
+    } catch (err: any) {
+      if (mountedRef.current) {
+        setError(err.message || 'Erro ao atualizar conteúdo');
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [showDrafts, sectorId]);
 
   // Deletar notícia via API
   const deleteNews = useCallback(async (id: string) => {
@@ -203,40 +251,79 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
       setError(err.message || 'Erro ao deletar evento');
     }
   }, [refreshContent]);
+  
+  // Deletar mensagem via API
+  const deleteMessage = useCallback(async (id: string) => {
+    try {
+      const response = await fetch(`/api/admin/sector-content?type=sector_messages&id=${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erro ao deletar mensagem');
+      }
+      
+      await refreshContent();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao deletar mensagem');
+    }
+  }, [refreshContent]);
 
-  // Carregar inicial
   useEffect(() => {
-    let mounted = true;
+    if (!sectorId || sectorId === 'undefined') {
+      return;
+    }
 
-    const loadContent = async () => {
-      if (sectorId && mounted) {
-        try {
-          await fetchContent(true);
-        } catch (error) {
-          // Error handling is done in fetchContent
+    const loadData = async () => {
+      setIsLoading(true);
+      
+      try {
+        const response = await fetch(`/api/admin/sector-content-batch?sectorId=${sectorId}&includeUnpublished=true`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          setNews(data.data.news || []);
+          setEvents(data.data.events || []);
+          setMessages(data.data.messages || []);
+          setTotalDraftNewsCount(data.data.draftNewsCount || 0);
+          setTotalDraftEventsCount(data.data.draftEventsCount || 0);
+          setTotalDraftMessagesCount(data.data.draftMessagesCount || 0);
         }
+      } catch (err) {
+        setError('Erro ao carregar dados');
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    loadContent();
+    loadData();
 
     return () => {
-      mounted = false;
+      mountedRef.current = false;
     };
-  }, [sectorId, fetchContent]);
+  }, [sectorId]);
+
+  // Filtrar dados baseado em showDrafts
+  const filteredNews = showDrafts ? news : news.filter(n => n.is_published !== false);
+  const filteredEvents = showDrafts ? events : events.filter(e => e.is_published !== false);
+  const filteredMessages = showDrafts ? messages : messages.filter(m => m.is_published !== false);
 
   return {
-    news,
-    events,
+    news: filteredNews,
+    events: filteredEvents,
+    messages: filteredMessages,
     showDrafts,
     isLoading,
     error,
     totalDraftNewsCount,
     totalDraftEventsCount,
+    totalDraftMessagesCount,
     toggleDrafts,
     refreshContent,
     deleteNews,
-    deleteEvent
+    deleteEvent,
+    deleteMessage
   };
 }
 

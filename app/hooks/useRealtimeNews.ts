@@ -77,13 +77,11 @@ export function useRealtimeNews({
       const { data: fetchedData, error: fetchError } = await query;
 
       if (fetchError) {
-        console.error('Error fetching data:', fetchError);
         setError(fetchError.message);
       } else {
         setData(fetchedData || []);
       }
     } catch (err) {
-      console.error('Unexpected error:', err);
       setError('Erro ao carregar dados');
     } finally {
       setLoading(false);
@@ -113,7 +111,6 @@ export function useRealtimeNews({
           filter: filter || undefined
         },
         (payload: any) => {
-          console.log('Realtime INSERT:', payload);
           const rawItem = payload.new as any;
           // Map legacy fields to new fields for compatibility
           const newItem: NewsEvent = {
@@ -139,7 +136,6 @@ export function useRealtimeNews({
           filter: filter || undefined
         },
         (payload: any) => {
-          console.log('Realtime UPDATE:', payload);
           const rawItem = payload.new as any;
           // Map legacy fields to new fields for compatibility
           const updatedItem: NewsEvent = {
@@ -174,23 +170,19 @@ export function useRealtimeNews({
           filter: filter || undefined
         },
         (payload: any) => {
-          console.log('Realtime DELETE:', payload);
           const deletedItem = payload.old as { id: string };
           
           setData(prev => prev.filter(item => item.id !== deletedItem.id));
           onDelete?.(deletedItem);
         }
       )
-      .subscribe((status) => {
-        console.log(`Realtime subscription status for ${tableName}:`, status);
-      });
+      .subscribe();
 
     setChannel(subscriptionChannel);
 
     // Cleanup subscription on unmount
     return () => {
       if (subscriptionChannel) {
-        console.log(`Unsubscribing from ${tableName} realtime`);
         supabase.removeChannel(subscriptionChannel);
       }
     };
@@ -213,11 +205,9 @@ export function useRealtimeNews({
         .eq('id', id);
 
       if (error) {
-        console.error('Error toggling published status:', error);
         throw error;
       }
     } catch (err) {
-      console.error('Failed to toggle published status:', err);
       throw err;
     }
   }, [tableName, supabase]);
@@ -234,11 +224,9 @@ export function useRealtimeNews({
         .eq('id', id);
 
       if (error) {
-        console.error('Error toggling featured status:', error);
         throw error;
       }
     } catch (err) {
-      console.error('Failed to toggle featured status:', err);
       throw err;
     }
   }, [tableName, supabase]);

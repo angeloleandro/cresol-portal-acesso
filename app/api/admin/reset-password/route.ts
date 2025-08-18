@@ -10,7 +10,6 @@ export async function POST(request: NextRequest) {
     const { userId, newPassword, adminToken } = await request.json();
 
     // Log para depuração
-    console.log('API /api/admin/reset-password chamada para o usuário:', userId);
 
     if (!userId || !newPassword) {
       return NextResponse.json({ 
@@ -37,7 +36,6 @@ export async function POST(request: NextRequest) {
 
     if (adminToken) {
       // Verificar o token fornecido
-      console.log('Verificando token de admin fornecido...');
       const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(adminToken);
       
       if (authError || !user) {
@@ -48,7 +46,6 @@ export async function POST(request: NextRequest) {
       }
       
       adminUserId = user.id;
-      console.log('Admin autenticado:', adminUserId);
       
       // Verificar se o usuário é um administrador
       const { data: adminProfile, error: profileError } = await supabaseAdmin
@@ -65,7 +62,6 @@ export async function POST(request: NextRequest) {
       }
       
       isAdmin = adminProfile?.role === 'admin';
-      console.log('É administrador:', isAdmin);
           } else {
         // Método legado usando cookies - como fallback
       
@@ -129,7 +125,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se o usuário a ter a senha redefinida existe
-    console.log('Verificando existência do usuário:', userId);
     const { data: userToUpdate, error: userError } = await supabaseAdmin
       .from('profiles')
       .select('id, email, full_name')

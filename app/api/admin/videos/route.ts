@@ -249,11 +249,10 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('❌ [UPDATE] Erro na atualização:', updateError);
+      console.error('Erro na atualização:', updateError);
       
       // Tratamento específico para ordem duplicada
       if (updateError.code === '23505' && updateError.message.includes('order_index')) {
-        console.log('🔄 [UPDATE] Detectado order_index duplicado, tentando próximo valor...');
         
         // Buscar o próximo order_index disponível
         const { data: maxOrder } = await supabaseAdmin
@@ -265,7 +264,6 @@ export async function PUT(request: NextRequest) {
 
         const nextOrderIndex = (maxOrder?.order_index || 0) + 1;
         
-        console.log('🔄 [UPDATE] Tentando com order_index:', nextOrderIndex);
         
         // Nova tentativa com order_index corrigido
         const { data: updatedVideo2, error: updateError2 } = await supabaseAdmin

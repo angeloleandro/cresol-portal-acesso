@@ -49,7 +49,6 @@ function LoginContent() {
       }
 
       // Sucesso - o useAuth hook já gerencia o estado
-      console.log('✅ Login realizado com sucesso');
       
       // Aguardar um pouco mais para garantir que a sessão seja estabelecida
       await new Promise(resolve => setTimeout(resolve, 500));

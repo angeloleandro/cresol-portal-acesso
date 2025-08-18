@@ -9,15 +9,6 @@ interface SectorData {
   description?: string;
 }
 
-interface NotificationData {
-  id: string;
-  title: string;
-  message: string;
-  created_at: string;
-  read: boolean;
-  type: 'info' | 'success' | 'warning' | 'error';
-}
-
 interface UserProfileData {
   id: string;
   role: string;
@@ -35,13 +26,11 @@ interface CacheEntry<T> {
 
 // Cache stores
 const sectorsCache = new Map<string, CacheEntry<SectorData[]>>();
-const notificationsCache = new Map<string, CacheEntry<NotificationData[]>>();
 const userProfileCache = new Map<string, CacheEntry<UserProfileData>>();
 
 // Cache settings
 const CACHE_DURATION = {
   sectors: 10 * 60 * 1000, // 10 minutos - setores mudam pouco
-  notifications: 30 * 1000, // 30 segundos - notificações são mais dinâmicas
   userProfile: 5 * 60 * 1000, // 5 minutos - perfil de usuário
 };
 
@@ -107,50 +96,6 @@ export function setCachedSectors(
 }
 
 /**
- * NOTIFICATIONS CACHE
- */
-export function getCachedNotifications(userId: string): NotificationData[] | null {
-  cleanExpiredCache(notificationsCache);
-  
-  const cached = notificationsCache.get(userId);
-  
-  if (!cached || cached.expiresAt < Date.now()) {
-    if (cached) notificationsCache.delete(userId);
-    return null;
-  }
-  
-  return cached.data;
-}
-
-export function setCachedNotifications(notifications: NotificationData[], userId: string): void {
-  cleanExpiredCache(notificationsCache);
-  
-  const expiresAt = Date.now() + CACHE_DURATION.notifications;
-  
-  notificationsCache.set(userId, {
-    data: notifications,
-    timestamp: Date.now(),
-    expiresAt
-  });
-}
-
-export function updateCachedNotification(
-  userId: string, 
-  notificationId: string, 
-  updates: Partial<NotificationData>
-): boolean {
-  const cached = notificationsCache.get(userId);
-  if (!cached) return false;
-  
-  const updatedNotifications = cached.data.map(n => 
-    n.id === notificationId ? { ...n, ...updates } : n
-  );
-  
-  setCachedNotifications(updatedNotifications, userId);
-  return true;
-}
-
-/**
  * USER PROFILE CACHE
  */
 export function getCachedUserProfile(userId: string): UserProfileData | null {
@@ -190,14 +135,6 @@ export function invalidateSectorsCache(userRole?: string, userId?: string): void
   }
 }
 
-export function invalidateNotificationsCache(userId?: string): void {
-  if (userId) {
-    notificationsCache.delete(userId);
-  } else {
-    notificationsCache.clear();
-  }
-}
-
 export function invalidateUserProfileCache(userId?: string): void {
   if (userId) {
     userProfileCache.delete(userId);
@@ -208,7 +145,6 @@ export function invalidateUserProfileCache(userId?: string): void {
 
 export function clearAllNavbarCache(): void {
   sectorsCache.clear();
-  notificationsCache.clear();
   userProfileCache.clear();
 }
 
@@ -217,7 +153,6 @@ export function clearAllNavbarCache(): void {
  */
 export function getNavbarCacheStats(): {
   sectors: { size: number; oldestEntry?: number };
-  notifications: { size: number; oldestEntry?: number };
   userProfiles: { size: number; oldestEntry?: number };
 } {
   const now = Date.now();
@@ -231,10 +166,6 @@ export function getNavbarCacheStats(): {
     sectors: {
       size: sectorsCache.size,
       oldestEntry: getOldestEntry(sectorsCache)
-    },
-    notifications: {
-      size: notificationsCache.size,
-      oldestEntry: getOldestEntry(notificationsCache)
     },
     userProfiles: {
       size: userProfileCache.size,

@@ -1,6 +1,6 @@
 // Componente de gerenciamento de eventos do setor
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SectorEvent } from '../types/sector.types';
 import { formatEventPeriod, formatForDateTimeInput } from '../utils/dateFormatters';
 import { ToggleDraftsButton } from './ToggleDraftsButton';
@@ -24,6 +24,7 @@ export function EventsManagement({
   onRefresh,
   onDelete
 }: EventsManagementProps) {
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,6 +38,7 @@ export function EventsManagement({
     is_featured: false,
     is_published: true
   });
+
 
   const handleOpenModal = (event?: SectorEvent) => {
     if (event) {
@@ -130,14 +132,6 @@ export function EventsManagement({
     setIsSaving(true);
 
     try {
-      console.log('🔥 [FRONTEND] Iniciando salvamento de evento');
-      console.log('🔥 [FRONTEND] Dados a serem enviados:', {
-        type: 'event',
-        sectorId,
-        isEditing,
-        hasEndDate: !!currentEvent.end_date
-      });
-      
       const method = isEditing ? 'PUT' : 'POST';
       const endpoint = '/api/admin/sector-content';
       
@@ -152,34 +146,16 @@ export function EventsManagement({
           location: currentEvent.location?.trim()
         }
       };
-      
-      // Log detalhado dos dados sendo enviados
-      console.log('📤 [FRONTEND] Dados da requisição:');
-      console.log('  Método:', method);
-      console.log('  Endpoint:', endpoint);
-      console.log('  Payload:', JSON.stringify(requestData, null, 2));
 
       const response = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)
       });
-      
-      console.log('📥 [FRONTEND] Resposta da API:');
-      console.log('  Status:', response.status);
-      console.log('  Status Text:', response.statusText);
-      console.log('  OK:', response.ok);
 
       const responseData = await response.json();
-      console.log('📥 [FRONTEND] Dados da resposta:', responseData);
 
       if (!response.ok) {
-        console.error('❌ [FRONTEND] Erro na resposta da API:', {
-          status: response.status,
-          statusText: response.statusText,
-          responseData
-        });
-        
         // Tratamento específico de erros
         let errorMessage = 'Erro ao salvar evento';
         
@@ -202,22 +178,14 @@ export function EventsManagement({
         throw new Error(errorMessage);
       }
       
-      console.log('✅ [FRONTEND] Evento salvo com sucesso:', responseData);
-      
-      // Show success message briefly
-      console.log('🎉 [FRONTEND] Operação realizada com sucesso - atualizando dados...');
-      
-      // Refresh data to ensure consistency
-      await onRefresh();
-      
-      // Close modal only after success
+      // Close modal first for better UX
       handleCloseModal();
       
+      // Then refresh data to show the new/updated event
+      await onRefresh();
+      
     } catch (error: any) {
-      console.error('💥 [FRONTEND] Erro crítico ao salvar evento:');
-      console.error('  Tipo:', error.constructor?.name || 'Unknown');
-      console.error('  Mensagem:', error.message);
-      console.error('  Stack:', error.stack);
+      console.error('Erro ao salvar evento:', error);
       
       // Show user-friendly error message
       const userMessage = error.message.includes('fetch')
@@ -232,7 +200,12 @@ export function EventsManagement({
 
   const handleDeleteEvent = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir este evento?')) return;
-    await onDelete(id);
+    try {
+      await onDelete(id);
+      // onDelete já chama refreshContent internamente
+    } catch (error) {
+      console.error('Erro ao deletar evento:', error);
+    }
   };
 
   return (
@@ -258,6 +231,7 @@ export function EventsManagement({
 
       {/* Lista de eventos */}
       <div className="grid gap-4">
+        
         {events.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-500">

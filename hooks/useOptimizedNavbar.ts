@@ -9,9 +9,6 @@ import { supabase } from '@/lib/supabase';
 import { 
   getCachedSectors, 
   setCachedSectors,
-  getCachedNotifications,
-  setCachedNotifications,
-  updateCachedNotification,
   getCachedUserProfile,
   setCachedUserProfile
 } from '@/lib/navbar-cache';
@@ -37,15 +34,6 @@ interface Sector {
   name: string;
   description?: string;
   subsectors?: Subsector[];
-}
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  created_at: string;
-  read: boolean;
-  type: 'info' | 'success' | 'warning' | 'error';
 }
 
 interface UserProfile {
@@ -260,144 +248,6 @@ export function useOptimizedAgencies() {
   }, [fetchAgencies]);
 
   return { agencies, loading };
-}
-
-/**
- * Hook otimizado para gerenciar notificações
- */
-export function useOptimizedNotifications(userId?: string) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const lastFetchRef = useRef<number>(0);
-  const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const fetchNotifications = useCallback(async () => {
-    if (!userId) return;
-
-    const now = Date.now();
-    // Throttle: não buscar mais que 1x por 10 segundos
-    if (now - lastFetchRef.current < 10000) return;
-
-    try {
-      // Verificar cache primeiro
-      const cachedNotifications = getCachedNotifications(userId);
-      if (cachedNotifications) {
-        setNotifications(cachedNotifications);
-        setUnreadCount(cachedNotifications.filter(n => !n.read).length);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (!error && data) {
-        setNotifications(data);
-        setUnreadCount(data.filter(n => !n.read).length);
-        setCachedNotifications(data, userId);
-        lastFetchRef.current = now;
-      }
-    } catch (error) {
-      console.error('[NavbarHooks] Erro ao buscar notificações:', error instanceof Error ? error.message : error);
-    }
-  }, [userId]);
-
-  const markAsRead = useCallback(async (notificationId: string) => {
-    if (!userId) return;
-
-    try {
-      await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', notificationId);
-
-      // Atualizar estado local
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId ? { ...n, read: true } : n
-        )
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
-
-      // Atualizar cache
-      updateCachedNotification(userId, notificationId, { read: true });
-    } catch (error) {
-      console.error('[NavbarHooks] Erro ao marcar notificação como lida:', error instanceof Error ? error.message : error);
-    }
-  }, [userId]);
-
-  const markAllAsRead = useCallback(async () => {
-    if (!userId) return;
-
-    try {
-      await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('user_id', userId)
-        .eq('read', false);
-
-      const updatedNotifications = notifications.map(n => ({ ...n, read: true }));
-      setNotifications(updatedNotifications);
-      setUnreadCount(0);
-      setCachedNotifications(updatedNotifications, userId);
-    } catch (error) {
-      console.error('[NavbarHooks] Erro ao marcar todas as notificações como lidas:', error instanceof Error ? error.message : error);
-    }
-  }, [userId, notifications]);
-
-  // Fetch inicial
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
-
-  // Polling inteligente (apenas se há notificações não lidas)
-  useEffect(() => {
-    if (!userId) return;
-
-    // Se há notificações não lidas, fazer polling mais frequente
-    const interval = unreadCount > 0 ? 30000 : 60000; // 30s se há não lidas, 60s caso contrário
-
-    fetchIntervalRef.current = setInterval(fetchNotifications, interval);
-
-    return () => {
-      if (fetchIntervalRef.current) {
-        clearInterval(fetchIntervalRef.current);
-      }
-    };
-  }, [userId, fetchNotifications, unreadCount]);
-
-  return {
-    notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-    refetch: fetchNotifications
-  };
-}
-
-/**
- * Hook otimizado para formatação de tempo relativo (memoizado)
- */
-export function useRelativeTime() {
-  const formatRelativeTime = useCallback((date: string) => {
-    const now = new Date();
-    const notificationDate = new Date(date);
-    const diffInMinutes = Math.floor((now.getTime() - notificationDate.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'Agora';
-    if (diffInMinutes < 60) return `${diffInMinutes}m atrás`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h atrás`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d atrás`;
-  }, []);
-
-  return { formatRelativeTime };
 }
 
 /**

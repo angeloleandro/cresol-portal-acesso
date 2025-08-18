@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logger } from '@/lib/logger';
 
 /**
  * Cria um cliente Supabase com privilégios administrativos usando a service role key
@@ -84,18 +85,43 @@ export function extractAuthToken(authHeader: string | null): string | null {
 
 /**
  * Middleware de autenticação para APIs administrativas
- * @param request Request object do Next.js
+ * @param request Request object do Next.js (suporta Request e NextRequest)
  * @returns Objeto com informações do usuário autenticado ou erro
  */
-export async function authenticateAdminRequest(request: Request) {
+export async function authenticateAdminRequest(request: Request | { headers: Headers | { get: (name: string) => string | null } }) {
+  const requestId = logger.generateRequestId();
+  const authTimer = logger.authStart('Admin Authentication', { requestId });
+  
   try {
+    // Timer para criação do client
+    const clientTimer = logger.dbStart('Create Admin Client', { requestId });
     const supabaseAdmin = createAdminSupabaseClient();
+    logger.dbEnd(clientTimer);
     
-    // Extrair token do header
-    const authHeader = request.headers.get('authorization');
+    // Extrair token do header - compatível com Request e NextRequest
+    let authHeader: string | null = null;
+    
+    if (request.headers && typeof request.headers.get === 'function') {
+      authHeader = request.headers.get('authorization');
+    }
+    
+    logger.debug('Token extraction', { 
+      requestId,
+      hasHeaders: !!request.headers,
+      hasGetMethod: !!(request.headers && typeof request.headers.get === 'function'),
+      authHeaderPresent: !!authHeader,
+      authHeaderLength: authHeader?.length || 0
+    });
+    
     const token = extractAuthToken(authHeader);
     
     if (!token) {
+      logger.authEnd(authTimer);
+      logger.warn('Token de autorização não encontrado', { 
+        requestId,
+        authHeaderPresent: !!authHeader,
+        authHeaderValue: authHeader ? `${authHeader.substring(0, 10)}...` : null
+      });
       return { 
         success: false, 
         error: 'Token de autorização não encontrado',
@@ -103,10 +129,14 @@ export async function authenticateAdminRequest(request: Request) {
       };
     }
 
-    // Validar usuário com token
+    // Validar usuário com token - PRIMEIRA QUERY SUPABASE
+    const getUserTimer = logger.dbStart('supabase.auth.getUser', { requestId });
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    logger.dbEnd(getUserTimer);
     
     if (authError || !user) {
+      logger.authEnd(authTimer);
+      logger.error('Token inválido ou usuário não encontrado', authError || undefined, { requestId });
       return { 
         success: false, 
         error: 'Token inválido ou usuário não encontrado',
@@ -114,20 +144,32 @@ export async function authenticateAdminRequest(request: Request) {
       };
     }
 
-    // Verificar role do usuário
+    // Verificar role do usuário - SEGUNDA QUERY SUPABASE
+    const profileTimer = logger.dbStart('profiles.select(role)', { requestId, userId: user.id });
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
+    logger.dbEnd(profileTimer);
 
     if (profileError || !profile) {
+      logger.authEnd(authTimer);
+      logger.error('Perfil de usuário não encontrado', profileError, { requestId, userId: user.id });
       return { 
         success: false, 
         error: 'Perfil de usuário não encontrado',
         status: 403 
       };
     }
+
+    const authResult = logger.authEnd(authTimer);
+    logger.success('Autenticação admin bem-sucedida', { 
+      requestId, 
+      userId: user.id, 
+      role: profile.role,
+      totalAuthTime: authResult?.duration
+    });
 
     return {
       success: true,
@@ -136,7 +178,8 @@ export async function authenticateAdminRequest(request: Request) {
       supabaseAdmin
     };
   } catch (error) {
-    console.error('Erro na autenticação admin:', error);
+    logger.authEnd(authTimer);
+    logger.error('Erro crítico na autenticação admin', error instanceof Error ? error : new Error(String(error)), { requestId });
     return { 
       success: false, 
       error: 'Erro interno do servidor',

@@ -28,12 +28,12 @@ const UnifiedLoadingSpinner: React.FC<UnifiedLoadingSpinnerProps> = ({
   const spinnerContent = (
     <ConfigProvider theme={theme}>
       <Flex align="center" gap="middle" vertical>
-        <Spin size={size} {...props}>
-          {/* O tip só funciona quando o Spin tem children (nested mode) */}
-          <div style={{ padding: message ? 50 : 0 }}>
-            {message && <div className="text-gray-600 mt-4">{message}</div>}
+        <Spin size={size} {...props} />
+        {message && (
+          <div className="text-gray-600 text-sm mt-2 text-center">
+            {message}
           </div>
-        </Spin>
+        )}
       </Flex>
     </ConfigProvider>
   );

@@ -7,13 +7,15 @@ interface TabNavigationProps {
   onTabChange: (tab: TabType) => void;
   totalDraftNewsCount?: number;
   totalDraftEventsCount?: number;
+  totalDraftMessagesCount?: number;
 }
 
 export function TabNavigation({ 
   activeTab, 
   onTabChange,
   totalDraftNewsCount = 0,
-  totalDraftEventsCount = 0
+  totalDraftEventsCount = 0,
+  totalDraftMessagesCount = 0
 }: TabNavigationProps) {
   const tabs: Array<{
     id: TabType;
@@ -24,7 +26,7 @@ export function TabNavigation({
     { id: 'events', label: 'Eventos', draftCount: totalDraftEventsCount },
     { id: 'subsectors', label: 'Subsetores' },
     { id: 'groups', label: 'Grupos' },
-    { id: 'messages', label: 'Mensagens' }
+    { id: 'messages', label: 'Mensagens', draftCount: totalDraftMessagesCount }
   ];
 
   return (

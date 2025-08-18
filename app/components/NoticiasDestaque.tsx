@@ -22,60 +22,43 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
       setIsLoading(true);
       
       try {
-        console.log('Buscando notícias para o dashboard...');
         
-        let newsData;
-        
-        // Primeiro, tentar buscar notícias em destaque
-        const { data: featuredData, error: featuredError } = await supabase
+        // OTIMIZADO: Uma única query que prioriza notícias em destaque e depois as mais recentes
+        const { data: newsData, error } = await supabase
           .from('sector_news')
           .select('id, title, summary, image_url, created_at, sector_id, is_featured')
           .eq('is_published', true)
-          .eq('is_featured', true)
-          .order('created_at', { ascending: false })
-          .limit(limit);
+          .order('is_featured', { ascending: false }) // Prioriza is_featured=true primeiro
+          .order('created_at', { ascending: false })  // Depois ordena por data
+          .limit(limit * 2); // Buscar mais que o limite para garantir variedade
           
-        if (featuredError) {
-          console.error('Erro ao buscar notícias em destaque:', featuredError);
-          throw featuredError;
+        if (error) {
+          console.error('[NoticiasDestaque] ❌ Erro na query otimizada:', error);
+          throw error;
         }
         
-        // Se não encontrou suficientes notícias em destaque, buscar as mais recentes
-        if (!featuredData || featuredData.length < limit) {
-          console.log(`Encontradas ${featuredData?.length || 0} notícias em destaque. Buscando mais notícias recentes...`);
-          
-          const numToFetch = limit - (featuredData?.length || 0);
-          const { data: recentData, error: recentError } = await supabase
-            .from('sector_news')
-            .select('id, title, summary, image_url, created_at, sector_id, is_featured')
-            .eq('is_published', true)
-            .eq('is_featured', false)
-            .order('created_at', { ascending: false })
-            .limit(numToFetch);
-            
-          if (recentError) {
-            console.error('Erro ao buscar notícias recentes:', recentError);
-            newsData = featuredData || [];
-          } else {
-            // Combinar as notícias em destaque com as recentes
-            newsData = [...(featuredData || []), ...(recentData || [])];
-          }
-        } else {
-          newsData = featuredData;
-        }
-        
-        console.log(`Total de notícias encontradas: ${newsData?.length || 0}`);
-        
-        // Se tiver dados, use-os
+        // Processar os dados: priorizar notícias em destaque e pegar as primeiras {limit}
+        let finalNews: NewsItem[] = [];
         if (newsData && newsData.length > 0) {
-          const formattedNews = newsData.map((item: any) => ({
+          // Separar notícias em destaque e comuns
+          const featuredNews = newsData.filter(news => news.is_featured);
+          const regularNews = newsData.filter(news => !news.is_featured);
+          
+          // Combinar: primeiro todas as em destaque, depois as comuns até atingir o limite
+          const combinedNews = [
+            ...featuredNews,
+            ...regularNews
+          ].slice(0, limit);
+          
+          // Mapear para NewsItem com categoria obrigatória
+          finalNews = combinedNews.map((item: any) => ({
             ...item,
-            category: 'Notícia' // Podemos buscar a categoria do setor posteriormente
+            category: 'Notícia' // Categoria padrão
           }));
-          setFeaturedNews(formattedNews);
-        } else {
-          setFeaturedNews([]);
         }
+        
+        
+        setFeaturedNews(finalNews);
       } catch (error) {
         console.error('Erro ao buscar notícias:', error);
         setFeaturedNews([]);

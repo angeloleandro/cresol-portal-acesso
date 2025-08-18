@@ -81,17 +81,17 @@ export default function OptimizedImage({
   const shouldForceUnoptimized = isBlobUrl || isDataUrl;
 
   // Log de debug apenas em desenvolvimento
-  if (process.env.NODE_ENV === 'development') {
-    console.log('OptimizedImage Config:', {
-      src: imageSrc?.substring(0, 50) + '...',
-      alt,
-      isVercel,
-      isSupabaseImage,
-      isSvg,
-      shouldForceUnoptimized,
-      renderingStrategy: isSvg ? 'HTML_IMG_TAG' : 'NEXT_IMAGE'
-    });
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  //   console.log('OptimizedImage Config:', {
+  //     src: imageSrc?.substring(0, 50) + '...',
+  //     alt,
+  //     isVercel,
+  //     isSupabaseImage,
+  //     isSvg,
+  //     shouldForceUnoptimized,
+  //     renderingStrategy: isSvg ? 'HTML_IMG_TAG' : 'NEXT_IMAGE'
+  //   });
+  // }
 
   const handleImageError = () => {
     // Log detalhado apenas em desenvolvimento

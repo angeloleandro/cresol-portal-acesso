@@ -13,11 +13,11 @@ import Footer from '../components/Footer';
 import GlobalSearch from '../components/GlobalSearch';
 import SistemasLateral from '../components/SistemasLateral';
 import ParecerSolicitacao from '../components/ParecerSolicitacao';
-import NotificationsAndMessages from '../components/NotificationsAndMessages';
 import { handleComponentError, devLog } from '@/lib/error-handler';
 import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { Icon } from '../components/icons';
+import { logger } from '@/lib/logger';
 
 interface QuickStats {
   activeUsers: number;
@@ -38,27 +38,39 @@ export default function Home() {
   });
 
   const checkUser = useCallback(async () => {
+    const pageTimer = logger.componentStart('HomePage.checkUser');
+    logger.info('Iniciando verificação de usuário na home page');
+    
     try {
+      const authTimer = logger.dbStart('supabase.auth.getUser');
       const { data: userData } = await supabase.auth.getUser();
+      logger.dbEnd(authTimer);
       
       if (!userData.user) {
+        logger.warn('Usuário não autenticado - redirecionando para login');
+        logger.componentEnd(pageTimer);
         router.replace('/login');
         return;
       }
 
       setUser(userData.user);
+      logger.success('Usuário autenticado na home page', { userId: userData.user.id });
       
       // Simular dados de estatísticas rápidas
+      const statsTimer = logger.componentStart('HomePage.loadStats');
       setStats({
         activeUsers: 15,
         systemsOnline: 25, // Todos os sistemas ativos
         unreadNotifications: 3,
         pendingApprovals: 2
       });
+      logger.componentEnd(statsTimer);
       
       setLoading(false);
+      logger.componentEnd(pageTimer);
     } catch (error) {
-      console.error('Erro ao verificar usuário:', error);
+      logger.error('Erro crítico ao verificar usuário na home', error instanceof Error ? error : new Error(String(error)));
+      logger.componentEnd(pageTimer);
       router.replace('/login');
     }
   }, [router]);
@@ -70,6 +82,13 @@ export default function Home() {
   if (loading) {
     return <UnifiedLoadingSpinner fullScreen message={LOADING_MESSAGES.home} />;
   }
+
+  // Log de renderização da página
+  logger.info('Renderizando página home', { 
+    userId: user?.id,
+    stats,
+    componentsLoaded: ['BannerCarousel', 'NoticiasDestaque', 'VideoGallery', 'ImageGalleryHome']
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -102,7 +121,6 @@ export default function Home() {
               </div>
               <EventosDestaque limit={4} />
               <SistemasLateral />
-              <NotificationsAndMessages />
             </div>
           </div>
         </div>

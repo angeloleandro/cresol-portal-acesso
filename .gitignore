@@ -23,6 +23,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
+.env.local
 .env*.local
 
 # vercel
@@ -30,7 +32,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
-# sensitive files
-.mcp.json
+# claude settings with sensitive tokens
+.claude/settings.local.json

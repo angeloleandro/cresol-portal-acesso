@@ -7,8 +7,11 @@ import {
   extractAccessToken,
   getRouteType 
 } from './lib/middleware-auth';
+import { logger } from './lib/logger';
 
 export async function middleware(request: NextRequest) {
+  const requestId = logger.generateRequestId();
+  
   try {
     // Atualizar a sessão Supabase (refresh tokens se necessário)
     const { supabase, response } = updateSession(request);
@@ -27,8 +30,8 @@ export async function middleware(request: NextRequest) {
     }
     
     // Para rotas que requerem auth, fazer verificação otimizada
-  const accessToken = extractAccessToken(request) || undefined;
-  const authResult = await getOptimizedUserAuth(supabase, accessToken);
+    const accessToken = extractAccessToken(request) || undefined;
+    const authResult = await getOptimizedUserAuth(supabase, accessToken);
     
     if (!authResult.user) {
       // Não autenticado - redirecionar para login se acessando área restrita
@@ -66,18 +69,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/home', request.url));
     }
     
-    // Log cache hit/miss para debugging em desenvolvimento
-    if (process.env.NODE_ENV === 'development' && authResult.fromCache) {
-      console.log(`🚀 Middleware cache HIT para usuário ${user.id}`);
-    }
-    
     return response;
     
   } catch (error) {
-    // Log apenas erros críticos em produção
-    if (process.env.NODE_ENV === 'development') {
-      console.error('❌ Erro no middleware:', error);
-    }
+    logger.error('Erro crítico no middleware', error instanceof Error ? error : new Error(String(error)), { 
+      requestId,
+      path: request.nextUrl.pathname 
+    });
     
     // Se ocorrer erro em rotas admin, redirecionar para login
     if (request.nextUrl.pathname.startsWith('/admin')) {

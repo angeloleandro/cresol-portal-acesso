@@ -12,19 +12,14 @@ export default function AuthDebugPanel() {
   }, []);
 
   const checkAuth = async () => {
-    console.log('🔍 [AuthDebugPanel] Verificando autenticação...');
     
     const supabase = createClient();
     
     // Verificar sessão
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    console.log('🔐 [AuthDebugPanel] Sessão:', session);
-    console.log('🔐 [AuthDebugPanel] Erro sessão:', sessionError);
     
     // Verificar usuário
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    console.log('👤 [AuthDebugPanel] Usuário:', user);
-    console.log('👤 [AuthDebugPanel] Erro usuário:', userError);
     
     // Verificar perfil
     let profile = null;
@@ -35,8 +30,6 @@ export default function AuthDebugPanel() {
         .eq('id', user.id)
         .single();
       profile = data;
-      console.log('📋 [AuthDebugPanel] Perfil:', profile);
-      console.log('📋 [AuthDebugPanel] Erro perfil:', error);
     }
     
     setAuthState({

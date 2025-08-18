@@ -9,6 +9,7 @@ interface TabNavigationProps {
     events: number;
     news: number;
     systems: number;
+    messages?: number;
   };
 }
 
@@ -18,7 +19,7 @@ export function TabNavigation({ activeTab, onTabChange, counts }: TabNavigationP
     { id: 'news', label: 'Notícias', count: counts.news },
     { id: 'systems', label: 'Sistemas', count: counts.systems },
     { id: 'groups', label: 'Grupos' },
-    { id: 'messages', label: 'Mensagens' }
+    { id: 'messages', label: 'Mensagens', count: counts.messages }
   ];
 
   return (

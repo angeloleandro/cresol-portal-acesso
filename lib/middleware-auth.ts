@@ -26,10 +26,13 @@ export async function getOptimizedUserAuth(
   supabase: SupabaseClient,
   accessToken?: string
 ): Promise<AuthResult> {
+  const { logger } = await import('./logger');
+  
   try {
     // Verificar cache primeiro se temos access token
     if (accessToken) {
       const cachedData = getCachedUserData(accessToken);
+      
       if (cachedData) {
         return {
           user: {
@@ -63,6 +66,7 @@ export async function getOptimizedUserAuth(
       .single();
 
     if (profileError) {
+      logger.error('Erro ao verificar permissões do usuário', profileError, { userId: user.id });
       return {
         user: null,
         error: 'Erro ao verificar permissões do usuário',
@@ -94,6 +98,7 @@ export async function getOptimizedUserAuth(
     };
 
   } catch (error) {
+    logger.error('Erro interno de autenticação', error instanceof Error ? error : new Error(String(error)));
     return {
       user: null,
       error: error instanceof Error ? error.message : 'Erro interno de autenticação',
@@ -118,21 +123,51 @@ export function hasSectorAdminAccess(role: string): boolean {
 
 /**
  * Extrair access token dos cookies de forma otimizada
+ * Suporta múltiplos formatos de cookie do Supabase
  */
 export function extractAccessToken(request: Request): string | null {
   const cookieHeader = request.headers.get('cookie');
   if (!cookieHeader) return null;
 
-  // Parse otimizado - busca apenas pelo token que precisamos
-  const accessTokenMatch = cookieHeader.match(/sb-[^-]+-auth-token=([^;]+)/);
-  if (!accessTokenMatch) return null;
+  // Padrões possíveis de cookie do Supabase
+  const patterns = [
+    /sb-[^-]+-auth-token=([^;]+)/,  // Formato padrão
+    /sb-[^-]+-auth-token-code-verifier=([^;]+)/, // Formato alternativo
+    /supabase\.auth\.token=([^;]+)/, // Formato legacy
+    /sb-[^=]+=([^;]+)/ // Formato genérico sb-*
+  ];
 
-  try {
-    const tokenData = JSON.parse(decodeURIComponent(accessTokenMatch[1]));
-    return tokenData.access_token || null;
-  } catch {
-    return null;
+  for (const pattern of patterns) {
+    const match = cookieHeader.match(pattern);
+    if (match) {
+      try {
+        const tokenData = JSON.parse(decodeURIComponent(match[1]));
+        
+        // Verificar diferentes estruturas possíveis
+        if (tokenData.access_token) {
+          return tokenData.access_token;
+        } else if (typeof tokenData === 'string') {
+          // Token direto como string
+          return tokenData;
+        } else if (tokenData.token) {
+          return tokenData.token;
+        }
+      } catch {
+        // Se falhar parse JSON, pode ser um token direto
+        try {
+          const decoded = decodeURIComponent(match[1]);
+          // Se não tem caracteres especiais de JSON, pode ser token direto
+          if (!decoded.includes('{') && !decoded.includes('[')) {
+            return decoded;
+          }
+        } catch {
+          // Continua tentando outros padrões
+        }
+      }
+    }
   }
+
+  return null;
 }
 
 /**

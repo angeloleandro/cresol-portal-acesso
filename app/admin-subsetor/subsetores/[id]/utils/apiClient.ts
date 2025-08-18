@@ -140,18 +140,38 @@ export const groupsApi = {
  */
 export const messagesApi = {
   /**
-   * Envia uma mensagem para grupos ou usuários
+   * Envia uma mensagem seguindo formato da API
    */
-  async send(messageData: Message & {
-    priority?: string;
-    context_type: string;
-    context_id: string;
+  async send(messageData: {
+    title: string;
+    content: string; 
+    type: string;
+    group_id: string;
+    expire_at: string;
+    links: any[];
   }) {
+    // Importar createClient aqui para evitar problemas de dependência
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabase = createClient();
+    
+    // Obter sessão para autenticação
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      throw new Error('Usuário não autenticado');
+    }
+
     const response = await fetchWithErrorHandling('/api/notifications/send', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      },
       body: JSON.stringify(messageData)
     });
-    return response.json();
+
+    const result = await response.json();
+    
+    return result;
   }
 };

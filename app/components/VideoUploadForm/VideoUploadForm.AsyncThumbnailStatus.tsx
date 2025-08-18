@@ -7,7 +7,6 @@ import { memo } from 'react'
 import Image from 'next/image'
 import { Icon } from '../icons/Icon'
 import { useAsyncThumbnailGenerator } from '@/app/hooks/useAsyncThumbnailGenerator'
-import { Spinner } from "@chakra-ui/react"
 import { CRESOL_UI_CONFIG } from '@/lib/design-tokens'
 
 interface AsyncThumbnailStatusProps {
@@ -44,10 +43,7 @@ export const VideoUploadFormAsyncThumbnailStatus = memo(({
       <div className="flex items-start gap-3">
         {asyncThumb.isGenerating && (
           <div className="flex-shrink-0">
-            <Spinner
-              size="sm"
-              color="blue.500"
-            />
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
           </div>
         )}
         

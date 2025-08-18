@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "supabase-cresol": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=taodkzafqgoparihaljx"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_a2495fd9cb8a80f239b93ff1496424314649d9bd"
+      }
+    }
+  }
+}

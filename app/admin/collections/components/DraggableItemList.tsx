@@ -9,8 +9,6 @@ import Image from 'next/image';
 import { CollectionItem } from '@/lib/types/collections';
 import { cn } from '@/lib/utils/cn';
 import Icon from '@/app/components/icons/Icon';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface DraggableItemListProps {
   items: CollectionItem[];
@@ -189,7 +187,7 @@ const DraggableItemList: React.FC<DraggableItemListProps> = ({
       {isReordering && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
           <div className="flex items-center">
-            <UnifiedLoadingSpinner size="small" className="inline-flex items-center mr-2" />
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600 mr-2"></div>
             <span className="text-sm text-yellow-800">Salvando nova ordem...</span>
           </div>
         </div>

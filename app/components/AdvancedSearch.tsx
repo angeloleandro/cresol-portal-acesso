@@ -11,7 +11,6 @@ import {
 import { Icon } from './icons/Icon';
 import OptimizedImage from './OptimizedImage';
 import { supabase } from '@/lib/supabase';
-import { Spinner } from "@chakra-ui/react";
 import { CRESOL_UI_CONFIG } from '@/lib/design-tokens';
 import Link from 'next/link';
 
@@ -474,11 +473,7 @@ export default function AdvancedSearch({
                 />
                 {loading && (
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    <Spinner
-                      size="sm"
-                      color={CRESOL_UI_CONFIG.spinner.contexts.home.color}
-                      css={{ "--spinner-track-color": CRESOL_UI_CONFIG.spinner.contexts.home.trackColor }}
-                    />
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
                   </div>
                 )}
               </div>

@@ -138,7 +138,6 @@ export async function POST(request: NextRequest) {
         console.error('Erro ao resolver conflito de posição:', resolveError);
         // Continuar com a posição original em caso de erro
       } else if (resolvedPosition !== finalOrderIndex) {
-        console.log(`Posição ${finalOrderIndex} ocupada, usando posição ${resolvedPosition}`);
         finalOrderIndex = resolvedPosition;
       }
     }
@@ -259,7 +258,6 @@ export async function PUT(request: NextRequest) {
         positionChanged = resolvedPosition !== order_index;
         
         if (positionChanged) {
-          console.log(`Banner ${id}: Posição ${order_index} ocupada, usando posição ${resolvedPosition}`);
         }
       }
       

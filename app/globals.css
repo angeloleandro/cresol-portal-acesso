@@ -3081,3 +3081,25 @@ li:not(:first-child)::before,
   box-shadow: none !important;
   background-image: none !important;
 }
+
+/* ========================================
+   CHAKRA UI CARD COMPONENTS - BORDER FIX
+   Ensure Chakra UI cards have proper borders
+======================================== */
+
+
+
+
+/* Padrão elegante para cards Chakra UI - seguindo design do app */
+[data-scope="card"][data-part="root"],
+[data-scope="card"][data-part="root"][data-variant="outline"] {
+  border: 1px solid rgb(229 231 235 / 0.4) !important; /* border-gray-200/40 */
+  background-color: white !important;
+  border-radius: 0.375rem !important; /* rounded-md */
+  transition: border-color 150ms ease-out !important;
+}
+
+[data-scope="card"][data-part="root"]:hover,
+[data-scope="card"][data-part="root"][data-variant="outline"]:hover {
+  border-color: rgb(229 231 235 / 0.7) !important; /* hover:border-gray-200/70 */
+}

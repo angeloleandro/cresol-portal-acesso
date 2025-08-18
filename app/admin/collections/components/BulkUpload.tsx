@@ -8,8 +8,6 @@ import { Collection } from '@/lib/types/collections';
 import CollectionLoading from '@/app/components/Collections/Collection.Loading';
 import { cn } from '@/lib/utils/cn';
 import Icon from '@/app/components/icons/Icon';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
 import VideoUploadAdvanced from './VideoUploadAdvanced';
 
@@ -767,7 +765,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
               
               {isUploading && (
                 <div className="flex items-center px-4 py-2 text-sm font-medium text-gray-800">
-                  <UnifiedLoadingSpinner size="small" className="inline-flex items-center mr-2" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
                   Fazendo Upload...
                 </div>
               )}

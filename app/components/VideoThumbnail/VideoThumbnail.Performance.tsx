@@ -17,7 +17,6 @@ import {
 } from 'react';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import { Spinner } from "@chakra-ui/react";
 import { 
   ThumbnailPerformanceConfig,
   ThumbnailProviderValue,
@@ -356,7 +355,7 @@ export function ProgressiveImage({
       {/* Loading state */}
       {loadingState === 'loading' && !imageData.lowRes && (
         <div className="absolute inset-0 bg-neutral-200 animate-pulse flex items-center justify-center">
-          <Spinner size="sm" color="gray.400" />
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
         </div>
       )}
 

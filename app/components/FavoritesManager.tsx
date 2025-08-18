@@ -3,7 +3,6 @@
 import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
 import OptimizedImage from './OptimizedImage';
 import { supabase } from '@/lib/supabase';
-import { Spinner } from "@chakra-ui/react";
 import { CRESOL_UI_CONFIG } from '@/lib/design-tokens';
 
 interface FavoriteItem {
@@ -349,11 +348,7 @@ export function FavoriteButton({
       title={favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
     >
       {isLoading ? (
-        <Spinner
-          size="sm"
-          color={CRESOL_UI_CONFIG.spinner.contexts.home.color}
-          css={{ "--spinner-track-color": CRESOL_UI_CONFIG.spinner.contexts.home.trackColor }}
-        />
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-500"></div>
       ) : (
         <svg 
           className={sizeClasses[size]} 

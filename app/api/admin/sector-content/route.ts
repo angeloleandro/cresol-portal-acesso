@@ -185,7 +185,6 @@ export async function POST(request: NextRequest) {
     const { type, action, data } = body;
     const operationType = action || type;
     
-    console.log(`[API-POST] ${operationType} - tipo:${type}, hasData:${!!data}`);
 
     const supabase = await createAuthenticatedClient();
     
@@ -193,7 +192,6 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError) {
-      console.error('[API-POST] Auth falhou:', authError?.message);
       return NextResponse.json(
         { 
           error: API_ERROR_MESSAGES.unauthorized, 
@@ -206,7 +204,6 @@ export async function POST(request: NextRequest) {
     }
     
     if (!user) {
-      console.error('[API-POST] Usuário não encontrado');
       return NextResponse.json(
         { error: API_ERROR_MESSAGES.userNotFound },
         { status: HTTP_STATUS.UNAUTHORIZED }
@@ -221,7 +218,6 @@ export async function POST(request: NextRequest) {
       .single();
     
     if (profileError) {
-      console.error('[API-POST] Erro perfil:', profileError.message);
       return NextResponse.json(
         { 
           error: API_ERROR_MESSAGES.internalError,
@@ -231,10 +227,8 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    console.log(`[API-POST] User: ${user.email}, Role: ${profile?.role}`);
     
     if (!profile || (profile.role !== 'admin' && profile.role !== 'sector_admin' && profile.role !== 'subsector_admin')) {
-      console.error(`[API-POST] Permissão negada - role: ${profile?.role}`);
       return NextResponse.json(
         { 
           error: API_ERROR_MESSAGES.permissionDenied, 
@@ -265,14 +259,20 @@ export async function POST(request: NextRequest) {
       } else {
         mappedType = CONTENT_TYPES.sectorEvents; // default para sector_events
       }
+    } else if (type === 'message' || type === 'messages') {
+      if (data.sector_id || action === 'sector') {
+        mappedType = 'sector_messages';
+      } else if (data.subsector_id) {
+        mappedType = 'subsector_messages';
+      } else {
+        mappedType = 'sector_messages'; // default para sector_messages
+      }
     }
     
-    console.log(`[API-POST] Mapeamento: "${type}" → "${mappedType}" (sector_id: ${data.sector_id})`);
     
     // Validar campos obrigatórios para notícias
     if (mappedType === CONTENT_TYPES.sectorNews || mappedType === CONTENT_TYPES.subsectorNews) {
       if (!data.title || !data.summary || !data.content) {
-        console.error(`[API-POST] Campos obrigatórios faltando - notícias`);
         return NextResponse.json(
           { 
             error: API_ERROR_MESSAGES.missingFields,
@@ -292,7 +292,6 @@ export async function POST(request: NextRequest) {
     // Validar campos obrigatórios para eventos
     if (mappedType === CONTENT_TYPES.sectorEvents || mappedType === CONTENT_TYPES.subsectorEvents) {
       if (!data.title || !data.description || !data.start_date) {
-        console.error(`[API-POST] Campos obrigatórios faltando - eventos`);
         return NextResponse.json(
           { 
             error: API_ERROR_MESSAGES.missingFields,
@@ -300,6 +299,24 @@ export async function POST(request: NextRequest) {
               title: !data.title,
               description: !data.description,
               start_date: !data.start_date
+            },
+            receivedType: type,
+            mappedType: mappedType
+          },
+          { status: HTTP_STATUS.BAD_REQUEST }
+        );
+      }
+    }
+    
+    // Validar campos obrigatórios para mensagens
+    if (mappedType === 'sector_messages' || mappedType === 'subsector_messages') {
+      if (!data.title || !data.content) {
+        return NextResponse.json(
+          { 
+            error: API_ERROR_MESSAGES.missingFields,
+            missing: {
+              title: !data.title,
+              content: !data.content
             },
             receivedType: type,
             mappedType: mappedType
@@ -326,54 +343,45 @@ export async function POST(request: NextRequest) {
       case CONTENT_TYPES.createNews:
       case CONTENT_TYPES.sectorNews:
         try {
-          console.log(`[API-POST] Inserindo notícia: "${enrichedData.title}" (is_published: ${enrichedData.is_published})`);
           ({ data: result, error } = await adminClient
             .from('sector_news')
             .insert(enrichedData)
             .select()
             .single());
           if (result) {
-            console.log(`[API-POST] ✅ Notícia criada: ID=${result.id}, published=${result.is_published}`);
           }
         } catch (insertError: any) {
           error = insertError;
-          console.error('[API-POST] Erro INSERT sector_news:', insertError.message);
         }
         break;
         
       case CONTENT_TYPES.sectorEvents:
-        console.log(`[API-POST] Inserindo evento: "${enrichedData.title}" (is_published: ${enrichedData.is_published})`);
         ({ data: result, error } = await adminClient
           .from('sector_events')
           .insert(enrichedData)
           .select()
           .single());
         if (result) {
-          console.log(`[API-POST] ✅ Evento criado: ID=${result.id}, published=${result.is_published}`);
         }
         break;
         
       case CONTENT_TYPES.subsectorNews:
-        console.log(`[API-POST] Inserindo subsector news: "${enrichedData.title}" (is_published: ${enrichedData.is_published})`);
         ({ data: result, error } = await adminClient
           .from('subsector_news')
           .insert(enrichedData)
           .select()
           .single());
         if (result) {
-          console.log(`[API-POST] ✅ Subsector news criada: ID=${result.id}, published=${result.is_published}`);
         }
         break;
         
       case CONTENT_TYPES.subsectorEvents:
-        console.log(`[API-POST] Inserindo subsector event: "${enrichedData.title}" (is_published: ${enrichedData.is_published})`);
         ({ data: result, error } = await adminClient
           .from('subsector_events')
           .insert(enrichedData)
           .select()
           .single());
         if (result) {
-          console.log(`[API-POST] ✅ Subsector event criado: ID=${result.id}, published=${result.is_published}`);
         }
         break;
         
@@ -395,8 +403,27 @@ export async function POST(request: NextRequest) {
         ({ result, error } = updateEventResult);
         break;
         
+      case 'sector_messages':
+        ({ data: result, error } = await adminClient
+          .from('sector_messages')
+          .insert(enrichedData)
+          .select()
+          .single());
+        if (result) {
+        }
+        break;
+        
+      case 'subsector_messages':
+        ({ data: result, error } = await adminClient
+          .from('subsector_messages')
+          .insert(enrichedData)
+          .select()
+          .single());
+        if (result) {
+        }
+        break;
+        
       default:
-        console.error(`[API-POST] Tipo inválido: ${type} → ${mappedType}`);
         return NextResponse.json(
           { 
             error: API_ERROR_MESSAGES.invalidType, 
@@ -415,7 +442,6 @@ export async function POST(request: NextRequest) {
     }
     
     if (error) {
-      console.error('[API-POST] Erro final:', error.message);
       return NextResponse.json(
         { 
           error: error.message,
@@ -430,7 +456,6 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    console.log(`[API-POST] ✅ Criado com sucesso: ID=${result?.id}, tipo=${mappedType}`);
     return NextResponse.json({ 
       data: result,
       success: true,
@@ -441,7 +466,6 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('[API-POST] Erro crítico:', error.message);
     return NextResponse.json(
       { 
         error: 'Erro interno do servidor',
@@ -461,7 +485,6 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { type, id, data, sectorId, subsectorId } = body;
     
-    console.log(`[API-PUT] Atualizando ${type} ID:${id}, sectorId:${sectorId}`);
 
     const supabase = await createAuthenticatedClient();
     
@@ -469,7 +492,6 @@ export async function PUT(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
-      console.error('[API-PUT] Auth erro:', authError?.message || 'User not found');
       return NextResponse.json(
         { error: API_ERROR_MESSAGES.unauthorized },
         { status: HTTP_STATUS.UNAUTHORIZED }
@@ -483,10 +505,8 @@ export async function PUT(request: NextRequest) {
       .eq('id', user.id)
       .single();
     
-    console.log(`[API-PUT] User: ${user.email}, Role: ${profile?.role}`);
     
     if (!profile || (profile.role !== 'admin' && profile.role !== 'sector_admin' && profile.role !== 'subsector_admin')) {
-      console.error(`[API-PUT] Permissão negada - role: ${profile?.role}`);
       return NextResponse.json(
         { error: API_ERROR_MESSAGES.permissionDenied },
         { status: HTTP_STATUS.FORBIDDEN }
@@ -511,6 +531,12 @@ export async function PUT(request: NextRequest) {
       } else if (subsectorId) {
         realType = CONTENT_TYPES.subsectorEvents; // 'subsector_events'
       }
+    } else if (type === 'message' || type === 'messages') {
+      if (sectorId) {
+        realType = 'sector_messages';
+      } else if (subsectorId) {
+        realType = 'subsector_messages';
+      }
     }
     
     // Se o tipo já é completo (vem direto do frontend), manter como está
@@ -519,11 +545,9 @@ export async function PUT(request: NextRequest) {
       realType = type;
     }
     
-    console.log(`[API-PUT] Mapeamento: "${type}" → "${realType}" (ID: ${realId})`);
     
     // Validações com logging detalhado
     if (!realId) {
-      console.error('[API-PUT] ID obrigatório faltando');
       return NextResponse.json(
         { 
           error: API_ERROR_MESSAGES.invalidId,
@@ -534,7 +558,6 @@ export async function PUT(request: NextRequest) {
     }
     
     if (!realType) {
-      console.error(`[API-PUT] Tipo inválido: ${type}`);
       return NextResponse.json(
         { 
           error: API_ERROR_MESSAGES.invalidType,
@@ -546,7 +569,6 @@ export async function PUT(request: NextRequest) {
     }
     
     if (!data || typeof data !== 'object') {
-      console.error('[API-PUT] Dados obrigatórios faltando');
       return NextResponse.json(
         { 
           error: API_ERROR_MESSAGES.missingFields,
@@ -559,7 +581,6 @@ export async function PUT(request: NextRequest) {
     // Validar campos obrigatórios para eventos (similar ao POST)
     if (realType === CONTENT_TYPES.sectorEvents || realType === CONTENT_TYPES.subsectorEvents) {
       if (!data.title || !data.description || !data.start_date) {
-        console.error('[API-PUT] Campos obrigatórios faltando - eventos');
         return NextResponse.json(
           { 
             error: API_ERROR_MESSAGES.missingFields,
@@ -578,13 +599,29 @@ export async function PUT(request: NextRequest) {
     // Validar campos obrigatórios para notícias (similar ao POST)
     if (realType === CONTENT_TYPES.sectorNews || realType === CONTENT_TYPES.subsectorNews) {
       if (!data.title || !data.summary || !data.content) {
-        console.error('[API-PUT] Campos obrigatórios faltando - notícias');
         return NextResponse.json(
           { 
             error: API_ERROR_MESSAGES.missingFields,
             missing: {
               title: !data.title,
               summary: !data.summary,
+              content: !data.content
+            },
+            type: realType
+          },
+          { status: HTTP_STATUS.BAD_REQUEST }
+        );
+      }
+    }
+    
+    // Validar campos obrigatórios para mensagens
+    if (realType === 'sector_messages' || realType === 'subsector_messages') {
+      if (!data.title || !data.content) {
+        return NextResponse.json(
+          { 
+            error: API_ERROR_MESSAGES.missingFields,
+            missing: {
+              title: !data.title,
               content: !data.content
             },
             type: realType
@@ -614,7 +651,6 @@ export async function PUT(request: NextRequest) {
     // ATUALIZAÇÃO NO BANCO - COM LOGGING DETALHADO USANDO CLIENTE ADMIN
     switch (realType) {
       case CONTENT_TYPES.sectorNews:
-        console.log(`[API-PUT] Atualizando notícia ID=${realId}: "${updateData.title}"`);
         ({ data: result, error } = await putAdminClient
           .from('sector_news')
           .update(updateData)
@@ -622,12 +658,10 @@ export async function PUT(request: NextRequest) {
           .select()
           .single());
         if (result) {
-          console.log(`[API-PUT] ✅ Notícia atualizada: published=${result.is_published}`);
         }
         break;
         
       case CONTENT_TYPES.sectorEvents:
-        console.log(`[API-PUT] Atualizando evento ID=${realId}: "${updateData.title}"`);
         ({ data: result, error } = await putAdminClient
           .from('sector_events')
           .update(updateData)
@@ -635,12 +669,10 @@ export async function PUT(request: NextRequest) {
           .select()
           .single());
         if (result) {
-          console.log(`[API-PUT] ✅ Evento atualizado: published=${result.is_published}`);
         }
         break;
         
       case CONTENT_TYPES.subsectorNews:
-        console.log(`[API-PUT] Atualizando subsector news ID=${realId}: "${updateData.title}"`);
         ({ data: result, error } = await putAdminClient
           .from('subsector_news')
           .update(updateData)
@@ -648,12 +680,10 @@ export async function PUT(request: NextRequest) {
           .select()
           .single());
         if (result) {
-          console.log(`[API-PUT] ✅ Subsector news atualizada: published=${result.is_published}`);
         }
         break;
         
       case CONTENT_TYPES.subsectorEvents:
-        console.log(`[API-PUT] Atualizando subsector event ID=${realId}: "${updateData.title}"`);
         ({ data: result, error } = await putAdminClient
           .from('subsector_events')
           .update(updateData)
@@ -661,12 +691,32 @@ export async function PUT(request: NextRequest) {
           .select()
           .single());
         if (result) {
-          console.log(`[API-PUT] ✅ Subsector event atualizado: published=${result.is_published}`);
+        }
+        break;
+        
+      case 'sector_messages':
+        ({ data: result, error } = await putAdminClient
+          .from('sector_messages')
+          .update(updateData)
+          .eq('id', realId)
+          .select()
+          .single());
+        if (result) {
+        }
+        break;
+        
+      case 'subsector_messages':
+        ({ data: result, error } = await putAdminClient
+          .from('subsector_messages')
+          .update(updateData)
+          .eq('id', realId)
+          .select()
+          .single());
+        if (result) {
         }
         break;
         
       default:
-        console.error(`[API-PUT] Tipo inválido: ${type} → ${realType}`);
         return NextResponse.json(
           { 
             error: API_ERROR_MESSAGES.invalidType,
@@ -684,7 +734,6 @@ export async function PUT(request: NextRequest) {
     }
     
     if (error) {
-      console.error('[API-PUT] Erro final:', error.message);
       return NextResponse.json(
         { 
           error: error.message,
@@ -700,7 +749,6 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    console.log(`[API-PUT] ✅ Atualizado com sucesso: ID=${realId}, tipo=${realType}`);
     return NextResponse.json({ 
       data: result,
       success: true,
@@ -711,7 +759,6 @@ export async function PUT(request: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('[API-PUT] Erro crítico:', error.message);
     return NextResponse.json(
       { error: API_ERROR_MESSAGES.internalError },
       { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
@@ -726,7 +773,6 @@ export async function DELETE(request: NextRequest) {
     const type = searchParams.get('type');
     const id = searchParams.get('id');
     
-    console.log(`[API-DELETE] Excluindo ${type} ID:${id}`);
 
     const supabase = await createAuthenticatedClient();
     
@@ -734,7 +780,6 @@ export async function DELETE(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
-      console.error('[API-DELETE] Auth erro:', authError?.message || 'User not found');
       return NextResponse.json(
         { error: API_ERROR_MESSAGES.unauthorized },
         { status: HTTP_STATUS.UNAUTHORIZED }
@@ -748,10 +793,8 @@ export async function DELETE(request: NextRequest) {
       .eq('id', user.id)
       .single();
     
-    console.log(`[API-DELETE] User: ${user.email}, Role: ${profile?.role}`);
     
     if (!profile || (profile.role !== 'admin' && profile.role !== 'sector_admin' && profile.role !== 'subsector_admin')) {
-      console.error(`[API-DELETE] Permissão negada - role: ${profile?.role}`);
       return NextResponse.json(
         { error: API_ERROR_MESSAGES.permissionDenied },
         { status: HTTP_STATUS.FORBIDDEN }
@@ -772,46 +815,56 @@ export async function DELETE(request: NextRequest) {
     
     switch (type) {
       case CONTENT_TYPES.sectorNews:
-        console.log(`[API-DELETE] Excluindo notícia ID=${id}`);
         ({ error } = await deleteAdminClient
           .from('sector_news')
           .delete()
           .eq('id', id));
         if (!error) {
-          console.log(`[API-DELETE] ✅ Notícia excluída`);
         }
         break;
         
       case CONTENT_TYPES.sectorEvents:
-        console.log(`[API-DELETE] Excluindo evento ID=${id}`);
         ({ error } = await deleteAdminClient
           .from('sector_events')
           .delete()
           .eq('id', id));
         if (!error) {
-          console.log(`[API-DELETE] ✅ Evento excluído`);
         }
         break;
         
       case CONTENT_TYPES.subsectorNews:
-        console.log(`[API-DELETE] Excluindo subsector news ID=${id}`);
         ({ error } = await deleteAdminClient
           .from('subsector_news')
           .delete()
           .eq('id', id));
         if (!error) {
-          console.log(`[API-DELETE] ✅ Subsector news excluída`);
         }
         break;
         
       case CONTENT_TYPES.subsectorEvents:
-        console.log(`[API-DELETE] Excluindo subsector event ID=${id}`);
         ({ error } = await deleteAdminClient
           .from('subsector_events')
           .delete()
           .eq('id', id));
         if (!error) {
-          console.log(`[API-DELETE] ✅ Subsector event excluído`);
+        }
+        break;
+        
+      case 'sector_messages':
+        ({ error } = await deleteAdminClient
+          .from('sector_messages')
+          .delete()
+          .eq('id', id));
+        if (!error) {
+        }
+        break;
+        
+      case 'subsector_messages':
+        ({ error } = await deleteAdminClient
+          .from('subsector_messages')
+          .delete()
+          .eq('id', id));
+        if (!error) {
         }
         break;
         
@@ -832,7 +885,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true });
     
   } catch (error: any) {
-    console.error('[API-DELETE] Erro crítico:', error.message);
     return NextResponse.json(
       { error: API_ERROR_MESSAGES.internalError },
       { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }

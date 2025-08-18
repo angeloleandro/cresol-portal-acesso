@@ -273,8 +273,7 @@ export default function RoleModal({
               <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-md p-3">
                 {loadingSubsectors ? (
                   <div className="text-center py-4">
-                    <UnifiedLoadingSpinner size="default" className="inline-flex items-center" />
-                    <p className="text-sm text-cresol-gray mt-2">Carregando sub-setores...</p>
+                    <UnifiedLoadingSpinner size="default" message="Carregando sub-setores..." />
                   </div>
                 ) : subsectors.length === 0 ? (
                   <p className="text-sm text-cresol-gray">

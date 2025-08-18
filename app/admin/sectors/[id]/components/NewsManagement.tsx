@@ -178,11 +178,11 @@ export function NewsManagement({
         throw new Error(errorMessage);
       }
       
-      // Refresh data to ensure consistency
-      await onRefresh();
-      
-      // Close modal only after success
+      // Close modal first for better UX
       handleCloseModal();
+      
+      // Then refresh data to show the new/updated item
+      await onRefresh();
       
     } catch (error: any) {
       
@@ -198,6 +198,12 @@ export function NewsManagement({
 
   const handleDeleteNews = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta notícia?')) return;
+    try {
+      await onDelete(id);
+      // onDelete já chama refreshContent internamente
+    } catch (error) {
+      console.error('Erro ao deletar notícia:', error);
+    }
     await onDelete(id);
   };
 

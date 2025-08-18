@@ -12,9 +12,11 @@
       "args": [
         "-y",
         "@supabase/mcp-server-supabase@latest",
-        "--project-ref=taodkzafqgoparihaljx",
-        "--access-token=${env:SUPABASE_ACCESS_TOKEN_CRESOL}"
-      ]
+        "--project-ref=taodkzafqgoparihaljx"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${env:SUPABASE_ACCESS_TOKEN_CRESOL}"
+      }
     },
     "playwright": {
       "command": "npx",

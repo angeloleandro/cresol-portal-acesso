@@ -1,49 +1,47 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { authenticateAdminRequest } from '@/lib/supabase/admin';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
+  const apiTimer = logger.apiStart('GET /api/admin/subsectors');
+  
   try {
     const { searchParams } = new URL(request.url);
     const sectorId = searchParams.get('sector_id');
-
-    // Criar cliente do Supabase com a chave de serviço
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!supabaseUrl || !serviceKey) {
-      return NextResponse.json({ error: 'Configuração do servidor incompleta.' }, { status: 500 });
-    }
+    logger.info('Iniciando busca de sub-setores', { sectorId: sectorId || 'undefined' });
 
-    const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
-      auth: { persistSession: false }
+    // Verificar autenticação usando helper
+    const authResult = await authenticateAdminRequest(request);
+    
+    logger.debug('Resultado da autenticação', { 
+      success: authResult.success,
+      hasProfile: !!authResult.success && 'profile' in authResult && !!authResult.profile,
+      role: authResult.success && 'profile' in authResult ? authResult.profile?.role : null,
+      error: !authResult.success ? authResult.error : null
     });
-
-    // Verificar autenticação
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Token de autorização necessário.' }, { status: 401 });
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Token inválido.' }, { status: 401 });
+    if (!authResult.success) {
+      logger.apiEnd(apiTimer);
+      logger.error('Autenticação falhou');
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
-    // Verificar se o usuário tem permissão
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
+    const { supabaseAdmin, profile } = authResult;
 
     if (!profile || !['admin', 'sector_admin'].includes(profile.role)) {
+      logger.apiEnd(apiTimer);
+      logger.warn('Permissão negada para sub-setores', { role: profile?.role });
       return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 });
     }
 
-    // Buscar sub-setores
+    // Buscar sub-setores usando admin client
+    const subsectorsTimer = logger.dbStart('subsectors.select', { 
+      sectorId: sectorId || undefined, 
+      userId: authResult.user?.id || undefined 
+    });
+    
     let query = supabaseAdmin
       .from('subsectors')
       .select(`
@@ -59,17 +57,34 @@ export async function GET(request: NextRequest) {
 
     if (sectorId) {
       query = query.eq('sector_id', sectorId);
+      logger.debug('Filtrando por sector_id', { sectorId: sectorId || undefined });
     }
 
     const { data, error } = await query;
+    logger.dbEnd(subsectorsTimer);
 
     if (error) {
+      logger.apiEnd(apiTimer);
+      logger.error('Erro ao buscar sub-setores no banco', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ data });
+    const subsectorCount = data?.length || 0;
+    logger.success('Sub-setores carregados com sucesso', { subsectorCount, sectorId: sectorId || undefined });
+    
+    const apiResult = logger.apiEnd(apiTimer);
+    return NextResponse.json({ 
+      data,
+      _debug: {
+        totalTime: apiResult?.duration,
+        subsectorCount,
+        sectorId
+      }
+    });
+    
   } catch (error) {
-    console.error('Erro na API de sub-setores:', error);
+    logger.apiEnd(apiTimer);
+    logger.error('Erro crítico na API de sub-setores', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
 }
@@ -83,40 +98,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nome e setor são obrigatórios.' }, { status: 400 });
     }
 
-    // Criar cliente do Supabase com a chave de serviço
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    if (!supabaseUrl || !serviceKey) {
-      return NextResponse.json({ error: 'Configuração do servidor incompleta.' }, { status: 500 });
+    // Verificar autenticação usando helper
+    const authResult = await authenticateAdminRequest(request);
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
-    const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
-      auth: { persistSession: false }
-    });
+    const { user, profile, supabaseAdmin } = authResult;
 
-    // Verificar autenticação
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Token de autorização necessário.' }, { status: 401 });
+    if (!profile) {
+      return NextResponse.json({ error: 'Perfil não encontrado.' }, { status: 403 });
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Token inválido.' }, { status: 401 });
-    }
-
-    // Verificar se o usuário tem permissão
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    const isAdmin = profile?.role === 'admin';
-    const isSectorAdmin = profile?.role === 'sector_admin';
+    const isAdmin = profile.role === 'admin';
+    const isSectorAdmin = profile.role === 'sector_admin';
 
     if (!isAdmin && !isSectorAdmin) {
       return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 });
@@ -135,7 +130,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Criar sub-setor
+    // Criar sub-setor usando admin client
     const { data, error } = await supabaseAdmin
       .from('subsectors')
       .insert([{ name, description, sector_id }])
@@ -162,46 +157,26 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'ID e nome são obrigatórios.' }, { status: 400 });
     }
 
-    // Criar cliente do Supabase com a chave de serviço
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    if (!supabaseUrl || !serviceKey) {
-      return NextResponse.json({ error: 'Configuração do servidor incompleta.' }, { status: 500 });
+    // Verificar autenticação usando helper
+    const authResult = await authenticateAdminRequest(request);
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
-    const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
-      auth: { persistSession: false }
-    });
+    const { supabaseAdmin, profile } = authResult;
 
-    // Verificar autenticação
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Token de autorização necessário.' }, { status: 401 });
+    if (!profile) {
+      return NextResponse.json({ error: 'Perfil não encontrado.' }, { status: 403 });
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Token inválido.' }, { status: 401 });
-    }
-
-    // Verificar se o usuário tem permissão
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    const isAdmin = profile?.role === 'admin';
-    const isSectorAdmin = profile?.role === 'sector_admin';
+    const isAdmin = profile.role === 'admin';
+    const isSectorAdmin = profile.role === 'sector_admin';
 
     if (!isAdmin && !isSectorAdmin) {
       return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 });
     }
 
-    // Atualizar sub-setor
+    // Atualizar sub-setor usando admin client
     const { data, error } = await supabaseAdmin
       .from('subsectors')
       .update({ name, description, updated_at: new Date().toISOString() })
@@ -229,43 +204,19 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'ID é obrigatório.' }, { status: 400 });
     }
 
-    // Criar cliente do Supabase com a chave de serviço
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    if (!supabaseUrl || !serviceKey) {
-      return NextResponse.json({ error: 'Configuração do servidor incompleta.' }, { status: 500 });
+    // Verificar autenticação usando helper
+    const authResult = await authenticateAdminRequest(request);
+    if (!authResult.success) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
-    const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
-      auth: { persistSession: false }
-    });
-
-    // Verificar autenticação
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Token de autorização necessário.' }, { status: 401 });
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Token inválido.' }, { status: 401 });
-    }
-
-    // Verificar se o usuário tem permissão
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
+    const { supabaseAdmin, profile } = authResult;
 
     if (!profile || !['admin', 'sector_admin'].includes(profile.role)) {
       return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 });
     }
 
-    // Deletar sub-setor (CASCADE deletará eventos, notícias e sistemas relacionados)
+    // Deletar sub-setor usando admin client (CASCADE deletará dados relacionados)
     const { error } = await supabaseAdmin
       .from('subsectors')
       .delete()

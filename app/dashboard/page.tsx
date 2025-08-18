@@ -13,14 +13,14 @@ import GlobalSearch from '../components/GlobalSearch';
 import Breadcrumbs from '../components/Breadcrumbs';
 import EventosDestaque from '../components/EventosDestaque';
 import NoticiasDestaque from '../components/NoticiasDestaque';
-import { Icon } from '../components/icons/Icon';
+import { Icon, IconName } from '../components/icons/Icon';
+import QuickActionCard from '../components/dashboard/QuickActionCard';
 
 interface QuickAction {
   title: string;
   description: string;
-  icon: JSX.Element;
+  icon: IconName;
   href: string;
-  color: string;
 }
 
 interface DashboardStats {
@@ -54,8 +54,7 @@ export default function Dashboard() {
       setUser(data.user);
       await Promise.all([
         fetchProfile(data.user.id),
-        fetchStats(data.user.id),
-        fetchRecentSystems(data.user.id)
+        fetchDashboardData(data.user.id) // OTIMIZADO: 1 chamada em vez de 2
       ]);
       
       setLoading(false);
@@ -83,31 +82,25 @@ export default function Dashboard() {
     }
   };
 
-  const fetchStats = async (userId: string) => {
+  // FUNÇÃO OTIMIZADA: 1 chamada para API batch em vez de 4 queries separadas
+  const fetchDashboardData = async (userId: string) => {
     try {
-      // Buscar quantidade de sistemas disponíveis
-      const { data: systems } = await supabase
-        .from('systems')
-        .select('id')
-        .limit(1000);
-
-      // Buscar eventos próximos
-      const { data: events } = await supabase
-        .from('sector_events')
-        .select('id')
-        .eq('is_published', true)
-        .gte('start_date', new Date().toISOString())
-        .limit(50);
-
-      // Buscar notificações não lidas (se houver)
-      const { data: notifications } = await supabase
-        .from('notification_recipients')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('is_read', false)
-        .limit(100);
-
-      // Buscar favoritos (localStorage por enquanto)
+      
+      const response = await fetch('/api/dashboard/stats');
+      
+      if (!response.ok) {
+        throw new Error(`Erro API dashboard: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Erro desconhecido na API dashboard');
+      }
+      
+      const { systemsCount, upcomingEventsCount, unreadNotificationsCount, recentSystems } = result.data;
+      
+      // Buscar favoritos (localStorage - não pode ser feito no servidor)
       let favoritesCount = 0;
       try {
         const savedFavorites = localStorage.getItem(`favorites_${userId}`);
@@ -119,28 +112,17 @@ export default function Dashboard() {
       }
 
       setStats({
-        systemsCount: systems?.length || 0,
-        upcomingEventsCount: events?.length || 0,
-        unreadNotificationsCount: notifications?.length || 0,
+        systemsCount,
+        upcomingEventsCount,
+        unreadNotificationsCount,
         favoriteSystemsCount: favoritesCount
       });
-    } catch (error) {
-      console.error('Erro ao buscar estatísticas:', error);
-    }
-  };
-
-  const fetchRecentSystems = async (userId: string) => {
-    try {
-      // Buscar sistemas mais acessados ou todos se não houver histórico
-      const { data: systems } = await supabase
-        .from('systems')
-        .select('id, name, description, url, icon, sectors(name)')
-        .limit(6)
-        .order('name');
-
-      setRecentSystems(systems || []);
-    } catch (error) {
-      console.error('Erro ao buscar sistemas recentes:', error);
+      
+      setRecentSystems(recentSystems);
+      
+      
+    } catch (error: any) {
+      console.error('[Dashboard] ❌ Erro ao carregar dados:', error.message);
     }
   };
 
@@ -148,30 +130,26 @@ export default function Dashboard() {
     {
       title: 'Sistemas',
       description: 'Acesse todos os sistemas disponíveis',
-      icon: <Icon name="monitor" className="h-6 w-6" />,
-      href: '/sistemas',
-      color: 'bg-purple-500 hover:bg-purple-600'
+      icon: 'monitor',
+      href: '/sistemas'
     },
     {
       title: 'Calendário',
       description: 'Veja eventos e treinamentos',
-      icon: <Icon name="clock" className="h-6 w-6" />,
-      href: '/eventos?view=calendar',
-      color: 'bg-blue-500 hover:bg-blue-600'
+      icon: 'clock',
+      href: '/eventos?view=calendar'
     },
     {
       title: 'Notícias',
       description: 'Fique por dentro das novidades',
-      icon: <Icon name="chat-line" className="h-6 w-6" />,
-      href: '/noticias',
-      color: 'bg-green-500 hover:bg-green-600'
+      icon: 'chat-line',
+      href: '/noticias'
     },
     {
       title: 'Galeria',
       description: 'Fotos e vídeos da Cresol',
-      icon: <Icon name="image" className="h-6 w-6" />,
-      href: '/galeria',
-      color: 'bg-pink-500 hover:bg-pink-600'
+      icon: 'image',
+      href: '/galeria'
     }
   ];
 
@@ -272,25 +250,15 @@ export default function Dashboard() {
         {/* Ações Rápidas */}
         <div className="mb-8">
           <h2 className="heading-2 mb-4">Ações Rápidas</h2>
-          <div className="grid-responsive">
+          <div className="grid-modern-stats">
             {quickActions.map((action, index) => (
-              <Link
+              <QuickActionCard
                 key={index}
+                title={action.title}
+                description={action.description}
+                icon={action.icon}
                 href={action.href}
-                className="card text-white transition-all duration-200"
-                style={{ backgroundColor: action.color.includes('bg-purple') ? 'var(--color-secondary)' : 
-                         action.color.includes('bg-blue') ? 'var(--color-info-text)' :
-                         action.color.includes('bg-green') ? 'var(--color-success-text)' :
-                         '#EC4899' }}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-2 bg-white/20 rounded-lg">
-                    {action.icon}
-                  </div>
-                </div>
-                <h3 className="heading-4 text-white mb-1">{action.title}</h3>
-                <p className="body-text-small text-white/90">{action.description}</p>
-              </Link>
+              />
             ))}
           </div>
         </div>

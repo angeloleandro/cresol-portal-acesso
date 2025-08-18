@@ -1,0 +1,295 @@
+// Componente de gerenciamento de mensagens do subsetor - SIMPLIFICADO
+import React, { useState } from 'react';
+import { formatDate } from '../utils/dateFormatters';
+import { ToggleDraftsButton } from './ToggleDraftsButton';
+
+interface SubsectorMessage {
+  id: string;
+  title: string;
+  content: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  subsector_id: string;
+}
+
+interface MessagesManagementProps {
+  subsectorId: string;
+  messages: SubsectorMessage[];
+  showDrafts: boolean;
+  totalDraftMessagesCount: number;
+  onToggleDrafts: () => Promise<void>;
+  onRefresh: () => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+}
+
+export function MessagesManagement({
+  subsectorId,
+  messages,
+  showDrafts,
+  totalDraftMessagesCount,
+  onToggleDrafts,
+  onRefresh,
+  onDelete
+}: MessagesManagementProps) {
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState<Partial<SubsectorMessage>>({
+    title: '',
+    content: '',
+    is_published: true
+  });
+
+  const handleOpenModal = (message?: SubsectorMessage) => {
+    if (message) {
+      setCurrentMessage(message);
+      setIsEditing(true);
+    } else {
+      setCurrentMessage({
+        title: '',
+        content: '',
+        is_published: true
+      });
+      setIsEditing(false);
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentMessage({
+      title: '',
+      content: '',
+      is_published: true
+    });
+  };
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const handleSaveMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Reset error state
+    setSaveError(null);
+
+    // Validação
+    if (!currentMessage.title?.trim()) {
+      setSaveError('Título é obrigatório');
+      return;
+    }
+    
+    if (!currentMessage.content?.trim()) {
+      setSaveError('Conteúdo é obrigatório');
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const method = isEditing ? 'PUT' : 'POST';
+      const endpoint = '/api/admin/subsector-content';
+      
+      const requestData = {
+        type: 'messages',
+        subsectorId,
+        data: {
+          ...currentMessage,
+          subsector_id: subsectorId,
+          title: currentMessage.title?.trim(),
+          content: currentMessage.content?.trim()
+        }
+      };
+      
+      const response = await fetch(endpoint, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      });
+      
+      if (!response.ok) {
+        const responseData = await response.json();
+        throw new Error(responseData.error || 'Erro ao salvar mensagem');
+      }
+      
+      // Refresh data
+      await onRefresh();
+      
+      // Close modal
+      handleCloseModal();
+      
+    } catch (error: any) {
+      setSaveError(error.message || 'Erro ao salvar mensagem');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteMessage = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
+    await onDelete(id);
+  };
+
+  return (
+    <div className="p-6">
+      {/* Cabeçalho com ações */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center space-x-4">
+          <h2 className="text-xl font-semibold text-gray-900">Mensagens</h2>
+          <ToggleDraftsButton
+            showDrafts={showDrafts}
+            onToggle={onToggleDrafts}
+            draftCount={totalDraftMessagesCount}
+            type="messages"
+          />
+        </div>
+        <button
+          onClick={() => handleOpenModal()}
+          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+        >
+          Nova Mensagem
+        </button>
+      </div>
+
+      {/* Lista de mensagens */}
+      <div className="grid gap-4">
+        {messages.length === 0 ? (
+          <div className="text-center py-12 bg-gray-50 rounded-lg">
+            <p className="text-gray-500">
+              {showDrafts 
+                ? 'Nenhum rascunho de mensagem encontrado'
+                : 'Nenhuma mensagem publicada ainda'
+              }
+            </p>
+          </div>
+        ) : (
+          messages.map((item) => (
+            <div key={item.id} className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                    {!item.is_published && (
+                      <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+                        Rascunho
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-gray-600 mb-2">{item.content}</p>
+                  <p className="text-sm text-gray-500">{formatDate(item.created_at)}</p>
+                </div>
+                <div className="flex space-x-2 ml-4">
+                  <button
+                    onClick={() => handleOpenModal(item)}
+                    className="text-blue-600 hover:text-blue-700"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDeleteMessage(item.id)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Modal de criação/edição */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold mb-4">
+                {isEditing ? 'Editar Mensagem' : 'Nova Mensagem'}
+              </h2>
+              
+              {/* Error display */}
+              {saveError && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                  <p className="text-sm text-red-800">{saveError}</p>
+                </div>
+              )}
+              
+              <form onSubmit={handleSaveMessage} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Título <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={currentMessage.title || ''}
+                    onChange={(e) => setCurrentMessage({ ...currentMessage, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    placeholder="Digite o título da mensagem..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Conteúdo <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={currentMessage.content || ''}
+                    onChange={(e) => setCurrentMessage({ ...currentMessage, content: e.target.value })}
+                    rows={6}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    placeholder="Digite o conteúdo da mensagem..."
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col space-y-3 p-4 bg-gray-50 rounded-md">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={currentMessage.is_published !== false}
+                      onChange={(e) => setCurrentMessage({ ...currentMessage, is_published: e.target.checked })}
+                      className="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary focus:ring-2"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      {currentMessage.is_published !== false ? 'Publicar imediatamente' : 'Salvar como rascunho'}
+                    </span>
+                  </label>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    disabled={isSaving}
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center space-x-2"
+                  >
+                    {isSaving ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        <span>Salvando...</span>
+                      </>
+                    ) : (
+                      <span>Salvar</span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

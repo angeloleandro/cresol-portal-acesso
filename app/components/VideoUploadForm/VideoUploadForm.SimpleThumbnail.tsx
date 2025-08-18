@@ -8,7 +8,6 @@ import Image from 'next/image'
 import { ThumbnailConfigProps } from './VideoUploadForm.types'
 import { Icon } from '../icons/Icon'
 import { useThumbnailGenerator } from '@/app/hooks/useThumbnailGenerator'
-import { Spinner } from "@chakra-ui/react"
 import { VideoUploadFormThumbnailTimePicker } from './VideoUploadForm.ThumbnailTimePicker'
 import { VIDEO_HELPERS } from '@/lib/constants/video-ui'
 
@@ -353,7 +352,7 @@ export const VideoUploadFormSimpleThumbnail = memo(({
               >
                 {autoThumbState.isGenerating ? (
                   <div className="flex items-center gap-2">
-                    <Spinner size="sm" color="white" />
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     <span>Gerando...</span>
                   </div>
                 ) : (

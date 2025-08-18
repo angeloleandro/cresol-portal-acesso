@@ -48,20 +48,34 @@ export interface Group {
   description: string;
   sector_id: string | null;
   is_automatic: boolean;
+  type?: 'manual' | 'automatic';
   members: string[];
+  member_count: number;
   created_at: string;
 }
 
 export interface Message {
-  group_id: string;
+  id?: string;
   title: string;
-  content: string;
-  type: 'info' | 'warning' | 'success' | 'error';
-  expire_at: string;
-  links: Array<{
+  message: string; // Campo real no banco
+  type: 'info' | 'warning' | 'success' | 'error' | 'event' | 'news';
+  priority?: 'low' | 'normal' | 'high';
+  sector_id?: string;
+  subsector_id?: string | null;
+  expires_at?: string | null;
+  sent_by?: string | null;
+  related_event_id?: string | null;
+  related_news_id?: string | null;
+  is_global?: boolean;
+  created_at?: string;
+  // Campos para compatibilidade com interface atual
+  content?: string; // Mapeado de 'message'
+  expire_at?: string; // Mapeado de 'expires_at'
+  links?: Array<{
     url: string;
     text: string;
   }>;
+  is_published?: boolean; // Para funcionalidade de rascunho (será simulado)
 }
 
 export interface User {

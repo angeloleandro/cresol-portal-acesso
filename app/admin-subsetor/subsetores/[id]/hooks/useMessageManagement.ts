@@ -45,22 +45,28 @@ export function useMessageManagement(): UseMessageManagementReturn {
       throw new Error('Por favor, preencha o título e a mensagem.');
     }
 
-    // Validar destinatários
+    // Validar destinatários - prioritizar grupos
     if (currentMessage.groups.length === 0 && currentMessage.users.length === 0) {
       throw new Error('Por favor, selecione pelo menos um grupo ou usuário para enviar a mensagem.');
     }
 
     try {
-      await messagesApi.send({
+      // Mapear dados para formato compatível com API
+      const apiData = {
         title: currentMessage.title,
-        message: currentMessage.message,
+        content: currentMessage.message,
         type: currentMessage.type as MessageType,
-        priority: currentMessage.type === 'urgent' ? 'urgent' : 'normal',
-        groups: currentMessage.groups,
-        users: currentMessage.users,
-        context_type: 'subsector',
-        context_id: subsectorId
-      });
+        group_id: currentMessage.groups.length > 0 ? currentMessage.groups[0] : '',
+        expire_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        links: []
+      };
+
+      // Se não há grupo selecionado mas há usuários, alertar
+      if (!apiData.group_id && currentMessage.users.length > 0) {
+        throw new Error('Esta versão requer envio por grupos. Por favor, selecione um grupo.');
+      }
+
+      await messagesApi.send(apiData);
 
       setIsMessageModalOpen(false);
     } catch (error: unknown) {

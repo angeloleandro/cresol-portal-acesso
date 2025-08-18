@@ -32,62 +32,43 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
       setIsLoading(true);
       
       try {
-        console.log('Buscando eventos para o dashboard...');
         
-        let eventsData;
+        // OTIMIZADO: Uma única query que prioriza eventos em destaque e depois eventos futuros
+        const today = new Date().toISOString();
         
-        // Primeiro, tentar buscar eventos em destaque
-        const { data: featuredData, error: featuredError } = await supabase
+        const { data: eventsData, error } = await supabase
           .from('sector_events')
           .select('id, title, description, location, start_date, end_date, is_featured, created_at, sector_id')
           .eq('is_published', true)
-          .eq('is_featured', true)
-          .order('start_date', { ascending: true })
-          .limit(limit);
+          .gte('start_date', today)  // Apenas eventos futuros
+          .order('is_featured', { ascending: false }) // Prioriza is_featured=true primeiro
+          .order('start_date', { ascending: true })   // Depois ordena por data
+          .limit(limit * 2); // Buscar mais que o limite para garantir variedade
           
-        if (featuredError) {
-          console.error('Erro ao buscar eventos em destaque:', featuredError);
-          throw featuredError;
+        if (error) {
+          console.error('[EventosDestaque] ❌ Erro na query otimizada:', error);
+          throw error;
         }
         
-        // Se não encontrou suficientes eventos em destaque, buscar os mais próximos
-        if (!featuredData || featuredData.length < limit) {
-          console.log(`Encontrados ${featuredData?.length || 0} eventos em destaque. Buscando mais eventos próximos...`);
-          
-          // Obter data atual para filtrar eventos futuros
-          const today = new Date().toISOString();
-          
-          const numToFetch = limit - (featuredData?.length || 0);
-          const { data: upcomingData, error: upcomingError } = await supabase
-            .from('sector_events')
-            .select('id, title, description, location, start_date, end_date, is_featured, created_at, sector_id')
-            .eq('is_published', true)
-            .eq('is_featured', false)
-            .gte('start_date', today)  // Apenas eventos futuros
-            .order('start_date', { ascending: true })
-            .limit(numToFetch);
-            
-          if (upcomingError) {
-            console.error('Erro ao buscar eventos próximos:', upcomingError);
-            eventsData = featuredData || [];
-          } else {
-            // Combinar os eventos em destaque com os próximos
-            eventsData = [...(featuredData || []), ...(upcomingData || [])];
-          }
-        } else {
-          eventsData = featuredData;
-        }
-        
-        console.log(`Total de eventos encontrados: ${eventsData?.length || 0}`);
-        
-        // Se tiver dados, use-os
+        // Processar os dados: priorizar eventos em destaque e pegar os primeiros {limit}
+        let finalEvents: EventItem[] = [];
         if (eventsData && eventsData.length > 0) {
-          setFeaturedEvents(eventsData);
-        } else {
-          setFeaturedEvents([]);
+          // Separar eventos em destaque e comuns
+          const featuredEvents = eventsData.filter(event => event.is_featured);
+          const regularEvents = eventsData.filter(event => !event.is_featured);
+          
+          // Combinar: primeiro todos os em destaque, depois os comuns até atingir o limite
+          finalEvents = [
+            ...featuredEvents,
+            ...regularEvents
+          ].slice(0, limit);
         }
+        
+        
+        setFeaturedEvents(finalEvents);
+        
       } catch (error) {
-        console.error('Erro ao buscar eventos:', error);
+        console.error('[EventosDestaque] ❌ Erro ao buscar eventos:', error);
         setFeaturedEvents([]);
       } finally {
         setIsLoading(false);

@@ -8,8 +8,6 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { Collection } from '@/lib/types/collections';
 import Icon from '@/app/components/icons/Icon';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface GalleryImage {
   id: string;
@@ -405,7 +403,7 @@ const ItemSelector: React.FC<ItemSelectorProps> = ({
             >
               {isSubmitting ? (
                 <div className="flex items-center">
-                  <UnifiedLoadingSpinner size="small" className="inline-flex items-center mr-2" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Adicionando...
                 </div>
               ) : (

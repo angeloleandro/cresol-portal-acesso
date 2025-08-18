@@ -27,6 +27,7 @@ import { MessagesTab } from './components/tabs/MessagesTab';
 // Modal Components - Using adapted sector standard modals for subsector
 import { SubsectorEventsManagement } from './components/adapters/SubsectorEventsManagement';
 import { SubsectorNewsManagement } from './components/adapters/SubsectorNewsManagement';
+import { SubsectorMessagesManagement } from './components/adapters/SubsectorMessagesManagement';
 import { GroupModal } from './components/modals/GroupModal';
 import { MessageModal } from './components/modals/MessageModal';
 
@@ -76,6 +77,7 @@ export default function SubsectorManagement() {
     subsector,
     events,
     news,
+    messages,
     systems,
     users,
     workLocations,
@@ -84,6 +86,7 @@ export default function SubsectorManagement() {
     showDrafts,
     totalDraftEventsCount,
     totalDraftNewsCount,
+    totalDraftMessagesCount,
     setShowDrafts,
     refreshData
   } = useSubsectorData(subsectorId);
@@ -173,6 +176,7 @@ export default function SubsectorManagement() {
   const breadcrumbItems = [
     { label: 'Admin', href: '/admin' },
     { label: 'Subsetores', href: '/admin-subsetor' },
+    { label: subsector?.sector_name || 'Setor', href: '#' },
     { label: subsector?.name || 'Carregando...', href: '#' }
   ];
 
@@ -207,7 +211,8 @@ export default function SubsectorManagement() {
         counts={{
           events: events.length,
           news: news.length,
-          systems: systems.length
+          systems: systems.length,
+          messages: messages.length
         }}
       />
 
@@ -240,8 +245,8 @@ export default function SubsectorManagement() {
         )}
 
         {activeTab === 'messages' && (
-          <MessagesTab
-            onOpenMessageModal={messageManagement.handleOpenMessageModal}
+          <SubsectorMessagesManagement
+            subsectorId={subsectorId}
           />
         )}
       </main>

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import OptimizedImage from "./OptimizedImage";
 import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
+import { logger } from "@/lib/logger";
 
 interface Banner {
   id: string;
@@ -21,16 +22,24 @@ export default function BannerCarousel() {
 
   useEffect(() => {
     const fetchBanners = async () => {
+      const componentTimer = logger.componentStart('BannerCarousel.fetchBanners');
+      logger.info('Iniciando carregamento de banners');
+      
+      const queryTimer = logger.dbStart('banners.select(active)');
       const { data, error } = await supabase
         .from("banners")
         .select("*")
         .eq("is_active", true)
         .order("order_index", { ascending: true });
+      logger.dbEnd(queryTimer);
       
       if (error) {
-        console.error('Erro ao buscar banners:', error);
+        logger.error('Erro ao buscar banners', error);
+        logger.componentEnd(componentTimer);
+        return;
       }
       
+      const processTimer = logger.componentStart('BannerCarousel.processImages');
       const processedBanners = (data || []).map(banner => ({
         ...banner,
         image_url: processSupabaseImageUrl(banner.image_url) || banner.image_url
@@ -42,8 +51,13 @@ export default function BannerCarousel() {
           debugImageUrl(banner.image_url, `Banner: ${banner.title}`)
         );
       }
+      logger.componentEnd(processTimer);
       
       setBanners(processedBanners);
+      
+      const bannerCount = processedBanners.length;
+      logger.success(`Banners carregados com sucesso`, { bannerCount });
+      logger.componentEnd(componentTimer);
     };
     fetchBanners();
   }, []);

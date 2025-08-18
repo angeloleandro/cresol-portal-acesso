@@ -9,16 +9,6 @@ export async function POST(request: NextRequest) {
   try {
     const { email, fullName, positionId, workLocationId, role, avatarUrl, adminToken } = await request.json();
 
-    // Log para depuração
-    console.log('API /api/admin/create-user chamada com:', { 
-      email, 
-      fullName, 
-      positionId, 
-      workLocationId, 
-      role, 
-      avatarUrl,
-      adminTokenProvided: !!adminToken
-    });
 
     if (!email || !fullName) {
       return NextResponse.json({ 

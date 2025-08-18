@@ -21,7 +21,12 @@ export function useSectorAuth(sectorId: string): UseSectorAuthReturn {
 
   const checkUser = useCallback(async () => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        router.push('/login');
+        return;
+      }
       
       if (!userData?.user) {
         router.push('/login');
@@ -35,8 +40,12 @@ export function useSectorAuth(sectorId: string): UseSectorAuthReturn {
         .eq('id', userData.user.id)
         .single();
 
-      if (profileError || !profile) {
-        console.error('Erro ao buscar perfil:', profileError);
+      if (profileError) {
+        router.push('/login');
+        return;
+      }
+
+      if (!profile) {
         router.push('/login');
         return;
       }
@@ -53,7 +62,6 @@ export function useSectorAuth(sectorId: string): UseSectorAuthReturn {
         router.push('/home');
       }
     } catch (error) {
-      console.error('Erro ao verificar usuário:', error);
       router.push('/login');
     } finally {
       setLoading(false);

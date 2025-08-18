@@ -1,0 +1,110 @@
+{
+  "mcpServers": {
+    "supabase-portal-cresol-fronteiras": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=taodkzafqgoparihaljx"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_a2495fd9cb8a80f239b93ff1496424314649d9bd"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}",
+        "FRONTEND_FOCUS": "true",
+        "SUPPORTED_LIBRARIES": "mui,antd,chakra-ui,mantine,shadcn,radix-ui,tailwindcss,nextjs",
+        "VERSION_TRACKING": "true",
+        "CACHE_DOCUMENTATION": "true"
+      }
+    },
+    "figma": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "figma-mcp-pro@latest"
+      ],
+      "env": {
+        "FIGMA_API_KEY": "${FIGMA_API_KEY}"
+      }
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github@latest"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}",
+        "FRONTEND_LIBRARIES_REPOS": "mui/material-ui,ant-design/ant-design,chakra-ui/chakra-ui,mantinedev/mantine,shadcn-ui/ui,TanStack/table,radix-ui/primitives,tailwindlabs/tailwindcss,vercel/next.js"
+      }
+    },
+    "magic-ui": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@magicuidesign/mcp@latest"
+      ],
+      "env": {}
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@executeautomation/playwright-mcp-server"
+      ],
+      "env": {}
+    },
+    "chakra-ui": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@chakra-ui/react-mcp"
+      ],
+      "env": {}
+    },
+    "mui-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@mui/mcp@latest"
+      ],
+      "env": {}
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem@latest"
+      ],
+      "env": {
+        "ALLOWED_DIRECTORIES": "/home/angel/projetos/cresol-portal-acesso"
+      }
+    },
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory@latest"
+      ],
+      "env": {}
+    }
+  }
+}

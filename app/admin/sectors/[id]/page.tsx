@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
+
+// Context Provider
+import { SectorDataProvider, useSectorDataContext } from './contexts/SectorDataContext';
 
 // Types
 import { TabType } from './types/sector.types';
@@ -15,54 +18,85 @@ import { useSectorData } from './hooks/useSectorData';
 import { useGroupsManagement } from './hooks/useGroupsManagement';
 import { useSectorContent } from './SectorContentManager';
 
-// Components
+// Components - Lazy loading para otimização
 import { TabNavigation } from './components/TabNavigation';
-import { NewsManagement } from './components/NewsManagement';
-import { EventsManagement } from './components/EventsManagement';
-import { SubsectorsManagement } from './components/SubsectorsManagement';
-import { GroupsManagement } from './components/GroupsManagement';
-import { MessagesManagement } from './components/MessagesManagement';
+const NewsManagement = lazy(() => import('./components/NewsManagement').then(m => ({ default: m.NewsManagement })));
+const EventsManagement = lazy(() => import('./components/EventsManagement').then(m => ({ default: m.EventsManagement })));
+const SubsectorsManagement = lazy(() => import('./components/SubsectorsManagement').then(m => ({ default: m.SubsectorsManagement })));
+const GroupsManagement = lazy(() => import('./components/GroupsManagement').then(m => ({ default: m.GroupsManagement })));
+const MessagesManagement = lazy(() => import('./components/MessagesManagement').then(m => ({ default: m.MessagesManagement })));
 
-export default function SectorDashboard() {
+// Componente interno que usa o contexto
+function SectorDashboardContent() {
   const params = useParams();
   const sectorId = params.id as string;
   
-  // Estado da aba ativa
   const [activeTab, setActiveTab] = useState<TabType>('news');
   
-  // Hooks customizados para gerenciar diferentes aspectos
-  const { user, isAuthorized, loading: authLoading } = useSectorAuth(sectorId);
-  const { sector, subsectors, refreshData: refreshSectorData } = useSectorData(sectorId);
-  const {
-    news,
-    events,
-    showDrafts,
-    isLoading: contentLoading,
-    totalDraftNewsCount,
-    totalDraftEventsCount,
-    toggleDrafts,
-    refreshContent,
-    deleteNews,
-    deleteEvent
-  } = useSectorContent(sectorId);
+  // Usar hook simples para buscar dados do setor (similar ao subsetor)
+  const { sector: sectorFromHook } = useSectorData(sectorId);
   
+  // Usar contexto para dados compartilhados
   const {
+    sector: sectorFromContext,
+    subsectors,
     groups,
     automaticGroups,
     workLocations,
     userSearchTerm,
     userLocationFilter,
+    filteredUsers,
     setUserSearchTerm,
     setUserLocationFilter,
-    refreshAll: refreshGroups,
-    filteredUsers
-  } = useGroupsManagement(sectorId);
+    refreshSectorData,
+    refreshGroupsData,
+    isLoading: contextLoading,
+    error: contextError
+  } = useSectorDataContext();
+  
+  // Usar o setor do hook se disponível, senão do contexto
+  const sector = sectorFromHook || sectorFromContext;
 
-  // Loading state
-  if (authLoading || contentLoading) {
+  const { user, isAuthorized, loading: authLoading } = useSectorAuth(sectorId);
+  
+  const {
+    news,
+    events,
+    messages,
+    showDrafts,
+    isLoading: contentLoading,
+    totalDraftNewsCount,
+    totalDraftEventsCount,
+    totalDraftMessagesCount,
+    toggleDrafts,
+    refreshContent,
+    deleteNews,
+    deleteEvent,
+    deleteMessage
+  } = useSectorContent(sectorId);
+
+
+  // Loading state - mais permissivo para evitar travamento
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
-        <UnifiedLoadingSpinner message="Carregando informações do setor..." />
+        <UnifiedLoadingSpinner message="Verificando autenticação..." />
+      </div>
+    );
+  }
+  
+  // Se está carregando contexto mas já tem pelo menos o ID do setor, renderiza a página
+  // Isto evita travamento na tela de loading
+  const showLoadingOverlay = contextLoading && !sector;
+
+  // Error state
+  if (contextError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-2">Erro</h2>
+          <p className="text-gray-600">{contextError}</p>
+        </div>
       </div>
     );
   }
@@ -79,14 +113,29 @@ export default function SectorDashboard() {
     );
   }
 
+  // Breadcrumb com fallback seguro
   const breadcrumbItems = [
     { label: 'Admin', href: '/admin' },
     { label: 'Setores', href: '/admin/sectors' },
-    { label: sector?.name || 'Carregando...', href: '#' }
+    { label: sector?.name || 'Setor', href: '#' }
   ];
 
+  // Componente de loading para lazy components
+  const LazyLoadingSpinner = () => (
+    <div className="flex items-center justify-center py-8">
+      <UnifiedLoadingSpinner message="Carregando..." />
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      {showLoadingOverlay && (
+        <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
+          <UnifiedLoadingSpinner message="Carregando informações do setor..." />
+        </div>
+      )}
+      <div className="min-h-screen bg-gray-50">
+      
       {/* Admin Header padrão */}
       <AdminHeader user={user} />
       
@@ -101,7 +150,7 @@ export default function SectorDashboard() {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <h1 className="text-2xl font-bold text-gray-900">
-            Gerenciar Setor: {sector?.name}
+            Gerenciar Setor: {sector?.name || 'Carregando...'}
           </h1>
           {sector?.description && (
             <p className="mt-2 text-gray-600">{sector.description}</p>
@@ -115,65 +164,93 @@ export default function SectorDashboard() {
         onTabChange={setActiveTab}
         totalDraftNewsCount={totalDraftNewsCount}
         totalDraftEventsCount={totalDraftEventsCount}
+        totalDraftMessagesCount={totalDraftMessagesCount}
       />
 
-      {/* Conteúdo da aba ativa */}
+      {/* Conteúdo da aba ativa com lazy loading */}
       <main className="max-w-7xl mx-auto">
         {activeTab === 'news' && (
-          <NewsManagement
-            sectorId={sectorId}
-            news={news}
-            showDrafts={showDrafts}
-            totalDraftNewsCount={totalDraftNewsCount}
-            onToggleDrafts={toggleDrafts}
-            onRefresh={refreshContent}
-            onDelete={deleteNews}
-          />
+          <Suspense fallback={<LazyLoadingSpinner />}>
+            <NewsManagement
+              sectorId={sectorId}
+              news={news}
+              showDrafts={showDrafts}
+              totalDraftNewsCount={totalDraftNewsCount}
+              onToggleDrafts={toggleDrafts}
+              onRefresh={refreshContent}
+              onDelete={deleteNews}
+            />
+          </Suspense>
         )}
 
         {activeTab === 'events' && (
-          <EventsManagement
-            sectorId={sectorId}
-            events={events}
-            showDrafts={showDrafts}
-            totalDraftEventsCount={totalDraftEventsCount}
-            onToggleDrafts={toggleDrafts}
-            onRefresh={refreshContent}
-            onDelete={deleteEvent}
-          />
+          <Suspense fallback={<LazyLoadingSpinner />}>
+            <EventsManagement
+              sectorId={sectorId}
+              events={events}
+              showDrafts={showDrafts}
+              totalDraftEventsCount={totalDraftEventsCount}
+              onToggleDrafts={toggleDrafts}
+              onRefresh={refreshContent}
+              onDelete={deleteEvent}
+            />
+          </Suspense>
         )}
 
         {activeTab === 'subsectors' && (
-          <SubsectorsManagement
-            sectorId={sectorId}
-            subsectors={subsectors}
-            onRefresh={refreshSectorData}
-          />
+          <Suspense fallback={<LazyLoadingSpinner />}>
+            <SubsectorsManagement
+              sectorId={sectorId}
+              subsectors={subsectors}
+              onRefresh={refreshSectorData}
+            />
+          </Suspense>
         )}
 
         {activeTab === 'groups' && (
-          <GroupsManagement
-            sectorId={sectorId}
-            groups={groups}
-            automaticGroups={automaticGroups}
-            workLocations={workLocations}
-            userSearchTerm={userSearchTerm}
-            userLocationFilter={userLocationFilter}
-            filteredUsers={filteredUsers}
-            onSearchTermChange={setUserSearchTerm}
-            onLocationFilterChange={setUserLocationFilter}
-            onRefresh={refreshGroups}
-          />
+          <Suspense fallback={<LazyLoadingSpinner />}>
+            <GroupsManagement
+              sectorId={sectorId}
+              groups={groups}
+              automaticGroups={automaticGroups}
+              workLocations={workLocations}
+              userSearchTerm={userSearchTerm}
+              userLocationFilter={userLocationFilter}
+              filteredUsers={filteredUsers}
+              onSearchTermChange={setUserSearchTerm}
+              onLocationFilterChange={setUserLocationFilter}
+              onRefresh={refreshGroupsData}
+            />
+          </Suspense>
         )}
 
         {activeTab === 'messages' && (
-          <MessagesManagement
-            groups={groups}
-            automaticGroups={automaticGroups}
-            onRefresh={refreshGroups}
-          />
+          <Suspense fallback={<LazyLoadingSpinner />}>
+            <MessagesManagement
+              sectorId={sectorId}
+              messages={messages}
+              showDrafts={showDrafts}
+              totalDraftMessagesCount={totalDraftMessagesCount}
+              onToggleDrafts={toggleDrafts}
+              onRefresh={refreshContent}
+              onDelete={deleteMessage}
+            />
+          </Suspense>
         )}
       </main>
     </div>
+    </>
+  );
+}
+
+// Componente principal com Provider
+export default function SectorDashboard() {
+  const params = useParams();
+  const sectorId = params.id as string;
+
+  return (
+    <SectorDataProvider sectorId={sectorId}>
+      <SectorDashboardContent />
+    </SectorDataProvider>
   );
 }
