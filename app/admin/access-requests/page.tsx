@@ -3,10 +3,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useAlert } from '@/app/components/alerts';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { FormSelect } from '@/app/components/forms/FormSelect';
 
 interface AccessRequest {
   id: string;
@@ -32,6 +34,7 @@ interface EditableAccessData {
 
 export default function AccessRequests() {
   const router = useRouter();
+  const { showSuccess, showError, showWarning, users } = useAlert();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<AccessRequest[]>([]);
@@ -176,16 +179,16 @@ export default function AccessRequests() {
           console.error('Erro ao fazer upsert no perfil durante a atualização da solicitação:', profileUpsertError);
           // Não lançar erro aqui necessariamente, pois a principal operação (access_requests) pode ter sido bem-sucedida.
           // Apenas logar ou notificar de forma não bloqueante.
-          alert('Dados da solicitação atualizados, mas houve um problema ao sincronizar com o perfil do usuário.');
+          showWarning('Dados da solicitação atualizados, mas houve um problema ao sincronizar com o perfil do usuário.');
         }
       }
       
       fetchRequests(); // Recarregar a lista para refletir as mudanças
-      alert('Solicitação atualizada com sucesso!');
+      users.updated();
 
     } catch (error: any) {
       console.error('Erro ao atualizar solicitação:', error);
-      alert(`Erro ao atualizar solicitação: ${error.message}`);
+      showError('Erro ao atualizar solicitação', error.message);
     }
   };
 
@@ -195,7 +198,7 @@ export default function AccessRequests() {
 
     if (!currentRequestOriginalData) {
         console.error('Dados originais da solicitação não encontrados para processamento.');
-        alert('Erro interno: não foi possível encontrar os dados originais da solicitação.');
+        showError('Erro interno', 'Não foi possível encontrar os dados originais da solicitação.');
         return;
     }
 
@@ -206,7 +209,7 @@ export default function AccessRequests() {
     };
 
     if (!payloadForApi.email || !payloadForApi.full_name) {
-        alert('Por favor, certifique-se de que o nome completo está preenchido e o e-mail original é válido.');
+        showWarning('Por favor, certifique-se de que o nome completo está preenchido e o e-mail original é válido.');
         return;
     }
 
@@ -230,14 +233,14 @@ export default function AccessRequests() {
 
         if (!response.ok) {
           console.error('Falha ao aprovar solicitação (API):', result.error);
-          alert(`Erro ao aprovar: ${result.error || 'Erro desconhecido'}`);
+          showError('Erro ao aprovar', result.error || 'Erro desconhecido');
         } else {
-          console.log('Solicitação aprovada com sucesso (API):', result.message);
-          alert(result.message || 'Aprovado com sucesso!');
+          console.log('Aprovação bem-sucedida:', result.message);
+          users.created();
         }
       } catch (error) {
         console.error('Erro de rede ou inesperado ao chamar API de aprovação:', error);
-        alert('Ocorreu um erro de comunicação ao tentar aprovar a solicitação.');
+        showError('Erro de comunicação', 'Ocorreu um erro ao tentar aprovar a solicitação.');
       }
     } else { // status === 'rejected'
       // Para rejeição, também chamaremos a API para centralizar a lógica de status
@@ -260,14 +263,14 @@ export default function AccessRequests() {
 
         if (!response.ok) {
           console.error('Falha ao rejeitar solicitação (API):', result.error);
-          alert(`Erro ao rejeitar: ${result.error || 'Erro desconhecido'}`);
+          showError('Erro ao rejeitar', result.error || 'Erro desconhecido');
         } else {
-          console.log('Solicitação rejeitada com sucesso (API):', result.message);
-          alert(result.message || 'Rejeitado com sucesso!');
+          console.log('Solicitação rejeitada com sucesso:', result.message);
+          showSuccess('Solicitação rejeitada com sucesso!');
         }
       } catch (error) {
         console.error('Erro de rede ou inesperado ao chamar API de rejeição:', error);
-        alert('Ocorreu um erro de comunicação ao tentar rejeitar a solicitação.');
+        showError('Erro de comunicação', 'Ocorreu um erro ao tentar rejeitar a solicitação.');
       }
     }
     fetchRequests();
@@ -304,17 +307,18 @@ export default function AccessRequests() {
             <label htmlFor="status-filter" className="text-sm font-medium text-cresol-gray ml-2 mr-2">
               Filtrar:
             </label>
-            <select
-              id="status-filter"
+            <FormSelect
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
+              options={[
+                { value: 'all', label: 'Todos' },
+                { value: 'pending', label: 'Pendentes' },
+                { value: 'approved', label: 'Aprovados' },
+                { value: 'rejected', label: 'Rejeitados' }
+              ]}
               className="text-sm border-0 focus:ring-0 focus:outline-none py-1 pl-1 pr-7 bg-transparent text-gray-800"
-            >
-              <option value="all">Todos</option>
-              <option value="pending">Pendentes</option>
-              <option value="approved">Aprovados</option>
-              <option value="rejected">Rejeitados</option>
-            </select>
+              size="sm"
+            />
           </div>
         </div>
         
@@ -365,17 +369,21 @@ export default function AccessRequests() {
                       />
                     </td>
                     <td className="px-6 py-4">
-                      <select
-                        className="w-full border border-cresol-gray-light rounded-md px-2 py-1 text-sm min-w-[180px]"
+                      <FormSelect
                         value={editData[request.id]?.work_location_id || ''}
                         onChange={e => handleEditChange(request.id, 'work_location_id', e.target.value)}
                         disabled={request.status !== 'pending'}
-                      >
-                        <option value="">Selecione</option>
-                        {workLocations.map(loc => (
-                          <option key={loc.id} value={loc.id}>{loc.name}</option>
-                        ))}
-                      </select>
+                        options={[
+                          { value: '', label: 'Selecione' },
+                          ...workLocations.map(loc => ({
+                            value: loc.id,
+                            label: loc.name
+                          }))
+                        ]}
+                        placeholder="Selecione"
+                        className="w-full min-w-[180px]"
+                        size="sm"
+                      />
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-cresol-gray">

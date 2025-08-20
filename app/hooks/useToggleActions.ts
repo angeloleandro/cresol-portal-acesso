@@ -9,6 +9,7 @@ import { GenericContentAdapter, BaseContentData } from '@/app/admin-subsetor/sub
 interface UseToggleActionsOptions {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
+  onConfirmationNeeded?: (message: string, onConfirm: () => void) => void;
 }
 
 export function useToggleActions<T extends BaseContentData>(
@@ -157,7 +158,7 @@ export function useToggleActions<T extends BaseContentData>(
   }, [adapter, options]);
 
   /**
-   * Toggle com confirmação
+   * Toggle com confirmação (usando modal moderno)
    */
   const toggleWithConfirmation = useCallback(async (
     id: string,
@@ -165,12 +166,24 @@ export function useToggleActions<T extends BaseContentData>(
     currentValue: boolean,
     confirmMessage: string
   ): Promise<boolean> => {
-    if (!window.confirm(confirmMessage)) {
-      return false;
-    }
-
-    return toggleField(id, fieldName, currentValue);
-  }, [toggleField]);
+    return new Promise((resolve) => {
+      if (options?.onConfirmationNeeded) {
+        // Usa modal moderno através do callback
+        options.onConfirmationNeeded(confirmMessage, async () => {
+          const result = await toggleField(id, fieldName, currentValue);
+          resolve(result);
+        });
+      } else {
+        // Fallback para confirm() apenas se não houver modal configurado
+        console.warn('useToggleActions: onConfirmationNeeded não configurado, usando confirm() nativo');
+        if (!window.confirm(confirmMessage)) {
+          resolve(false);
+          return;
+        }
+        toggleField(id, fieldName, currentValue).then(resolve);
+      }
+    });
+  }, [toggleField, options]);
 
   /**
    * Helpers para verificar estado de loading

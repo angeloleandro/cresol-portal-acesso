@@ -4,6 +4,7 @@
 
 import { supabase } from "./supabase";
 
+import { logger } from './production-logger';
 export const STORAGE_BUCKETS = {
   videos: 'videos',
   banners: 'banners'
@@ -31,8 +32,7 @@ export async function ensureVideosBucket(): Promise<boolean> {
         return false;
       }
       
-      console.log('Videos bucket created successfully');
-    }
+          }
     
     return true;
   } catch (error) {
@@ -69,7 +69,7 @@ export async function uploadThumbnailWithFallback(
     
     // If videos bucket doesn't exist or fails, try banners bucket as fallback
     if (uploadError && preferredBucket === STORAGE_BUCKETS.videos) {
-      console.warn('Failed to upload to videos bucket, trying banners bucket:', uploadError);
+      logger.warn('Failed to upload to videos bucket, trying banners bucket:', uploadError);
       
       const { error: fallbackError } = await supabase.storage
         .from(STORAGE_BUCKETS.banners)

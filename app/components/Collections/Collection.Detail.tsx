@@ -13,6 +13,8 @@ import CollectionEmptyState from './Collection.EmptyState';
 import { formatCollection } from '@/lib/utils/collections';
 import { cn } from '@/lib/utils/cn';
 import Icon from '@/app/components/icons/Icon';
+import DeleteModal from '@/app/components/ui/DeleteModal';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
 
 // Conditional import for admin functionality
 let DraggableItemList: React.ComponentType<any> | null = null;
@@ -39,6 +41,7 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
   onBulkUpload,
   onVideoUpload,
 }) => {
+  const deleteModal = useDeleteModal('item');
   // Determine if we need to fetch items
   const needsFetchItems = !('items' in initialCollection);
   const collectionId = needsFetchItems ? initialCollection.id : null;
@@ -88,20 +91,22 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
   };
 
   // Handle item removal with optional confirmation (admin view)
-  const handleRemoveItem = async (itemId: string) => {
+  const handleRemoveItem = async (item: any) => {
+    if (!item || !onItemRemove) return;
+    await onItemRemove(item);
+  };
+
+  const handleRemoveClick = (itemId: string) => {
     const items = collection.items || [];
     const item = items.find(i => i.id === itemId);
-    if (!item || !onItemRemove) return;
+    if (!item) return;
     
     if (isAdminView) {
-      const confirmed = window.confirm(
-        'Tem certeza que deseja remover este item da coleção?'
-      );
-      
-      if (!confirmed) return;
+      const itemName = item.item_data?.title || 'Item';
+      deleteModal.openDeleteModal(item, itemName);
+    } else {
+      handleRemoveItem(item);
     }
-    
-    await onItemRemove(item);
   };
   
   // Handle item reordering (admin view)
@@ -376,7 +381,7 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
                       {selectedItems.length} selecionado{selectedItems.length !== 1 ? 's' : ''}
                     </span>
                     <button
-                      onClick={() => selectedItems.forEach(handleRemoveItem)}
+                      onClick={() => selectedItems.forEach(id => handleRemoveClick(id))}
                       className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
                     >
                       Remover
@@ -390,7 +395,7 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
                 <DraggableItemList
                   items={collection.items || []}
                   onReorder={handleReorder}
-                  onItemRemove={handleRemoveItem}
+                  onItemRemove={handleRemoveClick}
                 />
               ) : (
                 <div className={cn(
@@ -489,7 +494,7 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleRemoveItem(item.id);
+                              handleRemoveClick(item.id);
                             }}
                             className="text-red-500 hover:text-red-700 p-1"
                           >
@@ -590,6 +595,16 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
           </div>
         </div>
       )}
+
+      {/* Modal de exclusão */}
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeDeleteModal}
+        onConfirm={() => deleteModal.confirmDelete(handleRemoveItem)}
+        itemName={deleteModal.itemName}
+        itemType={deleteModal.itemType}
+        isLoading={deleteModal.isDeleting}
+      />
     </div>
   );
 };

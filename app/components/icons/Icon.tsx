@@ -10,6 +10,7 @@ import {
   HomeIcon,
   Bars3Icon,
   XMarkIcon,
+  EllipsisHorizontalIcon,
   MagnifyingGlassIcon,
   ArrowTopRightOnSquareIcon,
   UserIcon,
@@ -64,6 +65,7 @@ import {
   FilmIcon,
   WrenchScrewdriverIcon,
   LockClosedIcon,
+  DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';
 
 export type IconName =
@@ -86,6 +88,7 @@ export type IconName =
   | 'check'
   | 'suitcase'
   | 'trash'
+  | 'more-horizontal'
   | 'filter'
   | 'user-2'
   | 'user-remove'
@@ -155,7 +158,12 @@ export type IconName =
   | 'Mail'
   // Missing icons needed for admin components
   | 'layers'
-  | 'file-text';
+  | 'file-text'
+  | 'message-square'
+  | 'edit'
+  | 'copy'
+  | 'eye'
+  | 'eye-slash';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   name: IconName;
@@ -225,6 +233,7 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   'check': CheckIcon,
   'pencil': PencilIcon,
   'trash': TrashIcon,
+  'more-horizontal': EllipsisHorizontalIcon,
   'save': DocumentArrowDownIcon,
   'refresh': ArrowPathIcon,
   'download': ArrowDownTrayIcon,
@@ -294,6 +303,11 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   // Missing icons needed for admin components
   'layers': Squares2X2Icon,
   'file-text': DocumentIcon,
+  'message-square': ChatBubbleLeftIcon,
+  'edit': PencilIcon,
+  'copy': DocumentDuplicateIcon,
+  'eye': EyeIcon,
+  'eye-slash': EyeSlashIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, ...props }) => {

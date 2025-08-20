@@ -1,109 +1,48 @@
-// Hook para gerenciamento de grupos de notificação
+// Hook OTIMIZADO para gerenciamento de grupos e usuários usando contexto
+// Evita requisições duplicadas compartilhando dados via SubsectorDataContext
+// Baseado no padrão do setor para manter consistência
 
-import { useState, useCallback, useEffect } from 'react';
-import { Group } from '../types/subsector.types';
-import { groupsApi } from '../utils/apiClient';
+import { useSubsectorDataContext } from '../contexts/SubsectorDataContext';
 
 interface UseGroupManagementReturn {
-  groups: Group[];
-  isGroupModalOpen: boolean;
-  currentGroup: {
-    name: string;
-    description: string;
-    members: string[];
-  };
-  handleOpenGroupModal: () => void;
-  handleSaveGroup: (subsectorId: string) => Promise<void>;
-  setIsGroupModalOpen: (open: boolean) => void;
-  setCurrentGroup: React.Dispatch<React.SetStateAction<{
-    name: string;
-    description: string;
-    members: string[];
-  }>>;
-  fetchGroups: () => Promise<void>;
+  groups: any[];
+  automaticGroups: any[];
+  allUsers: any[];
+  workLocations: any[];
+  userSearchTerm: string;
+  userLocationFilter: string;
+  setUserSearchTerm: (term: string) => void;
+  setUserLocationFilter: (filter: string) => void;
+  refreshAll: () => Promise<void>;
+  filteredUsers: any[];
 }
 
 export function useGroupManagement(subsectorId: string): UseGroupManagementReturn {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
-  const [currentGroup, setCurrentGroup] = useState({
-    name: '',
-    description: '',
-    members: [] as string[]
-  });
+  // Usar dados compartilhados do contexto ao invés de fazer requisições duplicadas
+  const {
+    groups,
+    automaticGroups,
+    allUsers,
+    workLocations,
+    userSearchTerm,
+    userLocationFilter,
+    filteredUsers,
+    setUserSearchTerm,
+    setUserLocationFilter,
+    refreshGroupsData
+  } = useSubsectorDataContext();
 
-  const fetchGroups = useCallback(async () => {
-    try {
-      const result = await groupsApi.fetchAll();
-      
-      // Validar que result.groups é um array antes de filtrar
-      if (result?.groups && Array.isArray(result.groups)) {
-        const filteredGroups = result.groups.filter((group: Group) => 
-          group.subsector_id === subsectorId
-        );
-        setGroups(filteredGroups);
-      } else {
-        // Warning handled silently
-        setGroups([]);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      // Error handled silently
-      setGroups([]);
-    }
-  }, [subsectorId]);
-
-  const handleOpenGroupModal = () => {
-    setCurrentGroup({
-      name: '',
-      description: '',
-      members: []
-    });
-    setIsGroupModalOpen(true);
-  };
-
-  const handleSaveGroup = async (subsectorId: string) => {
-    // Validar subsectorId
-    if (!subsectorId || typeof subsectorId !== 'string' || !subsectorId.trim()) {
-      throw new Error('Por favor, forneça um ID de subsetor válido.');
-    }
-
-    // Validar nome do grupo
-    if (!currentGroup.name.trim()) {
-      throw new Error('Por favor, informe o nome do grupo.');
-    }
-
-    try {
-      await groupsApi.create({
-        name: currentGroup.name,
-        description: currentGroup.description,
-        subsector_id: subsectorId,
-        members: currentGroup.members
-      });
-
-      setIsGroupModalOpen(false);
-      await fetchGroups();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar grupo';
-      // Error handled silently
-      throw error;
-    }
-  };
-
-  useEffect(() => {
-    if (subsectorId) {
-      fetchGroups();
-    }
-  }, [subsectorId, fetchGroups]);
-
+  // Retornar dados do contexto compartilhado
   return {
     groups,
-    isGroupModalOpen,
-    currentGroup,
-    handleOpenGroupModal,
-    handleSaveGroup,
-    setIsGroupModalOpen,
-    setCurrentGroup,
-    fetchGroups
+    automaticGroups,
+    allUsers,
+    workLocations,
+    userSearchTerm,
+    userLocationFilter,
+    setUserSearchTerm,
+    setUserLocationFilter,
+    refreshAll: refreshGroupsData,
+    filteredUsers
   };
 }

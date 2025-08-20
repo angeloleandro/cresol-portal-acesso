@@ -263,7 +263,7 @@ const SearchButton = memo(({ isOpen, onToggle, user }: {
             onClick={onToggle}
           />
           
-          <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg border border-gray-200 z-50">
+          <div className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-lg border border-gray-200 z-50 md:w-96">
             <div className="p-4">
               <h3 className="text-sm font-medium text-gray-900 mb-3">Buscar no Portal</h3>
               <GlobalSearch 

@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { logger } from '@/lib/production-logger';
 
 /**
  * Hook que retorna um cliente Supabase autenticado
@@ -16,11 +17,10 @@ export const useSupabaseClient = () => {
     const client = createClient();
     
     // Log para debug
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔄 [useSupabaseClient] Cliente criado/atualizado');
-      console.log('   Sessão ativa:', !!session);
-      console.log('   User ID:', session?.user?.id);
-    }
+    logger.debug('useSupabaseClient - Cliente criado/atualizado', {
+      sessionActive: !!session,
+      userId: session?.user?.id
+    });
     
     return client;
   }, [session]);

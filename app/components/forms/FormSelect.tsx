@@ -104,6 +104,15 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
     };
   }, []);
 
+  // Auto-focus search input when dropdown opens
+  useEffect(() => {
+    if (isOpen && searchable && searchInputRef.current) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen, searchable]);
+
   // Filter options based on search query
   const filteredOptions = useMemo(() => {
     if (!searchQuery.trim()) return options;
@@ -230,7 +239,6 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
   // Add ungrouped options
   groupedOptions.ungrouped.forEach((option) => {
     menuItems.push({
-      key: option.value,
       option,
       isGroup: false
     });
@@ -242,16 +250,13 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
     menuItems.push({
       key: `group-${groupName}`,
       groupName,
-      isGroup: true,
       isGroupHeader: true
     });
     
     // Add group options
     groupOptions.forEach((option) => {
       menuItems.push({
-        key: option.value,
         option,
-        isGroup: true,
         groupName
       });
     });
@@ -362,32 +367,45 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
               base: [
                 "rounded-md",
                 "text-default-700",
-                "transition-colors",
+                "transition-all duration-150",
+                "border-0",
+                "outline-none",
+                "ring-0",
+                "shadow-none",
                 "data-[hover=true]:bg-primary",
                 "data-[hover=true]:text-white",
                 "data-[selectable=true]:focus:bg-primary", 
                 "data-[selectable=true]:focus:text-white",
+                "data-[focus-visible=true]:outline-none",
+                "data-[focus-visible=true]:ring-0",
+                "data-[focus-visible=true]:shadow-none",
+                "data-[disabled=true]:opacity-50",
+                "data-[disabled=true]:cursor-not-allowed",
+                "before:hidden",
+                "after:hidden"
               ],
             }}
           >
             {/* Search Input */}
-            {searchable && filteredOptions.length > 0 ? (
+            {searchable ? (
               <DropdownItem
                 key="search"
-                className="p-0 mb-1"
+                className="p-0 mb-1 hover:bg-transparent focus:bg-transparent data-[hover=true]:bg-transparent"
                 isReadOnly
                 textValue="search"
               >
-                <div className="flex items-center gap-2 p-2 border-b border-default-200">
-                  <Icon name="search" className="h-4 w-4 text-default-400" />
+                <div className="flex items-center gap-2 p-2 border-b border-gray-200 bg-white">
+                  <Icon name="search" className="h-4 w-4 text-gray-400" />
                   <input
                     ref={searchInputRef}
                     type="text"
                     placeholder="Pesquisar..."
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    className="flex-1 outline-none text-sm bg-transparent"
+                    className="flex-1 outline-none text-sm bg-transparent placeholder-gray-400 text-gray-700 focus:outline-none"
                     autoComplete="off"
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
                   />
                 </div>
               </DropdownItem>
@@ -395,8 +413,13 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
             
             {/* Options or Empty State */}
             {filteredOptions.length === 0 ? (
-              <DropdownItem key="empty" isReadOnly textValue="empty">
-                <div className="flex flex-col items-center justify-center py-4 text-default-400">
+              <DropdownItem 
+                key="empty" 
+                isReadOnly 
+                textValue="empty"
+                className="hover:bg-transparent focus:bg-transparent data-[hover=true]:bg-transparent cursor-default"
+              >
+                <div className="flex flex-col items-center justify-center py-4 text-gray-400">
                   <Icon name="search" className="h-6 w-6 mb-2" />
                   <span className="text-sm">
                     {searchQuery ? emptyText : noOptionsText}
@@ -409,14 +432,14 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
                 {groupedOptions.ungrouped.map((option) => (
                   <DropdownItem
                     key={option.value}
-                    className={option.value === value ? 'bg-primary/10' : ''}
+                    className={option.value === value ? 'bg-gray-100 text-primary font-medium' : ''}
                     onPress={() => handleOptionSelect(option)}
                     textValue={option.label}
                   >
                     <div className="flex flex-col">
                       <span className="truncate">{option.label}</span>
                       {option.description && (
-                        <span className="text-xs text-default-400 truncate">
+                        <span className="text-xs text-gray-500 truncate">
                           {option.description}
                         </span>
                       )}
@@ -430,7 +453,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
                     {/* Group Header */}
                     <DropdownItem
                       key={`group-header-${groupName}`}
-                      className="font-medium text-xs text-default-500 px-2 py-1 cursor-default"
+                      className="font-medium text-xs text-gray-500 px-2 py-1 cursor-default hover:bg-transparent focus:bg-transparent data-[hover=true]:bg-transparent"
                       isReadOnly
                       textValue={groupName}
                     >
@@ -441,14 +464,14 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
                     {groupOptions.map((option) => (
                       <DropdownItem
                         key={option.value}
-                        className={`ml-2 ${option.value === value ? 'bg-primary/10' : ''}`}
+                        className={`ml-2 ${option.value === value ? 'bg-gray-100 text-primary font-medium' : ''}`}
                         onPress={() => handleOptionSelect(option)}
                         textValue={option.label}
                       >
                         <div className="flex flex-col">
                           <span className="truncate">{option.label}</span>
                           {option.description && (
-                            <span className="text-xs text-default-400 truncate">
+                            <span className="text-xs text-gray-500 truncate">
                               {option.description}
                             </span>
                           )}

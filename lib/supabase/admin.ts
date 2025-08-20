@@ -2,6 +2,13 @@ import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { logger } from '@/lib/logger';
 
+// Helper para detectar se estamos em build time
+const isBuildTime = () => {
+  return process.env.NEXT_PHASE === 'phase-production-build' || 
+         process.env.NEXT_PHASE === 'phase-development-server' ||
+         (typeof window === 'undefined' && !process.env.VERCEL_URL);
+};
+
 /**
  * Cria um cliente Supabase com privilégios administrativos usando a service role key
  * @returns Cliente Supabase configurado com service role
@@ -40,7 +47,9 @@ export async function validateAdminUser(userId: string): Promise<boolean> {
 
     return data.role === 'admin';
   } catch (error) {
-    console.error('Erro ao validar admin user:', error);
+    if (!isBuildTime()) {
+      console.error('Erro ao validar admin user:', error);
+    }
     return false;
   }
 }
@@ -66,7 +75,9 @@ export async function validateAdminOrSectorAdminUser(userId: string): Promise<bo
 
     return ['admin', 'sector_admin'].includes(data.role);
   } catch (error) {
-    console.error('Erro ao validar admin/sector admin user:', error);
+    if (!isBuildTime()) {
+      console.error('Erro ao validar admin/sector admin user:', error);
+    }
     return false;
   }
 }

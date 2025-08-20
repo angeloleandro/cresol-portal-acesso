@@ -55,9 +55,9 @@ export function useMessageManagement(): UseMessageManagementReturn {
       const apiData = {
         title: currentMessage.title,
         content: currentMessage.message,
-        type: currentMessage.type as MessageType,
-        group_id: currentMessage.groups.length > 0 ? currentMessage.groups[0] : '',
-        expire_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        type: currentMessage.type,
+        group_id: currentMessage.groups[0] || '', // Usar primeiro grupo selecionado
+        expire_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 dias
         links: []
       };
 

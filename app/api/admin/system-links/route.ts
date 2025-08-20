@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { handleApiError, devLog } from '@/lib/error-handler';
+import { adminCORS } from '@/lib/cors-config';
 
 interface SystemLink {
   id?: string;
@@ -12,7 +13,7 @@ interface SystemLink {
 }
 
 // GET - Listar todos os links
-export async function GET(request: NextRequest) {
+export const GET = adminCORS(async (request: NextRequest) => {
   try {
     const supabase = createClient();
     
@@ -54,10 +55,10 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST - Criar novo link
-export async function POST(request: NextRequest) {
+export const POST = adminCORS(async (request: NextRequest) => {
   try {
     const supabase = createClient();
     
@@ -90,10 +91,6 @@ export async function POST(request: NextRequest) {
     const { data: link, error } = await supabase
       .from('system_links')
       .insert([{
-        name: body.name,
-        url: body.url,
-        description: body.description || null,
-        display_order: body.display_order || 0,
         is_active: body.is_active !== undefined ? body.is_active : true
       }])
       .select()
@@ -117,10 +114,10 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT - Atualizar link existente
-export async function PUT(request: NextRequest) {
+export const PUT = adminCORS(async (request: NextRequest) => {
   try {
     const supabase = createClient();
     
@@ -152,10 +149,6 @@ export async function PUT(request: NextRequest) {
     const { data: link, error } = await supabase
       .from('system_links')
       .update({
-        name: body.name,
-        url: body.url,
-        description: body.description,
-        display_order: body.display_order,
         is_active: body.is_active
       })
       .eq('id', body.id)
@@ -180,10 +173,10 @@ export async function PUT(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // DELETE - Excluir link
-export async function DELETE(request: NextRequest) {
+export const DELETE = adminCORS(async (request: NextRequest) => {
   try {
     const supabase = createClient();
     
@@ -236,4 +229,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+});

@@ -108,7 +108,10 @@ export default function AdminImageGallery({
         /* Modo Preview - usa o ImagePreviewGrid */
         <ImagePreviewGrid
           images={previewImages.map(baseImageToGalleryImage)}
-          onImageClick={(image, index) => console.log('Image clicked:', image, index)}
+          onImageClick={(image, index) => {
+            // Preview mode - apenas visualização
+            console.log('Imagem clicada no preview:', image, index);
+          }}
           columns={{ xs: 2, sm: 3, md: 4, lg: 4, xl: 4 }}
           aspectRatio="4:3"
         />

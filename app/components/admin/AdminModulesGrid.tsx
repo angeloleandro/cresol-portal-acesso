@@ -75,12 +75,6 @@ const ADMIN_MODULES: AdminModule[] = [
     link: '/admin/collections',
   },
   {
-    title: 'Notificações',
-    description: 'Gerenciar notificações e comunicações do sistema',
-    icon: 'bell',
-    link: '/admin/notifications',
-  },
-  {
     title: 'Analytics',
     description: 'Visualizar métricas e relatórios do sistema',
     icon: 'chart-bar-vertical',
@@ -91,6 +85,24 @@ const ADMIN_MODULES: AdminModule[] = [
     description: 'Gerenciar indicadores econômicos da página inicial',
     icon: 'work-economi-indicator',
     link: '/admin/economic-indicators',
+  },
+  {
+    title: 'Mensagens',
+    description: 'Gerenciar mensagens de setores e subsetores centralizadamente',
+    icon: 'message-square',
+    link: '/admin/messages',
+  },
+  {
+    title: 'Notícias',
+    description: 'Gerenciar notícias de setores e subsetores centralizadamente',
+    icon: 'document-text',
+    link: '/admin/news',
+  },
+  {
+    title: 'Eventos',
+    description: 'Gerenciar eventos de setores e subsetores centralizadamente',
+    icon: 'calendar',
+    link: '/admin/events',
   },
 ];
 

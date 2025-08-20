@@ -84,29 +84,44 @@ export const sectorContentApi = {
 };
 
 /**
- * API Client para gerenciamento de grupos
+ * API Client para gerenciamento de grupos de mensagens
  */
 export const groupsApi = {
   /**
-   * Busca todos os grupos
+   * Busca todos os grupos por subsetor
    */
-  async fetchAll(): Promise<{ groups: Group[] }> {
-    const response = await fetchWithErrorHandling('/api/notifications/groups');
+  async fetchAll(subsectorId?: string): Promise<{ groups: Group[]; success: boolean }> {
+    const url = subsectorId ? `/api/admin/message-groups?subsector_id=${subsectorId}` : '/api/admin/message-groups';
+    const response = await fetchWithErrorHandling(url);
     return response.json();
   },
 
   /**
-   * Cria um novo grupo
+   * Cria um novo grupo de mensagem
    */
   async create(groupData: {
     name: string;
-    description: string;
+    description?: string;
+    color_theme?: string;
     subsector_id: string;
-    members: string[];
   }) {
-    const response = await fetchWithErrorHandling('/api/notifications/groups', {
+    // Importar createClient aqui para evitar problemas de dependência
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabase = createClient();
+    
+    // Obter sessão para autenticação
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    const response = await fetchWithErrorHandling('/api/admin/message-groups', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      },
       body: JSON.stringify(groupData)
     });
     return response.json();
@@ -116,10 +131,24 @@ export const groupsApi = {
    * Atualiza um grupo existente
    */
   async update(groupId: string, groupData: Partial<Group>) {
-    const response = await fetchWithErrorHandling(`/api/notifications/groups/${groupId}`, {
+    // Importar createClient aqui para evitar problemas de dependência
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabase = createClient();
+    
+    // Obter sessão para autenticação
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    const response = await fetchWithErrorHandling('/api/admin/message-groups', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(groupData)
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({ id: groupId, ...groupData })
     });
     return response.json();
   },
@@ -128,8 +157,22 @@ export const groupsApi = {
    * Exclui um grupo
    */
   async delete(groupId: string) {
-    const response = await fetchWithErrorHandling(`/api/notifications/groups/${groupId}`, {
-      method: 'DELETE'
+    // Importar createClient aqui para evitar problemas de dependência
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabase = createClient();
+    
+    // Obter sessão para autenticação
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    const response = await fetchWithErrorHandling(`/api/admin/message-groups?id=${groupId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`
+      }
     });
     return response.json();
   }

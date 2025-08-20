@@ -134,7 +134,6 @@ export function useMessagesData(sectorId: string): UseMessagesDataReturn {
       }
 
       const response = await fetch(`/api/notifications/messages?id=${id}`, {
-        method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'

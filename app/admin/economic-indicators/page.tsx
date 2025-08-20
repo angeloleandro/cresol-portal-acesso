@@ -11,6 +11,7 @@ import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
+import { FormSelect } from '@/app/components/forms/FormSelect';
 
 interface EconomicIndicator {
   id?: string;
@@ -342,19 +343,16 @@ export default function EconomicIndicatorsAdmin() {
                     <label htmlFor="icon" className="block text-sm font-medium text-gray-700">
                       Ícone *
                     </label>
-                    <select
-                      id="icon"
-                      required
+                    <FormSelect
                       value={formData.icon}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, icon: e.target.value })}
-                      className="mt-1 block w-full border-gray-300 rounded-sm-md  focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                    >
-                      {AVAILABLE_ICONS.map((icon) => (
-                        <option key={icon.value} value={icon.value}>
-                          {icon.icon} {icon.label}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                      required
+                      options={AVAILABLE_ICONS.map((icon) => ({
+                        value: icon.value,
+                        label: `${icon.icon} ${icon.label}`
+                      }))}
+                      placeholder="Selecione um ícone"
+                    />
                   </div>
 
                   <div>

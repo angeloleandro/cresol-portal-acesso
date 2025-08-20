@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { authenticateAdminRequest } from '@/lib/supabase/admin';
 import { logger } from '@/lib/logger';
+import { adminCORS } from '@/lib/cors-config';
 
-export async function GET(request: NextRequest) {
+export const GET = adminCORS(async (request: NextRequest) => {
   const apiTimer = logger.apiStart('GET /api/admin/subsectors');
   
   try {
@@ -87,9 +88,9 @@ export async function GET(request: NextRequest) {
     logger.error('Erro crítico na API de sub-setores', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = adminCORS(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { name, description, sector_id } = body;
@@ -146,9 +147,9 @@ export async function POST(request: NextRequest) {
     console.error('Erro ao criar sub-setor:', error);
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
-}
+});
 
-export async function PUT(request: NextRequest) {
+export const PUT = adminCORS(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { id, name, description } = body;
@@ -193,9 +194,9 @@ export async function PUT(request: NextRequest) {
     console.error('Erro ao atualizar sub-setor:', error);
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = adminCORS(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -234,4 +235,4 @@ export async function DELETE(request: NextRequest) {
       details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     }, { status: 500 });
   }
-} 
+});

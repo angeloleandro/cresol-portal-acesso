@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { Icon } from '../icons/Icon';
 import { Button } from "../ui/Button";
-import { ChakraCard } from '../ui/ChakraCard';
 import { Badge, Box, HStack, Stack, Text } from "@chakra-ui/react";
 
 interface SubsectorCardProps {
@@ -26,91 +25,86 @@ export default function SubsectorCard({
   onDelete,
   className = '' 
 }: SubsectorCardProps) {
-  const createdDate = new Date(subsector.created_at);
-  const daysAgo = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
 
   return (
-    <ChakraCard.Root 
-      variant="outline" 
-      size="md" 
-      colorPalette="gray"
-      className={`${className} hover:border-gray-300 transition-colors duration-150`}
+    <Box 
+      borderWidth="1px"
+      borderColor="gray.200"
+      borderRadius="md"
+      bg="white"
+      _hover={{ borderColor: "gray.300" }}
+      transition="border-color 0.15s"
+      className={`${className} admin-subsector-card`}
     >
       {/* Header com ícone, título e ações */}
-      <ChakraCard.Header className="p-6 pb-0">
+      <Box className="p-6 pb-0">
         <HStack justify="space-between" align="flex-start">
-          <Stack gap="1">
-            <ChakraCard.Title>
-              {subsector.name}
-            </ChakraCard.Title>
-            <Badge colorPalette="gray" variant="subtle" fontSize="xs">
-              {daysAgo === 0 ? 'Hoje' : `${daysAgo} dias atrás`}
-            </Badge>
-          </Stack>
+          <Text fontSize="lg" fontWeight="semibold" color="gray.800">
+            {subsector.name}
+          </Text>
 
-          <HStack gap="1">
+          <div className="relative group">
             <Button
-              onClick={onEdit}
               variant="ghost"
               size="sm"
               colorPalette="gray"
-              title="Editar sub-setor"
+              title="Opções"
             >
-              <Icon name="pencil" className="h-4 w-4" />
+              <Icon name="more-horizontal" className="h-4 w-4" />
             </Button>
-            <Button
-              onClick={onDelete}
-              variant="ghost"
-              size="sm"
-              colorPalette="red"
-              title="Excluir sub-setor"
-            >
-              <Icon name="trash" className="h-4 w-4" />
-            </Button>
-          </HStack>
+            
+            {/* Menu dropdown que aparece no hover */}
+            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+              <div className="py-1 min-w-[140px]">
+                <button
+                  onClick={onEdit}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  title="Editar sub-setor"
+                >
+                  <Icon name="pencil" className="h-4 w-4" />
+                  Editar
+                </button>
+                <button
+                  onClick={onDelete}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  title="Excluir sub-setor"
+                >
+                  <Icon name="trash" className="h-4 w-4" />
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
         </HStack>
-      </ChakraCard.Header>
+      </Box>
 
       {/* Body com setor pai, descrição e informações */}
-      <ChakraCard.Body className="p-6 space-y-5">
+      <Box className="p-6 space-y-5">
         {/* Setor pai em destaque */}
         <HStack align="center" gap="2">
           <Text fontSize="sm" color="gray.600">Setor:</Text>
-          <Badge colorPalette="orange" variant="outline">
+          <Badge colorScheme="orange" variant="outline">
             {subsector.sector_name}
           </Badge>
         </HStack>
 
         {/* Descrição */}
         {subsector.description && (
-          <ChakraCard.Description>
-            <Text>
-              {subsector.description}
-            </Text>
-          </ChakraCard.Description>
+          <Text color="gray.600">
+            {subsector.description}
+          </Text>
         )}
 
-        {/* Informações do sub-setor */}
-        <Box pt="4" borderTop="1px" borderColor="gray.100">
-          <Text fontSize="xs" color="gray.600">
-            Criado em {createdDate.toLocaleDateString('pt-BR', {
-              day: '2-digit',
-              month: 'long',
-              year: 'numeric'
-            })}
-          </Text>
-        </Box>
-      </ChakraCard.Body>
+      </Box>
 
       {/* Footer com ações */}
-      <ChakraCard.Footer className="p-6 flex gap-2 justify-start">
+      <Box className="p-6 flex gap-2 justify-start">
         <Button
           as={Link}
           href={`/admin-subsetor/subsetores/${subsector.id}`}
           variant="solid"
-          colorPalette="orange"
+          colorScheme="orange"
           size="sm"
-          borderRadius="sm"
         >
           Gerenciar
         </Button>
@@ -118,13 +112,12 @@ export default function SubsectorCard({
           as={Link}
           href={`/subsetores/${subsector.id}/equipe`}
           variant="outline"
-          colorPalette="gray"
+          colorScheme="gray"
           size="sm"
-          borderRadius="sm"
         >
           Equipe
         </Button>
-      </ChakraCard.Footer>
-    </ChakraCard.Root>
+      </Box>
+    </Box>
   );
 }

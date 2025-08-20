@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { useAlert } from '@/app/components/alerts';
 
 interface WorkLocation {
   id: string;
@@ -20,14 +21,13 @@ interface WorkLocation {
 
 export default function WorkLocationsAdmin() {
   const router = useRouter();
+  const alert = useAlert();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [newAddress, setNewAddress] = useState('');
   const [newPhone, setNewPhone] = useState('');
@@ -38,6 +38,8 @@ export default function WorkLocationsAdmin() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<WorkLocation | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
 
   useEffect(() => {
     const checkUser = async () => {
@@ -74,12 +76,10 @@ export default function WorkLocationsAdmin() {
 
   const handleCreateOrEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
-    setFormSuccess(null);
     setFormLoading(true);
     try {
       if (!newName.trim()) {
-        setFormError('O nome do local é obrigatório.');
+        alert.showError('Erro de validação', 'O nome do local é obrigatório.');
         setFormLoading(false);
         return;
       }
@@ -117,9 +117,9 @@ export default function WorkLocationsAdmin() {
                 
               if (groupError) {
                 console.error('Erro ao criar grupo:', groupError);
-                setFormSuccess('Local atualizado com sucesso! (Erro ao criar grupo)');
+                alert.showWarning('Parcialmente concluído', 'Local atualizado com sucesso! (Erro ao criar grupo)');
               } else {
-                setFormSuccess('Local atualizado e grupo criado com sucesso!');
+                alert.showSuccess('Sucesso', 'Local atualizado e grupo criado com sucesso!');
               }
             } else if (groupAction === 'remove' && hasGroup) {
               // Remover grupo existente
@@ -131,9 +131,9 @@ export default function WorkLocationsAdmin() {
                 
               if (removeError) {
                 console.error('Erro ao remover grupo:', removeError);
-                setFormSuccess('Local atualizado com sucesso! (Erro ao remover grupo)');
+                alert.showWarning('Parcialmente concluído', 'Local atualizado com sucesso! (Erro ao remover grupo)');
               } else {
-                setFormSuccess('Local atualizado e grupo removido com sucesso!');
+                alert.showSuccess('Sucesso', 'Local atualizado e grupo removido com sucesso!');
               }
             } else if (groupAction === 'keep' && hasGroup) {
               // Atualizar nome do grupo existente se necessário
@@ -149,14 +149,14 @@ export default function WorkLocationsAdmin() {
               if (updateGroupError) {
                 console.error('Erro ao atualizar grupo:', updateGroupError);
               }
-              setFormSuccess('Local atualizado com sucesso!');
+              alert.showSuccess('Sucesso', 'Local atualizado com sucesso!');
             } else {
-              setFormSuccess('Local atualizado com sucesso!');
+              alert.showSuccess('Sucesso', 'Local atualizado com sucesso!');
             }
           }
         } catch (groupError) {
           console.error('Erro ao gerenciar grupo:', groupError);
-          setFormSuccess('Local atualizado com sucesso! (Erro ao gerenciar grupo)');
+          alert.showWarning('Parcialmente concluído', 'Local atualizado com sucesso! (Erro ao gerenciar grupo)');
         }
       } else {
         // Criar
@@ -191,17 +191,17 @@ export default function WorkLocationsAdmin() {
 
               if (groupError) {
                 console.error('Erro ao criar grupo:', groupError);
-                setFormSuccess('Local cadastrado com sucesso! (Erro ao criar grupo automático)');
+                alert.showWarning('Parcialmente concluído', 'Local cadastrado com sucesso! (Erro ao criar grupo automático)');
               } else {
-                setFormSuccess('Local e grupo cadastrados com sucesso!');
+                alert.showSuccess('Sucesso', 'Local e grupo cadastrados com sucesso!');
               }
             }
           } catch (groupError) {
             console.error('Erro ao criar grupo:', groupError);
-            setFormSuccess('Local cadastrado com sucesso! (Erro ao criar grupo automático)');
+            alert.showWarning('Parcialmente concluído', 'Local cadastrado com sucesso! (Erro ao criar grupo automático)');
           }
         } else {
-          setFormSuccess('Local cadastrado com sucesso!');
+          alert.showSuccess('Sucesso', 'Local cadastrado com sucesso!');
         }
       }
       setNewName('');
@@ -213,7 +213,7 @@ export default function WorkLocationsAdmin() {
       setEditing(null);
       fetchWorkLocations();
     } catch (error: any) {
-      setFormError('Erro ao salvar local: ' + error.message);
+      alert.showError('Erro', 'Erro ao salvar local: ' + error.message);
     } finally {
       setFormLoading(false);
     }
@@ -252,8 +252,6 @@ export default function WorkLocationsAdmin() {
   const handleDeleteConfirm = async () => {
     if (!locationToDelete) return;
     
-    setFormError(null);
-    setFormSuccess(null);
     setIsDeleting(true);
     
     try {
@@ -264,12 +262,12 @@ export default function WorkLocationsAdmin() {
       
       if (error) throw error;
       
-      setFormSuccess('Local excluído com sucesso!');
+      alert.showSuccess('Sucesso', 'Local excluído com sucesso!');
       fetchWorkLocations();
       setShowDeleteModal(false);
       setLocationToDelete(null);
     } catch (error: any) {
-      setFormError('Erro ao excluir local: ' + error.message);
+      alert.showError('Erro', 'Erro ao excluir local: ' + error.message);
     } finally {
       setIsDeleting(false);
     }

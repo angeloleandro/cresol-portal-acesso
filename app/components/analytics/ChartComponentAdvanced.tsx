@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useAlert } from '@/app/components/alerts';
 
 interface ChartData {
   label: string;
@@ -69,6 +70,7 @@ export default function ChartComponentAdvanced({
   isLoading = false,
   className = ''
 }: ChartComponentAdvancedProps) {
+  const { showInfo } = useAlert();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const colors = colorPalettes[colorPalette];
@@ -87,7 +89,7 @@ export default function ChartComponentAdvanced({
   const handleExport = (format: 'png' | 'svg' | 'pdf') => {
     // Chart export functionality - removed console.log for production
     // In a real implementation, this would use MUI X Charts export functionality
-    alert(`Funcionalidade de exportação para ${format.toUpperCase()} seria implementada aqui`);
+    showInfo(`Funcionalidade de exportação para ${format.toUpperCase()} será implementada em breve`);
   };
 
   if (isLoading) {

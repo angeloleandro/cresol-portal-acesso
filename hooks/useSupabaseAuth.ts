@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
+import { logger } from '@/lib/production-logger';
 
 export interface UserProfile {
   id: string;
@@ -34,7 +35,7 @@ export const useSupabaseAuth = () => {
     initialized: false
   });
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   // Fetch user profile from database
   const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
@@ -46,13 +47,13 @@ export const useSupabaseAuth = () => {
         .single();
 
       if (error) {
-        console.error('Erro ao buscar perfil:', error);
+        logger.error('Erro ao buscar perfil', error);
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Erro fatal ao buscar perfil:', error);
+      logger.error('Erro fatal ao buscar perfil', error);
       return null;
     }
   }, [supabase]);
@@ -84,7 +85,7 @@ export const useSupabaseAuth = () => {
         });
       }
     } catch (error) {
-      console.error('Erro ao atualizar estado de auth:', error);
+      logger.error('Erro ao atualizar estado de auth', error);
       setState({
         user: null,
         profile: null,
@@ -126,7 +127,7 @@ export const useSupabaseAuth = () => {
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('Erro ao fazer logout:', error);
+        logger.error('Erro ao fazer logout', error);
         setState(prev => ({ ...prev, loading: false }));
         return { error };
       }
@@ -134,7 +135,7 @@ export const useSupabaseAuth = () => {
       // State will be updated automatically by auth listener
       return { error: null };
     } catch (error) {
-      console.error('Erro fatal no logout:', error);
+      logger.error('Erro fatal no logout', error);
       setState(prev => ({ ...prev, loading: false }));
       return { error: error as Error };
     }
@@ -146,13 +147,13 @@ export const useSupabaseAuth = () => {
       const { data, error } = await supabase.auth.refreshSession();
       
       if (error) {
-        console.error('Erro ao renovar sessão:', error);
+        logger.error('Erro ao renovar sessão', error);
         return { error };
       }
 
       return { data, error: null };
     } catch (error) {
-      console.error('Erro fatal ao renovar sessão:', error);
+      logger.error('Erro fatal ao renovar sessão', error);
       return { error: error as Error };
     }
   }, [supabase]);
@@ -167,14 +168,14 @@ export const useSupabaseAuth = () => {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Erro ao obter sessão inicial:', error);
+          logger.error('Erro ao obter sessão inicial', error);
         }
 
         if (mounted) {
           await updateAuthState(session);
         }
       } catch (error) {
-        console.error('Erro na inicialização da auth:', error);
+        logger.error('Erro na inicialização da auth', error);
         if (mounted) {
           setState({
             user: null,
@@ -192,9 +193,7 @@ export const useSupabaseAuth = () => {
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('🔄 Auth state change:', event, session?.user?.email);
-        }
+        logger.debug('Auth state change', { event, userEmail: session?.user?.email });
 
         if (mounted) {
           await updateAuthState(session);

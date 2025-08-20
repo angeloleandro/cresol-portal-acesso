@@ -364,7 +364,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       return (
         <ButtonSpinner 
           size={sizeConfig.spinnerSize}
-          className={spinnerPlacement === 'end' ? 'ml-2' : 'mr-2'}
+          className=""
         />
       );
     };
@@ -372,21 +372,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const renderContent = () => {
       if (loading && loadingText) {
         return (
-          <>
+          <div className="flex items-center justify-center gap-2">
             {spinnerPlacement === 'start' && renderSpinner()}
-            {loadingText}
+            <span>{loadingText}</span>
             {spinnerPlacement === 'end' && renderSpinner()}
-          </>
+          </div>
         );
       }
 
       if (loading) {
         return (
-          <>
+          <div className="flex items-center justify-center gap-2">
             {spinnerPlacement === 'start' && renderSpinner()}
-            {children}
+            <span>{children}</span>
             {spinnerPlacement === 'end' && renderSpinner()}
-          </>
+          </div>
         );
       }
 

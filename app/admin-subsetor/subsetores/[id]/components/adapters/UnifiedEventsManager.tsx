@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createEventsAdapter, type EventContentData as EventData } from './GenericContentAdapter';
+import { useAlert } from '@/app/components/alerts';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
@@ -12,6 +13,7 @@ interface UnifiedEventsManagerProps {
 }
 
 export function UnifiedEventsManager({ type, entityId, entityName }: UnifiedEventsManagerProps) {
+  const { showError, content } = useAlert();
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
@@ -19,13 +21,6 @@ export function UnifiedEventsManager({ type, entityId, entityName }: UnifiedEven
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<EventData | null>(null);
   const [formData, setFormData] = useState<Partial<EventData>>({
-    title: '',
-    description: '',
-    start_date: '',
-    end_date: '',
-    location: '',
-    is_published: false,
-    is_featured: false,
   });
 
   const adapter = createEventsAdapter(type, entityId);
@@ -58,7 +53,7 @@ export function UnifiedEventsManager({ type, entityId, entityName }: UnifiedEven
       resetForm();
       fetchEvents();
     } catch (error) {
-      alert('Erro ao salvar evento');
+      showError('Erro ao salvar evento', 'Tente novamente.');
     }
   };
 
@@ -71,7 +66,7 @@ export function UnifiedEventsManager({ type, entityId, entityName }: UnifiedEven
       setEventToDelete(null);
       fetchEvents();
     } catch (error) {
-      alert('Erro ao excluir evento');
+      showError('Erro ao excluir evento', 'Tente novamente.');
     }
   };
 
@@ -97,13 +92,6 @@ export function UnifiedEventsManager({ type, entityId, entityName }: UnifiedEven
     if (event) {
       setSelectedEvent(event);
       setFormData({
-        title: event.title,
-        description: event.description,
-        start_date: event.start_date,
-        end_date: event.end_date || '',
-        location: event.location || '',
-        is_published: event.is_published || false,
-        is_featured: event.is_featured || false,
       });
     } else {
       resetForm();
@@ -114,24 +102,12 @@ export function UnifiedEventsManager({ type, entityId, entityName }: UnifiedEven
   const resetForm = () => {
     setSelectedEvent(null);
     setFormData({
-      title: '',
-      description: '',
-      start_date: '',
-      end_date: '',
-      location: '',
-      is_published: false,
-      is_featured: false,
     });
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     });
   };
 

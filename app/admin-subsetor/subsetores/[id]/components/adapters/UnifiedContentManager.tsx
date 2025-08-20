@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useAlert } from '@/app/components/alerts';
 import { 
   PlusIcon, 
   PencilIcon, 
@@ -72,6 +73,7 @@ export function UnifiedContentManager<T extends BaseContentData>({
   useRealtime = false,
   fields = DEFAULT_FIELDS[type]
 }: UnifiedContentManagerProps<T>) {
+  const { showError, content } = useAlert();
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<T | null>(null);
@@ -159,7 +161,7 @@ export function UnifiedContentManager<T extends BaseContentData>({
       if (!useRealtime) fetchItems();
     } catch (error) {
       console.error('Error saving content:', error, { type, entityId, operation: 'save' });
-      alert(`Erro ao salvar ${type}: ${(error as Error)?.message || String(error)}`);
+      showError(`Erro ao salvar ${type}`, (error as Error)?.message || String(error));
     }
   };
 
@@ -174,7 +176,7 @@ export function UnifiedContentManager<T extends BaseContentData>({
       if (!useRealtime) fetchItems();
     } catch (error) {
       console.error('Error deleting content:', error, { type, entityId, operation: 'delete', id: itemToDelete?.id });
-      alert(`Erro ao excluir ${type}: ${(error as Error)?.message || String(error)}`);
+      showError(`Erro ao excluir ${type}`, (error as Error)?.message || String(error));
     }
   };
 
@@ -189,7 +191,7 @@ export function UnifiedContentManager<T extends BaseContentData>({
       }
     } catch (error) {
       console.error('Error toggling published status:', error, { type, entityId, operation: 'togglePublished', id: item.id });
-      alert(`Erro ao alterar status de publicação: ${(error as Error)?.message || String(error)}`);
+      showError('Erro ao alterar status de publicação', (error as Error)?.message || String(error));
     }
   };
 
@@ -204,7 +206,7 @@ export function UnifiedContentManager<T extends BaseContentData>({
       }
     } catch (error) {
       console.error('Error toggling featured status:', error, { type, entityId, operation: 'toggleFeatured', id: item.id });
-      alert(`Erro ao alterar destaque: ${(error as Error)?.message || String(error)}`);
+      showError('Erro ao alterar destaque', (error as Error)?.message || String(error));
     }
   };
 

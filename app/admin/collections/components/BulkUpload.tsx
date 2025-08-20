@@ -519,8 +519,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                       collection={collection}
                       onVideoAdded={(videoData) => {
                         // Opcional: callback para atualizar lista local
-                        console.log('Vídeo adicionado via upload avançado:', videoData);
-                        // Aqui poderia atualizar o estado local se necessário
+                                                // Aqui poderia atualizar o estado local se necessário
                         onClose(); // Fechar modal após sucesso
                       }}
                       buttonText="YouTube"

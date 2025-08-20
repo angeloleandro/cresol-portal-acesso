@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAlert } from '@/app/components/alerts';
 import { getCroppedImg, uploadImageToSupabase, validateImageFile } from '../utils/imageProcessing';
 import { CropArea } from '../types/sector.types';
 
@@ -30,6 +31,7 @@ interface UseImageUploadReturn {
 }
 
 export function useImageUpload(): UseImageUploadReturn {
+  const { showError, showWarning } = useAlert();
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [originalImage, setOriginalImage] = useState<string | null>(null);
@@ -123,7 +125,7 @@ export function useImageUpload(): UseImageUploadReturn {
     // Validar arquivo
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      alert(validation.error);
+      showWarning(validation.error || 'Arquivo inválido');
       return;
     }
 

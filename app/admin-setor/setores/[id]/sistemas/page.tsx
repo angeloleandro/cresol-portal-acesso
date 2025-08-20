@@ -8,6 +8,8 @@ import { supabase } from '@/lib/supabase';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { ADMIN_LAYOUT, ADMIN_TYPOGRAPHY, ADMIN_COLORS, ADMIN_BUTTONS, ADMIN_FORMS, ADMIN_MODALS, ADMIN_CARDS, ADMIN_NAVIGATION, ADMIN_MEDIA, ADMIN_STATES, ADMIN_ICONS, ADMIN_VALIDATION, ADMIN_DIMENSIONS } from '@/lib/constants/admin-config';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import DeleteModal from '@/app/components/ui/DeleteModal';
 
 interface Sector {
   id: string;
@@ -48,6 +50,9 @@ export default function SectorSystemsManagement() {
   
   // Lista de ícones disponíveis
   const availableIcons = ADMIN_ICONS.system.available;
+  
+  // Modal de exclusão
+  const deleteModal = useDeleteModal('sistema');
 
   const fetchSector = useCallback(async () => {
     const { data, error } = await supabase
@@ -166,7 +171,9 @@ export default function SectorSystemsManagement() {
       fetchSystems();
     } catch (error) {
       // Debug log removed
-      alert('Erro ao salvar sistema. Tente novamente.');
+      // TODO: Implementar sistema de notificação moderno (toast/alert)
+      console.error('Erro ao salvar sistema:', error);
+      // Por ora, mostrar erro no console até implementar sistema de notificação
     }
   };
 
@@ -182,21 +189,25 @@ export default function SectorSystemsManagement() {
     setShowSystemForm(true);
   };
 
-  const deleteSystem = async (id: string) => {
-    if (!confirm(ADMIN_VALIDATION.confirm.deleteSystem)) return;
-    
+  const handleDeleteClick = (system: System) => {
+    deleteModal.openDeleteModal(system, system.name);
+  };
+
+  const deleteSystem = async (system: System) => {
     try {
       const { error } = await supabase
         .from('systems')
         .delete()
-        .eq('id', id);
+        .eq('id', system.id);
       
       if (error) throw error;
       
       fetchSystems();
     } catch (error) {
       // Debug log removed
-      alert('Erro ao excluir sistema. Tente novamente.');
+      // TODO: Implementar sistema de notificação moderno (toast/alert) 
+      console.error('Erro ao excluir sistema:', error);
+      // Por ora, mostrar erro no console até implementar sistema de notificação
     }
   };
 
@@ -343,7 +354,7 @@ export default function SectorSystemsManagement() {
                   Editar
                 </button>
                 <button
-                  onClick={() => deleteSystem(system.id)}
+                  onClick={() => handleDeleteClick(system)}
                   className={`flex-1 bg-red-50 text-red-600 px-3 py-2 rounded-md ${ADMIN_TYPOGRAPHY.sizes.small} hover:bg-red-100`}
                 >
                   Excluir
@@ -450,6 +461,16 @@ export default function SectorSystemsManagement() {
             </div>
           </div>
         )}
+
+        {/* Modal de Exclusão */}
+        <DeleteModal
+          isOpen={deleteModal.isOpen}
+          onClose={deleteModal.closeDeleteModal}
+          onConfirm={() => deleteModal.confirmDelete(deleteSystem)}
+          itemName={deleteModal.itemName}
+          itemType={deleteModal.itemType}
+          isLoading={deleteModal.isDeleting}
+        />
       </main>
     </div>
   );

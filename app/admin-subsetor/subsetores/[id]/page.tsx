@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { useAlert } from '@/app/components/alerts';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
@@ -64,6 +65,7 @@ const adaptSubsectorNewsToSector = (news: SubsectorNews): SectorNews => ({
 });
 
 export default function SubsectorManagement() {
+  const { showInfo } = useAlert();
   const router = useRouter();
   const params = useParams();
   const { profile } = useAuth();
@@ -94,6 +96,10 @@ export default function SubsectorManagement() {
   // Feature Management Hooks - Only for components not using sector standard
   const groupManagement = useGroupManagement(subsectorId);
   const messageManagement = useMessageManagement();
+
+  // Modal states for groups and messages
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [currentGroup, setCurrentGroup] = useState<any>(null);
 
   // Loading state
   if (loading) {
@@ -161,16 +167,18 @@ export default function SubsectorManagement() {
 
   const handleNewSystem = () => {
     // System creation modal implementation pending
-    alert('Criação de sistemas será implementada em versão futura');
+    showInfo('Criação de sistemas será implementada em versão futura');
   };
 
 
   const handleGroupSave = async () => {
-    await groupManagement.handleSaveGroup(subsectorId);
+    // Group save logic handled by GroupModal component
+    await groupManagement.refreshAll();
   };
 
   const handleMessageSend = async () => {
-    await messageManagement.handleSendMessage(subsectorId);
+    // Message send logic handled by MessageModal component
+    await refreshData();
   };
 
   const breadcrumbItems = [
@@ -240,7 +248,7 @@ export default function SubsectorManagement() {
         {activeTab === 'groups' && (
           <GroupsTab
             groups={groupManagement.groups}
-            onOpenGroupModal={groupManagement.handleOpenGroupModal}
+            onOpenGroupModal={() => setIsGroupModalOpen(true)}
           />
         )}
 
@@ -253,11 +261,11 @@ export default function SubsectorManagement() {
 
       {/* Modals - Only for groups and messages since events/news now use management components */}
       <GroupModal
-        isOpen={groupManagement.isGroupModalOpen}
-        currentGroup={groupManagement.currentGroup}
-        onClose={() => groupManagement.setIsGroupModalOpen(false)}
+        isOpen={isGroupModalOpen}
+        currentGroup={currentGroup}
+        onClose={() => setIsGroupModalOpen(false)}
         onSave={handleGroupSave}
-        onChange={groupManagement.setCurrentGroup}
+        onChange={setCurrentGroup}
         users={users}
       />
 

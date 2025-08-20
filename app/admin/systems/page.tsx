@@ -11,6 +11,7 @@ import { Icon } from '@/app/components/icons/Icon';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
+import { FormSelect } from '@/app/components/forms/FormSelect';
 
 interface System {
   id: string;
@@ -33,10 +34,10 @@ export default function SystemsManagement() {
   const [sectors, setSectors] = useState<any[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [newSystem, setNewSystem] = useState({ 
-    name: '', 
-    description: '', 
+    name: '',
+    description: '',
     url: '',
-    icon: '/icons/default-app.svg',
+    icon: '',
     sector_id: '' 
   });
   const [editingSystem, setEditingSystem] = useState<System | null>(null);
@@ -145,10 +146,10 @@ export default function SystemsManagement() {
         ]);
       
       setNewSystem({ 
-        name: '', 
-        description: '', 
+        name: '',
+        description: '',
         url: '',
-        icon: '/icons/default-app.svg',
+        icon: '',
         sector_id: '' 
       });
       setIsAddModalOpen(false);
@@ -171,7 +172,7 @@ export default function SystemsManagement() {
           description: editingSystem.description,
           url: editingSystem.url,
           icon: editingSystem.icon,
-          sector_id: editingSystem.sector_id || null,
+          sector_id: editingSystem.sector_id,
           updated_at: new Date().toISOString()
         })
         .eq('id', editingSystem.id);
@@ -285,18 +286,18 @@ export default function SystemsManagement() {
             
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
               {isAdmin && (
-                <select
+                <FormSelect
                   value={sectorFilter}
                   onChange={(e) => setSectorFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                >
-                  <option value="all">Todos os setores</option>
-                  {sectors.map(sector => (
-                    <option key={sector.id} value={sector.id}>
-                      {sector.name}
-                    </option>
-                  ))}
-                </select>
+                  options={[
+                    { value: 'all', label: 'Todos os setores' },
+                    ...sectors.map(sector => ({
+                      value: sector.id,
+                      label: sector.name
+                    }))
+                  ]}
+                  placeholder="Todos os setores"
+                />
               )}
               
               <button
@@ -440,19 +441,18 @@ export default function SystemsManagement() {
                 
                 <div className="mb-6">
                   <label htmlFor="sector" className="form-label">Setor</label>
-                  <select
-                    id="sector"
+                  <FormSelect
                     value={newSystem.sector_id}
                     onChange={(e) => setNewSystem({...newSystem, sector_id: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  >
-                    <option value="">Nenhum</option>
-                    {sectors.map(sector => (
-                      <option key={sector.id} value={sector.id}>
-                        {sector.name}
-                      </option>
-                    ))}
-                  </select>
+                    options={[
+                      { value: '', label: 'Nenhum' },
+                      ...sectors.map(sector => ({
+                        value: sector.id,
+                        label: sector.name
+                      }))
+                    ]}
+                    placeholder="Nenhum"
+                  />
                 </div>
                 
                 <div className="flex justify-end space-x-2">
@@ -539,19 +539,18 @@ export default function SystemsManagement() {
                 
                 <div className="mb-6">
                   <label htmlFor="edit-sector" className="form-label">Setor</label>
-                  <select
-                    id="edit-sector"
+                  <FormSelect
                     value={editingSystem.sector_id || ''}
                     onChange={(e) => setEditingSystem({...editingSystem, sector_id: e.target.value || null})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  >
-                    <option value="">Nenhum</option>
-                    {sectors.map(sector => (
-                      <option key={sector.id} value={sector.id}>
-                        {sector.name}
-                      </option>
-                    ))}
-                  </select>
+                    options={[
+                      { value: '', label: 'Nenhum' },
+                      ...sectors.map(sector => ({
+                        value: sector.id,
+                        label: sector.name
+                      }))
+                    ]}
+                    placeholder="Nenhum"
+                  />
                 </div>
                 
                 <div className="flex justify-end space-x-2">

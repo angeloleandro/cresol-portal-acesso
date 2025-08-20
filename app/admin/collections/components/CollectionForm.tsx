@@ -10,6 +10,7 @@ import { COLLECTION_CONFIG, COLLECTION_TYPE_LABELS } from '@/lib/constants/colle
 import { validateCollection } from '@/lib/utils/collections';
 import { cn } from '@/lib/utils/cn';
 import { useCollectionUpload } from '@/app/components/Collections/Collection.hooks';
+import { FormSelect, type SelectOption } from '@/app/components/forms';
 
 export interface CollectionFormData {
   name: string;
@@ -97,7 +98,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
         description: collection.description || '',
         type: collection.type || 'mixed',
         color_theme: collection.color_theme || '#F58220',
-        is_active: collection.is_active ?? true,
+        is_active: collection.is_active !== undefined ? collection.is_active : true,
         cover_image_url: collection.cover_image_url || '',
       };
     }
@@ -119,8 +120,8 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
       const validation = {
         errors: {
           name: validateCollection.name(formData.name),
-          description: validateCollection.description(formData.description || ''),
-          colorTheme: validateCollection.colorTheme(formData.color_theme || ''),
+          description: validateCollection.description(formData.description),
+          color_theme: validateCollection.colorTheme(formData.color_theme),
         } as Record<string, string | null>,
         isValid: false,
       };
@@ -179,8 +180,8 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
     const validation = {
       errors: {
         name: validateCollection.name(formData.name),
-        description: validateCollection.description(formData.description || ''),
-        colorTheme: validateCollection.colorTheme(formData.color_theme || ''),
+        description: validateCollection.description(formData.description),
+        color_theme: validateCollection.colorTheme(formData.color_theme),
       } as Record<string, string | null>,
       isValid: false,
     };
@@ -366,19 +367,18 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
           <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
             Tipo de Coleção <span className="text-red-500">*</span>
           </label>
-          <select
-            id="type"
+          <FormSelect
             value={formData.type}
-            onChange={(e) => handleChange('type', e.target.value)}
-            className={cn(
-              "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent",
-              allErrors.type ? "border-red-300" : "border-gray-300"
-            )}
-          >
-            <option value="mixed">{COLLECTION_TYPE_LABELS.mixed}</option>
-            <option value="images">{COLLECTION_TYPE_LABELS.images}</option>
-            <option value="videos">{COLLECTION_TYPE_LABELS.videos}</option>
-          </select>
+            onChange={(e) => handleChange('type', e.currentTarget.value)}
+            placeholder="Selecione o tipo de coleção"
+            options={[
+              { value: 'mixed', label: COLLECTION_TYPE_LABELS.mixed },
+              { value: 'images', label: COLLECTION_TYPE_LABELS.images },
+              { value: 'videos', label: COLLECTION_TYPE_LABELS.videos }
+            ]}
+            required
+            fullWidth
+          />
           {allErrors.type && (
             <p className="text-red-600 text-xs mt-1">{allErrors.type}</p>
           )}
@@ -389,15 +389,16 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
           <label htmlFor="is_active" className="block text-sm font-medium text-gray-700 mb-1">
             Status
           </label>
-          <select
-            id="is_active"
+          <FormSelect
             value={formData.is_active ? 'active' : 'inactive'}
-            onChange={(e) => handleChange('is_active', e.target.value === 'active')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-          >
-            <option value="active">Ativo</option>
-            <option value="inactive">Inativo</option>
-          </select>
+            onChange={(e) => handleChange('is_active', e.currentTarget.value === 'active')}
+            placeholder="Selecione o status"
+            options={[
+              { value: 'active', label: 'Ativo' },
+              { value: 'inactive', label: 'Inativo' }
+            ]}
+            fullWidth
+          />
         </div>
       </div>
 

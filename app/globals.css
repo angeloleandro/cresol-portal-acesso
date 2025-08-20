@@ -5,6 +5,7 @@
 /* Import estilos customizados */
 @import './styles/minimalist-ui.css';
 @import './styles/forms.css';
+@import './globals-fixes.css';
 
 :root {
   /* Cores Primárias */
@@ -3080,6 +3081,52 @@ li:not(:first-child)::before,
   outline: none !important;
   box-shadow: none !important;
   background-image: none !important;
+}
+
+/* ============================================================================= */
+/* CHAKRA UI CARDS - FORCE BORDERS (Override NextUI border removal)           */
+/* ============================================================================= */
+/* Solução para problema onde NextUI CSS estava removendo bordas dos cards     */
+/* Chakra UI com regras muito abrangentes usando !important                    */
+/* ============================================================================= */
+
+/* Force borders specifically for Chakra UI Card components */
+[data-chakra-card="true"],
+.chakra-card-root,
+[class*="chakra-card"] {
+  border: 1px solid rgba(229, 231, 235, 0.4) !important; /* gray-200/40 */
+  transition: border-color 150ms ease !important;
+}
+
+[data-chakra-card="true"]:hover,
+.chakra-card-root:hover,
+[class*="chakra-card"]:hover {
+  border-color: rgba(229, 231, 235, 0.7) !important; /* gray-200/70 */
+}
+
+/* Specific override for our admin cards - ONLY the root element */
+.admin-sector-card,
+.admin-subsector-card {
+  border: 1.5px solid rgba(229, 231, 235, 0.5) !important; /* Mais grossa e um pouco mais opaca */
+  border-radius: 0.375rem !important; /* rounded-md */
+  transition: border-color 150ms ease !important;
+}
+
+.admin-sector-card:hover,
+.admin-subsector-card:hover {
+  border-color: rgba(229, 231, 235, 0.8) !important; /* Mais visível no hover */
+}
+
+/* Remove borders from child elements inside our admin cards */
+.admin-sector-card > *,
+.admin-subsector-card > *,
+.admin-sector-card * > *,
+.admin-subsector-card * > * {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
 }
 
 /* ========================================

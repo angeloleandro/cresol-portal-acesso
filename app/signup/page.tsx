@@ -6,6 +6,7 @@ import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { Button } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
+import { FormSelect } from '@/app/components/forms/FormSelect';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export default function Signup() {
@@ -144,8 +145,8 @@ export default function Signup() {
     <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
       <div className="card max-w-md w-full">
         <div className="flex flex-col items-center mb-6">
-          <div className="flex items-baseline justify-center mb-4">
-            <div className="relative w-48 h-24">
+          <div className="flex items-center justify-center mb-4">
+            <div className="relative w-48 h-16">
               <OptimizedImage 
                 src="/logo-horizontal-laranja.svg" 
                 alt="Logo Cresol" 
@@ -155,13 +156,15 @@ export default function Signup() {
                 className="object-contain"
               />
             </div>
-            <div className="flex items-baseline ml-3">
+            <div className="flex items-center ml-3">
               <div className="h-6 w-px bg-primary/30 mx-2"></div>
-              <span className="text-primary font-bold text-lg tracking-wide">HUB</span>
-              <span className="text-primary/60 font-light text-sm ml-1">2.0</span>
+              <div className="flex items-baseline">
+                <span className="text-primary font-bold text-lg tracking-wide">HUB</span>
+                <span className="text-primary/60 font-light text-sm ml-1">2.0</span>
+              </div>
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Solicitar Acesso</h1>
+          <h1 className="text-xl font-semibold text-gray-800">Solicitar Acesso</h1>
           <p className="text-gray-600 text-sm mt-1">
             Preencha o formulário para solicitar acesso
           </p>
@@ -208,39 +211,43 @@ export default function Signup() {
               Cargo
               <span className="text-red-500 ml-1">*</span>
             </label>
-            <select
+            <FormSelect
               id="position"
+              name="position"
               value={positionId}
               onChange={e => setPositionId(e.target.value)}
+              options={[
+                { value: '', label: 'Selecione o cargo' },
+                ...positions.map(position => ({
+                  value: position.id,
+                  label: position.name,
+                  description: position.department
+                }))
+              ]}
+              placeholder="Selecione o cargo"
               required
-              className="w-full border rounded-md px-3 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 border-gray-300 focus:border-primary focus:ring-primary/20"
-            >
-              <option value="">Selecione o cargo</option>
-              {positions.map(position => (
-                <option key={position.id} value={position.id}>
-                  {position.name}
-                  {position.department && ` - ${position.department}`}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div>
             <label htmlFor="workLocation" className="block text-sm font-medium text-gray-700 mb-1">
               Local de Atuação
               <span className="text-red-500 ml-1">*</span>
             </label>
-            <select
+            <FormSelect
               id="workLocation"
+              name="workLocation"
               value={workLocationId}
               onChange={e => setWorkLocationId(e.target.value)}
+              options={[
+                { value: '', label: 'Selecione o local de atuação' },
+                ...workLocations.map(loc => ({
+                  value: loc.id,
+                  label: loc.name
+                }))
+              ]}
+              placeholder="Selecione o local de atuação"
               required
-              className="w-full border rounded-md px-3 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 border-gray-300 focus:border-primary focus:ring-primary/20"
-            >
-              <option value="">Selecione o local de atuação</option>
-              {workLocations.map(loc => (
-                <option key={loc.id} value={loc.id}>{loc.name}</option>
-              ))}
-            </select>
+            />
           </div>
           <StandardizedInput
             id="password"

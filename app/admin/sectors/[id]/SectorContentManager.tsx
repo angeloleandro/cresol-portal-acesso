@@ -305,9 +305,9 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
   }, [sectorId]);
 
   // Filtrar dados baseado em showDrafts
-  const filteredNews = showDrafts ? news : news.filter(n => n.is_published !== false);
-  const filteredEvents = showDrafts ? events : events.filter(e => e.is_published !== false);
-  const filteredMessages = showDrafts ? messages : messages.filter(m => m.is_published !== false);
+  const filteredNews = showDrafts ? news : news.filter(n => n.is_published === true);
+  const filteredEvents = showDrafts ? events : events.filter(e => e.is_published === true);
+  const filteredMessages = showDrafts ? messages : messages.filter(m => m.is_published === true);
 
   return {
     news: filteredNews,

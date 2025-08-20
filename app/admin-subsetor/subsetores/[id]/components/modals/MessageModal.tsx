@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Message, MessageType, Group, User } from '../../types/subsector.types';
+import { FormSelect, type SelectOption } from '@/app/components/forms';
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -80,15 +81,16 @@ export function MessageModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tipo da Mensagem
               </label>
-              <select
+              <FormSelect
                 value={currentMessage.type}
                 onChange={(e) => onChange(prev => ({...prev, type: e.target.value as MessageType}))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-              >
-                <option value="general">Geral</option>
-                <option value="urgent">Urgente</option>
-                <option value="info">Informativo</option>
-              </select>
+                options={[
+                  { value: 'general', label: 'Geral' },
+                  { value: 'urgent', label: 'Urgente' },
+                  { value: 'info', label: 'Informativo' }
+                ]}
+                placeholder="Selecione o tipo"
+              />
             </div>
           </div>
 

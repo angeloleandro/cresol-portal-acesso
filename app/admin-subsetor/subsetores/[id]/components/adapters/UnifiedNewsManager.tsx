@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createNewsAdapter, type NewsContentData as NewsData } from './GenericContentAdapter';
+import { useAlert } from '@/app/components/alerts';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 interface UnifiedNewsManagerProps {
@@ -11,6 +12,7 @@ interface UnifiedNewsManagerProps {
 }
 
 export function UnifiedNewsManager({ type, entityId, entityName }: UnifiedNewsManagerProps) {
+  const { showError, content } = useAlert();
   const [news, setNews] = useState<NewsData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedNews, setSelectedNews] = useState<NewsData | null>(null);
@@ -18,12 +20,6 @@ export function UnifiedNewsManager({ type, entityId, entityName }: UnifiedNewsMa
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [newsToDelete, setNewsToDelete] = useState<NewsData | null>(null);
   const [formData, setFormData] = useState<Partial<NewsData>>({
-    title: '',
-    summary: '',
-    content: '',
-    image_url: '',
-    is_published: false,
-    is_featured: false,
   });
 
   const adapter = createNewsAdapter(type, entityId);
@@ -56,7 +52,7 @@ export function UnifiedNewsManager({ type, entityId, entityName }: UnifiedNewsMa
       resetForm();
       fetchNews();
     } catch (error) {
-      alert('Erro ao salvar notícia');
+      showError('Erro ao salvar notícia', 'Tente novamente.');
     }
   };
 
@@ -69,7 +65,7 @@ export function UnifiedNewsManager({ type, entityId, entityName }: UnifiedNewsMa
       setNewsToDelete(null);
       fetchNews();
     } catch (error) {
-      alert('Erro ao excluir notícia');
+      showError('Erro ao excluir notícia', 'Tente novamente.');
     }
   };
 
@@ -86,12 +82,6 @@ export function UnifiedNewsManager({ type, entityId, entityName }: UnifiedNewsMa
     if (newsItem) {
       setSelectedNews(newsItem);
       setFormData({
-        title: newsItem.title,
-        summary: newsItem.summary,
-        content: newsItem.content,
-        image_url: newsItem.image_url || '',
-        is_published: newsItem.is_published || false,
-        is_featured: newsItem.is_featured || false,
       });
     } else {
       resetForm();
@@ -102,12 +92,6 @@ export function UnifiedNewsManager({ type, entityId, entityName }: UnifiedNewsMa
   const resetForm = () => {
     setSelectedNews(null);
     setFormData({
-      title: '',
-      summary: '',
-      content: '',
-      image_url: '',
-      is_published: false,
-      is_featured: false,
     });
   };
 

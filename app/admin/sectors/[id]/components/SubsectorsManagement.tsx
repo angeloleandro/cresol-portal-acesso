@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Subsector } from '../types/sector.types';
 import { formatDate } from '../utils/dateFormatters';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import DeleteModal from '@/app/components/ui/DeleteModal';
 
 interface SubsectorsManagementProps {
   sectorId: string;
@@ -26,6 +28,9 @@ export function SubsectorsManagement({
     description: '',
     sector_id: sectorId
   });
+
+  // Modal de exclusão
+  const deleteModal = useDeleteModal('subsetor');
 
   const handleOpenModal = (subsector?: Subsector) => {
     // Reset states
@@ -131,19 +136,23 @@ export function SubsectorsManagement({
     }
   };
 
-  const handleDeleteSubsector = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este subsetor?')) return;
+  const handleDeleteClick = (subsector: Subsector) => {
+    deleteModal.openDeleteModal(subsector, subsector.name);
+  };
 
+  const handleDeleteSubsector = async (subsector: Subsector) => {
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        alert('Usuário não autenticado');
+        // TODO: Implementar sistema de notificação moderno (toast/alert)
+        console.error('Erro: Usuário não autenticado');
+        // Por ora, mostrar erro no console até implementar sistema de notificação
         return;
       }
 
-      const response = await fetch(`/api/admin/subsectors?id=${id}`, {
+      const response = await fetch(`/api/admin/subsectors?id=${subsector.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`
@@ -159,7 +168,9 @@ export function SubsectorsManagement({
       await onRefresh();
     } catch (error: any) {
       console.error('Erro ao excluir subsetor:', error);
-      alert(error.message || 'Erro ao excluir subsetor. Verifique se não há dados vinculados.');
+      // TODO: Implementar sistema de notificação moderno (toast/alert)
+      console.error('Erro ao excluir subsetor:', error.message || error);
+      // Por ora, mostrar erro no console até implementar sistema de notificação
     }
   };
 
@@ -198,7 +209,7 @@ export function SubsectorsManagement({
                     </svg>
                   </button>
                   <button
-                    onClick={() => handleDeleteSubsector(subsector.id)}
+                    onClick={() => handleDeleteClick(subsector)}
                     className="p-1 text-red-600 hover:bg-red-50 rounded"
                     title="Excluir"
                   >
@@ -325,6 +336,16 @@ export function SubsectorsManagement({
           </div>
         </div>
       )}
+
+      {/* Modal de Exclusão */}
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeDeleteModal}
+        onConfirm={() => deleteModal.confirmDelete(handleDeleteSubsector)}
+        itemName={deleteModal.itemName}
+        itemType={deleteModal.itemType}
+        isLoading={deleteModal.isDeleting}
+      />
     </div>
   );
 }

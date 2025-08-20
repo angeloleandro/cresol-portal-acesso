@@ -118,7 +118,6 @@ export const FormField: React.FC<FormFieldProps> = ({
         {/* Input Element */}
         <div className="form-field-input">
           {React.cloneElement(children as React.ReactElement, {
-            id: fieldId,
             'aria-describedby': [
               error ? errorId : '',
               helpText ? helpId : ''

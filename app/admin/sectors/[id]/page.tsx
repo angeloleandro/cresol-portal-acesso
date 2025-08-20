@@ -15,7 +15,6 @@ import { TabType } from './types/sector.types';
 // Hooks
 import { useSectorAuth } from './hooks/useSectorAuth';
 import { useSectorData } from './hooks/useSectorData';
-import { useGroupsManagement } from './hooks/useGroupsManagement';
 import { useSectorContent } from './SectorContentManager';
 
 // Components - Lazy loading para otimização
@@ -64,7 +63,6 @@ function SectorDashboardContent() {
     events,
     messages,
     showDrafts,
-    isLoading: contentLoading,
     totalDraftNewsCount,
     totalDraftEventsCount,
     totalDraftMessagesCount,

@@ -100,18 +100,10 @@ export {
 
 // Constants and Utilities
 export const VIDEO_GALLERY_CONFIG = {
-  DEFAULT_LIMIT: 4,
-  VIRTUALIZATION_THRESHOLD: 20,
-  PRELOAD_THRESHOLD: 4,
   ANIMATION_DURATIONS: {
-    FAST: 150,
-    NORMAL: 300,
     SLOW: 500
   },
   GRID_LAYOUTS: {
-    SINGLE: 'single-centered',
-    DUAL: 'dual-columns', 
-    ASYMMETRIC: 'asymmetric-3',
     RESPONSIVE: 'responsive-grid'
   } as const
 };
@@ -220,9 +212,6 @@ export const useVideoGalleryContext = () => {
   if (!context) {
     // Return defaults if no provider
     return {
-      enableAnimations: true,
-      enableVirtualization: false,
-      performanceMode: 'normal' as const,
       errorReporting: (error: Error, context: string) => {
         // Production error reporting should be handled by error tracking service
         if (process.env.NODE_ENV === 'development') {

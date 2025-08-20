@@ -139,19 +139,17 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
       label: sector.name,
       sector: sector,
       hasSubsectors: sector.subsectors && sector.subsectors.length > 0,
-  isOpen: openSubsectors.has(sector.id),
-  className: sector.subsectors && sector.subsectors.length > 0 ? 'font-bold text-default-900' : undefined,
+      isOpen: openSubsectors.has(sector.id)
     });
     
     // Sub-setores (se estiver aberto)
     if (sector.subsectors && sector.subsectors.length > 0 && openSubsectors.has(sector.id)) {
       sector.subsectors.forEach((subsector) => {
         menuItems.push({
-          key: subsector.id,
+          key: `${sector.id}-${subsector.id}`,
           type: 'link',
           href: `/subsetores/${subsector.id}`,
           label: subsector.name,
-          className: 'pl-6 text-xs bg-amber-50 sector-subsector',
           isSubsector: true // Flag para identificar sub-setores
         });
       });
@@ -170,7 +168,6 @@ const HeroUISectorsDropdown = memo(({ pathname, sectors }: HeroUISectorsDropdown
         shouldFlip={true}
         shouldCloseOnBlur={true}
         classNames={{
-          content: "w-[280px] max-h-[75vh] min-h-[200px] bg-white border-0 rounded-md shadow-xl overflow-hidden z-50 p-0",
         }}
       >
       <DropdownTrigger>

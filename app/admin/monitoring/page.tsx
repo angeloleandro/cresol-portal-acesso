@@ -47,12 +47,12 @@ export default function MonitoringPage() {
         // Fallback para dados mock em caso de erro
         const mockActivities: UserActivity[] = [
           {
-            id: '1',
-            user_name: 'Usuário Sistema',
-            action: 'Login',
+            id: 'mock-1',
+            user_name: 'Sistema',
+            action: 'Login no sistema',
             timestamp: new Date().toISOString(),
-            ip_address: '192.168.1.100',
-            user_agent: 'Mozilla/5.0...',
+            ip_address: '127.0.0.1',
+            user_agent: 'Mozilla/5.0',
             success: true
           }
         ];
@@ -60,7 +60,7 @@ export default function MonitoringPage() {
       } else {
         const activities = data?.map((item: any) => ({
           id: item.id,
-          user_name: item.profiles?.name || 'Usuário Desconhecido',
+          user_name: item.profiles?.name || 'Usuário desconhecido',
           action: item.action,
           timestamp: item.timestamp,
           ip_address: item.ip_address || 'N/A',

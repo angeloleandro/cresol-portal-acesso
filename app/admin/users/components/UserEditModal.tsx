@@ -10,10 +10,12 @@ import {
   Input
 } from '@nextui-org/react';
 import { Icon } from '@/app/components/icons/Icon';
+import { useAlert } from '@/app/components/alerts';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import { Button as CButton } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
+import { FormSelect, type SelectOption } from '@/app/components/forms';
 
 interface UserProfile {
   id: string;
@@ -77,6 +79,7 @@ export default function UserEditModal({
   onRefreshUserSectors,
   onRefreshUserSubsectors
 }: UserEditModalProps) {
+  const alert = useAlert();
   const [fullName, setFullName] = useState(user.full_name);
   const [email, setEmail] = useState(user.email);
   const [positionId, setPositionId] = useState(user.position_id || '');
@@ -136,12 +139,12 @@ export default function UserEditModal({
       const file = e.target.files[0];
       
       if (!file.type.startsWith('image/')) {
-        alert('Por favor, selecione apenas arquivos de imagem.');
+        alert.form.validationError();
         return;
       }
       
       if (file.size > 2 * 1024 * 1024) {
-        alert('A imagem deve ter menos de 2MB.');
+        alert.showWarning('Arquivo muito grande', 'A imagem deve ter menos de 2MB.');
         return;
       }
       
@@ -219,10 +222,12 @@ export default function UserEditModal({
       }
       
       setResetPasswordSuccess(newPassword);
+      alert.users.passwordReset();
     } catch (error: unknown) {
       console.error('Erro ao resetar senha:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       setResetPasswordError(`Erro ao resetar senha: ${errorMessage}`);
+      alert.showError('Erro ao resetar senha', errorMessage);
     } finally {
       setResetPasswordLoading(false);
     }
@@ -231,10 +236,6 @@ export default function UserEditModal({
   const handleSave = async () => {
     try {
       const updateData: Record<string, unknown> = {
-        full_name: fullName,
-        email: email,
-        position_id: positionId || null,
-        work_location_id: workLocationId || null,
       };
 
       if (avatarFile) {
@@ -245,7 +246,7 @@ export default function UserEditModal({
           }
         } catch (error: unknown) {
           const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-          alert(`Erro ao fazer upload da imagem: ${errorMessage}`);
+          alert.showError('Erro no upload', `Erro ao fazer upload da imagem: ${errorMessage}`);
           return;
         }
       }
@@ -379,12 +380,13 @@ export default function UserEditModal({
         URL.revokeObjectURL(avatarPreview);
       }
       
+      alert.users.updated();
       onSave();
       onClose();
     } catch (error: unknown) {
       console.error('Erro ao salvar edição:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      alert(`Erro ao salvar alterações: ${errorMessage}`);
+      alert.showError('Erro ao salvar alterações', errorMessage);
     }
   };
 
@@ -766,16 +768,19 @@ export default function UserEditModal({
                   <label className="block text-xs font-medium text-cresol-gray mb-1">
                     Filtrar por setor
                   </label>
-                  <select
+                  <FormSelect
                     value={selectedSectorForSubsectors}
-                    onChange={(e) => setSelectedSectorForSubsectors(e.target.value)}
-                    className="w-full px-3 py-2 border border-cresol-gray-light rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                  >
-                    <option value="">Todos os setores</option>
-                    {sectors.map(sector => (
-                      <option key={sector.id} value={sector.id}>{sector.name}</option>
-                    ))}
-                  </select>
+                    onChange={(e) => setSelectedSectorForSubsectors(e.currentTarget.value)}
+                    placeholder="Todos os setores"
+                    options={[
+                      { value: '', label: 'Todos os setores' },
+                      ...sectors.map(sector => ({
+                        value: sector.id,
+                        label: sector.name
+                      }))
+                    ]}
+                    fullWidth
+                  />
                 </div>
                 
                 <div className="max-h-40 overflow-y-auto border border-cresol-gray-light rounded-md p-3">

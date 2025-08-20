@@ -230,15 +230,14 @@ export default function AnalyticsPage() {
         };
       case 'activity':
         return {
-          labels: ['Logins', 'Acessos a Sistemas', 'Notificações Lidas'],
-          values: [analytics.activity.logins, analytics.activity.systemAccess, analytics.activity.notificationsRead],
+          labels: ['Logins', 'Acessos a Sistemas'],
+          values: [analytics.activity.logins, analytics.activity.systemAccess],
           colors: ['#f97316', '#fb923c', '#fdba74']
         };
       default:
         return { labels: [], values: [], colors: [] };
     }
   };
-
 
   const getPeriodLabel = (period: string): string => {
     switch (period) {
@@ -581,17 +580,7 @@ export default function AnalyticsPage() {
                 >
                   Sistemas
                 </StandardizedButton>
-                
-                <StandardizedButton
-                  variant="primary"
-                  size="sm"
-                  icon={<Icon name="bell" className="h-4 w-4" />}
-                  onClick={() => router.push('/admin/notifications')}
-                  className="min-w-0"
-                >
-                  Notificações
-                </StandardizedButton>
-                
+
                 <StandardizedButton
                   variant="secondary"
                   size="sm"

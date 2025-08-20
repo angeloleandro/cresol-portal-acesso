@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import OptimizedImage from '../components/OptimizedImage';
 import { Button } from '@/app/components/ui/Button';
-import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
+import { FormSelect } from '@/app/components/forms/FormSelect';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import Navbar from '../components/Navbar';
@@ -193,26 +193,26 @@ export default function ProfilePage() {
     setLoadingActivity(true);
     try {
       // Simulação de logs de atividade (implementar com dados reais depois)
-      const mockLogs = [
+      const mockLogs: ActivityLog[] = [
         {
           id: '1',
-          action: 'Login',
-          description: 'Login realizado com sucesso',
-          created_at: new Date().toISOString(),
+          action: 'Login realizado',
+          description: 'Acesso realizado ao sistema',
+          created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 min atrás
           ip_address: '192.168.1.100'
         },
         {
           id: '2',
           action: 'Perfil atualizado',
-          description: 'Informações do perfil foram atualizadas',
-          created_at: new Date(Date.now() - 86400000).toISOString(),
+          description: 'Informações do perfil foram alteradas',
+          created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2h atrás
           ip_address: '192.168.1.100'
         },
         {
           id: '3',
-          action: 'Senha alterada',
-          description: 'Senha foi alterada com sucesso',
-          created_at: new Date(Date.now() - 172800000).toISOString(),
+          action: 'Login realizado',
+          description: 'Acesso realizado ao sistema',
+          created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 dia atrás
           ip_address: '192.168.1.101'
         }
       ];
@@ -296,11 +296,8 @@ export default function ProfilePage() {
       setUpdating(true);
       
       const updateData: Record<string, unknown> = {
-        full_name: fullName,
-        position_id: positionId || null,
         phone,
         bio,
-        work_location_id: workLocationId || null,
         updated_at: new Date().toISOString()
       };
       
@@ -638,20 +635,21 @@ export default function ProfilePage() {
                     <label htmlFor="position" className="form-label">
                       Cargo
                     </label>
-                    <select
+                    <FormSelect
                       id="position"
+                      name="position"
                       value={positionId}
                       onChange={(e) => setPositionId(e.target.value)}
-                      className="input bg-gray-50 text-muted"
-                    >
-                      <option value="">Selecione um cargo</option>
-                      {positions.map((position) => (
-                        <option key={position.id} value={position.id}>
-                          {position.name}
-                          {position.department && ` - ${position.department}`}
-                        </option>
-                      ))}
-                    </select>
+                      options={[
+                        { value: '', label: 'Selecione um cargo' },
+                        ...positions.map((position) => ({
+                          value: position.id,
+                          label: position.name,
+                          description: position.department
+                        }))
+                      ]}
+                      placeholder="Selecione um cargo"
+                    />
                     
                     {positionId && (() => {
                       const selectedPosition = positions.find(pos => pos.id === positionId);
@@ -694,19 +692,20 @@ export default function ProfilePage() {
                     <label htmlFor="workLocation" className="form-label">
                       Local de Trabalho
                     </label>
-                    <select
+                    <FormSelect
                       id="workLocation"
+                      name="workLocation"
                       value={workLocationId}
                       onChange={(e) => setWorkLocationId(e.target.value)}
-                      className="input bg-gray-50 text-muted"
-                    >
-                      <option value="">Selecione um local</option>
-                      {workLocations.map((location) => (
-                        <option key={location.id} value={location.id}>
-                          {location.name}
-                        </option>
-                      ))}
-                    </select>
+                      options={[
+                        { value: '', label: 'Selecione um local' },
+                        ...workLocations.map((location) => ({
+                          value: location.id,
+                          label: location.name
+                        }))
+                      ]}
+                      placeholder="Selecione um local"
+                    />
                     
                     {workLocationId && (() => {
                       const selectedLocation = workLocations.find(loc => loc.id === workLocationId);

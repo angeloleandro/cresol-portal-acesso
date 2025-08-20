@@ -18,10 +18,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a **Next.js 14** application using the **App Router** pattern for Cresol's internal access portal. The application provides unified access to internal business systems with role-based authentication.
 
 ### Tech Stack
-- **Frontend**: Next.js 14 with TypeScript, Tailwind CSS
+- **Frontend**: Next.js 14 with TypeScript, Tailwind CSS, Chakra UI v3
 - **Backend**: Supabase (PostgreSQL database + Auth + Storage)
 - **Authentication**: Supabase Auth with middleware-based route protection
-- **Styling**: Tailwind CSS with custom Cresol brand colors
+- **Styling**: Tailwind CSS with custom Cresol brand colors + Chakra UI components
 - **Icons**: Custom SVG icon components in `/app/components/icons/`
 - **Image Handling**: `react-easy-crop` for image cropping
 - **Date Handling**: `date-fns` for date formatting
@@ -41,25 +41,34 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - Role-based access control with three levels:
   - `admin` - Full system access
   - `sector_admin` - Sector-specific admin access
+  - `subsector_admin` - Subsector-specific admin access
   - `user` - Standard user access
 - Auth state managed via Supabase client-side session handling
 - Protected routes automatically redirect unauthenticated users to `/login`
+- Optimized middleware authentication with caching in `lib/middleware-auth.ts`
 
 #### Route Structure
 - `/home` - Main landing page (requires auth)
 - `/admin/*` - Full admin panel (admin role only)
   - `/admin/users` - User management with role assignment
   - `/admin/sectors` - Sector management
+  - `/admin/sectors/[id]` - Individual sector management
   - `/admin/system-links` - System link management
-  - `/admin/notifications` - Notification management
   - `/admin/economic-indicators` - Economic data management
   - `/admin/banners` - Banner management
   - `/admin/gallery` - Image gallery management
   - `/admin/videos` - Video gallery management
+  - `/admin/collections` - Collection management
+  - `/admin/positions` - Position management
+  - `/admin/work-locations` - Work location management
 - `/admin-setor/*` - Sector admin panel (sector_admin + admin roles)
+  - `/admin-setor/setores/[id]` - Sector-specific content management
 - `/admin-subsetor/*` - Subsector admin panel
+  - `/admin-subsetor/subsetores/[id]` - Subsector-specific content management
 - `/setores/[id]` - Dynamic sector pages
 - `/subsetores/[id]` - Dynamic subsector pages with team management
+- `/mensagens` - Messages page
+- `/mensagens/[id]` - Individual message view
 - `/api/admin/*` - Admin API endpoints
 - `/api/auth/*` - Authentication endpoints
 - `/api/notifications/*` - Notification API endpoints
@@ -69,33 +78,40 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - RLS (Row Level Security) policies enforce data access controls
 - Server-side operations use service role key for elevated permissions
 - Client-side operations use anon key with user context
+- Optimized database queries with connection pooling
 
 #### Component Architecture
 - Shared UI components in `/app/components/`
 - Page-specific components co-located with pages
-- Global components: `Navbar`, `Footer`, `GlobalSearch`, `NotificationCenter`
+- Global components: `Navbar`, `Footer`, `GlobalSearch`
 - Admin-specific components for user management, content management
 - Custom icon system in `/app/components/icons/` with centralized `Icon.tsx` component
-- UI utilities in `/app/components/ui/`: `ConfirmationModal`, `ErrorMessage`, `LoadingSpinner`
+- UI utilities in `/app/components/ui/`: `ConfirmationModal`, `ErrorMessage`, `LoadingSpinner`, `ChakraCard`
 - Specialized components: `BannerCarousel`, `EconomicIndicators`, `SystemLinks`
+- Alert system in `/app/components/alerts/` with Chakra UI integration
 
 ### Database Schema (Key Tables)
 - `profiles` - User profiles with role assignments and sector associations
 - `sectors` - Organizational sectors/departments
 - `subsectors` - Sub-departments within sectors with team member management
-- `notifications` - System notifications with group targeting
 - `economic_indicators` - Economic data display with admin management
 - `access_requests` - User access approval workflow
 - `system_links` - Centralized system link management
 - `banners` - Homepage banner management
 - `gallery_images` - Image gallery with categorization
 - `videos` - Video gallery management
+- `collections` - Collection management for grouped content
+- `positions` - Job positions
+- `work_locations` - Work locations
+- `message_groups` - Message groups for targeted communication
+- `sector_messages` - Sector-specific messages
+- `subsector_messages` - Subsector-specific messages
 
 ### File Upload & Storage
 - Uses Supabase Storage with public `images` bucket
 - Supports image uploads for avatars, banners, gallery
 - Image cropping functionality with `react-easy-crop`
-- Organized by folders: `avatars/`, `sector-news/`, `banners/`
+- Organized by folders: `avatars/`, `sector-news/`, `banners/`, `uploads/`, `thumbnails/`
 
 ### Styling System
 - Custom Tailwind config with Cresol brand colors:
@@ -107,6 +123,7 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - Border radius standardization (primary: 6px/md)
 - Custom scrollbar utilities for consistent UX
 - Enhanced animation utilities (shimmer, pulse-slow, fade-in, slide-up, scale-in)
+- Chakra UI v3 integration for modern component library
 
 ### Environment Configuration
 - Development runs on port 4000 (not default 3000)
@@ -121,17 +138,18 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - Sensitive operations use service role key server-side only
 - User data access controlled by RLS policies
 - Session validation on protected routes
+- Optimized auth caching to reduce database load
 
 ### Notable Implementation Details
 - Custom error handling in `lib/error-handler.ts`
 - SSR-compatible Supabase client setup in `lib/supabase/`
 - Middleware-based authentication in `middleware.ts` with role-based route protection
 - Image cropping utility in `app/components/getCroppedImg.ts`
-- Custom notification system with group targeting and real-time updates
 - Economic indicators integration with admin management interface
 - Comprehensive user role management with direct role updates
 - Advanced search functionality with filters
 - File upload handling for images, banners, and videos
+- Messaging system with hierarchical organization (sector/subsector)
 
 ### Development Workflow
 1. Changes should maintain existing authentication patterns
@@ -142,6 +160,7 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 6. Use existing icon components from `/app/components/icons/` instead of external libraries
 7. Follow the established file upload patterns for Supabase Storage
 8. Maintain consistency with existing modal and confirmation patterns
+9. Use Chakra UI components when appropriate for better UX
 
 ### Testing
 - No specific test framework configured - verify functionality manually
@@ -161,6 +180,7 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - **Virtual Scrolling**: For large datasets using `@tanstack/react-virtual`
 - **Caching**: Strategic caching for video thumbnails and economic indicators
 - **Bundle Optimization**: SWC minification enabled in `next.config.js`
+- **Auth Caching**: Middleware-level authentication caching to reduce database queries
 
 ## Design Guidelines
 
@@ -168,6 +188,7 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - Não usar emoji nos componentes, e usar ícones somente quando realmente necessário
 - Manter consistência com o design system existente usando componentes padronizados
 - Priorizar simplicidade e clareza na interface
+- Use Chakra UI v3 components for consistent design patterns
 
 ## Development Best Practices
 
@@ -182,11 +203,11 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - Utilitários e helpers em `/lib/`
 - Tipos TypeScript em `/types/`
 - Constantes de design em `/lib/design-tokens/`
+- Contextos React em componentes específicos de página (ex: `/app/admin/sectors/[id]/contexts/`)
 
 # Important Instruction Reminders
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
-- Sempre use agents indicados nos prompts, caso não seja indicado nenhum agente explicitamente, procure o agent mais 
-qualificado para a task
+- Sempre use agents indicados nos prompts, caso não seja indicado nenhum agente explicitamente, procure o agent mais qualificado para a task

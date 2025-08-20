@@ -3,6 +3,8 @@
  * Otimizado para deployment na Vercel com Image Optimization
  */
 
+import { logger } from './production-logger';
+
 // Configurações do Supabase Storage
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_STORAGE_PATH = '/storage/v1/object/public/images/';
@@ -123,11 +125,11 @@ export function debugImageUrl(url: string | null | undefined, context?: string):
       }
     };
     
-    console.log(`[Image Debug${context ? ` - ${context}` : ''}]:`, debugInfo);
+    logger.debug(`Image Debug${context ? ` - ${context}` : ''}`, debugInfo);
     
     // Log adicional se a URL não for válida
     if (!isValidImageUrl(url)) {
-      console.warn(`[Image Warning] URL inválida detectada: ${url}`);
+      logger.warn('URL inválida detectada', { url });
     }
   }
 }

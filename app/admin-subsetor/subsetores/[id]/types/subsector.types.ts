@@ -19,19 +19,27 @@ export interface SubsectorEvent {
   id: string;
   title: string;
   description: string;
+  location: string;
   start_date: string;
+  end_date: string | null;
   is_published: boolean;
   is_featured: boolean;
+  created_at: string;
+  updated_at: string;
+  subsector_id: string;
 }
 
 export interface SubsectorNews {
   id: string;
   title: string;
   summary: string;
-  content?: string;
+  content: string;
+  image_url: string | null;
   is_published: boolean;
   is_featured: boolean;
   created_at: string;
+  updated_at: string;
+  subsector_id: string;
 }
 
 export interface System {
@@ -42,14 +50,27 @@ export interface System {
   icon?: string;
 }
 
-export interface Group {
+export interface MessageGroup {
   id: string;
   name: string;
   description: string;
+  color_theme: string;
+  sector_id: string | null;
   subsector_id: string | null;
+  created_by: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  // Campos relacionados
+  sectors?: { name: string };
+  subsectors?: { name: string; sectors: { name: string } };
+  profiles?: { full_name: string };
+}
+
+// Mantendo interface Group para compatibilidade com código existente
+export interface Group extends MessageGroup {
   is_automatic: boolean;
   members: string[];
-  created_at: string;
 }
 
 export type MessageType = 'general' | 'urgent' | 'announcement';
@@ -82,6 +103,13 @@ export interface CropArea {
 }
 
 export type TabType = 'events' | 'news' | 'systems' | 'groups' | 'messages';
+
+// Interface para dados do grupo no modal
+export interface GroupData {
+  name: string;
+  description: string;
+  members: string[];
+}
 
 // Estados dos modais
 export interface ModalState<T> {

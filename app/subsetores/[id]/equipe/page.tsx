@@ -9,6 +9,7 @@ import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import Breadcrumb from '../../../components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { useAlert } from '@/app/components/alerts';
 
 interface User {
   id: string;
@@ -48,6 +49,7 @@ export default function SubsectorTeamPage() {
   const router = useRouter();
   const params = useParams();
   const subsectorId = params?.id as string;
+  const { showSuccess, showError, showWarning, subsectors } = useAlert();
   
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [subsector, setSubsector] = useState<Subsector | null>(null);
@@ -194,7 +196,7 @@ export default function SubsectorTeamPage() {
 
   const handleAddMember = async () => {
     if (!selectedUserId || !subsectorId) {
-      alert('Selecione um usuário');
+      showWarning('Selecione um usuário');
       return;
     }
 
@@ -219,17 +221,17 @@ export default function SubsectorTeamPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Membro adicionado com sucesso!');
+        subsectors.teamUpdated();
         setShowAddModal(false);
         setSelectedUserId('');
         setMemberPositionId('');
         fetchTeamMembers();
       } else {
-        alert(data.error || 'Erro ao adicionar membro');
+        showError('Erro ao adicionar membro', data.error);
       }
     } catch (error) {
       console.error('Erro ao adicionar membro:', error);
-      alert('Erro ao adicionar membro');
+      showError('Erro ao adicionar membro', 'Ocorreu um erro inesperado. Tente novamente.');
     }
   };
 
@@ -256,17 +258,17 @@ export default function SubsectorTeamPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Cargo atualizado com sucesso!');
+        showSuccess('Cargo atualizado com sucesso!');
         setShowEditModal(false);
         setEditingMember(null);
         setMemberPositionId('');
         fetchTeamMembers();
       } else {
-        alert(data.error || 'Erro ao atualizar cargo');
+        showError('Erro ao atualizar cargo', data.error);
       }
     } catch (error) {
       console.error('Erro ao atualizar cargo:', error);
-      alert('Erro ao atualizar cargo');
+      showError('Erro ao atualizar cargo', 'Ocorreu um erro inesperado. Tente novamente.');
     }
   };
 
@@ -290,12 +292,13 @@ export default function SubsectorTeamPage() {
         fetchTeamMembers();
         setShowDeleteModal(false);
         setMemberToDelete(null);
+        showSuccess('Membro removido da equipe com sucesso!');
       } else {
-        alert(data.error || 'Erro ao remover membro');
+        showError('Erro ao remover membro', data.error);
       }
     } catch (error) {
       console.error('Erro ao remover membro:', error);
-      alert('Erro ao remover membro');
+      showError('Erro ao remover membro', 'Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       setIsDeleting(false);
     }

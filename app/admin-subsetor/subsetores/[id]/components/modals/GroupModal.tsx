@@ -1,18 +1,13 @@
 // Modal para criação e edição de grupos de notificação
 
-
-interface GroupData {
-  name: string;
-  description: string;
-  members: string[];
-}
+import { GroupData } from '../../types/subsector.types';
 
 interface GroupModalProps {
   isOpen: boolean;
-  currentGroup: GroupData;
+  currentGroup: GroupData | null;
   onClose: () => void;
   onSave: () => Promise<void>;
-  onChange: React.Dispatch<React.SetStateAction<GroupData>>;
+  onChange: React.Dispatch<React.SetStateAction<GroupData | null>>;
   users: { id: string; full_name: string; email: string; }[];
 }
 
@@ -36,12 +31,17 @@ export function GroupModal({
   };
 
   const handleMemberToggle = (userId: string) => {
-    onChange(prev => ({
-      ...prev,
-      members: prev.members.includes(userId)
-        ? prev.members.filter(id => id !== userId)
-        : [...prev.members, userId]
-    }));
+    onChange(prev => {
+      if (!prev) {
+        return { name: '', description: '', members: [userId] };
+      }
+      return {
+        ...prev,
+        members: prev.members.includes(userId)
+          ? prev.members.filter(id => id !== userId)
+          : [...prev.members, userId]
+      };
+    });
   };
 
   return (
@@ -57,8 +57,8 @@ export function GroupModal({
             </label>
             <input
               type="text"
-              value={currentGroup.name}
-              onChange={(e) => onChange(prev => ({...prev, name: e.target.value}))}
+              value={currentGroup?.name || ''}
+              onChange={(e) => onChange(prev => prev ? {...prev, name: e.target.value} : {name: e.target.value, description: '', members: []})}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
               placeholder="Ex: Coordenação Técnica"
               required
@@ -70,8 +70,8 @@ export function GroupModal({
               Descrição
             </label>
             <textarea
-              value={currentGroup.description}
-              onChange={(e) => onChange(prev => ({...prev, description: e.target.value}))}
+              value={currentGroup?.description || ''}
+              onChange={(e) => onChange(prev => prev ? {...prev, description: e.target.value} : {name: '', description: e.target.value, members: []})}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
               rows={3}
               placeholder="Descreva o propósito deste grupo..."
@@ -96,7 +96,7 @@ export function GroupModal({
                     >
                       <input
                         type="checkbox"
-                        checked={currentGroup.members.includes(user.id)}
+                        checked={currentGroup?.members?.includes(user.id) || false}
                         onChange={() => handleMemberToggle(user.id)}
                         className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mr-3"
                       />

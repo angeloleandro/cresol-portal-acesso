@@ -68,13 +68,18 @@ export function useEventManagement(onRefresh: () => Promise<void>): UseEventMana
           is_published: event.is_published ?? false
         });
       } else {
+        const now = new Date().toISOString();
         await sectorContentApi.create('subsector_events', {
           subsector_id: subsectorId,
           title: event.title,
           description: event.description,
+          location: '', // Campo obrigatório no tipo
           start_date: event.start_date,
+          end_date: null, // Campo obrigatório no tipo
           is_featured: event.is_featured ?? false,
-          is_published: event.is_published ?? false
+          is_published: event.is_published ?? false,
+          created_at: now, // Campo obrigatório no tipo
+          updated_at: now // Campo obrigatório no tipo
         });
       }
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import AdminHeader from '@/app/components/AdminHeader';
+import { useAlert } from '@/app/components/alerts';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import UserFilters from './components/UserFilters';
 import UserForm from './components/UserForm';
@@ -51,6 +52,7 @@ interface Subsector {
 
 export default function UsersManagement() {
   const router = useRouter();
+  const { showError, auth } = useAlert();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [users, setUsers] = useState<ProfileUser[]>([]);
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
@@ -76,12 +78,12 @@ export default function UsersManagement() {
 
   const handleAuthError = useCallback((error: string) => {
     if (error.includes('JWT') || error.includes('token') || error.includes('unauthorized')) {
-      alert('Sua sessão expirou. Redirecionando para o login...');
+      auth.sessionExpired();
       router.replace('/login');
       return true;
     }
     return false;
-  }, [router]);
+  }, [router, auth]);
 
   const fetchUserSectors = useCallback(async (userId: string) => {
     try {
@@ -177,12 +179,12 @@ export default function UsersManagement() {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       if (!handleAuthError(errorMessage)) {
-        alert(`Erro ao buscar usuários: ${errorMessage}`);
+        showError('Erro ao buscar usuários', errorMessage);
       }
     } finally {
       setLoading(false);
     }
-  }, [router, handleAuthError, fetchUserSectors, fetchUserSubsectors]);
+  }, [router, handleAuthError, fetchUserSectors, fetchUserSubsectors, showError]);
 
   useEffect(() => {
     // Só executar no lado do cliente

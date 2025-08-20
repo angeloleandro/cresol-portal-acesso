@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { FormSelect } from '@/app/components/forms/FormSelect';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
 import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
@@ -217,18 +218,18 @@ export default function MensagensPage() {
             </div>
 
             {/* Filtro por setor */}
-            <select
+            <FormSelect
               value={selectedSector}
               onChange={(e) => setSelectedSector(e.target.value)}
-              className="input"
-            >
-              <option value="all">Todos os setores</option>
-              {sectors.map((sector) => (
-                <option key={sector.id} value={sector.id}>
-                  {sector.name}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: 'all', label: 'Todos os setores' },
+                ...sectors.map((sector) => ({
+                  value: sector.id,
+                  label: sector.name
+                }))
+              ]}
+              placeholder="Filtrar por setor"
+            />
 
             {/* Contador */}
             <div className="flex items-center text-sm text-muted">

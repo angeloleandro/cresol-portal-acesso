@@ -10,10 +10,12 @@ import {
   Input
 } from '@nextui-org/react';
 import { Icon } from '@/app/components/icons/Icon';
+import { useAlert } from '@/app/components/alerts';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
 import { Button as CButton } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
+import { FormSelect, type SelectOption } from '@/app/components/forms';
 
 interface WorkLocation {
   id: string;
@@ -35,14 +37,13 @@ interface UserFormProps {
 }
 
 export default function UserForm({ workLocations, positions, onSuccess, onCancel }: UserFormProps) {
+  const alert = useAlert();
   const [formLoading, setFormLoading] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserName, setNewUserName] = useState('');
   const [newUserPositionId, setNewUserPositionId] = useState('');
   const [newUserWorkLocationId, setNewUserWorkLocationId] = useState('');
   const [newUserRole, setNewUserRole] = useState<'user' | 'sector_admin' | 'subsector_admin' | 'admin'>('user');
-  const [formError, setFormError] = useState<string | null>(null);
-  const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [newUserAvatarFile, setNewUserAvatarFile] = useState<File | null>(null);
   const [newUserAvatarPreview, setNewUserAvatarPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -84,30 +85,27 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
       const file = e.target.files[0];
       
       if (!file.type.startsWith('image/')) {
-        setFormError('Por favor, selecione apenas arquivos de imagem.');
+        alert.form.validationError();
         return;
       }
       
       if (file.size > 2 * 1024 * 1024) {
-        setFormError('A imagem deve ter menos de 2MB.');
+        alert.showWarning('Arquivo muito grande', 'A imagem deve ter menos de 2MB.');
         return;
       }
       
       setNewUserAvatarFile(file);
       const previewUrl = URL.createObjectURL(file);
       setNewUserAvatarPreview(previewUrl);
-      setFormError(null);
     }
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
-    setFormSuccess(null);
     setFormLoading(true);
     
     if (!newUserEmail.endsWith('@cresol.com.br')) {
-      setFormError('Por favor, utilize um e-mail corporativo da Cresol.');
+      alert.showError('E-mail inválido', 'Por favor, utilize um e-mail corporativo da Cresol.');
       setFormLoading(false);
       return;
     }
@@ -120,7 +118,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
         .maybeSingle();
       
       if (existingUser) {
-        setFormError('Este e-mail já está cadastrado no sistema.');
+        alert.showError('E-mail duplicado', 'Este e-mail já está cadastrado no sistema.');
         setFormLoading(false);
         return;
       }
@@ -154,7 +152,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
         } catch (error) {
           console.error('Erro ao fazer upload da imagem:', error);
           const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-          setFormError(`Erro ao fazer upload da imagem: ${errorMessage}`);
+          alert.showError('Erro no upload', `Erro ao fazer upload da imagem: ${errorMessage}`);
           setFormLoading(false);
           return;
         } finally {
@@ -166,13 +164,12 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
       const adminToken = session?.access_token;
 
       if (!adminToken) {
-        setFormError('Token de administrador inválido. Faça login novamente.');
+        alert.showError('Erro de autenticação', 'Token de administrador inválido. Faça login novamente.');
         setFormLoading(false);
         return;
       }
 
       const response = await fetch('/api/admin/create-user', {
-        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -193,7 +190,8 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
         throw new Error(data.error || 'Falha ao criar usuário');
       }
 
-      setFormSuccess(`Usuário criado com sucesso! Senha temporária: ${data.tempPassword}`);
+      alert.users.created();
+      alert.showInfo('Senha temporária', `Senha temporária: ${data.tempPassword}`);
       
       setNewUserEmail('');
       setNewUserName('');
@@ -210,7 +208,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
     } catch (error: unknown) {
       console.error('Erro ao criar usuário:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      setFormError(`Falha ao criar usuário: ${errorMessage}`);
+      alert.showError('Falha ao criar usuário', errorMessage);
     } finally {
       setFormLoading(false);
     }
@@ -219,19 +217,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
   return (
     <div className="card mb-6">
       <h3 className="heading-4 text-primary mb-4">Cadastrar Novo Usuário</h3>
-      
-      {formError && (
-        <div className="alert-error body-text-small">
-          {formError}
-        </div>
-      )}
 
-      {formSuccess && (
-        <div className="alert-success body-text-small">
-          {formSuccess}
-        </div>
-      )}
-      
       <form onSubmit={handleCreateUser} className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start gap-6 mb-4">
           <div className="flex-shrink-0">
@@ -547,18 +533,19 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
             <label htmlFor="newUserRole" className="form-label">
               Papel no Sistema
             </label>
-            <select
-              id="newUserRole"
+            <FormSelect
               value={newUserRole}
-              onChange={(e) => setNewUserRole(e.target.value as 'user' | 'sector_admin' | 'subsector_admin' | 'admin')}
+              onChange={(e) => setNewUserRole(e.currentTarget.value as 'user' | 'sector_admin' | 'subsector_admin' | 'admin')}
+              placeholder="Selecione o papel no sistema"
+              options={[
+                { value: 'user', label: 'Usuário' },
+                { value: 'sector_admin', label: 'Administrador de Setor' },
+                { value: 'subsector_admin', label: 'Admin. Subsetorial' },
+                { value: 'admin', label: 'Administrador' }
+              ]}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            >
-              <option value="user">Usuário</option>
-              <option value="sector_admin">Administrador de Setor</option>
-              <option value="subsector_admin">Admin. Subsetorial</option>
-              <option value="admin">Administrador</option>
-            </select>
+              fullWidth
+            />
           </div>
         </div>
         

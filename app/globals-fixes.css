@@ -1,0 +1,38 @@
+/* Global fixes for alignment issues */
+
+/* Fix input icon alignment */
+.input-icon-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Fix button loading state alignment */
+.btn-loading-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Ensure input icons are vertically centered */
+input[type="email"] ~ div[class*="absolute"],
+input[type="password"] ~ div[class*="absolute"],
+input[type="text"] ~ div[class*="absolute"] {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Fix UnifiedLoadingSpinner alignment in buttons */
+button .inline-flex {
+  vertical-align: middle;
+}
+
+/* Ensure consistent button content alignment */
+button > div {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}

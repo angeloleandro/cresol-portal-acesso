@@ -5,7 +5,7 @@
 
 import type React from 'react';
 import { useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
+import { useAlert } from '@/app/components/alerts';
 import CollectionList from '@/app/components/Collections/Collection.List';
 import CollectionModal from './CollectionModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -27,7 +27,8 @@ const CollectionsManager: React.FC<CollectionsManagerProps> = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
-  // Collections hook
+  // Hooks
+  const alert = useAlert();
   const {
     collections,
     loading,
@@ -73,9 +74,10 @@ const CollectionsManager: React.FC<CollectionsManagerProps> = ({
   const handleToggleStatus = async (collection: Collection) => {
     try {
       await toggleCollectionStatus(collection.id, !collection.is_active);
-      toast.success(`Coleção ${!collection.is_active ? 'ativada' : 'desativada'} com sucesso!`);
+      alert.collections.statusChanged(!collection.is_active);
     } catch (error) {
-      toast.error('Erro ao alterar status da coleção');
+      const errorMessage = error instanceof Error ? error.message : 'Erro inesperado';
+      alert.showError('Erro ao alterar status da coleção', errorMessage);
       console.error(error);
     }
   };
@@ -85,10 +87,10 @@ const CollectionsManager: React.FC<CollectionsManagerProps> = ({
     try {
       if (formMode === 'create') {
         await createCollection(data);
-        toast.success('Coleção criada com sucesso!');
+        alert.collections.created();
       } else {
         await updateCollection(selectedCollection!.id, data);
-        toast.success('Coleção atualizada com sucesso!');
+        alert.collections.updated();
       }
       setIsFormModalOpen(false);
       setSelectedCollection(null);
@@ -96,7 +98,8 @@ const CollectionsManager: React.FC<CollectionsManagerProps> = ({
         onCreateCollectionClose();
       }
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao salvar coleção');
+      const errorMessage = error.message || 'Erro ao salvar coleção';
+      alert.showError('Erro ao salvar coleção', errorMessage);
       throw error; // Re-throw to keep modal open
     }
   };
@@ -107,11 +110,12 @@ const CollectionsManager: React.FC<CollectionsManagerProps> = ({
 
     try {
       await deleteCollection(selectedCollection.id);
-      toast.success('Coleção excluída com sucesso!');
+      alert.collections.deleted();
       setIsDeleteModalOpen(false);
       setSelectedCollection(null);
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao excluir coleção');
+      const errorMessage = error.message || 'Erro ao excluir coleção';
+      alert.showError('Erro ao excluir coleção', errorMessage);
     }
   };
 

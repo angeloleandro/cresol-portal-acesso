@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import Image from 'next/image';
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
@@ -63,8 +62,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
             ...regularEvents
           ].slice(0, limit);
         }
-        
-        
+
         setFeaturedEvents(finalEvents);
         
       } catch (error) {
@@ -82,10 +80,6 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
       minute: '2-digit'
     }).format(date);
   };

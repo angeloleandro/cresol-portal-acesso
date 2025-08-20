@@ -6,6 +6,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { logger } from '../production-logger';
 
 interface RealtimeNewsOptions {
   sectorId?: string;
@@ -63,7 +64,7 @@ export function useRealtimeNews(options: RealtimeNewsOptions = {}) {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('Missing Supabase environment variables');
+      logger.error('Missing Supabase environment variables');
       setError('Configuration error: Missing Supabase credentials');
       return;
     }
@@ -102,7 +103,7 @@ export function useRealtimeNews(options: RealtimeNewsOptions = {}) {
       if (error) throw error;
       setNews(data || []);
     } catch (err: any) {
-      console.error('Erro ao buscar notícias:', err);
+      logger.error('Erro ao buscar notícias', err);
       setError(err.message);
     }
   }, [sectorId, subsectorId, onlyPublished]);
@@ -135,7 +136,7 @@ export function useRealtimeNews(options: RealtimeNewsOptions = {}) {
       if (error) throw error;
       setEvents(data || []);
     } catch (err: any) {
-      console.error('Erro ao buscar eventos:', err);
+      logger.error('Erro ao buscar eventos', err);
       setError(err.message);
     }
   }, [sectorId, subsectorId, onlyPublished, includeEvents]);
@@ -174,7 +175,7 @@ export function useRealtimeNews(options: RealtimeNewsOptions = {}) {
           filter: `sector_id=eq.${sectorId}`
         },
         (payload: any) => {
-          console.log('Realtime update - sector_news:', payload);
+          logger.debug('Realtime update - sector_news', payload);
           
           if (payload.eventType === 'INSERT') {
             const newItem = payload.new as NewsItem;
@@ -204,7 +205,7 @@ export function useRealtimeNews(options: RealtimeNewsOptions = {}) {
             filter: `sector_id=eq.${sectorId}`
           },
           (payload: any) => {
-            console.log('Realtime update - sector_events:', payload);
+            logger.debug('Realtime update - sector_events', payload);
             
             if (payload.eventType === 'INSERT') {
               const newItem = payload.new as EventItem;
@@ -241,7 +242,7 @@ export function useRealtimeNews(options: RealtimeNewsOptions = {}) {
           filter: `subsector_id=eq.${subsectorId}`
         },
         (payload: any) => {
-          console.log('Realtime update - subsector_news:', payload);
+          logger.debug('Realtime update - subsector_news', payload);
           
           if (payload.eventType === 'INSERT') {
             const newItem = payload.new as NewsItem;
@@ -271,7 +272,7 @@ export function useRealtimeNews(options: RealtimeNewsOptions = {}) {
             filter: `subsector_id=eq.${subsectorId}`
           },
           (payload: any) => {
-            console.log('Realtime update - subsector_events:', payload);
+            logger.debug('Realtime update - subsector_events', payload);
             
             if (payload.eventType === 'INSERT') {
               const newItem = payload.new as EventItem;
@@ -299,9 +300,9 @@ export function useRealtimeNews(options: RealtimeNewsOptions = {}) {
 
     // Inscrever no canal
     channel.subscribe((status: any) => {
-      console.log('Realtime subscription status:', status);
+      logger.debug('Realtime subscription status', { status });
       if (status === 'SUBSCRIBED') {
-        console.log('✅ Realtime conectado para news/events');
+        logger.debug('Realtime conectado para news/events');
       }
     });
 
@@ -310,7 +311,7 @@ export function useRealtimeNews(options: RealtimeNewsOptions = {}) {
     // Cleanup
     return () => {
       if (channelRef.current && supabaseRef.current) {
-        console.log('🔄 Limpando subscription realtime');
+        logger.debug('Limpando subscription realtime');
         supabaseRef.current.removeChannel(channelRef.current);
       }
     };

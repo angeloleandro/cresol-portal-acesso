@@ -8,7 +8,6 @@ export async function GET(request: NextRequest) {
     // Verificar autenticação usando helper
     const authResult = await authenticateAdminRequest(request);
     if (!authResult.success) {
-      console.error('Falha na autenticação:', authResult.error);
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 

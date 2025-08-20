@@ -360,7 +360,7 @@ export class ImagePreviewPerformance {
   
   static logMetric(operation: string, duration: number): void {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[ImagePreview] ${operation}: ${duration.toFixed(2)}ms`);
+      console.log(`ImagePreview: ${operation} completed in ${duration}ms`);
     }
   }
 }

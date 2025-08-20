@@ -2,6 +2,7 @@
 
 import { ImageLoaderProps } from 'next/image';
 
+import { logger } from '../../lib/production-logger';
 /**
  * Loader customizado para imagens do Supabase Storage
  * Otimiza URLs e adiciona parâmetros de transformação quando disponível
@@ -15,7 +16,7 @@ export default function supabaseImageLoader({ src, width, quality }: ImageLoader
   // Construir URL base do Supabase
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!supabaseUrl) {
-    console.warn('NEXT_PUBLIC_SUPABASE_URL não configurado');
+    logger.warn('NEXT_PUBLIC_SUPABASE_URL não configurado');
     return src;
   }
 

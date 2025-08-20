@@ -2,8 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
+import { adminCORS } from '@/lib/cors-config';
 
-export async function POST(request: NextRequest) {
+export const POST = adminCORS(async (request: NextRequest) => {
   const requestCookies = cookies();
   
   try {
@@ -171,4 +172,4 @@ export async function POST(request: NextRequest) {
       error: error.message || 'Erro interno do servidor' 
     }, { status: 500 });
   }
-} 
+});

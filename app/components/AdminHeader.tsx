@@ -20,7 +20,9 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Painel', href: '/admin' },
   { label: 'Usuários', href: '/admin/users' },
-  { label: 'Notificações', href: '/admin/notifications' },
+  { label: 'Mensagens', href: '/admin/messages' },
+  { label: 'Notícias', href: '/admin/news' },
+  { label: 'Eventos', href: '/admin/events' },
   { label: 'Analytics', href: '/admin/analytics' },
   { label: 'Home', href: '/home' },
 ];

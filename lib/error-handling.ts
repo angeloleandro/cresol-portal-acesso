@@ -47,9 +47,7 @@ export async function processApiResponse<T = any>(
   response: Response,
   context: ErrorContext
 ): Promise<T> {
-  console.log(`🔍 [API_RESPONSE] Processing response for ${context.operation}`);
-  console.log(`📊 [API_RESPONSE] Status: ${response.status} ${response.statusText}`);
-
+    
   let responseData: ApiResponse<T>;
   
   try {
@@ -63,8 +61,6 @@ export async function processApiResponse<T = any>(
       parseError instanceof Error ? parseError : undefined
     );
   }
-
-  console.log(`📋 [API_RESPONSE] Response data:`, responseData);
 
   if (!response.ok) {
     const errorMessage = responseData.error || `Erro HTTP ${response.status}`;
@@ -87,8 +83,7 @@ export async function processApiResponse<T = any>(
     );
   }
 
-  console.log(`✅ [API_RESPONSE] Successfully processed ${context.operation}`);
-  return (responseData.data || responseData) as T;
+    return (responseData.data || responseData) as T;
 }
 
 /**
@@ -147,5 +142,4 @@ export function validateAdminEnvironment(): void {
     throw new Error(errorMessage);
   }
 
-  console.log('✅ [ENV_VALIDATION] All required environment variables present');
-}
+  }

@@ -96,7 +96,6 @@ const HeroUIAgenciesDropdown = memo(({ pathname, agencies }: HeroUIAgenciesDropd
         shouldFlip={true}
         shouldCloseOnBlur={true}
         classNames={{
-          content: "min-w-[320px] max-h-[75vh] min-h-[200px] bg-white border-0 rounded-md shadow-xl overflow-hidden z-50 p-0",
         }}
       >
       <DropdownTrigger>

@@ -95,7 +95,6 @@ export function useCollections(initialFilters?: Partial<CollectionFilters>) {
       
       const response = await fetch('/api/admin/collections/stats', {
         headers,
-        credentials: 'include',
       });
       
       if (response.ok) {
@@ -131,10 +130,7 @@ export function useCollections(initialFilters?: Partial<CollectionFilters>) {
     }
 
     const response = await fetch('/api/collections', {
-      method: 'POST',
       headers,
-      body: JSON.stringify(data),
-      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -158,10 +154,7 @@ export function useCollections(initialFilters?: Partial<CollectionFilters>) {
     }
 
     const response = await fetch(`/api/collections/${id}`, {
-      method: 'PUT',
       headers,
-      body: JSON.stringify(data),
-      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -185,9 +178,7 @@ export function useCollections(initialFilters?: Partial<CollectionFilters>) {
     }
 
     const response = await fetch(`/api/collections/${id}`, { 
-      method: 'DELETE',
       headers,
-      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -261,7 +252,6 @@ export function useCollectionItems(collectionId: string | null) {
       
       const response = await fetch(`/api/collections/${collectionId}/items`, {
         headers,
-        credentials: 'include',
       });
       
       if (!response.ok) {
@@ -294,10 +284,8 @@ export function useCollectionItems(collectionId: string | null) {
     }
 
     const response = await fetch(`/api/collections/${collectionId}/items`, {
-      method: 'POST',
       headers,
       body: JSON.stringify({ item_id: itemId, item_type: itemType }),
-      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -323,9 +311,7 @@ export function useCollectionItems(collectionId: string | null) {
     }
 
     const response = await fetch(`/api/collections/${collectionId}/items/${itemId}`, {
-      method: 'DELETE',
       headers,
-      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -347,7 +333,6 @@ export function useCollectionItems(collectionId: string | null) {
     error,
     collection,
     actions: {
-      refresh: fetchItems,
       addItem,
       removeItem,
     },
@@ -377,10 +362,7 @@ export function useCollectionUpload() {
       }
 
       const response = await fetch('/api/collections/upload/cover', {
-        method: 'POST',
         headers,
-        body: formData,
-        credentials: 'include',
       });
 
       if (!response.ok) {

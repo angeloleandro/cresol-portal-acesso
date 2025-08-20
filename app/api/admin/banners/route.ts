@@ -5,9 +5,10 @@ import {
   authorizeAdminOperation,
   AdminAPIResponses 
 } from '@/lib/supabase/admin';
+import { adminCORS } from '@/lib/cors-config';
 
 // GET /api/admin/banners - Listar todos os banners
-export async function GET(request: NextRequest) {
+export const GET = adminCORS(async (request: NextRequest) => {
   try {
     const auth = await authenticateAdminRequest(request);
     
@@ -76,10 +77,10 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/admin/banners - Criar novo banner
-export async function POST(request: NextRequest) {
+export const POST = adminCORS(async (request: NextRequest) => {
   try {
     const auth = await authenticateAdminRequest(request);
     
@@ -186,10 +187,10 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/admin/banners - Atualizar banner existente
-export async function PUT(request: NextRequest) {
+export const PUT = adminCORS(async (request: NextRequest) => {
   try {
     const auth = await authenticateAdminRequest(request);
     
@@ -301,10 +302,10 @@ export async function PUT(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // DELETE /api/admin/banners - Excluir banner
-export async function DELETE(request: NextRequest) {
+export const DELETE = adminCORS(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -373,4 +374,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

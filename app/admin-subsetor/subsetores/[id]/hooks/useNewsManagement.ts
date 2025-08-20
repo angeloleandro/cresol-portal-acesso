@@ -68,13 +68,16 @@ export function useNewsManagement(onRefresh: () => Promise<void>): UseNewsManage
           is_published: news.is_published ?? false
         });
       } else {
+        const now = new Date().toISOString();
         await sectorContentApi.create('subsector_news', {
           subsector_id: subsectorId,
           title: news.title,
           summary: news.summary,
           content: news.content || '',
+          image_url: null, // Campo obrigatório no tipo
           is_featured: news.is_featured ?? false,
-          is_published: news.is_published ?? false
+          is_published: news.is_published ?? false,
+          updated_at: now // Campo obrigatório no tipo (created_at omitido no payload)
         });
       }
 

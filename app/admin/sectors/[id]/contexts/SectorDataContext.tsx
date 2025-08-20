@@ -210,15 +210,38 @@ export function SectorDataProvider({ sectorId, children }: SectorDataProviderPro
     }
   }, [sectorId, fetchWithTimeout]);
 
-  // Buscar grupos
+  // Buscar grupos de mensagens
   const fetchGroups = useCallback(async () => {
-    // Temporariamente desabilitado após remoção de notificações
-    // TODO: Reimplementar quando grupos forem integrados com mensagens
-    if (mountedRef.current) {
-      setGroups([]);
-      setAutomaticGroups([]);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const response = await fetch(`/api/admin/message-groups?sector_id=${sectorId}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && mountedRef.current) {
+          // Os grupos agora são de mensagens, não há mais "grupos automáticos"
+          setGroups(result.groups || []);
+          setAutomaticGroups([]); // Deixar vazio por enquanto
+        }
+      }
+    } catch (err) {
+      // Falha silenciosa para grupos - não quebrar a aplicação se grupos não carregarem
+      if (mountedRef.current) {
+        setGroups([]);
+        setAutomaticGroups([]);
+      }
     }
-  }, []); // Removida dependência desnecessária
+  }, [sectorId]);
 
   // Buscar usuários com cache
   const fetchUsers = useCallback(async () => {
@@ -311,9 +334,7 @@ export function SectorDataProvider({ sectorId, children }: SectorDataProviderPro
 
       if (result.positions && mountedRef.current) {
         const positionsData = result.positions.map((pos: any) => ({
-          id: pos.id,
           label: `${pos.name}${pos.department ? ` - ${pos.department}` : ''}`,
-          value: pos.id,
           meta: pos
         }));
         setPositions(positionsData);
@@ -364,7 +385,7 @@ export function SectorDataProvider({ sectorId, children }: SectorDataProviderPro
       await Promise.all([
         fetchSectorData(),
         fetchSubsectors(),
-        // fetchGroups(), // Removido temporariamente
+        fetchGroups(),
         fetchUsers(),
         fetchWorkLocations(),
         fetchPositions()
@@ -409,7 +430,7 @@ export function SectorDataProvider({ sectorId, children }: SectorDataProviderPro
     Promise.all([
       fetchSectorData(),
       fetchSubsectors(),
-      // fetchGroups(), // Removido temporariamente
+      fetchGroups(),
       fetchUsers(),
       fetchWorkLocations(),
       fetchPositions()

@@ -34,8 +34,8 @@ export async function middleware(request: NextRequest) {
     const authResult = await getOptimizedUserAuth(supabase, accessToken);
     
     if (!authResult.user) {
-      // Não autenticado - redirecionar para login se acessando área restrita
-      if (routeType.isAdmin || routeType.isSectorAdmin) {
+      // Não autenticado - redirecionar para login se acessando área restrita ou raiz
+      if (routeType.isAdmin || routeType.isSectorAdmin || request.nextUrl.pathname === '/') {
         const redirectUrl = new URL('/login', request.url);
         redirectUrl.searchParams.set('redirectedFrom', request.nextUrl.pathname);
         redirectUrl.searchParams.set('auth', 'failed');
@@ -46,6 +46,11 @@ export async function middleware(request: NextRequest) {
     
     // Usuário autenticado
     const user = authResult.user;
+    
+    // Se está na raiz, redirecionar para home (já está autenticado aqui)
+    if (request.nextUrl.pathname === '/') {
+      return NextResponse.redirect(new URL('/home', request.url));
+    }
     
     // Se tentando acessar login, redirecionar para home
     if (request.nextUrl.pathname === '/login') {

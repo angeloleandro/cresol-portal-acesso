@@ -130,9 +130,11 @@ export default function AdvancedSearch({
       // Buscar em sistemas
       if (selectedFilter.types.length === 0 || selectedFilter.types.includes('system')) {
         const { data: systems, count } = await supabase
-          .from('systems')
+          .from('system_links')
           .select('*', { count: 'exact' })
+          .eq('is_active', true)
           .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+          .order('display_order', { ascending: true })
           .range((currentPage - 1) * resultsPerPage, currentPage * resultsPerPage - 1);
 
         if (systems) {
@@ -142,9 +144,8 @@ export default function AdvancedSearch({
             type: 'system' as const,
             description: system.description,
             url: system.url,
-            icon: system.icon,
             score: calculateRelevanceScore(system.name, system.description, query),
-            metadata: { sector_id: system.sector_id }
+            metadata: { display_order: system.display_order }
           })));
         }
         totalCount += count || 0;

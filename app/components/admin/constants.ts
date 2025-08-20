@@ -4,9 +4,6 @@ import { CRESOL_COLORS } from '@/lib/design-tokens';
 export const DESIGN_TOKENS = {
   // Cores Cresol - Usando design tokens centralizados
   colors: {
-    primary: CRESOL_COLORS.primary.DEFAULT,
-    primaryDark: CRESOL_COLORS.primary.dark,
-    secondary: CRESOL_COLORS.secondary.DEFAULT,
     gray: CRESOL_COLORS.gray
   },
 
@@ -41,8 +38,6 @@ export const DESIGN_TOKENS = {
 
   // Shadows
   boxShadow: {
-    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
   }
 };
@@ -59,44 +54,21 @@ export const DEFAULT_CONFIG = {
   
   // Animações
   transitions: {
-    fast: '150ms',
-    normal: '200ms',
     slow: '300ms'
   },
 
   // Breakpoints
   breakpoints: {
-    sm: '640px',
-    md: '768px',
-    lg: '1024px',
     xl: '1280px'
   }
 };
 
 // Ícones padrão para diferentes contextos
 export const DEFAULT_ICONS = {
-  users: 'user-group',
-  sectors: 'building-1',
-  subsectors: 'folder',
-  notifications: 'mail',
-  settings: 'cog',
-  analytics: 'chart-bar',
-  search: 'magnifying-glass',
-  add: 'plus',
-  edit: 'pencil',
-  delete: 'trash',
-  view: 'eye',
-  save: 'check',
-  cancel: 'x-mark',
   loading: 'arrow-path'
 };
 
 // Mensagens padrão
 export const DEFAULT_MESSAGES = {
-  loading: 'Carregando...',
-  error: 'Ocorreu um erro. Tente novamente.',
-  success: 'Operação realizada com sucesso!',
-  noData: 'Nenhum item encontrado.',
-  confirmDelete: 'Tem certeza que deseja excluir este item?',
   unsavedChanges: 'Você tem alterações não salvas. Deseja continuar?'
 };

@@ -43,8 +43,8 @@ export default function SectorSystemsManagement() {
   const [isSectorAdmin, setIsSectorAdmin] = useState(false);
   
   const [newSystem, setNewSystem] = useState({ 
-    name: '', 
-    description: '', 
+    name: '',
+    description: '',
     url: '',
     icon: '/icons/default-app.svg',
     sector_id: sectorId 
@@ -143,7 +143,6 @@ export default function SectorSystemsManagement() {
     checkUser();
   }, [router, sectorId, fetchSector, fetchSystems]);
 
-
   const handleAddSystem = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -155,8 +154,8 @@ export default function SectorSystemsManagement() {
         .insert([newSystem]);
       
       setNewSystem({ 
-        name: '', 
-        description: '', 
+        name: '',
+        description: '',
         url: '',
         icon: '/icons/default-app.svg',
         sector_id: sectorId 

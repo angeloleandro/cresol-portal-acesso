@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createNewsAdapter, type NewsContentData as NewsData } from './GenericContentAdapter';
 import { useRealtimeNews } from '@/app/hooks/useRealtimeNews';
+import { useAlert } from '@/app/components/alerts';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, StarIcon, WifiIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
@@ -14,6 +15,7 @@ interface UnifiedNewsManagerProps {
 }
 
 export function UnifiedNewsManagerWithRealtime({ type, entityId, entityName, showDrafts = true }: UnifiedNewsManagerProps) {
+  const { showError, content } = useAlert();
   const [selectedNews, setSelectedNews] = useState<NewsData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -67,7 +69,7 @@ export function UnifiedNewsManagerWithRealtime({ type, entityId, entityName, sho
       // Não precisa chamar refresh() pois o realtime atualizará automaticamente
     } catch (error) {
       // Debug log removed
-      alert('Erro ao salvar notícia. Por favor, tente novamente.');
+      showError('Erro ao salvar notícia', 'Por favor, tente novamente.');
     }
   };
 
@@ -81,7 +83,7 @@ export function UnifiedNewsManagerWithRealtime({ type, entityId, entityName, sho
       // Não precisa chamar refresh() pois o realtime atualizará automaticamente
     } catch (error) {
       // Debug log removed
-      alert('Erro ao excluir notícia. Por favor, tente novamente.');
+      showError('Erro ao excluir notícia', 'Por favor, tente novamente.');
     }
   };
 
@@ -90,7 +92,7 @@ export function UnifiedNewsManagerWithRealtime({ type, entityId, entityName, sho
       await togglePublishedRealtime(newsItem.id!, !newsItem.is_published);
     } catch (error) {
       // Debug log removed
-      alert('Erro ao alterar status de publicação');
+      showError('Erro ao alterar status de publicação', 'Tente novamente.');
     }
   };
 
@@ -99,7 +101,7 @@ export function UnifiedNewsManagerWithRealtime({ type, entityId, entityName, sho
       await toggleFeaturedRealtime(newsItem.id!, !newsItem.is_featured);
     } catch (error) {
       // Debug log removed
-      alert('Erro ao alterar destaque');
+      showError('Erro ao alterar destaque', 'Tente novamente.');
     }
   };
 

@@ -98,7 +98,6 @@ async function updateUserPassword(
   return { success: true };
 }
 
-
 export async function POST(request: NextRequest) {
   const { accessRequestId, adminUserId, adminToken, editedUserData, targetStatus } = await request.json();
 

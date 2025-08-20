@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
+import { useAlert } from '@/app/components/alerts';
 import UserEditModal from './UserEditModal';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal'; // Importe o modal
 
@@ -70,6 +71,7 @@ export default function UserList({
   onRefreshUserSectors,
   onRefreshUserSubsectors
 }: UserListProps) {
+  const alert = useAlert();
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -78,9 +80,24 @@ export default function UserList({
   const handleDeleteUser = async (userId: string, userEmail: string, userFullName: string) => {
     setDeletingUserId(userId);
     try {
-      // ... (lógica de exclusão permanece a mesma)
+      // Excluir usuário usando a API
+      const response = await fetch('/api/admin/delete-user', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Erro ao excluir usuário');
+      }
+
+      alert.users.deleted();
+      onUserUpdate(); // Atualizar lista de usuários
     } catch (error: unknown) {
-      // ... (tratamento de erro permanece o mesmo)
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      alert.showError('Erro ao excluir usuário', errorMessage);
     } finally {
       setDeletingUserId(null);
       setIsDeleteModalOpen(false);

@@ -91,8 +91,19 @@ export default function AdminBanners() {
     setError(null);
     
     try {
+      // Obter sessão para incluir token de autenticação
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Sessão expirada. Por favor, faça login novamente.');
+      }
+      
       const response = await fetch(`/api/admin/banners?id=${bannerToDelete.id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
       });
       
       if (!response.ok) {
@@ -166,7 +177,7 @@ export default function AdminBanners() {
             description="Comece criando o primeiro banner para exibir na página inicial."
             icon="image"
             action={{
-              label: 'Criar primeiro banner',
+              label: "Criar Banner",
               onClick: () => setShowForm(true)
             }}
           />

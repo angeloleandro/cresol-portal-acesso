@@ -1,0 +1,779 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createAdminSupabaseClient } from '@/lib/supabase/admin';
+import { z } from 'zod';
+
+// Schema de validação para criação/edição de notícia
+const newsSchema = z.object({
+  type: z.enum(['sector', 'subsector'], { message: 'Tipo é obrigatório' }),
+  sector_id: z.string().optional(),
+  subsector_id: z.string().optional(),
+  title: z.string().min(1, 'Título é obrigatório'),
+  summary: z.string().optional(),
+  content: z.string().min(1, 'Conteúdo é obrigatório'),
+  image_url: z.string().optional(),
+  is_featured: z.boolean().optional().default(false),
+  is_published: z.boolean().optional().default(false),
+}).refine(
+  (data) => {
+    if (data.type === 'sector' && !data.sector_id) {
+      return false;
+    }
+    if (data.type === 'subsector' && !data.subsector_id) {
+      return false;
+    }
+    return true;
+  },
+  {
+    path: ["sector_id"]
+  }
+);
+
+const updateNewsSchema = newsSchema.partial().extend({
+  id: z.string().min(1, 'ID é obrigatório para atualização'),
+});
+
+// Schema para filtros de busca
+const searchFiltersSchema = z.object({
+  type: z.enum(['all', 'sector', 'subsector']).optional().default('all'),
+  search: z.string().optional(),
+  sector_id: z.string().optional(),
+  subsector_id: z.string().optional(),
+  status: z.enum(['all', 'published', 'draft']).optional().default('all'),
+  featured: z.enum(['all', 'featured', 'not_featured']).optional().default('all'),
+  date_from: z.string().optional(),
+  date_to: z.string().optional(),
+  page: z.coerce.number().min(1).optional().default(1),
+  limit: z.coerce.number().min(1).max(100).optional().default(10),
+  order_by: z.enum(['created_at', 'updated_at', 'title']).optional().default('created_at'),
+  order_direction: z.enum(['asc', 'desc']).optional().default('desc'),
+});
+
+// Função auxiliar para verificar permissões de admin
+async function checkAdminPermissions(userId: string) {
+  const supabase = createAdminSupabaseClient();
+  
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+
+  if (!profile) {
+    throw new Error('Usuário não encontrado');
+  }
+
+  // Apenas admin geral pode acessar este endpoint
+  return profile.role === 'admin';
+}
+
+// GET - Buscar todas as notícias com filtros
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    
+    // Pré-processar parâmetros para converter strings vazias em undefined
+    const rawFilters = Object.fromEntries(searchParams);
+    const cleanedFilters = Object.entries(rawFilters).reduce((acc, [key, value]) => {
+      // Converter strings vazias em undefined para campos UUID
+      if (['sector_id', 'subsector_id', 'author_id'].includes(key) && value === '') {
+        return acc; // Omitir o campo
+      }
+      acc[key] = value;
+      return acc;
+    }, {} as Record<string, any>);
+    
+    const filters = searchFiltersSchema.parse(cleanedFilters);
+
+    const supabase = createAdminSupabaseClient();
+
+    // Verificar autenticação
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+            return NextResponse.json(
+        { error: 'Token de autorização necessário' },
+        { status: 401 }
+      );
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+            return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Verificar permissões de admin
+    const hasPermission = await checkAdminPermissions(user.id);
+    if (!hasPermission) {
+            return NextResponse.json(
+        { error: 'Acesso negado - apenas admin geral' },
+        { status: 403 }
+      );
+    }
+
+    const timestamp = new Date().toISOString();
+
+    // Construir queries para notícias de setor e subsetor
+    let sectorNews: any[] = [];
+    let subsectorNews: any[] = [];
+    let totalCount = 0;
+
+    // Buscar notícias de setor
+    if (filters.type === 'all' || filters.type === 'sector') {
+      let sectorQuery = supabase
+        .from('sector_news')
+        .select(`
+          id,
+          title,
+          summary,
+          content,
+          image_url,
+          is_featured,
+          is_published,
+          created_at,
+          updated_at,
+          sector_id,
+          sectors!inner(id, name)
+        `, { count: 'exact' });
+
+      // Aplicar filtros
+      if (filters.search) {
+        sectorQuery = sectorQuery.or(`title.ilike.%${filters.search}%,summary.ilike.%${filters.search}%,content.ilike.%${filters.search}%`);
+      }
+      
+      if (filters.sector_id) {
+        sectorQuery = sectorQuery.eq('sector_id', filters.sector_id);
+      }
+      
+      if (filters.status === 'published') {
+        sectorQuery = sectorQuery.eq('is_published', true);
+      } else if (filters.status === 'draft') {
+        sectorQuery = sectorQuery.eq('is_published', false);
+      }
+      
+      if (filters.featured === 'featured') {
+        sectorQuery = sectorQuery.eq('is_featured', true);
+      } else if (filters.featured === 'not_featured') {
+        sectorQuery = sectorQuery.eq('is_featured', false);
+      }
+      
+      if (filters.date_from) {
+        sectorQuery = sectorQuery.gte('created_at', filters.date_from);
+      }
+      
+      if (filters.date_to) {
+        sectorQuery = sectorQuery.lte('created_at', filters.date_to);
+      }
+
+            const { data: sectorData, count: sectorCount } = await sectorQuery
+        .order(filters.order_by, { ascending: filters.order_direction === 'asc' });
+
+      sectorNews = (sectorData || []).map(news => ({
+        ...news,
+      }));
+      
+      totalCount += sectorCount || 0;
+    }
+
+    // Buscar notícias de subsetor
+    if (filters.type === 'all' || filters.type === 'subsector') {
+      let subsectorQuery = supabase
+        .from('subsector_news')
+        .select(`
+          id,
+          title,
+          summary,
+          content,
+          image_url,
+          is_featured,
+          is_published,
+          created_at,
+          updated_at,
+          subsector_id,
+          subsectors!inner(id, name, sectors(name))
+        `, { count: 'exact' });
+
+      // Aplicar filtros
+      if (filters.search) {
+        subsectorQuery = subsectorQuery.or(`title.ilike.%${filters.search}%,summary.ilike.%${filters.search}%,content.ilike.%${filters.search}%`);
+      }
+      
+      if (filters.subsector_id) {
+        subsectorQuery = subsectorQuery.eq('subsector_id', filters.subsector_id);
+      }
+      
+      if (filters.sector_id) {
+        subsectorQuery = subsectorQuery.eq('subsectors.sector_id', filters.sector_id);
+      }
+      
+      if (filters.status === 'published') {
+        subsectorQuery = subsectorQuery.eq('is_published', true);
+      } else if (filters.status === 'draft') {
+        subsectorQuery = subsectorQuery.eq('is_published', false);
+      }
+      
+      if (filters.featured === 'featured') {
+        subsectorQuery = subsectorQuery.eq('is_featured', true);
+      } else if (filters.featured === 'not_featured') {
+        subsectorQuery = subsectorQuery.eq('is_featured', false);
+      }
+      
+      if (filters.date_from) {
+        subsectorQuery = subsectorQuery.gte('created_at', filters.date_from);
+      }
+      
+      if (filters.date_to) {
+        subsectorQuery = subsectorQuery.lte('created_at', filters.date_to);
+      }
+
+            const { data: subsectorData, count: subsectorCount } = await subsectorQuery
+        .order(filters.order_by, { ascending: filters.order_direction === 'asc' });
+
+      subsectorNews = (subsectorData || []).map(news => ({
+        ...news,
+      }));
+      
+      totalCount += subsectorCount || 0;
+    }
+
+    // Combinar e ordenar notícias
+    const allNews = [...sectorNews, ...subsectorNews];
+    
+    allNews.sort((a, b) => {
+      const aValue = a[filters.order_by];
+      const bValue = b[filters.order_by];
+      
+      if (filters.order_direction === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+    // Aplicar paginação após combinação
+    const startIndex = (filters.page - 1) * filters.limit;
+    const endIndex = startIndex + filters.limit;
+    const paginatedNews = allNews.slice(startIndex, endIndex);
+
+    // Calcular metadados de paginação baseado no total combinado
+    const actualTotalCount = allNews.length;
+    const totalPages = Math.ceil(actualTotalCount / filters.limit);
+    const hasNextPage = filters.page < totalPages;
+    const hasPrevPage = filters.page > 1;
+
+    return NextResponse.json({
+      data: {
+        pagination: {
+          totalPages,
+          hasNextPage,
+          hasPrevPage,
+        },
+      }
+    });
+
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      const timestamp = new Date().toISOString();
+      return NextResponse.json(
+        { 
+          details: error.issues
+        },
+        { status: 400 }
+      );
+    }
+
+    console.error('[SUPABASE-ERROR] Error in GET news:', { 
+      timestamp: new Date().toISOString()
+    });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Criar nova notícia
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+        
+    const validatedData = newsSchema.parse(body);
+    
+    const supabase = createAdminSupabaseClient();
+    
+    // Verificar autenticação
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json(
+        { error: 'Token de autorização necessário' },
+        { status: 401 }
+      );
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Verificar permissões de admin
+    const hasPermission = await checkAdminPermissions(user.id);
+    if (!hasPermission) {
+      return NextResponse.json(
+        { error: 'Acesso negado - apenas admin geral' },
+        { status: 403 }
+      );
+    }
+
+    // Preparar dados da notícia
+    const newsData = {
+      title: validatedData.title,
+      summary: validatedData.summary,
+      content: validatedData.content,
+      image_url: validatedData.image_url,
+      is_featured: validatedData.is_featured || false,
+      is_published: validatedData.is_published || false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    let newNews;
+
+    // Criar notícia no local apropriado
+    if (validatedData.type === 'sector') {
+      const { data, error } = await supabase
+        .from('sector_news')
+        .insert([{
+          ...newsData,
+          sector_id: validatedData.sector_id,
+        }])
+        .select(`
+          *,
+          sectors(name)
+        `)
+        .single();
+
+      if (error) {
+        console.error('[SUPABASE-ERROR] Error creating sector news:', {
+          newsData,
+          timestamp: new Date().toISOString()
+        });
+        return NextResponse.json(
+          { error: 'Erro ao criar notícia' },
+          { status: 500 }
+        );
+      }
+
+      newNews = {
+        ...data,
+      };
+    } else {
+      const { data, error } = await supabase
+        .from('subsector_news')
+        .insert([{
+          ...newsData,
+          subsector_id: validatedData.subsector_id,
+        }])
+        .select(`
+          *,
+          subsectors(name, sectors(name))
+        `)
+        .single();
+
+      if (error) {
+        console.error('Erro ao criar notícia de subsetor:', error);
+        return NextResponse.json(
+          { error: 'Erro ao criar notícia' },
+          { status: 500 }
+        );
+      }
+
+      newNews = {
+        ...data,
+      };
+    }
+
+    return NextResponse.json({
+      news: newNews
+    }, { status: 201 });
+
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { 
+          details: error.issues
+        },
+        { status: 400 }
+      );
+    }
+
+    console.error('Erro no POST news:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Atualizar notícia existente
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const validatedData = updateNewsSchema.parse(body);
+    const { id, type, ...updateData } = validatedData;
+
+    const supabase = createAdminSupabaseClient();
+    
+    // Verificar autenticação
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json(
+        { error: 'Token de autorização necessário' },
+        { status: 401 }
+      );
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Verificar permissões de admin
+    const hasPermission = await checkAdminPermissions(user.id);
+    if (!hasPermission) {
+      return NextResponse.json(
+        { error: 'Acesso negado - apenas admin geral' },
+        { status: 403 }
+      );
+    }
+
+    // Preparar dados de atualização
+    const cleanUpdateData = Object.fromEntries(
+      Object.entries(updateData).filter(([_, value]) => value !== undefined)
+    );
+
+    cleanUpdateData.updated_at = new Date().toISOString();
+
+    let updatedNews;
+
+    // Atualizar notícia no local apropriado
+    if (type === 'sector') {
+      const { data, error } = await supabase
+        .from('sector_news')
+        .update(cleanUpdateData)
+        .eq('id', id)
+        .select(`
+          *,
+          sectors(name)
+        `)
+        .single();
+
+      if (error) {
+        console.error('Erro ao atualizar notícia de setor:', error);
+        return NextResponse.json(
+          { error: 'Erro ao atualizar notícia' },
+          { status: 500 }
+        );
+      }
+
+      updatedNews = {
+        ...data,
+      };
+    } else {
+      const { data, error } = await supabase
+        .from('subsector_news')
+        .update(cleanUpdateData)
+        .eq('id', id)
+        .select(`
+          *,
+          subsectors(name, sectors(name))
+        `)
+        .single();
+
+      if (error) {
+        console.error('Erro ao atualizar notícia de subsetor:', error);
+        return NextResponse.json(
+          { error: 'Erro ao atualizar notícia' },
+          { status: 500 }
+        );
+      }
+
+      updatedNews = {
+        ...data,
+      };
+    }
+
+    return NextResponse.json({
+      news: updatedNews
+    });
+
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { 
+          details: error.issues
+        },
+        { status: 400 }
+      );
+    }
+
+    console.error('Erro no PUT news:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - Excluir notícia
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const type = searchParams.get('type');
+
+    if (!id || !type) {
+      return NextResponse.json(
+        { error: 'ID e tipo da notícia são obrigatórios' },
+        { status: 400 }
+      );
+    }
+
+    if (!['sector', 'subsector'].includes(type)) {
+      return NextResponse.json(
+        { error: 'Tipo deve ser "sector" ou "subsector"' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createAdminSupabaseClient();
+    
+    // Verificar autenticação
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json(
+        { error: 'Token de autorização necessário' },
+        { status: 401 }
+      );
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Verificar permissões de admin
+    const hasPermission = await checkAdminPermissions(user.id);
+    if (!hasPermission) {
+      return NextResponse.json(
+        { error: 'Acesso negado - apenas admin geral' },
+        { status: 403 }
+      );
+    }
+
+    // Excluir notícia do local apropriado
+    const tableName = type === 'sector' ? 'sector_news' : 'subsector_news';
+    
+    const { error } = await supabase
+      .from(tableName)
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error(`Erro ao excluir notícia de ${type}:`, error);
+      return NextResponse.json(
+        { error: 'Erro ao excluir notícia' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      message: 'Notícia excluída com sucesso'
+    });
+
+  } catch (error: any) {
+    console.error('Erro no DELETE news:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH - Alternar status de publicação
+export async function PATCH(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const type = searchParams.get('type');
+    const action = searchParams.get('action');
+
+    if (!id || !type || !action) {
+      return NextResponse.json(
+        { error: 'ID, tipo e ação são obrigatórios' },
+        { status: 400 }
+      );
+    }
+
+    if (!['sector', 'subsector'].includes(type)) {
+      return NextResponse.json(
+        { error: 'Tipo deve ser "sector" ou "subsector"' },
+        { status: 400 }
+      );
+    }
+
+    if (!['publish', 'unpublish', 'duplicate', 'feature', 'unfeature'].includes(action)) {
+      return NextResponse.json(
+        { error: 'Ação deve ser "publish", "unpublish", "duplicate", "feature" ou "unfeature"' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createAdminSupabaseClient();
+    
+    // Verificar autenticação
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json(
+        { error: 'Token de autorização necessário' },
+        { status: 401 }
+      );
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Verificar permissões de admin
+    const hasPermission = await checkAdminPermissions(user.id);
+    if (!hasPermission) {
+      return NextResponse.json(
+        { error: 'Acesso negado - apenas admin geral' },
+        { status: 403 }
+      );
+    }
+
+    const tableName = type === 'sector' ? 'sector_news' : 'subsector_news';
+
+    if (action === 'duplicate') {
+      // Buscar notícia original
+      const { data: originalNews, error: fetchError } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (fetchError || !originalNews) {
+        return NextResponse.json(
+          { error: 'Notícia não encontrada' },
+          { status: 404 }
+        );
+      }
+
+      // Criar cópia
+      const { title, summary, content, image_url, sector_id, subsector_id, is_featured } = originalNews;
+      const duplicatedData = {
+        title: `${title} (Cópia)`,
+        summary,
+        content,
+        image_url,
+        is_featured: false, // Cópia não vem destacada
+        is_published: false, // Cópia sempre começa como rascunho
+        ...(type === 'sector' ? { sector_id } : { subsector_id }),
+      };
+
+      const { data: duplicatedNews, error: duplicateError } = await supabase
+        .from(tableName)
+        .insert([duplicatedData])
+        .select('*')
+        .single();
+
+      if (duplicateError) {
+        console.error('Erro ao duplicar notícia:', duplicateError);
+        return NextResponse.json(
+          { error: 'Erro ao duplicar notícia' },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        data: duplicatedNews
+      });
+    } else {
+      // Publish/Unpublish/Feature/Unfeature
+      let updateField = {};
+      
+      if (action === 'publish') {
+        updateField = { is_published: true };
+      } else if (action === 'unpublish') {
+        updateField = { is_published: false };
+      } else if (action === 'feature') {
+        updateField = { is_featured: true };
+      } else if (action === 'unfeature') {
+        updateField = { is_featured: false };
+      }
+      
+      const { data: updatedNews, error } = await supabase
+        .from(tableName)
+        .update({ 
+          ...updateField,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error(`Erro ao ${action} notícia:`, error);
+        return NextResponse.json(
+          { error: `Erro ao executar ação ${action}` },
+          { status: 500 }
+        );
+      }
+
+      const actionMessages = {
+        unfeature: 'removida dos destaques'
+      };
+
+      return NextResponse.json({
+        message: `Notícia ${(actionMessages as any)[action]} com sucesso`,
+        data: updatedNews
+      });
+    }
+
+  } catch (error: any) {
+    console.error('Erro no PATCH news:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}

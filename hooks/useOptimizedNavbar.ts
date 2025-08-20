@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/production-logger';
 import { 
   getCachedSectors, 
   setCachedSectors,
@@ -99,7 +100,7 @@ export function useOptimizedUser() {
       });
 
     } catch (error) {
-      console.error('[NavbarHooks] Erro ao verificar usuário:', error instanceof Error ? error.message : error);
+      logger.error('NavbarHooks - Erro ao verificar usuário', error instanceof Error ? error : new Error(String(error)));
     } finally {
       setLoading(false);
     }

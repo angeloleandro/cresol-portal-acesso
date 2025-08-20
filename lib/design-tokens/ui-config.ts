@@ -271,7 +271,7 @@ export const INPUT_CONFIG = {
       right: 'rounded-r-md border-l-0',
     },
     element: {
-      base: 'absolute flex items-center justify-center pointer-events-none',
+      base: 'absolute inset-y-0 flex items-center justify-center pointer-events-none',
       left: 'left-0 pl-3',
       right: 'right-0 pr-3',
       interactive: 'pointer-events-auto cursor-pointer',

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { useAlert } from '@/app/components/alerts';
 import { 
   StandardizedAdminLayout, 
   StandardizedPageHeader, 
@@ -23,6 +24,7 @@ import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
+import { FormSelect } from '@/app/components/forms/FormSelect';
 
 interface Sector {
   id: string;
@@ -52,6 +54,7 @@ interface SectorAdmin {
 
 export default function SectorsManagement() {
   const router = useRouter();
+  const { showSuccess, showError, showWarning } = useAlert();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sectors, setSectors] = useState<Sector[]>([]);
@@ -167,7 +170,7 @@ export default function SectorsManagement() {
     e.preventDefault();
     
     if (!sectorForm.name.trim()) {
-      alert('Nome do setor é obrigatório');
+      showWarning('Nome do setor é obrigatório');
       return;
     }
     
@@ -183,7 +186,7 @@ export default function SectorsManagement() {
           .eq('id', editingSector.id);
         
         if (error) throw error;
-        alert('Setor atualizado com sucesso!');
+        showSuccess('Setor atualizado com sucesso');
       } else {
         // Criar setor
         const { error } = await supabase
@@ -194,14 +197,14 @@ export default function SectorsManagement() {
           }]);
         
         if (error) throw error;
-        alert('Setor criado com sucesso!');
+        showSuccess('Setor criado com sucesso');
       }
       
       resetSectorForm();
       fetchSectors();
     } catch (error) {
       console.error('Erro ao salvar setor:', error);
-      alert('Erro ao salvar setor. Tente novamente.');
+      showError('Erro ao salvar setor', 'Tente novamente.');
     }
   };
 
@@ -209,7 +212,7 @@ export default function SectorsManagement() {
     e.preventDefault();
     
     if (!subsectorForm.name.trim() || !subsectorForm.sector_id) {
-      alert('Nome do sub-setor e setor são obrigatórios');
+      showWarning('Nome do sub-setor e setor são obrigatórios');
       return;
     }
     
@@ -226,7 +229,7 @@ export default function SectorsManagement() {
           .eq('id', editingSubsector.id);
         
         if (error) throw error;
-        alert('Sub-setor atualizado com sucesso!');
+        showSuccess('Sub-setor atualizado com sucesso');
       } else {
         // Criar sub-setor
         const { error } = await supabase
@@ -238,14 +241,14 @@ export default function SectorsManagement() {
           }]);
         
         if (error) throw error;
-        alert('Sub-setor criado com sucesso!');
+        showSuccess('Sub-setor criado com sucesso');
       }
       
       resetSubsectorForm();
       fetchSubsectors();
     } catch (error) {
       console.error('Erro ao salvar sub-setor:', error);
-      alert('Erro ao salvar sub-setor. Tente novamente.');
+      showError('Erro ao salvar sub-setor', 'Tente novamente.');
     }
   };
 
@@ -277,18 +280,18 @@ export default function SectorsManagement() {
       if (type === 'sector') {
         await supabase.from('sector_admins').delete().eq('sector_id', data.id);
         await supabase.from('sectors').delete().eq('id', data.id);
-        alert('Setor excluído com sucesso!');
+        showSuccess('Setor excluído com sucesso');
         fetchSectors();
         fetchSectorAdmins();
       } else {
         await supabase.from('subsector_admins').delete().eq('subsector_id', data.id);
         await supabase.from('subsectors').delete().eq('id', data.id);
-        alert('Sub-setor excluído com sucesso!');
+        showSuccess('Sub-setor excluído com sucesso');
         fetchSubsectors();
       }
     } catch (error) {
       console.error(`Erro ao excluir ${type}:`, error);
-      alert(`Erro ao excluir ${type}. Tente novamente.`);
+      showError(`Erro ao excluir ${type}`, 'Tente novamente.');
     } finally {
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
@@ -544,19 +547,19 @@ export default function SectorsManagement() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Setor *
                     </label>
-                    <select
+                    <FormSelect
                       value={subsectorForm.sector_id}
                       onChange={(e) => setSubsectorForm({ ...subsectorForm, sector_id: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       required
-                    >
-                      <option value="">Selecione um setor</option>
-                      {sectors.map(sector => (
-                        <option key={sector.id} value={sector.id}>
-                          {sector.name}
-                        </option>
-                      ))}
-                    </select>
+                      options={[
+                        { value: '', label: 'Selecione um setor' },
+                        ...sectors.map(sector => ({
+                          value: sector.id,
+                          label: sector.name
+                        }))
+                      ]}
+                      placeholder="Selecione um setor"
+                    />
                   </div>
                   
                   <div>

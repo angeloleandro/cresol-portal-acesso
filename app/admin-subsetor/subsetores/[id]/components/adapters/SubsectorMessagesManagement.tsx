@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { useAlert } from '@/app/components/alerts';
 import { MessagesManagement } from '../MessagesManagement';
 
 interface SubsectorMessage {
@@ -22,6 +23,7 @@ interface SubsectorMessagesManagementProps {
 export function SubsectorMessagesManagement({
   subsectorId
 }: SubsectorMessagesManagementProps) {
+  const { showError, content } = useAlert();
   const [messages, setMessages] = useState<SubsectorMessage[]>([]);
   const [showDrafts, setShowDrafts] = useState(false);
   const [totalDraftMessagesCount, setTotalDraftMessagesCount] = useState(0);
@@ -89,7 +91,7 @@ export function SubsectorMessagesManagement({
       await fetchMessages();
     } catch (error) {
       console.error('Error deleting message:', error);
-      alert('Erro ao excluir mensagem');
+      showError('Erro ao excluir mensagem', 'Tente novamente.');
     }
   };
 

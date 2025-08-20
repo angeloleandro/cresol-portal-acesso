@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 
+import { logger } from '../../lib/production-logger';
 interface OptimizedImageProps {
   src: string;
   alt: string;
@@ -50,7 +51,7 @@ export default function OptimizedImage({
   const getOptimalQuality = () => {
     if (quality !== 75) return quality; // Respeitar quality explícita
     
-    const contextQuality = {
+    const contextQuality: Record<string, number> = {
       avatar: width && width <= 48 ? 60 : width && width <= 96 ? 70 : 80,
       thumbnail: 65,
       gallery: 80,
@@ -82,8 +83,7 @@ export default function OptimizedImage({
 
   // Log de debug apenas em desenvolvimento
   // if (process.env.NODE_ENV === 'development') {
-  //   console.log('OptimizedImage Config:', {
-  //     src: imageSrc?.substring(0, 50) + '...',
+  //    + '...',
   //     alt,
   //     isVercel,
   //     isSupabaseImage,
@@ -139,7 +139,7 @@ export default function OptimizedImage({
       
       // Para Vercel em produção, verificar se é HTTPS
       if (isVercel && process.env.NODE_ENV === 'production' && parsedUrl.protocol !== 'https:') {
-        console.warn('OptimizedImage: URL externa deve usar HTTPS para Vercel Image Optimization', url);
+        logger.warn('OptimizedImage: URL externa deve usar HTTPS para Vercel Image Optimization', url);
         return false;
       }
       
@@ -217,6 +217,7 @@ export default function OptimizedImage({
 
   // Para outros formatos (PNG, JPG, WebP), usar next/image
   const imageProps = {
+    ...props,
     src: imageSrc,
     alt,
     className,
@@ -227,8 +228,7 @@ export default function OptimizedImage({
     quality: getOptimalQuality(), // ✅ Quality dinâmica baseada no contexto
     placeholder: context === 'avatar' ? 'blur' : placeholder, // ✅ Blur automático para avatares
     blurDataURL: getBlurDataURL(), // ✅ Placeholder blur específico
-    unoptimized: shouldForceUnoptimized || unoptimized, // Apenas para Supabase
-    ...props
+    unoptimized: shouldForceUnoptimized || unoptimized // Apenas para Supabase
   };
 
   if (fill) {

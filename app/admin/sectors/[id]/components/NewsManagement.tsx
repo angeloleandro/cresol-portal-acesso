@@ -7,6 +7,8 @@ import { formatDate } from '../utils/dateFormatters';
 import { useImageUpload } from '../hooks/useImageUpload';
 import { ImageUploadCropper } from './ImageUploadCropper';
 import { ToggleDraftsButton } from './ToggleDraftsButton';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import DeleteModal from '@/app/components/ui/DeleteModal';
 
 interface NewsManagementProps {
   sectorId: string;
@@ -40,6 +42,7 @@ export function NewsManagement({
   });
 
   const imageUpload = useImageUpload();
+  const deleteModal = useDeleteModal('notícia');
 
   const handleOpenModal = (newsItem?: SectorNews) => {
     if (newsItem) {
@@ -196,15 +199,17 @@ export function NewsManagement({
     }
   };
 
-  const handleDeleteNews = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta notícia?')) return;
+  const handleDeleteClick = (newsItem: SectorNews) => {
+    deleteModal.openDeleteModal(newsItem, newsItem.title);
+  };
+
+  const handleDeleteNews = async (newsItem: SectorNews) => {
     try {
-      await onDelete(id);
+      await onDelete(newsItem.id);
       // onDelete já chama refreshContent internamente
     } catch (error) {
       console.error('Erro ao deletar notícia:', error);
     }
-    await onDelete(id);
   };
 
   return (
@@ -279,7 +284,7 @@ export function NewsManagement({
                     Editar
                   </button>
                   <button
-                    onClick={() => handleDeleteNews(item.id)}
+                    onClick={() => handleDeleteClick(item)}
                     className="text-red-600 hover:text-red-700"
                   >
                     Excluir
@@ -507,6 +512,16 @@ export function NewsManagement({
           </div>
         </div>
       )}
+
+      {/* Modal de Exclusão */}
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeDeleteModal}
+        onConfirm={() => deleteModal.confirmDelete(handleDeleteNews)}
+        itemName={deleteModal.itemName}
+        itemType={deleteModal.itemType}
+        isLoading={deleteModal.isDeleting}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 
+import { logger } from '../../../../lib/production-logger';
 interface PerformanceMetrics {
   renderTime: number;
   componentMounts: number;
@@ -182,7 +183,7 @@ export function useMemoryLeakDetection(componentName: string) {
     if (process.env.NODE_ENV === 'development') {
       // Warn about potential memory leaks
       if (instanceCountRef.current > 50) {
-        console.warn(
+        logger.warn(
           `Potential memory leak in ${componentName}:`,
           `${instanceCountRef.current} instances created`
         );

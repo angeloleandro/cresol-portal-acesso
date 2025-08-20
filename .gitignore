@@ -35,3 +35,7 @@ yarn-error.log*
 
 # claude settings with sensitive tokens
 .claude/settings.local.json
+
+# MCP configurations with tokens
+.claude_mcp.json
+.mcp.json

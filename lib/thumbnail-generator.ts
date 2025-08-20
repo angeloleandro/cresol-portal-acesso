@@ -3,6 +3,8 @@
  * Gera thumbnails automáticos de vídeos usando Canvas API
  */
 
+import { logger } from './production-logger';
+
 export interface ThumbnailOptions {
   seekTime?: number; // Tempo em segundos para capturar (default: auto)
   timestamp?: number; // Alias para seekTime para compatibilidade
@@ -49,7 +51,7 @@ export async function generateVideoThumbnail(
     throw new Error(`Navegador não suporta geração de thumbnails: ${support.reasons.join(', ')}`);
   }
 
-  console.log('🎬 Iniciando geração de thumbnail para:', {
+  logger.debug('Iniciando geração de thumbnail', {
     nome: videoFile.name,
     tamanho: videoFile.size,
     tipo: videoFile.type,
@@ -73,7 +75,7 @@ export async function generateVideoThumbnail(
     const timeout = setTimeout(() => {
       if (!isResolved) {
         isResolved = true;
-        console.error('❌ Timeout ao gerar thumbnail após 15 segundos');
+        logger.error('Timeout ao gerar thumbnail após 15 segundos');
         if (videoUrl) URL.revokeObjectURL(videoUrl);
         reject(new Error('Timeout ao gerar thumbnail (15s)'));
       }
@@ -85,21 +87,22 @@ export async function generateVideoThumbnail(
 
     const attemptLoad = () => {
       loadAttempts++;
-      console.log(`🔄 Tentativa ${loadAttempts}/${maxLoadAttempts} de carregamento...`);
+      logger.debug(`Tentativa ${loadAttempts}/${maxLoadAttempts} de carregamento...`);
       
       video.load();
       
       // Timeout para esta tentativa específica
       const attemptTimeout = setTimeout(() => {
         if (loadAttempts < maxLoadAttempts) {
-          console.warn(`⚠️ Tentativa ${loadAttempts} timeout, tentando novamente...`);
+          logger.debug(`Tentativa ${loadAttempts} timeout, tentando novamente...`);
           attemptLoad();
         }
       }, 5000);
 
       video.onloadedmetadata = () => {
         clearTimeout(attemptTimeout);
-        console.log('📊 Metadata carregada na tentativa', loadAttempts, ':', {
+        logger.debug('Metadata carregada na tentativa', {
+          tentativa: loadAttempts,
           duração: video.duration,
           largura: video.videoWidth,
           altura: video.videoHeight,
@@ -109,7 +112,7 @@ export async function generateVideoThumbnail(
 
         if (video.duration <= 0 || isNaN(video.duration)) {
           if (loadAttempts < maxLoadAttempts) {
-            console.warn('⚠️ Duração inválida, tentando recarregar...');
+            logger.debug('Duração inválida, tentando recarregar...');
             attemptLoad();
             return;
           }
@@ -117,7 +120,9 @@ export async function generateVideoThumbnail(
           clearTimeout(timeout);
           if (!isResolved) {
             isResolved = true;
-            console.error('❌ Duração do vídeo permanece inválida após', maxLoadAttempts, 'tentativas');
+            logger.error('Duração do vídeo permanece inválida após múltiplas tentativas', undefined, {
+              tentativas: maxLoadAttempts
+            });
             if (videoUrl) URL.revokeObjectURL(videoUrl);
             reject(new Error('Vídeo não possui duração válida após múltiplas tentativas'));
           }
@@ -128,14 +133,14 @@ export async function generateVideoThumbnail(
         const seekTime = options.seekTime ?? Math.min(3, video.duration * 0.2);
         const finalSeekTime = Math.max(0, Math.min(seekTime, video.duration - 0.1));
         
-        console.log('⏱️ Navegando para timestamp:', finalSeekTime);
+        logger.debug('Navegando para timestamp', { timestamp: finalSeekTime });
         video.currentTime = finalSeekTime;
       };
     };
 
     video.onseeked = () => {
       try {
-        console.log('🎯 Seek completo em:', video.currentTime + 's');
+        logger.debug('Seek completo', { currentTime: video.currentTime });
 
         // Calcular dimensões mantendo aspect ratio
         let { videoWidth: width, videoHeight: height } = video;
@@ -144,24 +149,24 @@ export async function generateVideoThumbnail(
           throw new Error('Dimensões do vídeo inválidas');
         }
 
-        console.log('📏 Dimensões originais:', { width, height });
+        logger.debug('Dimensões originais', { width, height });
         
         if (width > maxWidth || height > maxHeight) {
           const ratio = Math.min(maxWidth / width, maxHeight / height);
           width = Math.floor(width * ratio);
           height = Math.floor(height * ratio);
-          console.log('📏 Dimensões redimensionadas:', { width, height, ratio });
+          logger.debug('Dimensões redimensionadas', { width, height, ratio });
         }
 
         // Configurar canvas
         canvas.width = width;
         canvas.height = height;
 
-        console.log('🎨 Canvas configurado:', { width, height });
+        logger.debug('Canvas configurado', { width, height });
 
         // Desenhar frame do vídeo
         ctx.drawImage(video, 0, 0, width, height);
-        console.log('🖼️ Frame desenhado no canvas');
+        logger.debug('Frame desenhado no canvas');
 
         // Converter para blob
         canvas.toBlob((blob) => {
@@ -169,7 +174,7 @@ export async function generateVideoThumbnail(
           
           if (!isResolved && blob) {
             isResolved = true;
-            console.log('✅ Thumbnail gerado com sucesso:', {
+            logger.debug('Thumbnail gerado com sucesso', {
               tamanho: blob.size,
               tipo: blob.type,
               timestamp: video.currentTime
@@ -187,7 +192,7 @@ export async function generateVideoThumbnail(
             });
           } else if (!isResolved) {
             isResolved = true;
-            console.error('❌ Falha ao gerar blob da thumbnail');
+            logger.error('Falha ao gerar blob da thumbnail');
             if (videoUrl) URL.revokeObjectURL(videoUrl);
             reject(new Error('Falha ao gerar thumbnail - blob nulo'));
           }
@@ -197,7 +202,7 @@ export async function generateVideoThumbnail(
         clearTimeout(timeout);
         if (!isResolved) {
           isResolved = true;
-          console.error('❌ Erro ao processar thumbnail:', error);
+          logger.error('Erro ao processar thumbnail', error);
           if (videoUrl) URL.revokeObjectURL(videoUrl);
           reject(error instanceof Error ? error : new Error('Erro ao processar thumbnail'));
         }
@@ -205,10 +210,10 @@ export async function generateVideoThumbnail(
     };
 
     video.onerror = (error) => {
-      console.error('❌ Erro ao carregar vídeo na tentativa', loadAttempts, ':', error);
+      logger.error('Erro ao carregar vídeo', error, { tentativa: loadAttempts });
       
       if (loadAttempts < maxLoadAttempts) {
-        console.warn('⚠️ Erro de carregamento, tentando novamente...');
+        logger.debug('Erro de carregamento, tentando novamente...');
         setTimeout(() => attemptLoad(), 1000);
         return;
       }
@@ -216,14 +221,14 @@ export async function generateVideoThumbnail(
       clearTimeout(timeout);
       if (!isResolved) {
         isResolved = true;
-        console.error('❌ Falha definitiva ao carregar vídeo após', maxLoadAttempts, 'tentativas');
+        logger.error('Falha definitiva ao carregar vídeo', undefined, { tentativas: maxLoadAttempts });
         if (videoUrl) URL.revokeObjectURL(videoUrl);
         reject(new Error(`Erro ao carregar vídeo para thumbnail (${maxLoadAttempts} tentativas)`));
       }
     };
 
     video.onabort = () => {
-      console.warn('⚠️ Carregamento abortado na tentativa', loadAttempts);
+      logger.debug('Carregamento abortado', { tentativa: loadAttempts });
       
       if (loadAttempts < maxLoadAttempts) {
         setTimeout(() => attemptLoad(), 1000);
@@ -233,30 +238,30 @@ export async function generateVideoThumbnail(
       clearTimeout(timeout);
       if (!isResolved) {
         isResolved = true;
-        console.error('❌ Carregamento foi abortado após', maxLoadAttempts, 'tentativas');
+        logger.error('Carregamento foi abortado', undefined, { tentativas: maxLoadAttempts });
         if (videoUrl) URL.revokeObjectURL(videoUrl);
         reject(new Error('Carregamento do vídeo foi abortado'));
       }
     };
 
     video.onstalled = () => {
-      console.warn('⚠️ Carregamento travado na tentativa', loadAttempts);
+      logger.debug('Carregamento travado', { tentativa: loadAttempts });
     };
 
     video.onloadstart = () => {
-      console.log('🔄 Início do carregamento na tentativa', loadAttempts);
+      logger.debug('Início do carregamento', { tentativa: loadAttempts });
     };
 
     video.onloadeddata = () => {
-      console.log('📊 Dados carregados na tentativa', loadAttempts);
+      logger.debug('Dados carregados', { tentativa: loadAttempts });
     };
 
     video.oncanplay = () => {
-      console.log('▶️ Pode reproduzir na tentativa', loadAttempts);
+      logger.debug('Pode reproduzir', { tentativa: loadAttempts });
     };
 
     video.oncanplaythrough = () => {
-      console.log('🏁 Pode reproduzir completo na tentativa', loadAttempts);
+      logger.debug('Pode reproduzir completo', { tentativa: loadAttempts });
     };
 
     // Configurar vídeo
@@ -271,7 +276,7 @@ export async function generateVideoThumbnail(
     videoUrl = URL.createObjectURL(videoFile);
     video.src = videoUrl;
     
-    console.log('🔄 Iniciando processo de carregamento do vídeo...', {
+    logger.debug('Iniciando processo de carregamento do vídeo', {
       fileName: videoFile.name,
       fileSize: videoFile.size,
       fileType: videoFile.type
@@ -289,7 +294,7 @@ export async function generateVideoThumbnailSimple(
   videoSource: File | string,
   options: ThumbnailOptions = {}
 ): Promise<ThumbnailResult> {
-  console.log('🔄 Tentando geração simples de thumbnail...');
+  logger.debug('Tentando geração simples de thumbnail...');
   
   return new Promise((resolve, reject) => {
     const video = document.createElement('video');
@@ -319,7 +324,7 @@ export async function generateVideoThumbnailSimple(
     }, 8000);
 
     video.addEventListener('loadedmetadata', () => {
-      console.log('📊 Metadata simples carregada');
+      logger.debug('Metadata simples carregada');
       
       // Usar timestamp/seekTime ou 0 como fallback
       const seekTime = options.seekTime ?? options.timestamp ?? 0;
@@ -347,7 +352,7 @@ export async function generateVideoThumbnailSimple(
           clearTimeout(timeout);
           if (!resolved && blob) {
             resolved = true;
-            console.log('✅ Thumbnail simples gerado');
+            logger.debug('Thumbnail simples gerado');
             cleanup();
             resolve({
               blob,
@@ -414,7 +419,7 @@ export async function generateMultipleThumbnails(
       });
       results.push(result);
     } catch (error) {
-      console.warn(`Falha ao gerar thumbnail para timestamp ${timestamp}:`, error);
+      logger.debug(`Falha ao gerar thumbnail para timestamp ${timestamp}`, error);
       
       // Tentar versão simples como fallback
       try {
@@ -423,9 +428,9 @@ export async function generateMultipleThumbnails(
           seekTime: timestamp
         });
         results.push(simpleResult);
-        console.log(`✅ Thumbnail simples gerado para timestamp ${timestamp}`);
+        logger.debug(`Thumbnail simples gerado para timestamp ${timestamp}`);
       } catch (simpleError) {
-        console.warn(`Falha também na versão simples para timestamp ${timestamp}:`, simpleError);
+        logger.debug(`Falha também na versão simples para timestamp ${timestamp}`, simpleError);
       }
     }
   }
@@ -458,7 +463,7 @@ export function checkThumbnailSupport(): {
 } {
   const reasons: string[] = [];
   
-  console.log('🔍 Verificando suporte do navegador para geração de thumbnails...');
+  logger.debug('Verificando suporte do navegador para geração de thumbnails...');
   
   // Verificar Canvas 2D
   try {
@@ -471,7 +476,7 @@ export function checkThumbnailSupport(): {
       try {
         ctx.fillStyle = 'red';
         ctx.fillRect(0, 0, 10, 10);
-        console.log('✅ Canvas 2D funcional');
+        logger.debug('Canvas 2D funcional');
       } catch (error) {
         reasons.push('Canvas 2D não funcional');
       }
@@ -491,7 +496,7 @@ export function checkThumbnailSupport(): {
       const webmSupport = video.canPlayType('video/webm');
       const movSupport = video.canPlayType('video/quicktime');
       
-      console.log('🎥 Suporte a formatos de vídeo:', {
+      logger.debug('Suporte a formatos de vídeo', {
         mp4: mp4Support,
         webm: webmSupport,
         mov: movSupport
@@ -509,19 +514,19 @@ export function checkThumbnailSupport(): {
   if (typeof Blob === 'undefined') {
     reasons.push('Blob API não suportada');
   } else {
-    console.log('✅ Blob API disponível');
+    logger.debug('Blob API disponível');
   }
   
   if (typeof URL.createObjectURL === 'undefined') {
     reasons.push('URL.createObjectURL não suportado');
   } else {
-    console.log('✅ URL.createObjectURL disponível');
+    logger.debug('URL.createObjectURL disponível');
   }
   
   // Verificar se estamos em um contexto seguro (HTTPS ou localhost)
   const isSecureContext = window.isSecureContext || location.protocol === 'https:' || location.hostname === 'localhost';
   if (!isSecureContext) {
-    console.warn('⚠️ Contexto não seguro - algumas funcionalidades podem não funcionar');
+    logger.warn('Contexto não seguro - algumas funcionalidades podem não funcionar');
   }
   
   // Verificar User Agent para dispositivos móveis conhecidos por problemas
@@ -529,14 +534,14 @@ export function checkThumbnailSupport(): {
   const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
   const isIOS = /ipad|iphone|ipod/.test(userAgent);
   
-  console.log('📱 Informações do dispositivo:', {
+  logger.debug('Informações do dispositivo', {
     isMobile,
     isIOS,
     userAgent: userAgent.substring(0, 100) + '...'
   });
   
   if (isIOS) {
-    console.warn('⚠️ iOS detectado - pode ter limitações com geração de thumbnails');
+    logger.debug('iOS detectado - pode ter limitações com geração de thumbnails');
   }
   
   const result = {
@@ -544,7 +549,7 @@ export function checkThumbnailSupport(): {
     reasons
   };
   
-  console.log(result.supported ? '✅ Navegador suporta geração de thumbnails' : '❌ Navegador NÃO suporta geração de thumbnails:', result.reasons);
+  logger.debug(result.supported ? 'Navegador suporta geração de thumbnails' : 'Navegador NÃO suporta geração de thumbnails', { reasons: result.reasons });
   
   return result;
 }
@@ -557,7 +562,7 @@ export function cleanupObjectUrls(urls: string[]): void {
     try {
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.warn('Erro ao limpar URL de objeto:', error);
+      logger.debug('Erro ao limpar URL de objeto', error);
     }
   });
 }

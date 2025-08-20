@@ -196,6 +196,6 @@ export function getRouteType(pathname: string): {
     isSectorAdmin: isSectorAdminRoute,
     isApiAdmin: isApiAdminRoute && !isPublicApi,
     isPublicApi,
-    requiresAuth: isAdminRoute || isSectorAdminRoute || isApiAdminRoute || isPublicApi
+    requiresAuth: pathname === '/' || isAdminRoute || isSectorAdminRoute || isApiAdminRoute || isPublicApi
   };
 }

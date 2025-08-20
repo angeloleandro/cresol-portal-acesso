@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client';
 import { Group, User, WorkLocation } from '../types/sector.types';
 import { formatDate } from '../utils/dateFormatters';
 import UserSelectionFilter from '@/app/components/ui/UserSelectionFilter';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import DeleteModal from '@/app/components/ui/DeleteModal';
 
 interface GroupsManagementProps {
   sectorId: string;
@@ -41,6 +43,9 @@ const GroupsManagement = memo(function GroupsManagement({
     members: [] as string[]
   });
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  
+  // Modal de exclusão
+  const deleteModal = useDeleteModal('grupo');
 
   const handleOpenModal = useCallback((editGroup?: Group) => {
     if (editGroup) {
@@ -88,7 +93,9 @@ const GroupsManagement = memo(function GroupsManagement({
     }
 
     if (selectedUserIds.length === 0) {
-      alert('Selecione pelo menos um membro para o grupo');
+      // TODO: Implementar sistema de notificação moderno (toast/alert)
+      console.warn('Validação: Selecione pelo menos um membro para o grupo');
+      // Por ora, retornar sem ação até implementar sistema de notificação
       return;
     }
 
@@ -133,7 +140,9 @@ const GroupsManagement = memo(function GroupsManagement({
       await onRefresh();
       handleCloseModal();
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Erro ao salvar grupo. Tente novamente.');
+      // TODO: Implementar sistema de notificação moderno (toast/alert)
+      console.error('Erro ao salvar grupo:', error instanceof Error ? error.message : error);
+      // Por ora, mostrar erro no console até implementar sistema de notificação
     } finally {
       setIsSubmitting(false);
     }
@@ -143,11 +152,11 @@ const GroupsManagement = memo(function GroupsManagement({
     setSelectedUserIds(userIds);
   }, []);
 
-  const handleDeleteGroup = useCallback(async (groupId: string, groupName: string) => {
-    if (!confirm(`Tem certeza que deseja excluir o grupo "${groupName}"?`)) {
-      return;
-    }
+  const handleDeleteClick = useCallback((group: Group) => {
+    deleteModal.openDeleteModal(group, group.name);
+  }, [deleteModal]);
 
+  const handleDeleteGroup = useCallback(async (group: Group) => {
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -156,7 +165,7 @@ const GroupsManagement = memo(function GroupsManagement({
         throw new Error('Usuário não autenticado');
       }
 
-      const response = await fetch(`/api/notifications/groups?id=${groupId}`, {
+      const response = await fetch(`/api/notifications/groups?id=${group.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`
@@ -170,7 +179,9 @@ const GroupsManagement = memo(function GroupsManagement({
 
       await onRefresh();
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Erro ao excluir grupo. Tente novamente.');
+      // TODO: Implementar sistema de notificação moderno (toast/alert)
+      console.error('Erro ao excluir grupo:', error instanceof Error ? error.message : error);
+      // Por ora, mostrar erro no console até implementar sistema de notificação
     }
   }, [onRefresh]);
 
@@ -236,7 +247,7 @@ const GroupsManagement = memo(function GroupsManagement({
                         </svg>
                       </button>
                       <button
-                        onClick={() => handleDeleteGroup(group.id, group.name)}
+                        onClick={() => handleDeleteClick(group)}
                         className="p-1 text-red-500 hover:text-red-700 transition-colors"
                         title="Excluir grupo"
                       >
@@ -329,6 +340,16 @@ const GroupsManagement = memo(function GroupsManagement({
           </div>
         </div>
       )}
+
+      {/* Modal de Exclusão */}
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeDeleteModal}
+        onConfirm={() => deleteModal.confirmDelete(handleDeleteGroup)}
+        itemName={deleteModal.itemName}
+        itemType={deleteModal.itemType}
+        isLoading={deleteModal.isDeleting}
+      />
     </div>
   );
 });

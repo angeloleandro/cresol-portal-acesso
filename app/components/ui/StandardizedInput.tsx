@@ -314,7 +314,7 @@ export const StandardizedInput = forwardRef<HTMLInputElement | HTMLTextAreaEleme
               {element || (iconName && <Icon name={iconName} className={INPUT_CONFIG.sizes[size].iconSize} />)}
             </button>
           ) : (
-            <div className="text-gray-400">
+            <div className="flex items-center justify-center w-full h-full text-gray-400">
               {element || (iconName && <Icon name={iconName} className={INPUT_CONFIG.sizes[size].iconSize} />)}
             </div>
           )}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { handleApiError, devLog } from '@/lib/error-handler';
+import { adminCORS } from '@/lib/cors-config';
 
 interface EconomicIndicator {
   id?: string;
@@ -14,7 +15,7 @@ interface EconomicIndicator {
 }
 
 // GET - Listar todos os indicadores
-export async function GET(request: NextRequest) {
+export const GET = adminCORS(async (request: NextRequest) => {
   try {
     const supabase = createClient();
     
@@ -56,10 +57,10 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST - Criar novo indicador
-export async function POST(request: NextRequest) {
+export const POST = adminCORS(async (request: NextRequest) => {
   try {
     const supabase = createClient();
     
@@ -121,10 +122,10 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT - Atualizar indicador existente
-export async function PUT(request: NextRequest) {
+export const PUT = adminCORS(async (request: NextRequest) => {
   try {
     const supabase = createClient();
     
@@ -156,12 +157,6 @@ export async function PUT(request: NextRequest) {
     const { data: indicator, error } = await supabase
       .from('economic_indicators')
       .update({
-        title: body.title,
-        value: body.value,
-        icon: body.icon,
-        description: body.description,
-        display_order: body.display_order,
-        is_active: body.is_active,
         issue_date: body.issue_date
       })
       .eq('id', body.id)
@@ -186,10 +181,10 @@ export async function PUT(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // DELETE - Excluir indicador
-export async function DELETE(request: NextRequest) {
+export const DELETE = adminCORS(async (request: NextRequest) => {
   try {
     const supabase = createClient();
     
@@ -242,4 +237,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+});

@@ -7,8 +7,11 @@ import AuthDebugPanel from '@/app/components/AuthDebugPanel';
 import Link from 'next/link';
 import { useSupabaseClient } from '@/hooks/useSupabaseClient';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { useAlert } from '@/app/components/alerts';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import DeleteModal from '@/app/components/ui/DeleteModal';
 
 interface Sector {
   id: string;
@@ -44,6 +47,7 @@ export default function SectorContentManagement() {
   const router = useRouter();
   const params = useParams();
   const sectorId = params.id as string;
+  const { showError, showWarning, content } = useAlert();
   
   const { user, profile, isAuthenticated, isSectorAdmin, loading: authLoading, signOut: authSignOut } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -59,6 +63,10 @@ export default function SectorContentManagement() {
   
   // Cliente Supabase autenticado
   const supabase = useSupabaseClient();
+
+  // Modais de exclusão
+  const deleteNewsModal = useDeleteModal('notícia');
+  const deleteEventModal = useDeleteModal('evento');
 
   // Estados para o formulário de notícias
   const [showNewsForm, setShowNewsForm] = useState(false);
@@ -231,13 +239,13 @@ export default function SectorContentManagement() {
       // Verificar o tipo de arquivo - apenas formatos otimizados para web
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Por favor, selecione apenas arquivos PNG, JPG ou WebP.');
+        showWarning('Por favor, selecione apenas arquivos PNG, JPG ou WebP.');
         return;
       }
       
       // Verificar o tamanho do arquivo (limite de 2MB)
       if (file.size > 2 * 1024 * 1024) {
-        alert('A imagem deve ter menos de 2MB.');
+        showWarning('A imagem deve ter menos de 2MB.');
         return;
       }
       
@@ -251,7 +259,7 @@ export default function SectorContentManagement() {
         
         // Verificar dimensões mínimas (recomendado: pelo menos 300x200)
         if (img.width < 300 || img.height < 200) {
-          alert('Para melhor qualidade, recomendamos imagens com pelo menos 300x200 pixels.');
+          showWarning('Para melhor qualidade, recomendamos imagens com pelo menos 300x200 pixels.');
         }
         
         setNewsImageFile(file);
@@ -393,7 +401,7 @@ export default function SectorContentManagement() {
       setShowNewsForm(false);
       fetchNews();
     } catch (error: any) {
-      alert(`Erro ao salvar notícia: ${error.message}`);
+      showError('Erro ao salvar notícia', error.message);
     }
   };
 
@@ -453,7 +461,7 @@ export default function SectorContentManagement() {
       setShowEventForm(false);
       fetchEvents();
     } catch (error) {
-      alert('Erro ao salvar evento. Tente novamente.');
+      showError('Erro ao salvar evento', 'Tente novamente.');
     }
   };
 
@@ -497,11 +505,13 @@ export default function SectorContentManagement() {
     setActiveTab('events');
   };
 
-  const deleteNews = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta notícia?')) return;
-    
+  const handleDeleteNewsClick = (newsItem: SectorNews) => {
+    deleteNewsModal.openDeleteModal(newsItem, newsItem.title);
+  };
+
+  const deleteNews = async (newsItem: SectorNews) => {
     try {
-      const response = await fetch(`/api/admin/sector-content?type=sector_news&id=${id}`, {
+      const response = await fetch(`/api/admin/sector-content?type=sector_news&id=${newsItem.id}`, {
         method: 'DELETE',
       });
       
@@ -512,15 +522,17 @@ export default function SectorContentManagement() {
       
       fetchNews();
     } catch (error) {
-      alert('Erro ao excluir notícia. Tente novamente.');
+      showError('Erro ao excluir notícia', 'Tente novamente.');
     }
   };
 
-  const deleteEvent = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este evento?')) return;
-    
+  const handleDeleteEventClick = (eventItem: SectorEvent) => {
+    deleteEventModal.openDeleteModal(eventItem, eventItem.title);
+  };
+
+  const deleteEvent = async (eventItem: SectorEvent) => {
     try {
-      const response = await fetch(`/api/admin/sector-content?type=sector_events&id=${id}`, {
+      const response = await fetch(`/api/admin/sector-content?type=sector_events&id=${eventItem.id}`, {
         method: 'DELETE',
       });
       
@@ -531,7 +543,7 @@ export default function SectorContentManagement() {
       
       fetchEvents();
     } catch (error) {
-      alert('Erro ao excluir evento. Tente novamente.');
+      showError('Erro ao excluir evento', 'Tente novamente.');
     }
   };
 
@@ -885,7 +897,7 @@ export default function SectorContentManagement() {
                               </svg>
                             </button>
                             <button
-                              onClick={() => deleteNews(item.id)}
+                              onClick={() => handleDeleteNewsClick(item)}
                               className="text-red-500 hover:text-red-700"
                             >
                               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1102,7 +1114,7 @@ export default function SectorContentManagement() {
                             </svg>
                           </button>
                           <button
-                            onClick={() => deleteEvent(item.id)}
+                            onClick={() => handleDeleteEventClick(item)}
                             className="text-red-500 hover:text-red-700"
                           >
                             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1173,6 +1185,25 @@ export default function SectorContentManagement() {
           <AuthDebugPanel />
         </div>
       )}
+
+      {/* Modais de Exclusão */}
+      <DeleteModal
+        isOpen={deleteNewsModal.isOpen}
+        onClose={deleteNewsModal.closeDeleteModal}
+        onConfirm={() => deleteNewsModal.confirmDelete(deleteNews)}
+        itemName={deleteNewsModal.itemName}
+        itemType={deleteNewsModal.itemType}
+        isLoading={deleteNewsModal.isDeleting}
+      />
+
+      <DeleteModal
+        isOpen={deleteEventModal.isOpen}
+        onClose={deleteEventModal.closeDeleteModal}
+        onConfirm={() => deleteEventModal.confirmDelete(deleteEvent)}
+        itemName={deleteEventModal.itemName}
+        itemType={deleteEventModal.itemType}
+        isLoading={deleteEventModal.isDeleting}
+      />
     </div>
   );
 } 

@@ -42,16 +42,29 @@ export interface SectorEvent {
   updated_at: string;
 }
 
-export interface Group {
+export interface MessageGroup {
   id: string;
   name: string;
   description: string;
+  color_theme: string;
   sector_id: string | null;
+  subsector_id: string | null;
+  created_by: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  // Campos relacionados
+  sectors?: { name: string };
+  subsectors?: { name: string; sectors: { name: string } };
+  profiles?: { full_name: string };
+}
+
+// Mantendo interface Group para compatibilidade com código existente
+export interface Group extends MessageGroup {
   is_automatic: boolean;
   type?: 'manual' | 'automatic';
   members: string[];
   member_count: number;
-  created_at: string;
 }
 
 export interface Message {

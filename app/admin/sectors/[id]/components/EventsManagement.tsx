@@ -1,9 +1,12 @@
 // Componente de gerenciamento de eventos do setor
 
 import React, { useState, useEffect } from 'react';
+import { useAlert } from '@/app/components/alerts';
 import { SectorEvent } from '../types/sector.types';
 import { formatEventPeriod, formatForDateTimeInput } from '../utils/dateFormatters';
 import { ToggleDraftsButton } from './ToggleDraftsButton';
+import DeleteModal from '@/app/components/ui/DeleteModal';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
 
 interface EventsManagementProps {
   sectorId: string;
@@ -24,21 +27,14 @@ export function EventsManagement({
   onRefresh,
   onDelete
 }: EventsManagementProps) {
-
+  const alert = useAlert();
+  const deleteModal = useDeleteModal('evento');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
   const [currentEvent, setCurrentEvent] = useState<Partial<SectorEvent>>({
-    title: '',
-    description: '',
-    location: '',
-    start_date: new Date().toISOString(),
-    end_date: null,
-    is_featured: false,
     is_published: true
   });
-
 
   const handleOpenModal = (event?: SectorEvent) => {
     if (event) {
@@ -46,12 +42,6 @@ export function EventsManagement({
       setIsEditing(true);
     } else {
       setCurrentEvent({
-        title: '',
-        description: '',
-        location: '',
-        start_date: new Date().toISOString(),
-        end_date: null,
-        is_featured: false,
         is_published: true
       });
       setIsEditing(false);
@@ -62,12 +52,6 @@ export function EventsManagement({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setCurrentEvent({
-      title: '',
-      description: '',
-      location: '',
-      start_date: new Date().toISOString(),
-      end_date: null,
-      is_featured: false,
       is_published: true
     });
   };
@@ -75,8 +59,7 @@ export function EventsManagement({
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Reset error state
-    setSaveError(null);
+    // Reset error state - não necessário mais com alertas
 
     // Validação detalhada dos campos obrigatórios
     const validationErrors: string[] = [];
@@ -125,7 +108,7 @@ export function EventsManagement({
     }
     
     if (validationErrors.length > 0) {
-      setSaveError('Erros de validação:\n\n' + validationErrors.join('\n'));
+      alert.showError('Erros de validação', validationErrors.join('\n'));
       return;
     }
 
@@ -136,13 +119,9 @@ export function EventsManagement({
       const endpoint = '/api/admin/sector-content';
       
       const requestData = {
-        type: 'event',
         sectorId,
         data: {
           ...currentEvent,
-          sector_id: sectorId,
-          title: currentEvent.title?.trim(),
-          description: currentEvent.description?.trim(),
           location: currentEvent.location?.trim()
         }
       };
@@ -184,6 +163,13 @@ export function EventsManagement({
       // Then refresh data to show the new/updated event
       await onRefresh();
       
+      // Show success message
+      if (isEditing) {
+        alert.content.eventUpdated();
+      } else {
+        alert.content.eventCreated();
+      }
+      
     } catch (error: any) {
       console.error('Erro ao salvar evento:', error);
       
@@ -192,19 +178,20 @@ export function EventsManagement({
         ? 'Erro de conexão. Verifique sua internet e tente novamente.'
         : error.message || 'Erro desconhecido ao salvar evento. Tente novamente.';
         
-      setSaveError(userMessage);
+      alert.showError('Erro ao salvar evento', userMessage);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleDeleteEvent = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este evento?')) return;
+  const handleDeleteEvent = async (eventToDelete: SectorEvent) => {
     try {
-      await onDelete(id);
+      await onDelete(eventToDelete.id);
+      alert.content.eventDeleted();
       // onDelete já chama refreshContent internamente
     } catch (error) {
       console.error('Erro ao deletar evento:', error);
+      alert.showError('Erro ao deletar evento', error instanceof Error ? error.message : 'Erro desconhecido');
     }
   };
 
@@ -284,7 +271,7 @@ export function EventsManagement({
                     Editar
                   </button>
                   <button
-                    onClick={() => handleDeleteEvent(item.id)}
+                    onClick={() => deleteModal.openDeleteModal(item, item.title)}
                     className="text-red-600 hover:text-red-700"
                   >
                     Excluir
@@ -304,35 +291,7 @@ export function EventsManagement({
               <h2 className="text-xl font-semibold mb-4">
                 {isEditing ? 'Editar Evento' : 'Novo Evento'}
               </h2>
-              
-              {/* Error display */}
-              {saveError && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-red-800 whitespace-pre-line">{saveError}</p>
-                    </div>
-                    <div className="ml-auto pl-3">
-                      <button
-                        type="button"
-                        onClick={() => setSaveError(null)}
-                        className="inline-flex text-red-400 hover:text-red-600"
-                      >
-                        <span className="sr-only">Fechar</span>
-                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
+
               <form onSubmit={handleSaveEvent} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -506,6 +465,16 @@ export function EventsManagement({
           </div>
         </div>
       )}
+
+      {/* Modal de exclusão */}
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeDeleteModal}
+        onConfirm={() => deleteModal.confirmDelete(handleDeleteEvent)}
+        itemName={deleteModal.itemName}
+        itemType={deleteModal.itemType}
+        isLoading={deleteModal.isDeleting}
+      />
     </div>
   );
 }

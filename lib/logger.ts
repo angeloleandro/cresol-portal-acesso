@@ -68,13 +68,7 @@ class PerformanceLogger {
     const contextStr = context ? 
       ` | ${Object.entries(context).map(([k, v]) => `${k}:${v}`).join(' ')}` : '';
     
-    console.log(
-      `${colors.dim}[${timestamp}]${colors.reset} ` +
-      `${bgColor}${colors.white}${colors.bright} ${level} ${colors.reset} ` +
-      `${color}${icon} ${message}${colors.reset}` +
-      `${colors.dim}${contextStr}${colors.reset}`
-    );
-  }
+      }
 
   // === LOGS PRINCIPAIS ===
 
@@ -312,8 +306,7 @@ class PerformanceLogger {
     
     const line = '═'.repeat(80);
     const titleStr = title ? ` ${title} ` : '';
-    console.log(`${colors.cyan}${line}${titleStr}${line}${colors.reset}`);
-  }
+      }
 
   // Limprar timers órfãos
   cleanup() {

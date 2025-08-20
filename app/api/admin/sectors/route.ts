@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateAdminRequest } from '@/lib/supabase/admin';
+import { adminCORS } from '@/lib/cors-config';
 
 // GET - Listar setores
-export async function GET(request: NextRequest) {
+export const GET = adminCORS(async (request: NextRequest) => {
   try {
     // Verificar autenticação usando helper
     const authResult = await authenticateAdminRequest(request);
@@ -39,4 +40,4 @@ export async function GET(request: NextRequest) {
     console.error('Erro na API de setores:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
-}
+});

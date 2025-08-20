@@ -1,7 +1,10 @@
 // Componente de gerenciamento de mensagens do setor - SIMPLIFICADO
 import React, { useState } from 'react';
+import { useAlert } from '@/app/components/alerts';
 import { formatDate } from '../utils/dateFormatters';
 import { ToggleDraftsButton } from './ToggleDraftsButton';
+import DeleteModal from '@/app/components/ui/DeleteModal';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
 
 interface SectorMessage {
   id: string;
@@ -32,12 +35,11 @@ export function MessagesManagement({
   onRefresh,
   onDelete
 }: MessagesManagementProps) {
-  
+  const alert = useAlert();
+  const deleteModal = useDeleteModal('mensagem');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentMessage, setCurrentMessage] = useState<Partial<SectorMessage>>({
-    title: '',
-    content: '',
     is_published: true
   });
 
@@ -47,8 +49,6 @@ export function MessagesManagement({
       setIsEditing(true);
     } else {
       setCurrentMessage({
-        title: '',
-        content: '',
         is_published: true
       });
       setIsEditing(false);
@@ -59,29 +59,23 @@ export function MessagesManagement({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setCurrentMessage({
-      title: '',
-      content: '',
       is_published: true
     });
   };
 
   const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
 
   const handleSaveMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Reset error state
-    setSaveError(null);
-
     // Validação
     if (!currentMessage.title?.trim()) {
-      setSaveError('Título é obrigatório');
+      alert.showError('Campo obrigatório', 'Título é obrigatório');
       return;
     }
     
     if (!currentMessage.content?.trim()) {
-      setSaveError('Conteúdo é obrigatório');
+      alert.showError('Campo obrigatório', 'Conteúdo é obrigatório');
       return;
     }
 
@@ -119,20 +113,28 @@ export function MessagesManagement({
       // Then refresh data to show the new/updated message
       await onRefresh();
       
+      // Show success message
+      if (isEditing) {
+        alert.content.messageUpdated();
+      } else {
+        alert.content.messageCreated();
+      }
+      
     } catch (error: any) {
-      setSaveError(error.message || 'Erro ao salvar mensagem');
+      alert.showError('Erro ao salvar mensagem', error.message || 'Erro ao salvar mensagem');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleDeleteMessage = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
+  const handleDeleteMessage = async (messageToDelete: SectorMessage) => {
     try {
-      await onDelete(id);
+      await onDelete(messageToDelete.id);
+      alert.content.messageDeleted();
       // onDelete já chama refreshContent internamente
     } catch (error) {
       console.error('Erro ao deletar mensagem:', error);
+      alert.showError('Erro ao deletar mensagem', error instanceof Error ? error.message : 'Erro desconhecido');
     }
   };
 
@@ -192,7 +194,7 @@ export function MessagesManagement({
                     Editar
                   </button>
                   <button
-                    onClick={() => handleDeleteMessage(item.id)}
+                    onClick={() => deleteModal.openDeleteModal(item, item.title)}
                     className="text-red-600 hover:text-red-700"
                   >
                     Excluir
@@ -212,14 +214,7 @@ export function MessagesManagement({
               <h2 className="text-xl font-semibold mb-4">
                 {isEditing ? 'Editar Mensagem' : 'Nova Mensagem'}
               </h2>
-              
-              {/* Error display */}
-              {saveError && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-                  <p className="text-sm text-red-800">{saveError}</p>
-                </div>
-              )}
-              
+
               <form onSubmit={handleSaveMessage} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -295,6 +290,16 @@ export function MessagesManagement({
           </div>
         </div>
       )}
+
+      {/* Modal de exclusão */}
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeDeleteModal}
+        onConfirm={() => deleteModal.confirmDelete(handleDeleteMessage)}
+        itemName={deleteModal.itemName}
+        itemType={deleteModal.itemType}
+        isLoading={deleteModal.isDeleting}
+      />
     </div>
   );
 }

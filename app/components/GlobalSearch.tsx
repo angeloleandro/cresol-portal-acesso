@@ -13,7 +13,7 @@ import { CRESOL_COLORS } from '@/lib/design-tokens';
 interface QuickResult {
   id: string;
   title: string;
-  type: 'system' | 'event' | 'news' | 'sector';
+  type: 'system' | 'event' | 'news' | 'sector' | 'subsector' | 'message' | 'video' | 'gallery' | 'collection';
   description?: string;
   url: string;
   icon?: string;
@@ -29,7 +29,7 @@ interface GlobalSearchProps {
 
 export default function GlobalSearch({ 
   className = '',
-  placeholder = 'Buscar sistemas, eventos, notícias...',
+  placeholder = 'Buscar sistemas, eventos, notícias, setores, mensagens...',
   showAdvancedButton = true,
   autoFocus = false,
   compact = false
@@ -50,37 +50,82 @@ export default function GlobalSearch({
   const performQuickSearch = useCallback(async () => {
     setLoading(true);
     try {
+      // Executar todas as queries em paralelo usando Promise.allSettled para não falhar se uma der erro
+      const searchPromises = [
+        // Buscar sistemas (limite 3)
+        supabase
+          .from('system_links')
+          .select('id, name, description, url')
+          .eq('is_active', true)
+          .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+          .order('display_order', { ascending: true })
+          .limit(3),
+        
+        // Buscar eventos (limite 2)
+        supabase
+          .from('sector_events')
+          .select('id, title, description')
+          .eq('is_published', true)
+          .gte('start_date', new Date().toISOString())
+          .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
+          .limit(2),
+        
+        // Buscar notícias (limite 2)
+        supabase
+          .from('sector_news')
+          .select('id, title, summary')
+          .eq('is_published', true)
+          .or(`title.ilike.%${query}%,content.ilike.%${query}%,summary.ilike.%${query}%`)
+          .limit(2),
+        
+        // Buscar setores (limite 2)
+        supabase
+          .from('sectors')
+          .select('id, name, description')
+          .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+          .limit(2),
+        
+        // Buscar subsetores (limite 2)
+        supabase
+          .from('subsectors')
+          .select('id, name, description, sector_id')
+          .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+          .limit(2),
+        
+        // Buscar mensagens de setores (limite 1)
+        supabase
+          .from('sector_messages')
+          .select('id, title, content')
+          .eq('is_published', true)
+          .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
+          .limit(1),
+        
+        // Buscar vídeos (limite 1)
+        supabase
+          .from('dashboard_videos')
+          .select('id, title')
+          .eq('is_active', true)
+          .ilike('title', `%${query}%`)
+          .limit(1)
+      ];
+
+      const searchResults = await Promise.allSettled(searchPromises);
       const results: QuickResult[] = [];
 
-      // Buscar sistemas (limite 3)
-      const { data: systems } = await supabase
-        .from('systems')
-        .select('id, name, description, url, icon')
-        .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-        .limit(3);
-
-      if (systems) {
-        results.push(...systems.map(system => ({
+      // Processar sistemas
+      if (searchResults[0].status === 'fulfilled' && searchResults[0].value.data) {
+        results.push(...searchResults[0].value.data.map((system: any) => ({
           id: system.id,
           title: system.name,
           type: 'system' as const,
           description: system.description,
-          url: system.url,
-          icon: system.icon
+          url: system.url
         })));
       }
 
-      // Buscar eventos (limite 2)
-      const { data: events } = await supabase
-        .from('sector_events')
-        .select('id, title, description')
-        .eq('is_published', true)
-        .gte('start_date', new Date().toISOString())
-        .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
-        .limit(2);
-
-      if (events) {
-        results.push(...events.map(event => ({
+      // Processar eventos
+      if (searchResults[1].status === 'fulfilled' && searchResults[1].value.data) {
+        results.push(...searchResults[1].value.data.map((event: any) => ({
           id: event.id,
           title: event.title,
           type: 'event' as const,
@@ -89,16 +134,9 @@ export default function GlobalSearch({
         })));
       }
 
-      // Buscar notícias (limite 2)
-      const { data: news } = await supabase
-        .from('sector_news')
-        .select('id, title, summary')
-        .eq('is_published', true)
-        .or(`title.ilike.%${query}%,content.ilike.%${query}%,summary.ilike.%${query}%`)
-        .limit(2);
-
-      if (news) {
-        results.push(...news.map(article => ({
+      // Processar notícias
+      if (searchResults[2].status === 'fulfilled' && searchResults[2].value.data) {
+        results.push(...searchResults[2].value.data.map((article: any) => ({
           id: article.id,
           title: article.title,
           type: 'news' as const,
@@ -107,15 +145,9 @@ export default function GlobalSearch({
         })));
       }
 
-      // Buscar setores (limite 2)
-      const { data: sectors } = await supabase
-        .from('sectors')
-        .select('id, name, description')
-        .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-        .limit(2);
-
-      if (sectors) {
-        results.push(...sectors.map(sector => ({
+      // Processar setores
+      if (searchResults[3].status === 'fulfilled' && searchResults[3].value.data) {
+        results.push(...searchResults[3].value.data.map((sector: any) => ({
           id: sector.id,
           title: sector.name,
           type: 'sector' as const,
@@ -124,12 +156,66 @@ export default function GlobalSearch({
         })));
       }
 
+      // Processar subsetores
+      if (searchResults[4].status === 'fulfilled' && searchResults[4].value.data) {
+        results.push(...searchResults[4].value.data.map((subsector: any) => ({
+          id: subsector.id,
+          title: subsector.name,
+          type: 'subsector' as const,
+          description: subsector.description,
+          url: `/subsetores/${subsector.id}`
+        })));
+      }
+
+      // Processar mensagens
+      if (searchResults[5].status === 'fulfilled' && searchResults[5].value.data) {
+        results.push(...searchResults[5].value.data.map((message: any) => ({
+          id: message.id,
+          title: message.title,
+          type: 'message' as const,
+          description: message.content?.substring(0, 100) + '...',
+          url: `/mensagens/${message.id}`
+        })));
+      }
+
+      // Processar vídeos
+      if (searchResults[6].status === 'fulfilled' && searchResults[6].value.data) {
+        results.push(...searchResults[6].value.data.map((video: any) => ({
+          id: video.id,
+          title: video.title,
+          type: 'video' as const,
+          description: 'Vídeo',
+          url: `/videos/${video.id}`
+        })));
+      }
+
+      // Log de debugging para queries que falharam
+      if (process.env.NODE_ENV === 'development') {
+        searchResults.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.error(`Query ${index} falhou:`, result.reason);
+          }
+        });
+      }
+
       setQuickResults(results);
       setShowResults(true);
       setSelectedIndex(-1);
 
     } catch (error) {
       console.error('Erro na busca rápida:', error);
+      // Em caso de erro, limpar resultados e mostrar estado adequado
+      setQuickResults([]);
+      setShowResults(false);
+      
+      // Log do erro para debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Detalhes do erro na busca:', {
+          query,
+          error: error instanceof Error ? error.message : 'Erro desconhecido',
+          timestamp: new Date().toISOString()
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -286,7 +372,12 @@ export default function GlobalSearch({
       system: <Icon name="monitor" className="h-4 w-4" />,
       event: <Icon name="clock" className="h-4 w-4" />,
       news: <Icon name="chat-line" className="h-4 w-4" />,
-      sector: <Icon name="building-1" className="h-4 w-4" />
+      sector: <Icon name="building-1" className="h-4 w-4" />,
+      subsector: <Icon name="building-1" className="h-4 w-4" />,
+      message: <Icon name="chat-line" className="h-4 w-4" />,
+      video: <Icon name="play" className="h-4 w-4" />,
+      gallery: <Icon name="image" className="h-4 w-4" />,
+      collection: <Icon name="folder" className="h-4 w-4" />
     };
     return icons[type];
   };
@@ -296,7 +387,12 @@ export default function GlobalSearch({
       system: 'text-blue-600',
       event: 'text-green-600',
       news: 'text-purple-600',
-      sector: 'text-orange-600'
+      sector: 'text-orange-600',
+      subsector: 'text-orange-500',
+      message: 'text-indigo-600',
+      video: 'text-red-600',
+      gallery: 'text-pink-600',
+      collection: 'text-teal-600'
     };
     return colors[type];
   };
@@ -306,7 +402,12 @@ export default function GlobalSearch({
       system: 'Sistema',
       event: 'Evento',
       news: 'Notícia',
-      sector: 'Setor'
+      sector: 'Setor',
+      subsector: 'Subsetor',
+      message: 'Mensagem',
+      video: 'Vídeo',
+      gallery: 'Galeria',
+      collection: 'Coleção'
     };
     return labels[type];
   };

@@ -17,6 +17,8 @@ import VideoUploadModal from '../../components/VideoUploadModal';
 import CollectionDetail from '@/app/components/Collections/Collection.Detail';
 import { Collection, CollectionWithItems, CollectionItem } from '@/lib/types/collections';
 import { useCollectionItems } from '@/app/components/Collections/Collection.hooks';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import DeleteModal from '@/app/components/ui/DeleteModal';
 import clsx from 'clsx';
 
 interface CollectionDetailEditPageProps {
@@ -38,6 +40,9 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   const [isItemSelectorOpen, setIsItemSelectorOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [isVideoUploadOpen, setIsVideoUploadOpen] = useState(false);
+  
+  // Modal de exclusão
+  const deleteModal = useDeleteModal('coleção');
 
   const loadCollection = useCallback(async () => {
     setIsLoading(true);
@@ -108,16 +113,14 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
     }
   };
 
-  // Handle collection deletion
-  const handleDelete = async () => {
+  // Handle collection deletion click
+  const handleDeleteClick = () => {
     if (!collection) return;
-    
-    const confirmed = window.confirm(
-      `Tem certeza que deseja excluir a coleção "${collection.name}"? Esta ação não pode ser desfeita.`
-    );
-    
-    if (!confirmed) return;
-    
+    deleteModal.openDeleteModal(collection, collection.name);
+  };
+
+  // Handle collection deletion
+  const handleDelete = async (collection: CollectionWithItems) => {
     try {
       const response = await fetch(`/api/collections/${collectionId}`, {
         method: 'DELETE',
@@ -469,7 +472,7 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={handleDelete}
+                  onClick={handleDeleteClick}
                   className={clsx(
                     'inline-flex items-center gap-2 px-5 py-2.5',
                     'bg-red-500 text-white rounded-md font-medium',
@@ -570,6 +573,16 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
           onVideoAdded={handleVideoAdded}
         />
       )}
+
+      {/* Modal de Exclusão */}
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeDeleteModal}
+        onConfirm={() => deleteModal.confirmDelete(handleDelete)}
+        itemName={deleteModal.itemName}
+        itemType={deleteModal.itemType}
+        isLoading={deleteModal.isDeleting}
+      />
     </div>
   );
 };

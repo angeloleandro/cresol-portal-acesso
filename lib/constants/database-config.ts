@@ -32,6 +32,11 @@ export const TABLES = {
   DASHBOARD_VIDEOS: 'dashboard_videos',
   COLLECTIONS: 'collections',
   COLLECTION_VIDEOS: 'collection_videos',
+  
+  // Message system tables
+  MESSAGE_GROUPS: 'message_groups',
+  SECTOR_MESSAGES: 'sector_messages',
+  SUBSECTOR_MESSAGES: 'subsector_messages',
 } as const;
 
 // Column Names
@@ -70,6 +75,11 @@ export const COLUMNS = {
   ROLE: 'role',
   EMAIL: 'email',
   AVATAR_URL: 'avatar_url',
+  
+  // Message groups specific
+  GROUP_ID: 'group_id',
+  COLOR_THEME: 'color_theme',
+  NAME: 'name',
 } as const;
 
 // Query Constants

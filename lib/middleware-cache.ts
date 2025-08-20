@@ -1,3 +1,5 @@
+import { logger } from './production-logger';
+
 /**
  * Middleware Performance Cache System
  * Otimiza performance do middleware através de cache de dados de usuário e sessão
@@ -146,7 +148,7 @@ export function getCacheStats(): {
  */
 export function warmupCache(userDataList: UserCacheData[], accessTokens: string[]): void {
   if (userDataList.length !== accessTokens.length) {
-    console.warn('[Cache] Warmup: Número de tokens e dados não coincidem');
+    logger.warn('[Cache] Warmup: Número de tokens e dados não coincidem');
     return;
   }
 
@@ -159,8 +161,7 @@ export function warmupCache(userDataList: UserCacheData[], accessTokens: string[
     }
   }
   
-  console.log(`[Cache] Warmup: Pre-carregados ${userDataList.length} usuários no cache`);
-}
+  }
 
 /**
  * Reset das métricas de cache (para testes)

@@ -35,8 +35,7 @@ export class AppError extends Error {
 export const devLog = {
   info: (message: string, data?: any) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[INFO] ${message}`, data ? data : '');
-    }
+          }
   },
   
   warn: (message: string, data?: any) => {
@@ -53,8 +52,7 @@ export const devLog = {
   
   debug: (message: string, data?: any) => {
     if (process.env.NODE_ENV === 'development') {
-      console.debug(`[DEBUG] ${message}`, data ? data : '');
-    }
+          }
   }
 };
 

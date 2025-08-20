@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useAlert } from '@/app/components/alerts';
+import { FormSelect } from '@/app/components/forms/FormSelect';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
@@ -39,6 +41,7 @@ export default function RoleModal({
   onSuccess,
   onRefreshSubsectors
 }: RoleModalProps) {
+  const alert = useAlert();
   const [selectedRole, setSelectedRole] = useState<'user' | 'sector_admin' | 'subsector_admin' | 'admin'>(currentRole);
   const [selectedSectors, setSelectedSectors] = useState<string[]>(userSectors);
   const [selectedSubsectors, setSelectedSubsectors] = useState<string[]>(userSubsectors);
@@ -52,12 +55,7 @@ export default function RoleModal({
 
   const handleSave = async () => {
     try {
-      console.log('Iniciando atualização de role...');
-      console.log('User ID:', userId);
-      console.log('Nova role:', selectedRole);
-      console.log('Setores selecionados:', selectedSectors);
-      console.log('Sub-setores selecionados:', selectedSubsectors);
-
+                              
       // Atualizar role no perfil
       const { data: roleData, error: roleError } = await getSupabaseClient()
         .from('profiles')
@@ -65,16 +63,12 @@ export default function RoleModal({
         .eq('id', userId)
         .select();
 
-      console.log('Resultado da atualização de role:', { data: roleData, error: roleError });
-
       if (roleError) {
-        console.error('Erro ao atualizar role:', roleError);
         throw roleError;
       }
       
       // Limpar associações existentes
-      console.log('Removendo associações anteriores...');
-      const { error: deleteSectorError } = await getSupabaseClient().from('sector_admins').delete().eq('user_id', userId);
+            const { error: deleteSectorError } = await getSupabaseClient().from('sector_admins').delete().eq('user_id', userId);
       const { error: deleteSubsectorError } = await getSupabaseClient().from('subsector_admins').delete().eq('user_id', userId);
       
       if (deleteSectorError) {
@@ -86,8 +80,7 @@ export default function RoleModal({
       
       // Adicionar novas associações
       if (selectedRole === 'sector_admin' && selectedSectors.length > 0) {
-        console.log('Inserindo associações de setor...');
-        const sectorInserts = selectedSectors.map(sectorId => ({
+                const sectorInserts = selectedSectors.map(sectorId => ({
           user_id: userId,
           sector_id: sectorId
         }));
@@ -97,11 +90,9 @@ export default function RoleModal({
           .insert(sectorInserts)
           .select();
           
-        console.log('Resultado da inserção de setores:', { data: sectorData, error: sectorError });
-        if (sectorError) throw sectorError;
+                if (sectorError) throw sectorError;
       } else if (selectedRole === 'subsector_admin' && selectedSubsectors.length > 0) {
-        console.log('Inserindo associações de sub-setor...');
-        const subsectorInserts = selectedSubsectors.map(subsectorId => ({
+                const subsectorInserts = selectedSubsectors.map(subsectorId => ({
           user_id: userId,
           subsector_id: subsectorId
         }));
@@ -111,18 +102,16 @@ export default function RoleModal({
           .insert(subsectorInserts)
           .select();
           
-        console.log('Resultado da inserção de sub-setores:', { data: subsectorData, error: subsectorError });
-        if (subsectorError) throw subsectorError;
+                if (subsectorError) throw subsectorError;
       }
       
-      console.log('Role atualizado com sucesso!');
-      alert('Role atualizado com sucesso!');
+            alert.users.roleChanged(selectedRole);
       onSuccess();
       
     } catch (error) {
       console.error('Erro detalhado ao salvar alterações de role:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      alert(`Erro ao salvar alterações: ${errorMessage}`);
+      alert.showError('Erro ao salvar alterações', errorMessage);
     }
   };
 
@@ -144,6 +133,7 @@ export default function RoleModal({
       onRefreshSubsectors(sectorId);
     } catch (error) {
       console.error('Erro ao buscar sub-setores:', error);
+      alert.showError('Erro ao carregar subsetores');
     } finally {
       setLoadingSubsectors(false);
     }
@@ -170,7 +160,7 @@ export default function RoleModal({
             <label className="block text-sm font-medium text-cresol-gray mb-2">
               Tipo de Conta
             </label>
-            <select
+            <FormSelect
               value={selectedRole}
               onChange={(e) => {
                 setSelectedRole(e.target.value as 'user' | 'sector_admin' | 'subsector_admin' | 'admin');
@@ -178,13 +168,14 @@ export default function RoleModal({
                 setSelectedSubsectors([]);
                 setSelectedSectorForSubs('');
               }}
-              className="w-full px-3 py-2 border border-cresol-gray-light rounded-sm-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            >
-              <option value="user">Usuário</option>
-              <option value="sector_admin">Administrador de Setor</option>
-              <option value="subsector_admin">Administrador de Sub-setor</option>
-              <option value="admin">Administrador</option>
-            </select>
+              options={[
+                { value: 'user', label: 'Usuário' },
+                { value: 'sector_admin', label: 'Administrador de Setor' },
+                { value: 'subsector_admin', label: 'Administrador de Sub-setor' },
+                { value: 'admin', label: 'Administrador' }
+              ]}
+              placeholder="Selecione o tipo de conta"
+            />
           </div>
 
           {selectedRole === 'sector_admin' && (
@@ -251,7 +242,7 @@ export default function RoleModal({
                 <label className="block text-xs font-medium text-cresol-gray mb-1">
                   Filtrar por setor
                 </label>
-                <select
+                <FormSelect
                   value={selectedSectorForSubs}
                   onChange={(e) => {
                     setSelectedSectorForSubs(e.target.value);
@@ -261,13 +252,16 @@ export default function RoleModal({
                       fetchSubsectors();
                     }
                   }}
-                  className="w-full px-3 py-2 border border-cresol-gray-light rounded-sm-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                >
-                  <option value="">Todos os setores</option>
-                  {sectors.map(sector => (
-                    <option key={sector.id} value={sector.id}>{sector.name}</option>
-                  ))}
-                </select>
+                  options={[
+                    { value: '', label: 'Todos os setores' },
+                    ...sectors.map(sector => ({
+                      value: sector.id,
+                      label: sector.name
+                    }))
+                  ]}
+                  placeholder="Filtrar por setor"
+                  size="sm"
+                />
               </div>
               
               <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-md p-3">
