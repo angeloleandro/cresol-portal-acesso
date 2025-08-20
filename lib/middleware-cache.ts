@@ -16,12 +16,68 @@ interface SessionCache {
   userId: string;
   userData: UserCacheData;
   expiresAt: number;
+  lastAccessed: number;
+  accessCount: number;
 }
 
-// Cache em memória para dados de usuário (limita a 1000 entradas)
-const userCache = new Map<string, SessionCache>();
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutos (otimizado)
-const MAX_CACHE_SIZE = 1000;
+// LRU Cache implementation para melhor gestão de memória
+class LRUCache<K, V> {
+  private cache: Map<K, V>;
+  private maxSize: number;
+  
+  constructor(maxSize: number) {
+    this.cache = new Map();
+    this.maxSize = maxSize;
+  }
+  
+  get(key: K): V | undefined {
+    const value = this.cache.get(key);
+    if (value !== undefined) {
+      // Move para o final (mais recente)
+      this.cache.delete(key);
+      this.cache.set(key, value);
+    }
+    return value;
+  }
+  
+  set(key: K, value: V): void {
+    // Se já existe, delete primeiro para reordenar
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.maxSize) {
+      // Remove o mais antigo (primeiro item)
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
+    }
+    this.cache.set(key, value);
+  }
+  
+  delete(key: K): boolean {
+    return this.cache.delete(key);
+  }
+  
+  clear(): void {
+    this.cache.clear();
+  }
+  
+  get size(): number {
+    return this.cache.size;
+  }
+  
+  entries(): IterableIterator<[K, V]> {
+    return this.cache.entries();
+  }
+  
+  values(): IterableIterator<V> {
+    return this.cache.values();
+  }
+}
+
+// Cache em memória otimizado com LRU
+const userCache = new LRUCache<string, SessionCache>(1500);
+const CACHE_DURATION = 15 * 60 * 1000; // 15 minutos (aumentado para reduzir miss rate)
 
 // Métricas de cache
 let cacheHits = 0;
@@ -29,27 +85,25 @@ let cacheMisses = 0;
 
 /**
  * Limpa cache expirado para evitar memory leaks
+ * Com LRU, a limpeza é mais eficiente
  */
 function cleanExpiredCache(): void {
   const now = Date.now();
-  const expiredKeys = Array.from(userCache.entries())
-    .filter(([_, data]) => data.expiresAt < now)
-    .map(([key]) => key);
-    
+  const expiredKeys: string[] = [];
+  
+  // Identifica chaves expiradas
+  for (const [key, data] of userCache.entries()) {
+    if (data.expiresAt < now) {
+      expiredKeys.push(key);
+    }
+  }
+  
+  // Remove expiradas
   for (const key of expiredKeys) {
     userCache.delete(key);
   }
   
-  // Se o cache ainda está muito grande, remove as entradas mais antigas
-  if (userCache.size > MAX_CACHE_SIZE) {
-    const sortedEntries = Array.from(userCache.entries())
-      .sort(([, a], [, b]) => a.expiresAt - b.expiresAt);
-      
-    const toDelete = sortedEntries.slice(0, userCache.size - MAX_CACHE_SIZE);
-    for (const [key] of toDelete) {
-      userCache.delete(key);
-    }
-  }
+  // LRU já gerencia o tamanho máximo automaticamente
 }
 
 /**
@@ -61,41 +115,63 @@ function getCacheKey(accessToken: string): string {
 }
 
 /**
- * Recupera dados do usuário do cache
+ * Recupera dados do usuário do cache com refresh automático
  */
 export function getCachedUserData(accessToken: string): UserCacheData | null {
-  cleanExpiredCache();
-  
   const cacheKey = getCacheKey(accessToken);
-  const cached = userCache.get(cacheKey);
+  const cached = userCache.get(cacheKey); // LRU atualiza ordem automaticamente
   
-  if (!cached || cached.expiresAt < Date.now()) {
-    if (cached) userCache.delete(cacheKey);
+  if (!cached) {
     cacheMisses++;
     return null;
   }
   
+  const now = Date.now();
+  
+  // Verifica se expirou
+  if (cached.expiresAt < now) {
+    userCache.delete(cacheKey);
+    cacheMisses++;
+    return null;
+  }
+  
+  // Atualiza métricas de acesso
+  cached.lastAccessed = now;
+  cached.accessCount++;
+  userCache.set(cacheKey, cached);
+  
   cacheHits++;
+  
+  // Retorna dados se ainda válidos
   return cached.userData;
 }
 
 /**
- * Armazena dados do usuário no cache
+ * Armazena dados do usuário no cache com métricas aprimoradas
  */
 export function setCachedUserData(accessToken: string, userData: UserCacheData): void {
-  cleanExpiredCache();
-  
   const cacheKey = getCacheKey(accessToken);
-  const expiresAt = Date.now() + CACHE_DURATION;
+  const now = Date.now();
+  const expiresAt = now + CACHE_DURATION;
+  
+  // Verifica se já existe para preservar contadores
+  const existing = userCache.get(cacheKey);
   
   userCache.set(cacheKey, {
     userId: userData.id,
     userData: {
       ...userData,
-      cachedAt: Date.now()
+      cachedAt: now
     },
-    expiresAt
+    expiresAt,
+    lastAccessed: now,
+    accessCount: existing ? existing.accessCount + 1 : 1
   });
+  
+  // Limpa cache expirado periodicamente (a cada 100 inserções)
+  if (Math.random() < 0.01) {
+    cleanExpiredCache();
+  }
 }
 
 /**

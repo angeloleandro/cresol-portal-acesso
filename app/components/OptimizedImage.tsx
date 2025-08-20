@@ -153,8 +153,15 @@ export default function OptimizedImage({
         return true;
       }
       
+      // Verificar se é um domínio do YouTube
+      if (parsedUrl.hostname === 'img.youtube.com' || 
+          parsedUrl.hostname === 'i.ytimg.com' ||
+          parsedUrl.hostname === 'www.youtube.com') {
+        return true;
+      }
+      
       // Outros domínios externos permitidos
-      const allowedDomains = ['img.youtube.com', 'cresol.com.br', 'localhost'];
+      const allowedDomains = ['cresol.com.br', 'localhost'];
       return allowedDomains.some(domain => parsedUrl.hostname.includes(domain));
       
     } catch {

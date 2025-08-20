@@ -74,6 +74,7 @@ export const HomeVideoCard = memo(function HomeVideoCard({
             onError={handleImageError}
             priority={priority}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            unoptimized={video.upload_type === 'youtube'}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
