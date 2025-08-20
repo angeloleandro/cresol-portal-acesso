@@ -7,6 +7,7 @@
 "use client";
 
 import { useState, useCallback, memo } from 'react';
+import Button from '@/app/components/ui/Button';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { Icon } from './icons/Icon';
@@ -50,8 +51,6 @@ export const HomeVideoCard = memo(function HomeVideoCard({
         className
       )}
       onClick={handleClick}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.98 }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       role="button"
@@ -123,23 +122,22 @@ export const HomeVideoCard = memo(function HomeVideoCard({
       {/* Card.Footer equivalent - altura mínima consistente */}
       <div className="px-4 pb-4 min-h-[48px] flex items-center justify-end">
         {/* Action button - removida tag "Ativo" */}
-        <motion.button
+        <Button
           className={clsx(
             'inline-flex items-center gap-1 px-3 py-1.5 rounded-md',
             'bg-primary text-white text-sm font-medium',
             'hover:bg-primary/90 transition-colors duration-150',
             'focus:outline-none focus:ring-2 focus:ring-primary/20'
           )}
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             handleClick();
           }}
-          whileTap={{ scale: 0.95 }}
           aria-label={`Reproduzir ${video.title}`}
         >
           <Icon name="play" className="w-4 h-4" />
           Assistir
-        </motion.button>
+        </Button>
       </div>
     </motion.article>
   );

@@ -7,6 +7,7 @@
  */
 
 import type React from 'react';
+import Button from '@/app/components/ui/Button';
 import { useState } from 'react';
 import { Collection } from '@/lib/types/collections';
 import VideoUploadModal from './VideoUploadModal';
@@ -49,9 +50,7 @@ export const VideoUploadAdvanced: React.FC<VideoUploadAdvancedProps> = ({
   if (showAsButton) {
     return (
       <>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <Button
           onClick={() => setShowModal(true)}
           disabled={disabled}
           className={`
@@ -66,7 +65,7 @@ export const VideoUploadAdvanced: React.FC<VideoUploadAdvancedProps> = ({
           `}
         >
           {buttonText}
-        </motion.button>
+        </Button>
 
         <VideoUploadModal
           isOpen={showModal}

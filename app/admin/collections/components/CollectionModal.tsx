@@ -7,6 +7,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { Collection } from '@/lib/types/collections';
 import CollectionForm, { CollectionFormData } from './CollectionForm';
+import Button from '@/app/components/ui/Button';
 
 interface CollectionModalProps {
   isOpen: boolean;
@@ -47,43 +48,47 @@ const CollectionModal: React.FC<CollectionModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-gray-900/50 transition-opacity" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       
       {/* Modal */}
-      <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-        <div className="relative transform overflow-hidden rounded-md bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-          
-          {/* Header */}
-          <div className="bg-white px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {mode === 'create' ? 'Nova Coleção' : 'Editar Coleção'}
-              </h3>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+        
+        {/* Header - Fixed */}
+        <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {mode === 'create' ? 'Nova Coleção' : 'Editar Coleção'}
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {mode === 'create' ? 'Crie uma nova coleção para organizar conteúdos' : 'Atualize as informações da coleção'}
+            </p>
           </div>
+          <Button
+            variant="secondary"
+            size="xs"
+            onClick={onClose}
+            className="ml-4 !p-1"
+            aria-label="Fechar modal"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </Button>
+        </div>
 
-          {/* Form Content */}
-          <div className="px-6 py-4">
-            <CollectionForm
-              collection={collection}
-              mode={mode}
-              onSubmit={handleSubmit}
-              onCancel={onClose}
-              isSubmitting={isSubmitting}
-              errors={errors}
-              className="space-y-4"
-            />
-          </div>
+        {/* Body - Scrollable */}
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          <CollectionForm
+            collection={collection}
+            mode={mode}
+            onSubmit={handleSubmit}
+            onCancel={onClose}
+            isSubmitting={isSubmitting}
+            errors={errors}
+            className="space-y-4"
+          />
         </div>
       </div>
     </div>

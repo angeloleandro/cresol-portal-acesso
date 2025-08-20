@@ -79,12 +79,12 @@ export const VideoCleanModal = memo(function VideoCleanModal({ isOpen, video, on
     <AnimatePresence mode="wait">
       {isOpen && (
         <div
-          className="fixed inset-0 flex items-center justify-center"
+          className="fixed inset-0 flex items-center justify-center animate-in fade-in duration-200"
           style={backdropStyle}
           onClick={handleBackdropClick}
         >
           <motion.div
-            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.2 } }}
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
@@ -95,7 +95,7 @@ export const VideoCleanModal = memo(function VideoCleanModal({ isOpen, video, on
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] } }}
             exit={{ opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.15 } }}
-            className="relative w-full max-w-4xl bg-white rounded-lg shadow-2xl overflow-hidden"
+            className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
@@ -104,7 +104,6 @@ export const VideoCleanModal = memo(function VideoCleanModal({ isOpen, video, on
             style={{
               zIndex: 999999,
               maxWidth: 'calc(100vw - 32px)',
-              maxHeight: 'calc(100vh - 32px)',
               position: 'relative',
               margin: '16px',
               pointerEvents: 'all'
@@ -112,34 +111,40 @@ export const VideoCleanModal = memo(function VideoCleanModal({ isOpen, video, on
             onClick={(e) => e.stopPropagation()}
             onMouseMove={(e) => e.stopPropagation()}
           >
-            <button
-              className="absolute top-4 right-4 w-10 h-10 bg-black/20 text-white rounded-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-white/50"
-              style={modalContainerStyle}
-              onMouseEnter={(e) => {
-                e.stopPropagation();
-                e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.4)';
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.stopPropagation();
-                e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.2)';
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-              onClick={onClose}
-              aria-label="Fechar modal"
-            >
-              <Icon name="x" className="w-5 h-5" />
-            </button>
-            <div
-              className="aspect-video bg-black"
-              style={{ pointerEvents: 'all', userSelect: 'none', WebkitUserSelect: 'none', position: 'relative' }}
-              onMouseMove={(e) => e.stopPropagation()}
-              onMouseEnter={(e) => e.stopPropagation()}
-              onMouseLeave={(e) => e.stopPropagation()}
-            >
-              <CleanVideoPlayer video={video} />
+            {/* Header with title and close button */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Reprodutor de Vídeo
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {video.title}
+                  </p>
+                </div>
+                <button
+                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  onClick={onClose}
+                  aria-label="Fechar modal"
+                >
+                  <Icon name="x" className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
             </div>
-            <CleanVideoInfo video={video} />
+            
+            {/* Video Player Container - Scrollable body */}
+            <div className="flex-1 overflow-y-auto">
+              <div
+                className="aspect-video bg-black"
+                style={{ pointerEvents: 'all', userSelect: 'none', WebkitUserSelect: 'none', position: 'relative' }}
+                onMouseMove={(e) => e.stopPropagation()}
+                onMouseEnter={(e) => e.stopPropagation()}
+                onMouseLeave={(e) => e.stopPropagation()}
+              >
+                <CleanVideoPlayer video={video} />
+              </div>
+              <CleanVideoInfo video={video} />
+            </div>
           </motion.div>
         </div>
       )}
@@ -337,7 +342,7 @@ const CleanVideoInfo = memo(function CleanVideoInfo({ video }: { video: Dashboar
   const formattedDate = useMemo(() => formatDate(video.created_at), [formatDate, video.created_at]);
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gray-50 border-t border-gray-200">
       <div className="flex items-start justify-between gap-6">
         {/* Main Info */}
         <div className="flex-1 min-w-0 space-y-4">
@@ -383,9 +388,9 @@ const CleanVideoInfo = memo(function CleanVideoInfo({ video }: { video: Dashboar
               href={video.video_url}
               download
               className="
-                inline-flex items-center gap-2 px-4 py-2 
+                inline-flex items-center gap-2 px-3 py-1.5 text-sm
                 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 
-                rounded-lg text-sm font-medium transition-colors
+                rounded-lg font-medium transition-colors
                 focus:outline-none focus:ring-2 focus:ring-primary/20
               "
             >
@@ -398,9 +403,9 @@ const CleanVideoInfo = memo(function CleanVideoInfo({ video }: { video: Dashboar
               target="_blank"
               rel="noopener noreferrer"
               className="
-                inline-flex items-center gap-2 px-4 py-2 
+                inline-flex items-center gap-2 px-3 py-1.5 text-sm
                 bg-red-600 hover:bg-red-700 text-white 
-                rounded-lg text-sm font-medium transition-colors
+                rounded-lg font-medium transition-colors
                 focus:outline-none focus:ring-2 focus:ring-red-500/20
               "
             >

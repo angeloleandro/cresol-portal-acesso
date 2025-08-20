@@ -407,25 +407,25 @@ export default function UserEditModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg border border-gray-300 w-full max-w-2xl mx-4 relative max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-cresol-gray-light">
-          <h3 className="heading-4 text-primary">Editar Usuário</h3>
-          <CButton
-            type="button"
-            variant="ghost"
-            colorPalette="gray"
-            size="sm"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
+        <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900">Editar Usuário</h3>
+            <p className="mt-1 text-sm text-gray-500">Atualize as informações do usuário</p>
+          </div>
+          <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            startElement={<Icon name="x" className="h-5 w-5" />}
+            className="ml-4 p-1 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
+            aria-label="Fechar modal"
           >
-            <span className="sr-only">Fechar</span>
-          </CButton>
+            <Icon name="x" className="h-4 w-4" />
+          </button>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="mb-6 flex justify-center">
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          <div className="mb-4 flex justify-center">
             <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-50 border border-cresol-gray-light">
               {(avatarPreview || user.avatar_url) ? (
                 <OptimizedImage
@@ -872,14 +872,15 @@ export default function UserEditModal({
           </div>
         </div>
         
-        <div className="border-t border-cresol-gray-light p-6 bg-gray-50">
-          <div className="flex justify-end space-x-3">
+        <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0 rounded-b-lg">
+          <div className="flex items-center justify-end gap-2">
             <CButton
               type="button"
               variant="outline"
               colorPalette="gray"
-              size="md"
+              size="sm"
               onClick={onClose}
+              className="px-3 py-1.5 text-sm"
             >
               Cancelar
             </CButton>
@@ -887,10 +888,11 @@ export default function UserEditModal({
               type="button"
               variant="solid"
               colorPalette="orange"
-              size="md"
+              size="sm"
               onClick={handleSave}
+              className="px-3 py-1.5 text-sm"
             >
-              Salvar
+              Salvar Alterações
             </CButton>
           </div>
         </div>

@@ -6,6 +6,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
+import Button from '@/app/components/ui/Button';
 import clsx from 'clsx';
 import { Icon } from '../icons/Icon';
 import { 
@@ -335,7 +336,6 @@ function PlaceholderIcon({
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.4, type: 'spring' }}
-        whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
       >
         <Icon
           name={iconConfig.name as any || 'video'}
@@ -477,7 +477,7 @@ export function ErrorThumbnailPlaceholder({
 
         {/* Retry button */}
         {retryable && onRetry && (
-          <motion.button
+          <Button
             className={clsx(
               'px-3 py-1 text-xs font-medium rounded-md',
               'bg-red-100 text-red-700 hover:bg-red-200',
@@ -485,14 +485,12 @@ export function ErrorThumbnailPlaceholder({
               'transition-colors duration-200'
             )}
             onClick={onRetry}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
             Tentar novamente
-          </motion.button>
+          </Button>
         )}
       </div>
     </motion.div>

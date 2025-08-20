@@ -42,7 +42,6 @@ export const VIDEO_CONFIG = {
   CACHE_CONTROL: '3600', // 1 hour
   UPLOAD_TYPE: {
     YOUTUBE: 'youtube' as const,
-    VIMEO: 'vimeo' as const,
     DIRECT: 'direct' as const
   }
 } as const;

@@ -103,7 +103,7 @@ function VideosContent() {
             if (video.upload_type === 'direct') {
               return video.processing_status === 'ready' && video.upload_progress === 100;
             }
-            return false; // Filter out vimeo videos
+            return false;
           });
           
           setVideos(readyVideos);

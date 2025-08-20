@@ -4,6 +4,7 @@
 // Interface completa para visualizar e editar coleções individuais
 
 import { useState, useEffect, useCallback } from 'react';
+import Button from '@/app/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
@@ -359,14 +360,12 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
             <h3 className="mt-2 text-sm font-medium text-gray-900">Erro ao carregar coleção</h3>
             <p className="mt-1 text-sm text-gray-500">{error}</p>
             <div className="mt-6 flex justify-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <Button
                 onClick={loadCollection}
                 className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 Tentar Novamente
-              </motion.button>
+              </Button>
               <Link
                 href="/admin/collections"
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors"
@@ -407,83 +406,51 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="mb-8"
+        className="mb-6"
       >
-        <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-primary mb-1">
+            <h1 className="text-2xl font-semibold text-gray-900">
               {isEditing ? 'Editar Coleção' : 'Detalhes da Coleção'}
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               {isEditing ? 'Modifique os detalhes da coleção' : `Visualize e gerencie a coleção "${collection.name}"`}
             </p>
           </div>
-          <div className="flex gap-3 flex-wrap sm:justify-end">
+          <div className="flex gap-2 flex-wrap sm:justify-end">
             {!isEditing && (
               <>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <button
                   onClick={handleEditToggle}
-                  className={clsx(
-                    'inline-flex items-center gap-2 px-5 py-2.5',
-                    'bg-primary text-white rounded-md font-medium',
-                    'hover:bg-primary/90 transition-colors duration-150',
-                    'focus:outline-none focus:ring-2 focus:ring-primary/20',
-                    'shadow-sm'
-                  )}
+                  className="text-sm font-medium text-primary hover:text-primary/80 px-3 py-1.5 rounded-md transition-colors"
                 >
-                  <Icon name="pencil" className="h-5 w-5" />
+                  <Icon name="pencil" className="h-4 w-4 inline mr-1.5" />
                   Editar
-                </motion.button>
+                </button>
                 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <button
                   onClick={() => router.push('/admin/gallery')}
-                  className={clsx(
-                    'inline-flex items-center gap-2 px-5 py-2.5',
-                    'bg-gray-100 text-gray-700 rounded-md font-medium',
-                    'hover:bg-gray-200 transition-colors duration-150',
-                    'focus:outline-none focus:ring-2 focus:ring-gray-300/20',
-                    'shadow-sm'
-                  )}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-md transition-colors"
                 >
-                  <Icon name="image" className="h-5 w-5" />
+                  <Icon name="image" className="h-4 w-4 inline mr-1.5" />
                   Galeria
-                </motion.button>
+                </button>
                 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <button
                   onClick={() => router.push('/admin/videos')}
-                  className={clsx(
-                    'inline-flex items-center gap-2 px-5 py-2.5',
-                    'bg-gray-100 text-gray-700 rounded-md font-medium',
-                    'hover:bg-gray-200 transition-colors duration-150',
-                    'focus:outline-none focus:ring-2 focus:ring-gray-300/20',
-                    'shadow-sm'
-                  )}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-md transition-colors"
                 >
-                  <Icon name="video" className="h-5 w-5" />
+                  <Icon name="video" className="h-4 w-4 inline mr-1.5" />
                   Vídeos
-                </motion.button>
+                </button>
                 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <button
                   onClick={handleDeleteClick}
-                  className={clsx(
-                    'inline-flex items-center gap-2 px-5 py-2.5',
-                    'bg-red-500 text-white rounded-md font-medium',
-                    'hover:bg-red-600 transition-colors duration-150',
-                    'focus:outline-none focus:ring-2 focus:ring-red-500/20',
-                    'shadow-sm'
-                  )}
+                  className="text-sm font-medium text-red-600 hover:text-red-700 px-3 py-1.5 rounded-md transition-colors"
                 >
-                  <Icon name="trash" className="h-5 w-5" />
+                  <Icon name="trash" className="h-4 w-4 inline mr-1.5" />
                   Excluir
-                </motion.button>
+                </button>
               </>
             )}
           </div>

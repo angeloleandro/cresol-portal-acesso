@@ -27,6 +27,7 @@ import clsx from 'clsx';
 import CollectionsManager from '@/app/admin/collections/components/CollectionsManager';
 import { useCollections } from '@/app/components/Collections/Collection.hooks';
 import { Collection } from '@/lib/types/collections';
+import Button from '@/app/components/ui/Button';
 
 interface AdminVideoFilters extends VideoFilters {
   status: 'all' | 'active' | 'inactive' | 'processing';
@@ -302,16 +303,10 @@ export default function AdminVideos() {
     children: React.ReactNode; 
     count?: number; 
   }) => (
-    <button
+    <Button
+      variant={isActive ? 'primary' : 'secondary'}
+      size="xs"
       onClick={onClick}
-      className={clsx(
-        'px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-150',
-        'border',
-        'focus:outline-none focus:ring-2 focus:ring-primary/20',
-        isActive
-          ? 'bg-primary text-white border-primary shadow-sm'
-          : 'bg-white text-neutral-700 border-neutral-300/40 hover:border-neutral-300/70'
-      )}
       aria-pressed={isActive}
     >
       {children}
@@ -323,7 +318,7 @@ export default function AdminVideos() {
           {count}
         </span>
       )}
-    </button>
+    </Button>
   );
 
   const FilterSection = () => (
@@ -410,36 +405,22 @@ export default function AdminVideos() {
               <p className="text-sm text-gray-600">Gerencie todos os vídeos do sistema com filtros avançados</p>
             </div>
             <div className="flex gap-3 flex-wrap sm:justify-end">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={clsx(
-                  'inline-flex items-center gap-2 px-5 py-2.5',
-                  'bg-primary text-white rounded-md font-medium',
-                  'hover:bg-primary/90 transition-colors duration-150',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/20',
-                  'shadow-sm'
-                )}
+              <Button
+                variant="primary"
+                size="sm"
+                icon="plus"
                 onClick={() => setShowForm(true)}
               >
-                <Icon name="plus" className="h-5 w-5" />
                 Novo Vídeo
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={clsx(
-                  'inline-flex items-center gap-2 px-5 py-2.5',
-                  'bg-gray-100 text-gray-700 rounded-md font-medium',
-                  'hover:bg-gray-200 transition-colors duration-150',
-                  'focus:outline-none focus:ring-2 focus:ring-gray-300/20',
-                  'shadow-sm'
-                )}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon="folder"
                 onClick={() => setShowCollectionsManager(true)}
               >
-                <Icon name="folder" className="h-5 w-5" />
                 Gerenciar Coleções
-              </motion.button>
+              </Button>
             </div>
           </div>
 
@@ -531,31 +512,33 @@ export default function AdminVideos() {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="max-w-4xl w-full max-h-[85vh] overflow-y-auto scrollbar-modal"
+                className="max-w-4xl w-full max-h-[85vh] flex flex-col bg-white rounded-md overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                <VideoUploadFormRoot
-                  initialData={editVideo ? {
-                    id: editVideo.id,
-                    title: editVideo.title,
-                    video_url: editVideo.video_url,
-                    thumbnail_url: editVideo.thumbnail_url ?? undefined,
-                    is_active: editVideo.is_active,
-                    order_index: editVideo.order_index,
-                    upload_type: editVideo.upload_type === 'vimeo' ? 'youtube' : editVideo.upload_type,
-                    file_size: editVideo.file_size ?? undefined,
-                    original_filename: editVideo.original_filename ?? undefined
-                  } : undefined}
-                  onSave={() => { 
-                    setShowForm(false); 
-                    setEditVideo(null); 
-                    fetchVideos(); 
-                  }}
-                  onCancel={() => { 
-                    setShowForm(false); 
-                    setEditVideo(null); 
-                  }}
-                />
+                <div className="flex-1 overflow-y-auto scrollbar-modal">
+                  <VideoUploadFormRoot
+                    initialData={editVideo ? {
+                      id: editVideo.id,
+                      title: editVideo.title,
+                      video_url: editVideo.video_url,
+                      thumbnail_url: editVideo.thumbnail_url ?? undefined,
+                      is_active: editVideo.is_active,
+                      order_index: editVideo.order_index,
+                      upload_type: editVideo.upload_type,
+                      file_size: editVideo.file_size ?? undefined,
+                      original_filename: editVideo.original_filename ?? undefined
+                    } : undefined}
+                    onSave={() => { 
+                      setShowForm(false); 
+                      setEditVideo(null); 
+                      fetchVideos(); 
+                    }}
+                    onCancel={() => { 
+                      setShowForm(false); 
+                      setEditVideo(null); 
+                    }}
+                  />
+                </div>
               </motion.div>
             </motion.div>
           )}
@@ -599,12 +582,13 @@ export default function AdminVideos() {
                     <h3 className="text-lg font-semibold text-gray-900">
                       Gerenciar Coleções
                     </h3>
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="xs"
+                      icon="close"
                       onClick={() => setShowCollectionsManager(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <Icon name="close" className="w-6 h-6" />
-                    </button>
+                      className="!p-1"
+                    />
                   </div>
                 </div>
                 <div className="max-h-[70vh] overflow-y-auto">
@@ -626,48 +610,56 @@ export default function AdminVideos() {
                     <h3 className="text-lg font-semibold text-gray-900">
                       Adicionar à Coleção
                     </h3>
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="xs"
+                      icon="close"
                       onClick={() => setShowAddToCollectionModal(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <Icon name="close" className="w-6 h-6" />
-                    </button>
+                      className="!p-1"
+                    />
                   </div>
                   <p className="text-sm text-gray-600 mb-4">
                     Selecione uma coleção para adicionar o vídeo &quot;{selectedVideoForCollection.title}&quot;
                   </p>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {collections?.map((collection) => (
-                      <button
+                      <Button
                         key={collection.id}
+                        variant="secondary"
+                        size="sm"
                         onClick={() => handleAddToCollectionSubmit(collection.id)}
-                        className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 transition-colors"
+                        className="w-full text-left justify-start"
+                        fullWidth
                       >
-                        <div className="font-medium text-gray-900">{collection.name}</div>
-                        {collection.description && (
-                          <div className="text-sm text-gray-600 mt-1">{collection.description}</div>
-                        )}
-                        <div className="text-xs text-gray-500 mt-1">
-                          Tipo: {collection.type === 'images' ? 'Imagens' : collection.type === 'videos' ? 'Vídeos' : 'Misto'}
-                          {collection.type === 'images' && (
-                            <span className="text-red-500 ml-2">(Não compatível com vídeos)</span>
+                        <div>
+                          <div className="font-medium text-gray-900">{collection.name}</div>
+                          {collection.description && (
+                            <div className="text-sm text-gray-600 mt-1">{collection.description}</div>
                           )}
+                          <div className="text-xs text-gray-500 mt-1">
+                            Tipo: {collection.type === 'images' ? 'Imagens' : collection.type === 'videos' ? 'Vídeos' : 'Misto'}
+                            {collection.type === 'images' && (
+                              <span className="text-red-500 ml-2">(Não compatível com vídeos)</span>
+                            )}
+                          </div>
                         </div>
-                      </button>
+                      </Button>
                     ))}
                   </div>
                   {(!collections || collections.length === 0) && (
                     <div className="text-center py-6 text-gray-500">
                       <p>Nenhuma coleção encontrada.</p>
-                      <button
+                      <Button
+                        variant="primary"
+                        size="xs"
                         onClick={() => {
                           setShowAddToCollectionModal(false);
                           setShowCollectionsManager(true);
                         }}
-                        className="mt-2 text-primary hover:underline text-sm"
+                        className="mt-2"
                       >
                         Criar nova coleção
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>

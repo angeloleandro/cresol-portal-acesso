@@ -57,12 +57,34 @@ export function MessageModal({
   const selectedCount = currentMessage.groups.length + currentMessage.users.length;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-md p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Enviar Mensagem
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+        {/* Header - Fixed */}
+        <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Enviar Mensagem
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Selecione os destinatários e digite sua mensagem
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="ml-4 p-1 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
+            aria-label="Fechar modal"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        {/* Body - Scrollable */}
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          <form id="message-form" onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -211,24 +233,29 @@ export function MessageModal({
               </div>
             )}
           </div>
-
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+          </form>
+        </div>
+        
+        {/* Footer - Fixed with small buttons */}
+        <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0 rounded-b-lg">
+          <div className="flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+              className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-500 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50"
+              form="message-form"
+              className="px-3 py-1.5 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary transition-colors disabled:opacity-50"
               disabled={selectedCount === 0}
             >
               Enviar Mensagem
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -163,6 +163,6 @@ export interface DashboardVideo {
   thumbnail_url: string | null;
   is_active: boolean;
   order_index: number;
-  upload_type: 'youtube' | 'vimeo' | 'direct';
+  upload_type: 'youtube' | 'direct';
   created_at: string;
 }

@@ -54,37 +54,48 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   const hasItems = 'items' in collection ? (collection as any).items?.length > 0 : false;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto animate-in fade-in duration-200">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
       {/* Modal */}
       <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-        <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+        <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-300">
           
           {/* Header */}
-          <div className="bg-white px-6 py-4">
-            <div className="flex items-center">
-              <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                </svg>
-              </div>
-              <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                <h3 className="text-lg font-semibold leading-6 text-gray-900">
-                  Excluir Coleção
-                </h3>
-                <div className="mt-2">
-                  <p className="text-sm text-gray-500">
-                    Esta ação não pode ser desfeita. A coleção será permanentemente removida.
-                  </p>
+          <div className="bg-white px-6 py-4 border-b border-gray-200">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center">
+                <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                  <h3 className="text-lg font-semibold leading-6 text-gray-900">
+                    Excluir Coleção
+                  </h3>
+                  <div className="mt-1">
+                    <p className="text-sm text-gray-500">
+                      Esta ação não pode ser desfeita. A coleção será permanentemente removida.
+                    </p>
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={onClose}
+                disabled={isDeleting}
+                className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+              >
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="bg-white px-6 py-4 space-y-4">
+          {/* Content - Scrollable body */}
+          <div className="flex-1 overflow-y-auto bg-white px-6 py-4 space-y-4">
             {/* Collection Info */}
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-start gap-3">
@@ -174,12 +185,12 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row-reverse gap-3">
+          <div className="bg-gray-50 px-6 py-3 flex flex-col sm:flex-row-reverse gap-3 border-t border-gray-200">
             <button
               type="button"
               onClick={handleConfirm}
               disabled={!canDelete || isDeleting}
-              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isDeleting ? (
                 <div className="flex items-center justify-center">
@@ -195,7 +206,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isDeleting}
-              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Cancelar
             </button>

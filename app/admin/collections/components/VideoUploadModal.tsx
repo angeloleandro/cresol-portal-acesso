@@ -128,7 +128,7 @@ export const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-modal bg-white rounded-md shadow-xl"
+          className="max-w-4xl w-full max-h-[90vh] flex flex-col bg-white rounded-md shadow-xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -186,28 +186,30 @@ export const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
           )}
 
           {/* VideoUploadForm Integration */}
-          <div className="p-6">
-            <div className="mb-6 bg-gray-50 border border-gray-200 rounded-md p-4">
-              <div className="flex items-center gap-2">
-                <Icon name="folder" className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-900">
-                  Destino: Coleção &ldquo;{collection.name}&rdquo;
-                </span>
+          <div className="flex-1 overflow-y-auto scrollbar-modal">
+            <div className="p-6">
+              <div className="mb-6 bg-gray-50 border border-gray-200 rounded-md p-4">
+                <div className="flex items-center gap-2">
+                  <Icon name="folder" className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-900">
+                    Destino: Coleção &ldquo;{collection.name}&rdquo;
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  O vídeo do YouTube será automaticamente adicionado a esta coleção
+                </p>
               </div>
-              <p className="text-xs text-gray-600 mt-1">
-                O vídeo do YouTube será automaticamente adicionado a esta coleção
-              </p>
+              
+              <VideoUploadFormRoot
+                onSave={handleVideoSave}
+                onCancel={handleCancel}
+                // Passar contexto de coleção através de uma prop customizada
+                customContext={{
+                  collectionId: collection.id,
+                  collectionName: collection.name
+                }}
+              />
             </div>
-            
-            <VideoUploadFormRoot
-              onSave={handleVideoSave}
-              onCancel={handleCancel}
-              // Passar contexto de coleção através de uma prop customizada
-              customContext={{
-                collectionId: collection.id,
-                collectionName: collection.name
-              }}
-            />
           </div>
         </motion.div>
       </motion.div>

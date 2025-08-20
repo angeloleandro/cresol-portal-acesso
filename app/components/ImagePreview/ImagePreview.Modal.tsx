@@ -105,7 +105,7 @@ export function ImageModal({
     <AnimatePresence mode="wait">
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-200"
           initial="hidden"
           animate="visible"
           exit="hidden"
@@ -119,7 +119,7 @@ export function ImageModal({
           <motion.div
             ref={containerRef}
             className={clsx(
-              'relative w-full mx-4 bg-white border border-gray-200 overflow-hidden',
+              'relative w-full mx-4 bg-white border border-gray-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-300',
               isMobile ? 'h-full' : 'max-w-6xl max-h-[90vh] rounded-md'
             )}
             variants={modalVariants}
@@ -130,22 +130,26 @@ export function ImageModal({
             tabIndex={-1}
             {...swipeHandlers}
           >
-            {/* Close Button */}
-            <button
-              className={clsx(
-                'absolute top-4 right-4 z-20',
-                'w-10 h-10 bg-white/90 hover:bg-white',
-                'border border-gray-200 rounded-full shadow-lg',
-                'flex items-center justify-center',
-                'transition-all duration-200',
-                'hover:border-gray-300 focus:border-primary',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20'
-              )}
-              onClick={onClose}
-              aria-label="Fechar modal"
-            >
-              <Icon name="x" className="w-5 h-5 text-gray-600" />
-            </button>
+            {/* Header with title and close button */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Visualizador de Imagem
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {image.title || 'Imagem da galeria'}
+                  </p>
+                </div>
+                <button
+                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  onClick={onClose}
+                  aria-label="Fechar modal"
+                >
+                  <Icon name="x" className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+            </div>
 
             {/* Navigation Buttons */}
             {showNavigation && totalImages > 1 && (
@@ -202,11 +206,12 @@ export function ImageModal({
               </>
             )}
 
-            {/* Image Container */}
-            <div className={clsx(
-              'relative bg-black flex items-center justify-center overflow-hidden',
-              isMobile ? 'h-full' : 'aspect-video max-h-[70vh]'
-            )}>
+            {/* Image Container - Scrollable body */}
+            <div className="flex-1 overflow-y-auto">
+              <div className={clsx(
+                'relative bg-black flex items-center justify-center overflow-hidden',
+                isMobile ? 'h-full' : 'aspect-video max-h-[70vh]'
+              )}>
               {/* Loading State */}
               {!imageLoaded && !imageError && (
                 <motion.div
@@ -297,16 +302,17 @@ export function ImageModal({
                   </div>
                 </div>
               )}
-            </div>
+              </div>
 
-            {/* Image Information */}
-            {showInfo && !isMobile && (
-              <ImageInfo 
-                image={image} 
-                currentIndex={currentIndex} 
-                totalImages={totalImages} 
-              />
-            )}
+              {/* Image Information */}
+              {showInfo && !isMobile && (
+                <ImageInfo 
+                  image={image} 
+                  currentIndex={currentIndex} 
+                  totalImages={totalImages} 
+                />
+              )}
+            </div>
           </motion.div>
 
           {/* Mobile Info Overlay */}
@@ -366,7 +372,7 @@ function ImageInfo({
   };
 
   return (
-    <div className="p-6 bg-white border-t border-gray-200">
+    <div className="p-6 bg-gray-50 border-t border-gray-200">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           {/* Title */}
@@ -424,9 +430,9 @@ function ImageInfo({
             href={image.image_url}
             download
             className={clsx(
-              'inline-flex items-center gap-2 px-4 py-2',
+              'inline-flex items-center gap-2 px-3 py-1.5 text-sm',
               'bg-primary hover:bg-primary-dark',
-              'text-white text-sm font-medium',
+              'text-white font-medium',
               'rounded-lg transition-colors',
               'focus:outline-none focus:ring-2 focus:ring-primary/20'
             )}

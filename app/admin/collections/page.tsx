@@ -15,6 +15,7 @@ import CollectionsManager from './components/CollectionsManager';
 import { useCollections } from '@/app/components/Collections/Collection.hooks';
 import Icon from '@/app/components/icons/Icon';
 import clsx from 'clsx';
+import Button from '@/app/components/ui/Button';
 
 export default function AdminCollectionsPage() {
   const router = useRouter();
@@ -119,51 +120,30 @@ export default function AdminCollectionsPage() {
               <p className="text-sm text-gray-600">Organize e gerencie coleções de imagens e vídeos</p>
             </div>
             <div className="flex gap-3 flex-wrap sm:justify-end">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={clsx(
-                  'inline-flex items-center gap-2 px-5 py-2.5',
-                  'bg-primary text-white rounded-md font-medium',
-                  'hover:bg-primary/90 transition-colors duration-150',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/20',
-                  'shadow-sm'
-                )}
+              <Button
+                variant="primary"
+                size="sm"
+                icon="folder-plus"
                 onClick={() => setShowCreateCollection(true)}
               >
-                <Icon name="folder-plus" className="h-5 w-5" />
                 Nova Coleção
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={clsx(
-                  'inline-flex items-center gap-2 px-5 py-2.5',
-                  'bg-gray-100 text-gray-700 rounded-md font-medium',
-                  'hover:bg-gray-200 transition-colors duration-150',
-                  'focus:outline-none focus:ring-2 focus:ring-gray-300/20',
-                  'shadow-sm'
-                )}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon="image"
                 onClick={() => router.push('/admin/gallery')}
               >
-                <Icon name="image" className="h-5 w-5" />
                 Galeria
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={clsx(
-                  'inline-flex items-center gap-2 px-5 py-2.5',
-                  'bg-gray-100 text-gray-700 rounded-md font-medium',
-                  'hover:bg-gray-200 transition-colors duration-150',
-                  'focus:outline-none focus:ring-2 focus:ring-gray-300/20',
-                  'shadow-sm'
-                )}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon="video"
                 onClick={() => router.push('/admin/videos')}
               >
-                <Icon name="video" className="h-5 w-5" />
                 Vídeos
-              </motion.button>
+              </Button>
             </div>
           </div>
         </motion.div>

@@ -446,13 +446,13 @@ export default function AdvancedSearch({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+    <div className="fixed inset-0 z-50 overflow-hidden animate-in fade-in duration-200">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"></div>
       
       <div className="fixed inset-0 flex items-start justify-center pt-16 px-4">
         <div 
           ref={modalRef}
-          className="w-full max-w-4xl bg-white rounded-lg border border-gray-300 max-h-[80vh] overflow-hidden"
+          className="w-full max-w-4xl bg-white rounded-lg border border-gray-200 max-h-[80vh] overflow-hidden animate-in zoom-in-95 duration-300"
         >
           {/* Header */}
           <div className="p-4 border-b border-gray-200">
@@ -482,7 +482,7 @@ export default function AdvancedSearch({
               {/* Botões de ação */}
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`px-4 py-3 border rounded-md font-medium transition-colors ${
+                className={`px-3 py-1.5 text-sm border rounded-md font-medium transition-colors ${
                   showFilters
                     ? 'bg-primary text-white border-primary'
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -493,7 +493,7 @@ export default function AdvancedSearch({
 
               <button
                 onClick={() => setShowHistory(!showHistory)}
-                className={`px-4 py-3 border rounded-md font-medium transition-colors ${
+                className={`px-3 py-1.5 text-sm border rounded-md font-medium transition-colors ${
                   showHistory
                     ? 'bg-primary text-white border-primary'
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -504,7 +504,7 @@ export default function AdvancedSearch({
 
               <button
                 onClick={onClose}
-                className="p-3 text-gray-400 hover:text-gray-600 transition-colors rounded-md"
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-md"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -682,7 +682,7 @@ export default function AdvancedSearch({
                       locations: [],
                       tags: []
                     })}
-                    className="text-sm text-gray-600 hover:text-gray-800 rounded-md px-2 py-1"
+                    className="text-sm text-gray-600 hover:text-gray-800 rounded-md px-3 py-1.5 font-medium"
                   >
                     Limpar filtros
                   </button>
@@ -726,7 +726,7 @@ export default function AdvancedSearch({
                           setSearchHistory([]);
                           localStorage.removeItem('search_history');
                         }}
-                        className="text-xs text-red-600 hover:text-red-800 mt-2 rounded-md px-2 py-1"
+                        className="text-sm text-red-600 hover:text-red-800 mt-2 rounded-md px-3 py-1.5 font-medium"
                       >
                         Limpar histórico
                       </button>
@@ -841,14 +841,14 @@ export default function AdvancedSearch({
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Anterior
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => prev + 1)}
                   disabled={currentPage * resultsPerPage >= totalResults}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Próxima
                 </button>

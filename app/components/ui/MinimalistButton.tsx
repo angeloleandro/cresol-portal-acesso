@@ -21,19 +21,16 @@ interface MinimalistButtonProps {
   fullWidth?: boolean;
 }
 
-// Map minimalist variants to Chakra UI v3 Button
-const mapMinimalistVariant = (variant: MinimalistButtonProps['variant']): { variant: ButtonProps['variant']; colorPalette: ButtonProps['colorPalette'] } => {
+// Map minimalist variants to unified Button
+const mapMinimalistVariant = (variant: MinimalistButtonProps['variant']): 'primary' | 'secondary' => {
   switch (variant) {
     case 'primary':
-      return { variant: 'solid', colorPalette: 'orange' };
+      return 'primary';
     case 'secondary':
-      return { variant: 'subtle', colorPalette: 'gray' };
     case 'ghost':
-      return { variant: 'ghost', colorPalette: 'gray' };
     case 'outline':
-      return { variant: 'outline', colorPalette: 'gray' };
     default:
-      return { variant: 'solid', colorPalette: 'orange' };
+      return 'secondary';
   }
 };
 
@@ -60,18 +57,16 @@ export const MinimalistButton = forwardRef<HTMLButtonElement, MinimalistButtonPr
     },
     ref
   ) => {
-    const { variant: newVariant, colorPalette } = mapMinimalistVariant(variant);
+    const newVariant = mapMinimalistVariant(variant);
 
     return (
       <UnifiedButton
         ref={ref}
         variant={newVariant}
-        colorPalette={colorPalette}
         size={size}
         onClick={onClick}
         disabled={disabled}
         className={className}
-        fullWidth={fullWidth}
         icon={icon}
         iconPosition={iconPosition}
       >

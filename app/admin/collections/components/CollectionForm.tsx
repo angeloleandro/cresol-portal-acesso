@@ -11,6 +11,7 @@ import { validateCollection } from '@/lib/utils/collections';
 import { cn } from '@/lib/utils/cn';
 import { useCollectionUpload } from '@/app/components/Collections/Collection.hooks';
 import { FormSelect, type SelectOption } from '@/app/components/forms';
+import Button from '@/app/components/ui/Button';
 
 export interface CollectionFormData {
   name: string;
@@ -245,13 +246,15 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
             
             {/* Remove button */}
             {coverPreview && (
-              <button
+              <Button
+                variant="primary"
+                size="xs"
                 type="button"
                 onClick={handleCoverRemove}
-                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                className="absolute -top-2 -right-2 !w-6 !h-6 !min-w-0 !p-0 bg-red-500 hover:bg-red-600 rounded-full"
               >
                 ×
-              </button>
+              </Button>
             )}
           </div>
           
@@ -432,20 +435,22 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
       {/* Form Actions */}
       <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
         {showCancelButton && (
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {cancelButtonText}
-          </button>
+          </Button>
         )}
         
-        <button
+        <Button
+          variant="primary"
+          size="sm"
           type="submit"
           disabled={isSubmitting || isUploadingCover}
-          className="px-6 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSubmitting ? (
             <div className="flex items-center">
@@ -455,7 +460,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({
           ) : (
             finalSubmitText
           )}
-        </button>
+        </Button>
       </div>
 
       {/* Global Error */}

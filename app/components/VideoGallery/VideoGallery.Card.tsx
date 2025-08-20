@@ -7,6 +7,7 @@
 "use client";
 
 import { useState, useCallback, memo, useMemo } from 'react';
+import Button from '@/app/components/ui/Button';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -170,9 +171,7 @@ export function EnhancedVideoCard({
             )}
           </div>
           
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Button
             className={clsx(
               'px-3 py-1.5 rounded-md text-xs font-medium',
               'bg-primary/10 text-primary',
@@ -181,14 +180,14 @@ export function EnhancedVideoCard({
               'opacity-0 group-hover:opacity-100',
               'focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary/20'
             )}
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
               handleCardClick();
             }}
             aria-label={`Assistir ${video.title}`}
           >
             Assistir
-          </motion.button>
+          </Button>
         </div>
       </div>
     </motion.div>
@@ -348,9 +347,7 @@ export function AdminVideoCard({
           {/* Admin Action Buttons */}
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             {showEditButton && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <Button
                 className={clsx(
                   'px-2 py-1 rounded text-xs font-medium',
                   'bg-neutral-100 text-neutral-700',
@@ -362,13 +359,11 @@ export function AdminVideoCard({
                 aria-label={`Editar ${video.title}`}
               >
                 <Icon name="pencil" className="w-3 h-3" />
-              </motion.button>
+              </Button>
             )}
 
             {showAddToCollectionButton && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <Button
                 className={clsx(
                   'px-2 py-1 rounded text-xs font-medium',
                   'bg-blue-50 text-blue-600',
@@ -380,13 +375,11 @@ export function AdminVideoCard({
                 aria-label={`Adicionar ${video.title} à coleção`}
               >
                 <Icon name="folder-plus" className="w-3 h-3" />
-              </motion.button>
+              </Button>
             )}
             
             {showDeleteButton && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <Button
                 className={clsx(
                   'px-2 py-1 rounded text-xs font-medium',
                   'bg-red-50 text-red-600',
@@ -398,7 +391,7 @@ export function AdminVideoCard({
                 aria-label={`Remover ${video.title}`}
               >
                 <Icon name="trash" className="w-3 h-3" />
-              </motion.button>
+              </Button>
             )}
           </div>
         </div>

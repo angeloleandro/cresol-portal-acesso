@@ -57,6 +57,7 @@ export default function SectorContentManagement() {
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [activeTab, setActiveTab] = useState('news');
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [showDrafts, setShowDrafts] = useState(true); // Mostrar rascunhos por padrão para admins
   const [totalDraftNewsCount, setTotalDraftNewsCount] = useState(0); // Contador total de rascunhos de notícias
   const [totalDraftEventsCount, setTotalDraftEventsCount] = useState(0); // Contador total de rascunhos de eventos
@@ -175,6 +176,19 @@ export default function SectorContentManagement() {
     setEvents(data || []);
   }, [sectorId, supabase, showDrafts]);
 
+  const fetchTeamMembers = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/admin/sector-team?sector_id=${sectorId}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setTeamMembers(data.teamMembers || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar equipe:', error);
+    }
+  }, [sectorId]);
+
   // Verificação de autenticação com novo hook
   useEffect(() => {
     const checkAuthAndLoadData = async () => {
@@ -214,14 +228,15 @@ export default function SectorContentManagement() {
       await Promise.all([
         fetchSector(),
         fetchNews(),
-        fetchEvents()
+        fetchEvents(),
+        fetchTeamMembers()
       ]);
       
       setLoading(false);
     };
 
     checkAuthAndLoadData();
-  }, [isAuthenticated, authLoading, profile, user, sectorId, router, fetchEvents, fetchNews, fetchSector, supabase]);
+  }, [isAuthenticated, authLoading, profile, user, sectorId, router, fetchEvents, fetchNews, fetchSector, fetchTeamMembers, supabase]);
 
   // useEffect adicional para monitorar mudanças em showDrafts
   useEffect(() => {
@@ -668,6 +683,16 @@ export default function SectorContentManagement() {
               }`}
             >
               Eventos
+            </button>
+            <button
+              onClick={() => setActiveTab('team')}
+              className={`py-2 px-4 border-b-2 font-medium text-sm ${
+                activeTab === 'team' 
+                  ? 'border-primary text-primary' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Equipe
             </button>
           </div>
         </div>
@@ -1164,6 +1189,90 @@ export default function SectorContentManagement() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Aba de Equipe */}
+          {activeTab === 'team' && (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">Equipe do Setor</h3>
+                <Link
+                  href={`/setores/${sectorId}/equipe`}
+                  className="bg-primary text-white px-3 py-1 rounded-md hover:bg-primary-dark text-sm"
+                >
+                  Gerenciar Equipe
+                </Link>
+              </div>
+              
+              {teamMembers.length === 0 ? (
+                <div className="bg-white p-6 rounded-md border border-gray-200 text-center">
+                  <p className="text-gray-500 mb-4">Nenhum membro cadastrado neste setor.</p>
+                  <Link
+                    href={`/setores/${sectorId}/equipe`}
+                    className="text-primary hover:underline"
+                  >
+                    Adicionar primeiro membro →
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Membros diretos do setor */}
+                  {teamMembers.filter(m => !m.is_from_subsector).length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 uppercase tracking-wider mb-3">
+                        Membros Diretos ({teamMembers.filter(m => !m.is_from_subsector).length})
+                      </h4>
+                      <div className="bg-white rounded-md border border-gray-200">
+                        {teamMembers.filter(m => !m.is_from_subsector).map((member, index) => (
+                          <div key={member.id} className={`p-4 flex items-center ${
+                            index !== teamMembers.filter(m => !m.is_from_subsector).length - 1 ? 'border-b border-gray-200' : ''
+                          }`}>
+                            <div className="flex-1">
+                              <div className="flex items-center">
+                                <span className="font-medium text-gray-900">{member.profiles?.full_name}</span>
+                                {member.position && (
+                                  <span className="ml-2 text-sm text-gray-600">• {member.position}</span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-500">{member.profiles?.email}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Membros de subsetores */}
+                  {teamMembers.filter(m => m.is_from_subsector).length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 uppercase tracking-wider mb-3">
+                        Membros dos Sub-setores ({teamMembers.filter(m => m.is_from_subsector).length})
+                      </h4>
+                      <div className="bg-blue-50 rounded-md border border-blue-200">
+                        {teamMembers.filter(m => m.is_from_subsector).map((member, index) => (
+                          <div key={member.id} className={`p-4 flex items-center ${
+                            index !== teamMembers.filter(m => m.is_from_subsector).length - 1 ? 'border-b border-blue-200' : ''
+                          }`}>
+                            <div className="flex-1">
+                              <div className="flex items-center">
+                                <span className="font-medium text-gray-900">{member.profiles?.full_name}</span>
+                                {member.position && (
+                                  <span className="ml-2 text-sm text-gray-600">• {member.position}</span>
+                                )}
+                                {member.subsectors && (
+                                  <span className="ml-2 text-sm text-blue-600">• {member.subsectors.name}</span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-500">{member.profiles?.email}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

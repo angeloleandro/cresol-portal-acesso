@@ -469,7 +469,7 @@ export const VideoUploadFormRoot = memo(({
   }, [onCancel])
   
   return (
-    <div className="bg-white rounded-md border border-neutral-200 max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} noValidate className="p-6 space-y-8">
         {/* Header */}
         <VideoUploadFormHeader 

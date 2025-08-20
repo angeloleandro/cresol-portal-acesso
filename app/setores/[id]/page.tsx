@@ -2,14 +2,16 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../../components/Navbar';
 import SubsectorTeam from '../../components/SubsectorTeam';
+import SectorTeam from '../../components/SectorTeam';
+import { Icon } from '../../components/icons';
 import Breadcrumb from '../../components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import Button from '@/app/components/ui/Button';
 
 interface Sector {
   id: string;
@@ -74,7 +76,6 @@ export default function SetorDetalhesPage() {
   const [news, setNews] = useState<SectorNews[]>([]);
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [messages, setMessages] = useState<SectorMessage[]>([]);
-  const [activeTab, setActiveTab] = useState('news');
   const [isAdmin, setIsAdmin] = useState(false);
 
   const fetchSector = useCallback(async () => {
@@ -115,7 +116,8 @@ export default function SetorDetalhesPage() {
       .select('*')
       .eq('sector_id', sectorId)
       .eq('is_published', true)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(3);
     
     if (error) {
       console.error('[SetorDetalhes] Erro ao buscar notícias:', error.message || error);
@@ -132,7 +134,9 @@ export default function SetorDetalhesPage() {
       .select('*')
       .eq('sector_id', sectorId)
       .eq('is_published', true)
-      .order('start_date', { ascending: true });
+      .gte('start_date', new Date().toISOString())
+      .order('start_date', { ascending: true })
+      .limit(3);
     
     if (error) {
       console.error('[SetorDetalhes] Erro ao buscar eventos:', error.message || error);
@@ -149,7 +153,8 @@ export default function SetorDetalhesPage() {
       .select('*')
       .eq('sector_id', sectorId)
       .eq('is_published', true)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(3);
     
     if (error) {
       console.error('[SetorDetalhes] Erro ao buscar mensagens:', error.message || error);
@@ -196,16 +201,6 @@ export default function SetorDetalhesPage() {
     checkUser();
   }, [sectorId, router, fetchSector, fetchSubsectors, fetchNews, fetchEvents, fetchMessages]);
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   if (loading) {
     return <UnifiedLoadingSpinner fullScreen message={LOADING_MESSAGES.sectors} size="large" />;
@@ -227,13 +222,35 @@ export default function SetorDetalhesPage() {
   return (
     <div className="min-h-screen bg-cresol-gray-light/30">
       <Navbar />
+      
+      {/* Header do Setor */}
+      <header className="bg-white border-b border-cresol-gray-light">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-cresol-gray-dark">
+                {sector.name}
+              </h1>
+            </div>
+          </div>
+          
+          {sector.description && (
+            <p className="text-cresol-gray mt-2">
+              {sector.description}
+            </p>
+          )}
+        </div>
+      </header>
 
+      {/* Conteúdo Principal */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Navigation */}
         <div className="flex items-center mb-6">
-          <button
+          <Button
+            variant="secondary"
+            size="xs"
             onClick={() => router.back()}
-            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors mr-4"
+            className="!p-2"
             title="Voltar"
             aria-label="Voltar à página anterior"
           >
@@ -250,7 +267,7 @@ export default function SetorDetalhesPage() {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-          </button>
+          </Button>
           
           <div className="flex-1">
             <Breadcrumb 
@@ -263,292 +280,353 @@ export default function SetorDetalhesPage() {
           </div>
         </div>
 
-        <div className="mb-8">          
-          <h1 className="text-3xl font-bold text-primary mb-2">{sector.name}</h1>
-          <p className="text-cresol-gray mb-6">{sector.description || 'Sem descrição'}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           
-          {/* Abas */}
-          <div className="border-b border-cresol-gray-light mt-6">
-            <nav className="-mb-px flex space-x-8" role="tablist">
-              <button
-                onClick={() => setActiveTab('news')}
-                className={`${
-                  activeTab === 'news'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray-light'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                aria-selected={activeTab === 'news'}
-                role="tab"
-                aria-controls="news-panel"
-                id="news-tab"
-              >
-                Notícias
-              </button>
-              <button
-                onClick={() => setActiveTab('events')}
-                className={`${
-                  activeTab === 'events'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray-light'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                aria-selected={activeTab === 'events'}
-                role="tab"
-                aria-controls="events-panel"
-                id="events-tab"
-              >
-                Eventos
-              </button>
-              <button
-                onClick={() => setActiveTab('messages')}
-                className={`${
-                  activeTab === 'messages'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray-light'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                aria-selected={activeTab === 'messages'}
-                role="tab"
-                aria-controls="messages-panel"
-                id="messages-tab"
-              >
-                Mensagens
-              </button>
-              <button
-                onClick={() => setActiveTab('subsectors')}
-                className={`${
-                  activeTab === 'subsectors'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-cresol-gray hover:text-cresol-gray-dark hover:border-cresol-gray-light'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                aria-selected={activeTab === 'subsectors'}
-                role="tab"
-                aria-controls="subsectors-panel"
-                id="subsectors-tab"
-              >
-                Sub-setores ({subsectors.length})
-              </button>
-            </nav>
-          </div>
-        </div>
-
-        {/* Conteúdo da aba de Notícias */}
-        {activeTab === 'news' && (
-          <div id="news-panel" role="tabpanel" aria-labelledby="news-tab">
+          {/* Coluna Principal */}
+          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
             
-            {news.length === 0 ? (
-              <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
-                <p className="text-cresol-gray">
-                  Nenhuma notícia publicada para este setor.
-                </p>
+            {/* Notícias Recentes */}
+            <section 
+              className="bg-white rounded-md border border-cresol-gray-light"
+              aria-labelledby="recent-news-heading"
+            >
+              <div className="p-6 border-b border-cresol-gray-light">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <Icon name="list" className="h-5 w-5 text-primary mr-2" aria-hidden="true" />
+                    <h2 id="recent-news-heading" className="text-xl font-semibold text-cresol-gray-dark">
+                      Notícias Recentes
+                    </h2>
+                  </div>
+                  {news.length > 0 && (
+                    <Link 
+                      href={`/setores/${sectorId}/noticias`}
+                      className="text-sm text-primary hover:text-primary/80 transition-colors"
+                    >
+                      Ver todas
+                    </Link>
+                  )}
+                </div>
               </div>
-            ) : (
-              <div className="space-y-6">
-                {news.map((item) => (
-                  <div 
-                    key={item.id} 
-                    className="bg-white rounded-lg  border border-cresol-gray-light overflow-hidden max-w-4xl mx-auto"
-                  >
-                    {item.image_url && (
-                      <div className="relative w-full h-64">
-                        <OptimizedImage
-                          src={item.image_url}
-                          alt={item.title}
-                          fill
-                          className="border-b border-cresol-gray-light object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="p-6">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-xs text-cresol-gray">
-                          {formatDate(item.created_at)}
-                        </span>
-                        <div className="flex gap-2">
-                          {!item.is_published && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800">
-                              Rascunho
-                            </span>
-                          )}
-                          {item.is_featured && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">
+              <div className="p-6">
+                {news.length === 0 ? (
+                  <div className="text-center py-8" role="status">
+                    <p className="text-cresol-gray">
+                      Nenhuma notícia publicada ainda.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4" role="list" aria-label="Lista de notícias recentes">
+                    {news.map((article, index) => (
+                      <article 
+                        key={article.id}
+                        className="border-b border-cresol-gray-light last:border-b-0 pb-4 last:pb-0"
+                        role="listitem"
+                        aria-labelledby={`news-title-${index}`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 
+                            id={`news-title-${index}`}
+                            className="font-semibold text-cresol-gray-dark"
+                          >
+                            {article.title}
+                          </h3>
+                          {article.is_featured && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary ml-2">
                               Destaque
                             </span>
                           )}
                         </div>
-                      </div>
-                      <h2 className="text-xl font-semibold text-cresol-gray mb-2">{item.title}</h2>
-                      <p className="text-cresol-gray mb-4">{item.summary}</p>
-                      
-                      {item.content && (
-                        <div className="mt-4 pt-4 border-t border-cresol-gray-light">
-                          <div className="prose prose-sm max-w-none prose-headings:text-cresol-gray prose-p:text-cresol-gray">
-                            <p>{item.content}</p>
-                          </div>
+                        <p className="text-cresol-gray text-sm mb-2">
+                          {article.summary}
+                        </p>
+                        <div className="flex items-center text-xs text-cresol-gray">
+                          <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
+                          <time dateTime={article.created_at}>
+                            {new Date(article.created_at).toLocaleDateString('pt-BR')}
+                          </time>
                         </div>
-                      )}
-                    </div>
+                      </article>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
-        )}
+            </section>
 
-        {/* Conteúdo da aba de Eventos */}
-        {activeTab === 'events' && (
-          <div id="events-panel" role="tabpanel" aria-labelledby="events-tab">
-            
-            {events.length === 0 ? (
-              <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
-                <p className="text-cresol-gray">
-                  Nenhum evento publicado para este setor.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {events.map((item) => (
-                  <div 
-                    key={item.id}
-                    className="bg-white rounded-lg  border border-cresol-gray-light p-6"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                      <h2 className="text-xl font-semibold text-cresol-gray">{item.title}</h2>
-                      <div className="flex gap-2 mt-2 md:mt-0">
-                        {!item.is_published && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Rascunho
-                          </span>
-                        )}
-                        {item.is_featured && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">
-                            Destaque
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col md:flex-row md:items-center mb-4 text-sm text-cresol-gray">
-                      <div className="flex items-center mb-2 md:mb-0 md:mr-6">
-                        <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>{formatDate(item.start_date)}</span>
-                      </div>
-                      
-                      {item.end_date && (
-                        <div className="flex items-center mb-2 md:mb-0 md:mr-6">
-                          <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          <span>Até {formatDate(item.end_date)}</span>
-                        </div>
-                      )}
-                      
-                      {item.location && (
-                        <div className="flex items-center">
-                          <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <span>{item.location}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <p className="text-cresol-gray">{item.description}</p>
+            {/* Próximos Eventos */}
+            <section 
+              className="bg-white rounded-md border border-cresol-gray-light"
+              aria-labelledby="upcoming-events-heading"
+            >
+              <div className="p-6 border-b border-cresol-gray-light">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <Icon name="calendar" className="h-5 w-5 text-primary mr-2" aria-hidden="true" />
+                    <h2 id="upcoming-events-heading" className="text-xl font-semibold text-cresol-gray-dark">
+                      Próximos Eventos
+                    </h2>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Conteúdo da aba de Mensagens */}
-        {activeTab === 'messages' && (
-          <div id="messages-panel" role="tabpanel" aria-labelledby="messages-tab">
-            
-            {messages.length === 0 ? (
-              <div className="bg-white rounded-lg border border-cresol-gray-light p-8 text-center">
-                <p className="text-cresol-gray">
-                  Nenhuma mensagem publicada para este setor.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {messages.map((item) => (
-                  <div 
-                    key={item.id} 
-                    className="bg-white rounded-lg border border-cresol-gray-light p-6"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                      <h2 className="text-xl font-semibold text-cresol-gray">{item.title}</h2>
-                      <div className="flex gap-2 mt-2 md:mt-0">
-                        {!item.is_published && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Rascunho
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <p className="text-cresol-gray whitespace-pre-line">{item.content}</p>
-                    
-                    <div className="mt-4 pt-4 border-t border-cresol-gray-light">
-                      <span className="text-xs text-cresol-gray">
-                        Publicado em: {formatDate(item.created_at)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Conteúdo da aba de Sub-setores */}
-        {activeTab === 'subsectors' && (
-          <div id="subsectors-panel" role="tabpanel" aria-labelledby="subsectors-tab">
-            {subsectors.length === 0 ? (
-              <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
-                <p className="text-cresol-gray">Nenhum sub-setor cadastrado para este setor.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {subsectors.map((subsector) => (
-                  <Link 
-                    href={`/subsetores/${subsector.id}`} 
-                    key={subsector.id}
-                    className="block group"
-                    aria-label={`Acessar sub-setor ${subsector.name}`}
-                  >
-                    <div 
-                      className="bg-white rounded-lg border-2 border-cresol-gray-light overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-cresol-primary/10 hover:border-cresol-primary hover:-translate-y-1 cursor-pointer"
+                  {events.length > 0 && (
+                    <Link 
+                      href={`/setores/${sectorId}/eventos`}
+                      className="text-sm text-primary hover:text-primary/80 transition-colors"
                     >
-                      <div className="p-6 border-b border-cresol-gray-light">
-                        <h3 className="text-xl font-semibold text-cresol-gray-dark mb-2 group-hover:text-cresol-primary transition-colors duration-200">
-                          {subsector.name}
-                        </h3>
-                        {subsector.description && (
-                          <p className="text-cresol-gray text-sm">
-                            {subsector.description}
-                          </p>
-                        )}
-                      </div>
-                      
-                      <div className="p-4">
-                        <SubsectorTeam 
-                          subsectorId={subsector.id}
-                          subsectorName={subsector.name}
-                          showFullPage={true}
-                          maxMembers={4}
-                        />
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+                      Ver todos
+                    </Link>
+                  )}
+                </div>
               </div>
-            )}
+              <div className="p-6">
+                {events.length === 0 ? (
+                  <div className="text-center py-8" role="status">
+                    <p className="text-cresol-gray">
+                      Nenhum evento programado.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4" role="list" aria-label="Lista de próximos eventos">
+                    {events.map((event, index) => (
+                      <article 
+                        key={event.id}
+                        className="border border-cresol-gray-light rounded-lg p-4"
+                        role="listitem"
+                        aria-labelledby={`event-title-${index}`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 
+                            id={`event-title-${index}`}
+                            className="font-semibold text-cresol-gray-dark"
+                          >
+                            {event.title}
+                          </h3>
+                          {event.is_featured && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary ml-2">
+                              Destaque
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-cresol-gray text-sm mb-3">
+                          {event.description}
+                        </p>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-cresol-gray">
+                          <div className="flex items-center">
+                            <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
+                            <time dateTime={event.start_date}>
+                              {new Date(event.start_date).toLocaleDateString('pt-BR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </time>
+                          </div>
+                          {event.location && (
+                            <div className="flex items-center">
+                              <Icon name="map" className="h-3 w-3 mr-1" aria-hidden="true" />
+                              <span aria-label={`Local: ${event.location}`}>
+                                {event.location}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Mensagens Recentes */}
+            <section 
+              className="bg-white rounded-md border border-cresol-gray-light"
+              aria-labelledby="recent-messages-heading"
+            >
+              <div className="p-6 border-b border-cresol-gray-light">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <Icon name="message-square" className="h-5 w-5 text-primary mr-2" aria-hidden="true" />
+                    <h2 id="recent-messages-heading" className="text-xl font-semibold text-cresol-gray-dark">
+                      Mensagens Recentes
+                    </h2>
+                  </div>
+                  {messages.length > 0 && (
+                    <Link 
+                      href={`/setores/${sectorId}/mensagens`}
+                      className="text-sm text-primary hover:text-primary/80 transition-colors"
+                    >
+                      Ver todas
+                    </Link>
+                  )}
+                </div>
+              </div>
+              <div className="p-6">
+                {messages.length === 0 ? (
+                  <div className="text-center py-8" role="status">
+                    <p className="text-cresol-gray">
+                      Nenhuma mensagem publicada ainda.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4" role="list" aria-label="Lista de mensagens recentes">
+                    {messages.map((message, index) => (
+                      <article 
+                        key={message.id}
+                        className="border-b border-cresol-gray-light last:border-b-0 pb-4 last:pb-0"
+                        role="listitem"
+                        aria-labelledby={`message-title-${index}`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 
+                            id={`message-title-${index}`}
+                            className="font-semibold text-cresol-gray-dark"
+                          >
+                            {message.title}
+                          </h3>
+                        </div>
+                        <p className="text-cresol-gray text-sm mb-2 line-clamp-2">
+                          {message.content}
+                        </p>
+                        <div className="flex items-center text-xs text-cresol-gray">
+                          <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
+                          <time dateTime={message.created_at}>
+                            {new Date(message.created_at).toLocaleDateString('pt-BR')}
+                          </time>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
-        )}
+
+          {/* Sidebar */}
+          <aside className="lg:col-span-1 space-y-4 lg:space-y-6" role="complementary" aria-label="Informações adicionais">
+            
+            {/* Equipe do Setor */}
+            <section className="bg-white rounded-lg border border-cresol-gray-light">
+              <div className="p-4 border-b border-cresol-gray-light">
+                <div className="flex items-center">
+                  <Icon name="user-group" className="h-5 w-5 text-primary mr-2" aria-hidden="true" />
+                  <h3 className="font-semibold text-cresol-gray-dark">
+                    Equipe do Setor
+                  </h3>
+                </div>
+              </div>
+              <div className="p-4">
+                <SectorTeam 
+                  sectorId={sectorId}
+                  sectorName={sector?.name || ''}
+                  showFullPage={false}
+                  maxMembers={6}
+                />
+              </div>
+            </section>
+
+            {/* Sub-setores */}
+            {subsectors.length > 0 && (
+              <section 
+                className="bg-white rounded-lg border border-cresol-gray-light"
+                aria-labelledby="subsectors-heading"
+              >
+                <div className="p-4 border-b border-cresol-gray-light">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Icon name="building-2" className="h-5 w-5 text-primary mr-2" aria-hidden="true" />
+                      <h3 id="subsectors-heading" className="font-semibold text-cresol-gray-dark">
+                        Sub-setores ({subsectors.length})
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="space-y-3">
+                    {subsectors.slice(0, 5).map((subsector) => (
+                      <Link 
+                        href={`/subsetores/${subsector.id}`} 
+                        key={subsector.id}
+                        className="block group"
+                        aria-label={`Acessar sub-setor ${subsector.name}`}
+                      >
+                        <div className="flex items-center p-3 border border-cresol-gray-light rounded-lg hover:border-primary transition-colors group">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-cresol-gray-dark group-hover:text-primary transition-colors text-sm">
+                              {subsector.name}
+                            </h4>
+                            {subsector.description && (
+                              <p className="text-xs text-cresol-gray mt-1 line-clamp-2">
+                                {subsector.description}
+                              </p>
+                            )}
+                          </div>
+                          <Icon 
+                            name="chevron-right" 
+                            className="h-4 w-4 text-cresol-gray group-hover:text-primary transition-colors ml-2" 
+                            aria-hidden="true" 
+                          />
+                        </div>
+                      </Link>
+                    ))}
+                    {subsectors.length > 5 && (
+                      <div className="pt-2 border-t border-cresol-gray-light">
+                        <p className="text-xs text-cresol-gray text-center">
+                          + {subsectors.length - 5} sub-setores adicionais
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Informações do Setor */}
+            <section 
+              className="bg-white rounded-lg border border-cresol-gray-light"
+              aria-labelledby="sector-info-heading"
+            >
+              <div className="p-4 border-b border-cresol-gray-light">
+                <div className="flex items-center">
+                  <Icon name="info" className="h-5 w-5 text-primary mr-2" aria-hidden="true" />
+                  <h3 id="sector-info-heading" className="font-semibold text-cresol-gray-dark">
+                    Informações do Setor
+                  </h3>
+                </div>
+              </div>
+              <div className="p-4">
+                <dl className="space-y-3 text-sm">
+                  <div>
+                    <dt className="font-medium text-cresol-gray-dark">Total de Sub-setores:</dt>
+                    <dd className="text-cresol-gray mt-1">{subsectors.length}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-cresol-gray-dark">Criado em:</dt>
+                    <dd className="text-cresol-gray mt-1">
+                      <time dateTime={sector.created_at}>
+                        {new Date(sector.created_at).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </time>
+                    </dd>
+                  </div>
+                  {isAdmin && (
+                    <div className="pt-3 border-t border-cresol-gray-light">
+                      <Link
+                        href={`/admin-setor/setores/${sectorId}`}
+                        className="inline-flex items-center text-sm text-primary hover:text-primary/80 transition-colors"
+                      >
+                        <Icon name="pencil" className="h-4 w-4 mr-1" aria-hidden="true" />
+                        Gerenciar Setor
+                      </Link>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            </section>
+          </aside>
+        </div>
       </main>
     </div>
   );

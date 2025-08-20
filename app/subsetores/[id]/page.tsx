@@ -314,14 +314,9 @@ export default function SubsectorDetailsPage() {
           </div>
           
           {subsector.description && (
-            <div className="bg-primary/5 rounded-lg p-4" role="region" aria-labelledby="subsector-description">
-              <div className="flex items-start">
-                <Icon name="building-2" className="h-5 w-5 text-primary mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                <p className="text-cresol-gray" id="subsector-description">
-                  {subsector.description}
-                </p>
-              </div>
-            </div>
+            <p className="text-cresol-gray mt-2" id="subsector-description">
+              {subsector.description}
+            </p>
           )}
         </div>
       </header>

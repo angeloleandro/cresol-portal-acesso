@@ -244,14 +244,19 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-md shadow-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="bg-white rounded-md shadow-lg w-full max-w-4xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-300">
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {editingGroup ? 'Editar Grupo' : 'Criar Grupo'}
-              </h2>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {editingGroup ? 'Editar Grupo' : 'Criar Grupo'}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  {editingGroup ? 'Atualize as informações e filtros do grupo' : 'Configure o grupo selecionando setores e cargos para incluir usuários automaticamente'}
+                </p>
+              </div>
               <button
                 onClick={handleClose}
                 className="p-1 hover:bg-gray-100 rounded transition-colors"
@@ -418,18 +423,18 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="px-6 py-3 border-t border-gray-200 bg-gray-50">
             <div className="flex justify-end space-x-3">
               <button
                 onClick={handleClose}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={loading || !formData.name.trim() || filteredUsers.length === 0}
-                className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-sm bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Salvando...' : editingGroup ? 'Salvar Alterações' : 'Criar Grupo'}
               </button>

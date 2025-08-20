@@ -47,7 +47,7 @@ export function VideoModal({ isOpen, video, onClose }: VideoModalProps) {
     <AnimatePresence mode="wait">
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-200"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { duration: 0.2 } }}
           exit={{ opacity: 0, transition: { duration: 0.2, delay: 0.1 } }}
@@ -62,37 +62,43 @@ export function VideoModal({ isOpen, video, onClose }: VideoModalProps) {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] } }}
             exit={{ opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } }}
-            className="relative w-full max-w-4xl mx-4 bg-white border border-gray-200 rounded-md overflow-hidden"
+            className="relative w-full max-w-4xl max-h-[90vh] mx-4 bg-white border border-gray-200 rounded-md overflow-hidden flex flex-col animate-in zoom-in-95 duration-300"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
             tabIndex={-1}
           >
-            {/* Close Button */}
-            <button
-              className={clsx(
-                'absolute top-4 right-4 z-10',
-                'w-10 h-10 bg-white/90 hover:bg-white',
-                'border border-neutral-200 rounded-full',
-                'flex items-center justify-center',
-                'transition-all duration-200',
-                'hover:border-gray-300 focus:border-gray-300',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20'
-              )}
-              onClick={onClose}
-              aria-label="Fechar modal"
-            >
-              <Icon name="x" className="w-5 h-5 text-neutral-600" />
-            </button>
-
-            {/* Video Player Container */}
-            <div className="aspect-video bg-black rounded-t-lg overflow-hidden">
-              <VideoPlayer video={video} />
+            {/* Header with title and close button */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Reprodutor de Vídeo
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {video.title}
+                  </p>
+                </div>
+                <button
+                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  onClick={onClose}
+                  aria-label="Fechar modal"
+                >
+                  <Icon name="x" className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
             </div>
-            
-            {/* Video Information */}
-            <VideoInfo video={video} />
+
+            {/* Video Player Container - Scrollable body */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="aspect-video bg-black">
+                <VideoPlayer video={video} />
+              </div>
+              
+              {/* Video Information */}
+              <VideoInfo video={video} />
+            </div>
           </motion.div>
         </motion.div>
       )}
@@ -242,7 +248,7 @@ function VideoInfo({ video }: { video: DashboardVideo }) {
   };
 
   return (
-    <div className="p-6 bg-white">
+    <div className="p-6 bg-gray-50 border-t border-gray-200">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           {/* Title */}
@@ -305,9 +311,9 @@ function VideoInfo({ video }: { video: DashboardVideo }) {
               href={video.video_url}
               download
               className={clsx(
-                'inline-flex items-center gap-2 px-3 py-2',
+                'inline-flex items-center gap-2 px-3 py-1.5 text-sm',
                 'bg-neutral-100 hover:bg-neutral-200',
-                'text-neutral-700 text-sm font-medium',
+                'text-neutral-700 font-medium',
                 'rounded-lg transition-colors',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -323,9 +329,9 @@ function VideoInfo({ video }: { video: DashboardVideo }) {
               target="_blank"
               rel="noopener noreferrer"
               className={clsx(
-                'inline-flex items-center gap-2 px-3 py-2',
+                'inline-flex items-center gap-2 px-3 py-1.5 text-sm',
                 'bg-red-600 hover:bg-red-700',
-                'text-white text-sm font-medium',
+                'text-white font-medium',
                 'rounded-lg transition-colors',
                 'focus:outline-none focus:ring-2 focus:ring-red-500/20'
               )}
@@ -354,11 +360,6 @@ function VideoTypeBadge({ uploadType }: { uploadType: DashboardVideo['upload_typ
       icon: 'monitor-play' as const,
       label: 'YouTube',
       className: 'bg-red-100 text-red-800 border-red-200'
-    },
-    vimeo: {
-      icon: 'video' as const,
-      label: 'Vimeo',
-      className: 'bg-blue-100 text-blue-800 border-blue-200'
     }
   };
 

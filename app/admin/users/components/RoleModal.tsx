@@ -140,22 +140,27 @@ export default function RoleModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg border border-gray-300 w-full max-w-3xl mx-4 relative max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-primary">Alterar Role do Usuário</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col">
+        <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Alterar Role do Usuário</h3>
+            <p className="mt-1 text-sm text-gray-500">Configure o tipo de acesso e permissões</p>
+          </div>
           <button
             type="button"
-            className="text-cresol-gray hover:text-cresol-gray-dark"
+            className="ml-4 p-1 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
             onClick={onClose}
+            aria-label="Fechar modal"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
           <div>
             <label className="block text-sm font-medium text-cresol-gray mb-2">
               Tipo de Conta
@@ -335,18 +340,18 @@ export default function RoleModal({
           </div>
         </div>
         
-        <div className="border-t border-gray-200 p-6 bg-gray-50">
-          <div className="flex justify-end space-x-3">
+        <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0 rounded-b-lg">
+          <div className="flex items-center justify-end gap-2">
             <button
               type="button"
-              className="px-4 py-2 border border-cresol-gray-light rounded-sm-md text-cresol-gray hover:bg-gray-50"
+              className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-500 transition-colors"
               onClick={onClose}
             >
               Cancelar
             </button>
             <button
               type="button"
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+              className="px-3 py-1.5 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary transition-colors"
               onClick={handleSave}
             >
               Salvar Alterações

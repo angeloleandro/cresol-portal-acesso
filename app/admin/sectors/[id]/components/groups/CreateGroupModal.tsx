@@ -285,27 +285,32 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-md shadow-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
-          {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {editingGroup ? 'Editar Grupo' : 'Criar Grupo'}
-              </h2>
-              <button
-                onClick={handleClose}
-                className="p-1 hover:bg-gray-100 rounded transition-colors"
-              >
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+        <div className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+          {/* Header - Fixed */}
+          <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {editingGroup ? 'Editar Grupo' : 'Criar Novo Grupo'}
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                {editingGroup ? 'Atualize as informações do grupo' : 'Configure um novo grupo de mensagens'}
+              </p>
             </div>
+            <button
+              onClick={handleClose}
+              className="ml-4 p-1 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
+              aria-label="Fechar modal"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          {/* Body - Scrollable */}
+          <div className="flex-1 overflow-y-auto px-5 py-4">
             {/* Group Info Section */}
             <div className="mb-6">
               <div className="space-y-4">
@@ -480,19 +485,19 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             )}
           </div>
 
-          {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <div className="flex justify-end space-x-3">
+          {/* Footer - Fixed with small buttons */}
+          <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0 rounded-b-lg">
+            <div className="flex items-center justify-end gap-2">
               <button
                 onClick={handleClose}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-500 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={loading || !formData.name.trim() || selectedUsers.length === 0}
-                className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Salvando...' : editingGroup ? 'Salvar Alterações' : 'Criar Grupo'}
               </button>

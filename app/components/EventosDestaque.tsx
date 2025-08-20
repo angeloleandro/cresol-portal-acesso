@@ -80,6 +80,10 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('pt-BR', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
       minute: '2-digit'
     }).format(date);
   };
@@ -94,7 +98,6 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
     }
     
     // Se tiver data de término em dia diferente
-    const end = new Date(endDate);
     return `${formatDate(startDate)} - ${formatDate(endDate)}`;
   };
 

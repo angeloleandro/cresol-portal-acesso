@@ -255,27 +255,30 @@ export function EventModal({
               </form>
             </Dialog.Body>
 
-            {/* Fixed Footer */}
+            {/* Fixed Footer with small buttons */}
             <Dialog.Footer 
               px={{ base: "4", md: "6" }}
-              py="4" 
+              py="3" 
               borderTopWidth="1px"
               borderTopColor="gray.200"
+              bg="gray.50"
               flexShrink="0"
             >
               <HStack 
-                gap="3" 
+                gap="2" 
                 justify="flex-end" 
                 width="full"
-                flexDirection={{ base: "column-reverse", sm: "row" }}
               >
                 <Dialog.ActionTrigger asChild>
                   <Button
                     variant="outline"
-                    size="md"
+                    size="sm"
                     colorPalette="gray"
                     onClick={onClose}
-                    width={{ base: "full", sm: "auto" }}
+                    px="3"
+                    py="1.5"
+                    fontSize="sm"
+                    fontWeight="medium"
                   >
                     Cancelar
                   </Button>
@@ -285,11 +288,14 @@ export function EventModal({
                   form="event-form"
                   variant="solid"
                   colorPalette="orange"
-                  size="md"
+                  size="sm"
                   bg="cresolOrange"
                   color="white"
                   _hover={{ bg: "orange.600" }}
-                  width={{ base: "full", sm: "auto" }}
+                  px="3"
+                  py="1.5"
+                  fontSize="sm"
+                  fontWeight="medium"
                   loading={isSubmitting}
                   disabled={!isFormValid || isSubmitting}
                 >

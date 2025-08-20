@@ -32,46 +32,35 @@ interface LegacyStandardizedButtonProps {
 // =============================================================================
 // LEGACY VARIANT MAPPING TO CHAKRA UI V3
 // =============================================================================
-const mapLegacyVariant = (variant: LegacyStandardizedButtonProps['variant']): { variant: ButtonProps['variant']; colorPalette: ButtonProps['colorPalette'] } => {
+const mapLegacyVariant = (variant: LegacyStandardizedButtonProps['variant']): 'primary' | 'secondary' => {
   switch (variant) {
     case 'primary':
-      return { variant: 'solid', colorPalette: 'orange' };
-    case 'secondary':
-      return { variant: 'outline', colorPalette: 'gray' };
     case 'danger':
-      return { variant: 'solid', colorPalette: 'red' };
-    case 'outline':
-      return { variant: 'outline', colorPalette: 'orange' };
-    case 'ghost':
-      return { variant: 'ghost', colorPalette: 'gray' };
-    case 'link':
-      return { variant: 'plain', colorPalette: 'orange' };
     case 'success':
-      return { variant: 'solid', colorPalette: 'green' };
+      return 'primary';
+    case 'secondary':
+    case 'outline':
+    case 'ghost':
+    case 'link':
     case 'warning':
-      return { variant: 'solid', colorPalette: 'yellow' };
     case 'info':
-      return { variant: 'solid', colorPalette: 'blue' };
     default:
-      return { variant: 'solid', colorPalette: 'orange' };
+      return 'secondary';
   }
 };
 
 // =============================================================================
 // LEGACY SIZE MAPPING TO CHAKRA UI V3
 // =============================================================================
-const mapLegacySize = (size: LegacyStandardizedButtonProps['size']): ButtonProps['size'] => {
+const mapLegacySize = (size: LegacyStandardizedButtonProps['size']): 'xs' | 'sm' | 'md' => {
   switch (size) {
     case 'xs':
       return 'xs';
     case 'sm':
       return 'sm';
-    case 'md':
-      return 'md';
     case 'lg':
-      return 'lg';
     case 'xl':
-      return 'xl';
+    case 'md':
     default:
       return 'md';
   }
@@ -121,31 +110,23 @@ const StandardizedButton = forwardRef<HTMLButtonElement, LegacyStandardizedButto
     ref
   ) => {
     // Map legacy props to new Button props
-    const { variant: newVariant, colorPalette } = mapLegacyVariant(variant);
+    const newVariant = mapLegacyVariant(variant);
     const newSize = mapLegacySize(size);
 
     // Handle icon composition (legacy support)
-    const startElement = icon && iconPosition === 'left' ? icon : undefined;
-    const endElement = icon && iconPosition === 'right' ? icon : undefined;
+    const iconElement = icon && iconPosition ? icon : undefined;
 
     return (
       <Button
         ref={ref}
         type={type}
         variant={newVariant}
-        colorPalette={colorPalette}
         size={newSize}
         disabled={disabled}
-        loading={loading}
-        fullWidth={fullWidth}
         onClick={onClick}
         className={className}
-        href={href}
-        target={target}
-        rel={rel}
-        as={as}
-        startElement={startElement}
-        endElement={endElement}
+        icon={iconElement}
+        iconPosition={iconPosition}
         {...rest}
       >
         {children}

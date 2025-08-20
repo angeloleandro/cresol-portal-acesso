@@ -1,0 +1,201 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import OptimizedImage from './OptimizedImage';
+import Link from 'next/link';
+import { Icon } from './icons';
+
+interface TeamMember {
+  id: string;
+  user_id: string;
+  position?: string;
+  is_from_subsector: boolean;
+  subsector_id?: string;
+  profiles: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url?: string;
+    position?: string;
+    work_location_id?: string;
+    work_locations?: { name: string };
+  };
+  subsectors?: {
+    id: string;
+    name: string;
+  };
+}
+
+interface SectorTeamProps {
+  sectorId: string;
+  sectorName: string;
+  showFullPage?: boolean;
+  maxMembers?: number;
+}
+
+export default function SectorTeam({ 
+  sectorId, 
+  sectorName, 
+  showFullPage = true, 
+  maxMembers = 6 
+}: SectorTeamProps) {
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const response = await fetch(`/api/admin/sector-team?sector_id=${sectorId}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          setTeamMembers(data.teamMembers || []);
+        } else {
+          console.error('Erro ao buscar equipe do setor:', data.error);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar equipe do setor:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (sectorId) {
+      fetchTeamMembers();
+    }
+  }, [sectorId]);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg border border-cresol-gray-light p-4">
+        <div className="animate-pulse">
+          <div className="h-4 bg-cresol-gray-light rounded-sm w-1/3 mb-3"></div>
+          <div className="space-y-2">
+            <div className="h-3 bg-cresol-gray-light rounded-sm w-1/2"></div>
+            <div className="h-3 bg-cresol-gray-light rounded-sm w-1/4"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const displayMembers = teamMembers.slice(0, maxMembers);
+  const remainingCount = teamMembers.length - maxMembers;
+
+  // Separar membros diretos e de subsetores
+  const directMembers = teamMembers.filter(m => !m.is_from_subsector);
+  const subsectorMembers = teamMembers.filter(m => m.is_from_subsector);
+
+  return (
+    <div className="bg-white rounded-lg border border-cresol-gray-light p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center">
+          <Icon name="user-group" className="h-5 w-5 text-primary mr-2" />
+          <h3 className="font-semibold text-cresol-gray-dark">
+            Equipe do Setor
+          </h3>
+        </div>
+        {showFullPage && teamMembers.length > 0 && (
+          <Link
+            href={`/setores/${sectorId}/equipe`}
+            className="text-primary hover:text-primary-dark text-sm flex items-center gap-1"
+          >
+            Ver completa
+            <Icon name="external-link" className="h-3 w-3" />
+          </Link>
+        )}
+      </div>
+
+      {teamMembers.length === 0 ? (
+        <p className="text-sm text-cresol-gray">
+          Nenhum membro cadastrado no setor
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {/* Membros diretos do setor */}
+          {directMembers.length > 0 && (
+            <>
+              <div className="text-xs font-medium text-cresol-gray-dark uppercase tracking-wider">
+                Membros do Setor
+              </div>
+              {directMembers.slice(0, Math.ceil(maxMembers/2)).map(member => (
+                <div key={member.id} className="flex items-center">
+                  <div className="relative h-8 w-8 rounded-full overflow-hidden bg-cresol-gray-light mr-3 flex-shrink-0">
+                    {member.profiles.avatar_url ? (
+                      <OptimizedImage
+                        src={member.profiles.avatar_url}
+                        alt={member.profiles.full_name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
+                        <Icon name="user-group" className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-cresol-gray-dark truncate">
+                      {member.profiles.full_name}
+                    </p>
+                    <p className="text-xs text-cresol-gray truncate">
+                      {member.position || member.profiles.position || 'Membro da equipe'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* Membros de subsetores */}
+          {subsectorMembers.length > 0 && (
+            <>
+              <div className="text-xs font-medium text-cresol-gray-dark uppercase tracking-wider mt-3">
+                Membros dos Sub-setores
+              </div>
+              {subsectorMembers.slice(0, Math.floor(maxMembers/2)).map(member => (
+                <div key={member.id} className="flex items-center">
+                  <div className="relative h-8 w-8 rounded-full overflow-hidden bg-cresol-gray-light mr-3 flex-shrink-0">
+                    {member.profiles.avatar_url ? (
+                      <OptimizedImage
+                        src={member.profiles.avatar_url}
+                        alt={member.profiles.full_name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-secondary/10 text-secondary">
+                        <Icon name="user-group" className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-cresol-gray-dark truncate">
+                      {member.profiles.full_name}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <p className="text-xs text-cresol-gray truncate">
+                        {member.position || member.profiles.position || 'Membro'}
+                      </p>
+                      {member.subsectors && (
+                        <span className="text-xs text-secondary">
+                          • {member.subsectors.name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+          
+          {remainingCount > 0 && (
+            <div className="text-xs text-cresol-gray text-center py-2 border-t border-cresol-gray-light">
+              +{remainingCount} {remainingCount === 1 ? 'membro' : 'membros'}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

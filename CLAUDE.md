@@ -169,7 +169,7 @@ This is a **Next.js 14** application using the **App Router** pattern for Cresol
 - Test file upload functionality with proper error handling
 
 ### Video System Architecture
-- **Upload Types**: YouTube, Vimeo, and direct file uploads supported
+- **Upload Types**: YouTube and direct file uploads supported
 - **File Processing**: Thumbnail generation with `lib/thumbnail-generator.ts`
 - **Storage**: Organized in Supabase storage with folder structure (`uploads/`, `thumbnails/`)
 - **UI Components**: Modular video system in `app/components/VideoGallery/`

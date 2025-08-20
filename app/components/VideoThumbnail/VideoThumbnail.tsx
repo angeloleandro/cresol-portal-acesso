@@ -331,7 +331,7 @@ function ThumbnailOverlay({
  * Thumbnail Badge Component
  */
 interface ThumbnailBadgeProps {
-  uploadType: 'youtube' | 'vimeo' | 'direct';
+  uploadType: 'youtube' | 'direct';
   variant: ThumbnailVariant;
   isHovered: boolean;
 }
