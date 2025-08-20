@@ -162,7 +162,7 @@ export function useOptimizedSectors(
         // Buscar todos os setores para navegação
         const { data, error } = await supabase
           .from('sectors')
-          .select('id, name, description, subsectors(id, name, description, sector_id)')
+          .select('id, name, subsectors(id, name, sector_id)')
           .order('name', { ascending: true });
 
         if (!error) {
@@ -212,7 +212,7 @@ export function useOptimizedSectors(
           const sectorIds = sectorAdmins.map(admin => admin.sector_id);
           const { data: userSectors } = await supabase
             .from('sectors')
-            .select('id, name, description, subsectors(id, name, description, sector_id)')
+            .select('id, name, subsectors(id, name, sector_id)')
             .in('id', sectorIds)
             .order('name');
 
@@ -227,7 +227,7 @@ export function useOptimizedSectors(
         // Para outros usuários, buscar todos os setores
         const { data, error } = await supabase
           .from('sectors')
-          .select('id, name, description, subsectors(id, name, description, sector_id)')
+          .select('id, name, subsectors(id, name, sector_id)')
           .order('name', { ascending: true });
 
         if (!error) {
@@ -281,7 +281,7 @@ export function useOptimizedAgencies() {
       // Buscar sub-setores específicos do setor Agências
       const { data, error } = await supabase
         .from('subsectors')
-        .select('id, name, description, sector_id')
+        .select('id, name, sector_id')
         .eq('sector_id', AGENCIES_SECTOR_ID)
         .order('name', { ascending: true });
 

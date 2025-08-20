@@ -88,14 +88,6 @@ export default function ProfilePage() {
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [loadingActivity, setLoadingActivity] = useState(false);
 
-  // Estados para configurações de privacidade
-  const [privacySettings, setPrivacySettings] = useState({
-    showEmail: true,
-    showPhone: false,
-    showPosition: true,
-    allowNotifications: true,
-    allowDirectMessages: true
-  });
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -296,6 +288,9 @@ export default function ProfilePage() {
       setUpdating(true);
       
       const updateData: Record<string, unknown> = {
+        full_name: fullName,
+        position_id: positionId || null,
+        work_location_id: workLocationId || null,
         phone,
         bio,
         updated_at: new Date().toISOString()
@@ -503,8 +498,7 @@ export default function ProfilePage() {
               {[
                 { id: 'profile', label: 'Informações Pessoais', icon: 'user' },
                 { id: 'security', label: 'Segurança', icon: 'shield' },
-                { id: 'activity', label: 'Atividade Recente', icon: 'clock' },
-                { id: 'privacy', label: 'Privacidade', icon: 'eye' }
+                { id: 'activity', label: 'Atividade Recente', icon: 'clock' }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -627,7 +621,7 @@ export default function ProfilePage() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
-                      className="input bg-gray-50 text-muted"
+                      className="input"
                     />
                   </div>
 
@@ -915,65 +909,6 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Tab: Privacidade */}
-            {activeTab === 'privacy' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Configurações de Privacidade</h3>
-                  <p className="text-sm text-gray-600 mb-6">
-                    Controle quais informações são visíveis para outros usuários.
-                  </p>
-                  
-                  <div className="space-y-4">
-                    {[
-                      { key: 'showEmail', label: 'Mostrar e-mail no perfil público', description: 'Outros usuários poderão ver seu endereço de e-mail' },
-                      { key: 'showPhone', label: 'Mostrar telefone no perfil público', description: 'Outros usuários poderão ver seu número de telefone' },
-                      { key: 'showPosition', label: 'Mostrar cargo no perfil público', description: 'Outros usuários poderão ver seu cargo atual' },
-                      { key: 'allowNotifications', label: 'Receber notificações por e-mail', description: 'Receba atualizações importantes por e-mail' },
-                      { key: 'allowDirectMessages', label: 'Permitir mensagens diretas', description: 'Outros usuários podem enviar mensagens para você' }
-                    ].map((setting) => (
-                      <div key={setting.key} className="flex items-start justify-between py-4 border-b border-gray-200 last:border-b-0">
-                        <div className="flex-grow">
-                          <h4 className="text-sm font-medium text-gray-900">{setting.label}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{setting.description}</p>
-                        </div>
-                        <div className="flex-shrink-0 ml-4">
-                          <button
-                            type="button"
-                            onClick={() => setPrivacySettings(prev => ({
-                              ...prev,
-                              [setting.key]: !prev[setting.key as keyof typeof prev]
-                            }))}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                              privacySettings[setting.key as keyof typeof privacySettings]
-                                ? 'bg-primary'
-                                : 'bg-gray-200'
-                            }`}
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                privacySettings[setting.key as keyof typeof privacySettings]
-                                  ? 'translate-x-6'
-                                  : 'translate-x-1'
-                              }`}
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="pt-6 border-t border-gray-200">
-                    <Button
-                      type="button"
-                      variant="primary"
-                    >
-                      Salvar Configurações
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>

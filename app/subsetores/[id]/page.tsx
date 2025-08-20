@@ -350,8 +350,7 @@ export default function SubsectorDetailsPage() {
               items={[
                 { label: 'Home', href: '/home', icon: 'house' },
                 { label: 'Setores', href: '/setores' },
-                { label: getSectorName(subsector.sectors), href: `/setores/${Array.isArray(subsector.sectors) ? subsector.sectors[0]?.id : subsector.sectors?.id}` },
-                { label: subsector.name }
+                { label: getSectorName(subsector.sectors), href: `/setores/${Array.isArray(subsector.sectors) ? subsector.sectors[0]?.id : subsector.sectors?.id}` }
               ]} 
             />
           </div>
@@ -420,79 +419,6 @@ export default function SubsectorDetailsPage() {
               </div>
             </section>
 
-            {/* Próximos Eventos */}
-            <section 
-              className="bg-white rounded-md  border border-cresol-gray-light"
-              aria-labelledby="upcoming-events-heading"
-            >
-              <div className="p-6 border-b border-cresol-gray-light">
-                <div className="flex justify-between items-center">
-                  <h2 id="upcoming-events-heading" className="text-xl font-semibold text-cresol-gray-dark">
-                    Próximos Eventos
-                  </h2>
-                  
-                </div>
-              </div>
-              <div className="p-6">
-                {events.length === 0 ? (
-                  <div className="text-center py-8" role="status">
-                    <p className="text-cresol-gray">
-                      Nenhum evento programado.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4" role="list" aria-label="Lista de próximos eventos">
-                    {events.map((event, index) => (
-                      <article 
-                        key={event.id}
-                        className="border border-cresol-gray-light rounded-lg p-4"
-                        role="listitem"
-                        aria-labelledby={`event-title-${index}`}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 
-                            id={`event-title-${index}`}
-                            className="font-semibold text-cresol-gray-dark"
-                          >
-                            {event.title}
-                          </h3>
-                          {event.is_published === false && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-yellow-100 text-yellow-800 ml-2">
-                              Rascunho
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-cresol-gray text-sm mb-3">
-                          {event.description}
-                        </p>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-cresol-gray">
-                          <div className="flex items-center">
-                            <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
-                            <time dateTime={event.start_date}>
-                              {new Date(event.start_date).toLocaleDateString('pt-BR', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </time>
-                          </div>
-                          {event.location && (
-                            <div className="flex items-center">
-                              <Icon name="map" className="h-3 w-3 mr-1" aria-hidden="true" />
-                              <span aria-label={`Local: ${event.location}`}>
-                                {event.location}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
 
             {/* Mensagens Recentes */}
             <section 
@@ -563,6 +489,78 @@ export default function SubsectorDetailsPage() {
               showFullPage={true}
               maxMembers={6}
             />
+
+            {/* Próximos Eventos */}
+            <section 
+              className="bg-white rounded-lg border border-cresol-gray-light"
+              aria-labelledby="upcoming-events-heading"
+            >
+              <div className="p-4 border-b border-cresol-gray-light">
+                <h3 id="upcoming-events-heading" className="font-semibold text-cresol-gray-dark flex items-center">
+                  <Icon name="calendar" className="h-4 w-4 mr-2" aria-hidden="true" />
+                  Próximos Eventos
+                </h3>
+              </div>
+              <div className="p-4">
+                {events.length === 0 ? (
+                  <div className="text-center py-6" role="status">
+                    <p className="text-cresol-gray text-sm">
+                      Nenhum evento programado.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3" role="list" aria-label="Lista de próximos eventos">
+                    {events.map((event, index) => (
+                      <article 
+                        key={event.id}
+                        className="border border-cresol-gray-light rounded-md p-3"
+                        role="listitem"
+                        aria-labelledby={`event-title-${index}`}
+                      >
+                        <div className="mb-2">
+                          <h4 
+                            id={`event-title-${index}`}
+                            className="font-medium text-cresol-gray-dark text-sm leading-tight"
+                          >
+                            {event.title}
+                          </h4>
+                          {event.is_published === false && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
+                              Rascunho
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-cresol-gray text-xs mb-2 line-clamp-2">
+                          {event.description}
+                        </p>
+                        <div className="space-y-1 text-xs text-cresol-gray">
+                          <div className="flex items-center">
+                            <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
+                            <time dateTime={event.start_date}>
+                              {new Date(event.start_date).toLocaleDateString('pt-BR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </time>
+                          </div>
+                          {event.location && (
+                            <div className="flex items-center">
+                              <Icon name="map" className="h-3 w-3 mr-1" aria-hidden="true" />
+                              <span aria-label={`Local: ${event.location}`} className="text-xs truncate">
+                                {event.location}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
 
             {/* Informações Adicionais */}
             <section 

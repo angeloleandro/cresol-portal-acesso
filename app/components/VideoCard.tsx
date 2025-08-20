@@ -81,61 +81,39 @@ export const HomeVideoCard = memo(function HomeVideoCard({
           </div>
         )}
         
-        {/* Play button overlay */}
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-          <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 transform scale-90 group-hover:scale-100 transition-transform duration-200">
-            <Icon name="play" className="w-6 h-6 text-gray-800" />
-          </div>
-        </div>
 
-        {/* Video type badge */}
-        {video.upload_type && (
-          <div className="absolute top-3 left-3">
-            <span className={clsx(
-              'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium',
-              'bg-white/90 backdrop-blur-sm text-gray-700'
-            )}>
-              <Icon 
-                name={video.upload_type === 'youtube' ? 'monitor-play' : 'monitor-play'} 
-                className="w-3 h-3" 
-              />
-              {video.upload_type === 'youtube' ? 'YouTube' : 'Vídeo'}
-            </span>
-          </div>
-        )}
       </div>
 
-      {/* Card.Body equivalent - altura mínima garantida */}
-      <div className="p-4 space-y-2 min-h-[80px] flex flex-col">
+      {/* Card.Body equivalent - altura fixa garantida */}
+      <div className="p-4 h-[100px] flex flex-col">
         {/* Card.Title equivalent - truncado para 2 linhas */}
-        <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-primary transition-colors duration-150 flex-1">
+        <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-primary transition-colors duration-150 flex-grow">
           {video.title || 'Vídeo sem título'}
         </h3>
-        
-        {/* Card.Description equivalent - simplificado */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 mt-auto">
-          <Icon name="clock" className="w-4 h-4 flex-shrink-0" />
-          <span>Clique para assistir</span>
-        </div>
       </div>
 
-      {/* Card.Footer equivalent - altura mínima consistente */}
-      <div className="px-4 pb-4 min-h-[48px] flex items-center justify-end">
-        {/* Action button - removida tag "Ativo" */}
+      {/* Card.Footer equivalent - badge e botão alinhados */}
+      <div className="px-4 pb-4 flex items-center justify-between">
+        {/* Video type badge movido para footer */}
+        {video.upload_type && (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
+            <Icon 
+              name={video.upload_type === 'youtube' ? 'monitor-play' : 'monitor-play'} 
+              className="w-3 h-3" 
+            />
+            {video.upload_type === 'youtube' ? 'YouTube' : 'Vídeo'}
+          </span>
+        )}
+        
+        {/* Action button simplificado */}
         <Button
-          className={clsx(
-            'inline-flex items-center gap-1 px-3 py-1.5 rounded-md',
-            'bg-primary text-white text-sm font-medium',
-            'hover:bg-primary/90 transition-colors duration-150',
-            'focus:outline-none focus:ring-2 focus:ring-primary/20'
-          )}
+          className="px-4 py-1.5 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary/20"
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             handleClick();
           }}
           aria-label={`Reproduzir ${video.title}`}
         >
-          <Icon name="play" className="w-4 h-4" />
           Assistir
         </Button>
       </div>

@@ -283,19 +283,39 @@ export default function SectorTeamPage() {
         method: 'DELETE'
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        fetchTeamMembers();
-        setShowDeleteModal(false);
-        setMemberToDelete(null);
-        showSuccess('Membro removido da equipe com sucesso!');
-      } else {
-        showError('Erro ao remover membro', data.error);
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        // Try to get error message from response
+        const contentType = response.headers.get('content-type');
+        let errorMessage = 'Erro ao remover membro';
+        
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch {
+            // If JSON parsing fails, use text
+            errorMessage = await response.text() || errorMessage;
+          }
+        } else {
+          // Non-JSON response
+          errorMessage = await response.text() || errorMessage;
+        }
+        
+        showError('Erro ao remover membro', errorMessage);
+        return;
       }
+
+      // Parse successful response
+      const data = await response.json();
+      fetchTeamMembers();
+      setShowDeleteModal(false);
+      setMemberToDelete(null);
+      showSuccess('Membro removido da equipe com sucesso!');
     } catch (error) {
       console.error('Erro ao remover membro:', error);
-      showError('Erro ao remover membro', 'Ocorreu um erro inesperado. Tente novamente.');
+      // Network error or other exception
+      showError('Erro ao remover membro', 'Ocorreu um erro de rede. Verifique sua conexão e tente novamente.');
     } finally {
       setIsDeleting(false);
     }
@@ -779,7 +799,13 @@ export default function SectorTeamPage() {
         onClose={handleRemoveMemberCancel}
         onConfirm={handleRemoveMemberConfirm}
         title="Confirmar Remoção"
-        message={`Tem certeza que deseja remover <strong>${memberToDelete?.profiles?.full_name}</strong> da equipe?<br><br>Esta ação não pode ser desfeita e o membro será removido permanentemente da equipe do setor.`}
+        message={
+          <>
+            Tem certeza que deseja remover <strong>{memberToDelete?.profiles?.full_name}</strong> da equipe?
+            <br /><br />
+            Esta ação não pode ser desfeita e o membro será removido permanentemente da equipe do setor.
+          </>
+        }
         isLoading={isDeleting}
         confirmButtonText="Remover Membro"
         cancelButtonText="Cancelar"

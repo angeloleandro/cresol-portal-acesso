@@ -412,7 +412,7 @@ export default function SetorDetalhesPage() {
                           <div className="flex items-center">
                             <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
                             <time dateTime={event.start_date}>
-                              {new Date(event.start_date).toLocaleDateString('pt-BR', {
+                              {new Date(event.start_date).toLocaleString('pt-BR', {
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric',

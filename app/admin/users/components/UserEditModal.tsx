@@ -236,6 +236,11 @@ export default function UserEditModal({
   const handleSave = async () => {
     try {
       const updateData: Record<string, unknown> = {
+        full_name: fullName,
+        email: email,
+        position_id: positionId || null,
+        work_location_id: workLocationId || null,
+        updated_at: new Date().toISOString()
       };
 
       if (avatarFile) {

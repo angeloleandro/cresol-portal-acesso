@@ -7,6 +7,7 @@
 @import './styles/forms.css';
 @import './globals-fixes.css';
 
+
 :root {
   /* Cores Primárias */
   --color-primary: #F58220; /* Laranja Cresol */
@@ -2312,11 +2313,20 @@ label:has(input[type="checkbox"]) {
 
 /* DROPDOWN CONTAINER STYLING FIXES */
 /* Fix border-radius to match app standard (less rounded) */
+/* COMMENTED: This was forcing border-radius on ALL dropdowns, including submenus */
+/*
 [data-slot="content"],
 .nextui-dropdown-content,
 [role="menu"],
 [role="listbox"],
 [data-popper-placement] {
+  border-radius: 0.375rem !important;
+}
+*/
+
+/* Only apply border-radius to main dropdowns, not submenus */
+[data-slot="content"]:not([data-submenu]),
+.nextui-dropdown-content:not([data-submenu]) {
   border-radius: 0.375rem !important; /* 6px - standard app border radius */
 }
 

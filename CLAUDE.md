@@ -211,3 +211,4 @@ NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
 - Sempre use agents indicados nos prompts, caso não seja indicado nenhum agente explicitamente, procure o agent mais qualificado para a task
+- Não use o servidor de desevolvimento

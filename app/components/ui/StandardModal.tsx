@@ -58,21 +58,22 @@ export const StandardModal: React.FC<StandardModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !preventBackdropClose) {
-          onClose();
-        }
-      }}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={() => {
+          if (!preventBackdropClose) {
+            onClose();
+          }
+        }}
+      />
       
       {/* Modal */}
       <div 
         ref={modalRef}
         className={`relative bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] ${className}`}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header - Fixed */}
         <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">

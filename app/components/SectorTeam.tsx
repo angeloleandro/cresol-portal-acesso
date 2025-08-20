@@ -43,9 +43,13 @@ export default function SectorTeam({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+    
     const fetchTeamMembers = async () => {
       try {
-        const response = await fetch(`/api/admin/sector-team?sector_id=${sectorId}`);
+        const response = await fetch(`/api/admin/sector-team?sector_id=${sectorId}`, {
+          signal: controller.signal
+        });
         const data = await response.json();
         
         if (response.ok) {
@@ -54,6 +58,10 @@ export default function SectorTeam({
           console.error('Erro ao buscar equipe do setor:', data.error);
         }
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          // Request was cancelled, ignore
+          return;
+        }
         console.error('Erro ao buscar equipe do setor:', error);
       } finally {
         setLoading(false);
@@ -63,6 +71,10 @@ export default function SectorTeam({
     if (sectorId) {
       fetchTeamMembers();
     }
+    
+    return () => {
+      controller.abort();
+    };
   }, [sectorId]);
 
   if (loading) {
@@ -79,12 +91,15 @@ export default function SectorTeam({
     );
   }
 
-  const displayMembers = teamMembers.slice(0, maxMembers);
-  const remainingCount = teamMembers.length - maxMembers;
-
   // Separar membros diretos e de subsetores
   const directMembers = teamMembers.filter(m => !m.is_from_subsector);
   const subsectorMembers = teamMembers.filter(m => m.is_from_subsector);
+  
+  // Calculate how many members to show from each list
+  const directShown = Math.min(directMembers.length, Math.ceil(maxMembers/2));
+  const subsectorShown = Math.min(subsectorMembers.length, maxMembers - directShown);
+  const totalShown = directShown + subsectorShown;
+  const remainingCount = teamMembers.length - totalShown;
 
   return (
     <div className="bg-white rounded-lg border border-cresol-gray-light p-4">
@@ -118,7 +133,7 @@ export default function SectorTeam({
               <div className="text-xs font-medium text-cresol-gray-dark uppercase tracking-wider">
                 Membros do Setor
               </div>
-              {directMembers.slice(0, Math.ceil(maxMembers/2)).map(member => (
+              {directMembers.slice(0, directShown).map(member => (
                 <div key={member.id} className="flex items-center">
                   <div className="relative h-8 w-8 rounded-full overflow-hidden bg-cresol-gray-light mr-3 flex-shrink-0">
                     {member.profiles.avatar_url ? (
@@ -153,7 +168,7 @@ export default function SectorTeam({
               <div className="text-xs font-medium text-cresol-gray-dark uppercase tracking-wider mt-3">
                 Membros dos Sub-setores
               </div>
-              {subsectorMembers.slice(0, Math.floor(maxMembers/2)).map(member => (
+              {subsectorMembers.slice(0, subsectorShown).map(member => (
                 <div key={member.id} className="flex items-center">
                   <div className="relative h-8 w-8 rounded-full overflow-hidden bg-cresol-gray-light mr-3 flex-shrink-0">
                     {member.profiles.avatar_url ? (

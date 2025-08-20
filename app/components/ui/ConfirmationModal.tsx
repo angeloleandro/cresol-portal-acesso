@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, ReactNode } from 'react';
 import { Icon } from '@/app/components/icons/Icon';
 
 interface ConfirmationModalProps {
@@ -9,7 +9,7 @@ interface ConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message: ReactNode;
   isLoading?: boolean;
   requiresConfirmationInput?: boolean;
   confirmationText?: string;
@@ -132,10 +132,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
         {/* Body - Scrollable if needed */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          <div 
-            className="text-sm text-gray-600 mb-4"
-            dangerouslySetInnerHTML={{ __html: message }}
-          />
+          <div className="text-sm text-gray-600 mb-4">
+            {message}
+          </div>
           {requiresConfirmationInput && (
             <div>
               <label htmlFor="confirmation-input" className="block text-sm font-medium text-gray-700 mb-2">

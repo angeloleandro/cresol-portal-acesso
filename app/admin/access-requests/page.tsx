@@ -25,6 +25,12 @@ interface WorkLocation {
   name: string;
 }
 
+interface Position {
+  id: string;
+  name: string;
+  department?: string;
+}
+
 interface EditableAccessData {
   full_name: string;
   email: string;
@@ -41,6 +47,7 @@ export default function AccessRequests() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
   const [editData, setEditData] = useState<Record<string, EditableAccessData>>({});
 
   const fetchRequests = useCallback(async () => {
@@ -85,6 +92,14 @@ export default function AccessRequests() {
     if (!error && data) setWorkLocations(data);
   };
 
+  const fetchPositions = async () => {
+    const { data, error } = await supabase
+      .from('positions')
+      .select('id, name, department')
+      .order('name');
+    if (!error && data) setPositions(data);
+  };
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -107,6 +122,7 @@ export default function AccessRequests() {
         setIsAdmin(true);
         fetchRequests();
         fetchWorkLocations();
+        fetchPositions();
       } else {
         // Redirecionar usuários não-admin para o dashboard
         router.replace('/dashboard');
@@ -331,134 +347,156 @@ export default function AccessRequests() {
             <p className="text-cresol-gray">Nenhuma solicitação encontrada com os filtros atuais.</p>
           </div>
         ) : (
-          <div className="bg-white  rounded-lg overflow-hidden border border-cresol-gray-light">
-            <table className="min-w-full divide-y divide-cresol-gray-light">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-cresol-gray uppercase tracking-wider">Nome</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-cresol-gray uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-cresol-gray uppercase tracking-wider">Cargo</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-cresol-gray uppercase tracking-wider">Local de Atuação</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-cresol-gray uppercase tracking-wider">Data</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-cresol-gray uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-cresol-gray uppercase tracking-wider">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-cresol-gray-light">
-                {requests.map((request) => (
-                  <tr key={request.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <input
-                        type="text"
-                        className="w-full border border-cresol-gray-light rounded-md px-2 py-1 text-sm"
-                        value={editData[request.id]?.full_name || ''}
-                        onChange={e => handleEditChange(request.id, 'full_name', e.target.value)}
-                        disabled={request.status !== 'pending'}
-                      />
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-cresol-gray">{request.email}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <input
-                        type="text"
-                        className="w-full border border-cresol-gray-light rounded-md px-2 py-1 text-sm min-w-[150px]"
-                        value={editData[request.id]?.position || ''}
-                        onChange={e => handleEditChange(request.id, 'position', e.target.value)}
-                        disabled={request.status !== 'pending'}
-                      />
-                    </td>
-                    <td className="px-6 py-4">
-                      <FormSelect
-                        value={editData[request.id]?.work_location_id || ''}
-                        onChange={e => handleEditChange(request.id, 'work_location_id', e.target.value)}
-                        disabled={request.status !== 'pending'}
-                        options={[
-                          { value: '', label: 'Selecione' },
-                          ...workLocations.map(loc => ({
-                            value: loc.id,
-                            label: loc.name
-                          }))
-                        ]}
-                        placeholder="Selecione"
-                        className="w-full min-w-[180px]"
-                        size="sm"
-                      />
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-cresol-gray">
-                        {new Date(request.created_at).toLocaleDateString('pt-BR')}
+          <div className="bg-white rounded-lg overflow-hidden border border-cresol-gray-light">
+            <div className="overflow-x-auto">
+              <div className="min-w-full">
+                {/* Cabeçalho fixo */}
+                <div className="bg-gray-50 border-b border-cresol-gray-light">
+                  <div className="grid grid-cols-6 gap-4 px-6 py-3">
+                    <div className="col-span-2">
+                      <div className="text-xs font-medium text-cresol-gray uppercase tracking-wider">Nome & Email</div>
+                    </div>
+                    <div className="text-xs font-medium text-cresol-gray uppercase tracking-wider">Cargo & Local</div>
+                    <div className="text-xs font-medium text-cresol-gray uppercase tracking-wider">Data</div>
+                    <div className="text-xs font-medium text-cresol-gray uppercase tracking-wider">Status</div>
+                    <div className="text-xs font-medium text-cresol-gray uppercase tracking-wider">Ações</div>
+                  </div>
+                </div>
+                
+                {/* Lista de requisições */}
+                <div className="divide-y divide-cresol-gray-light">
+                  {requests.map((request) => (
+                    <div key={request.id} className="grid grid-cols-6 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
+                      {/* Nome & Email */}
+                      <div className="col-span-2">
+                        <div className="space-y-1">
+                          <input
+                            type="text"
+                            className="w-full border border-cresol-gray-light rounded-md px-2 py-1.5 text-sm font-medium"
+                            value={editData[request.id]?.full_name || ''}
+                            onChange={e => handleEditChange(request.id, 'full_name', e.target.value)}
+                            disabled={request.status !== 'pending'}
+                            placeholder="Nome completo"
+                          />
+                          <div className="text-xs text-cresol-gray truncate" title={request.email}>
+                            {request.email}
+                          </div>
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${request.status === 'pending' ? 'bg-cresol-gray-light text-cresol-gray' : 
-                          request.status === 'approved' ? 'bg-primary/10 text-primary' : 
-                          'bg-cresol-gray text-white'}`}>
-                        {request.status === 'pending' ? 'Pendente' : 
-                          request.status === 'approved' ? 'Aprovado' : 'Rejeitado'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium">
-                      <div className="flex space-x-3">
-                        {request.status === 'pending' ? (
-                          <>
+                      
+                      {/* Cargo & Local */}
+                      <div className="space-y-1">
+                        <FormSelect
+                          value={editData[request.id]?.position || ''}
+                          onChange={e => handleEditChange(request.id, 'position', e.target.value)}
+                          disabled={request.status !== 'pending'}
+                          options={[
+                            { value: '', label: 'Selecionar cargo...' },
+                            ...positions.map(pos => ({
+                              value: pos.name,
+                              label: pos.department ? `${pos.name} - ${pos.department}` : pos.name
+                            }))
+                          ]}
+                          placeholder="Cargo"
+                          className="w-full text-xs"
+                          size="sm"
+                        />
+                        <FormSelect
+                          value={editData[request.id]?.work_location_id || ''}
+                          onChange={e => handleEditChange(request.id, 'work_location_id', e.target.value)}
+                          disabled={request.status !== 'pending'}
+                          options={[
+                            { value: '', label: 'Selecionar local...' },
+                            ...workLocations.map(loc => ({
+                              value: loc.id,
+                              label: loc.name
+                            }))
+                          ]}
+                          placeholder="Local"
+                          className="w-full text-xs"
+                          size="sm"
+                        />
+                      </div>
+                      
+                      {/* Data */}
+                      <div className="flex items-center">
+                        <div className="text-sm text-cresol-gray">
+                          {new Date(request.created_at).toLocaleDateString('pt-BR')}
+                        </div>
+                      </div>
+                      
+                      {/* Status */}
+                      <div className="flex items-center">
+                        <span className={`px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full 
+                          ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                            request.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                            'bg-red-100 text-red-800'}`}>
+                          {request.status === 'pending' ? 'Pendente' : 
+                            request.status === 'approved' ? 'Aprovado' : 'Rejeitado'}
+                        </span>
+                      </div>
+                      
+                      {/* Ações */}
+                      <div className="flex items-center">
+                        <div className="flex flex-col space-y-1 w-full">
+                          {request.status === 'pending' ? (
+                            <>
+                              <button
+                                onClick={() => handleStatusChange(request.id, 'approved')}
+                                className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition-colors"
+                              >
+                                Aprovar
+                              </button>
+                              <button
+                                onClick={() => handleStatusChange(request.id, 'rejected')}
+                                className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 transition-colors"
+                              >
+                                Rejeitar
+                              </button>
+                            </>
+                          ) : (
                             <button
-                              onClick={() => handleStatusChange(request.id, 'approved')}
-                              className="text-primary hover:text-primary-dark transition-colors"
-                            >
-                              Aprovar
-                            </button>
-                            <button
-                              onClick={() => handleStatusChange(request.id, 'rejected')}
-                              className="text-cresol-gray hover:text-primary transition-colors"
-                            >
-                              Rejeitar
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              // Permitir edição mesmo para solicitações já processadas
-                              const currentRequest = requests.find(r => r.id === request.id);
-                              if (!currentRequest) return;
+                              onClick={() => {
+                                // Permitir edição mesmo para solicitações já processadas
+                                const currentRequest = requests.find(r => r.id === request.id);
+                                if (!currentRequest) return;
 
-                              const updatedEditData = { ...editData };
-                              updatedEditData[request.id] = {
-                                full_name: currentRequest.full_name || '',
-                                email: currentRequest.email,
-                                position: currentRequest.position || '',
-                                work_location_id: currentRequest.work_location_id || '',
-                              };
-                              setEditData(updatedEditData);
-                              
-                              // Habilitar campos para edição temporariamente (visual)
-                              // A lógica de submissão usará os dados de 'editData' que inclui o email original
-                              const editableRequest = { ...currentRequest, status: 'pending' as 'pending' | 'approved' | 'rejected' };
-                              const updatedRequests = requests.map(r => 
-                                r.id === request.id ? editableRequest : r
-                              );
-                              setRequests(updatedRequests);
-                            }}
-                            className="text-primary hover:text-primary-dark transition-colors"
-                          >
-                            Editar
-                          </button>
-                        )}
-                        {request.status === 'pending' && editData[request.id] && (
-                          <button
-                            onClick={() => handleUpdateRequest(request.id)}
-                            className="text-green-600 hover:text-green-800 ml-3"
-                          >
-                            Salvar
-                          </button>
-                        )}
+                                const updatedEditData = { ...editData };
+                                updatedEditData[request.id] = {
+                                  full_name: currentRequest.full_name || '',
+                                  email: currentRequest.email,
+                                  position: currentRequest.position || '',
+                                  work_location_id: currentRequest.work_location_id || '',
+                                };
+                                setEditData(updatedEditData);
+                                
+                                // Habilitar campos para edição temporariamente (visual)
+                                const editableRequest = { ...currentRequest, status: 'pending' as 'pending' | 'approved' | 'rejected' };
+                                const updatedRequests = requests.map(r => 
+                                  r.id === request.id ? editableRequest : r
+                                );
+                                setRequests(updatedRequests);
+                              }}
+                              className="text-xs bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark transition-colors"
+                            >
+                              Editar
+                            </button>
+                          )}
+                          {request.status === 'pending' && editData[request.id] && (
+                            <button
+                              onClick={() => handleUpdateRequest(request.id)}
+                              className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors"
+                            >
+                              Salvar
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </main>
