@@ -119,7 +119,7 @@ export default function AdminImageGallery({
         /* Modo Admin - grid original com ações */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {images.map((img) => (
-            <div key={img.id} className="bg-white rounded-lg border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 overflow-hidden flex flex-col">
+            <div key={img.id} className="bg-white rounded-lg border border-gray-200/60 hover:border-gray-200 transition-colors duration-150 overflow-hidden flex flex-col">
               <div className="relative w-full h-48 bg-cresol-gray-light">
                 {img.image_url ? (
                   <OptimizedImage 

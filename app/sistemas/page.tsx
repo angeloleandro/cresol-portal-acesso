@@ -177,14 +177,14 @@ export default function SistemasPage() {
             </div>
             
             {/* Contador de sistemas */}
-            <div className="bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-4 min-w-[160px]">
+            <div className="bg-white rounded-md border border-gray-200/60 hover:border-gray-200 transition-colors duration-150 p-4 min-w-[160px]">
               <div className="body-text-small text-muted">Total de sistemas</div>
               <div className="text-2xl font-bold text-primary">{filteredSystems.length}</div>
             </div>
           </div>
 
           {/* Filtros e Busca */}
-          <div className="bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-6">
+          <div className="bg-white rounded-md border border-gray-200/60 hover:border-gray-200 transition-colors duration-150 p-6">
             {error && (
               <div className="mb-6">
                 <ErrorMessage
@@ -272,7 +272,7 @@ export default function SistemasPage() {
 
         {/* Lista de sistemas */}
         {!error && filteredSystems.length === 0 ? (
-          <div className="bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-12 text-center">
+          <div className="bg-white rounded-md border border-gray-200/60 hover:border-gray-200 transition-colors duration-150 p-12 text-center">
             <div className="max-w-md mx-auto">
               <Icon name="monitor" className="mx-auto h-16 w-16 text-muted mb-4" />
               <h3 className="heading-3 text-title mb-2">Nenhum sistema encontrado</h3>
@@ -300,7 +300,7 @@ export default function SistemasPage() {
               : 'space-y-4'
           }>
             {filteredSystems.map((system) => (
-              <div key={system.id} className="bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-6 group">
+              <div key={system.id} className="bg-white rounded-md border border-gray-200/60 hover:border-gray-200 transition-colors duration-150 p-6 group">
                 <div className={`${viewMode === 'list' ? 'flex items-start gap-4' : ''}`}>
                   {/* Ícone do sistema */}
                   <div className={`${viewMode === 'list' ? 'flex-shrink-0' : 'mb-4'}`}>

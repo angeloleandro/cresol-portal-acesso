@@ -93,7 +93,7 @@ const HierarchicalSubmenu = memo(({
       {/* Hover bridge invisível */}
       <div className="absolute -left-2 top-0 w-2 h-full bg-transparent" />
       
-      <div className="bg-white border border-gray-200 shadow-lg min-w-[200px] max-h-[400px] overflow-y-auto rounded-md p-1" data-submenu="true">
+      <div className="bg-white border border-gray-200/60 hover:border-gray-200 min-w-[200px] max-h-[400px] overflow-y-auto rounded-md p-1 transition-colors duration-150" data-submenu="true">
         {/* Lista de subsetores */}
         <div className="py-1">
           {sector.subsectors.map((subsector, index) => (

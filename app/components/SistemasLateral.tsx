@@ -116,7 +116,7 @@ export default function SistemasLateral({ limit = 6 }: SistemasLateralProps) {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center justify-between p-3 bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-md transition-colors duration-150"
+              className="group flex items-center justify-between p-3 bg-white border border-gray-200/60 hover:border-gray-200 rounded-md transition-colors duration-150"
               title={link.description || `Acessar ${link.name}`}
             >
               <div className="flex-1 min-w-0">

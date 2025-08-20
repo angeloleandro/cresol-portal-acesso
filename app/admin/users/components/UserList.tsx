@@ -118,7 +118,7 @@ export default function UserList({
 
   if (users.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-8 text-center">
+      <div className="bg-white rounded-lg border border-gray-200/60 hover:border-gray-200 transition-colors duration-150 p-8 text-center">
         <p className="text-cresol-gray">Nenhum usuário encontrado.</p>
       </div>
     );

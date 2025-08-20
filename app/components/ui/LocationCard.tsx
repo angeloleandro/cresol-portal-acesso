@@ -34,7 +34,7 @@ export const LocationCard: React.FC<LocationCardProps> = ({
   };
   
   return (
-    <div className={`group bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-lg p-3 transition-colors duration-150 ${className}`}>
+    <div className={`group bg-white border border-gray-200/60 hover:border-gray-200 rounded-lg p-3 transition-colors duration-150 ${className}`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-3 flex-1 min-w-0">
           <div className="flex items-center space-x-2">

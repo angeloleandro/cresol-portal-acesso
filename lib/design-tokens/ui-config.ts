@@ -169,7 +169,7 @@ export const BUTTON_CONFIG = {
 // Baseado no StandardizedCard.tsx existente
 export const CARD_CONFIG = {
   // Classes base (eliminando hardcode de bg-white border border-gray-200 rounded-lg)
-  base: 'bg-white border border-gray-200 rounded-lg shadow-sm',
+  base: 'bg-white border border-gray-200/60 rounded-lg',
   
   // Tamanhos de padding (consolidando p-4, p-6, p-12 encontrados)
   padding: {
@@ -183,8 +183,8 @@ export const CARD_CONFIG = {
   // Variantes de hover
   variants: {
     default: '',
-    hover: 'hover:shadow-md transition-shadow duration-200',
-    clickable: 'hover:shadow-md transition-shadow duration-200 cursor-pointer',
+    hover: 'hover:border-gray-200 transition-colors duration-150',
+    clickable: 'hover:border-gray-200 transition-colors duration-150 cursor-pointer',
   },
   
   // Configurações de layout interno
@@ -322,7 +322,7 @@ export const MODAL_CONFIG = {
   
   // Container do modal
   container: {
-    base: 'bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transition-all duration-200',
+    base: 'bg-white rounded-lg border border-gray-200/60 max-w-md w-full mx-4 transition-all duration-200',
     sizes: {
       sm: 'max-w-sm',
       md: 'max-w-md',   // Padrão

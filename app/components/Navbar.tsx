@@ -118,7 +118,7 @@ const GalleryDropdown = memo(({ pathname }: {
         isOpen={isDropdownOpen}
         onOpenChange={setIsDropdownOpen}
         classNames={{
-          content: "min-w-[200px] max-h-[400px] md:max-h-[60vh] bg-white border border-default-200 rounded-md shadow-lg overflow-y-auto scrollbar-branded focus:outline-none focus:border-none focus:ring-0",
+          content: "min-w-[200px] max-h-[400px] md:max-h-[60vh] bg-white border border-gray-200/60 hover:border-gray-200 rounded-md overflow-y-auto scrollbar-branded focus:outline-none focus:border-none focus:ring-0 transition-colors duration-150",
         }}
       >
         <DropdownTrigger>

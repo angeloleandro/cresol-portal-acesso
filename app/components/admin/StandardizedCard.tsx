@@ -23,9 +23,9 @@ interface StandardizedCardProps {
  * Card padronizado seguindo o design system da página /admin/users
  * 
  * Features:
- * - Fundo branco com borda cinza clara
+ * - Fundo branco com borda cinza clara (60% opacidade)
  * - Arredondamento consistente (rounded-lg)
- * - Shadow sutil
+ * - Hover com intensificação da borda (100% opacidade)
  * - Estados hover opcionais
  * - Padding configurável
  * - Layout flexível
@@ -42,15 +42,15 @@ export default function StandardizedCard({
   variant = 'default'
 }: StandardizedCardProps) {
   const variantClasses = {
-    default: 'bg-white border border-gray-200',
-    outline: 'bg-white border border-gray-200',
-    elevated: 'bg-white border border-gray-100 shadow-sm',
-    subtle: 'bg-gray-50 border border-gray-200'
+    default: 'bg-white border border-gray-200/60',
+    outline: 'bg-white border border-gray-200/60',
+    elevated: 'bg-white border border-gray-200/60',
+    subtle: 'bg-gray-50 border border-gray-200/60'
   } as const;
 
   const baseClasses = `${variantClasses[variant]} rounded-lg`;
   
-  const hoverClasses = hover ? 'hover:shadow-md hover:border-gray-300 transition-all duration-200' : '';
+  const hoverClasses = hover ? 'hover:border-gray-200 transition-colors duration-150' : '';
   
   const paddingClasses = {
     sm: 'p-3',

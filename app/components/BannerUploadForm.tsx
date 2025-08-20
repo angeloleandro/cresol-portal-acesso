@@ -191,7 +191,7 @@ export default function BannerUploadForm({ initialData, onSave, onCancel }: Bann
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150 p-6 max-w-lg mx-auto">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200/60 hover:border-gray-200 transition-colors duration-150 p-6 max-w-lg mx-auto">
       <h3 className="text-lg font-semibold mb-4">{initialData?.id ? 'Editar Banner' : 'Novo Banner'}</h3>
       {error && <div className="text-red-500 mb-2">{error}</div>}
       <div className="mb-4">

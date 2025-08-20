@@ -68,43 +68,43 @@ export const StandardizedMetricsCard: React.FC<StandardizedMetricsCardProps> = (
       iconBg: 'bg-primary/10',
       iconColor: 'text-primary',
       accent: 'text-primary',
-      border: 'border-primary/20',
-      hoverBorder: 'hover:border-primary/40'
+      border: 'border-gray-200/60',
+      hoverBorder: 'hover:border-gray-200'
     },
     secondary: {
       iconBg: 'bg-gray-100',
       iconColor: 'text-gray-400',
       accent: 'text-gray-900',
-      border: 'border-gray-200',
-      hoverBorder: 'hover:border-gray-300'
+      border: 'border-gray-200/60',
+      hoverBorder: 'hover:border-gray-200'
     },
     info: {
       iconBg: 'bg-gray-100',
       iconColor: 'text-gray-400',
       accent: 'text-gray-900',
-      border: 'border-gray-200',
-      hoverBorder: 'hover:border-gray-300'
+      border: 'border-gray-200/60',
+      hoverBorder: 'hover:border-gray-200'
     },
     success: {
       iconBg: 'bg-gray-100',
       iconColor: 'text-gray-400',
       accent: 'text-gray-900',
-      border: 'border-gray-200',
-      hoverBorder: 'hover:border-gray-300'
+      border: 'border-gray-200/60',
+      hoverBorder: 'hover:border-gray-200'
     },
     warning: {
       iconBg: 'bg-gray-100',
       iconColor: 'text-gray-400',
       accent: 'text-gray-900',
-      border: 'border-gray-200',
-      hoverBorder: 'hover:border-gray-300'
+      border: 'border-gray-200/60',
+      hoverBorder: 'hover:border-gray-200'
     },
     danger: {
       iconBg: 'bg-gray-100',
       iconColor: 'text-gray-400',
       accent: 'text-gray-900',
-      border: 'border-gray-200',
-      hoverBorder: 'hover:border-gray-300'
+      border: 'border-gray-200/60',
+      hoverBorder: 'hover:border-gray-200'
     }
   };
 
@@ -139,7 +139,7 @@ export const StandardizedMetricsCard: React.FC<StandardizedMetricsCardProps> = (
   const cardClasses = `
     bg-white rounded-lg border transition-all duration-200 
     ${colors.border} ${colors.hoverBorder}
-    ${onClick ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''}
+    ${onClick ? 'cursor-pointer hover:-translate-y-0.5' : ''}
     ${sizes.padding}
     ${className}
   `.trim();

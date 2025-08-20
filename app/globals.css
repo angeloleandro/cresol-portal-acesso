@@ -1149,7 +1149,7 @@ html {
 .btn-outline {
   background-color: transparent;
   color: var(--color-gray-dark);
-  border: 1px solid rgba(210, 210, 206, 0.4);
+  border: 1px solid rgba(210, 210, 206, 0.6);
   font-weight: 500;
   padding: var(--spacing-2) var(--spacing-4);
   border-radius: var(--border-radius-medium);
@@ -1162,7 +1162,7 @@ html {
 }
 
 .btn-outline:hover {
-  border-color: rgba(210, 210, 206, 0.7);
+  border-color: rgba(210, 210, 206, 1);
 }
 
 /* Inputs com ícone à esquerda (utilitário global) */
@@ -1209,12 +1209,12 @@ html {
   background-color: var(--color-white);
   border-radius: var(--border-radius-large);
   padding: var(--spacing-6);
-  border: 1px solid rgba(210, 210, 206, 0.4);
+  border: 1px solid rgba(210, 210, 206, 0.6);
   transition: border-color 150ms ease;
 }
 
 .card:hover {
-  border-color: rgba(210, 210, 206, 0.7);
+  border-color: rgba(210, 210, 206, 1);
 }
 
 /* Variações sutis para cards dentro de seções */
@@ -1222,12 +1222,12 @@ html {
   background-color: rgba(249, 250, 251, 0.5);
   border-radius: var(--border-radius-large);
   padding: var(--spacing-6);
-  border: 1px solid rgba(210, 210, 206, 0.4);
+  border: 1px solid rgba(210, 210, 206, 0.6);
   transition: border-color 150ms ease;
 }
 
 .card-section:hover {
-  border-color: rgba(210, 210, 206, 0.7);
+  border-color: rgba(210, 210, 206, 1);
 }
 
 .card-nested {
@@ -1358,17 +1358,17 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--color-white);
   border-radius: var(--border-radius-large);
   padding: var(--spacing-6);
-  border: 1px solid rgba(210, 210, 206, 0.4);
+  border: 1px solid rgba(210, 210, 206, 0.6);
   transition: border-color 150ms ease;
 }
 
 .card-standard:hover {
-  border-color: rgba(210, 210, 206, 0.7);
+  border-color: rgba(210, 210, 206, 1);
 }
 
 .card-status {
   background-color: rgba(249, 250, 251, 0.7);
-  border: 1px solid rgba(210, 210, 206, 0.4);
+  border: 1px solid rgba(210, 210, 206, 0.6);
   border-radius: var(--border-radius-large);
   padding: var(--spacing-4);
   text-align: center;
@@ -1376,7 +1376,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-status:hover {
-  border-color: rgba(210, 210, 206, 0.7);
+  border-color: rgba(210, 210, 206, 1);
 }
 
 /* Classes Utilitárias de Cor */
@@ -2303,7 +2303,7 @@ label:has(input[type="checkbox"]) {
 [data-dropdown] [role="menuitem"]:hover,
 .nextui-dropdown-menu [role="menuitem"]:hover {
   transform: translateX(2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-color: rgba(210, 210, 206, 1);
 }
 
 /* ========================================

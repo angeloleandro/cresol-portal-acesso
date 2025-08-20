@@ -35,12 +35,16 @@ export default function SectorCard({
   return (
     <Box 
       borderWidth="1px"
-      borderColor="gray.200"
       borderRadius="md"
       bg="white"
-      _hover={{ borderColor: "gray.300" }}
       transition="border-color 0.15s"
       className={`${className} admin-sector-card`}
+      css={{
+        borderColor: 'rgba(210, 210, 206, 0.6)',
+        '&:hover': {
+          borderColor: 'rgba(210, 210, 206, 1)'
+        }
+      }}
     >
       {/* Header com ícone, título e ações */}
       <Box className="p-6 pb-0">
@@ -60,7 +64,7 @@ export default function SectorCard({
             </Button>
             
             {/* Menu dropdown que aparece no hover */}
-            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200/60 hover:border-gray-200 rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
               <div className="py-1 min-w-[120px]">
                 <button
                   onClick={onEdit}

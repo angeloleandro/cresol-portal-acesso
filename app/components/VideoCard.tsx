@@ -44,7 +44,7 @@ export const HomeVideoCard = memo(function HomeVideoCard({
     <motion.article
       className={clsx(
         // Card.Root equivalent - following project's standardized pattern
-        'bg-white rounded-md border border-gray-200/40 hover:border-gray-200/70',
+        'bg-white rounded-md border border-gray-200/60 hover:border-gray-200',
         'overflow-hidden cursor-pointer group',
         'transition-colors duration-150',
         'max-w-sm w-full', // maxW="sm" equivalent

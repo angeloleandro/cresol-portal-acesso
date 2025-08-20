@@ -52,7 +52,7 @@ export const TRANSITION_PRESETS = {
   
   // UI-specific transitions
   button: 'transition-all duration-150 ease-out',       // Button interactions
-  card: 'transition-shadow duration-200 ease-out',      // Card hover effects
+  card: 'transition-colors duration-150 ease-out',       // Card hover effects
   modal: 'transition-all duration-250 ease-out',        // Modal enter/exit
   dropdown: 'transition-all duration-200 ease-out',     // Dropdown animations
   tooltip: 'transition-all duration-150 ease-out',      // Quick tooltips
@@ -167,9 +167,8 @@ export const MICRO_INTERACTIONS = {
   // Card interactions
   cardHover: {
     transition: TRANSITION_PRESETS.card,
-    shadow: CRESOL_DESIGN_TOKENS.shadows.lg,
-    transform: 'translateY(-2px)',
-    duration: ANIMATION_DURATIONS.normal,
+    borderColor: 'rgba(210, 210, 206, 1)',
+    duration: ANIMATION_DURATIONS.fast,
   },
   
   cardPress: {
@@ -287,9 +286,9 @@ export const LOADING_ANIMATIONS = {
 export const HOVER_EFFECTS = {
   // Lift effects
   lift: {
-    light: `hover:shadow-md hover:-translate-y-0.5 ${TRANSITION_PRESETS.allNormal}`,
-    medium: `hover:shadow-lg hover:-translate-y-1 ${TRANSITION_PRESETS.allNormal}`,
-    strong: `hover:shadow-xl hover:-translate-y-2 ${TRANSITION_PRESETS.allNormal}`,
+    light: `hover:border-gray-200 hover:-translate-y-0.5 ${TRANSITION_PRESETS.allNormal}`,
+    medium: `hover:border-gray-200 hover:-translate-y-1 ${TRANSITION_PRESETS.allNormal}`,
+    strong: `hover:border-gray-200 hover:-translate-y-2 ${TRANSITION_PRESETS.allNormal}`,
   },
   
   // Scale effects
@@ -299,12 +298,12 @@ export const HOVER_EFFECTS = {
     large: `hover:scale-125 ${TRANSITION_PRESETS.transform}`,
   },
   
-  // Glow effects
-  glow: {
-    primary: `hover:shadow-lg hover:shadow-primary/25 ${TRANSITION_PRESETS.shadow}`,
-    success: `hover:shadow-lg hover:shadow-green-500/25 ${TRANSITION_PRESETS.shadow}`,
-    warning: `hover:shadow-lg hover:shadow-yellow-500/25 ${TRANSITION_PRESETS.shadow}`,
-    error: `hover:shadow-lg hover:shadow-red-500/25 ${TRANSITION_PRESETS.shadow}`,
+  // Border emphasis effects (replacing glow)
+  borderEmphasis: {
+    primary: `hover:border-primary ${TRANSITION_PRESETS.colors}`,
+    success: `hover:border-green-500 ${TRANSITION_PRESETS.colors}`,
+    warning: `hover:border-yellow-500 ${TRANSITION_PRESETS.colors}`,
+    error: `hover:border-red-500 ${TRANSITION_PRESETS.colors}`,
   },
   
   // Color shifts

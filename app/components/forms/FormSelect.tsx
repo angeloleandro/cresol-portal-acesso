@@ -295,7 +295,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
           shouldFlip={true}
           shouldCloseOnBlur={true}
           classNames={{
-            content: `min-w-[200px] max-h-[${maxHeight}px] bg-white border border-default-200 rounded-md shadow-lg overflow-y-auto scrollbar-branded`,
+            content: `min-w-[200px] max-h-[${maxHeight}px] bg-white border border-gray-200/60 hover:border-gray-200 rounded-md overflow-y-auto scrollbar-branded transition-colors duration-150`,
           }}
         >
           <DropdownTrigger>

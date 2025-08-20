@@ -187,7 +187,7 @@ export default function EventosDestaque({ compact = false, limit = 4 }: EventosD
             <Link 
               key={event.id} 
               href={`/eventos/${event.id}`}
-                              className="block bg-white border border-gray-200/40 hover:border-gray-200/70 rounded-md transition-colors duration-150 p-3"
+                              className="block bg-white border border-gray-200/60 hover:border-gray-200 rounded-md transition-colors duration-150 p-3"
             >
               <div className="flex flex-col">
                 <div className="flex justify-between items-start mb-1.5">

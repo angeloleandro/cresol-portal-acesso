@@ -154,7 +154,7 @@ export default function AdminCollectionsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className={clsx(
-            'bg-white rounded-md shadow-sm border border-gray-200/40 hover:border-gray-200/70 transition-colors duration-150',
+            'bg-white rounded-md border border-gray-200/60 hover:border-gray-200 transition-colors duration-150',
             'overflow-hidden'
           )}
         >

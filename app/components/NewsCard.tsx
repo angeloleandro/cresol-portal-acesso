@@ -61,7 +61,7 @@ export const HorizontalNewsCard = memo(({
         // Card.Root equivalent - horizontal flex layout
         'group block',
         'bg-white rounded-md overflow-hidden',
-        'border border-gray-200/40 hover:border-gray-200/70',
+        'border border-gray-200/60 hover:border-gray-200',
         'transition-colors duration-150',
         'flex flex-col md:flex-row',
         'max-w-4xl', // Chakra's maxW="xl" equivalent
@@ -164,7 +164,7 @@ export const CompactNewsCard = memo(({
       href={`/noticias/${news.id}`}
       className={clsx(
         'group block p-3',
-        'bg-white border border-gray-200/40 hover:border-gray-200/70',
+        'bg-white border border-gray-200/60 hover:border-gray-200',
         'rounded-md transition-colors duration-150',
         className
       )}
@@ -214,9 +214,8 @@ export const FeaturedNewsCard = memo(({
       className={clsx(
         'group block',
         'bg-white rounded-md overflow-hidden',
-        'border border-gray-200/40 hover:border-gray-200/70',
+        'border border-gray-200/60 hover:border-gray-200',
         'transition-colors duration-150',
-        'shadow-sm hover:shadow-md',
         className
       )}
     >
