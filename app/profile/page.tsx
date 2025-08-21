@@ -450,7 +450,11 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="heading-1">{profile?.full_name || 'Nome não informado'}</h1>
-                  <p className="body-text text-muted">{profile?.position || 'Cargo não informado'}</p>
+                  <p className="body-text text-muted">
+                    {profile?.position_id 
+                      ? positions.find(pos => pos.id === profile.position_id)?.name 
+                      : profile?.position || 'Cargo não informado'}
+                  </p>
                   <p className="body-text-small text-muted">
                     {workLocations.find(loc => loc.id === profile?.work_location_id)?.name || 'Local não informado'}
                   </p>

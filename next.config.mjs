@@ -139,9 +139,9 @@ const nextConfig = {
                 return module.size() > 160000 &&
                   /node_modules[/\\]/.test(module.identifier());
               },
-              name() {
+              name(module) {
                 const hash = createHash('sha1');
-                hash.update(Math.random().toString());
+                hash.update(module.identifier());
                 return hash.digest('hex').substring(0, 8);
               },
               priority: 30,

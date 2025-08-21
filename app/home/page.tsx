@@ -1,24 +1,27 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Navbar from '../components/Navbar';
-import NoticiasDestaque from '../components/NoticiasDestaque';
-import EventosDestaque from '../components/EventosDestaque';
-import MensagensDestaque from '../components/MensagensDestaque';
-import BannerCarousel from '@/app/components/BannerCarousel';
-import VideoGallery from '@/app/components/VideoGallery';
-import ImageGalleryHome from '../components/ImageGalleryHome';
-import Footer from '../components/Footer';
-import GlobalSearch from '../components/GlobalSearch';
-import SistemasLateral from '../components/SistemasLateral';
-import ParecerSolicitacao from '../components/ParecerSolicitacao';
 import { handleComponentError, devLog } from '@/lib/error-handler';
 import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { Icon } from '../components/icons';
 import { logger } from '@/lib/logger';
+import { InlineSuspense } from '../components/OptimizedSuspense';
+
+// Lazy load componentes pesados para melhorar o tempo de carregamento inicial
+const BannerCarousel = lazy(() => import('@/app/components/BannerCarousel'));
+const NoticiasDestaque = lazy(() => import('../components/NoticiasDestaque'));
+const EventosDestaque = lazy(() => import('../components/EventosDestaque'));
+const MensagensDestaque = lazy(() => import('../components/MensagensDestaque'));
+const VideoGallery = lazy(() => import('@/app/components/VideoGallery'));
+const ImageGalleryHome = lazy(() => import('../components/ImageGalleryHome'));
+const Footer = lazy(() => import('../components/Footer'));
+const GlobalSearch = lazy(() => import('../components/GlobalSearch'));
+const SistemasLateral = lazy(() => import('../components/SistemasLateral'));
+const ParecerSolicitacao = lazy(() => import('../components/ParecerSolicitacao'));
 
 interface QuickStats {
   activeUsers: number;
@@ -55,7 +58,7 @@ export default function Home() {
       }
 
       setUser(userData.user);
-      logger.success('Usuário autenticado na home page', { userId: userData.user.id });
+      logger.info('Usuário autenticado na home page', { userId: userData.user.id });
       
       // Simular dados de estatísticas rápidas
       const statsTimer = logger.componentStart('HomePage.loadStats');
@@ -98,9 +101,11 @@ export default function Home() {
       {/* Banner Carousel - Compacto */}
       <div className="py-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <BannerCarousel />
+          <InlineSuspense message="Carregando banners...">
+            <BannerCarousel />
+          </InlineSuspense>
         </div>
-          </div>
+      </div>
           
       {/* Seções de Conteúdo - Layout 2/3 + 1/3 */}
       <div className="py-8 bg-gray-50">
@@ -108,28 +113,45 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Primeira Coluna - 2/3 do espaço (Notícias, Vídeos, Galeria, Indicadores) */}
             <div className="lg:col-span-2 space-y-6">
-              <NoticiasDestaque />
-              <VideoGallery />
-              <ImageGalleryHome />
-              <ParecerSolicitacao />
+              <InlineSuspense message="Carregando notícias...">
+                <NoticiasDestaque />
+              </InlineSuspense>
+              <InlineSuspense message="Carregando vídeos...">
+                <VideoGallery />
+              </InlineSuspense>
+              <InlineSuspense message="Carregando galeria...">
+                <ImageGalleryHome />
+              </InlineSuspense>
+              <InlineSuspense message="Carregando solicitações...">
+                <ParecerSolicitacao />
+              </InlineSuspense>
             </div>
 
             {/* Segunda Coluna - 1/3 do espaço (Busca + Eventos + Mensagens + Sistemas) */}
             <div className="lg:col-span-1 space-y-6">
               <div className="card">
                 <h3 className="heading-4 text-title mb-4">Busca Global</h3>
-                <GlobalSearch compact />
+                <InlineSuspense message="Carregando busca...">
+                  <GlobalSearch compact />
+                </InlineSuspense>
               </div>
-              <EventosDestaque limit={4} />
-              <MensagensDestaque compact limit={3} />
-              <SistemasLateral />
+              <InlineSuspense message="Carregando eventos...">
+                <EventosDestaque limit={4} />
+              </InlineSuspense>
+              <InlineSuspense message="Carregando mensagens...">
+                <MensagensDestaque compact limit={3} />
+              </InlineSuspense>
+              <InlineSuspense message="Carregando sistemas...">
+                <SistemasLateral />
+              </InlineSuspense>
             </div>
           </div>
         </div>
       </div>
       
-
-      <Footer />
+      <InlineSuspense message="Carregando rodapé...">
+        <Footer />
+      </InlineSuspense>
     </div>
   );
 } 

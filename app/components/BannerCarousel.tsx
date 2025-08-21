@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/supabase";
-import OptimizedImage from "./OptimizedImage";
+import { cachedQueries } from "@/lib/supabase/cached-client";
+import { HeroImage } from "./OptimizedImageWithBlur";
 import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
 import { logger } from "@/lib/logger";
 
@@ -25,39 +25,34 @@ export default function BannerCarousel() {
       const componentTimer = logger.componentStart('BannerCarousel.fetchBanners');
       logger.info('Iniciando carregamento de banners');
       
-      const queryTimer = logger.dbStart('banners.select(active)');
-      const { data, error } = await supabase
-        .from("banners")
-        .select("*")
-        .eq("is_active", true)
-        .order("order_index", { ascending: true });
-      logger.dbEnd(queryTimer);
-      
-      if (error) {
-        logger.error('Erro ao buscar banners', error);
+      try {
+        const queryTimer = logger.dbStart('banners.cached.select');
+        const data = await cachedQueries.getBanners();
+        logger.dbEnd(queryTimer);
+        
+        const processTimer = logger.componentStart('BannerCarousel.processImages');
+        const processedBanners = (data || []).map((banner: any) => ({
+          ...banner,
+          image_url: processSupabaseImageUrl(banner.image_url) || banner.image_url
+        }));
+        
+        // Debug das URLs em desenvolvimento
+        if (process.env.NODE_ENV === 'development') {
+          processedBanners.forEach(banner => 
+            debugImageUrl(banner.image_url, `Banner: ${banner.title}`)
+          );
+        }
+        logger.componentEnd(processTimer);
+        
+        setBanners(processedBanners);
+        
+        const bannerCount = processedBanners.length;
+        logger.info(`Banners carregados com sucesso (com cache)`, { bannerCount });
         logger.componentEnd(componentTimer);
-        return;
+      } catch (error) {
+        logger.error('Erro ao buscar banners', error instanceof Error ? error : new Error(String(error)));
+        logger.componentEnd(componentTimer);
       }
-      
-      const processTimer = logger.componentStart('BannerCarousel.processImages');
-      const processedBanners = (data || []).map(banner => ({
-        ...banner,
-        image_url: processSupabaseImageUrl(banner.image_url) || banner.image_url
-      }));
-      
-      // Debug das URLs em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
-        processedBanners.forEach(banner => 
-          debugImageUrl(banner.image_url, `Banner: ${banner.title}`)
-        );
-      }
-      logger.componentEnd(processTimer);
-      
-      setBanners(processedBanners);
-      
-      const bannerCount = processedBanners.length;
-      logger.success(`Banners carregados com sucesso`, { bannerCount });
-      logger.componentEnd(componentTimer);
     };
     fetchBanners();
   }, []);
@@ -87,27 +82,21 @@ export default function BannerCarousel() {
         >
           {banner.link ? (
             <a href={banner.link} target="_blank" rel="noopener noreferrer">
-              <OptimizedImage 
+              <HeroImage 
                 src={banner.image_url} 
                 alt={banner.title || "Banner"} 
                 fill 
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px" 
                 className="object-cover w-full h-full rounded-md" 
-                priority={idx === current}
-                quality={85}
-                fallbackText="Banner indisponível"
+                placeholder="blur"
               />
             </a>
           ) : (
-            <OptimizedImage 
+            <HeroImage 
               src={banner.image_url} 
               alt={banner.title || "Banner"} 
               fill 
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px" 
               className="object-cover w-full h-full rounded-md" 
-              priority={idx === current}
-              quality={85}
-              fallbackText="Banner indisponível"
+              placeholder="blur"
             />
           )}
           {banner.title && (

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import { NewsCard, CompactNewsCard, FeaturedNewsCard } from './NewsCard';
+import { cachedQueries } from '@/lib/supabase/cached-client';
+import { MemoizedNewsCard, MemoizedCompactNewsCard, MemoizedFeaturedNewsCard } from './MemoizedComponents';
 import type { NewsItem } from './NewsCard';
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
@@ -11,51 +11,33 @@ import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 interface NoticiasDestaqueProps {
   compact?: boolean;
   limit?: number;
+  preloadedData?: NewsItem[];
 }
 
-export default function NoticiasDestaque({ compact = false, limit = 4 }: NoticiasDestaqueProps) {
+function NoticiasDestaque({ compact = false, limit = 4, preloadedData }: NoticiasDestaqueProps) {
   const [featuredNews, setFeaturedNews] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Se tem dados pré-carregados, usa eles
+    if (preloadedData) {
+      setFeaturedNews(preloadedData);
+      setIsLoading(false);
+      return;
+    }
+    
     const fetchNews = async () => {
       setIsLoading(true);
       
       try {
+        // Usa cache otimizado para buscar notícias
+        const newsData = await cachedQueries.getFeaturedNews(limit);
         
-        // OTIMIZADO: Uma única query que prioriza notícias em destaque e depois as mais recentes
-        const { data: newsData, error } = await supabase
-          .from('sector_news')
-          .select('id, title, summary, image_url, created_at, sector_id, is_featured')
-          .eq('is_published', true)
-          .order('is_featured', { ascending: false }) // Prioriza is_featured=true primeiro
-          .order('created_at', { ascending: false })  // Depois ordena por data
-          .limit(limit * 2); // Buscar mais que o limite para garantir variedade
-          
-        if (error) {
-          console.error('[NoticiasDestaque] ❌ Erro na query otimizada:', error);
-          throw error;
-        }
-        
-        // Processar os dados: priorizar notícias em destaque e pegar as primeiras {limit}
-        let finalNews: NewsItem[] = [];
-        if (newsData && newsData.length > 0) {
-          // Separar notícias em destaque e comuns
-          const featuredNews = newsData.filter(news => news.is_featured);
-          const regularNews = newsData.filter(news => !news.is_featured);
-          
-          // Combinar: primeiro todas as em destaque, depois as comuns até atingir o limite
-          const combinedNews = [
-            ...featuredNews,
-            ...regularNews
-          ].slice(0, limit);
-          
-          // Mapear para NewsItem com categoria obrigatória
-          finalNews = combinedNews.map((item: any) => ({
-            ...item,
-            category: 'Notícia' // Categoria padrão
-          }));
-        }
+        // Mapear para NewsItem com categoria obrigatória
+        const finalNews: NewsItem[] = (newsData || []).map((item: any) => ({
+          ...item,
+          category: 'Notícia' // Categoria padrão
+        }));
 
         setFeaturedNews(finalNews);
       } catch (error) {
@@ -67,7 +49,7 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
     };
 
     fetchNews();
-  }, [limit]);
+  }, [limit, preloadedData]);
 
   // Formatador de data
   const formatDate = (dateString: string) => {
@@ -109,38 +91,29 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
         </div>
       ) : (
         <div className={compact ? "space-y-2" : "space-y-4"}>
-          {/* No modo compacto, usar CompactNewsCard */}
+          {/* No modo compacto, usar MemoizedCompactNewsCard */}
           {compact ? (
             featuredNews.map((news) => (
-              <CompactNewsCard
+              <MemoizedCompactNewsCard
                 key={news.id}
                 news={news}
-                showCategory={true}
-                showDate={true}
               />
             ))
           ) : (
             <>
               {/* Primeira notícia em formato horizontal (featured) */}
               {featuredNews.slice(0, 1).map((news) => (
-                <NewsCard
+                <MemoizedFeaturedNewsCard
                   key={news.id}
                   news={news}
-                  variant="horizontal"
-                  priority={true}
-                  showCategory={true}
-                  showDate={true}
-                  showImage={true}
                 />
               ))}
               
               {/* Outras notícias em formato compacto */}
               {featuredNews.slice(1).map((news) => (
-                <CompactNewsCard
+                <MemoizedCompactNewsCard
                   key={news.id}
                   news={news}
-                  showCategory={true}
-                  showDate={true}
                 />
               ))}
             </>
@@ -149,4 +122,7 @@ export default function NoticiasDestaque({ compact = false, limit = 4 }: Noticia
       )}
     </div>
   );
-} 
+}
+
+// Exporta versão memoizada do componente
+export default memo(NoticiasDestaque); 

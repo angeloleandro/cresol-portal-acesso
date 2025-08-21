@@ -20,6 +20,8 @@ export type Database = {
           position: string | null
           work_location_id: string | null
           position_id: string | null
+          phone: string | null
+          bio: string | null
           updated_at: string | null
         }
         Insert: {
@@ -32,6 +34,8 @@ export type Database = {
           position?: string | null
           work_location_id?: string | null
           position_id?: string | null
+          phone?: string | null
+          bio?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -44,6 +48,8 @@ export type Database = {
           position?: string | null
           work_location_id?: string | null
           position_id?: string | null
+          phone?: string | null
+          bio?: string | null
           updated_at?: string | null
         }
       }

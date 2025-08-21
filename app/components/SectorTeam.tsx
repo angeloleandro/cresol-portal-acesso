@@ -17,6 +17,8 @@ interface TeamMember {
     email: string;
     avatar_url?: string;
     position?: string;
+    phone?: string;
+    bio?: string;
     work_location_id?: string;
     work_locations?: { name: string };
   };

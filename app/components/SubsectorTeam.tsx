@@ -15,6 +15,8 @@ interface TeamMember {
     email: string;
     avatar_url?: string;
     position?: string;
+    phone?: string;
+    bio?: string;
   };
 }
 
