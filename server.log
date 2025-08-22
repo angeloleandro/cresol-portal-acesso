@@ -1,0 +1,9 @@
+  ▲ Next.js 14.2.31
+  - Local:        http://localhost:3000
+  - Environments: .env.local, .env
+  - Experiments (use with caution):
+    · scrollRestoration
+
+ ✓ Starting...
+ ✓ Ready in 1542ms
+[?25h

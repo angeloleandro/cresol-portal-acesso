@@ -4,6 +4,7 @@
  * VideoUploadModal Component - Collections Integration
  * Modal que integra o VideoUploadFormRoot com o sistema de coleções
  * Replica funcionalidade completa da galeria de vídeos para coleções
+ * Inclui suporte completo para geração de thumbnails com timestamp personalizado
  */
 
 import { useState, useCallback } from 'react';
@@ -135,7 +136,7 @@ export const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
           <div className="bg-white px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Upload YouTube</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Adicionar Vídeo</h2>
                 <p className="text-sm text-gray-600 mt-1">
                   Adicionando vídeo à coleção &ldquo;{collection.name}&rdquo;
                 </p>
@@ -196,7 +197,7 @@ export const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-gray-600 mt-1">
-                  O vídeo do YouTube será automaticamente adicionado a esta coleção
+                  O vídeo será automaticamente adicionado a esta coleção com suporte completo para geração de thumbnails
                 </p>
               </div>
               

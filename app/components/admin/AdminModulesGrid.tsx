@@ -99,6 +99,12 @@ const ADMIN_MODULES: AdminModule[] = [
     link: '/admin/news',
   },
   {
+    title: 'Documentos',
+    description: 'Gerenciar documentos de setores e subsetores centralizadamente',
+    icon: 'file',
+    link: '/admin/documents',
+  },
+  {
     title: 'Eventos',
     description: 'Gerenciar eventos de setores e subsetores centralizadamente',
     icon: 'calendar',

@@ -42,6 +42,20 @@ export interface SectorEvent {
   updated_at: string;
 }
 
+export interface SectorDocument {
+  id: string;
+  sector_id: string;
+  title: string;
+  description: string | null;
+  file_url: string;
+  file_type: string | null;
+  file_size: number | null;
+  is_featured: boolean;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface MessageGroup {
   id: string;
   name: string;
@@ -114,4 +128,4 @@ export interface CropArea {
   height: number;
 }
 
-export type TabType = 'news' | 'events' | 'subsectors' | 'groups' | 'messages';
+export type TabType = 'news' | 'events' | 'documents' | 'subsectors' | 'groups' | 'messages';

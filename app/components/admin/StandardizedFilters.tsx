@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { CRESOL_UI_CONFIG, CRESOL_SPACING_SYSTEM } from '@/lib/design-tokens';
+import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 
 interface Filter {
   id: string;
@@ -10,7 +11,7 @@ interface Filter {
   onChange: (value: string) => void;
   type: 'search' | 'select';
   placeholder?: string;
-  options?: Array<{ value: string; label: string; }>;
+  options?: ChakraSelectOption[];
 }
 
 interface StandardizedFiltersProps {
@@ -77,17 +78,15 @@ export default function StandardizedFilters({
                   />
                 </div>
               ) : (
-                <select
+                <ChakraSelect
+                  options={filter.options || []}
                   value={filter.value}
-                  onChange={(e) => filter.onChange(e.target.value)}
-                  className={`${CRESOL_UI_CONFIG.input.base} ${CRESOL_UI_CONFIG.input.variants.outline.classes} ${CRESOL_UI_CONFIG.input.variants.outline.states.default} ${CRESOL_UI_CONFIG.input.sizes.md.classes}`}
-                >
-                  {filter.options?.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(value) => filter.onChange(value as string)}
+                  placeholder={filter.placeholder}
+                  size="md"
+                  variant="outline"
+                  fullWidth
+                />
               )}
             </div>
           ))}

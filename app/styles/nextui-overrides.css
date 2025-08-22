@@ -1,0 +1,36 @@
+/**
+ * NextUI Overrides - Customizações mínimas para componentes NextUI
+ * 
+ * Apenas estilos essenciais que não conflitam com os componentes
+ */
+
+/* Estilo específico para o menu dropdown do NextUI */
+.nextui-dropdown-menu {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Scrollbar customizada para dropdowns */
+.scrollbar-branded {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.scrollbar-branded::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-branded::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-branded::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 3px;
+}
+
+.scrollbar-branded::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}

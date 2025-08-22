@@ -1,6 +1,5 @@
 // Componente unificado para gerenciar conteúdo do setor com lógica limpa
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { CONTENT_DEFAULTS } from '@/lib/constants/content-defaults';
 
 
 interface SectorNews {
@@ -42,11 +41,26 @@ interface SectorMessage {
   sector_id: string;
 }
 
+interface SectorDocument {
+  id: string;
+  title: string;
+  description: string | null;
+  file_url: string;
+  file_type: string | null;
+  file_size: number | null;
+  is_featured: boolean;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  sector_id: string;
+}
+
 interface UseSectorContentReturn {
   // Estados
   news: SectorNews[];
   events: SectorEvent[];
   messages: SectorMessage[];
+  documents: SectorDocument[];
   showDrafts: boolean;
   isLoading: boolean;
   error: string | null;
@@ -55,6 +69,7 @@ interface UseSectorContentReturn {
   totalDraftNewsCount: number;
   totalDraftEventsCount: number;
   totalDraftMessagesCount: number;
+  totalDraftDocumentsCount: number;
   
   // Ações
   toggleDrafts: () => Promise<void>;
@@ -62,6 +77,7 @@ interface UseSectorContentReturn {
   deleteNews: (id: string) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   deleteMessage: (id: string) => Promise<void>;
+  deleteDocument: (id: string) => Promise<void>;
 }
 
 export function useSectorContent(sectorId: string | undefined): UseSectorContentReturn {
@@ -69,60 +85,16 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
   const [news, setNews] = useState<SectorNews[]>([]);
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [messages, setMessages] = useState<SectorMessage[]>([]);
+  const [documents, setDocuments] = useState<SectorDocument[]>([]);
   const [showDrafts, setShowDrafts] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalDraftNewsCount, setTotalDraftNewsCount] = useState(0);
   const [totalDraftEventsCount, setTotalDraftEventsCount] = useState(0);
   const [totalDraftMessagesCount, setTotalDraftMessagesCount] = useState(0);
+  const [totalDraftDocumentsCount, setTotalDraftDocumentsCount] = useState(0);
   
   const mountedRef = useRef(true);
-  const fetchContent = useCallback(async (includesDrafts: boolean) => {
-    if (!sectorId) return;
-    
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const batchResponse = await fetch(`/api/admin/sector-content-batch?sectorId=${sectorId}&includeUnpublished=${includesDrafts}`);
-      
-      if (!batchResponse.ok) {
-        throw new Error(`Erro API: ${batchResponse.status}`);
-      }
-      
-      const batchResult = await batchResponse.json();
-      
-      if (!batchResult.success) {
-        throw new Error(batchResult.error || 'Erro na API');
-      }
-      
-      const { news: newsData, events: eventsData, messages: messagesData, draftNewsCount, draftEventsCount, draftMessagesCount } = batchResult.data;
-      
-      const newsToSet = newsData || [];
-      const eventsToSet = eventsData || [];
-      const messagesToSet = messagesData || [];
-      
-      if (!mountedRef.current) {
-        return;
-      }
-
-      if (!Array.isArray(newsToSet) || !Array.isArray(eventsToSet)) {
-        throw new Error('Formato de dados inválido');
-      }
-
-      setNews(newsToSet);
-      setEvents(eventsToSet);
-      setMessages(messagesToSet);
-      setTotalDraftNewsCount(draftNewsCount);
-      setTotalDraftEventsCount(draftEventsCount);
-      setTotalDraftMessagesCount(draftMessagesCount || 0);
-      
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar conteúdo');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [sectorId]);
 
   const toggleDrafts = useCallback(async () => {
     if (!sectorId) return;
@@ -151,12 +123,13 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
         throw new Error(batchResult.error || 'Erro na API batch toggle');
       }
       
-      const { news: newsData, events: eventsData, messages: messagesData } = batchResult.data;
+      const { news: newsData, events: eventsData, messages: messagesData, documents: documentsData } = batchResult.data;
       
       if (mountedRef.current) {
         setNews(newsData);
         setEvents(eventsData);
         setMessages(messagesData || []);
+        setDocuments(documentsData || []);
       }
       
     } catch (err: any) {
@@ -194,15 +167,17 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
         throw new Error(batchResult.error || 'Erro na API batch refresh');
       }
       
-      const { news: newsData, events: eventsData, messages: messagesData, draftNewsCount, draftEventsCount, draftMessagesCount } = batchResult.data;
+      const { news: newsData, events: eventsData, messages: messagesData, documents: documentsData, draftNewsCount, draftEventsCount, draftMessagesCount, draftDocumentsCount } = batchResult.data;
       
       if (mountedRef.current) {
         setNews(newsData);
         setEvents(eventsData);
         setMessages(messagesData || []);
+        setDocuments(documentsData || []);
         setTotalDraftNewsCount(draftNewsCount);
         setTotalDraftEventsCount(draftEventsCount);
         setTotalDraftMessagesCount(draftMessagesCount || 0);
+        setTotalDraftDocumentsCount(draftDocumentsCount || 0);
       }
       
     } catch (err: any) {
@@ -269,6 +244,24 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
       setError(err.message || 'Erro ao deletar mensagem');
     }
   }, [refreshContent]);
+  
+  // Deletar documento via API
+  const deleteDocument = useCallback(async (id: string) => {
+    try {
+      const response = await fetch(`/api/admin/sector-content?type=sector_documents&id=${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erro ao deletar documento');
+      }
+      
+      await refreshContent();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao deletar documento');
+    }
+  }, [refreshContent]);
 
   useEffect(() => {
     if (!sectorId || sectorId === 'undefined') {
@@ -286,9 +279,11 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
           setNews(data.data.news || []);
           setEvents(data.data.events || []);
           setMessages(data.data.messages || []);
+          setDocuments(data.data.documents || []);
           setTotalDraftNewsCount(data.data.draftNewsCount || 0);
           setTotalDraftEventsCount(data.data.draftEventsCount || 0);
           setTotalDraftMessagesCount(data.data.draftMessagesCount || 0);
+          setTotalDraftDocumentsCount(data.data.draftDocumentsCount || 0);
         }
       } catch (err) {
         setError('Erro ao carregar dados');
@@ -308,22 +303,26 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
   const filteredNews = showDrafts ? news : news.filter(n => n.is_published === true);
   const filteredEvents = showDrafts ? events : events.filter(e => e.is_published === true);
   const filteredMessages = showDrafts ? messages : messages.filter(m => m.is_published === true);
+  const filteredDocuments = showDrafts ? documents : documents.filter(d => d.is_published === true);
 
   return {
     news: filteredNews,
     events: filteredEvents,
     messages: filteredMessages,
+    documents: filteredDocuments,
     showDrafts,
     isLoading,
     error,
     totalDraftNewsCount,
     totalDraftEventsCount,
     totalDraftMessagesCount,
+    totalDraftDocumentsCount,
     toggleDrafts,
     refreshContent,
     deleteNews,
     deleteEvent,
-    deleteMessage
+    deleteMessage,
+    deleteDocument
   };
 }
 

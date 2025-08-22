@@ -1,20 +1,23 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+
+// [DEBUG] Component tracking
+let newsPageRenderCount = 0;
+const newsPageInstanceId = `news-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { useAlert } from '@/app/components/alerts';
-import { FormSelect, type SelectOption } from '@/app/components/forms';
+import { FormSelect } from '@/app/components/forms';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { Icon } from '@/app/components/icons/Icon';
 import { StandardizedButton } from '@/app/components/admin';
-import { Box, Tabs } from "@chakra-ui/react";
 import { NewsForm } from './components/NewsForm';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
 
 interface News {
   id: string;
@@ -32,220 +35,67 @@ interface News {
   sector_name?: string;
 }
 
-interface NewsStats {
-  total: number;
-  published: number;
-  drafts: number;
-  featured: number;
-  bySector: { [key: string]: number };
-  byType: { sector: number; subsector: number };
-}
-
-interface Filters {
-  search: string;
-  type: 'all' | 'sector' | 'subsector';
-  status: 'all' | 'published' | 'draft';
-  featured: 'all' | 'featured' | 'not_featured';
-  sector_id: string;
-  subsector_id: string;
-}
-
 export default function NewsAdminPage() {
-  const router = useRouter();
+  // [DEBUG] Component render tracking
+  newsPageRenderCount++;
+  console.log(`[DEBUG-COMPONENT] NewsAdminPage - Render ${newsPageRenderCount}:`, {
+    instanceId: newsPageInstanceId,
+    renderCount: newsPageRenderCount,
+    timestamp: new Date().toISOString(),
+    stackTrace: new Error().stack?.split('\n').slice(1, 4)
+  });
+
   const alert = useAlert();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [news, setNews] = useState<News[]>([]);
-  const [sectors, setSectors] = useState<any[]>([]);
-  const [subsectors, setSubsectors] = useState<any[]>([]);
-  const [stats, setStats] = useState<NewsStats>({
-    total: 0,
-    published: 0,
-    drafts: 0,
-    featured: 0,
-    bySector: {},
-    byType: { sector: 0, subsector: 0 }
+  const { user } = useAdminAuth();
+  const { 
+    data: news, 
+    loading, 
+    stats, 
+    pagination, 
+    filters, 
+    updateFilters, 
+    updatePagination, 
+    reload 
+  } = useAdminData<News>({
+    endpoint: 'news',
+    initialFilters: {
+      search: '',
+      type: 'all',
+      status: 'all',
+      featured: 'all',
+      sector_id: '',
+      subsector_id: ''
+    },
+    debounceMs: 500
   });
   
-  const [filters, setFilters] = useState<Filters>({
-    search: '',
-    type: 'all',
-    status: 'all',
-    featured: 'all',
-    sector_id: '',
-    subsector_id: ''
-  });
-
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalCount: 0,
-    limit: 20
-  });
-
+  const [sectors, setSectors] = useState<any[]>([]);
+  const [subsectors, setSubsectors] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<News | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const checkAuth = useCallback(async () => {
-    try {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-
-      // Verificar se é admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      if (!profile || profile.role !== 'admin') {
-        alert.showError('Acesso negado', 'Apenas administradores gerais podem acessar esta página');
-        router.replace('/admin');
-        return;
-      }
-
-      setUser(data.user);
-    } catch (error) {
-      console.error('Erro na verificação de auth:', error);
-      router.replace('/login');
-    }
-  }, [router, alert]);
-
+  // Carregar dados iniciais (setores e subsetores)
   const loadInitialData = useCallback(async () => {
     try {
-      // Carregar setores
-      const { data: sectorsData } = await supabase
-        .from('sectors')
-        .select('id, name')
-        .order('name');
+      const [sectorsData, subsectorsData] = await Promise.all([
+        supabase.from('sectors').select('id, name').order('name'),
+        supabase.from('subsectors').select('id, name, sector_id, sectors(name)').order('name')
+      ]);
       
-      setSectors(sectorsData || []);
-
-      // Carregar subsetores
-      const { data: subsectorsData } = await supabase
-        .from('subsectors')
-        .select('id, name, sector_id, sectors(name)')
-        .order('name');
-      
-      setSubsectors(subsectorsData || []);
+      setSectors(sectorsData.data || []);
+      setSubsectors(subsectorsData.data || []);
     } catch (error) {
       console.error('Erro ao carregar dados iniciais:', error);
     }
   }, []);
 
-  const loadNews = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      // Não setar loading se já temos dados (evita piscagem)
-      if (news.length === 0) {
-        setLoading(true);
-      }
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        router.replace('/login');
-        return;
-      }
-
-      // Construir parâmetros da query
-      const queryParams = new URLSearchParams();
-      
-      // Adicionar parâmetros obrigatórios
-      queryParams.set('page', pagination.currentPage.toString());
-      queryParams.set('limit', pagination.limit.toString());
-      queryParams.set('order_by', 'created_at');
-      queryParams.set('order_direction', 'desc');
-
-      // Adicionar parâmetros opcionais condicionalmente (evitar strings vazias)
-      if (filters.search) queryParams.set('search', filters.search);
-      if (filters.type !== 'all') queryParams.set('type', filters.type);
-      if (filters.status !== 'all') queryParams.set('status', filters.status);
-      if (filters.featured !== 'all') queryParams.set('featured', filters.featured);
-      if (filters.sector_id) queryParams.set('sector_id', filters.sector_id);
-      if (filters.subsector_id) queryParams.set('subsector_id', filters.subsector_id);
-
-      const response = await fetch(`/api/admin/news?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro ao carregar notícias');
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setNews(data.data.news || []);
-        setPagination({
-          currentPage: data.data.pagination?.currentPage || 1,
-          totalPages: data.data.pagination?.totalPages || 1,
-          totalCount: data.data.pagination?.totalCount || 0,
-          limit: pagination.limit
-        });
-
-        // Calcular estatísticas
-        const allNews = data.data.news || [];
-        const published = allNews.filter((n: News) => n.is_published).length;
-        const drafts = allNews.filter((n: News) => !n.is_published).length;
-        const featured = allNews.filter((n: News) => n.is_featured).length;
-        
-        const bySector: { [key: string]: number } = {};
-        const byType = { sector: 0, subsector: 0 };
-        
-        allNews.forEach((newsItem: News) => {
-          if (newsItem.type === 'sector') {
-            byType.sector++;
-            if (newsItem.location_name) {
-              bySector[newsItem.location_name] = (bySector[newsItem.location_name] || 0) + 1;
-            }
-          } else {
-            byType.subsector++;
-            if (newsItem.sector_name) {
-              bySector[newsItem.sector_name] = (bySector[newsItem.sector_name] || 0) + 1;
-            }
-          }
-        });
-
-        setStats({
-          total: allNews.length,
-          published,
-          drafts,
-          featured,
-          bySector,
-          byType
-        });
-      }
-    } catch (error: any) {
-      console.error('Erro ao carregar notícias:', error);
-      alert.showError('Erro', error.message || 'Erro ao carregar notícias');
-    } finally {
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, pagination.currentPage, pagination.limit]);
-
-  // Verificar autenticação e permissões
-  useEffect(() => {
-    checkAuth();
-    loadInitialData();
-  }, [checkAuth, loadInitialData]);
-
-  // Carregar notícias quando filtros mudarem
+  // Carregar dados iniciais quando usuário estiver autenticado
   useEffect(() => {
     if (user) {
-      loadNews();
+      loadInitialData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, pagination.currentPage, user]);
+  }, [user, loadInitialData]);
 
   const handleEdit = (newsItem: News) => {
     setEditingNews(newsItem);
@@ -263,7 +113,7 @@ export default function NewsAdminPage() {
   };
 
   const handleSuccess = () => {
-    loadNews(); // Recarregar a lista
+    reload(); // Recarregar a lista
   };
 
   const handleAction = async (action: string, newsItem: News) => {
@@ -289,7 +139,7 @@ export default function NewsAdminPage() {
 
       if (data.success) {
         alert.showSuccess('Sucesso', data.message);
-        loadNews();
+        reload();
       } else {
         throw new Error(data.error);
       }
@@ -327,7 +177,7 @@ export default function NewsAdminPage() {
 
       if (data.success) {
         alert.showSuccess('Sucesso', 'Notícia excluída com sucesso');
-        loadNews();
+        reload();
       } else {
         throw new Error(data.error);
       }
@@ -359,14 +209,17 @@ export default function NewsAdminPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Loading Overlay para autenticação */}
-      {!user && (
+      <AdminHeader user={user} />
+      
+      {/* Loading Overlay */}
+      {loading && news.length === 0 && (
         <div className="fixed inset-0 bg-white/50 z-50 flex items-center justify-center">
-          <UnifiedLoadingSpinner fullScreen={true} size="large" message="Verificando permissões..." />
+          <UnifiedLoadingSpinner 
+            size="default" 
+            message="Carregando notícias..."
+          />
         </div>
       )}
-      
-      <AdminHeader user={user} />
       
       <main className="container py-8">
         {/* Breadcrumb */}
@@ -405,7 +258,7 @@ export default function NewsAdminPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted">Total</p>
-                <p className="text-2xl font-bold text-primary">{stats.total}</p>
+                <p className="text-2xl font-bold text-primary">{stats?.total || 0}</p>
               </div>
             </div>
           </div>
@@ -417,7 +270,7 @@ export default function NewsAdminPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted">Publicadas</p>
-                <p className="text-2xl font-bold text-green-600">{stats.published}</p>
+                <p className="text-2xl font-bold text-green-600">{stats?.published || 0}</p>
               </div>
             </div>
           </div>
@@ -429,7 +282,7 @@ export default function NewsAdminPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted">Rascunhos</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.drafts}</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats?.drafts || 0}</p>
               </div>
             </div>
           </div>
@@ -441,7 +294,7 @@ export default function NewsAdminPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted">Em Destaque</p>
-                <p className="text-2xl font-bold text-purple-600">{stats.featured}</p>
+                <p className="text-2xl font-bold text-purple-600">{stats?.featured || 0}</p>
               </div>
             </div>
           </div>
@@ -457,7 +310,7 @@ export default function NewsAdminPage() {
                 type="text"
                 placeholder="Título, resumo ou conteúdo..."
                 value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                onChange={(e) => updateFilters({ search: e.target.value })}
                 className="input"
               />
             </div>
@@ -467,7 +320,7 @@ export default function NewsAdminPage() {
               <label className="label">Tipo</label>
               <FormSelect
                 value={filters.type}
-                onChange={(e) => setFilters({ ...filters, type: e.target.value as any, sector_id: '', subsector_id: '' })}
+                onChange={(e) => updateFilters({ type: e.target.value, sector_id: '', subsector_id: '' })}
                 options={[
                   { value: 'all', label: 'Todos' },
                   { value: 'sector', label: 'Setor' },
@@ -482,7 +335,7 @@ export default function NewsAdminPage() {
               <label className="label">Status</label>
               <FormSelect
                 value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value as any })}
+                onChange={(e) => updateFilters({ status: e.target.value })}
                 options={[
                   { value: 'all', label: 'Todos' },
                   { value: 'published', label: 'Publicadas' },
@@ -497,7 +350,7 @@ export default function NewsAdminPage() {
               <label className="label">Destaque</label>
               <FormSelect
                 value={filters.featured}
-                onChange={(e) => setFilters({ ...filters, featured: e.target.value as any })}
+                onChange={(e) => updateFilters({ featured: e.target.value })}
                 options={[
                   { value: 'all', label: 'Todos' },
                   { value: 'featured', label: 'Em destaque' },
@@ -512,7 +365,7 @@ export default function NewsAdminPage() {
               <label className="label">Setor</label>
               <FormSelect
                 value={filters.sector_id}
-                onChange={(e) => setFilters({ ...filters, sector_id: e.target.value, subsector_id: '' })}
+                onChange={(e) => updateFilters({ sector_id: e.target.value, subsector_id: '' })}
                 options={[
                   { value: '', label: 'Todos os setores' },
                   ...sectors.map(sector => ({
@@ -532,7 +385,7 @@ export default function NewsAdminPage() {
                 <label className="label">Subsetor</label>
                 <FormSelect
                   value={filters.subsector_id}
-                  onChange={(e) => setFilters({ ...filters, subsector_id: e.target.value })}
+                  onChange={(e) => updateFilters({ subsector_id: e.target.value })}
                   options={[
                     { value: '', label: 'Todos os subsetores' },
                     ...getFilteredSubsectors().map(subsector => ({
@@ -693,7 +546,7 @@ export default function NewsAdminPage() {
                 
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => setPagination({ ...pagination, currentPage: pagination.currentPage - 1 })}
+                    onClick={() => updatePagination({ currentPage: pagination.currentPage - 1 })}
                     disabled={pagination.currentPage === 1}
                     className="btn btn-ghost btn-sm"
                   >
@@ -705,7 +558,7 @@ export default function NewsAdminPage() {
                   </span>
                   
                   <button
-                    onClick={() => setPagination({ ...pagination, currentPage: pagination.currentPage + 1 })}
+                    onClick={() => updatePagination({ currentPage: pagination.currentPage + 1 })}
                     disabled={pagination.currentPage === pagination.totalPages}
                     className="btn btn-ghost btn-sm"
                   >

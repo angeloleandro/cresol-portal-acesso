@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {
-            return NextResponse.json(
+      return NextResponse.json(
         { error: 'Token de autorização necessário' },
         { status: 401 }
       );
@@ -114,8 +114,6 @@ export async function GET(request: NextRequest) {
         { status: 403 }
       );
     }
-
-    const timestamp = new Date().toISOString();
 
     // Construir queries para notícias de setor e subsetor
     let sectorNews: any[] = [];
@@ -174,6 +172,9 @@ export async function GET(request: NextRequest) {
 
       sectorNews = (sectorData || []).map(news => ({
         ...news,
+        type: 'sector',
+        location_name: (news as any).sectors?.name,
+        location_id: news.sector_id,
       }));
       
       totalCount += sectorCount || 0;
@@ -235,6 +236,10 @@ export async function GET(request: NextRequest) {
 
       subsectorNews = (subsectorData || []).map(news => ({
         ...news,
+        type: 'subsector',
+        location_name: (news as any).subsectors?.name,
+        location_id: news.subsector_id,
+        sector_name: (news as any).subsectors?.sectors?.name,
       }));
       
       totalCount += subsectorCount || 0;
@@ -265,19 +270,40 @@ export async function GET(request: NextRequest) {
     const hasNextPage = filters.page < totalPages;
     const hasPrevPage = filters.page > 1;
 
+    // Calcular estatísticas
+    const published = allNews.filter(n => n.is_published).length;
+    const drafts = allNews.filter(n => !n.is_published).length;
+    const featured = allNews.filter(n => n.is_featured).length;
+
+
     return NextResponse.json({
+      success: true,
       data: {
+        news: paginatedNews,
         pagination: {
+          currentPage: filters.page,
           totalPages,
+          totalCount: actualTotalCount,
+          limit: filters.limit,
           hasNextPage,
           hasPrevPage,
         },
+        stats: {
+          total: actualTotalCount,
+          published,
+          drafts,
+          featured,
+          byType: { 
+            sector: sectorNews.length, 
+            subsector: subsectorNews.length 
+          }
+        },
+        filters: filters,
       }
     });
 
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      const timestamp = new Date().toISOString();
       return NextResponse.json(
         { 
           details: error.issues
@@ -699,7 +725,7 @@ export async function PATCH(request: NextRequest) {
       }
 
       // Criar cópia
-      const { title, summary, content, image_url, sector_id, subsector_id, is_featured } = originalNews;
+      const { title, summary, content, image_url, sector_id, subsector_id } = originalNews;
       const duplicatedData = {
         title: `${title} (Cópia)`,
         summary,

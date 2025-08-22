@@ -1,18 +1,22 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+
+// [DEBUG] Component tracking
+let eventsPageRenderCount = 0;
+const eventsPageInstanceId = `events-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { useAlert } from '@/app/components/alerts';
-import { FormSelect, type SelectOption } from '@/app/components/forms';
+import { FormSelect } from '@/app/components/forms';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { Icon } from '@/app/components/icons/Icon';
 import { StandardizedButton } from '@/app/components/admin';
 import { EventForm } from './components/EventForm';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import DeleteModal from '@/app/components/ui/DeleteModal';
+import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
 
 interface Event {
   id: string;
@@ -59,26 +63,39 @@ interface EventsResponse {
   };
 }
 
-interface FilterState {
-  search: string;
-  type: 'all' | 'sector' | 'subsector';
-  status: 'all' | 'published' | 'draft';
-  featured: 'all' | 'featured' | 'not_featured';
-  period: 'all' | 'upcoming' | 'past';
-  page: number;
-  limit: number;
-  order_by: 'start_date' | 'created_at' | 'updated_at' | 'title';
-  order_direction: 'asc' | 'desc';
-}
-
 export default function EventsPage() {
-  const router = useRouter();
+  // [DEBUG] Component render tracking
+  eventsPageRenderCount++;
+  console.log(`[DEBUG-COMPONENT] EventsPage - Render ${eventsPageRenderCount}:`, {
+    instanceId: eventsPageInstanceId,
+    renderCount: eventsPageRenderCount,
+    timestamp: new Date().toISOString(),
+    stackTrace: new Error().stack?.split('\n').slice(1, 4)
+  });
+
   const alert = useAlert();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [stats, setStats] = useState<any>(null);
-  const [pagination, setPagination] = useState<any>(null);
+  const { user, loading: authLoading } = useAdminAuth();
+  const { 
+    data: events, 
+    loading, 
+    stats, 
+    pagination, 
+    filters, 
+    updateFilters, 
+    updatePagination, 
+    reload 
+  } = useAdminData<Event>({
+    endpoint: 'events',
+    initialFilters: {
+      search: '',
+      type: 'all',
+      status: 'all',
+      featured: 'all',
+      period: 'all'
+    },
+    debounceMs: 500
+  });
+
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Modal de exclusão
@@ -90,129 +107,7 @@ export default function EventsPage() {
     event: null as Event | null
   });
 
-  const [filters, setFilters] = useState<FilterState>({
-    search: '',
-    type: 'all',
-    status: 'all',
-    featured: 'all',
-    period: 'all',
-    page: 1,
-    limit: 20,
-    order_by: 'start_date',
-    order_direction: 'asc'
-  });
-
-  const checkAuth = useCallback(async () => {
-    try {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-
-      // Verificar se é admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      if (!profile || profile.role !== 'admin') {
-        alert.showError('Acesso negado', 'Apenas administradores gerais podem acessar esta página');
-        router.replace('/admin');
-        return;
-      }
-
-      setUser(data.user);
-    } catch (error) {
-      console.error('Erro na verificação de auth:', error);
-      router.replace('/login');
-    }
-  }, [router, alert]);
-
-  const loadInitialData = async () => {
-    try {
-      // Dados iniciais podem ser carregados aqui se necessário
-      setLoading(false);
-    } catch (error) {
-      console.error('Erro ao carregar dados iniciais:', error);
-      setLoading(false);
-    }
-  };
-
-  const fetchEvents = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      // Não setar loading se já temos dados (evita piscagem)
-      if (events.length === 0) {
-        setLoading(true);
-      }
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        router.replace('/login');
-        return;
-      }
-
-      // Construir parâmetros de busca
-      const searchParams = new URLSearchParams();
-      
-      if (filters.search) searchParams.set('search', filters.search);
-      if (filters.type !== 'all') searchParams.set('type', filters.type);
-      if (filters.status !== 'all') searchParams.set('status', filters.status);
-      if (filters.featured !== 'all') searchParams.set('featured', filters.featured);
-      if (filters.period !== 'all') searchParams.set('period', filters.period);
-      
-      searchParams.set('page', filters.page.toString());
-      searchParams.set('limit', filters.limit.toString());
-
-      const response = await fetch(`/api/admin/events?${searchParams.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao carregar eventos');
-      }
-
-      const result = await response.json();
-
-      if (result.success) {
-        setEvents(result.data.events);
-        setStats(result.data.stats);
-        setPagination(result.data.pagination);
-      } else {
-        throw new Error(result.error || 'Erro desconhecido');
-      }
-    } catch (error: any) {
-      console.error('Erro ao carregar eventos:', error);
-      alert.showError('Erro', error.message || 'Erro ao carregar eventos');
-    } finally {
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, filters.search, filters.type, filters.status, filters.featured, filters.period, filters.page, filters.limit]);
-
-  // Verificar autenticação e permissões
-  useEffect(() => {
-    const initAuth = async () => {
-      await checkAuth();
-      loadInitialData();
-    };
-    initAuth();
-  }, [checkAuth]);
-
-  // Carregar eventos quando filtros mudarem
-  useEffect(() => {
-    if (user) {
-      fetchEvents();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, user]);
+  // Não é necessário mais lógica de carregamento, tudo é gerenciado pelos hooks
 
   const handleDeleteClick = (event: Event) => {
     deleteModal.openDeleteModal(event, event.title);
@@ -248,7 +143,7 @@ export default function EventsPage() {
 
       if (result.success) {
         alert.showSuccess('Sucesso', 'Evento excluído com sucesso');
-        fetchEvents(); // Recarregar lista
+        reload(); // Recarregar lista
       } else {
         throw new Error(result.error || 'Erro desconhecido');
       }
@@ -294,7 +189,7 @@ export default function EventsPage() {
           'Sucesso',
           `Evento ${action === 'publish' ? 'publicado' : 'despublicado'} com sucesso`
         );
-        fetchEvents(); // Recarregar lista
+        reload(); // Recarregar lista
       } else {
         throw new Error(result.error || 'Erro desconhecido');
       }
@@ -340,7 +235,7 @@ export default function EventsPage() {
           'Sucesso',
           `Evento ${action === 'feature' ? 'marcado como destaque' : 'removido dos destaques'} com sucesso`
         );
-        fetchEvents(); // Recarregar lista
+        reload(); // Recarregar lista
       } else {
         throw new Error(result.error || 'Erro desconhecido');
       }
@@ -382,7 +277,7 @@ export default function EventsPage() {
 
       if (result.success) {
         alert.showSuccess('Sucesso', 'Evento duplicado com sucesso');
-        fetchEvents(); // Recarregar lista
+        reload(); // Recarregar lista
       } else {
         throw new Error(result.error || 'Erro desconhecido');
       }
@@ -402,16 +297,12 @@ export default function EventsPage() {
   };
 
   const resetFilters = () => {
-    setFilters({
+    updateFilters({
       search: '',
       type: 'all',
       status: 'all',
       featured: 'all',
-      period: 'all',
-      page: 1,
-      limit: 20,
-      order_by: 'start_date',
-      order_direction: 'asc'
+      period: 'all'
     });
   };
 
@@ -571,7 +462,7 @@ export default function EventsPage() {
                   type="text"
                   placeholder="Título ou descrição..."
                   value={filters.search}
-                  onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value, page: 1 }))}
+                  onChange={(e) => updateFilters({ search: e.target.value })}
                   className="input pl-10"
                 />
               </div>
@@ -582,7 +473,7 @@ export default function EventsPage() {
               <label className="label">Tipo</label>
               <FormSelect
                 value={filters.type}
-                onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value as any, page: 1 }))}
+                onChange={(e) => updateFilters({ type: e.target.value })}
                 options={[
                   { value: 'all', label: 'Todos' },
                   { value: 'sector', label: 'Setor' },
@@ -597,7 +488,7 @@ export default function EventsPage() {
               <label className="label">Status</label>
               <FormSelect
                 value={filters.status}
-                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value as any, page: 1 }))}
+                onChange={(e) => updateFilters({ status: e.target.value })}
                 options={[
                   { value: 'all', label: 'Todos' },
                   { value: 'published', label: 'Publicados' },
@@ -612,7 +503,7 @@ export default function EventsPage() {
               <label className="label">Período</label>
               <FormSelect
                 value={filters.period}
-                onChange={(e) => setFilters(prev => ({ ...prev, period: e.target.value as any, page: 1 }))}
+                onChange={(e) => updateFilters({ period: e.target.value })}
                 options={[
                   { value: 'all', label: 'Todos' },
                   { value: 'upcoming', label: 'Próximos' },
@@ -627,7 +518,7 @@ export default function EventsPage() {
               <label className="label">Destaque</label>
               <FormSelect
                 value={filters.featured}
-                onChange={(e) => setFilters(prev => ({ ...prev, featured: e.target.value as any, page: 1 }))}
+                onChange={(e) => updateFilters({ featured: e.target.value })}
                 options={[
                   { value: 'all', label: 'Todos' },
                   { value: 'featured', label: 'Em destaque' },
@@ -846,10 +737,7 @@ export default function EventsPage() {
                 variant="secondary"
                 size="sm"
                 icon={<Icon name="chevron-left" className="h-4 w-4" />}
-                onClick={() => setFilters(prev => ({ 
-                  ...prev, 
-                  page: Math.max(1, prev.page - 1) 
-                }))}
+                onClick={() => updatePagination({ currentPage: Math.max(1, pagination.currentPage - 1) })}
                 disabled={pagination.currentPage <= 1 || loading}
               >
                 Anterior
@@ -859,10 +747,7 @@ export default function EventsPage() {
                 variant="secondary"
                 size="sm"
                 icon={<Icon name="chevron-right" className="h-4 w-4" />}
-                onClick={() => setFilters(prev => ({ 
-                  ...prev, 
-                  page: Math.min(pagination.totalPages, prev.page + 1) 
-                }))}
+                onClick={() => updatePagination({ currentPage: Math.min(pagination.totalPages, pagination.currentPage + 1) })}
                 disabled={pagination.currentPage >= pagination.totalPages || loading}
               >
                 Próxima
@@ -877,7 +762,7 @@ export default function EventsPage() {
         event={eventModal.event}
         isOpen={eventModal.isOpen}
         onClose={handleCloseEventModal}
-        onSuccess={fetchEvents}
+        onSuccess={reload}
       />
 
       {/* Modal de Exclusão */}

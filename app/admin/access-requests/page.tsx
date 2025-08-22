@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAlert } from '@/app/components/alerts';
@@ -43,31 +43,33 @@ export default function AccessRequests() {
   const { showSuccess, showError, showWarning, users } = useAlert();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [allRequests, setAllRequests] = useState<AccessRequest[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
   const [editData, setEditData] = useState<Record<string, EditableAccessData>>({});
+  const mountedRef = useRef<boolean>(true);
 
-  const fetchRequests = useCallback(async () => {
-    setLoading(true);
+  // Carregar TODOS os requests uma única vez
+  const fetchAllRequests = useCallback(async () => {
+    if (!isAdmin) return;
     
-    let query = supabase
+    if (mountedRef.current) {
+      setLoading(true);
+    }
+
+    const { data, error } = await supabase
       .from('access_requests')
       .select('*')
       .order('created_at', { ascending: false });
     
-    if (statusFilter !== 'all') {
-      query = query.eq('status', statusFilter);
-    }
-    
-    const { data, error } = await query;
+    if (!mountedRef.current) return;
     
     if (error) {
       console.error('Erro ao buscar solicitações:', error);
     } else {
-      setRequests(data || []);
+      setAllRequests(data || []);
       // Preencher dados editáveis, incluindo o email
       const editObj: Record<string, EditableAccessData> = {};
       (data || []).forEach((req: AccessRequest) => {
@@ -81,8 +83,10 @@ export default function AccessRequests() {
       setEditData(editObj);
     }
     
-    setLoading(false);
-  }, [statusFilter]);
+    if (mountedRef.current) {
+      setLoading(false);
+    }
+  }, [isAdmin]);
 
   const fetchWorkLocations = async () => {
     const { data, error } = await supabase
@@ -101,15 +105,21 @@ export default function AccessRequests() {
   };
 
   useEffect(() => {
+    mountedRef.current = true;
+    
     const checkUser = async () => {
       const { data: userData } = await supabase.auth.getUser();
+      
+      if (!mountedRef.current) return;
       
       if (!userData.user) {
         router.replace('/login');
         return;
       }
 
-      setUser(userData.user);
+      if (mountedRef.current) {
+        setUser(userData.user);
+      }
 
       // Verificar se o usuário é admin
       const { data: profile } = await supabase
@@ -118,9 +128,12 @@ export default function AccessRequests() {
         .eq('id', userData.user.id)
         .single();
 
+      if (!mountedRef.current) return;
+
       if (profile?.role === 'admin') {
-        setIsAdmin(true);
-        fetchRequests();
+        if (mountedRef.current) {
+          setIsAdmin(true);
+        }
         fetchWorkLocations();
         fetchPositions();
       } else {
@@ -130,13 +143,18 @@ export default function AccessRequests() {
     };
 
     checkUser();
-  }, [router, fetchRequests]);
 
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [router]);
+
+  // Carregar requests quando user for admin
   useEffect(() => {
     if (isAdmin) {
-      fetchRequests();
+      fetchAllRequests();
     }
-  }, [statusFilter, isAdmin, fetchRequests]);
+  }, [isAdmin, fetchAllRequests]);
 
   const handleEditChange = (id: string, field: string, value: string) => {
     setEditData(prev => ({
@@ -199,7 +217,7 @@ export default function AccessRequests() {
         }
       }
       
-      fetchRequests(); // Recarregar a lista para refletir as mudanças
+      fetchAllRequests(); // Recarregar a lista para refletir as mudanças
       users.updated();
 
     } catch (error: any) {
@@ -209,7 +227,7 @@ export default function AccessRequests() {
   };
 
   const handleStatusChange = async (id: string, status: 'approved' | 'rejected') => {
-    const currentRequestOriginalData = requests.find(req => req.id === id);
+    const currentRequestOriginalData = allRequests.find(req => req.id === id);
     const editedRequestUIData = editData[id];
 
     if (!currentRequestOriginalData) {
@@ -289,10 +307,15 @@ export default function AccessRequests() {
         showError('Erro de comunicação', 'Ocorreu um erro ao tentar rejeitar a solicitação.');
       }
     }
-    fetchRequests();
+    fetchAllRequests();
   };
 
-  if (loading && !requests.length) {
+  // Filtrar requests localmente
+  const filteredRequests = statusFilter === 'all' 
+    ? allRequests 
+    : allRequests.filter(req => req.status === statusFilter);
+
+  if (loading && !allRequests.length) {
     return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.loading} />;
   }
 
@@ -342,7 +365,7 @@ export default function AccessRequests() {
           <div className="flex justify-center my-12">
             <UnifiedLoadingSpinner message={LOADING_MESSAGES.loading} size="default" />
           </div>
-        ) : requests.length === 0 ? (
+        ) : filteredRequests.length === 0 ? (
           <div className="bg-white rounded-lg  border border-cresol-gray-light p-8 text-center">
             <p className="text-cresol-gray">Nenhuma solicitação encontrada com os filtros atuais.</p>
           </div>
@@ -365,7 +388,7 @@ export default function AccessRequests() {
                 
                 {/* Lista de requisições */}
                 <div className="divide-y divide-cresol-gray-light">
-                  {requests.map((request) => (
+                  {filteredRequests.map((request) => (
                     <div key={request.id} className="grid grid-cols-6 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
                       {/* Nome & Email */}
                       <div className="col-span-2">
@@ -458,7 +481,7 @@ export default function AccessRequests() {
                             <button
                               onClick={() => {
                                 // Permitir edição mesmo para solicitações já processadas
-                                const currentRequest = requests.find(r => r.id === request.id);
+                                const currentRequest = allRequests.find(r => r.id === request.id);
                                 if (!currentRequest) return;
 
                                 const updatedEditData = { ...editData };
@@ -472,10 +495,10 @@ export default function AccessRequests() {
                                 
                                 // Habilitar campos para edição temporariamente (visual)
                                 const editableRequest = { ...currentRequest, status: 'pending' as 'pending' | 'approved' | 'rejected' };
-                                const updatedRequests = requests.map(r => 
+                                const updatedRequests = allRequests.map(r => 
                                   r.id === request.id ? editableRequest : r
                                 );
-                                setRequests(updatedRequests);
+                                setAllRequests(updatedRequests);
                               }}
                               className="text-xs bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark transition-colors"
                             >

@@ -49,11 +49,23 @@ export async function GET(request: NextRequest) {
       messagesQuery = messagesQuery.eq('is_published', true);
     }
 
+    // Buscar documentos do setor
+    let documentsQuery = supabase
+      .from('sector_documents')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('created_at', { ascending: false });
+
+    if (!includeUnpublished) {
+      documentsQuery = documentsQuery.eq('is_published', true);
+    }
+
     // Executar todas as queries em paralelo
-    const [newsResult, eventsResult, messagesResult] = await Promise.all([
+    const [newsResult, eventsResult, messagesResult, documentsResult] = await Promise.all([
       newsQuery,
       eventsQuery,
-      messagesQuery
+      messagesQuery,
+      documentsQuery
     ]);
 
     // Verificar erros
@@ -66,15 +78,20 @@ export async function GET(request: NextRequest) {
     if (messagesResult.error) {
       console.error('Erro ao buscar mensagens:', messagesResult.error);
     }
+    if (documentsResult.error) {
+      console.error('Erro ao buscar documentos:', documentsResult.error);
+    }
 
     // Calcular contagem de rascunhos
     const newsData = newsResult.data || [];
     const eventsData = eventsResult.data || [];
     const messagesData = messagesResult.data || [];
+    const documentsData = documentsResult.data || [];
 
     const draftNewsCount = newsData.filter(item => !item.is_published).length;
     const draftEventsCount = eventsData.filter(item => !item.is_published).length;
     const draftMessagesCount = messagesData.filter(item => !item.is_published).length;
+    const draftDocumentsCount = documentsData.filter(item => !item.is_published).length;
 
     // Retornar dados mesmo se alguma query falhar
     return NextResponse.json({
@@ -83,9 +100,11 @@ export async function GET(request: NextRequest) {
         news: newsData,
         events: eventsData,
         messages: messagesData,
+        documents: documentsData,
         draftNewsCount,
         draftEventsCount,
-        draftMessagesCount
+        draftMessagesCount,
+        draftDocumentsCount
       }
     });
 

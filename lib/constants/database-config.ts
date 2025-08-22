@@ -9,12 +9,14 @@ export const TABLES = {
   SECTORS: 'sectors',
   SECTOR_NEWS: 'sector_news',
   SECTOR_EVENTS: 'sector_events',
+  SECTOR_DOCUMENTS: 'sector_documents',
   SECTOR_ADMINS: 'sector_admins',
   
   // Subsector tables
   SUBSECTORS: 'subsectors',
   SUBSECTOR_NEWS: 'subsector_news',
   SUBSECTOR_EVENTS: 'subsector_events',
+  SUBSECTOR_DOCUMENTS: 'subsector_documents',
   SUBSECTOR_SYSTEMS: 'subsector_systems',
   SUBSECTOR_MEMBERS: 'subsector_members',
   

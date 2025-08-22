@@ -8,6 +8,7 @@ interface UseSubsectorDataReturn {
   subsector: Subsector | null;
   events: SubsectorEvent[];
   news: SubsectorNews[];
+  documents: any[];
   messages: any[];
   systems: System[];
   users: User[];
@@ -17,10 +18,12 @@ interface UseSubsectorDataReturn {
   showDrafts: boolean;
   totalDraftEventsCount: number;
   totalDraftNewsCount: number;
+  totalDraftDocumentsCount: number;
   totalDraftMessagesCount: number;
   setShowDrafts: (show: boolean) => void;
   fetchEvents: () => Promise<void>;
   fetchNews: () => Promise<void>;
+  fetchDocuments: () => Promise<void>;
   fetchMessages: () => Promise<void>;
   fetchSystems: () => Promise<void>;
   fetchUsers: () => Promise<void>;
@@ -34,6 +37,7 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
   const [subsector, setSubsector] = useState<Subsector | null>(null);
   const [events, setEvents] = useState<SubsectorEvent[]>([]);
   const [news, setNews] = useState<SubsectorNews[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [systems, setSystems] = useState<System[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -43,6 +47,7 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
   const [showDrafts, setShowDrafts] = useState(true);
   const [totalDraftEventsCount, setTotalDraftEventsCount] = useState(0);
   const [totalDraftNewsCount, setTotalDraftNewsCount] = useState(0);
+  const [totalDraftDocumentsCount, setTotalDraftDocumentsCount] = useState(0);
   const [totalDraftMessagesCount, setTotalDraftMessagesCount] = useState(0);
 
   const fetchSubsector = useCallback(async () => {
@@ -143,6 +148,39 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
     }
   }, [subsectorId, supabase, showDrafts]);
 
+  const fetchDocuments = useCallback(async () => {
+    try {
+      const { data: allDocuments, error } = await supabase
+        .from('subsector_documents')
+        .select('id, title, description, file_url, file_type, file_size, is_published, is_featured, created_at, updated_at, subsector_id')
+        .eq('subsector_id', subsectorId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+      
+      if (allDocuments) {
+        // Calcular total de rascunhos
+        const totalDrafts = allDocuments.filter(d => !d.is_published).length;
+        setTotalDraftDocumentsCount(totalDrafts);
+        
+        // Aplicar filtro de publicação baseado em showDrafts
+        const filteredDocuments = showDrafts 
+          ? allDocuments 
+          : allDocuments.filter(d => d.is_published);
+        
+        setDocuments(filteredDocuments);
+      } else {
+        setDocuments([]);
+        setTotalDraftDocumentsCount(0);
+      }
+    } catch (error) {
+      setDocuments([]);
+      setTotalDraftDocumentsCount(0);
+    }
+  }, [subsectorId, supabase, showDrafts]);
+
   const fetchMessages = useCallback(async () => {
     try {
       const { data: allMessages, error } = await supabase
@@ -233,6 +271,7 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
       fetchSubsector(),
       fetchEvents(),
       fetchNews(),
+      fetchDocuments(),
       fetchMessages(),
       fetchSystems(),
       fetchUsers(),
@@ -240,7 +279,7 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
     ]);
     
     setLoading(false);
-  }, [fetchSubsector, fetchEvents, fetchNews, fetchMessages, fetchSystems, fetchUsers, fetchWorkLocations]);
+  }, [fetchSubsector, fetchEvents, fetchNews, fetchDocuments, fetchMessages, fetchSystems, fetchUsers, fetchWorkLocations]);
 
   useEffect(() => {
     if (subsectorId) {
@@ -252,6 +291,7 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
     subsector,
     events,
     news,
+    documents,
     messages,
     systems,
     users,
@@ -261,10 +301,12 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
     showDrafts,
     totalDraftEventsCount,
     totalDraftNewsCount,
+    totalDraftDocumentsCount,
     totalDraftMessagesCount,
     setShowDrafts,
     fetchEvents,
     fetchNews,
+    fetchDocuments,
     fetchMessages,
     fetchSystems,
     fetchUsers,

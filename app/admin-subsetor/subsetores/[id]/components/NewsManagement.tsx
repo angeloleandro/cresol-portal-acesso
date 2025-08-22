@@ -10,7 +10,7 @@ import { SubsectorNews } from '../types/subsector.types';
 import { formatDate } from '../utils/dateFormatters';
 import { useImageUpload } from '../hooks/useImageUpload';
 import { ImageUploadCropper } from './ImageUploadCropper';
-import { ToggleDraftsButton } from '@/app/admin/sectors/[id]/components/ToggleDraftsButton';
+import { ToggleDraftsButton } from './ToggleDraftsButton';
 
 interface NewsManagementProps {
   subsectorId: string;

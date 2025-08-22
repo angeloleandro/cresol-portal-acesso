@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -13,6 +13,7 @@ import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import Breadcrumbs from '../components/Breadcrumbs';
 import Footer from '../components/Footer';
 import { Icon } from '../components/icons/Icon';
+import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 
 interface EventItem {
   id: string;
@@ -221,6 +222,22 @@ function EventosPageContent() {
     return `${formatDate(startDate)} - ${formatDate(endDate)}`;
   };
 
+  // Opções para o select de setores (ChakraSelect)
+  const sectorOptions = useMemo((): ChakraSelectOption[] => [
+    { value: 'all', label: 'Todos os setores' },
+    ...sectors.map(sector => ({
+      value: sector.id,
+      label: sector.name
+    }))
+  ], [sectors]);
+
+  // Opções para o select de ordenação (ChakraSelect)
+  const sortOptions = useMemo((): ChakraSelectOption[] => [
+    { value: 'date', label: 'Data' },
+    { value: 'title', label: 'Título' },
+    { value: 'sector', label: 'Setor' }
+  ], []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -319,30 +336,27 @@ function EventosPageContent() {
                   </div>
 
                   {/* Filtro por Setor */}
-                  <select
+                  <ChakraSelect
+                    options={sectorOptions}
                     value={sectorFilter}
-                    onChange={(e) => setSectorFilter(e.target.value)}
-                    className="input"
-                  >
-                    <option value="all">Todos os setores</option>
-                    {sectors.map((sector) => (
-                      <option key={sector.id} value={sector.id}>
-                        {sector.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(value) => setSectorFilter(value as string)}
+                    placeholder="Todos os setores"
+                    size="md"
+                    variant="outline"
+                    fullWidth={false}
+                  />
 
                   {/* Ordenação */}
                   <div className="flex space-x-2">
-                    <select
+                    <ChakraSelect
+                      options={sortOptions}
                       value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as any)}
-                      className="input"
-                    >
-                      <option value="date">Data</option>
-                      <option value="title">Título</option>
-                      <option value="sector">Setor</option>
-                    </select>
+                      onChange={(value) => setSortBy(value as any)}
+                      placeholder="Ordenar por"
+                      size="md"
+                      variant="outline"
+                      fullWidth={false}
+                    />
                     
                     <button
                       onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}

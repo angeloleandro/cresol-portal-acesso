@@ -5,6 +5,7 @@
 /* Import estilos customizados */
 @import './styles/minimalist-ui.css';
 @import './styles/forms.css';
+@import './styles/nextui-overrides.css';
 @import './globals-fixes.css';
 
 
@@ -3160,3 +3161,9 @@ li:not(:first-child)::before,
 [data-scope="card"][data-part="root"][data-variant="outline"]:hover {
   border-color: rgb(229 231 235 / 0.7) !important; /* hover:border-gray-200/70 */
 }
+
+/* ================================ */
+/* Chakra UI v3 Select - Bordas e estilos padrão */
+/* ================================ */
+
+/* Chakra Select - Estilos removidos para evitar duplicação com inline styles */

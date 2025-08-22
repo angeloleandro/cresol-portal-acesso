@@ -13,7 +13,7 @@ import { CRESOL_COLORS } from '@/lib/design-tokens';
 interface QuickResult {
   id: string;
   title: string;
-  type: 'system' | 'event' | 'news' | 'sector' | 'subsector' | 'message' | 'video' | 'gallery' | 'collection';
+  type: 'system' | 'event' | 'news' | 'sector' | 'subsector' | 'message' | 'video' | 'gallery' | 'collection' | 'document';
   description?: string;
   url: string;
   icon?: string;
@@ -29,7 +29,7 @@ interface GlobalSearchProps {
 
 export default function GlobalSearch({ 
   className = '',
-  placeholder = 'Buscar sistemas, eventos, notícias, setores, mensagens...',
+  placeholder = 'Buscar sistemas, eventos, notícias, documentos, setores, mensagens...',
   showAdvancedButton = true,
   autoFocus = false,
   compact = false
@@ -77,6 +77,22 @@ export default function GlobalSearch({
           .eq('is_published', true)
           .or(`title.ilike.%${query}%,content.ilike.%${query}%,summary.ilike.%${query}%`)
           .limit(2),
+        
+        // Buscar documentos de setores (limite 1)
+        supabase
+          .from('sector_documents')
+          .select('id, title, description')
+          .eq('is_published', true)
+          .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
+          .limit(1),
+        
+        // Buscar documentos de subsetores (limite 1)
+        supabase
+          .from('subsector_documents')
+          .select('id, title, description')
+          .eq('is_published', true)
+          .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
+          .limit(1),
         
         // Buscar setores (limite 2)
         supabase
@@ -167,9 +183,31 @@ export default function GlobalSearch({
         })));
       }
 
-      // Processar mensagens
+      // Processar documentos de setores
       if (searchResults[5].status === 'fulfilled' && searchResults[5].value.data) {
-        results.push(...searchResults[5].value.data.map((message: any) => ({
+        results.push(...searchResults[5].value.data.map((document: any) => ({
+          id: document.id,
+          title: document.title,
+          type: 'document' as const,
+          description: document.description,
+          url: `/documentos/${document.id}`
+        })));
+      }
+
+      // Processar documentos de subsetores
+      if (searchResults[6].status === 'fulfilled' && searchResults[6].value.data) {
+        results.push(...searchResults[6].value.data.map((document: any) => ({
+          id: document.id,
+          title: document.title,
+          type: 'document' as const,
+          description: document.description,
+          url: `/documentos/${document.id}`
+        })));
+      }
+
+      // Processar mensagens
+      if (searchResults[7].status === 'fulfilled' && searchResults[7].value.data) {
+        results.push(...searchResults[7].value.data.map((message: any) => ({
           id: message.id,
           title: message.title,
           type: 'message' as const,
@@ -179,8 +217,8 @@ export default function GlobalSearch({
       }
 
       // Processar vídeos
-      if (searchResults[6].status === 'fulfilled' && searchResults[6].value.data) {
-        results.push(...searchResults[6].value.data.map((video: any) => ({
+      if (searchResults[8].status === 'fulfilled' && searchResults[8].value.data) {
+        results.push(...searchResults[8].value.data.map((video: any) => ({
           id: video.id,
           title: video.title,
           type: 'video' as const,
@@ -377,7 +415,8 @@ export default function GlobalSearch({
       message: <Icon name="chat-line" className="h-4 w-4" />,
       video: <Icon name="play" className="h-4 w-4" />,
       gallery: <Icon name="image" className="h-4 w-4" />,
-      collection: <Icon name="folder" className="h-4 w-4" />
+      collection: <Icon name="folder" className="h-4 w-4" />,
+      document: <Icon name="file-text" className="h-4 w-4" />
     };
     return icons[type];
   };
@@ -392,7 +431,8 @@ export default function GlobalSearch({
       message: 'text-indigo-600',
       video: 'text-red-600',
       gallery: 'text-pink-600',
-      collection: 'text-teal-600'
+      collection: 'text-teal-600',
+      document: 'text-gray-600'
     };
     return colors[type];
   };
@@ -407,7 +447,8 @@ export default function GlobalSearch({
       message: 'Mensagem',
       video: 'Vídeo',
       gallery: 'Galeria',
-      collection: 'Coleção'
+      collection: 'Coleção',
+      document: 'Documento'
     };
     return labels[type];
   };

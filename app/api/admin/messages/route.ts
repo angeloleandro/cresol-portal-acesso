@@ -104,7 +104,6 @@ export const GET = adminCORS(async (request: NextRequest) => {
       );
     }
 
-
     // Construir queries para mensagens de setor e subsetor
     let sectorMessages: any[] = [];
     let subsectorMessages: any[] = [];
@@ -282,6 +281,10 @@ export const GET = adminCORS(async (request: NextRequest) => {
     const hasNextPage = filters.page < totalPages;
     const hasPrevPage = filters.page > 1;
 
+    // Calcular estatísticas
+    const published = allMessages.filter(m => m.is_published).length;
+    const drafts = allMessages.filter(m => !m.is_published).length;
+
     return NextResponse.json({
       success: true,
       data: {
@@ -293,6 +296,15 @@ export const GET = adminCORS(async (request: NextRequest) => {
           limit: filters.limit,
           hasNextPage,
           hasPrevPage,
+        },
+        stats: {
+          total: actualTotalCount,
+          published,
+          drafts,
+          byType: { 
+            sector: sectorMessages.length, 
+            subsector: subsectorMessages.length 
+          }
         },
         filters: filters,
       }

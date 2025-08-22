@@ -16,6 +16,7 @@ const BannerCarousel = lazy(() => import('@/app/components/BannerCarousel'));
 const NoticiasDestaque = lazy(() => import('../components/NoticiasDestaque'));
 const EventosDestaque = lazy(() => import('../components/EventosDestaque'));
 const MensagensDestaque = lazy(() => import('../components/MensagensDestaque'));
+const DocumentosDestaque = lazy(() => import('../components/DocumentosDestaque'));
 const VideoGallery = lazy(() => import('@/app/components/VideoGallery'));
 const ImageGalleryHome = lazy(() => import('../components/ImageGalleryHome'));
 const Footer = lazy(() => import('../components/Footer'));
@@ -140,6 +141,9 @@ export default function Home() {
               </InlineSuspense>
               <InlineSuspense message="Carregando mensagens...">
                 <MensagensDestaque compact limit={3} />
+              </InlineSuspense>
+              <InlineSuspense message="Carregando documentos...">
+                <DocumentosDestaque compact limit={3} />
               </InlineSuspense>
               <InlineSuspense message="Carregando sistemas...">
                 <SistemasLateral />

@@ -42,6 +42,20 @@ export interface SubsectorNews {
   subsector_id: string;
 }
 
+export interface SubsectorDocument {
+  id: string;
+  title: string;
+  description: string | null;
+  file_url: string;
+  file_type: string | null;
+  file_size: number | null;
+  is_published: boolean;
+  is_featured: boolean;
+  created_at: string;
+  updated_at: string;
+  subsector_id: string;
+}
+
 export interface System {
   id: string;
   name: string;
@@ -102,7 +116,7 @@ export interface CropArea {
   height: number;
 }
 
-export type TabType = 'events' | 'news' | 'systems' | 'groups' | 'messages';
+export type TabType = 'events' | 'news' | 'documents' | 'systems' | 'groups' | 'messages';
 
 // Interface para dados do grupo no modal
 export interface GroupData {

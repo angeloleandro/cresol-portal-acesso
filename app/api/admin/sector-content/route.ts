@@ -113,9 +113,27 @@ export async function GET(request: NextRequest) {
           .order('start_date', { ascending: false });
         break;
         
+      case 'sector_documents':
+        tableName = 'sector_documents';
+        query = supabase
+          .from('sector_documents')
+          .select('*')
+          .eq('sector_id', sectorId)
+          .order('created_at', { ascending: false });
+        break;
+        
+      case 'subsector_documents':
+        tableName = 'subsector_documents';
+        query = supabase
+          .from('subsector_documents')
+          .select('*')
+          .eq('subsector_id', subsectorId)
+          .order('created_at', { ascending: false });
+        break;
+        
       default:
         return NextResponse.json(
-          { error: 'Tipo inválido', supportedTypes: ['sector_news', 'sector_events', 'subsector_news', 'subsector_events'] },
+          { error: 'Tipo inválido', supportedTypes: ['sector_news', 'sector_events', 'subsector_news', 'subsector_events', 'sector_documents', 'subsector_documents'] },
           { status: HTTP_STATUS.BAD_REQUEST }
         );
     }
@@ -259,6 +277,14 @@ export async function POST(request: NextRequest) {
       } else {
         mappedType = CONTENT_TYPES.sectorEvents; // default para sector_events
       }
+    } else if (type === 'documents') {
+      if (data.sector_id || action === 'sector') {
+        mappedType = CONTENT_TYPES.sectorDocuments; // 'sector_documents'
+      } else if (data.subsector_id) {
+        mappedType = CONTENT_TYPES.subsectorDocuments; // 'subsector_documents'
+      } else {
+        mappedType = CONTENT_TYPES.sectorDocuments; // default para sector_documents
+      }
     } else if (type === 'message' || type === 'messages') {
       if (data.sector_id || action === 'sector') {
         mappedType = 'sector_messages';
@@ -299,6 +325,24 @@ export async function POST(request: NextRequest) {
               title: !data.title,
               description: !data.description,
               start_date: !data.start_date
+            },
+            receivedType: type,
+            mappedType: mappedType
+          },
+          { status: HTTP_STATUS.BAD_REQUEST }
+        );
+      }
+    }
+    
+    // Validar campos obrigatórios para documentos
+    if (mappedType === CONTENT_TYPES.sectorDocuments || mappedType === CONTENT_TYPES.subsectorDocuments) {
+      if (!data.title || !data.file_url) {
+        return NextResponse.json(
+          { 
+            error: API_ERROR_MESSAGES.missingFields,
+            missing: {
+              title: !data.title,
+              file_url: !data.file_url
             },
             receivedType: type,
             mappedType: mappedType
@@ -397,10 +441,36 @@ export async function POST(request: NextRequest) {
         ({ result, error } = updateSubsectorNewsResult);
         break;
         
+      case CONTENT_TYPES.sectorDocuments:
+        ({ data: result, error } = await adminClient
+          .from('sector_documents')
+          .insert(enrichedData)
+          .select()
+          .single());
+        if (result) {
+        }
+        break;
+        
+      case CONTENT_TYPES.subsectorDocuments:
+        ({ data: result, error } = await adminClient
+          .from('subsector_documents')
+          .insert(enrichedData)
+          .select()
+          .single());
+        if (result) {
+        }
+        break;
+        
       case CONTENT_TYPES.updateEvent:
         const updateEventResult = await handleUpdateOperation(adminClient, 'sector_events', enrichedData);
         if (updateEventResult instanceof NextResponse) return updateEventResult;
         ({ result, error } = updateEventResult);
+        break;
+        
+      case CONTENT_TYPES.updateDocument:
+        const updateDocumentResult = await handleUpdateOperation(adminClient, 'sector_documents', enrichedData);
+        if (updateDocumentResult instanceof NextResponse) return updateDocumentResult;
+        ({ result, error } = updateDocumentResult);
         break;
         
       case 'sector_messages':
@@ -531,6 +601,12 @@ export async function PUT(request: NextRequest) {
       } else if (subsectorId) {
         realType = CONTENT_TYPES.subsectorEvents; // 'subsector_events'
       }
+    } else if (type === 'documents') {
+      if (sectorId) {
+        realType = CONTENT_TYPES.sectorDocuments; // 'sector_documents'
+      } else if (subsectorId) {
+        realType = CONTENT_TYPES.subsectorDocuments; // 'subsector_documents'
+      }
     } else if (type === 'message' || type === 'messages') {
       if (sectorId) {
         realType = 'sector_messages';
@@ -541,7 +617,8 @@ export async function PUT(request: NextRequest) {
     
     // Se o tipo já é completo (vem direto do frontend), manter como está
     if (type === CONTENT_TYPES.sectorNews || type === CONTENT_TYPES.sectorEvents || 
-        type === CONTENT_TYPES.subsectorNews || type === CONTENT_TYPES.subsectorEvents) {
+        type === CONTENT_TYPES.subsectorNews || type === CONTENT_TYPES.subsectorEvents ||
+        type === CONTENT_TYPES.sectorDocuments || type === CONTENT_TYPES.subsectorDocuments) {
       realType = type;
     }
     
@@ -686,6 +763,28 @@ export async function PUT(request: NextRequest) {
       case CONTENT_TYPES.subsectorEvents:
         ({ data: result, error } = await putAdminClient
           .from('subsector_events')
+          .update(updateData)
+          .eq('id', realId)
+          .select()
+          .single());
+        if (result) {
+        }
+        break;
+        
+      case CONTENT_TYPES.sectorDocuments:
+        ({ data: result, error } = await putAdminClient
+          .from('sector_documents')
+          .update(updateData)
+          .eq('id', realId)
+          .select()
+          .single());
+        if (result) {
+        }
+        break;
+        
+      case CONTENT_TYPES.subsectorDocuments:
+        ({ data: result, error } = await putAdminClient
+          .from('subsector_documents')
           .update(updateData)
           .eq('id', realId)
           .select()
@@ -844,6 +943,24 @@ export async function DELETE(request: NextRequest) {
       case CONTENT_TYPES.subsectorEvents:
         ({ error } = await deleteAdminClient
           .from('subsector_events')
+          .delete()
+          .eq('id', id));
+        if (!error) {
+        }
+        break;
+        
+      case CONTENT_TYPES.sectorDocuments:
+        ({ error } = await deleteAdminClient
+          .from('sector_documents')
+          .delete()
+          .eq('id', id));
+        if (!error) {
+        }
+        break;
+        
+      case CONTENT_TYPES.subsectorDocuments:
+        ({ error } = await deleteAdminClient
+          .from('subsector_documents')
           .delete()
           .eq('id', id));
         if (!error) {

@@ -120,6 +120,15 @@ export default function Footer() {
               <li className="flex items-center">
                 <div className="w-1.5 h-1.5 bg-white rounded-full mr-3 flex-shrink-0"></div>
                 <Link 
+                  href="/documentos"
+                  className="text-white hover:text-white/80 transition-colors text-sm"
+                >
+                  Documentos
+                </Link>
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                <Link 
                   href="/eventos"
                   className="text-white hover:text-white/80 transition-colors text-sm"
                 >

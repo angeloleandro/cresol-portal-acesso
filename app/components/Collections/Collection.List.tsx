@@ -15,6 +15,7 @@ import {
   SORT_LABELS, 
   COLLECTION_TYPE_LABELS 
 } from '@/lib/constants/collections';
+import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 
 const CollectionList: React.FC<CollectionListProps> = ({
   limit,
@@ -54,6 +55,30 @@ const CollectionList: React.FC<CollectionListProps> = ({
     
     return result;
   }, [collections, limit]);
+
+  // Opções para o select de tipo (ChakraSelect)
+  const typeOptions = useMemo((): ChakraSelectOption[] => [
+    { value: 'all', label: 'Todos os tipos' },
+    { value: 'mixed', label: COLLECTION_TYPE_LABELS.mixed },
+    { value: 'images', label: COLLECTION_TYPE_LABELS.images },
+    { value: 'videos', label: COLLECTION_TYPE_LABELS.videos }
+  ], []);
+
+  // Opções para o select de status (ChakraSelect)
+  const statusOptions = useMemo((): ChakraSelectOption[] => [
+    { value: 'all', label: 'Todos' },
+    { value: 'active', label: 'Ativos' },
+    { value: 'inactive', label: 'Inativos' }
+  ], []);
+
+  // Opções para o select de ordenação (ChakraSelect)
+  const sortOptions = useMemo((): ChakraSelectOption[] => [
+    { value: 'order_index-asc', label: SORT_LABELS['order_index-asc'] },
+    { value: 'name-asc', label: SORT_LABELS['name-asc'] },
+    { value: 'name-desc', label: SORT_LABELS['name-desc'] },
+    { value: 'created_at-desc', label: SORT_LABELS['created_at-desc'] },
+    { value: 'created_at-asc', label: SORT_LABELS['created_at-asc'] }
+  ], []);
 
   // Handle search
   const handleSearchChange = (search: string) => {
@@ -154,37 +179,30 @@ const CollectionList: React.FC<CollectionListProps> = ({
 
             {/* Type Filter */}
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo
-              </label>
-              <select
-                id="type"
+              <ChakraSelect
+                label="Tipo"
+                options={typeOptions}
                 value={filters.type}
-                onChange={(e) => handleTypeFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="all">Todos os tipos</option>
-                <option value="mixed">{COLLECTION_TYPE_LABELS.mixed}</option>
-                <option value="images">{COLLECTION_TYPE_LABELS.images}</option>
-                <option value="videos">{COLLECTION_TYPE_LABELS.videos}</option>
-              </select>
+                onChange={(value) => handleTypeFilter(value as string)}
+                placeholder="Todos os tipos"
+                size="md"
+                variant="outline"
+                fullWidth
+              />
             </div>
 
             {/* Status Filter */}
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                id="status"
+              <ChakraSelect
+                label="Status"
+                options={statusOptions}
                 value={filters.status}
-                onChange={(e) => handleStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="all">Todos</option>
-                <option value="active">Ativos</option>
-                <option value="inactive">Inativos</option>
-              </select>
+                onChange={(value) => handleStatusFilter(value as string)}
+                placeholder="Todos"
+                size="md"
+                variant="outline"
+                fullWidth
+              />
             </div>
           </div>
 
@@ -192,20 +210,18 @@ const CollectionList: React.FC<CollectionListProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-gray-700">Ordenar por:</label>
-              <select
+              <ChakraSelect
+                options={sortOptions}
                 value={`${filters.sort_by}-${filters.sort_order}`}
-                onChange={(e) => {
-                  const [sortBy, sortOrder] = e.target.value.split('-');
+                onChange={(value) => {
+                  const [sortBy, sortOrder] = (value as string).split('-');
                   handleSortChange(sortBy, sortOrder as 'asc' | 'desc');
                 }}
-                className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="order_index-asc">{SORT_LABELS['order_index-asc']}</option>
-                <option value="name-asc">{SORT_LABELS['name-asc']}</option>
-                <option value="name-desc">{SORT_LABELS['name-desc']}</option>
-                <option value="created_at-desc">{SORT_LABELS['created_at-desc']}</option>
-                <option value="created_at-asc">{SORT_LABELS['created_at-asc']}</option>
-              </select>
+                placeholder="Ordenar por"
+                size="sm"
+                variant="outline"
+                fullWidth={false}
+              />
             </div>
 
             {/* Results count */}

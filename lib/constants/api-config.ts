@@ -63,6 +63,11 @@ export const API_ENDPOINTS = {
     videos: '/api/admin/videos',
     videosUpload: '/api/admin/videos/upload',
     systemLinks: '/api/admin/system-links',
+    documents: '/api/admin/documents',
+    news: '/api/admin/news',
+    events: '/api/admin/events',
+    messages: '/api/admin/messages',
+    messageGroups: '/api/admin/message-groups',
     
     // Collections
     collections: '/api/admin/collections',
@@ -152,10 +157,12 @@ export const CONTENT_TYPES = {
   // Sector content
   sectorNews: 'sector_news',
   sectorEvents: 'sector_events',
+  sectorDocuments: 'sector_documents',
   
   // Subsector content
   subsectorNews: 'subsector_news',
   subsectorEvents: 'subsector_events',
+  subsectorDocuments: 'subsector_documents',
   
   // Actions
   createNews: 'create_news',
@@ -164,6 +171,9 @@ export const CONTENT_TYPES = {
   createEvent: 'create_event',
   updateEvent: 'update_event',
   deleteEvent: 'delete_event',
+  createDocument: 'create_document',
+  updateDocument: 'update_document',
+  deleteDocument: 'delete_document',
   
   // Subsector actions
   updateSubsectorNews: 'update_subsector_news',
@@ -193,6 +203,7 @@ export const API_ERROR_MESSAGES = {
   // Content specific errors
   newsNotFound: 'Notícia não encontrada',
   eventNotFound: 'Evento não encontrado',
+  documentNotFound: 'Documento não encontrado',
   systemNotFound: 'Sistema não encontrado',
   sectorNotFound: 'Setor não encontrado',
   subsectorNotFound: 'Subsetor não encontrado',
@@ -220,6 +231,10 @@ export const API_SUCCESS_MESSAGES = {
   eventUpdated: 'Evento atualizado com sucesso',
   eventDeleted: 'Evento excluído com sucesso',
   
+  documentCreated: 'Documento criado com sucesso',
+  documentUpdated: 'Documento atualizado com sucesso',
+  documentDeleted: 'Documento excluído com sucesso',
+  
   systemCreated: 'Sistema criado com sucesso',
   systemUpdated: 'Sistema atualizado com sucesso',
   systemDeleted: 'Sistema excluído com sucesso',
@@ -246,6 +261,29 @@ export const API_VALIDATION = {
       required: true,
       minLength: 20,
       maxLength: 10000
+    }
+  },
+  
+  documents: {
+    title: {
+      required: true,
+      minLength: 3,
+      maxLength: 255
+    },
+    description: {
+      required: false,
+      maxLength: 1000
+    },
+    file_url: {
+      required: true
+    },
+    file_type: {
+      required: false,
+      maxLength: 50
+    },
+    file_size: {
+      required: false,
+      max: 10485760 // 10MB
     }
   },
   
@@ -317,7 +355,8 @@ export const CACHE_CONFIG = {
     users: 'users',
     systems: 'systems',
     news: 'news',
-    events: 'events'
+    events: 'events',
+    documents: 'documents'
   }
 } as const;
 

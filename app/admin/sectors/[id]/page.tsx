@@ -21,6 +21,7 @@ import { useSectorContent } from './SectorContentManager';
 import { TabNavigation } from './components/TabNavigation';
 const NewsManagement = lazy(() => import('./components/NewsManagement').then(m => ({ default: m.NewsManagement })));
 const EventsManagement = lazy(() => import('./components/EventsManagement').then(m => ({ default: m.EventsManagement })));
+const DocumentsManagement = lazy(() => import('./components/DocumentsManagement').then(m => ({ default: m.DocumentsManagement })));
 const SubsectorsManagement = lazy(() => import('./components/SubsectorsManagement').then(m => ({ default: m.SubsectorsManagement })));
 const GroupsManagement = lazy(() => import('./components/GroupsManagement').then(m => ({ default: m.GroupsManagement })));
 const MessagesManagement = lazy(() => import('./components/MessagesManagement').then(m => ({ default: m.MessagesManagement })));
@@ -62,15 +63,18 @@ function SectorDashboardContent() {
     news,
     events,
     messages,
+    documents,
     showDrafts,
     totalDraftNewsCount,
     totalDraftEventsCount,
     totalDraftMessagesCount,
+    totalDraftDocumentsCount,
     toggleDrafts,
     refreshContent,
     deleteNews,
     deleteEvent,
-    deleteMessage
+    deleteMessage,
+    deleteDocument
   } = useSectorContent(sectorId);
 
 
@@ -162,6 +166,7 @@ function SectorDashboardContent() {
         onTabChange={setActiveTab}
         totalDraftNewsCount={totalDraftNewsCount}
         totalDraftEventsCount={totalDraftEventsCount}
+        totalDraftDocumentsCount={totalDraftDocumentsCount}
         totalDraftMessagesCount={totalDraftMessagesCount}
       />
 
@@ -191,6 +196,20 @@ function SectorDashboardContent() {
               onToggleDrafts={toggleDrafts}
               onRefresh={refreshContent}
               onDelete={deleteEvent}
+            />
+          </Suspense>
+        )}
+
+        {activeTab === 'documents' && (
+          <Suspense fallback={<LazyLoadingSpinner />}>
+            <DocumentsManagement
+              sectorId={sectorId}
+              documents={documents}
+              showDrafts={showDrafts}
+              totalDraftDocumentsCount={totalDraftDocumentsCount}
+              onToggleDrafts={toggleDrafts}
+              onRefresh={refreshContent}
+              onDelete={deleteDocument}
             />
           </Suspense>
         )}

@@ -1,19 +1,22 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+
+// [DEBUG] Component tracking
+let messagesPageRenderCount = 0;
+const messagesPageInstanceId = `messages-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 import { supabase } from '@/lib/supabase';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { useAlert } from '@/app/components/alerts';
-import { FormSelect, type SelectOption } from '@/app/components/forms';
+import { FormSelect } from '@/app/components/forms';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { Icon } from '@/app/components/icons/Icon';
 import { StandardizedButton } from '@/app/components/admin';
-import { Box, Tabs } from "@chakra-ui/react";
 import { MessageForm } from './components/MessageForm';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import DeleteModal from '@/app/components/ui/DeleteModal';
+import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
 
 interface Message {
   id: string;
@@ -48,75 +51,47 @@ interface Filters {
 }
 
 export default function MessagesAdminPage() {
-  const router = useRouter();
+  // [DEBUG] Component render tracking
+  messagesPageRenderCount++;
+  console.log(`[DEBUG-COMPONENT] MessagesAdminPage - Render ${messagesPageRenderCount}:`, {
+    instanceId: messagesPageInstanceId,
+    renderCount: messagesPageRenderCount,
+    timestamp: new Date().toISOString(),
+    stackTrace: new Error().stack?.split('\n').slice(1, 4)
+  });
+
   const alert = useAlert();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [sectors, setSectors] = useState<any[]>([]);
-  const [subsectors, setSubsectors] = useState<any[]>([]);
-  const [stats, setStats] = useState<MessageStats>({
-    total: 0,
-    published: 0,
-    drafts: 0,
-    bySector: {},
-    byType: { sector: 0, subsector: 0 }
+  const { user, loading: authLoading } = useAdminAuth();
+  const { 
+    data: messages, 
+    loading, 
+    stats, 
+    pagination, 
+    filters, 
+    updateFilters, 
+    updatePagination, 
+    reload 
+  } = useAdminData<Message>({
+    endpoint: 'messages',
+    initialFilters: {
+      search: '',
+      type: 'all',
+      status: 'all',
+      sector_id: '',
+      subsector_id: ''
+    },
+    debounceMs: 500
   });
   
-  const [filters, setFilters] = useState<Filters>({
-    search: '',
-    type: 'all',
-    status: 'all',
-    sector_id: '',
-    subsector_id: ''
-  });
-
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalCount: 0,
-    hasNextPage: false,
-    hasPrevPage: false,
-    limit: 20
-  });
-
+  const [sectors, setSectors] = useState<any[]>([]);
+  const [subsectors, setSubsectors] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   
   // Modal de exclusão
   const deleteModal = useDeleteModal('mensagem');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  
-  // Ref para debounce
-  const debounceTimer = useRef<NodeJS.Timeout>();
 
-  const checkAuth = useCallback(async () => {
-    try {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-
-      // Verificar se é admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      if (!profile || profile.role !== 'admin') {
-        alert.showError('Acesso negado', 'Apenas administradores gerais podem acessar esta página');
-        router.replace('/admin');
-        return;
-      }
-
-      setUser(data.user);
-    } catch (error) {
-      console.error('Erro na verificação de auth:', error);
-      router.replace('/login');
-    }
-  }, [router, alert]);
 
   const loadInitialData = async () => {
     try {
@@ -140,125 +115,14 @@ export default function MessagesAdminPage() {
     }
   };
 
-  const loadMessages = useCallback(async () => {
-    if (!user) return;
 
-    try {
-      // Não setar loading se já temos dados (evita piscagem)
-      if (messages.length === 0) {
-        setLoading(true);
-      }
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        router.replace('/login');
-        return;
-      }
-
-      // Construir parâmetros de busca
-      const searchParams = new URLSearchParams();
-      
-      if (filters.search) searchParams.set('search', filters.search);
-      if (filters.type !== 'all') searchParams.set('type', filters.type);
-      if (filters.status !== 'all') searchParams.set('status', filters.status);
-      if (filters.sector_id) searchParams.set('sector_id', filters.sector_id);
-      if (filters.subsector_id) searchParams.set('subsector_id', filters.subsector_id);
-      
-      searchParams.set('page', pagination.currentPage.toString());
-      searchParams.set('limit', pagination.limit.toString());
-
-      const response = await fetch(`/api/admin/messages?${searchParams.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao carregar mensagens');
-      }
-
-      const result = await response.json();
-
-      if (result.success) {
-        setMessages(result.data.messages);
-        setPagination(result.data.pagination);
-        
-        // Calcular estatísticas
-        const newStats = calculateStats(result.data.messages);
-        setStats(newStats);
-      } else {
-        throw new Error(result.error || 'Erro desconhecido');
-      }
-    } catch (error: any) {
-      console.error('Erro ao carregar mensagens:', error);
-      alert.showError('Erro', error.message || 'Erro ao carregar mensagens');
-    } finally {
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, filters.search, filters.type, filters.status, filters.sector_id, filters.subsector_id, pagination.currentPage, pagination.limit]);
-
-  // Verificar autenticação e permissões
-  useEffect(() => {
-    checkAuth();
-    loadInitialData();
-  }, [checkAuth]);
-
-  // Carregar mensagens quando filtros mudarem (com debounce para search)
+  // Carregar dados iniciais (setores e subsetores)
   useEffect(() => {
     if (user) {
-      // Cancelar timer anterior se existir
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-      
-      // Se for mudança no search, aplicar debounce
-      if (filters.search !== '') {
-        debounceTimer.current = setTimeout(() => {
-          loadMessages();
-        }, 500); // 500ms de debounce
-      } else {
-        // Para outros filtros, carregar imediatamente
-        loadMessages();
-      }
+      loadInitialData();
     }
-    
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, pagination.currentPage, user]);
+  }, [user]);
 
-  const calculateStats = (messagesData: Message[]): MessageStats => {
-    const stats: MessageStats = {
-      total: messagesData.length,
-      published: 0,
-      drafts: 0,
-      bySector: {},
-      byType: { sector: 0, subsector: 0 }
-    };
-
-    messagesData.forEach(msg => {
-      if (msg.is_published) {
-        stats.published++;
-      } else {
-        stats.drafts++;
-      }
-
-      stats.byType[msg.type]++;
-
-      const sectorName = msg.type === 'sector' ? msg.location_name : msg.sector_name;
-      if (sectorName) {
-        stats.bySector[sectorName] = (stats.bySector[sectorName] || 0) + 1;
-      }
-    });
-
-    return stats;
-  };
 
   const handleToggleStatus = async (message: Message) => {
     const action = message.is_published ? 'unpublish' : 'publish';
@@ -294,7 +158,7 @@ export default function MessagesAdminPage() {
           'Sucesso',
           `Mensagem ${action === 'publish' ? 'publicada' : 'despublicada'} com sucesso`
         );
-        loadMessages(); // Recarregar lista
+        reload(); // Recarregar lista
       } else {
         throw new Error(result.error || 'Erro desconhecido');
       }
@@ -340,7 +204,7 @@ export default function MessagesAdminPage() {
 
       if (result.success) {
         alert.showSuccess('Sucesso', 'Mensagem excluída com sucesso');
-        loadMessages(); // Recarregar lista
+        reload(); // Recarregar lista
       } else {
         throw new Error(result.error || 'Erro desconhecido');
       }
@@ -382,7 +246,7 @@ export default function MessagesAdminPage() {
 
       if (result.success) {
         alert.showSuccess('Sucesso', 'Mensagem duplicada com sucesso');
-        loadMessages(); // Recarregar lista
+        reload(); // Recarregar lista
       } else {
         throw new Error(result.error || 'Erro desconhecido');
       }
@@ -402,14 +266,13 @@ export default function MessagesAdminPage() {
   };
 
   const resetFilters = () => {
-    setFilters({
+    updateFilters({
       search: '',
       type: 'all',
       status: 'all',
       sector_id: '',
       subsector_id: ''
     });
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
   const getFilteredSubsectors = () => {
@@ -474,7 +337,7 @@ export default function MessagesAdminPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted">Total</p>
-                <p className="text-2xl font-bold text-primary">{stats.total}</p>
+                <p className="text-2xl font-bold text-primary">{stats?.total || 0}</p>
               </div>
             </div>
           </div>
@@ -486,7 +349,7 @@ export default function MessagesAdminPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted">Publicadas</p>
-                <p className="text-2xl font-bold text-green-600">{stats.published}</p>
+                <p className="text-2xl font-bold text-green-600">{stats?.published || 0}</p>
               </div>
             </div>
           </div>
@@ -498,7 +361,7 @@ export default function MessagesAdminPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted">Rascunhos</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.drafts}</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats?.drafts || 0}</p>
               </div>
             </div>
           </div>
@@ -511,7 +374,7 @@ export default function MessagesAdminPage() {
               <div>
                 <p className="text-sm font-medium text-muted">Setores</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  {stats.byType.sector}
+                  {stats?.byType?.sector || 0}
                 </p>
               </div>
             </div>
@@ -532,7 +395,7 @@ export default function MessagesAdminPage() {
                   type="text"
                   placeholder="Título ou conteúdo..."
                   value={filters.search}
-                  onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                  onChange={(e) => updateFilters({ search: e.target.value })}
                   className="input pl-10"
                 />
               </div>
@@ -543,7 +406,7 @@ export default function MessagesAdminPage() {
               <label className="label">Tipo</label>
               <FormSelect
                 value={filters.type}
-                onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value as any }))}
+                onChange={(e) => updateFilters({ type: e.target.value as any })}
                 options={[
                   { value: 'all', label: 'Todos' },
                   { value: 'sector', label: 'Setor' },
@@ -558,7 +421,7 @@ export default function MessagesAdminPage() {
               <label className="label">Status</label>
               <FormSelect
                 value={filters.status}
-                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value as any }))}
+                onChange={(e) => updateFilters({ status: e.target.value as any })}
                 options={[
                   { value: 'all', label: 'Todos' },
                   { value: 'published', label: 'Publicadas' },
@@ -573,11 +436,10 @@ export default function MessagesAdminPage() {
               <label className="label">Setor</label>
               <FormSelect
                 value={filters.sector_id}
-                onChange={(e) => setFilters(prev => ({ 
-                  ...prev, 
+                onChange={(e) => updateFilters({ 
                   sector_id: e.target.value,
                   subsector_id: '' // Reset subsetor quando setor muda
-                }))}
+                })}
                 options={[
                   { value: '', label: 'Todos os setores' },
                   ...sectors.map(sector => ({
@@ -594,7 +456,7 @@ export default function MessagesAdminPage() {
               <label className="label">Subsetor</label>
               <FormSelect
                 value={filters.subsector_id}
-                onChange={(e) => setFilters(prev => ({ ...prev, subsector_id: e.target.value }))}
+                onChange={(e) => updateFilters({ subsector_id: e.target.value })}
                 options={[
                   { value: '', label: 'Todos os subsetores' },
                   ...getFilteredSubsectors().map(subsector => ({
@@ -791,10 +653,9 @@ export default function MessagesAdminPage() {
                 variant="secondary"
                 size="sm"
                 icon={<Icon name="chevron-left" className="h-4 w-4" />}
-                onClick={() => setPagination(prev => ({ 
-                  ...prev, 
-                  currentPage: Math.max(1, prev.currentPage - 1) 
-                }))}
+                onClick={() => updatePagination({ 
+                  currentPage: Math.max(1, pagination.currentPage - 1) 
+                })}
                 disabled={pagination.currentPage <= 1 || loading}
               >
                 Anterior
@@ -804,10 +665,9 @@ export default function MessagesAdminPage() {
                 variant="secondary"
                 size="sm"
                 icon={<Icon name="chevron-right" className="h-4 w-4" />}
-                onClick={() => setPagination(prev => ({ 
-                  ...prev, 
-                  currentPage: Math.min(prev.totalPages, prev.currentPage + 1) 
-                }))}
+                onClick={() => updatePagination({ 
+                  currentPage: Math.min(pagination.totalPages, pagination.currentPage + 1) 
+                })}
                 disabled={pagination.currentPage >= pagination.totalPages || loading}
               >
                 Próxima
@@ -826,7 +686,7 @@ export default function MessagesAdminPage() {
           setEditingMessage(null);
         }}
         onSuccess={() => {
-          loadMessages();
+          reload();
         }}
       />
 

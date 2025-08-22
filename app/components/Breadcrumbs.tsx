@@ -61,6 +61,7 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
       'subsetores': 'Subsetores',
       'eventos': 'Eventos',
       'noticias': 'Notícias',
+      'documentos': 'Documentos',
       'sistemas': 'Sistemas',
       'galeria': 'Galeria',
       'users': 'Usuários',

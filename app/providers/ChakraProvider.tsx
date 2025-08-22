@@ -1,27 +1,22 @@
 'use client';
 
-import { ChakraProvider, createSystem, defaultConfig } from "@chakra-ui/react";
-import { CRESOL_COLORS } from "@/lib/design-tokens";
+import { ChakraProvider } from "@chakra-ui/react";
+import { cresolSystem } from "@/app/styles/chakra-theme";
 
-// Create a custom theme that aligns with Cresol colors using centralized design tokens
-const system = createSystem(defaultConfig, {
-  theme: {
-    tokens: {
-      colors: {
-        cresolOrange: { value: CRESOL_COLORS.primary.DEFAULT },
-        cresolGray: { value: CRESOL_COLORS.gray.DEFAULT },
-        cresolSecondary: { value: CRESOL_COLORS.secondary.DEFAULT },
-        cresolSuccess: { value: CRESOL_COLORS.success.DEFAULT },
-        cresolWarning: { value: CRESOL_COLORS.warning.DEFAULT },
-        cresolError: { value: CRESOL_COLORS.error.DEFAULT },
-      }
-    }
-  }
-});
-
+/**
+ * ChakraUIProvider - Provider customizado para Chakra UI v3
+ * 
+ * Utiliza o sistema de design Cresol com tema completo:
+ * - Cores da marca Cresol (laranja #F58220, cinzas, verde)
+ * - Tamanhos padronizados (xs, sm, md, lg)
+ * - Variantes (outline, subtle)
+ * - Estados (hover, focus, invalid, disabled)
+ * - Design tokens centralizados
+ * - Recipes customizados para Select
+ */
 export function ChakraUIProvider({ children }: { children: React.ReactNode }) {
   return (
-    <ChakraProvider value={system}>
+    <ChakraProvider value={cresolSystem}>
       {children}
     </ChakraProvider>
   );

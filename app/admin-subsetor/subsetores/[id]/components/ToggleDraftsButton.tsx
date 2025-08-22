@@ -4,7 +4,7 @@ interface ToggleDraftsButtonProps {
   showDrafts: boolean;
   onToggle: () => void;
   draftCount: number;
-  type: 'news' | 'events' | 'messages';
+  type: 'news' | 'events' | 'messages' | 'documents';
 }
 
 export function ToggleDraftsButton({
@@ -21,6 +21,8 @@ export function ToggleDraftsButton({
         return 'eventos';
       case 'messages':
         return 'mensagens';
+      case 'documents':
+        return 'documentos';
       default:
         return 'itens';
     }

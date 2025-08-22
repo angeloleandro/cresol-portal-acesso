@@ -123,6 +123,16 @@ export async function GET(request: NextRequest) {
       messagesQuery = messagesQuery.eq('is_published', true);
     }
 
+    // 4. Build documents query with conditional filter
+    let documentsQuery = supabase
+      .from('subsector_documents')
+      .select('*')
+      .eq('subsector_id', subsectorId);
+    
+    if (!includeUnpublished) {
+      documentsQuery = documentsQuery.eq('is_published', true);
+    }
+
     const promises = [
       // 1. Notícias filtradas
       newsQuery.order('created_at', { ascending: false }),
@@ -133,21 +143,30 @@ export async function GET(request: NextRequest) {
       // 3. Mensagens filtradas
       messagesQuery.order('created_at', { ascending: false }),
       
-      // 4. Todas as notícias (para contagem de rascunhos)
+      // 4. Documentos filtrados
+      documentsQuery.order('created_at', { ascending: false }),
+      
+      // 5. Todas as notícias (para contagem de rascunhos)
       shouldUseAdminClient ? supabase
         .from('subsector_news')
         .select('id, is_published')
         .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null }),
       
-      // 5. Todos os eventos (para contagem de rascunhos)
+      // 6. Todos os eventos (para contagem de rascunhos)
       shouldUseAdminClient ? supabase
         .from('subsector_events')
         .select('id, is_published')
         .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null }),
         
-      // 6. Todas as mensagens (para contagem de rascunhos)
+      // 7. Todas as mensagens (para contagem de rascunhos)
       shouldUseAdminClient ? supabase
         .from('subsector_messages')
+        .select('id, is_published')
+        .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null }),
+      
+      // 8. Todos os documentos (para contagem de rascunhos)
+      shouldUseAdminClient ? supabase
+        .from('subsector_documents')
         .select('id, is_published')
         .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null })
     ];
@@ -158,9 +177,11 @@ export async function GET(request: NextRequest) {
       { data: filteredNews, error: newsError },
       { data: filteredEvents, error: eventsError },
       { data: filteredMessages, error: messagesError },
+      { data: filteredDocuments, error: documentsError },
       { data: allNews, error: allNewsError },
       { data: allEvents, error: allEventsError },
-      { data: allMessages, error: allMessagesError }
+      { data: allMessages, error: allMessagesError },
+      { data: allDocuments, error: allDocumentsError }
     ] = await Promise.all(promises);
     const promiseEndTime = Date.now();
 
@@ -189,9 +210,17 @@ export async function GET(request: NextRequest) {
         { status: HTTP_STATUS.BAD_REQUEST }
       );
     }
+    
+    if (documentsError) {
+      console.error('[API-SUBSECTOR-BATCH] Erro ao buscar documentos:', documentsError);
+      return NextResponse.json(
+        { error: `Erro ao buscar documentos: ${documentsError.message}` },
+        { status: HTTP_STATUS.BAD_REQUEST }
+      );
+    }
 
-    if (shouldUseAdminClient && (allNewsError || allEventsError || allMessagesError)) {
-      console.error('[API-SUBSECTOR-BATCH] Erro ao buscar contagem:', { allNewsError, allEventsError, allMessagesError });
+    if (shouldUseAdminClient && (allNewsError || allEventsError || allMessagesError || allDocumentsError)) {
+      console.error('[API-SUBSECTOR-BATCH] Erro ao buscar contagem:', { allNewsError, allEventsError, allMessagesError, allDocumentsError });
     }
 
     // Calcular estatísticas de rascunhos
@@ -199,15 +228,18 @@ export async function GET(request: NextRequest) {
     let draftNewsCount = 0;
     let draftEventsCount = 0;
     let draftMessagesCount = 0;
+    let draftDocumentsCount = 0;
 
-    if (shouldUseAdminClient && Array.isArray(allNews) && Array.isArray(allEvents) && Array.isArray(allMessages)) {
+    if (shouldUseAdminClient && Array.isArray(allNews) && Array.isArray(allEvents) && Array.isArray(allMessages) && Array.isArray(allDocuments)) {
       const newsRascunhos = allNews.filter(n => n && typeof n.is_published === 'boolean' ? n.is_published === false : false);
       const eventsRascunhos = allEvents.filter(e => e && typeof e.is_published === 'boolean' ? e.is_published === false : false);
       const messagesRascunhos = allMessages.filter(m => m && typeof m.is_published === 'boolean' ? m.is_published === false : false);
+      const documentsRascunhos = allDocuments.filter(d => d && typeof d.is_published === 'boolean' ? d.is_published === false : false);
       
       draftNewsCount = newsRascunhos.length;
       draftEventsCount = eventsRascunhos.length;
       draftMessagesCount = messagesRascunhos.length;
+      draftDocumentsCount = documentsRascunhos.length;
       
     }
 
@@ -215,12 +247,15 @@ export async function GET(request: NextRequest) {
       news: filteredNews || [],
       events: filteredEvents || [],
       messages: filteredMessages || [],
+      documents: filteredDocuments || [],
       newsCount: filteredNews?.length || 0,
       eventsCount: filteredEvents?.length || 0,
       messagesCount: filteredMessages?.length || 0,
+      documentsCount: filteredDocuments?.length || 0,
       draftNewsCount,
       draftEventsCount,
       draftMessagesCount,
+      draftDocumentsCount,
       includeUnpublished,
       subsectorId
     };

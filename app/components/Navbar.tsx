@@ -434,7 +434,6 @@ function Navbar() {
             >
               Calendário
             </Link>
-            
             <Link 
               href="/sistemas" 
               className={`text-sm font-medium ${

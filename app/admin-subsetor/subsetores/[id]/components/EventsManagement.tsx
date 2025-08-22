@@ -7,7 +7,7 @@ import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { SubsectorEvent } from '../types/subsector.types';
 import { formatEventPeriod, formatForDateTimeInput } from '../utils/dateFormatters';
-import { ToggleDraftsButton } from '@/app/admin/sectors/[id]/components/ToggleDraftsButton';
+import { ToggleDraftsButton } from './ToggleDraftsButton';
 
 interface EventsManagementProps {
   subsectorId: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { supabase } from '@/lib/supabase';
@@ -10,6 +10,7 @@ import Breadcrumb from '../../../components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { useAlert } from '@/app/components/alerts';
+import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 
 interface User {
   id: string;
@@ -70,6 +71,17 @@ export default function SubsectorTeamPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<TeamMember | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Opções para o select de posições (ChakraSelect)
+  const positionOptions = useMemo((): ChakraSelectOption[] => [
+    { value: '', label: 'Selecione um cargo' },
+    ...positions.map(position => ({
+      value: position.id,
+      label: position.department 
+        ? `${position.name} - ${position.department}`
+        : position.name
+    }))
+  ], [positions]);
 
   const fetchSubsector = useCallback(async () => {
     const { data, error } = await supabase
@@ -625,22 +637,16 @@ export default function SubsectorTeamPage() {
 
               {/* Cargo na Equipe */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-cresol-gray-dark mb-2">
-                  Cargo na Equipe (opcional)
-                </label>
-                <select
+                <ChakraSelect
+                  label="Cargo na Equipe (opcional)"
+                  options={positionOptions}
                   value={memberPositionId}
-                  onChange={(e) => setMemberPositionId(e.target.value)}
-                  className="w-full px-3 py-2 border border-cresol-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                >
-                  <option value="">Selecione um cargo</option>
-                  {positions.map(position => (
-                    <option key={position.id} value={position.id}>
-                      {position.name}
-                      {position.department && ` - ${position.department}`}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(value) => setMemberPositionId(value as string)}
+                  placeholder="Selecione um cargo"
+                  size="md"
+                  variant="outline"
+                  fullWidth
+                />
               </div>
               
               <div className="flex gap-3">
@@ -685,22 +691,16 @@ export default function SubsectorTeamPage() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-medium text-cresol-gray-dark mb-2">
-                  Cargo na Equipe
-                </label>
-                <select
+                <ChakraSelect
+                  label="Cargo na Equipe"
+                  options={positionOptions}
                   value={memberPositionId}
-                  onChange={(e) => setMemberPositionId(e.target.value)}
-                  className="w-full px-3 py-2 border border-cresol-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                >
-                  <option value="">Selecione um cargo</option>
-                  {positions.map(position => (
-                    <option key={position.id} value={position.id}>
-                      {position.name}
-                      {position.department && ` - ${position.department}`}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(value) => setMemberPositionId(value as string)}
+                  placeholder="Selecione um cargo"
+                  size="md"
+                  variant="outline"
+                  fullWidth
+                />
               </div>
               
               <div className="flex gap-3">

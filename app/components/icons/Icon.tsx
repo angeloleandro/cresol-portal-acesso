@@ -66,6 +66,8 @@ import {
   WrenchScrewdriverIcon,
   LockClosedIcon,
   DocumentDuplicateIcon,
+  CameraIcon,
+  MapPinIcon,
 } from '@heroicons/react/24/outline';
 
 export type IconName =
@@ -163,7 +165,9 @@ export type IconName =
   | 'edit'
   | 'copy'
   | 'eye'
-  | 'eye-slash';
+  | 'eye-slash'
+  | 'camera'
+  | 'map-pin';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   name: IconName;
@@ -308,6 +312,8 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   'copy': DocumentDuplicateIcon,
   'eye': EyeIcon,
   'eye-slash': EyeSlashIcon,
+  'camera': CameraIcon,
+  'map-pin': MapPinIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, ...props }) => {
