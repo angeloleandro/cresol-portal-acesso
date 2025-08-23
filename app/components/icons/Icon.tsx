@@ -68,6 +68,7 @@ import {
   DocumentDuplicateIcon,
   CameraIcon,
   MapPinIcon,
+  PhoneIcon,
 } from '@heroicons/react/24/outline';
 
 export type IconName =
@@ -167,7 +168,8 @@ export type IconName =
   | 'eye'
   | 'eye-slash'
   | 'camera'
-  | 'map-pin';
+  | 'map-pin'
+  | 'phone';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   name: IconName;
@@ -229,6 +231,7 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   'bell': BellIcon,
   'bell-notification': BellAlertIcon,
   'mail': EnvelopeIcon,
+  'phone': PhoneIcon,
   'chat-line': ChatBubbleLeftIcon,
 
   // Actions & Controls

@@ -4,29 +4,7 @@ import { useEffect, useState } from 'react';
 import OptimizedImage from './OptimizedImage';
 import Link from 'next/link';
 import { Icon } from './icons';
-
-interface TeamMember {
-  id: string;
-  user_id: string;
-  position?: string;
-  is_from_subsector: boolean;
-  subsector_id?: string;
-  profiles: {
-    id: string;
-    full_name: string;
-    email: string;
-    avatar_url?: string;
-    position?: string;
-    phone?: string;
-    bio?: string;
-    work_location_id?: string;
-    work_locations?: { name: string };
-  };
-  subsectors?: {
-    id: string;
-    name: string;
-  };
-}
+import type { SectorTeamMember } from '@/types/team';
 
 interface SectorTeamProps {
   sectorId: string;
@@ -41,7 +19,7 @@ export default function SectorTeam({
   showFullPage = true, 
   maxMembers = 6 
 }: SectorTeamProps) {
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamMembers, setTeamMembers] = useState<SectorTeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -158,6 +136,21 @@ export default function SectorTeam({
                     <p className="text-xs text-cresol-gray truncate">
                       {member.position || member.profiles.position || 'Membro da equipe'}
                     </p>
+                    {(member.profiles.phone || member.profiles.bio) && (
+                      <div className="mt-0.5 space-y-0.5">
+                        {member.profiles.phone && (
+                          <p className="text-xs text-cresol-gray truncate flex items-center gap-1">
+                            <Icon name="phone" className="h-3 w-3" />
+                            {member.profiles.phone}
+                          </p>
+                        )}
+                        {member.profiles.bio && (
+                          <p className="text-xs text-cresol-gray truncate" title={member.profiles.bio}>
+                            {member.profiles.bio.substring(0, 30)}{member.profiles.bio.length > 30 ? '...' : ''}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -200,6 +193,21 @@ export default function SectorTeam({
                         </span>
                       )}
                     </div>
+                    {(member.profiles.phone || member.profiles.bio) && (
+                      <div className="mt-0.5 space-y-0.5">
+                        {member.profiles.phone && (
+                          <p className="text-xs text-cresol-gray truncate flex items-center gap-1">
+                            <Icon name="phone" className="h-3 w-3" />
+                            {member.profiles.phone}
+                          </p>
+                        )}
+                        {member.profiles.bio && (
+                          <p className="text-xs text-cresol-gray truncate" title={member.profiles.bio}>
+                            {member.profiles.bio.substring(0, 30)}{member.profiles.bio.length > 30 ? '...' : ''}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

@@ -36,6 +36,8 @@ interface TeamMember {
     position?: string;
     work_location_id?: string;
     work_locations?: { name: string };
+    phone?: string;
+    bio?: string;
   };
 }
 
@@ -549,10 +551,23 @@ export default function SubsectorTeamPage() {
                         <Icon name="mail" className="h-4 w-4 mr-2" />
                         <span>{member.profiles.email}</span>
                       </div>
+                      {member.profiles.phone && (
+                        <div className="flex items-center">
+                          <Icon name="phone" className="h-4 w-4 mr-2" />
+                          <span>{member.profiles.phone}</span>
+                        </div>
+                      )}
                       {member.profiles.work_locations?.name && (
                         <div className="flex items-center">
                           <Icon name="map" className="h-4 w-4 mr-2" />
                           <span>{member.profiles.work_locations.name}</span>
+                        </div>
+                      )}
+                      {member.profiles.bio && (
+                        <div className="mt-2 pt-2 border-t border-cresol-gray-light">
+                          <p className="text-xs text-cresol-gray italic">
+                            {member.profiles.bio}
+                          </p>
                         </div>
                       )}
                     </div>
