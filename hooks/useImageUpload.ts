@@ -1,13 +1,21 @@
-// Hook para gerenciamento de upload e recorte de imagens
+// Centralized hook for image upload and cropping functionality
+// Used across admin panels for consistent image handling
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { supabase } from '@/lib/supabase';
 import { useAlert } from '@/app/components/alerts';
-import { getCroppedImg, uploadImageToSupabase, validateImageFile } from '../utils/imageProcessing';
-import { CropArea } from '../types/sector.types';
+import { getCroppedImg, uploadImageToSupabase, validateImageFile } from '@/lib/utils/imageProcessing';
+import { CropArea } from '@/lib/types/common';
+
+interface UseImageUploadOptions {
+  bucket?: string;
+  folder?: string;
+  useClientSupabase?: boolean;
+}
 
 interface UseImageUploadReturn {
-  // Estados
+  // States
   uploadingImage: boolean;
   imagePreview: string | null;
   originalImage: string | null;
@@ -17,7 +25,7 @@ interface UseImageUploadReturn {
   croppedAreaPixels: CropArea | null;
   fileInputRef: React.RefObject<HTMLInputElement>;
   
-  // Ações
+  // Actions
   setCrop: (crop: { x: number; y: number }) => void;
   setZoom: (zoom: number) => void;
   setRotation: (rotation: number) => void;
@@ -30,7 +38,13 @@ interface UseImageUploadReturn {
   uploadImage: (file: File) => Promise<string>;
 }
 
-export function useImageUpload(): UseImageUploadReturn {
+export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUploadReturn {
+  const {
+    bucket = 'images',
+    folder = 'uploads',
+    useClientSupabase = false
+  } = options;
+
   const { showError, showWarning } = useAlert();
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -41,14 +55,17 @@ export function useImageUpload(): UseImageUploadReturn {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropArea | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Refs para rastrear URLs de objetos criados para limpeza adequada
+  // Refs to track created object URLs for proper cleanup
   const originalImageUrlRef = useRef<string | null>(null);
   const imagePreviewUrlRef = useRef<string | null>(null);
+
+  // Select appropriate Supabase client
+  const supabaseClient = useClientSupabase ? createClient() : supabase;
 
   const uploadImage = async (file: File): Promise<string> => {
     setUploadingImage(true);
     try {
-      const imageUrl = await uploadImageToSupabase(file, supabase);
+      const imageUrl = await uploadImageToSupabase(file, supabaseClient, bucket, folder);
       return imageUrl;
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
@@ -73,19 +90,19 @@ export function useImageUpload(): UseImageUploadReturn {
         rotation
       );
 
-      // Criar um File a partir do Blob
+      // Create a File from the Blob
       const croppedFile = new File([file], 'cropped-image.jpg', { type: 'image/jpeg' });
       
-      // Fazer upload da imagem recortada
+      // Upload cropped image
       const uploadedUrl = await uploadImage(croppedFile);
       
-      // Revogar URL do original após o crop
+      // Revoke original URL after crop
       if (originalImageUrlRef.current) {
         URL.revokeObjectURL(originalImageUrlRef.current);
         originalImageUrlRef.current = null;
       }
       
-      // Limpar estados
+      // Clear states
       setImagePreview(uploadedUrl);
       setOriginalImage(null);
       setCrop({ x: 0, y: 0 });
@@ -102,7 +119,7 @@ export function useImageUpload(): UseImageUploadReturn {
   };
 
   const handleCancelCrop = () => {
-    // Revogar URL do original se existir
+    // Revoke original URL if exists
     if (originalImageUrlRef.current) {
       URL.revokeObjectURL(originalImageUrlRef.current);
       originalImageUrlRef.current = null;
@@ -122,19 +139,19 @@ export function useImageUpload(): UseImageUploadReturn {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validar arquivo
+    // Validate file
     const validation = validateImageFile(file);
     if (!validation.valid) {
       showWarning(validation.error || 'Arquivo inválido');
       return;
     }
 
-    // Revogar URL anterior se existir
+    // Revoke previous URL if exists
     if (originalImageUrlRef.current) {
       URL.revokeObjectURL(originalImageUrlRef.current);
     }
 
-    // Criar preview para recorte
+    // Create preview for cropping
     const fileUrl = URL.createObjectURL(file);
     originalImageUrlRef.current = fileUrl;
     setOriginalImage(fileUrl);
@@ -142,7 +159,7 @@ export function useImageUpload(): UseImageUploadReturn {
   };
 
   const handleRemoveImage = () => {
-    // Revogar URLs de objetos
+    // Revoke object URLs
     if (originalImageUrlRef.current) {
       URL.revokeObjectURL(originalImageUrlRef.current);
       originalImageUrlRef.current = null;
@@ -162,10 +179,10 @@ export function useImageUpload(): UseImageUploadReturn {
     }
   };
 
-  // Cleanup effect para revogar URLs quando o componente desmontar
+  // Cleanup effect to revoke URLs when component unmounts
   useEffect(() => {
     return () => {
-      // Limpar URLs de objetos ao desmontar
+      // Clean up object URLs on unmount
       if (originalImageUrlRef.current) {
         URL.revokeObjectURL(originalImageUrlRef.current);
       }

@@ -1,5 +1,7 @@
 // Types centralizados para o módulo de gerenciamento de subsetores
 
+import { CropArea } from '@/lib/types/common';
+
 export interface Profile {
   id: string;
   role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
@@ -107,13 +109,6 @@ export interface User {
 export interface WorkLocation {
   id: string;
   name: string;
-}
-
-export interface CropArea {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 }
 
 export type TabType = 'events' | 'news' | 'documents' | 'systems' | 'groups' | 'messages';

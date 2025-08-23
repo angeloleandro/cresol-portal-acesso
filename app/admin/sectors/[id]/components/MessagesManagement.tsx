@@ -1,8 +1,8 @@
 // Componente de gerenciamento de mensagens do setor - SIMPLIFICADO
 import React, { useState } from 'react';
 import { useAlert } from '@/app/components/alerts';
-import { formatDate } from '../utils/dateFormatters';
-import { ToggleDraftsButton } from './ToggleDraftsButton';
+import { formatDate } from '@/lib/utils/formatters';
+import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 

@@ -6,8 +6,8 @@ import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { SubsectorEvent } from '../types/subsector.types';
-import { formatEventPeriod, formatForDateTimeInput } from '../utils/dateFormatters';
-import { ToggleDraftsButton } from './ToggleDraftsButton';
+import { formatEventPeriod, formatForDateTimeInput } from '@/lib/utils/formatters';
+import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
 
 interface EventsManagementProps {
   subsectorId: string;

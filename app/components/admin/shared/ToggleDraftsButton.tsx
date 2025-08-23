@@ -1,3 +1,6 @@
+// Componente compartilhado de botão toggle para mostrar/ocultar rascunhos
+// Usado em admin, sector e subsector
+
 import React from 'react';
 
 interface ToggleDraftsButtonProps {

@@ -3,7 +3,7 @@
 import React, { useState, memo, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Group, User, WorkLocation } from '../types/sector.types';
-import { formatDate } from '../utils/dateFormatters';
+import { formatDate } from '@/lib/utils/formatters';
 import UserSelectionFilter from '@/app/components/ui/UserSelectionFilter';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import DeleteModal from '@/app/components/ui/DeleteModal';

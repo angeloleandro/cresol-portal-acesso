@@ -41,7 +41,6 @@
 export { FormField, type FormFieldProps } from './FormField';
 export { FormInput, type FormInputProps } from './FormInput';
 export { FormSelect, type FormSelectProps, type SelectOption } from './FormSelect';
-export { StandardSelect } from './StandardSelect';
 export { ChakraSelect, type ChakraSelectProps, type ChakraSelectOption } from './ChakraSelect';
 
 // Types are already exported with the components above

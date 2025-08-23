@@ -7,7 +7,7 @@ import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { Group, User, WorkLocation } from '../types/subsector.types';
-import { formatDate } from '../utils/dateFormatters';
+import { formatDate } from '@/lib/utils/formatters';
 import CreateGroupModal from './groups/CreateGroupModal';
 
 interface GroupsManagementProps {

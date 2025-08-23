@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
-import { formatDate } from '../utils/dateFormatters';
-import { ToggleDraftsButton } from './ToggleDraftsButton';
+import { formatDate } from '@/lib/utils/formatters';
+import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
 
 interface SubsectorMessage {
   id: string;

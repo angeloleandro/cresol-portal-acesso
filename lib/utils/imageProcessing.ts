@@ -1,18 +1,23 @@
-// Utilitários para processamento e recorte de imagens
+// Centralized image processing utilities
+// Used across the application for image cropping and upload
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CropArea } from '../types/sector.types';
+import { CropArea } from '@/lib/types/common';
 
-// Função para criar uma imagem a partir de uma URL
+/**
+ * Create an image element from a URL
+ * @param url - Image URL
+ * @returns Promise resolving to HTMLImageElement
+ */
 export const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
-    // Verificar se estamos no ambiente do navegador
+    // Check if we're in browser environment
     if (typeof window === 'undefined') {
       reject(new Error('Window is not defined, cannot create image'));
       return;
     }
     
-    // Usar o construtor global HTMLImageElement
+    // Use global HTMLImageElement constructor
     const image = new window.Image();
     image.addEventListener('load', () => resolve(image));
     image.addEventListener('error', (error: Event) => reject(error));
@@ -20,7 +25,13 @@ export const createImage = (url: string): Promise<HTMLImageElement> =>
     image.src = url;
   });
 
-// Função para obter o recorte final da imagem
+/**
+ * Get cropped image from source
+ * @param imageSrc - Source image URL
+ * @param pixelCrop - Crop area coordinates
+ * @param rotation - Rotation angle in degrees
+ * @returns Promise resolving to Blob and URL
+ */
 export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: CropArea,
@@ -34,16 +45,16 @@ export async function getCroppedImg(
     throw new Error('No 2d context');
   }
 
-  // Definir as dimensões do canvas para a área de recorte
+  // Set canvas dimensions to crop area
   canvas.width = pixelCrop.width;
   canvas.height = pixelCrop.height;
 
-  // Translação para permitir rotação da imagem
+  // Apply rotation if needed
   ctx.translate(canvas.width / 2, canvas.height / 2);
   ctx.rotate((rotation * Math.PI) / 180);
   ctx.translate(-canvas.width / 2, -canvas.height / 2);
 
-  // Desenhar a imagem recortada no canvas
+  // Draw cropped image to canvas
   ctx.drawImage(
     image,
     pixelCrop.x,
@@ -56,7 +67,7 @@ export async function getCroppedImg(
     pixelCrop.height
   );
 
-  // Criar um blob do canvas
+  // Create blob from canvas
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (!blob) {
@@ -69,30 +80,37 @@ export async function getCroppedImg(
   });
 }
 
-// Função para fazer upload de imagem para o Supabase
+/**
+ * Upload image to Supabase storage
+ * @param file - File to upload
+ * @param supabase - Supabase client instance
+ * @param bucket - Storage bucket name
+ * @param folder - Folder path within bucket
+ * @returns Promise resolving to public URL
+ */
 export async function uploadImageToSupabase(
   file: File,
   supabase: SupabaseClient,
   bucket: string = 'images',
-  folder: string = 'sector-news'
+  folder: string = 'uploads'
 ): Promise<string> {
-  // Lista de extensões permitidas para imagens
+  // Allowed image extensions
   const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
   
-  // Extrair extensão de forma segura
+  // Extract and validate file extension
   const nameParts = file.name.split('.');
   let fileExt = nameParts.length > 1 ? nameParts.pop() : '';
   
-  // Normalizar e validar a extensão
+  // Normalize extension
   if (fileExt) {
     fileExt = fileExt.toLowerCase().trim();
-    // Remover qualquer ponto inicial
+    // Remove leading dots
     fileExt = fileExt.replace(/^\.+/, '');
   }
   
-  // Validar contra a lista de extensões permitidas
+  // Validate extension
   if (!fileExt || !allowedExtensions.includes(fileExt)) {
-    // Tentar detectar a extensão pelo tipo MIME
+    // Try to detect extension from MIME type
     const mimeType = file.type.toLowerCase();
     if (mimeType.startsWith('image/')) {
       const mimeExt = mimeType.split('/')[1];
@@ -101,7 +119,7 @@ export async function uploadImageToSupabase(
       } else if (mimeType === 'image/svg+xml') {
         fileExt = 'svg';
       } else {
-        // Usar jpg como padrão para imagens genéricas
+        // Default to jpg for generic images
         fileExt = 'jpg';
       }
     } else {
@@ -109,7 +127,7 @@ export async function uploadImageToSupabase(
     }
   }
   
-  // Criar nome de arquivo seguro com apenas caracteres permitidos
+  // Create safe filename
   const safeFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
   const filePath = `${folder}/${safeFileName}`;
 
@@ -124,7 +142,7 @@ export async function uploadImageToSupabase(
     throw new Error(`Erro ao fazer upload da imagem: ${error.message}`);
   }
 
-  // Obter a URL pública da imagem
+  // Get public URL
   const { data: { publicUrl } } = supabase.storage
     .from(bucket)
     .getPublicUrl(filePath);
@@ -132,7 +150,11 @@ export async function uploadImageToSupabase(
   return publicUrl;
 }
 
-// Função para validar tipo e tamanho de arquivo
+/**
+ * Validate image file type and size
+ * @param file - File to validate
+ * @returns Validation result with error message if invalid
+ */
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   const maxSize = 5 * 1024 * 1024; // 5MB
@@ -152,4 +174,44 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
   }
 
   return { valid: true };
+}
+
+/**
+ * Delete image from Supabase storage
+ * @param imageUrl - Public URL of the image
+ * @param supabase - Supabase client instance
+ * @param bucket - Storage bucket name
+ * @returns Promise resolving to boolean success
+ */
+export async function deleteImageFromSupabase(
+  imageUrl: string,
+  supabase: SupabaseClient,
+  bucket: string = 'images'
+): Promise<boolean> {
+  try {
+    // Extract file path from URL
+    const url = new URL(imageUrl);
+    const pathParts = url.pathname.split(`/storage/v1/object/public/${bucket}/`);
+    
+    if (pathParts.length < 2) {
+      console.error('Invalid image URL format');
+      return false;
+    }
+    
+    const filePath = pathParts[1];
+    
+    const { error } = await supabase.storage
+      .from(bucket)
+      .remove([filePath]);
+    
+    if (error) {
+      console.error('Error deleting image:', error.message);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    return false;
+  }
 }

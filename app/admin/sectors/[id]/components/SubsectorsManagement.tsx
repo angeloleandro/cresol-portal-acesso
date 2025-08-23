@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Subsector } from '../types/sector.types';
-import { formatDate } from '../utils/dateFormatters';
+import { formatDate } from '@/lib/utils/formatters';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 

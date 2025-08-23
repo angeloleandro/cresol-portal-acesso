@@ -7,10 +7,10 @@ import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { SubsectorNews } from '../types/subsector.types';
-import { formatDate } from '../utils/dateFormatters';
-import { useImageUpload } from '../hooks/useImageUpload';
-import { ImageUploadCropper } from './ImageUploadCropper';
-import { ToggleDraftsButton } from './ToggleDraftsButton';
+import { formatDate } from '@/lib/utils/formatters';
+import { useImageUpload } from '@/hooks/useImageUpload';
+import { ImageUploadCropper } from '@/app/components/admin/shared/ImageUploadCropper';
+import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
 
 interface NewsManagementProps {
   subsectorId: string;

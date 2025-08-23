@@ -1,5 +1,7 @@
 // Types centralizados para o módulo de gerenciamento de setores
 
+import { CropArea } from '@/lib/types/common';
+
 export interface Sector {
   id: string;
   name: string;
@@ -119,13 +121,6 @@ export interface WorkLocation {
   name: string;
   city: string;
   state: string;
-}
-
-export interface CropArea {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 }
 
 export type TabType = 'news' | 'events' | 'documents' | 'subsectors' | 'groups' | 'messages';

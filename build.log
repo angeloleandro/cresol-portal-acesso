@@ -1,0 +1,129 @@
+
+> cresol-portal-acesso@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.31
+  - Environments: .env.local, .env
+  - Experiments (use with caution):
+    · scrollRestoration
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/71) ...
+   Generating static pages (17/71) 
+   Generating static pages (35/71) 
+   Generating static pages (53/71) 
+ ✓ Generating static pages (71/71)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                               Size     First Load JS
+┌ ○ /                                     422 B           485 kB
+├ ○ /_not-found                           880 B          88.7 kB
+├ ○ /admin                                2.33 kB         486 kB
+├ ○ /admin-setor                          1.58 kB         486 kB
+├ ƒ /admin-setor/setores/[id]             7.49 kB         492 kB
+├ ƒ /admin-setor/setores/[id]/sistemas    2.71 kB         487 kB
+├ ○ /admin-subsetor                       2.75 kB         487 kB
+├ ƒ /admin-subsetor/subsetores/[id]       4.56 kB         489 kB
+├ ○ /admin/access-requests                3.38 kB         488 kB
+├ ○ /admin/analytics                      6.82 kB         491 kB
+├ ○ /admin/banners                        3.89 kB         488 kB
+├ ○ /admin/collections                    1.47 kB         486 kB
+├ ƒ /admin/collections/[id]               16.6 kB         501 kB
+├ ○ /admin/documents                      6.7 kB          491 kB
+├ ○ /admin/economic-indicators            3.64 kB         488 kB
+├ ○ /admin/events                         6.35 kB         490 kB
+├ ○ /admin/gallery                        4.49 kB         489 kB
+├ ○ /admin/messages                       5.15 kB         489 kB
+├ ○ /admin/monitoring                     1.87 kB         486 kB
+├ ○ /admin/news                           5.93 kB         490 kB
+├ ○ /admin/positions                      3.57 kB         488 kB
+├ ○ /admin/sectors                        5.89 kB         490 kB
+├ ƒ /admin/sectors/[id]                   4.69 kB         489 kB
+├ ƒ /admin/sectors/[id]/systems           3.39 kB         488 kB
+├ ○ /admin/system-links                   3.22 kB         487 kB
+├ ○ /admin/systems                        3.21 kB         487 kB
+├ ○ /admin/users                          25.5 kB         510 kB
+├ ○ /admin/videos                         4.04 kB         488 kB
+├ ○ /admin/work-locations                 3.81 kB         488 kB
+├ ƒ /api/admin/approve-access-request     0 B                0 B
+├ ƒ /api/admin/banners                    0 B                0 B
+├ ƒ /api/admin/banners/positions          0 B                0 B
+├ ƒ /api/admin/collections/stats          0 B                0 B
+├ ƒ /api/admin/create-user                0 B                0 B
+├ ƒ /api/admin/documents                  0 B                0 B
+├ ƒ /api/admin/economic-indicators        0 B                0 B
+├ ƒ /api/admin/events                     0 B                0 B
+├ ƒ /api/admin/gallery                    0 B                0 B
+├ ƒ /api/admin/gallery/upload             0 B                0 B
+├ ƒ /api/admin/message-groups             0 B                0 B
+├ ƒ /api/admin/messages                   0 B                0 B
+├ ƒ /api/admin/news                       0 B                0 B
+├ ƒ /api/admin/positions                  0 B                0 B
+├ ƒ /api/admin/reset-password             0 B                0 B
+├ ƒ /api/admin/sector-content             0 B                0 B
+├ ƒ /api/admin/sector-content-batch       0 B                0 B
+├ ƒ /api/admin/sector-team                0 B                0 B
+├ ƒ /api/admin/sectors                    0 B                0 B
+├ ƒ /api/admin/subsector-admins           0 B                0 B
+├ ƒ /api/admin/subsector-content          0 B                0 B
+├ ƒ /api/admin/subsector-content-batch    0 B                0 B
+├ ƒ /api/admin/subsector-team             0 B                0 B
+├ ƒ /api/admin/subsectors                 0 B                0 B
+├ ƒ /api/admin/system-links               0 B                0 B
+├ ƒ /api/admin/update-user-role           0 B                0 B
+├ ƒ /api/admin/users                      0 B                0 B
+├ ƒ /api/admin/users/all                  0 B                0 B
+├ ƒ /api/admin/videos                     0 B                0 B
+├ ƒ /api/admin/videos/upload              0 B                0 B
+├ ƒ /api/auth/login                       0 B                0 B
+├ ƒ /api/auth/signup                      0 B                0 B
+├ ƒ /api/collections                      0 B                0 B
+├ ƒ /api/collections/[id]                 0 B                0 B
+├ ƒ /api/collections/[id]/items           0 B                0 B
+├ ƒ /api/collections/[id]/items/[itemId]  0 B                0 B
+├ ƒ /api/collections/[id]/reorder         0 B                0 B
+├ ƒ /api/collections/upload/cover         0 B                0 B
+├ ƒ /api/dashboard/stats                  0 B                0 B
+├ ƒ /api/positions                        0 B                0 B
+├ ƒ /api/sectors                          0 B                0 B
+├ ƒ /api/users/list                       0 B                0 B
+├ ƒ /api/videos/generate-thumbnail        0 B                0 B
+├ ƒ /api/videos/simple-upload             0 B                0 B
+├ ƒ /api/work-locations                   0 B                0 B
+├ ○ /dashboard                            2.38 kB         486 kB
+├ ○ /documentos                           2.57 kB         487 kB
+├ ƒ /documentos/[id]                      2.82 kB         487 kB
+├ ○ /eventos                              4.97 kB         489 kB
+├ ƒ /eventos/[id]                         2.54 kB         487 kB
+├ ○ /galeria                              1.48 kB         486 kB
+├ ○ /home                                 2.76 kB         487 kB
+├ ○ /login                                1.67 kB         486 kB
+├ ○ /mensagens                            2.14 kB         486 kB
+├ ƒ /mensagens/[id]                       2.27 kB         486 kB
+├ ○ /messages                             3.37 kB         487 kB
+├ ○ /noticias                             2.01 kB         486 kB
+├ ƒ /noticias/[id]                        2.04 kB         486 kB
+├ ○ /profile                              3.4 kB          488 kB
+├ ○ /setores                              1.35 kB         485 kB
+├ ƒ /setores/[id]                         3.87 kB         488 kB
+├ ƒ /setores/[id]/equipe                  4.15 kB         488 kB
+├ ○ /signup                               2.26 kB         486 kB
+├ ○ /sistemas                             2.73 kB         487 kB
+├ ƒ /subsetores/[id]                      3.73 kB         488 kB
+├ ƒ /subsetores/[id]/equipe               4.17 kB         488 kB
+└ ○ /videos                               2.4 kB          487 kB
++ First Load JS shared by all             87.8 kB
+  ├ chunks/2117-7003ec99805a1453.js       31.7 kB
+  ├ chunks/c29d28d2-732918645a159f10.js   53.6 kB
+  └ other shared chunks (total)           2.42 kB
+
+
+ƒ Middleware                              61.1 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

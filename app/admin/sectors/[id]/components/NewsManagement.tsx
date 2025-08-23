@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { SectorNews } from '../types/sector.types';
-import { formatDate } from '../utils/dateFormatters';
-import { useImageUpload } from '../hooks/useImageUpload';
-import { ImageUploadCropper } from './ImageUploadCropper';
-import { ToggleDraftsButton } from './ToggleDraftsButton';
+import { formatDate } from '@/lib/utils/formatters';
+import { useImageUpload } from '@/hooks/useImageUpload';
+import { ImageUploadCropper } from '@/app/components/admin/shared/ImageUploadCropper';
+import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { SubsectorDocument } from '../types/subsector.types';
-import { ToggleDraftsButton } from './ToggleDraftsButton';
+import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
