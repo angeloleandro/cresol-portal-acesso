@@ -41,6 +41,7 @@ function getFileTypeLabel(mimeType?: string): string {
 import Icon from '../components/icons/Icon';
 
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface DocumentItem {
   id: string;
   title: string;
@@ -163,14 +164,6 @@ export default function DocumentosPage() {
   }, [selectedSector, selectedType, searchTerm, documents, sectors]);
 
   // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric'
-    }).format(date);
-  };
 
   // Obter tipos únicos de arquivo
   const fileTypes = Array.from(new Set(documents.map(doc => doc.file_type).filter(Boolean)));
@@ -332,7 +325,7 @@ export default function DocumentosPage() {
                       ? document.sectors?.name 
                       : `${document.subsectors?.sectors?.name} - ${document.subsectors?.name}`}
                   </div>
-                  <div>{formatDate(document.created_at)}</div>
+                  <div>{FormatDate(document.created_at)}</div>
                 </div>
 
                 {/* Ações */}

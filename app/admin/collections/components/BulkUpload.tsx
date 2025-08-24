@@ -13,13 +13,14 @@ import { cn } from '@/lib/utils/cn';
 
 import VideoUploadAdvanced from './VideoUploadAdvanced';
 
+import { UPLOAD_LIMITS } from '@/lib/constants/limits';
 // Supported file types
 const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 const videoTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/avi'];
 
 // Max file sizes (in bytes)
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
+const MAX_IMAGE_SIZE = UPLOAD_LIMITS.IMAGE.MAX_SIZE; // 10MB
+const MAX_VIDEO_SIZE = UPLOAD_LIMITS.VIDEO.MAX_SIZE; // 100MB
 
 // Utility functions moved outside component for stability
 const getFileType = (file: File): 'image' | 'video' | null => {

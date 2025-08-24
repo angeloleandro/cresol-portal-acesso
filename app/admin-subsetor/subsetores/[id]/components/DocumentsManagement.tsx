@@ -10,6 +10,7 @@ import { FormatFileSize } from '@/lib/utils/formatters';
 
 import { SubsectorDocument } from '../types/subsector.types';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface DocumentsManagementProps {
   subsectorId: string;
   documents: SubsectorDocument[];
@@ -207,10 +208,6 @@ export function DocumentsManagement({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  };
-
   return (
     <div className="p-6">
       {/* Cabeçalho com ações */}
@@ -265,7 +262,7 @@ export function DocumentsManagement({
                     <p className="text-gray-600 mb-2">{item.description}</p>
                   )}
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <span>{formatDate(item.created_at)}</span>
+                    <span>{FormatDate(item.created_at)}</span>
                     {item.file_type && (
                       <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
                         {item.file_type.toUpperCase()}

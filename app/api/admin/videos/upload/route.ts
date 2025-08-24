@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { handleApiError, devLog } from '@/lib/error-handler';
 import { CreateClient } from '@/lib/supabase/server';
 
+import { UPLOAD_LIMITS } from '@/lib/constants/limits';
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validações básicas
-    const maxSize = 100 * 1024 * 1024; // 100MB
+    const maxSize = UPLOAD_LIMITS.VIDEO.MAX_SIZE; // 100MB
     const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/avi'];
 
     if (file.size > maxSize) {

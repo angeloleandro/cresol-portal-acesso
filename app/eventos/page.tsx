@@ -18,6 +18,7 @@ import Navbar from '../components/Navbar';
 
 
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface EventItem {
   id: string;
   title: string;
@@ -200,16 +201,6 @@ function EventosPageContent() {
   }, []);
 
   // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
 
   // Formatador para período do evento (data início e fim)
   const formatEventPeriod = (startDate: string, endDate: string | null) => {
@@ -217,12 +208,12 @@ function EventosPageContent() {
     
     // Se não houver data de término ou se for a mesma data, mostra apenas a data de início
     if (!endDate || new Date(endDate).toDateString() === start.toDateString()) {
-      return `${formatDate(startDate)}`;
+      return `${FormatDate(startDate)}`;
     }
     
     // Se tiver data de término em dia diferente
     const end = new Date(endDate);
-    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+    return `${FormatDate(startDate)} - ${FormatDate(endDate)}`;
   };
 
   // Opções para o select de setores (ChakraSelect)
@@ -414,8 +405,8 @@ function EventosPageContent() {
                               event.title,
                               event.description,
                               event.location,
-                              formatDate(event.start_date),
-                              event.end_date ? formatDate(event.end_date) : '',
+                              FormatDate(event.start_date),
+                              event.end_date ? FormatDate(event.end_date) : '',
                               event.sector_name || ''
                             ])
                           ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');

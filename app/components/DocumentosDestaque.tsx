@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface DocumentItem {
   id: string;
   title: string;
@@ -107,14 +108,6 @@ export default function DocumentosDestaque({ compact = false, limit = 4 }: Docum
   }, [limit]);
 
   // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric'
-    }).format(date);
-  };
 
   // Formatador de tipo de arquivo
   const getFileIcon = (fileType: string) => {
@@ -182,7 +175,7 @@ export default function DocumentosDestaque({ compact = false, limit = 4 }: Docum
                   )}
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-xs text-muted">
-                      {formatDate(document.created_at)}
+                      {FormatDate(document.created_at)}
                     </span>
                     {(document.sector_name || document.subsector_name) && (
                       <span className="text-xs text-primary">
@@ -240,7 +233,7 @@ export default function DocumentosDestaque({ compact = false, limit = 4 }: Docum
                     {getFileIcon(document.file_type)}
                   </div>
                   <span className="text-xs text-muted">
-                    {formatDate(document.created_at)}
+                    {FormatDate(document.created_at)}
                   </span>
                 </div>
                 

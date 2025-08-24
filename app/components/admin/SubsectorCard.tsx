@@ -4,7 +4,6 @@ import { Box, HStack, Text, Badge } from '@chakra-ui/react';
 import Link from 'next/link';
 
 import { Icon } from '../icons/Icon';
-import { Button } from "../ui/Button";
 
 interface SubsectorCardProps {
   subsector: {
@@ -33,7 +32,7 @@ export default function SubsectorCard({
       borderRadius="md"
       bg="white"
       transition="border-color 0.15s"
-      className={`${className} admin-subsector-card`}
+      className={`${className} admin-subsector-card flex flex-col h-full`}
       css={{
         borderColor: 'rgba(210, 210, 206, 0.6)',
         '&:hover': {
@@ -49,14 +48,12 @@ export default function SubsectorCard({
           </Text>
 
           <div className="relative group">
-            <Button
-              variant="ghost"
-              size="sm"
-              colorPalette="gray"
+            <button
               title="Opções"
+              className="p-2 text-primary hover:bg-orange-50 rounded-md transition-colors"
             >
-              <Icon name="more-horizontal" className="h-4 w-4" />
-            </Button>
+              <Icon name="more-horizontal" className="h-5 w-5" />
+            </button>
             
             {/* Menu dropdown que aparece no hover */}
             <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200/60 hover:border-gray-200 rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
@@ -83,11 +80,11 @@ export default function SubsectorCard({
         </HStack>
       </Box>
 
-      {/* Body com setor pai, descrição e informações */}
-      <Box className="p-6 space-y-5">
+      {/* Body com setor pai, descrição e informações - flex-grow para ocupar espaço disponível */}
+      <Box className="p-6 space-y-5 flex-grow">
         {/* Setor pai em destaque */}
         <HStack align="center" gap="2">
-          <Text fontSize="sm" color="gray.600">Setor:</Text>
+          <Text fontSize="sm" color="gray-600">Setor:</Text>
           <Badge colorScheme="orange" variant="outline">
             {subsector.sector_name}
           </Badge>
@@ -102,26 +99,18 @@ export default function SubsectorCard({
 
       </Box>
 
-      {/* Footer com ações */}
-      <Box className="p-6 flex gap-2 justify-start">
-        <Button
-          as={Link}
-          href={`/admin-subsetor/subsetores/${subsector.id}`}
-          variant="solid"
-          colorScheme="orange"
-          size="sm"
-        >
-          Gerenciar
-        </Button>
-        <Button
-          as={Link}
-          href={`/subsetores/${subsector.id}/equipe`}
-          variant="outline"
-          colorScheme="gray"
-          size="sm"
-        >
-          Equipe
-        </Button>
+      {/* Footer com ações - sempre fixo no final */}
+      <Box className="p-6 pt-3 flex gap-2 justify-start border-t border-gray-100">
+        <Link href={`/admin-subsetor/subsetores/${subsector.id}`}>
+          <button className="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary-dark transition-colors">
+            Gerenciar
+          </button>
+        </Link>
+        <Link href={`/subsetores/${subsector.id}/equipe`}>
+          <button className="px-4 py-2 border border-primary text-primary rounded-md text-sm font-medium hover:bg-orange-50 transition-colors">
+            Equipe
+          </button>
+        </Link>
       </Box>
     </Box>
   );

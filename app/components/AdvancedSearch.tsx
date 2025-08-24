@@ -15,6 +15,7 @@ import { Icon } from './icons/Icon';
 import OptimizedImage from './OptimizedImage';
 
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface SearchResult {
   id: string;
   title: string;
@@ -450,10 +451,6 @@ export default function AdvancedSearch({
     return labels[type] || type;
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -726,7 +723,7 @@ export default function AdvancedSearch({
                           </span>
                         </div>
                         <span className="text-gray-400 text-xs">
-                          {formatDate(historyItem.timestamp)}
+                          {FormatDate(historyItem.timestamp)}
                         </span>
                       </button>
                     ))}
@@ -820,10 +817,10 @@ export default function AdvancedSearch({
                             <span>📍 {result.metadata.location}</span>
                           )}
                           {result.metadata?.start_date && (
-                            <span>📅 {formatDate(result.metadata.start_date)}</span>
+                            <span>📅 {FormatDate(result.metadata.start_date)}</span>
                           )}
                           {result.metadata?.created_at && (
-                            <span>🕒 {formatDate(result.metadata.created_at)}</span>
+                            <span>🕒 {FormatDate(result.metadata.created_at)}</span>
                           )}
                         </div>
                       </div>

@@ -12,6 +12,7 @@ import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 import type { NewsItem } from './NewsCard';
 
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface NoticiasDestaqueProps {
   compact?: boolean;
   limit?: number;
@@ -56,12 +57,6 @@ function NoticiasDestaque({ compact = false, limit = 4, preloadedData }: Noticia
   }, [limit, preloadedData]);
 
   // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      year: 'numeric'
-    }).format(date);
-  };
 
   if (isLoading) {
     return (

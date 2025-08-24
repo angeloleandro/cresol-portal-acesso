@@ -15,6 +15,7 @@ import { useFocusManagement, useEscapeKey } from './VideoGallery.hooks';
 import { VideoModalProps, DashboardVideo } from './VideoGallery.types';
 import { Icon } from '../icons/Icon';
 
+import { FormatDate } from '@/lib/utils/formatters';
 /**
  * Main Video Modal Component
  */
@@ -241,14 +242,6 @@ function VideoPlayerLoading() {
  * Video Information Panel
  */
 function VideoInfo({ video }: { video: DashboardVideo }) {
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return null;
-    try {
-      return format(new Date(dateString), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-    } catch {
-      return null;
-    }
-  };
 
   return (
     <div className="p-6 bg-gray-50 border-t border-gray-200">
@@ -289,7 +282,7 @@ function VideoInfo({ video }: { video: DashboardVideo }) {
             {video.created_at && (
               <div className="flex items-center gap-2 text-sm text-neutral-600">
                 <Icon name="calendar" className="w-4 h-4 text-neutral-400" />
-                <span>Adicionado em {formatDate(video.created_at)}</span>
+                <span>Adicionado em {FormatDate(video.created_at)}</span>
               </div>
             )}
           </div>

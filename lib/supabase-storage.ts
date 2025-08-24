@@ -5,6 +5,7 @@
 import { logger } from './production-logger';
 import { supabase } from "./supabase";
 
+import { UPLOAD_LIMITS } from '@/lib/constants/limits';
 export const STORAGE_BUCKETS = {
   videos: 'videos',
   banners: 'banners'
@@ -28,7 +29,7 @@ export async function ensureVideosBucket(): Promise<boolean> {
       const { error } = await supabase.storage.createBucket(STORAGE_BUCKETS.videos, {
         public: true,
         allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-        fileSizeLimit: 10 * 1024 * 1024 // 10MB
+        fileSizeLimit: UPLOAD_LIMITS.IMAGE.MAX_SIZE // 10MB
       });
       
       if (error) {

@@ -365,17 +365,8 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
     }
   }, [state.hasMore, state.loading, state.filters, state.collections, getAuthHeaders]);
 
-  // Load inicial - apenas uma vez no mount do provider
-  useEffect(() => {
-    const initializeData = async () => {
-      await Promise.all([
-        fetchCollections(),
-        fetchStats()
-      ]);
-    };
-
-    initializeData();
-  }, [fetchCollections, fetchStats]);
+  // Removido load inicial automático - collections serão buscadas apenas quando necessário
+  // Isso evita chamadas desnecessárias nas páginas que não usam collections
 
   // Memoize do context value para evitar re-renders
   const contextValue = useMemo(() => ({

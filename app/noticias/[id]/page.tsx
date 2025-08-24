@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 
 import Breadcrumb from '../../components/Breadcrumb';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface NewsItem {
   id: string;
   title: string;
@@ -99,16 +100,6 @@ export default function NoticiaDetalhePage() {
   }, [router, id]);
 
   // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
 
   // Função para renderizar HTML como conteúdo
   const renderHTML = (html: string) => {
@@ -190,7 +181,7 @@ export default function NoticiaDetalhePage() {
               {news.category}
             </span>
             <span className="text-sm text-cresol-gray">
-              {formatDate(news.created_at)}
+              {FormatDate(news.created_at)}
             </span>
           </div>
           <h1 className="text-3xl font-bold text-cresol-gray mb-4">{news.title}</h1>
@@ -251,7 +242,7 @@ export default function NoticiaDetalhePage() {
                     <p className="text-sm text-cresol-gray mb-2 line-clamp-2">{item.summary}</p>
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-cresol-gray">
-                        {formatDate(item.created_at)}
+                        {FormatDate(item.created_at)}
                       </span>
                       <span className="text-primary font-medium">
                         Leia mais →

@@ -20,6 +20,7 @@ import { Icon } from '../icons/Icon';
 // Enhanced thumbnail system
 import { VideoThumbnail } from '../VideoThumbnail';
 
+import { FormatDate } from '@/lib/utils/formatters';
 /**
  * Admin Video Card Props - Extends base props with separate action handlers
  */
@@ -62,15 +63,6 @@ export function EnhancedVideoCard({
       handleCardClick();
     }
   }, [handleCardClick]);
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '';
-    try {
-      return format(new Date(dateString), 'dd MMM yyyy', { locale: ptBR });
-    } catch {
-      return '';
-    }
-  };
 
   return (
     <motion.div
@@ -164,7 +156,7 @@ export function EnhancedVideoCard({
           <div className="flex flex-col gap-1">
             {video.created_at && (
               <span className="text-xs text-neutral-400">
-                {formatDate(video.created_at)}
+                {FormatDate(video.created_at)}
               </span>
             )}
           </div>
@@ -235,15 +227,6 @@ export function AdminVideoCard({
       handlePlayClick();
     }
   }, [handlePlayClick]);
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '';
-    try {
-      return format(new Date(dateString), 'dd MMM yyyy', { locale: ptBR });
-    } catch {
-      return '';
-    }
-  };
 
   return (
     <motion.div
@@ -337,7 +320,7 @@ export function AdminVideoCard({
           <div className="flex flex-col gap-1">
             {video.created_at && (
               <span className="text-xs text-neutral-400">
-                {formatDate(video.created_at)}
+                {FormatDate(video.created_at)}
               </span>
             )}
           </div>

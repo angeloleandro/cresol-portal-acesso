@@ -18,6 +18,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface Profile {
   id: string;
   full_name: string;
@@ -307,17 +308,6 @@ export default function ProfilePage() {
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Nunca';
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   const getRoleName = (role?: string) => {
     switch (role) {
       case 'admin': return 'Administrador';
@@ -521,7 +511,7 @@ export default function ProfilePage() {
                       Conta criada em
                     </label>
                     <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-600">
-                      {formatDate(profile?.created_at)}
+                      {FormatDate(profile?.created_at)}
                     </div>
                   </div>
                 </div>

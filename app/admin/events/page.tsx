@@ -20,6 +20,7 @@ import { supabase } from '@/lib/supabase';
 
 import { EventForm } from './components/EventForm';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface Event {
   id: string;
   title: string;
@@ -256,13 +257,6 @@ export default function EventsPage() {
     } finally {
       setActionLoading(null);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      minute: '2-digit'
-    }).format(date);
   };
 
   const resetFilters = () => {
@@ -590,7 +584,7 @@ export default function EventsPage() {
                           </div>
                           <div className="flex items-center text-gray-500">
                             <Icon name="clock" className="h-4 w-4 text-gray-400 mr-1" />
-                            <span>{formatDate(event.start_date)}</span>
+                            <span>{FormatDate(event.start_date)}</span>
                           </div>
                         </div>
                       </td>

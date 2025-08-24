@@ -2,8 +2,6 @@
 
 "use client";
 
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useCallback, memo, useRef, useMemo } from 'react';
 
@@ -17,6 +15,7 @@ import { FormatFileSize as formatFileSize } from '@/lib/video-utils';
 import { VideoModalProps, DashboardVideo } from './VideoGallery.types';
 import { Icon } from '../icons/Icon';
 
+import { FormatDate } from '@/lib/utils/formatters';
 /**
  * Clean Video Modal Component
  */
@@ -330,16 +329,7 @@ const CleanVideoPlayerError = memo(function CleanVideoPlayerError({ message }: {
  * Clean Video Information Panel - Simplified and Memoized
  */
 const CleanVideoInfo = memo(function CleanVideoInfo({ video }: { video: DashboardVideo }) {
-  const formatDate = useCallback((dateString?: string) => {
-    if (!dateString) return null;
-    try {
-      return format(new Date(dateString), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-    } catch {
-      return null;
-    }
-  }, []);
-
-  const formattedDate = useMemo(() => formatDate(video.created_at), [formatDate, video.created_at]);
+  const formattedDate = useMemo(() => FormatDate(video.created_at), [video.created_at]);
 
   return (
     <div className="p-6 bg-gray-50 border-t border-gray-200">

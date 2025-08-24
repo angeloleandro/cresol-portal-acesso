@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { supabase } from '@/lib/supabase';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface EventItem {
   id: string;
   title: string;
@@ -209,16 +210,6 @@ export default function EventCalendar() {
   };
 
   // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
 
   // Formatador para período do evento (data início e fim)
   const formatEventPeriod = (startDate: string, endDate: string | null) => {
@@ -226,12 +217,12 @@ export default function EventCalendar() {
     
     // Se não houver data de término ou se for a mesma data, mostra apenas a data de início
     if (!endDate || new Date(endDate).toDateString() === start.toDateString()) {
-      return `${formatDate(startDate)}`;
+      return `${FormatDate(startDate)}`;
     }
     
     // Se tiver data de término em dia diferente
     const end = new Date(endDate);
-    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+    return `${FormatDate(startDate)} - ${FormatDate(endDate)}`;
   };
 
   // Função para formatar o nome do mês

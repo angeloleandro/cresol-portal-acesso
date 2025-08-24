@@ -38,6 +38,7 @@ function getFileTypeLabel(mimeType?: string): string {
 }
 import Icon from '../../components/icons/Icon';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface DocumentDetail {
   id: string;
   title: string;
@@ -156,16 +157,6 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
   }, [params.id, router]);
 
   // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: 'long', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
 
   // Função para baixar documento
   const handleDownload = () => {
@@ -256,7 +247,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
                 <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                   <div className="flex items-center">
                     <Icon name="calendar" className="mr-1 h-4 w-4" />
-                    {formatDate(document.created_at)}
+                    {FormatDate(document.created_at)}
                   </div>
                   <div className="flex items-center">
                     {document.type === 'sector' ? (
@@ -309,7 +300,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
                   <div className="flex justify-between">
                     <dt className="text-gray-500">Última atualização:</dt>
                     <dd className="font-medium text-gray-900">
-                      {formatDate(document.updated_at)}
+                      {FormatDate(document.updated_at)}
                     </dd>
                   </div>
                 </dl>

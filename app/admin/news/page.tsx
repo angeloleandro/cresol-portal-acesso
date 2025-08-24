@@ -21,6 +21,7 @@ import { supabase } from '@/lib/supabase';
 
 import { NewsForm } from './components/NewsForm';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface News {
   id: string;
   title: string;
@@ -189,14 +190,6 @@ export default function NewsAdminPage() {
   const getFilteredSubsectors = () => {
     if (!filters.sector_id) return subsectors;
     return subsectors.filter(sub => sub.sector_id === filters.sector_id);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('pt-BR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(new Date(dateString));
   };
 
   const truncateText = (text: string, maxLength: number) => {
@@ -467,9 +460,9 @@ export default function NewsAdminPage() {
 
                           {/* Dados da notícia */}
                           <div className="flex items-center space-x-4 text-sm text-muted">
-                            <span>Criada em {formatDate(newsItem.created_at)}</span>
+                            <span>Criada em {FormatDate(newsItem.created_at)}</span>
                             {newsItem.updated_at !== newsItem.created_at && (
-                              <span>• Editada em {formatDate(newsItem.updated_at)}</span>
+                              <span>• Editada em {FormatDate(newsItem.updated_at)}</span>
                             )}
                           </div>
                         </div>

@@ -14,6 +14,7 @@ import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
 
 
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface Message {
   id: string;
   title: string;
@@ -230,22 +231,6 @@ export default function MessagesPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diffInDays === 0) {
-      return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    } else if (diffInDays === 1) {
-      return 'Ontem';
-    } else if (diffInDays < 7) {
-      return `${diffInDays} dias atrás`;
-    } else {
-      return date.toLocaleDateString('pt-BR');
-    }
-  };
-
   const unreadCount = messages.filter(m => !m.is_read).length;
 
   if (loading && messages.length === 0) {
@@ -396,7 +381,7 @@ export default function MessagesPage() {
                           
                           <div className="flex items-center text-sm text-gray-500 space-x-4">
                             <span>De: {message.sender_name}</span>
-                            <span>{formatDate(message.created_at)}</span>
+                            <span>{FormatDate(message.created_at)}</span>
                           </div>
                         </div>
                         

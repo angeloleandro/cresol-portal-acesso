@@ -8,6 +8,7 @@ import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { FormatDate } from '@/lib/utils/formatters';
+import { UPLOAD_LIMITS } from '@/lib/constants/limits';
 
 import { SectorImage } from '../types/sector.types';
 // Componente simples de upload inline
@@ -441,9 +442,9 @@ export function ImagesManagement({
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                // Validar tamanho (10MB)
-                                if (file.size > 10 * 1024 * 1024) {
-                                  setUploadError('Arquivo muito grande. Máximo 10MB.');
+                                // Validar tamanho
+                                if (file.size > UPLOAD_LIMITS.IMAGE.MAX_SIZE) {
+                                  setUploadError(`Arquivo muito grande. Máximo ${UPLOAD_LIMITS.IMAGE.MAX_SIZE_TEXT}.`);
                                   return;
                                 }
                                 setSelectedFile(file);

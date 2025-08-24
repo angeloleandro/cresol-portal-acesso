@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { handleApiError, devLog } from '@/lib/error-handler';
 import { CreateClient } from '@/lib/supabase/server';
 
+import { UPLOAD_LIMITS } from '@/lib/constants/limits';
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validações básicas
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = UPLOAD_LIMITS.IMAGE.MAX_SIZE; // 10MB
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 
     if (file.size > maxSize) {

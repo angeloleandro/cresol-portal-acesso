@@ -3,7 +3,8 @@ import { updateSession } from './lib/supabase/middleware';
 import { 
   getOptimizedUserAuth, 
   hasAdminAccess, 
-  hasSectorAdminAccess, 
+  hasSectorAdminAccess,
+  hasSubsectorAdminAccess,
   extractAccessToken,
   getRouteType 
 } from './lib/middleware-auth';
@@ -39,7 +40,7 @@ export async function middleware(request: NextRequest) {
     
     if (!authResult.user) {
       // Não autenticado - redirecionar para login se acessando área restrita ou raiz
-      if (routeType.isAdmin || routeType.isSectorAdmin || request.nextUrl.pathname === '/') {
+      if (routeType.isAdmin || routeType.isSectorAdmin || routeType.isSubsectorAdmin || request.nextUrl.pathname === '/') {
         const redirectUrl = new URL('/login', request.url);
         redirectUrl.searchParams.set('redirectedFrom', request.nextUrl.pathname);
         redirectUrl.searchParams.set('auth', 'failed');
@@ -75,6 +76,11 @@ export async function middleware(request: NextRequest) {
     
     // Verificar permissões para rotas sector_admin
     if (routeType.isSectorAdmin && !hasSectorAdminAccess(user.role)) {
+      return NextResponse.redirect(new URL('/home', request.url));
+    }
+    
+    // Verificar permissões para rotas subsector_admin
+    if (routeType.isSubsectorAdmin && !hasSubsectorAdminAccess(user.role)) {
       return NextResponse.redirect(new URL('/home', request.url));
     }
     

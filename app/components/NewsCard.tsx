@@ -1,12 +1,11 @@
 'use client';
 
 import clsx from 'clsx';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import Link from 'next/link';
-import { memo, useCallback } from 'react';
+import { memo } from 'react';
 
 import OptimizedImage from './OptimizedImage';
+import { FormatDate } from '@/lib/utils/formatters';
 
 /**
  * News Item Interface
@@ -34,6 +33,32 @@ export interface NewsCardProps {
   showImage?: boolean;
 }
 
+/**
+ * Main NewsCard Component
+ */
+export const NewsCard = memo(({
+  news,
+  variant = 'horizontal',
+  className,
+  priority = false,
+  showCategory = true,
+  showDate = true,
+  showImage = true
+}: NewsCardProps) => {
+  if (variant === 'compact') {
+    return <CompactNewsCard news={news} className={className} />;
+  }
+  
+  if (variant === 'featured') {
+    return <FeaturedNewsCard news={news} className={className} priority={priority} />;
+  }
+  
+  return <HorizontalNewsCard news={news} className={className} priority={priority} showCategory={showCategory} showDate={showDate} showImage={showImage} />;
+});
+
+/**
+ * Horizontal News Card Component
+ */
 export const HorizontalNewsCard = memo(({
   news,
   className,
@@ -42,249 +67,120 @@ export const HorizontalNewsCard = memo(({
   showDate = true,
   showImage = true
 }: Omit<NewsCardProps, 'variant'>) => {
-  
-  const formatDate = useCallback((dateString: string) => {
-    try {
-      return format(new Date(dateString), 'dd MMM yyyy', { locale: ptBR });
-    } catch {
-      return '';
-    }
-  }, []);
-
   return (
     <Link 
       href={`/noticias/${news.id}`}
       className={clsx(
-        // Card.Root equivalent - horizontal flex layout
-        'group block',
-        'bg-white rounded-md overflow-hidden',
-        'border border-gray-200/60 hover:border-gray-200',
-        'transition-colors duration-150',
-        'flex flex-col md:flex-row',
-        'max-w-4xl', // Chakra's maxW="xl" equivalent
+        'block bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200',
         className
       )}
     >
-      {/* Image Section - Chakra UI Image equivalent */}
-      {showImage && (
-        <div className="md:w-1/3 h-56 md:h-auto relative overflow-hidden flex-shrink-0">
-          {news.image_url ? (
+      <div className="flex">
+        {showImage && news.image_url && (
+          <div className="relative w-48 h-32 flex-shrink-0">
             <OptimizedImage
               src={news.image_url}
               alt={news.title}
               fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+              className="object-cover rounded-l-lg"
               priority={priority}
             />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-              <span className="text-2xl font-bold text-primary/60">Cresol</span>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Content Section - Chakra UI Box equivalent */}
-      <div className="flex-1 flex flex-col">
-        {/* Card.Body equivalent */}
-        <div className="p-6 flex-1 flex flex-col">
-          {/* Card.Title with badges */}
-          <div className="mb-3">
-            <h3 className="heading-4 text-title mb-2 leading-tight group-hover:text-primary transition-colors duration-150">
-              {news.title}
-            </h3>
-            
-            {/* HStack equivalent for badges */}
-            {(showCategory || showDate) && (
-              <div className="flex items-center gap-2 mt-2">
-                {showCategory && (
-                  <span className={clsx(
-                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                    'bg-primary/10 text-primary border border-primary/20'
-                  )}>
-                    {news.category}
-                  </span>
-                )}
-                {showDate && (
-                  <span className="text-xs text-muted">
-                    {formatDate(news.created_at)}
-                  </span>
-                )}
-              </div>
-            )}
           </div>
-          
-          {/* Card.Description equivalent */}
-          <p className="body-text text-body leading-relaxed line-clamp-3 flex-grow">
-            {news.summary}
-          </p>
-        </div>
-        
-        {/* Card.Footer equivalent */}
-        <div className="px-6 pb-6">
-          <span className="inline-flex items-center text-sm font-medium text-primary group-hover:text-primary-dark transition-colors duration-150">
-            Leia mais
-            <svg className="ml-1 w-4 h-4 transition-transform duration-150 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </span>
-        </div>
-      </div>
-    </Link>
-  );
-});
-
-HorizontalNewsCard.displayName = 'HorizontalNewsCard';
-
-export const CompactNewsCard = memo(({
-  news,
-  className,
-  showCategory = true,
-  showDate = true
-}: Omit<NewsCardProps, 'variant' | 'showImage'>) => {
-  
-  const formatDate = useCallback((dateString: string) => {
-    try {
-      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
-    } catch {
-      return '';
-    }
-  }, []);
-
-  return (
-    <Link 
-      href={`/noticias/${news.id}`}
-      className={clsx(
-        'group block p-3',
-        'bg-white border border-gray-200/60 hover:border-gray-200',
-        'rounded-md transition-colors duration-150',
-        className
-      )}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <h3 className="body-text-bold text-title line-clamp-2 mb-1 group-hover:text-primary transition-colors duration-150">
-            {news.title}
-          </h3>
-          <div className="flex items-center gap-2 text-xs text-muted">
-            {showDate && <span>{formatDate(news.created_at)}</span>}
-            {showCategory && showDate && <span>•</span>}
-            {showCategory && <span>{news.category}</span>}
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-});
-
-CompactNewsCard.displayName = 'CompactNewsCard';
-
-export const FeaturedNewsCard = memo(({
-  news,
-  className,
-  priority = true,
-  showCategory = true,
-  showDate = true,
-  showImage = true
-}: Omit<NewsCardProps, 'variant'>) => {
-  
-  const formatDate = useCallback((dateString: string) => {
-    try {
-      return format(new Date(dateString), 'dd MMM yyyy', { locale: ptBR });
-    } catch {
-      return '';
-    }
-  }, []);
-
-  return (
-    <Link 
-      href={`/noticias/${news.id}`}
-      className={clsx(
-        'group block',
-        'bg-white rounded-md overflow-hidden',
-        'border border-gray-200/60 hover:border-gray-200',
-        'transition-colors duration-150',
-        className
-      )}
-    >
-      {/* Featured Image */}
-      {showImage && (
-        <div className="aspect-video relative overflow-hidden">
-          {news.image_url ? (
-            <OptimizedImage
-              src={news.image_url}
-              alt={news.title}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-              priority={priority}
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-              <span className="text-3xl font-bold text-primary/60">Cresol</span>
-            </div>
-          )}
-          
-          {/* Overlay Badge */}
-          {showCategory && (
-            <div className="absolute top-4 left-4">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/90 text-primary backdrop-blur-sm border border-white/20">
+        )}
+        <div className="flex-1 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            {showCategory && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                 {news.category}
               </span>
-            </div>
-          )}
+            )}
+            {showDate && (
+              <span className="text-xs text-gray-500">
+                {FormatDate(news.created_at)}
+              </span>
+            )}
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{news.title}</h3>
+          <p className="text-sm text-gray-600 line-clamp-2">{news.summary}</p>
         </div>
+      </div>
+    </Link>
+  );
+});
+
+/**
+ * Compact News Card Component
+ */
+export const CompactNewsCard = memo(({
+  news,
+  className
+}: Omit<NewsCardProps, 'variant'>) => {
+  return (
+    <Link 
+      href={`/noticias/${news.id}`}
+      className={clsx(
+        'block p-3 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow duration-200',
+        className
       )}
-      
-      {/* Content */}
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="heading-3 text-title leading-tight group-hover:text-primary transition-colors duration-150">
-            {news.title}
-          </h3>
-          {showDate && (
-            <span className="text-sm text-muted ml-4 flex-shrink-0">
-              {formatDate(news.created_at)}
-            </span>
-          )}
-        </div>
-        
-        <p className="body-text text-body leading-relaxed line-clamp-3 mb-4">
-          {news.summary}
-        </p>
-        
-        <span className="inline-flex items-center text-sm font-medium text-primary group-hover:text-primary-dark transition-colors duration-150">
-          Leia mais
-          <svg className="ml-1 w-4 h-4 transition-transform duration-150 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+    >
+      <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{news.title}</h3>
+      <p className="text-xs text-gray-600 line-clamp-2">{news.summary}</p>
+      <div className="flex items-center gap-2 mt-2">
+        <span className="text-xs text-gray-500">
+          {FormatDate(news.created_at)}
         </span>
       </div>
     </Link>
   );
 });
 
-FeaturedNewsCard.displayName = 'FeaturedNewsCard';
-
 /**
- * Main News Card Component with variant support
+ * Featured News Card Component
  */
-export const NewsCard = memo(({
-  variant = 'horizontal',
-  ...props
-}: NewsCardProps) => {
-  switch (variant) {
-    case 'compact':
-      return <CompactNewsCard {...props} />;
-    case 'featured':
-      return <FeaturedNewsCard {...props} />;
-    case 'horizontal':
-    default:
-      return <HorizontalNewsCard {...props} />;
-  }
+export const FeaturedNewsCard = memo(({
+  news,
+  className,
+  priority = false
+}: Omit<NewsCardProps, 'variant'>) => {
+  return (
+    <Link 
+      href={`/noticias/${news.id}`}
+      className={clsx(
+        'block bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200',
+        className
+      )}
+    >
+      {news.image_url && (
+        <div className="relative h-48">
+          <OptimizedImage
+            src={news.image_url}
+            alt={news.title}
+            fill
+            className="object-cover"
+            priority={priority}
+          />
+        </div>
+      )}
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+            {news.category}
+          </span>
+          <span className="text-xs text-gray-500">
+            {FormatDate(news.created_at)}
+          </span>
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">{news.title}</h3>
+        <p className="text-sm text-gray-600 line-clamp-3">{news.summary}</p>
+      </div>
+    </Link>
+  );
 });
 
+// Display names for debugging
 NewsCard.displayName = 'NewsCard';
+HorizontalNewsCard.displayName = 'HorizontalNewsCard';
+CompactNewsCard.displayName = 'CompactNewsCard';
+FeaturedNewsCard.displayName = 'FeaturedNewsCard';
 
 export default NewsCard;

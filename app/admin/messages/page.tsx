@@ -20,6 +20,7 @@ import { supabase } from '@/lib/supabase';
 
 import { MessageForm } from './components/MessageForm';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface Message {
   id: string;
   title: string;
@@ -235,13 +236,6 @@ export default function MessagesAdminPage() {
     } finally {
       setActionLoading(null);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      minute: '2-digit'
-    }).format(date);
   };
 
   const resetFilters = () => {
@@ -555,13 +549,13 @@ export default function MessagesAdminPage() {
                         
                         <span className="flex items-center">
                           <Icon name="calendar" className="h-3 w-3 mr-1" />
-                          {formatDate(message.created_at)}
+                          {FormatDate(message.created_at)}
                         </span>
                         
                         {message.updated_at !== message.created_at && (
                           <span className="flex items-center">
                             <Icon name="edit" className="h-3 w-3 mr-1" />
-                            Editado em {formatDate(message.updated_at)}
+                            Editado em {FormatDate(message.updated_at)}
                           </span>
                         )}
                       </div>

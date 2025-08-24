@@ -133,6 +133,17 @@ export function HasSectorAdminAccess(role: string): boolean {
 }
 
 /**
+ * Verifica se usuário tem permissão para acessar rota subsector_admin
+ */
+/**
+ * hasSubsectorAdminAccess function
+ * @todo Add proper documentation
+ */
+export function HasSubsectorAdminAccess(role: string): boolean {
+  return role === 'admin' || role === 'sector_admin' || role === 'subsector_admin';
+}
+
+/**
  * extractAccessToken function
  * @todo Add proper documentation
  */
@@ -191,12 +202,14 @@ export function ExtractAccessToken(request: Request): string | null {
 export function GetRouteType(pathname: string): {
   isAdmin: boolean;
   isSectorAdmin: boolean;
+  isSubsectorAdmin: boolean;
   isApiAdmin: boolean;
   isPublicApi: boolean;
   requiresAuth: boolean;
 } {
   const isSectorAdminRoute = pathname.startsWith('/admin-setor');
-  const isAdminRoute = pathname.startsWith('/admin') && !isSectorAdminRoute;
+  const isSubsectorAdminRoute = pathname.startsWith('/admin-subsetor');
+  const isAdminRoute = pathname.startsWith('/admin') && !isSectorAdminRoute && !isSubsectorAdminRoute;
   const isApiAdminRoute = pathname.startsWith('/api/admin');
   
   // APIs públicas para usuários autenticados (apenas GET)
@@ -209,9 +222,10 @@ export function GetRouteType(pathname: string): {
   return {
     isAdmin: isAdminRoute,
     isSectorAdmin: isSectorAdminRoute,
+    isSubsectorAdmin: isSubsectorAdminRoute,
     isApiAdmin: isApiAdminRoute && !isPublicApi,
     isPublicApi,
-    requiresAuth: pathname === '/' || pathname === '/dashboard' || isAdminRoute || isSectorAdminRoute || isApiAdminRoute || isPublicApi
+    requiresAuth: pathname === '/' || pathname === '/dashboard' || isAdminRoute || isSectorAdminRoute || isSubsectorAdminRoute || isApiAdminRoute || isPublicApi
   };
 }
 
@@ -219,5 +233,6 @@ export function GetRouteType(pathname: string): {
 // Export camelCase versions for backward compatibility
 export const hasAdminAccess = HasAdminAccess;
 export const hasSectorAdminAccess = HasSectorAdminAccess;
+export const hasSubsectorAdminAccess = HasSubsectorAdminAccess;
 export const extractAccessToken = ExtractAccessToken;
 export const getRouteType = GetRouteType;

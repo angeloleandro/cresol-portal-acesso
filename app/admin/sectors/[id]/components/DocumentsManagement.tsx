@@ -12,6 +12,7 @@ import { FormatDate, FormatFileSize } from '@/lib/utils/formatters';
 
 import { SectorDocument } from '../types/sector.types';
 
+import { UPLOAD_LIMITS } from '@/lib/constants/limits';
 interface DocumentsManagementProps {
   sectorId: string;
   documents: SectorDocument[];
@@ -37,7 +38,7 @@ const FILE_TYPES = {
 } as const;
 
 const ALLOWED_FILE_TYPES = Object.values(FILE_TYPES);
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILE_SIZE = UPLOAD_LIMITS.IMAGE.MAX_SIZE; // 10MB
 const MAX_FILE_SIZE_LABEL = '10MB';
 
 /**

@@ -12,6 +12,7 @@ import { FormatDate, FormatFileSize } from '@/lib/utils/formatters';
 
 import { SubsectorImage } from '../types/subsector.types';
 
+import { UPLOAD_LIMITS } from '@/lib/constants/limits';
 interface ImagesManagementProps {
   subsectorId: string;
   images: SubsectorImage[];
@@ -440,7 +441,7 @@ export function ImagesManagement({
                               const file = e.target.files?.[0];
                               if (file) {
                                 // Validar tamanho (10MB)
-                                if (file.size > 10 * 1024 * 1024) {
+                                if (file.size > UPLOAD_LIMITS.IMAGE.MAX_SIZE) {
                                   setUploadError('Arquivo muito grande. Máximo 10MB.');
                                   return;
                                 }

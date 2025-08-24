@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface MessageItem {
   id: string;
   title: string;
@@ -101,14 +102,6 @@ export default function MensagensDestaque({ compact = false, limit = 4 }: Mensag
   }, [limit]);
 
   // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric'
-    }).format(date);
-  };
 
   if (isLoading) {
     return (
@@ -153,7 +146,7 @@ export default function MensagensDestaque({ compact = false, limit = 4 }: Mensag
                   <p className="body-text-small text-muted line-clamp-2 mt-1">{message.content}</p>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-xs text-muted">
-                      {formatDate(message.created_at)}
+                      {FormatDate(message.created_at)}
                     </span>
                     {(message.sector_name || message.subsector_name) && (
                       <span className="text-xs text-primary">
@@ -206,7 +199,7 @@ export default function MensagensDestaque({ compact = false, limit = 4 }: Mensag
                     Mensagem
                   </span>
                   <span className="text-xs text-muted">
-                    {formatDate(message.created_at)}
+                    {FormatDate(message.created_at)}
                   </span>
                 </div>
                 

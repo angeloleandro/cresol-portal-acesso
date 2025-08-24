@@ -5,6 +5,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { CropArea } from '@/lib/types/common';
 
+import { UPLOAD_LIMITS } from '@/lib/constants/limits';
 export const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     // Check if we're in browser environment
@@ -145,7 +146,7 @@ export async function uploadImageToSupabase(
  */
 export function ValidateImageFile(file: File): { valid: boolean; error?: string } {
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = UPLOAD_LIMITS.IMAGE.MAX_SIZE; // 5MB
 
   if (!validTypes.includes(file.type)) {
     return { 

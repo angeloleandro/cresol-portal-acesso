@@ -12,6 +12,7 @@ import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
 import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface MessageItem {
   id: string;
   title: string;
@@ -148,16 +149,6 @@ export default function MensagensPage() {
   }, [messages, selectedSector, searchTerm]);
 
   // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
 
   if (loading) {
     return (
@@ -276,7 +267,7 @@ export default function MensagensPage() {
                       )}
                     </div>
                     <span className="text-xs text-muted">
-                      {formatDate(message.created_at)}
+                      {FormatDate(message.created_at)}
                     </span>
                   </div>
                   

@@ -28,6 +28,7 @@ import {
 } from './ImagePreview.hooks';
 import { ImageModalProps, GalleryImage } from './ImagePreview.types';
 
+import { FormatDate } from '@/lib/utils/formatters';
 /**
  * Main Image Modal Component
  */
@@ -350,14 +351,6 @@ function ImageInfo({
   currentIndex?: number; 
   totalImages?: number; 
 }) {
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return null;
-    try {
-      return format(new Date(dateString), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-    } catch {
-      return null;
-    }
-  };
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return null;
@@ -402,7 +395,7 @@ function ImageInfo({
             {image.created_at && (
               <div className="flex items-center gap-2">
                 <Icon name="calendar" className="w-4 h-4 text-gray-400" />
-                <span>Adicionado em {formatDate(image.created_at)}</span>
+                <span>Adicionado em {FormatDate(image.created_at)}</span>
               </div>
             )}
 

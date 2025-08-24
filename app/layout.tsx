@@ -53,7 +53,7 @@ export const metadata: Metadata = {
  * generateViewport function
  * @todo Add proper documentation
  */
-export function GenerateViewport() {
+export function generateViewport() {
   return {
     themeColor: COLORS.primary.DEFAULT,
     colorScheme: 'light',

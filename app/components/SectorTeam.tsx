@@ -118,10 +118,10 @@ export default function SectorTeam({
               {directMembers.slice(0, directShown).map(member => (
                 <div key={member.id} className="flex items-center">
                   <div className="relative h-8 w-8 rounded-full overflow-hidden bg-cresol-gray-light mr-3 flex-shrink-0">
-                    {member.profiles.avatar_url ? (
+                    {member.profiles?.avatar_url ? (
                       <OptimizedImage
                         src={member.profiles.avatar_url}
-                        alt={member.profiles.full_name}
+                        alt={member.profiles?.full_name || 'Membro'}
                         fill
                         className="object-cover"
                       />
@@ -133,20 +133,20 @@ export default function SectorTeam({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-cresol-gray-dark truncate">
-                      {member.profiles.full_name}
+                      {member.profiles?.full_name || 'Nome não disponível'}
                     </p>
                     <p className="text-xs text-cresol-gray truncate">
-                      {member.position || member.profiles.position || 'Membro da equipe'}
+                      {member.position || member.profiles?.position || 'Membro da equipe'}
                     </p>
-                    {(member.profiles.phone || member.profiles.bio) && (
+                    {(member.profiles?.phone || member.profiles?.bio) && (
                       <div className="mt-0.5 space-y-0.5">
-                        {member.profiles.phone && (
+                        {member.profiles?.phone && (
                           <p className="text-xs text-cresol-gray truncate flex items-center gap-1">
                             <Icon name="phone" className="h-3 w-3" />
                             {member.profiles.phone}
                           </p>
                         )}
-                        {member.profiles.bio && (
+                        {member.profiles?.bio && (
                           <p className="text-xs text-cresol-gray truncate" title={member.profiles.bio}>
                             {member.profiles.bio.substring(0, 30)}{member.profiles.bio.length > 30 ? '...' : ''}
                           </p>
@@ -168,10 +168,10 @@ export default function SectorTeam({
               {subsectorMembers.slice(0, subsectorShown).map(member => (
                 <div key={member.id} className="flex items-center">
                   <div className="relative h-8 w-8 rounded-full overflow-hidden bg-cresol-gray-light mr-3 flex-shrink-0">
-                    {member.profiles.avatar_url ? (
+                    {member.profiles?.avatar_url ? (
                       <OptimizedImage
                         src={member.profiles.avatar_url}
-                        alt={member.profiles.full_name}
+                        alt={member.profiles?.full_name || 'Membro'}
                         fill
                         className="object-cover"
                       />
@@ -183,11 +183,11 @@ export default function SectorTeam({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-cresol-gray-dark truncate">
-                      {member.profiles.full_name}
+                      {member.profiles?.full_name || 'Nome não disponível'}
                     </p>
                     <div className="flex items-center gap-1">
                       <p className="text-xs text-cresol-gray truncate">
-                        {member.position || member.profiles.position || 'Membro'}
+                        {member.position || member.profiles?.position || 'Membro'}
                       </p>
                       {member.subsectors && (
                         <span className="text-xs text-secondary">
@@ -195,15 +195,15 @@ export default function SectorTeam({
                         </span>
                       )}
                     </div>
-                    {(member.profiles.phone || member.profiles.bio) && (
+                    {(member.profiles?.phone || member.profiles?.bio) && (
                       <div className="mt-0.5 space-y-0.5">
-                        {member.profiles.phone && (
+                        {member.profiles?.phone && (
                           <p className="text-xs text-cresol-gray truncate flex items-center gap-1">
                             <Icon name="phone" className="h-3 w-3" />
                             {member.profiles.phone}
                           </p>
                         )}
-                        {member.profiles.bio && (
+                        {member.profiles?.bio && (
                           <p className="text-xs text-cresol-gray truncate" title={member.profiles.bio}>
                             {member.profiles.bio.substring(0, 30)}{member.profiles.bio.length > 30 ? '...' : ''}
                           </p>

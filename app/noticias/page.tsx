@@ -8,6 +8,7 @@ import OptimizedImage from '@/app/components/OptimizedImage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { supabase } from '@/lib/supabase';
+import { FormatDate } from '@/lib/utils/formatters';
 
 import Breadcrumb from '../components/Breadcrumb';
 import Footer from '../components/Footer';
@@ -77,17 +78,6 @@ export default function NoticiasPage() {
     checkUser();
   }, [router]);
 
-  // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
 
   // Filtrar notícias por categoria
   const filteredNews = selectedCategory === 'all' 
@@ -224,7 +214,7 @@ export default function NoticiasPage() {
                         {item.category}
                       </span>
                       <span className="text-xs text-muted">
-                        {formatDate(item.created_at)}
+                        {FormatDate(item.created_at)}
                       </span>
                     </div>
                     <h2 className="heading-3 mb-3">{item.title}</h2>

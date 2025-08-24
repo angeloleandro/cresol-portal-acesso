@@ -11,6 +11,7 @@ import Breadcrumb from '../../components/Breadcrumb';
 import Footer from '../../components/Footer';
 import Navbar from '../../components/Navbar';
 
+import { FormatDate } from '@/lib/utils/formatters';
 interface MessageItem {
   id: string;
   title: string;
@@ -187,16 +188,6 @@ export default function MensagemDetalhePage() {
   }, [router, id]);
 
   // Formatador de data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
 
   if (loading) {
     return (
@@ -269,7 +260,7 @@ export default function MensagemDetalhePage() {
               <svg className="inline h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {formatDate(message.created_at)}
+              {FormatDate(message.created_at)}
             </span>
             <span>
               <svg className="inline h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,7 +310,7 @@ export default function MensagemDetalhePage() {
                     <p className="text-sm text-cresol-gray mb-2 line-clamp-3">{item.content}</p>
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-cresol-gray">
-                        {formatDate(item.created_at)}
+                        {FormatDate(item.created_at)}
                       </span>
                       <span className="text-primary font-medium">
                         Ler mais →
