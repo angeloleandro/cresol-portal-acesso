@@ -132,6 +132,26 @@ export async function GET(request: NextRequest) {
     if (!includeUnpublished) {
       documentsQuery = documentsQuery.eq('is_published', true);
     }
+    
+    // 5. Build videos query with conditional filter
+    let videosQuery = supabase
+      .from('subsector_videos')
+      .select('*')
+      .eq('subsector_id', subsectorId);
+    
+    if (!includeUnpublished) {
+      videosQuery = videosQuery.eq('is_published', true);
+    }
+
+    // 6. Build images query with conditional filter
+    let imagesQuery = supabase
+      .from('subsector_images')
+      .select('*')
+      .eq('subsector_id', subsectorId);
+    
+    if (!includeUnpublished) {
+      imagesQuery = imagesQuery.eq('is_published', true);
+    }
 
     const promises = [
       // 1. Notícias filtradas
@@ -146,27 +166,45 @@ export async function GET(request: NextRequest) {
       // 4. Documentos filtrados
       documentsQuery.order('created_at', { ascending: false }),
       
-      // 5. Todas as notícias (para contagem de rascunhos)
+      // 5. Vídeos filtrados
+      videosQuery.order('order_index', { ascending: true }).order('created_at', { ascending: false }),
+      
+      // 6. Imagens filtradas
+      imagesQuery.order('order_index', { ascending: true }).order('created_at', { ascending: false }),
+      
+      // 7. Todas as notícias (para contagem de rascunhos)
       shouldUseAdminClient ? supabase
         .from('subsector_news')
         .select('id, is_published')
         .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null }),
       
-      // 6. Todos os eventos (para contagem de rascunhos)
+      // 8. Todos os eventos (para contagem de rascunhos)
       shouldUseAdminClient ? supabase
         .from('subsector_events')
         .select('id, is_published')
         .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null }),
         
-      // 7. Todas as mensagens (para contagem de rascunhos)
+      // 9. Todas as mensagens (para contagem de rascunhos)
       shouldUseAdminClient ? supabase
         .from('subsector_messages')
         .select('id, is_published')
         .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null }),
       
-      // 8. Todos os documentos (para contagem de rascunhos)
+      // 10. Todos os documentos (para contagem de rascunhos)
       shouldUseAdminClient ? supabase
         .from('subsector_documents')
+        .select('id, is_published')
+        .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null }),
+      
+      // 11. Todos os vídeos (para contagem de rascunhos)
+      shouldUseAdminClient ? supabase
+        .from('subsector_videos')
+        .select('id, is_published')
+        .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null }),
+      
+      // 12. Todas as imagens (para contagem de rascunhos)
+      shouldUseAdminClient ? supabase
+        .from('subsector_images')
         .select('id, is_published')
         .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null })
     ];
@@ -178,49 +216,36 @@ export async function GET(request: NextRequest) {
       { data: filteredEvents, error: eventsError },
       { data: filteredMessages, error: messagesError },
       { data: filteredDocuments, error: documentsError },
+      { data: filteredVideos, error: videosError },
+      { data: filteredImages, error: imagesError },
       { data: allNews, error: allNewsError },
       { data: allEvents, error: allEventsError },
       { data: allMessages, error: allMessagesError },
-      { data: allDocuments, error: allDocumentsError }
+      { data: allDocuments, error: allDocumentsError },
+      { data: allVideos, error: allVideosError },
+      { data: allImages, error: allImagesError }
     ] = await Promise.all(promises);
     const promiseEndTime = Date.now();
 
 
-    // Verificar erros
-    if (newsError) {
-      console.error('[API-SUBSECTOR-BATCH] Erro ao buscar notícias:', newsError);
-      return NextResponse.json(
-        { error: `Erro ao buscar notícias: ${newsError.message}` },
-        { status: HTTP_STATUS.BAD_REQUEST }
-      );
+    // Verificar erros críticos
+    const hasErrors = newsError || eventsError || messagesError || documentsError || videosError || imagesError;
+    
+    if (hasErrors) {
+      const firstError = newsError || eventsError || messagesError || documentsError || videosError || imagesError;
+      if (firstError) {
+        console.error('[SUBSECTOR-BATCH] Erro ao buscar dados:', firstError.message);
+        return NextResponse.json(
+          { error: `Erro ao buscar dados: ${firstError.message}` },
+          { status: HTTP_STATUS.BAD_REQUEST }
+        );
+      }
     }
 
-    if (eventsError) {
-      console.error('[API-SUBSECTOR-BATCH] Erro ao buscar eventos:', eventsError);
-      return NextResponse.json(
-        { error: `Erro ao buscar eventos: ${eventsError.message}` },
-        { status: HTTP_STATUS.BAD_REQUEST }
-      );
-    }
-    
-    if (messagesError) {
-      console.error('[API-SUBSECTOR-BATCH] Erro ao buscar mensagens:', messagesError);
-      return NextResponse.json(
-        { error: `Erro ao buscar mensagens: ${messagesError.message}` },
-        { status: HTTP_STATUS.BAD_REQUEST }
-      );
-    }
-    
-    if (documentsError) {
-      console.error('[API-SUBSECTOR-BATCH] Erro ao buscar documentos:', documentsError);
-      return NextResponse.json(
-        { error: `Erro ao buscar documentos: ${documentsError.message}` },
-        { status: HTTP_STATUS.BAD_REQUEST }
-      );
-    }
-
-    if (shouldUseAdminClient && (allNewsError || allEventsError || allMessagesError || allDocumentsError)) {
-      console.error('[API-SUBSECTOR-BATCH] Erro ao buscar contagem:', { allNewsError, allEventsError, allMessagesError, allDocumentsError });
+    // Log apenas se houver erro crítico na contagem
+    if (shouldUseAdminClient && (allNewsError || allEventsError || allMessagesError || allDocumentsError || allVideosError || allImagesError)) {
+      const countErrors = { allNewsError, allEventsError, allMessagesError, allDocumentsError, allVideosError, allImagesError };
+      console.error('[SUBSECTOR-BATCH] Erro na contagem:', Object.values(countErrors).filter(Boolean).map(e => e?.message || 'Erro desconhecido'));
     }
 
     // Calcular estatísticas de rascunhos
@@ -229,17 +254,23 @@ export async function GET(request: NextRequest) {
     let draftEventsCount = 0;
     let draftMessagesCount = 0;
     let draftDocumentsCount = 0;
+    let draftVideosCount = 0;
+    let draftImagesCount = 0;
 
-    if (shouldUseAdminClient && Array.isArray(allNews) && Array.isArray(allEvents) && Array.isArray(allMessages) && Array.isArray(allDocuments)) {
+    if (shouldUseAdminClient && Array.isArray(allNews) && Array.isArray(allEvents) && Array.isArray(allMessages) && Array.isArray(allDocuments) && Array.isArray(allVideos) && Array.isArray(allImages)) {
       const newsRascunhos = allNews.filter(n => n && typeof n.is_published === 'boolean' ? n.is_published === false : false);
       const eventsRascunhos = allEvents.filter(e => e && typeof e.is_published === 'boolean' ? e.is_published === false : false);
       const messagesRascunhos = allMessages.filter(m => m && typeof m.is_published === 'boolean' ? m.is_published === false : false);
       const documentsRascunhos = allDocuments.filter(d => d && typeof d.is_published === 'boolean' ? d.is_published === false : false);
+      const videosRascunhos = allVideos.filter(v => v && typeof v.is_published === 'boolean' ? v.is_published === false : false);
+      const imagesRascunhos = allImages.filter(i => i && typeof i.is_published === 'boolean' ? i.is_published === false : false);
       
       draftNewsCount = newsRascunhos.length;
       draftEventsCount = eventsRascunhos.length;
       draftMessagesCount = messagesRascunhos.length;
       draftDocumentsCount = documentsRascunhos.length;
+      draftVideosCount = videosRascunhos.length;
+      draftImagesCount = imagesRascunhos.length;
       
     }
 
@@ -248,14 +279,20 @@ export async function GET(request: NextRequest) {
       events: filteredEvents || [],
       messages: filteredMessages || [],
       documents: filteredDocuments || [],
+      videos: filteredVideos || [],
+      images: filteredImages || [],
       newsCount: filteredNews?.length || 0,
       eventsCount: filteredEvents?.length || 0,
       messagesCount: filteredMessages?.length || 0,
       documentsCount: filteredDocuments?.length || 0,
+      videosCount: filteredVideos?.length || 0,
+      imagesCount: filteredImages?.length || 0,
       draftNewsCount,
       draftEventsCount,
       draftMessagesCount,
       draftDocumentsCount,
+      draftVideosCount,
+      draftImagesCount,
       includeUnpublished,
       subsectorId
     };
@@ -269,7 +306,7 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('[API-SUBSECTOR-BATCH] Erro crítico:', error.message);
+    console.error('[SUBSECTOR-BATCH] Erro crítico:', error.message);
     return NextResponse.json(
       { 
         error: 'Erro interno do servidor',

@@ -8,6 +8,7 @@ export interface DashboardVideo {
   title: string;
   video_url: string;
   thumbnail_url: string | null;
+  thumbnail_timestamp?: number | null;
   is_active: boolean;
   order_index: number;
   upload_type: 'youtube' | 'direct';
@@ -26,6 +27,7 @@ export interface VideoFormData {
   title: string;
   video_url: string;
   thumbnail_url?: string;
+  thumbnail_timestamp?: number;
   is_active: boolean;
   order_index: number;
   upload_type: 'youtube' | 'direct';

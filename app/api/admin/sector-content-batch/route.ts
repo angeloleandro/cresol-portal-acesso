@@ -60,26 +60,54 @@ export async function GET(request: NextRequest) {
       documentsQuery = documentsQuery.eq('is_published', true);
     }
 
+    // Buscar vídeos do setor
+    let videosQuery = supabase
+      .from('sector_videos')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('order_index', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    if (!includeUnpublished) {
+      videosQuery = videosQuery.eq('is_published', true);
+    }
+
+    // Buscar imagens do setor
+    let imagesQuery = supabase
+      .from('sector_images')
+      .select('*')
+      .eq('sector_id', sectorId)
+      .order('order_index', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    if (!includeUnpublished) {
+      imagesQuery = imagesQuery.eq('is_published', true);
+    }
+
     // Executar todas as queries em paralelo
-    const [newsResult, eventsResult, messagesResult, documentsResult] = await Promise.all([
+    const [newsResult, eventsResult, messagesResult, documentsResult, videosResult, imagesResult] = await Promise.all([
       newsQuery,
       eventsQuery,
       messagesQuery,
-      documentsQuery
+      documentsQuery,
+      videosQuery,
+      imagesQuery
     ]);
 
-    // Verificar erros
-    if (newsResult.error) {
-      console.error('Erro ao buscar notícias:', newsResult.error);
-    }
-    if (eventsResult.error) {
-      console.error('Erro ao buscar eventos:', eventsResult.error);
-    }
-    if (messagesResult.error) {
-      console.error('Erro ao buscar mensagens:', messagesResult.error);
-    }
-    if (documentsResult.error) {
-      console.error('Erro ao buscar documentos:', documentsResult.error);
+    // Verificar erros críticos
+    const hasErrors = newsResult.error || eventsResult.error || messagesResult.error || 
+                     documentsResult.error || videosResult.error || imagesResult.error;
+    
+    if (hasErrors) {
+      const errors = {
+        news: newsResult.error?.message,
+        events: eventsResult.error?.message, 
+        messages: messagesResult.error?.message,
+        documents: documentsResult.error?.message,
+        videos: videosResult.error?.message,
+        images: imagesResult.error?.message
+      };
+      console.error('[SECTOR-BATCH] Erro ao buscar dados:', errors);
     }
 
     // Calcular contagem de rascunhos
@@ -87,11 +115,29 @@ export async function GET(request: NextRequest) {
     const eventsData = eventsResult.data || [];
     const messagesData = messagesResult.data || [];
     const documentsData = documentsResult.data || [];
+    const videosData = videosResult.data || [];
+    const imagesData = imagesResult.data || [];
+    
+    // Log para debug de vídeos
+    console.log('[SECTOR-BATCH] Vídeos retornados:', {
+      count: videosData.length,
+      videos: videosData.map(v => ({
+        id: v.id,
+        title: v.title,
+        upload_type: v.upload_type,
+        thumbnail_url: v.thumbnail_url,
+        thumbnail_mode: v.thumbnail_mode,
+        thumbnail_timestamp: v.thumbnail_timestamp,
+        is_published: v.is_published
+      }))
+    });
 
     const draftNewsCount = newsData.filter(item => !item.is_published).length;
     const draftEventsCount = eventsData.filter(item => !item.is_published).length;
     const draftMessagesCount = messagesData.filter(item => !item.is_published).length;
     const draftDocumentsCount = documentsData.filter(item => !item.is_published).length;
+    const draftVideosCount = videosData.filter(item => !item.is_published).length;
+    const draftImagesCount = imagesData.filter(item => !item.is_published).length;
 
     // Retornar dados mesmo se alguma query falhar
     return NextResponse.json({
@@ -101,17 +147,22 @@ export async function GET(request: NextRequest) {
         events: eventsData,
         messages: messagesData,
         documents: documentsData,
+        videos: videosData,
+        images: imagesData,
         draftNewsCount,
         draftEventsCount,
         draftMessagesCount,
-        draftDocumentsCount
+        draftDocumentsCount,
+        draftVideosCount,
+        draftImagesCount
       }
     });
 
   } catch (error: any) {
-    console.error('Erro no GET sector-content-batch:', error);
+    console.error('[SECTOR-BATCH] Erro crítico:', error.message);
     return NextResponse.json(
       { 
+        error: 'Erro interno do servidor',
         details: error.message
       },
       { status: 500 }
@@ -168,7 +219,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (result.error) {
-      console.error(`Erro ao criar ${type}:`, result.error);
+      console.error(`[SECTOR-BATCH] Erro ao criar ${type}:`, result.error.message);
       return NextResponse.json(
         { error: `Erro ao criar ${type}` },
         { status: 500 }
@@ -180,9 +231,10 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('Erro no POST sector-content-batch:', error);
+    console.error('[SECTOR-BATCH] Erro no POST:', error.message);
     return NextResponse.json(
       { 
+        error: 'Erro interno do servidor',
         details: error.message
       },
       { status: 500 }
@@ -242,7 +294,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (result.error) {
-      console.error(`Erro ao atualizar ${type}:`, result.error);
+      console.error(`[SECTOR-BATCH] Erro ao atualizar ${type}:`, result.error.message);
       return NextResponse.json(
         { error: `Erro ao atualizar ${type}` },
         { status: 500 }
@@ -254,9 +306,10 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Erro no PUT sector-content-batch:', error);
+    console.error('[SECTOR-BATCH] Erro no PUT:', error.message);
     return NextResponse.json(
       { 
+        error: 'Erro interno do servidor',
         details: error.message
       },
       { status: 500 }
@@ -311,7 +364,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     if (result.error) {
-      console.error(`Erro ao deletar ${type}:`, result.error);
+      console.error(`[SECTOR-BATCH] Erro ao deletar ${type}:`, result.error.message);
       return NextResponse.json(
         { error: `Erro ao deletar ${type}` },
         { status: 500 }
@@ -323,9 +376,10 @@ export async function DELETE(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Erro no DELETE sector-content-batch:', error);
+    console.error('[SECTOR-BATCH] Erro no DELETE:', error.message);
     return NextResponse.json(
       { 
+        error: 'Erro interno do servidor',
         details: error.message
       },
       { status: 500 }

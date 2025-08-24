@@ -4,7 +4,6 @@
  */
 
 import { memo, useState, useRef, useCallback, useEffect } from 'react'
-import { Icon } from '../icons/Icon'
 
 interface ThumbnailTimePickerProps {
   videoFile: File | null
@@ -117,9 +116,8 @@ export const VideoUploadFormThumbnailTimePicker = memo(({
 
   if (!videoSrc) {
     return (
-      <div className="text-center text-neutral-500 py-8">
-        <Icon name="video" className="w-12 h-12 mx-auto mb-2 text-neutral-300" />
-        <p>Selecione um vídeo para escolher o momento da thumbnail</p>
+      <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
+        <p className="text-sm">Adicione um vídeo para selecionar a miniatura</p>
       </div>
     )
   }
@@ -155,10 +153,9 @@ export const VideoUploadFormThumbnailTimePicker = memo(({
             "
             title={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
-            <Icon 
-              name={isPlaying ? 'pause' : 'play'} 
-              className="w-6 h-6" 
-            />
+            <span className="text-2xl">
+              {isPlaying ? '❚❚' : '▶'}
+            </span>
           </button>
         )}
 
@@ -199,36 +196,38 @@ export const VideoUploadFormThumbnailTimePicker = memo(({
             />
           </div>
 
-          {/* Botões de salto rápido */}
-          <div className="flex gap-2 justify-center">
+          {/* Botões de salto rápido - Design minimalista */}
+          <div className="flex justify-between px-4">
             {[
-              { label: 'Início', percentage: 0, icon: 'skip-back' },
-              { label: '25%', percentage: 0.25, icon: 'chevron-left' },
-              { label: '50%', percentage: 0.5, icon: 'circle' },
-              { label: '75%', percentage: 0.75, icon: 'chevron-right' },
-              { label: 'Final', percentage: 0.95, icon: 'skip-forward' }
-            ].map(({ label, percentage, icon }) => (
+              { label: 'Início', percentage: 0 },
+              { label: '25%', percentage: 0.25 },
+              { label: '50%', percentage: 0.5 },
+              { label: '75%', percentage: 0.75 },
+              { label: 'Final', percentage: 0.95 }
+            ].map(({ label, percentage }) => (
               <button
                 key={label}
                 type="button"
                 onClick={() => handleQuickJump(percentage)}
                 disabled={disabled}
                 className="
-                  flex flex-col items-center gap-1 px-3 py-2 text-xs
-                  bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors
+                  inline-block text-xs text-gray-600 hover:text-primary
+                  py-1 px-2 rounded transition-colors
                   disabled:opacity-50 disabled:cursor-not-allowed
+                  hover:bg-gray-50 font-normal
+                  [&::before]:content-none [&::after]:content-none
                 "
+                style={{ textDecoration: 'none' }}
                 title={`Ir para ${label}`}
               >
-                <Icon name={icon as any} className="w-3 h-3" />
-                <span>{label}</span>
+                <span className="inline-block">{label}</span>
               </button>
             ))}
           </div>
 
-          {/* Informações adicionais */}
-          <div className="text-xs text-neutral-500 text-center">
-            Use o controle deslizante ou os botões para escolher o momento exato da thumbnail
+          {/* Dica de uso */}
+          <div className="text-xs text-gray-500 text-center pt-1">
+            Use o controle deslizante ou os botões para escolher o melhor momento
           </div>
         </div>
       )}

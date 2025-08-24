@@ -9,6 +9,8 @@ interface TabNavigationProps {
   totalDraftNewsCount?: number;
   totalDraftEventsCount?: number;
   totalDraftDocumentsCount?: number;
+  totalDraftVideosCount?: number;
+  totalDraftImagesCount?: number;
   totalDraftMessagesCount?: number;
 }
 
@@ -18,6 +20,8 @@ export function TabNavigation({
   totalDraftNewsCount = 0,
   totalDraftEventsCount = 0,
   totalDraftDocumentsCount = 0,
+  totalDraftVideosCount = 0,
+  totalDraftImagesCount = 0,
   totalDraftMessagesCount = 0
 }: TabNavigationProps) {
   const tabs: Array<{
@@ -28,6 +32,8 @@ export function TabNavigation({
     { id: 'news', label: 'Notícias', draftCount: totalDraftNewsCount },
     { id: 'events', label: 'Eventos', draftCount: totalDraftEventsCount },
     { id: 'documents', label: 'Documentos', draftCount: totalDraftDocumentsCount },
+    { id: 'videos', label: 'Vídeos', draftCount: totalDraftVideosCount },
+    { id: 'images', label: 'Imagens', draftCount: totalDraftImagesCount },
     { id: 'groups', label: 'Grupos' },
     { id: 'messages', label: 'Mensagens', draftCount: totalDraftMessagesCount }
   ];

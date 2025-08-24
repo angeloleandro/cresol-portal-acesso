@@ -1,59 +1,13 @@
 // Componente unificado para gerenciar conteúdo do subsetor com lógica limpa
 import { useState, useCallback, useEffect, useRef } from 'react';
-
-
-interface SubsectorNews {
-  id: string;
-  title: string;
-  summary: string;
-  content: string;
-  image_url: string | null;
-  is_featured: boolean;
-  is_published: boolean;
-  created_at: string;
-  updated_at: string;
-  subsector_id: string;
-}
-
-interface SubsectorEvent {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  start_date: string;
-  end_date: string | null;
-  is_featured: boolean;
-  is_published: boolean;
-  event_date: string;
-  created_at: string;
-  updated_at: string;
-  subsector_id: string;
-}
-
-interface SubsectorMessage {
-  id: string;
-  title: string;
-  content: string;
-  group_id: string | null;
-  is_published: boolean;
-  created_at: string;
-  updated_at: string;
-  subsector_id: string;
-}
-
-interface SubsectorDocument {
-  id: string;
-  title: string;
-  description: string | null;
-  file_url: string;
-  file_type: string | null;
-  file_size: number | null;
-  is_featured: boolean;
-  is_published: boolean;
-  created_at: string;
-  updated_at: string;
-  subsector_id: string;
-}
+import type { 
+  SubsectorNews, 
+  SubsectorEvent, 
+  SubsectorDocument, 
+  SubsectorVideo,
+  SubsectorImage,
+  SubsectorMessage
+} from './types/subsector.types';
 
 interface SubsectorContentProps {
   // Dados
@@ -61,6 +15,8 @@ interface SubsectorContentProps {
   events: SubsectorEvent[];
   messages: SubsectorMessage[];
   documents: SubsectorDocument[];
+  videos: SubsectorVideo[];
+  images: SubsectorImage[];
   showDrafts: boolean;
   isLoading: boolean;
   error: string | null;
@@ -70,6 +26,8 @@ interface SubsectorContentProps {
   totalDraftEventsCount: number;
   totalDraftMessagesCount: number;
   totalDraftDocumentsCount: number;
+  totalDraftVideosCount: number;
+  totalDraftImagesCount: number;
   
   // Ações
   toggleDrafts: () => Promise<void>;
@@ -78,6 +36,8 @@ interface SubsectorContentProps {
   deleteEvent: (id: string) => Promise<void>;
   deleteMessage: (id: string) => Promise<void>;
   deleteDocument: (id: string) => Promise<void>;
+  deleteVideo: (id: string) => Promise<void>;
+  deleteImage: (id: string) => Promise<void>;
 }
 
 export function useSubsectorContent(subsectorId: string | null): SubsectorContentProps {
@@ -85,6 +45,8 @@ export function useSubsectorContent(subsectorId: string | null): SubsectorConten
   const [events, setEvents] = useState<SubsectorEvent[]>([]);
   const [messages, setMessages] = useState<SubsectorMessage[]>([]);
   const [documents, setDocuments] = useState<SubsectorDocument[]>([]);
+  const [videos, setVideos] = useState<SubsectorVideo[]>([]);
+  const [images, setImages] = useState<SubsectorImage[]>([]);
   const [showDrafts, setShowDrafts] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +54,8 @@ export function useSubsectorContent(subsectorId: string | null): SubsectorConten
   const [totalDraftEventsCount, setTotalDraftEventsCount] = useState(0);
   const [totalDraftMessagesCount, setTotalDraftMessagesCount] = useState(0);
   const [totalDraftDocumentsCount, setTotalDraftDocumentsCount] = useState(0);
+  const [totalDraftVideosCount, setTotalDraftVideosCount] = useState(0);
+  const [totalDraftImagesCount, setTotalDraftImagesCount] = useState(0);
   
   const mountedRef = useRef(true);
   const loadingRef = useRef(false);
@@ -126,11 +90,15 @@ export function useSubsectorContent(subsectorId: string | null): SubsectorConten
         news: newsData, 
         events: eventsData, 
         messages: messagesData, 
-        documents: documentsData, 
+        documents: documentsData,
+        videos: videosData,
+        images: imagesData, 
         draftNewsCount, 
         draftEventsCount, 
         draftMessagesCount, 
-        draftDocumentsCount 
+        draftDocumentsCount,
+        draftVideosCount,
+        draftImagesCount 
       } = batchResult.data;
       
       if (mountedRef.current) {
@@ -138,10 +106,14 @@ export function useSubsectorContent(subsectorId: string | null): SubsectorConten
         setEvents(eventsData || []);
         setMessages(messagesData || []);
         setDocuments(documentsData || []);
+        setVideos(videosData || []);
+        setImages(imagesData || []);
         setTotalDraftNewsCount(draftNewsCount || 0);
         setTotalDraftEventsCount(draftEventsCount || 0);
         setTotalDraftMessagesCount(draftMessagesCount || 0);
         setTotalDraftDocumentsCount(draftDocumentsCount || 0);
+        setTotalDraftVideosCount(draftVideosCount || 0);
+        setTotalDraftImagesCount(draftImagesCount || 0);
       }
       
     } catch (err: any) {
@@ -178,31 +150,49 @@ export function useSubsectorContent(subsectorId: string | null): SubsectorConten
       const batchResponse = await fetch(`/api/admin/subsector-content-batch?${batchParams.toString()}`);
       
       if (!batchResponse.ok) {
-        throw new Error(`Erro API batch refresh: ${batchResponse.status}`);
+        throw new Error(`Erro API batch: ${batchResponse.status}`);
       }
       
       const batchResult = await batchResponse.json();
       
       if (!batchResult.success) {
-        throw new Error(batchResult.error || 'Erro na API batch refresh');
+        throw new Error(batchResult.error || 'Erro na API batch');
       }
       
-      const { news: newsData, events: eventsData, messages: messagesData, documents: documentsData, draftNewsCount, draftEventsCount, draftMessagesCount, draftDocumentsCount } = batchResult.data;
+      const { 
+        news: newsData, 
+        events: eventsData, 
+        messages: messagesData, 
+        documents: documentsData,
+        videos: videosData,
+        images: imagesData, 
+        draftNewsCount, 
+        draftEventsCount, 
+        draftMessagesCount, 
+        draftDocumentsCount,
+        draftVideosCount,
+        draftImagesCount 
+      } = batchResult.data;
       
       if (mountedRef.current) {
-        setNews(newsData);
-        setEvents(eventsData);
+        setNews(newsData || []);
+        setEvents(eventsData || []);
         setMessages(messagesData || []);
         setDocuments(documentsData || []);
-        setTotalDraftNewsCount(draftNewsCount);
-        setTotalDraftEventsCount(draftEventsCount);
+        setVideos(videosData || []);
+        setImages(imagesData || []);
+        setTotalDraftNewsCount(draftNewsCount || 0);
+        setTotalDraftEventsCount(draftEventsCount || 0);
         setTotalDraftMessagesCount(draftMessagesCount || 0);
         setTotalDraftDocumentsCount(draftDocumentsCount || 0);
+        setTotalDraftVideosCount(draftVideosCount || 0);
+        setTotalDraftImagesCount(draftImagesCount || 0);
       }
       
     } catch (err: any) {
+      console.error('Erro ao buscar conteúdo:', err);
       if (mountedRef.current) {
-        setError(err.message || 'Erro ao atualizar conteúdo');
+        setError(err.message || 'Erro ao carregar conteúdo');
       }
     } finally {
       if (mountedRef.current) {
@@ -216,82 +206,83 @@ export function useSubsectorContent(subsectorId: string | null): SubsectorConten
   }, []);
 
   const deleteNews = useCallback(async (id: string) => {
-    if (!subsectorId) return;
+    const response = await fetch(`/api/admin/subsectors/${subsectorId}/news/${id}`, {
+      method: 'DELETE',
+    });
     
-    try {
-      const response = await fetch(`/api/admin/subsector-content?type=news&id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao deletar notícia');
-      }
-
-      await refreshContent();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao deletar notícia');
-      throw err;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao excluir notícia');
     }
+    
+    await refreshContent();
   }, [subsectorId, refreshContent]);
 
   const deleteEvent = useCallback(async (id: string) => {
-    if (!subsectorId) return;
+    const response = await fetch(`/api/admin/subsectors/${subsectorId}/events/${id}`, {
+      method: 'DELETE',
+    });
     
-    try {
-      const response = await fetch(`/api/admin/subsector-content?type=event&id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao deletar evento');
-      }
-
-      await refreshContent();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao deletar evento');
-      throw err;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao excluir evento');
     }
+    
+    await refreshContent();
   }, [subsectorId, refreshContent]);
 
   const deleteMessage = useCallback(async (id: string) => {
-    if (!subsectorId) return;
+    const response = await fetch(`/api/admin/subsectors/${subsectorId}/messages/${id}`, {
+      method: 'DELETE',
+    });
     
-    try {
-      const response = await fetch(`/api/admin/subsector-content?type=message&id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao deletar mensagem');
-      }
-
-      await refreshContent();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao deletar mensagem');
-      throw err;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao excluir mensagem');
     }
+    
+    await refreshContent();
   }, [subsectorId, refreshContent]);
 
   const deleteDocument = useCallback(async (id: string) => {
-    if (!subsectorId) return;
+    const response = await fetch(`/api/admin/subsectors/${subsectorId}/documents/${id}`, {
+      method: 'DELETE',
+    });
     
-    try {
-      const response = await fetch(`/api/admin/subsector-content?type=document&id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao deletar documento');
-      }
-
-      await refreshContent();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao deletar documento');
-      throw err;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao excluir documento');
     }
+    
+    await refreshContent();
   }, [subsectorId, refreshContent]);
 
-  // Cleanup
+  const deleteVideo = useCallback(async (id: string) => {
+    const response = await fetch(`/api/admin/subsectors/${subsectorId}/videos/${id}`, {
+      method: 'DELETE',
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao excluir vídeo');
+    }
+    
+    await refreshContent();
+  }, [subsectorId, refreshContent]);
+
+  const deleteImage = useCallback(async (id: string) => {
+    const response = await fetch(`/api/admin/subsectors/${subsectorId}/images/${id}`, {
+      method: 'DELETE',
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao excluir imagem');
+    }
+    
+    await refreshContent();
+  }, [subsectorId, refreshContent]);
+
   useEffect(() => {
     return () => {
       mountedRef.current = false;
@@ -303,6 +294,8 @@ export function useSubsectorContent(subsectorId: string | null): SubsectorConten
     events,
     messages,
     documents,
+    videos,
+    images,
     showDrafts,
     isLoading,
     error,
@@ -310,14 +303,17 @@ export function useSubsectorContent(subsectorId: string | null): SubsectorConten
     totalDraftEventsCount,
     totalDraftMessagesCount,
     totalDraftDocumentsCount,
+    totalDraftVideosCount,
+    totalDraftImagesCount,
     toggleDrafts,
     refreshContent,
     deleteNews,
     deleteEvent,
     deleteMessage,
-    deleteDocument
+    deleteDocument,
+    deleteVideo,
+    deleteImage,
   };
 }
 
-// Export dos tipos também para uso em outros componentes
-export type { SubsectorNews, SubsectorEvent, SubsectorMessage, SubsectorDocument };
+export type { SubsectorNews, SubsectorEvent, SubsectorMessage, SubsectorDocument, SubsectorVideo, SubsectorImage };

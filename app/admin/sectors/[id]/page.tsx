@@ -25,6 +25,8 @@ const DocumentsManagement = lazy(() => import('./components/DocumentsManagement'
 const SubsectorsManagement = lazy(() => import('./components/SubsectorsManagement').then(m => ({ default: m.SubsectorsManagement })));
 const GroupsManagement = lazy(() => import('./components/GroupsManagement').then(m => ({ default: m.GroupsManagement })));
 const MessagesManagement = lazy(() => import('./components/MessagesManagement').then(m => ({ default: m.MessagesManagement })));
+const VideosManagement = lazy(() => import('./components/VideosManagement').then(m => ({ default: m.VideosManagement })));
+const ImagesManagement = lazy(() => import('./components/ImagesManagement').then(m => ({ default: m.ImagesManagement })));
 
 // Componente interno que usa o contexto
 function SectorDashboardContent() {
@@ -64,17 +66,23 @@ function SectorDashboardContent() {
     events,
     messages,
     documents,
+    videos,
+    images,
     showDrafts,
     totalDraftNewsCount,
     totalDraftEventsCount,
     totalDraftMessagesCount,
     totalDraftDocumentsCount,
+    totalDraftVideosCount,
+    totalDraftImagesCount,
     toggleDrafts,
     refreshContent,
     deleteNews,
     deleteEvent,
     deleteMessage,
-    deleteDocument
+    deleteDocument,
+    deleteVideo,
+    deleteImage
   } = useSectorContent(sectorId);
 
 
@@ -168,6 +176,8 @@ function SectorDashboardContent() {
         totalDraftEventsCount={totalDraftEventsCount}
         totalDraftDocumentsCount={totalDraftDocumentsCount}
         totalDraftMessagesCount={totalDraftMessagesCount}
+        totalDraftVideosCount={totalDraftVideosCount}
+        totalDraftImagesCount={totalDraftImagesCount}
       />
 
       {/* Conteúdo da aba ativa com lazy loading */}
@@ -251,6 +261,34 @@ function SectorDashboardContent() {
               onToggleDrafts={toggleDrafts}
               onRefresh={refreshContent}
               onDelete={deleteMessage}
+            />
+          </Suspense>
+        )}
+
+        {activeTab === 'videos' && (
+          <Suspense fallback={<LazyLoadingSpinner />}>
+            <VideosManagement
+              sectorId={sectorId}
+              videos={videos}
+              showDrafts={showDrafts}
+              totalDraftVideosCount={totalDraftVideosCount}
+              onToggleDrafts={toggleDrafts}
+              onRefresh={refreshContent}
+              onDelete={deleteVideo}
+            />
+          </Suspense>
+        )}
+
+        {activeTab === 'images' && (
+          <Suspense fallback={<LazyLoadingSpinner />}>
+            <ImagesManagement
+              sectorId={sectorId}
+              images={images}
+              showDrafts={showDrafts}
+              totalDraftImagesCount={totalDraftImagesCount}
+              onToggleDrafts={toggleDrafts}
+              onRefresh={refreshContent}
+              onDelete={deleteImage}
             />
           </Suspense>
         )}

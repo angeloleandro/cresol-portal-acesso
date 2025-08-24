@@ -132,8 +132,15 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
         {/* Body - Scrollable if needed */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          <div className="text-sm text-gray-600 mb-4">
-            {message}
+          <div 
+            className="text-sm text-gray-600 mb-4"
+            dangerouslySetInnerHTML={
+              typeof message === 'string' && (message.includes('<') || message.includes('&')) 
+                ? { __html: message }
+                : undefined
+            }
+          >
+            {typeof message !== 'string' || (!message.includes('<') && !message.includes('&')) ? message : null}
           </div>
           {requiresConfirmationInput && (
             <div>

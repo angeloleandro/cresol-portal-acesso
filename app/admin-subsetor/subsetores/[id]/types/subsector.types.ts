@@ -58,6 +58,48 @@ export interface SubsectorDocument {
   subsector_id: string;
 }
 
+export interface SubsectorVideo {
+  id: string;
+  subsector_id: string;
+  title: string;
+  description: string | null;
+  video_url: string;
+  thumbnail_url: string | null;
+  thumbnail_timestamp: number | null;
+  upload_type: 'youtube' | 'upload';
+  file_path: string | null;
+  file_size: number | null;
+  mime_type: string | null;
+  duration: number | null;
+  order_index: number;
+  is_published: boolean;
+  is_featured: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+}
+
+export interface SubsectorImage {
+  id: string;
+  subsector_id: string;
+  title: string;
+  description: string | null;
+  image_url: string;
+  thumbnail_url: string | null;
+  file_path: string | null;
+  file_size: number | null;
+  mime_type: string | null;
+  width: number | null;
+  height: number | null;
+  is_featured: boolean;
+  is_published: boolean;
+  order_index: number;
+  processing_status: 'pending' | 'processing' | 'ready' | 'failed';
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface System {
   id: string;
   name: string;
@@ -99,6 +141,16 @@ export interface Message {
   users: string[];
 }
 
+export interface SubsectorMessage {
+  id: string;
+  title: string;
+  content: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  subsector_id: string;
+}
+
 export interface User {
   id: string;
   full_name: string;
@@ -111,7 +163,7 @@ export interface WorkLocation {
   name: string;
 }
 
-export type TabType = 'events' | 'news' | 'documents' | 'systems' | 'groups' | 'messages';
+export type TabType = 'events' | 'news' | 'documents' | 'videos' | 'images' | 'systems' | 'groups' | 'messages';
 
 // Interface para dados do grupo no modal
 export interface GroupData {

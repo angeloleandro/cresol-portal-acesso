@@ -985,6 +985,24 @@ export async function DELETE(request: NextRequest) {
         }
         break;
         
+      case 'sector_videos':
+        ({ error } = await deleteAdminClient
+          .from('sector_videos')
+          .delete()
+          .eq('id', id));
+        if (!error) {
+        }
+        break;
+        
+      case 'subsector_videos':
+        ({ error } = await deleteAdminClient
+          .from('subsector_videos')
+          .delete()
+          .eq('id', id));
+        if (!error) {
+        }
+        break;
+        
       default:
         return NextResponse.json(
           { error: 'Tipo inválido' },

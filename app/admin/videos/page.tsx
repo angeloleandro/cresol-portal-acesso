@@ -429,7 +429,6 @@ export default function AdminVideos() {
             <AdvancedVideoGalleryHeader
               title=""
               subtitle=""
-              videoCount={filteredVideos.length}
               showSeeAll={false}
               showSearch={true}
               onSearch={handleSearch}
@@ -522,6 +521,7 @@ export default function AdminVideos() {
                       title: editVideo.title,
                       video_url: editVideo.video_url,
                       thumbnail_url: editVideo.thumbnail_url ?? undefined,
+                      thumbnail_timestamp: editVideo.thumbnail_timestamp ?? undefined,
                       is_active: editVideo.is_active,
                       order_index: editVideo.order_index,
                       upload_type: editVideo.upload_type,

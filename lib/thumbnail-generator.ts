@@ -297,6 +297,7 @@ export async function generateVideoThumbnailSimple(
   logger.debug('Tentando geração simples de thumbnail...');
   
   return new Promise((resolve, reject) => {
+    const startTime = Date.now();
     const video = document.createElement('video');
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -321,7 +322,7 @@ export async function generateVideoThumbnailSimple(
         cleanup();
         reject(new Error('Timeout na geração simples'));
       }
-    }, 8000);
+    }, 15000);
 
     video.addEventListener('loadedmetadata', () => {
       logger.debug('Metadata simples carregada');

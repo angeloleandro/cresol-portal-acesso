@@ -9,6 +9,14 @@ export const VIDEO_API_CONFIG = {
     videos: '/api/videos',
     adminVideos: '/api/admin/videos',
     simpleUpload: '/api/videos/simple-upload',
+    // Sector video endpoints
+    sectorVideos: (sectorId: string) => `/api/admin/sectors/${sectorId}/videos`,
+    sectorVideoUpload: (sectorId: string) => `/api/admin/sectors/${sectorId}/videos/upload`,
+    sectorVideoThumbnail: (sectorId: string, videoId: string) => `/api/admin/sectors/${sectorId}/videos/${videoId}/thumbnail`,
+    // Subsector video endpoints
+    subsectorVideos: (subsectorId: string) => `/api/admin/subsectors/${subsectorId}/videos`,
+    subsectorVideoUpload: (subsectorId: string) => `/api/admin/subsectors/${subsectorId}/videos/upload`,
+    subsectorVideoThumbnail: (subsectorId: string, videoId: string) => `/api/admin/subsectors/${subsectorId}/videos/${videoId}/thumbnail`,
   },
   timeouts: {
     upload: 300000, // 5 minutes
@@ -178,7 +186,7 @@ export const VIDEO_MESSAGES = {
     ROTATION_CONTROL: 'Controle de rotação da imagem',
     CHOOSE_TIME: 'Escolher momento:',
     REGENERATE_THUMBNAIL: 'Gerar em outro momento',
-    GENERATE_THUMBNAIL: 'Gerar Thumbnail',
+    GENERATE_THUMBNAIL: 'Gerar Miniatura',
   }
 } as const;
 
@@ -228,10 +236,20 @@ export const VIDEO_STORAGE_CONFIG = {
   folders: {
     uploads: 'uploads',
     thumbnails: 'thumbnails', 
+    sectors: 'sectors',
+    subsectors: 'subsectors',
   },
   paths: {
     publicUrl: (bucket: string, filePath: string) => 
       `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}`,
+    sectorVideo: (sectorId: string, fileName: string) => 
+      `uploads/sectors/${sectorId}/${new Date().toISOString().slice(0, 10).replace(/-/g, '/')}/${fileName}`,
+    subsectorVideo: (subsectorId: string, fileName: string) => 
+      `uploads/subsectors/${subsectorId}/${new Date().toISOString().slice(0, 10).replace(/-/g, '/')}/${fileName}`,
+    sectorThumbnail: (sectorId: string, fileName: string) => 
+      `thumbnails/sectors/${sectorId}/${fileName}`,
+    subsectorThumbnail: (subsectorId: string, fileName: string) => 
+      `thumbnails/subsectors/${subsectorId}/${fileName}`,
   }
 } as const;
 

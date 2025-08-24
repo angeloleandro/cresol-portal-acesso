@@ -406,10 +406,19 @@ function Navbar() {
             <Link 
               href="/home" 
               className={`text-sm font-medium ${
-                pathname === '/home' || pathname === '/dashboard' ? 'text-white' : 'text-white/80 hover:text-white'
+                pathname === '/home' ? 'text-white' : 'text-white/80 hover:text-white'
               }`}
             >
               Home
+            </Link>
+            
+            <Link 
+              href="/dashboard" 
+              className={`text-sm font-medium ${
+                pathname === '/dashboard' ? 'text-white' : 'text-white/80 hover:text-white'
+              }`}
+            >
+              Dashboard
             </Link>
             
             <HeroUISectorsDropdown 
@@ -514,10 +523,19 @@ function Navbar() {
           <Link 
             href="/home" 
             className={`block py-2 text-sm font-medium ${
-              pathname === '/home' || pathname === '/dashboard' ? 'text-white' : 'text-white/80'
+              pathname === '/home' ? 'text-white' : 'text-white/80'
             }`}
           >
             Home
+          </Link>
+          
+          <Link 
+            href="/dashboard" 
+            className={`block py-2 text-sm font-medium ${
+              pathname === '/dashboard' ? 'text-white' : 'text-white/80'
+            }`}
+          >
+            Dashboard
           </Link>
           
           <div>

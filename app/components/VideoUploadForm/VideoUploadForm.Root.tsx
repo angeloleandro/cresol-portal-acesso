@@ -1,9 +1,9 @@
+"use client";
+
 /**
  * VideoUploadForm Root Component
  * Enterprise-grade video upload form with modular architecture
  */
-
-"use client";
 
 import { useReducer, useCallback, useEffect, useMemo, memo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -93,9 +93,19 @@ export const VideoUploadFormRoot = memo(({
         original_filename: initialData.original_filename,
       }))
       
-      // Set thumbnail mode - for editing, always start with 'auto' to show thumbnail selector
-      // User can change to custom if they want to upload a different thumbnail
-      dispatch(videoUploadActions.setThumbnailMode('auto'))
+      // Set thumbnail mode based on existing data
+      // If no thumbnail_url, mode is 'none'
+      // If has thumbnail_timestamp, mode is 'auto' (from video frame)
+      // If has thumbnail_url but no timestamp, mode is 'custom' (uploaded image)
+      let mode: 'auto' | 'custom' | 'none' = 'auto'
+      if (!initialData.thumbnail_url) {
+        mode = 'none'
+      } else if (initialData.thumbnail_timestamp !== undefined && initialData.thumbnail_timestamp !== null) {
+        mode = 'auto'
+      } else {
+        mode = 'custom'
+      }
+      dispatch(videoUploadActions.setThumbnailMode(mode))
       
       // Update internal thumbnail preview
       setInternalState({
@@ -169,6 +179,11 @@ export const VideoUploadFormRoot = memo(({
   const handleThumbnailModeChange = useCallback((mode: 'auto' | 'custom' | 'none') => {
     dispatch(videoUploadActions.setThumbnailMode(mode))
     
+    // Clear thumbnail timestamp when switching to custom or none mode
+    if (mode === 'custom' || mode === 'none') {
+      setThumbnailTimestamp(1.0)
+    }
+    
     if (mode !== 'custom') {
       setInternalState({
         thumbnailPreview: mode === 'auto' && state.formData.upload_type === 'youtube' 
@@ -234,21 +249,52 @@ export const VideoUploadFormRoot = memo(({
   // Upload video file
   const uploadVideoFile = useCallback(async (file: File): Promise<{ id: string; url: string }> => {
     const formData = new FormData()
-    formData.append('video', file)
-    formData.append('title', state.formData.title)
-    formData.append('isActive', state.formData.is_active.toString())
-    formData.append('orderIndex', state.formData.order_index.toString())
-    if (thumbnailTimestamp !== null) {
-      formData.append('thumbnailTimestamp', thumbnailTimestamp.toString())
-    }
-    // Add collection_id for automatic collection integration
-    if (customContext?.collectionId) {
-      formData.append('collection_id', customContext.collectionId)
+    
+    // Detect context mode
+    const isSectorMode = customContext?.mode === 'sector' && customContext?.sectorId
+    const isSubsectorMode = customContext?.mode === 'subsector' && customContext?.subsectorId
+    
+    if (isSectorMode || isSubsectorMode) {
+      // Use same format for both sector and subsector
+      formData.append('file', file)
+      formData.append('title', state.formData.title)
+      formData.append('description', state.formData.description || '')
+      formData.append('is_published', state.formData.is_active.toString())
+      formData.append('is_featured', 'false')
+      formData.append('upload_type', 'upload')
+      formData.append('thumbnail_mode', state.thumbnailMode)
+      if (thumbnailTimestamp !== null) {
+        formData.append('thumbnail_timestamp', thumbnailTimestamp.toString())
+      }
+      // Add thumbnail if available
+      if (state.formData.thumbnailFile) {
+        formData.append('thumbnail', state.formData.thumbnailFile)
+      }
+    } else {
+      // Gallery mode
+      formData.append('video', file)
+      formData.append('title', state.formData.title)
+      formData.append('isActive', state.formData.is_active.toString())
+      formData.append('orderIndex', state.formData.order_index.toString())
+      if (thumbnailTimestamp !== null) {
+        formData.append('thumbnailTimestamp', thumbnailTimestamp.toString())
+      }
+      // Add collection_id for automatic collection integration
+      if (customContext?.collectionId) {
+        formData.append('collection_id', customContext.collectionId)
+      }
     }
 
     const session = await getAuthenticatedSession()
     
-    const response = await fetch(VIDEO_API_CONFIG.endpoints.simpleUpload, {
+    // Dynamic endpoint selection
+    const uploadEndpoint = isSectorMode 
+      ? `/api/admin/sectors/${customContext.sectorId}/videos/upload`
+      : isSubsectorMode
+      ? `/api/admin/subsectors/${customContext.subsectorId}/videos/upload`
+      : VIDEO_API_CONFIG.endpoints.simpleUpload
+    
+    const response = await fetch(uploadEndpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${session.access_token}`
@@ -266,7 +312,7 @@ export const VideoUploadFormRoot = memo(({
       id: result.video.id,
       url: result.video.url
     }
-  }, [state.formData.title, state.formData.is_active, state.formData.order_index, thumbnailTimestamp, customContext?.collectionId])
+  }, [state.formData.title, state.formData.is_active, state.formData.order_index, state.formData.description, state.formData.thumbnailFile, state.thumbnailMode, thumbnailTimestamp, customContext?.collectionId, customContext?.mode, customContext?.sectorId, customContext?.subsectorId])
   
   // Upload thumbnail helper
   const uploadThumbnail = useCallback(async (videoId?: string): Promise<string> => {
@@ -303,6 +349,26 @@ export const VideoUploadFormRoot = memo(({
     dispatch(videoUploadActions.setUploadStatus('uploading'))
     dispatch(videoUploadActions.setUploadProgress(0))
 
+    // Determine API endpoint based on context
+    const isSectorMode = customContext?.mode === 'sector' && customContext?.sectorId
+    const isSubsectorMode = customContext?.mode === 'subsector' && customContext?.subsectorId
+    
+    const getApiEndpoint = (videoId?: string) => {
+      if (isSectorMode) {
+        if (videoId) {
+          return `/api/admin/sectors/${customContext.sectorId}/videos/${videoId}`
+        }
+        return `/api/admin/sectors/${customContext.sectorId}/videos`
+      }
+      if (isSubsectorMode) {
+        if (videoId) {
+          return `/api/admin/subsectors/${customContext.subsectorId}/videos/${videoId}`
+        }
+        return `/api/admin/subsectors/${customContext.subsectorId}/videos`
+      }
+      return VIDEO_API_CONFIG.endpoints.adminVideos
+    }
+
     try {
       let videoId: string
       let finalVideoUrl: string
@@ -321,7 +387,7 @@ export const VideoUploadFormRoot = memo(({
             
             // Update video record with custom thumbnail
             if (thumbnailUrl) {
-              await makeAuthenticatedRequest(VIDEO_API_CONFIG.endpoints.adminVideos, {
+              await makeAuthenticatedRequest(getApiEndpoint(), {
                 method: 'PUT',
                 body: JSON.stringify({
                   id: videoId,
@@ -348,18 +414,32 @@ export const VideoUploadFormRoot = memo(({
             thumbUrl = await uploadThumbnail()
           }
           
-          const response = await makeAuthenticatedRequest(VIDEO_API_CONFIG.endpoints.adminVideos, {
+          const requestBody = isSectorMode || isSubsectorMode 
+            ? {
+                id: initialData.id,
+                title: state.formData.title,
+                description: state.formData.description || '',
+                video_url: finalVideoUrl,
+                is_published: state.formData.is_active,
+                is_featured: false,
+                thumbnail_url: thumbUrl,
+                upload_type: 'upload',
+                thumbnail_timestamp: thumbnailTimestamp
+              }
+            : {
+                id: initialData.id,
+                title: state.formData.title, 
+                video_url: finalVideoUrl,
+                is_active: state.formData.is_active, 
+                order_index: state.formData.order_index, 
+                thumbnail_url: thumbUrl,
+                upload_type: 'direct',
+                thumbnail_timestamp: thumbnailTimestamp
+              }
+          
+          const response = await makeAuthenticatedRequest(getApiEndpoint(), {
             method: 'PUT',
-            body: JSON.stringify({
-              id: initialData.id,
-              title: state.formData.title, 
-              video_url: finalVideoUrl,
-              is_active: state.formData.is_active, 
-              order_index: state.formData.order_index, 
-              thumbnail_url: thumbUrl,
-              upload_type: 'direct',
-              thumbnail_timestamp: thumbnailTimestamp
-            })
+            body: JSON.stringify(requestBody)
           })
           
           const responseData = await response.json()
@@ -391,20 +471,38 @@ export const VideoUploadFormRoot = memo(({
           thumbUrl = getYouTubeThumbnail(state.formData.video_url) || ""
         }
 
-        const requestBody = {
-          title: state.formData.title, 
-          video_url: state.formData.video_url, 
-          is_active: state.formData.is_active, 
-          order_index: state.formData.order_index, 
-          thumbnail_url: thumbUrl,
-          upload_type: 'youtube',
-          thumbnail_timestamp: thumbnailTimestamp
+        // Determine thumbnail_timestamp based on mode
+        let finalThumbnailTimestamp: number | null = null
+        if (state.thumbnailMode === 'auto') {
+          finalThumbnailTimestamp = thumbnailTimestamp
         }
+        // For 'custom' or 'none' modes, keep it null
+        
+        const requestBody = isSectorMode || isSubsectorMode 
+          ? {
+              title: state.formData.title,
+              description: state.formData.description || '',
+              video_url: state.formData.video_url,
+              is_published: state.formData.is_active,
+              is_featured: false,
+              thumbnail_url: thumbUrl,
+              upload_type: 'youtube',
+              thumbnail_timestamp: finalThumbnailTimestamp
+            }
+          : {
+              title: state.formData.title, 
+              video_url: state.formData.video_url, 
+              is_active: state.formData.is_active, 
+              order_index: state.formData.order_index, 
+              thumbnail_url: thumbUrl,
+              upload_type: 'youtube',
+              thumbnail_timestamp: finalThumbnailTimestamp
+            }
 
 
         if (initialData?.id) {
           
-          const response = await makeAuthenticatedRequest(VIDEO_API_CONFIG.endpoints.adminVideos, {
+          const response = await makeAuthenticatedRequest(getApiEndpoint(), {
             method: 'PUT',
             body: JSON.stringify({
               id: initialData.id,
@@ -428,7 +526,7 @@ export const VideoUploadFormRoot = memo(({
           videoId = initialData.id
         } else {
           
-          const response = await makeAuthenticatedRequest(VIDEO_API_CONFIG.endpoints.adminVideos, {
+          const response = await makeAuthenticatedRequest(getApiEndpoint(), {
             method: 'POST',
             body: JSON.stringify(requestBody)
           })
@@ -461,7 +559,7 @@ export const VideoUploadFormRoot = memo(({
       dispatch(videoUploadActions.setError(undefined, err.message || 'Erro ao salvar vídeo'))
       dispatch(videoUploadActions.setUploadStatus('error'))
     }
-  }, [state, initialData, uploadVideoFile, uploadThumbnail, getYouTubeThumbnail, onSave, thumbnailTimestamp])
+  }, [state, initialData, uploadVideoFile, uploadThumbnail, getYouTubeThumbnail, onSave, thumbnailTimestamp, customContext])
   
   const handleCancel = useCallback(() => {
     dispatch(videoUploadActions.resetForm())

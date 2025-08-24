@@ -32,6 +32,9 @@ export const VideoUploadFormSimpleThumbnail = memo(({
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const lastAutoTimestamp = useRef<number | null>(null)
+  const lastGeneratedTimestamp = useRef<number | null>(null)
+  const generateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isGeneratingRef = useRef<boolean>(false)
   
   // Estado para armazenar o timestamp selecionado no time picker
   const [selectedTimestamp, setSelectedTimestamp] = useState<number>(1.0)
@@ -39,10 +42,19 @@ export const VideoUploadFormSimpleThumbnail = memo(({
   // Hook de geração de thumbnail usando timestamp selecionado
   const autoThumbState = useThumbnailGenerator({
     videoFile: uploadType === 'direct' ? (videoFile || null) : null,
-    autoGenerate: false, // Geração manual via botão
+    autoGenerate: false, // Controle manual para evitar loops
     timestamp: selectedTimestamp
   })
   const [dragActive, setDragActive] = useState(false)
+  
+  // Cleanup timers ao desmontar
+  useEffect(() => {
+    return () => {
+      if (generateTimeoutRef.current) {
+        clearTimeout(generateTimeoutRef.current);
+      }
+    };
+  }, []);
   
   const handleModeChange = useCallback((newMode: 'auto' | 'custom' | 'none') => {
     if (!disabled) {
@@ -316,52 +328,63 @@ export const VideoUploadFormSimpleThumbnail = memo(({
               onTimeSelect={(timestamp) => {
                 setSelectedTimestamp(timestamp);
                 onTimestampChange?.(timestamp);
+                
+                // Cancelar geração anterior se existir
+                if (generateTimeoutRef.current) {
+                  clearTimeout(generateTimeoutRef.current);
+                }
+                
+                // Verificar se já foi gerado para este timestamp
+                if (lastGeneratedTimestamp.current === timestamp) {
+                  return;
+                }
+                
+                // Verificar se já está gerando
+                if (isGeneratingRef.current) {
+                  return;
+                }
+                
+                // Agendar geração com debounce de 500ms
+                generateTimeoutRef.current = setTimeout(async () => {
+                  if (isGeneratingRef.current) {
+                    return;
+                  }
+                  
+                  isGeneratingRef.current = true;
+                  
+                  try {
+                    const result = await autoThumbState.generateThumbnail(timestamp);
+                    
+                    if (result && result.blob) {
+                      const thumbnailFile = new File(
+                        [result.blob], 
+                        `thumbnail_${timestamp.toFixed(1)}s.jpg`, 
+                        { type: 'image/jpeg' }
+                      );
+                      onThumbnailSelect(thumbnailFile);
+                      lastGeneratedTimestamp.current = timestamp;
+                    }
+                  } catch (error) {
+                    console.error('Erro ao gerar thumbnail:', error);
+                  } finally {
+                    isGeneratingRef.current = false;
+                  }
+                }, 500);
               }}
               disabled={disabled}
             />
             
             <div className="mt-4 pt-4 border-t border-neutral-200">
-              <p className="text-sm text-neutral-600 mb-3">
-                Após escolher o momento ideal, clique em &quot;Gerar Thumbnail&quot; para criar a imagem.
+              <p className="text-sm text-neutral-600">
+                A miniatura será gerada automaticamente ao mover o controle de tempo.
               </p>
               
-              <button
-                type="button"
-                onClick={async () => {
-                  // Usar o sistema de geração local com o timestamp selecionado
-                  try {
-                    const result = await autoThumbState.generateThumbnail(selectedTimestamp);
-                    if (result && result.blob) {
-                      const thumbnailFile = new File(
-                        [result.blob], 
-                        `thumbnail_${selectedTimestamp.toFixed(1)}s.jpg`, 
-                        { type: 'image/jpeg' }
-                      );
-                      onThumbnailSelect(thumbnailFile);
-                    }
-                  } catch (error) {
-                    // Error handling
-                  }
-                }}
-                disabled={disabled || autoThumbState.isGenerating || !videoFile}
-                className="
-                  px-6 py-2 bg-primary text-white text-sm rounded-lg font-medium
-                  hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20
-                  disabled:opacity-50 disabled:cursor-not-allowed transition-colors
-                "
-              >
-                {autoThumbState.isGenerating ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Gerando...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Icon name="image" className="w-4 h-4" />
-                    <span>Gerar Thumbnail</span>
-                  </div>
-                )}
-              </button>
+              {autoThumbState.isGenerating && (
+                <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <span>Gerando miniatura...</span>
+                </div>
+              )}
             </div>
           </div>
           

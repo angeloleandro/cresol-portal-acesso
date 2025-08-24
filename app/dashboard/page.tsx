@@ -13,21 +13,14 @@ import GlobalSearch from '../components/GlobalSearch';
 import Breadcrumbs from '../components/Breadcrumbs';
 import EventosDestaque from '../components/EventosDestaque';
 import NoticiasDestaque from '../components/NoticiasDestaque';
-import { Icon, IconName } from '../components/icons/Icon';
-import QuickActionCard from '../components/dashboard/QuickActionCard';
+import { Icon } from '../components/icons/Icon';
 
-interface QuickAction {
-  title: string;
-  description: string;
-  icon: IconName;
-  href: string;
-}
 
 interface DashboardStats {
-  systemsCount: number;
-  upcomingEventsCount: number;
-  unreadNotificationsCount: number;
-  favoriteSystemsCount: number;
+  newsCount: number;
+  eventsCount: number;
+  messagesCount: number;
+  documentsCount: number;
 }
 
 export default function Dashboard() {
@@ -36,10 +29,10 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
-    systemsCount: 0,
-    upcomingEventsCount: 0,
-    unreadNotificationsCount: 0,
-    favoriteSystemsCount: 0
+    newsCount: 0,
+    eventsCount: 0,
+    messagesCount: 0,
+    documentsCount: 0
   });
   const [recentSystems, setRecentSystems] = useState<any[]>([]);
 
@@ -98,24 +91,13 @@ export default function Dashboard() {
         throw new Error(result.error || 'Erro desconhecido na API dashboard');
       }
       
-      const { systemsCount, upcomingEventsCount, unreadNotificationsCount, recentSystems } = result.data;
+      const { newsCount, eventsCount, messagesCount, documentsCount, recentSystems } = result.data;
       
-      // Buscar favoritos (localStorage - não pode ser feito no servidor)
-      let favoritesCount = 0;
-      try {
-        const savedFavorites = localStorage.getItem(`favorites_${userId}`);
-        if (savedFavorites) {
-          favoritesCount = JSON.parse(savedFavorites).length;
-        }
-      } catch (error) {
-        console.error('Erro ao carregar favoritos:', error);
-      }
-
       setStats({
-        systemsCount,
-        upcomingEventsCount,
-        unreadNotificationsCount,
-        favoriteSystemsCount: favoritesCount
+        newsCount,
+        eventsCount,
+        messagesCount,
+        documentsCount
       });
       
       setRecentSystems(recentSystems);
@@ -126,32 +108,6 @@ export default function Dashboard() {
     }
   };
 
-  const quickActions: QuickAction[] = [
-    {
-      title: 'Sistemas',
-      description: 'Acesse todos os sistemas disponíveis',
-      icon: 'monitor',
-      href: '/sistemas'
-    },
-    {
-      title: 'Calendário',
-      description: 'Veja eventos e treinamentos',
-      icon: 'clock',
-      href: '/eventos?view=calendar'
-    },
-    {
-      title: 'Notícias',
-      description: 'Fique por dentro das novidades',
-      icon: 'chat-line',
-      href: '/noticias'
-    },
-    {
-      title: 'Galeria',
-      description: 'Fotos e vídeos da Cresol',
-      icon: 'image',
-      href: '/galeria'
-    }
-  ];
 
   const getCurrentGreeting = () => {
     const hour = new Date().getHours();
@@ -196,72 +152,61 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Estatísticas Rápidas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="card-status">
-            <div className="flex items-center">
-              <div className="p-2 rounded-md bg-primary/10 mr-3">
-                <Icon name="monitor" className="w-5 h-5 text-primary" />
+        {/* Estatísticas Principais */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-primary rounded-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div className="p-3 bg-white/20 rounded-lg">
+                <Icon name="file-text" className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <p className="text-xl font-semibold text-title">{stats.systemsCount}</p>
-                <p className="body-text-small text-muted">Sistemas</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="card-status">
-            <div className="flex items-center">
-              <div className="p-2 rounded-md bg-primary/10 mr-3">
-                <Icon name="clock" className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-xl font-semibold text-title">{stats.upcomingEventsCount}</p>
-                <p className="body-text-small text-muted">Eventos</p>
+              <div className="text-right">
+                <p className="text-3xl font-bold">{stats.newsCount}</p>
+                <p className="text-sm opacity-90">NOTÍCIAS</p>
+                <p className="text-xs opacity-75 mt-1">Últimos 30 dias</p>
               </div>
             </div>
           </div>
           
-          <div className="card-status">
-            <div className="flex items-center">
-              <div className="p-2 rounded-md bg-primary/10 mr-3">
-                <Icon name="bell-notification" className="w-5 h-5 text-primary" />
+          <div className="bg-primary rounded-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div className="p-3 bg-white/20 rounded-lg">
+                <Icon name="calendar" className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <p className="text-xl font-semibold text-title">{stats.unreadNotificationsCount}</p>
-                <p className="body-text-small text-muted">Notificações</p>
+              <div className="text-right">
+                <p className="text-3xl font-bold">{stats.eventsCount}</p>
+                <p className="text-sm opacity-90">EVENTOS</p>
+                <p className="text-xs opacity-75 mt-1">Próximos 30 dias</p>
               </div>
             </div>
           </div>
           
-          <div className="card-status">
-            <div className="flex items-center">
-              <div className="p-2 rounded-md bg-primary/10 mr-3">
-                <Icon name="suitcase" className="w-5 h-5 text-primary" />
+          <div className="bg-primary rounded-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div className="p-3 bg-white/20 rounded-lg">
+                <Icon name="chat-line" className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <p className="text-xl font-semibold text-title">{stats.favoriteSystemsCount}</p>
-                <p className="body-text-small text-muted">Favoritos</p>
+              <div className="text-right">
+                <p className="text-3xl font-bold">{stats.messagesCount}</p>
+                <p className="text-sm opacity-90">MENSAGENS</p>
+                <p className="text-xs opacity-75 mt-1">Últimos 30 dias</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-primary rounded-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div className="p-3 bg-white/20 rounded-lg">
+                <Icon name="folder" className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold">{stats.documentsCount}</p>
+                <p className="text-sm opacity-90">DOCUMENTOS</p>
+                <p className="text-xs opacity-75 mt-1">Últimos 30 dias</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Ações Rápidas */}
-        <div className="mb-8">
-          <h2 className="heading-2 mb-4">Ações Rápidas</h2>
-          <div className="grid-modern-stats">
-            {quickActions.map((action, index) => (
-              <QuickActionCard
-                key={index}
-                title={action.title}
-                description={action.description}
-                icon={action.icon}
-                href={action.href}
-              />
-            ))}
-          </div>
-        </div>
 
         {/* Sistemas Recentes */}
         {recentSystems.length > 0 && (

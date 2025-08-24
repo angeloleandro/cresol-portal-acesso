@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import AdminHeader from '@/app/components/AdminHeader';
+import Breadcrumb from '@/app/components/Breadcrumb';
 
 // Context Provider
 import { SubsectorDataProvider, useSubsectorDataContext } from './contexts/SubsectorDataContext';
@@ -20,15 +22,11 @@ import { TabNavigation } from './components/TabNavigation';
 const NewsManagement = lazy(() => import('./components/NewsManagement').then(m => ({ default: m.NewsManagement })));
 const EventsManagement = lazy(() => import('./components/EventsManagement').then(m => ({ default: m.EventsManagement })));
 const DocumentsManagement = lazy(() => import('./components/DocumentsManagement').then(m => ({ default: m.DocumentsManagement })));
+const VideosManagement = lazy(() => import('./components/VideosManagement').then(m => ({ default: m.VideosManagement })));
+const ImagesManagement = lazy(() => import('./components/ImagesManagement').then(m => ({ default: m.ImagesManagement })));
 const MessagesManagement = lazy(() => import('./components/MessagesManagement').then(m => ({ default: m.MessagesManagement })));
 const GroupsManagement = lazy(() => import('./components/GroupsManagement').then(m => ({ default: m.GroupsManagement })));
 
-// Loading component para lazy loading
-const LazyLoadingSpinner = () => (
-  <div className="flex justify-center items-center h-64">
-    <UnifiedLoadingSpinner message="Carregando componente..." />
-  </div>
-);
 
 // Componente interno que usa o contexto
 function SubsectorDashboardContent() {
@@ -64,71 +62,142 @@ function SubsectorDashboardContent() {
     events,
     messages,
     documents,
+    videos,
     showDrafts,
     totalDraftNewsCount,
     totalDraftEventsCount,
     totalDraftMessagesCount,
     totalDraftDocumentsCount,
+    totalDraftVideosCount,
     toggleDrafts,
     refreshContent,
     deleteNews,
     deleteEvent,
     deleteMessage,
-    deleteDocument
+    deleteDocument,
+    deleteVideo
   } = useSubsectorContent(subsectorId);
+
+  // Temporary images state until SubsectorContentManager is updated
+  const [images, setImages] = useState([]);
+  const [totalDraftImagesCount, setTotalDraftImagesCount] = useState(0);
+
+  // Temporary images functions
+  const deleteImage = async (id: string) => {
+    try {
+      const response = await fetch(`/api/admin/subsectors/${subsectorId}/images/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erro ao deletar imagem');
+      }
+      
+      // Refresh images list
+      await refreshImages();
+    } catch (error) {
+      console.error('Erro ao deletar imagem:', error);
+      throw error;
+    }
+  };
+
+  const refreshImages = async () => {
+    if (!subsectorId) return;
+    
+    try {
+      const response = await fetch(`/api/admin/subsectors/${subsectorId}/images`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setImages(data.data || []);
+        setTotalDraftImagesCount(data.draftCount || 0);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar imagens:', error);
+    }
+  };
 
   // Verificação de autorização
   const isAuthorized = profile && profile.role && ['admin', 'sector_admin', 'subsector_admin'].includes(profile.role);
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <h1 className="text-2xl font-bold text-gray-900">Acesso Negado</h1>
-            <p className="mt-2 text-gray-600">Você não tem permissão para acessar esta página.</p>
-          </div>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Acesso Negado</h2>
+          <p className="text-gray-600">Você não tem permissão para acessar esta página.</p>
         </div>
       </div>
     );
   }
 
-  if (contextLoading) {
+  if (contextLoading && !subsector) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-7xl mx-auto">
-          <UnifiedLoadingSpinner fullScreen message="Carregando subsetor..." />
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <UnifiedLoadingSpinner message="Carregando subsetor..." />
       </div>
     );
   }
+
+  // Breadcrumb com fallback seguro
+  const breadcrumbItems = [
+    { label: 'Admin Subsetor', href: '/admin-subsetor' },
+    { label: 'Subsetores', href: '/admin-subsetor/subsetores' },
+    { label: subsector?.name || 'Subsetor', href: '#' }
+  ];
+
+  // Componente de loading para lazy components
+  const LazyLoadingSpinner = () => (
+    <div className="flex items-center justify-center py-8">
+      <UnifiedLoadingSpinner message="Carregando..." />
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
-          {/* Cabeçalho do Subsetor */}
-          <div className="bg-white shadow-sm rounded-lg mb-6 p-6">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {subsector?.name || 'Carregando...'}
-            </h1>
-            {subsector?.description && (
-              <p className="mt-2 text-gray-600">{subsector.description}</p>
-            )}
-          </div>
+    <>
+      {contextLoading && !subsector && (
+        <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
+          <UnifiedLoadingSpinner message="Carregando informações do subsetor..." />
+        </div>
+      )}
+      <div className="min-h-screen bg-gray-50">
+      
+      {/* Admin Header padrão */}
+      <AdminHeader user={profile} />
+      
+      {/* Breadcrumb */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
+      </div>
 
-          {/* Sistema de Abas */}
-          <div className="bg-white shadow-sm rounded-lg">
-            <TabNavigation 
+      {/* Cabeçalho do subsetor */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Gerenciar Subsetor: {subsector?.name || 'Carregando...'}
+          </h1>
+          {subsector?.description && (
+            <p className="mt-2 text-gray-600">{subsector.description}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Navegação por abas */}
+      <TabNavigation 
               activeTab={activeTab} 
               onTabChange={setActiveTab}
               totalDraftNewsCount={totalDraftNewsCount}
               totalDraftEventsCount={totalDraftEventsCount}
               totalDraftMessagesCount={totalDraftMessagesCount}
               totalDraftDocumentsCount={totalDraftDocumentsCount}
-            />
+              totalDraftVideosCount={totalDraftVideosCount}
+              totalDraftImagesCount={totalDraftImagesCount}
+      />
 
-            {/* Conteúdo das Abas */}
-            <div className="p-6">
+      {/* Conteúdo da aba ativa com lazy loading */}
+      <main className="max-w-7xl mx-auto">
               {activeTab === 'news' && (
                 <Suspense fallback={<LazyLoadingSpinner />}>
                   <NewsManagement
@@ -171,6 +240,34 @@ function SubsectorDashboardContent() {
                 </Suspense>
               )}
 
+              {activeTab === 'videos' && (
+                <Suspense fallback={<LazyLoadingSpinner />}>
+                  <VideosManagement
+                    subsectorId={subsectorId}
+                    videos={videos}
+                    showDrafts={showDrafts}
+                    totalDraftVideosCount={totalDraftVideosCount}
+                    onToggleDrafts={toggleDrafts}
+                    onRefresh={refreshContent}
+                    onDelete={deleteVideo}
+                  />
+                </Suspense>
+              )}
+
+              {activeTab === 'images' && (
+                <Suspense fallback={<LazyLoadingSpinner />}>
+                  <ImagesManagement
+                    subsectorId={subsectorId}
+                    images={images}
+                    showDrafts={showDrafts}
+                    totalDraftImagesCount={totalDraftImagesCount}
+                    onToggleDrafts={toggleDrafts}
+                    onRefresh={refreshContent}
+                    onDelete={deleteImage}
+                  />
+                </Suspense>
+              )}
+
               {activeTab === 'groups' && (
                 <Suspense fallback={<LazyLoadingSpinner />}>
                   <GroupsManagement
@@ -201,10 +298,9 @@ function SubsectorDashboardContent() {
                   />
                 </Suspense>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
+      </main>
+    </div>
+    </>
   );
 }
 

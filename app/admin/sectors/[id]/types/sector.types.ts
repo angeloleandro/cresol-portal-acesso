@@ -107,6 +107,16 @@ export interface Message {
   is_published?: boolean; // Para funcionalidade de rascunho (será simulado)
 }
 
+export interface SectorMessage {
+  id: string;
+  title: string;
+  content: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  sector_id: string;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -123,4 +133,47 @@ export interface WorkLocation {
   state: string;
 }
 
-export type TabType = 'news' | 'events' | 'documents' | 'subsectors' | 'groups' | 'messages';
+export interface SectorVideo {
+  id: string;
+  sector_id: string;
+  title: string;
+  description: string | null;
+  video_url: string;
+  thumbnail_url: string | null;
+  thumbnail_timestamp: number | null;
+  upload_type: 'youtube' | 'upload';
+  file_path: string | null;
+  file_size: number | null;
+  mime_type: string | null;
+  duration: number | null;
+  is_featured: boolean;
+  is_published: boolean;
+  order_index: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  published_at: string | null;
+}
+
+export interface SectorImage {
+  id: string;
+  sector_id: string;
+  title: string;
+  description: string | null;
+  image_url: string;
+  thumbnail_url: string | null;
+  file_path: string | null;
+  file_size: number | null;
+  mime_type: string | null;
+  width: number | null;
+  height: number | null;
+  is_featured: boolean;
+  is_published: boolean;
+  order_index: number;
+  processing_status: 'pending' | 'processing' | 'ready' | 'failed';
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type TabType = 'news' | 'events' | 'documents' | 'subsectors' | 'groups' | 'messages' | 'videos' | 'images';
