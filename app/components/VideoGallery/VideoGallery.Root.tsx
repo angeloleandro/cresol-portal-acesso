@@ -1,28 +1,31 @@
-/**
- * VideoGallery Root Component
- * Enterprise-grade unified video gallery system with advanced thumbnail system
- */
+
 
 "use client";
 
-import { useState, memo } from 'react';
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
+import { motion } from 'framer-motion';
+import { useState, memo } from 'react';
+
 import { useOptimizedVideoGallery, useOptimizedInView } from '@/hooks/useOptimizedVideoGallery';
-import { useKeyboardNavigation, usePerformanceMonitor } from './VideoGallery.hooks';
-import { VideoGalleryGrid } from './VideoGallery.Grid';
-import { EnhancedVideoCard, SkeletonVideoCard } from './VideoGallery.Card';
-import { VideoCleanModal } from './VideoGallery.CleanModal';
-import { VideoGalleryHeader } from './VideoGallery.Header';
-import { VideoGalleryLoadingState } from './VideoGallery.LoadingState';
-import { VideoGalleryEmptyState } from './VideoGallery.EmptyState';
+
 import { containerAnimations } from './VideoGallery.animations';
+import { EnhancedVideoCard } from './VideoGallery.Card';
+import { VideoCleanModal } from './VideoGallery.CleanModal';
+import { VideoGalleryEmptyState } from './VideoGallery.EmptyState';
+import { VideoGalleryGrid } from './VideoGallery.Grid';
+import { VideoGalleryHeader } from './VideoGallery.Header';
+import { useKeyboardNavigation, usePerformanceMonitor } from './VideoGallery.hooks';
+import { VideoGalleryLoadingState } from './VideoGallery.LoadingState';
 import { VideoGalleryProps } from './VideoGallery.types';
 // Enhanced thumbnail system
 import { ThumbnailPerformanceProvider, VideoThumbnail } from '../VideoThumbnail';
 
 /**
  * Main VideoGallery Root Component
+ */
+/**
+ * VideoGalleryRoot function
+ * @todo Add proper documentation
  */
 export function VideoGalleryRoot({
   limit = 4,

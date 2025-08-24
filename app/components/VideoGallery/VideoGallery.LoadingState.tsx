@@ -1,13 +1,10 @@
-/**
- * VideoGallery Loading States
- * Enterprise-grade skeleton loading components
- */
+
 
 "use client";
 
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import { loadingAnimations } from './VideoGallery.animations';
+import { motion } from 'framer-motion';
+
 import { GridSystem } from './VideoGallery.Grid';
 
 interface LoadingStateProps {
@@ -18,6 +15,10 @@ interface LoadingStateProps {
 
 /**
  * Main Loading State Component
+ */
+/**
+ * VideoGalleryLoadingState function
+ * @todo Add proper documentation
  */
 export function VideoGalleryLoadingState({ 
   count = 4, 
@@ -61,6 +62,10 @@ export function VideoGalleryLoadingState({
 
 /**
  * Skeleton Video Card
+ */
+/**
+ * SkeletonVideoCard function
+ * @todo Add proper documentation
  */
 export function SkeletonVideoCard() {
   return (
@@ -198,6 +203,10 @@ function SkeletonCompactCard() {
 /**
  * Header Loading State
  */
+/**
+ * VideoGalleryHeaderSkeleton function
+ * @todo Add proper documentation
+ */
 export function VideoGalleryHeaderSkeleton() {
   return (
     <div className="flex justify-between items-center mb-6 animate-pulse">
@@ -212,6 +221,10 @@ export function VideoGalleryHeaderSkeleton() {
 
 /**
  * Modal Loading State
+ */
+/**
+ * VideoModalLoadingState function
+ * @todo Add proper documentation
  */
 export function VideoModalLoadingState() {
   return (
@@ -253,6 +266,10 @@ interface ProgressiveLoadingProps {
   className?: string;
 }
 
+/**
+ * ProgressiveLoading function
+ * @todo Add proper documentation
+ */
 export function ProgressiveLoading({ 
   stage, 
   progress, 

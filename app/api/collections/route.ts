@@ -2,8 +2,9 @@
 // CRUD completo para coleções - Portal Cresol
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
 import { handleApiError, devLog } from '@/lib/error-handler';
+import { CreateClient } from '@/lib/supabase/server';
 
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic';
 // GET /api/collections - Listar coleções com filtros
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar se usuário está autenticado
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
 // POST /api/collections - Criar nova coleção (apenas admins)
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar se usuário está autenticado e é admin
     const { data: { user }, error: authError } = await supabase.auth.getUser();

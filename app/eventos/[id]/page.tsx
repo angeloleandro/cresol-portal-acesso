@@ -1,14 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import OptimizedImage from '@/app/components/OptimizedImage';
+import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import { StandardizedButton } from '@/app/components/admin';
-import { supabase } from '@/lib/supabase';
-import Breadcrumb from '../../components/Breadcrumb';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
+import Breadcrumb from '../../components/Breadcrumb';
+
 
 interface EventItem {
   id: string;

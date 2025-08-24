@@ -1,9 +1,7 @@
-/**
- * Hook para geração assíncrona de thumbnails após upload
- * Usado para evitar travamento durante o upload do vídeo
- */
-
 import { useState, useCallback, useEffect } from 'react'
+
+
+
 
 interface AsyncThumbnailState {
   isGenerating: boolean
@@ -20,6 +18,10 @@ interface UseAsyncThumbnailGeneratorOptions {
   timestamp?: number
 }
 
+/**
+ * useAsyncThumbnailGenerator function
+ * @todo Add proper documentation
+ */
 export function useAsyncThumbnailGenerator(options: UseAsyncThumbnailGeneratorOptions = {}) {
   const { videoId, videoUrl, autoStart = false, timestamp = 1.0 } = options
 
@@ -106,7 +108,7 @@ export function useAsyncThumbnailGenerator(options: UseAsyncThumbnailGeneratorOp
 
       // Log do erro para debugging
       if (process.env.NODE_ENV === 'development') {
-        console.error('Erro na geração assíncrona de thumbnail:', error)
+
       }
 
       return null
@@ -140,7 +142,7 @@ export function useAsyncThumbnailGenerator(options: UseAsyncThumbnailGeneratorOp
 
       return result
     } catch (error) {
-      console.error('Erro ao verificar status de thumbnail:', error)
+
       return null
     }
   }, [videoId])

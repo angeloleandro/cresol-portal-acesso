@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+
 import OptimizedImage from './OptimizedImage';
 
 interface OptimizedAvatarProps {

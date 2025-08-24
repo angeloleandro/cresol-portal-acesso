@@ -3,13 +3,15 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import AdminHeader from '@/app/components/AdminHeader';
-import { supabase } from '@/lib/supabase';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
 import CollectionDetailEditPage from './components/CollectionDetailEditPage';
 
 interface PageProps {

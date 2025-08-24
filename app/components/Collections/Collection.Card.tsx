@@ -4,11 +4,13 @@
 // Card individual para exibição de coleção - Portal Cresol
 
 import Image from 'next/image';
-import { CollectionCardProps } from './Collection.types';
-import { formatCollection } from '@/lib/utils/collections';
-import { cn } from '@/lib/utils/cn';
-import { CSS_CLASSES } from '@/lib/constants/collections';
+
 import Icon from '@/app/components/icons/Icon';
+import { CSS_CLASSES } from '@/lib/constants/collections';
+import { cn } from '@/lib/utils/cn';
+import { formatCollection } from '@/lib/utils/collections';
+
+import { CollectionCardProps } from './Collection.types';
 
 const CollectionCard: React.FC<CollectionCardProps> = ({
   collection,

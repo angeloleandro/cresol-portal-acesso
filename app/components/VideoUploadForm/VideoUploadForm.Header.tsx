@@ -1,11 +1,10 @@
-/**
- * VideoUploadForm Header Component
- * Enhanced header with visual hierarchy and contextual information
- */
-
 import { memo } from 'react'
+
 import { VideoUploadHeaderProps } from './VideoUploadForm.types'
 import { Icon } from '../icons/Icon'
+
+
+
 
 export const VideoUploadFormHeader = memo(({ 
   title, 

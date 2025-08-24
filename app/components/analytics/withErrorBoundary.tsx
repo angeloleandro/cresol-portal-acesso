@@ -1,6 +1,7 @@
 'use client';
 
 import { ComponentType, forwardRef } from 'react';
+
 import { AnalyticsErrorBoundary } from './ErrorBoundary';
 
 interface WithErrorBoundaryOptions {
@@ -8,6 +9,10 @@ interface WithErrorBoundaryOptions {
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
+/**
+ * withErrorBoundary function
+ * @todo Add proper documentation
+ */
 export function withErrorBoundary<P extends object>(
   Component: ComponentType<P>,
   options: WithErrorBoundaryOptions = {}

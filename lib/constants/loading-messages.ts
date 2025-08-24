@@ -1,8 +1,4 @@
-/**
- * Constantes centralizadas para mensagens de loading
- * Elimina hardcode e duplicação de textos
- * Garante consistência em toda a aplicação
- */
+
 
 export const LOADING_MESSAGES = {
   // ===== MENSAGENS GERAIS =====
@@ -89,10 +85,10 @@ export const LOADING_MESSAGES = {
 export type LoadingMessage = typeof LOADING_MESSAGES[keyof typeof LOADING_MESSAGES];
 
 /**
- * Função helper para mensagens com variáveis
- * @example getLoadingMessage('uploadProgress', { progress: 50 }) => "Enviando... 50%"
+ * getLoadingMessage function
+ * @todo Add proper documentation
  */
-export function getLoadingMessage(
+export function GetLoadingMessage(
   key: keyof typeof LOADING_MESSAGES,
   variables?: Record<string, string | number>
 ): string {

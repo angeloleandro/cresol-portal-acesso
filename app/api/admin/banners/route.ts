@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { adminCORS } from '@/lib/cors-config';
 import { 
-  createAdminSupabaseClient, 
+  CreateAdminSupabaseClient, 
   authenticateAdminRequest, 
-  authorizeAdminOperation,
+  AuthorizeAdminOperation,
   AdminAPIResponses 
 } from '@/lib/supabase/admin';
-import { adminCORS } from '@/lib/cors-config';
 
 // GET /api/admin/banners - Listar todos os banners
 export const GET = adminCORS(async (request: NextRequest) => {
@@ -19,14 +20,14 @@ export const GET = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    if (!authorizeAdminOperation(auth.profile?.role)) {
+    if (!AuthorizeAdminOperation(auth.profile?.role)) {
       return NextResponse.json(
         AdminAPIResponses.forbidden(), 
         { status: 403 }
       );
     }
 
-    const supabaseAdmin = createAdminSupabaseClient();
+    const supabaseAdmin = CreateAdminSupabaseClient();
     
     const { data: banners, error } = await supabaseAdmin
       .from('banners')
@@ -50,7 +51,7 @@ export const GET = adminCORS(async (request: NextRequest) => {
     }
 
     // Obter estatísticas de posições
-    const usedPositions = banners?.map(b => b.order_index).sort((a, b) => a - b) || [];
+    const usedPositions = banners?.map((b: any) => b.order_index).sort((a: number, b: number) => a - b) || [];
     const maxPosition = Math.max(...usedPositions, -1);
     const gaps = [];
     
@@ -91,7 +92,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    if (!authorizeAdminOperation(auth.profile?.role)) {
+    if (!AuthorizeAdminOperation(auth.profile?.role)) {
       return NextResponse.json(
         AdminAPIResponses.forbidden(), 
         { status: 403 }
@@ -108,7 +109,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    const supabaseAdmin = createAdminSupabaseClient();
+    const supabaseAdmin = CreateAdminSupabaseClient();
 
     // Determinar posição usando sistema inteligente
     let finalOrderIndex = order_index;
@@ -201,7 +202,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    if (!authorizeAdminOperation(auth.profile?.role)) {
+    if (!AuthorizeAdminOperation(auth.profile?.role)) {
       return NextResponse.json(
         AdminAPIResponses.forbidden(), 
         { status: 403 }
@@ -218,7 +219,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    const supabaseAdmin = createAdminSupabaseClient();
+    const supabaseAdmin = CreateAdminSupabaseClient();
 
     // Verificar se o banner existe
     const { data: existingBanner, error: fetchError } = await supabaseAdmin
@@ -326,14 +327,14 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    if (!authorizeAdminOperation(auth.profile?.role)) {
+    if (!AuthorizeAdminOperation(auth.profile?.role)) {
       return NextResponse.json(
         AdminAPIResponses.forbidden(), 
         { status: 403 }
       );
     }
 
-    const supabaseAdmin = createAdminSupabaseClient();
+    const supabaseAdmin = CreateAdminSupabaseClient();
 
     // Verificar se o banner existe antes de deletar
     const { data: banner, error: fetchError } = await supabaseAdmin

@@ -1,9 +1,12 @@
-import { type SupabaseClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+
+
+import { CreateAdminSupabaseClient } from '@/lib/auth';
+import { GenerateTemporaryPassword } from '@/lib/constants';
+
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { NextRequest } from 'next/server';
-import { createAdminSupabaseClient } from '@/lib/auth';
-import { generateTemporaryPassword } from '@/lib/constants';
+
 
 interface AccessRequestData {
   email: string;
@@ -16,7 +19,7 @@ interface AccessRequestData {
 
 // Helper function to fetch access request data with fallback for password_hash field
 async function fetchAccessRequestData(
-  supabaseClient: SupabaseClient, 
+  supabaseClient: SupabaseClient<any, "public", any>, 
   accessRequestId: string
 ): Promise<{ data: AccessRequestData | null; error: any }> {
   // Try to fetch with password_hash first
@@ -93,11 +96,15 @@ async function updateUserPassword(
   try {
     await supabaseClient.auth.admin.getUserById(userId);
   } catch (verifyErr) {
-    console.error('Post-update verification failed:', verifyErr);
+
   }
   return { success: true };
 }
 
+/**
+ * POST function
+ * @todo Add proper documentation
+ */
 export async function POST(request: NextRequest) {
   const { accessRequestId, adminUserId, adminToken, editedUserData, targetStatus } = await request.json();
 
@@ -111,7 +118,7 @@ export async function POST(request: NextRequest) {
 
   let supabaseAdminClient: SupabaseClient;
   try {
-    supabaseAdminClient = createAdminSupabaseClient();
+    supabaseAdminClient = CreateAdminSupabaseClient();
   } catch (e) {
     return NextResponse.json({ error: 'Erro na configuração do servidor.' }, { status: 500 });
   }
@@ -125,7 +132,7 @@ export async function POST(request: NextRequest) {
       const { data: { user }, error: authError } = await supabaseAdminClient.auth.getUser(adminToken);
       
       if (authError || !user) {
-        console.error('Erro ao verificar token admin:', authError);
+
         return NextResponse.json({ 
           error: 'Token de administrador inválido ou expirado.' 
         }, { status: 401 });
@@ -187,7 +194,7 @@ export async function POST(request: NextRequest) {
         // Já existe um perfil, usar este ID
         authUserId = existingProfile.id;
         
-        const userPassword = requestData?.password_hash || generateTemporaryPassword();
+        const userPassword = requestData?.password_hash || GenerateTemporaryPassword();
         
         // Aprovando usuário existente
         
@@ -207,7 +214,7 @@ export async function POST(request: NextRequest) {
       } else {
         // Não existe perfil, tentar criar um novo usuário Auth
         // Usar a senha inicial fornecida pelo usuário (se disponível) ou gerar senha aleatória
-        const userPassword = requestData?.password_hash || generateTemporaryPassword();
+        const userPassword = requestData?.password_hash || GenerateTemporaryPassword();
         
         // Criando novo usuário
         
@@ -221,8 +228,7 @@ export async function POST(request: NextRequest) {
           });
           
           if (createAuthUserError) {
-            console.error('Create user with direct password failed:', createAuthUserError.message);
-            
+
             // Se o erro for que o usuário já existe, tentar buscar o ID pelo auth
             if (createAuthUserError.message.toLowerCase().includes('user already registered')) {
               // Buscar usuário pelo email diretamente na tabela auth.users
@@ -253,7 +259,7 @@ export async function POST(request: NextRequest) {
               }
               
               if (authUserId) {
-                const userPasswordForExisting = requestData?.password_hash || generateTemporaryPassword();
+                const userPasswordForExisting = requestData?.password_hash || GenerateTemporaryPassword();
                 // Usuário já existe, atualizando senha
                 
                 const { success, error: passwordError } = await updateUserPassword(
@@ -274,6 +280,7 @@ export async function POST(request: NextRequest) {
               // FALLBACK HÍBRIDO: Se createUser com senha falhar por outro motivo, 
               // tentar abordagem híbrida (createUser sem senha + updateUserById)
               // Fallback: criar usuário sem senha e depois atualizar
+              const userPassword = requestData?.password_hash || GenerateTemporaryPassword();
               
               const { data: fallbackAuthResponse, error: fallbackCreateError } = await supabaseAdminClient.auth.admin.createUser({
                 email: userEmail,
@@ -321,7 +328,7 @@ export async function POST(request: NextRequest) {
             try {
               await supabaseAdminClient.auth.admin.getUserById(authUserId);
             } catch (verifyErr) {
-              console.error('Post-creation verification failed:', verifyErr);
+
             }
             
           } else {

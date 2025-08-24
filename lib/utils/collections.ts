@@ -2,17 +2,17 @@
 // Funções utilitárias para o sistema de coleções
 
 import { 
+  COLLECTION_CONFIG, 
+  ERROR_MESSAGES, 
+  THEME_COLORS 
+} from '@/lib/constants/collections';
+import { 
   Collection, 
   CollectionItem, 
   CollectionFilters, 
   GalleryImage, 
   DashboardVideo 
 } from '@/lib/types/collections';
-import { 
-  COLLECTION_CONFIG, 
-  ERROR_MESSAGES, 
-  THEME_COLORS 
-} from '@/lib/constants/collections';
 import { cn } from '@/lib/utils/cn';
 
 // Re-export centralized utils for compatibility
@@ -121,25 +121,46 @@ export const filterCollections = {
 
   applySorting: (collections: Collection[], sortBy: string, sortOrder: 'asc' | 'desc'): Collection[] => {
     return [...collections].sort((a, b) => {
-      let aValue: any = a[sortBy as keyof Collection];
-      let bValue: any = b[sortBy as keyof Collection];
+      const aValue: unknown = a[sortBy as keyof Collection];
+      const bValue: unknown = b[sortBy as keyof Collection];
       
       // Handle date strings
       if (sortBy.includes('_at')) {
-        aValue = new Date(aValue).getTime();
-        bValue = new Date(bValue).getTime();
+        const aDate = typeof aValue === 'string' || typeof aValue === 'number' || aValue instanceof Date ? new Date(aValue).getTime() : 0;
+        const bDate = typeof bValue === 'string' || typeof bValue === 'number' || bValue instanceof Date ? new Date(bValue).getTime() : 0;
+        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
       }
       
       // Handle strings
-      if (typeof aValue === 'string') {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const aStr = aValue.toLowerCase();
+        const bStr = bValue.toLowerCase();
+        if (sortOrder === 'asc') {
+          return aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
+        } else {
+          return aStr > bStr ? -1 : aStr < bStr ? 1 : 0;
+        }
       }
       
+      // Handle numbers
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      
+      // Handle booleans
+      if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
+        const aNum = aValue ? 1 : 0;
+        const bNum = bValue ? 1 : 0;
+        return sortOrder === 'asc' ? aNum - bNum : bNum - aNum;
+      }
+      
+      // Fallback for mixed types - convert to string
+      const aStr = String(aValue || '').toLowerCase();
+      const bStr = String(bValue || '').toLowerCase();
       if (sortOrder === 'asc') {
-        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+        return aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
       } else {
-        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+        return aStr > bStr ? -1 : aStr < bStr ? 1 : 0;
       }
     });
   },
@@ -258,20 +279,20 @@ export const integrationHelpers = {
 // Performance Helpers
 export const performanceHelpers = {
   // Debounce function
-  debounce: <T extends (...args: any[]) => void>(func: T, delay: number): T => {
+  debounce: <T extends (...args: unknown[]) => void>(func: T, delay: number): T => {
     let timeoutId: NodeJS.Timeout;
-    return ((...args: any[]) => {
+    return ((...args: Parameters<T>) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => func(...args), delay);
     }) as T;
   },
 
   // Throttle function
-  throttle: <T extends (...args: any[]) => void>(func: T, delay: number): T => {
+  throttle: <T extends (...args: unknown[]) => void>(func: T, delay: number): T => {
     let timeoutId: NodeJS.Timeout | null = null;
     let lastExecTime = 0;
     
-    return ((...args: any[]) => {
+    return ((...args: Parameters<T>) => {
       const currentTime = Date.now();
       
       if (currentTime - lastExecTime > delay) {
@@ -300,24 +321,35 @@ export const performanceHelpers = {
 // Error Handling
 export const errorHelpers = {
   // Extrair mensagem de erro user-friendly
-  getErrorMessage: (error: any): string => {
+  getErrorMessage: (error: unknown): string => {
     if (typeof error === 'string') return error;
-    if (error?.message) return error.message;
-    if (error?.error) return error.error;
+    if (error && typeof error === 'object') {
+      if ('message' in error && typeof error.message === 'string') return error.message;
+      if ('error' in error && typeof error.error === 'string') return error.error;
+    }
     return ERROR_MESSAGES.UNKNOWN_ERROR;
   },
 
   // Verificar se é erro de rede
-  isNetworkError: (error: any): boolean => {
-    return error?.code === 'NETWORK_ERROR' || 
-           error?.message?.includes('fetch') ||
-           error?.message?.includes('network');
+  isNetworkError: (error: unknown): boolean => {
+    if (!error || typeof error !== 'object') return false;
+    
+    const hasCode = 'code' in error && error.code === 'NETWORK_ERROR';
+    const hasMessage = 'message' in error && typeof (error as any).message === 'string';
+    const hasFetchError = hasMessage && ((error as any).message.includes('fetch') || (error as any).message.includes('network'));
+    
+    return hasCode || hasFetchError;
   },
 
   // Verificar se é erro de permissão
-  isPermissionError: (error: any): boolean => {
-    return error?.code === 'PERMISSION_DENIED' || 
-           error?.status === 403 ||
-           error?.message?.includes('permission');
+  isPermissionError: (error: unknown): boolean => {
+    if (!error || typeof error !== 'object') return false;
+    
+    const hasCode = 'code' in error && error.code === 'PERMISSION_DENIED';
+    const hasStatus = 'status' in error && error.status === 403;
+    const hasMessage = 'message' in error && typeof (error as any).message === 'string';
+    const hasPermissionError = hasMessage && (error as any).message.includes('permission');
+    
+    return hasCode || hasStatus || hasPermissionError;
   },
 };

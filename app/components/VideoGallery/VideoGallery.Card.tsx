@@ -1,25 +1,24 @@
-/**
- * Enhanced Video Card Component
- * Enterprise-grade video card with rich visual states and advanced thumbnail system
- * Otimizado com React.memo e hooks otimizados
- */
+
 
 "use client";
 
-import { useState, useCallback, memo, useMemo } from 'react';
-import Button from '@/app/components/ui/Button';
-import { motion } from 'framer-motion';
+import clsx from 'clsx';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import clsx from 'clsx';
-import { Icon } from '../icons/Icon';
-import { formatFileSize } from '@/lib/video-utils';
-import { cardAnimations, playButtonAnimations, badgeAnimations, thumbnailAnimations } from './VideoGallery.animations';
+import { motion } from 'framer-motion';
+import { useState, useCallback } from 'react';
+
+import Button from '@/app/components/ui/Button';
 import { useOptimizedImagePreload } from '@/hooks/useOptimizedVideoGallery';
+import { FormatFileSize } from '@/lib/video-utils';
+
+import { CardAnimations } from './VideoGallery.animations';
 import { VideoCardProps, DashboardVideo } from './VideoGallery.types';
+import { Icon } from '../icons/Icon';
+
+
 // Enhanced thumbnail system
 import { VideoThumbnail } from '../VideoThumbnail';
-import { useImagePreload } from './VideoGallery.hooks';
 
 /**
  * Admin Video Card Props - Extends base props with separate action handlers
@@ -37,6 +36,10 @@ export interface AdminVideoCardProps extends Omit<VideoCardProps, 'onClick'> {
 /**
  * Enhanced Video Card with micro-interactions
  */
+/**
+ * EnhancedVideoCard function
+ * @todo Add proper documentation
+ */
 export function EnhancedVideoCard({ 
   video, 
   onClick, 
@@ -44,11 +47,8 @@ export function EnhancedVideoCard({
   priority = false,
   className 
 }: VideoCardProps) {
-  const [imageError, setImageError] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  
   // Preload thumbnail for better UX
-  const { isImageLoaded } = useOptimizedImagePreload(
+  useOptimizedImagePreload(
     video.thumbnail_url ? [video.thumbnail_url] : []
   );
 
@@ -79,7 +79,7 @@ export function EnhancedVideoCard({
       animate="visible"
       whileHover="hover"
       whileTap="tap"
-      variants={cardAnimations}
+      variants={CardAnimations}
       className={clsx(
         'group cursor-pointer',
         'bg-white rounded-md border border-gray-200/40',
@@ -93,8 +93,6 @@ export function EnhancedVideoCard({
       tabIndex={0}
       role="button"
       aria-label={`Reproduzir vídeo: ${video.title}`}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
     >
       {/* Enhanced Thumbnail with Advanced System */}
       <div className="rounded-t-lg overflow-hidden">
@@ -155,7 +153,7 @@ export function EnhancedVideoCard({
             )}
             {video.file_size && (
               <p className="text-xs text-neutral-500">
-                Tamanho: {formatFileSize(video.file_size)}
+                Tamanho: {FormatFileSize(video.file_size)}
               </p>
             )}
           </div>
@@ -195,8 +193,8 @@ export function EnhancedVideoCard({
 }
 
 /**
- * Admin Video Card with separate Play, Edit, and Delete actions
- * Specialized for administrative interfaces
+ * AdminVideoCard function
+ * @todo Add proper documentation
  */
 export function AdminVideoCard({ 
   video, 
@@ -254,7 +252,7 @@ export function AdminVideoCard({
       animate="visible"
       whileHover="hover"
       whileTap="tap"
-      variants={cardAnimations}
+      variants={CardAnimations}
       className={clsx(
         'group cursor-pointer',
         'bg-white rounded-md border border-gray-200/40',
@@ -328,7 +326,7 @@ export function AdminVideoCard({
             )}
             {video.file_size && (
               <p className="text-xs text-neutral-500">
-                Tamanho: {formatFileSize(video.file_size)}
+                Tamanho: {FormatFileSize(video.file_size)}
               </p>
             )}
           </div>
@@ -400,11 +398,6 @@ export function AdminVideoCard({
   );
 }
 
-
-/**
- * Video Badge Component
- * Legacy badge component - keeping for CompactVideoCard compatibility
- */
 interface VideoBadgeProps {
   uploadType: DashboardVideo['upload_type'];
   className?: string;
@@ -457,6 +450,10 @@ function VideoBadge({ uploadType, className }: VideoBadgeProps) {
 /**
  * Skeleton Video Card for Loading States
  */
+/**
+ * SkeletonVideoCard function
+ * @todo Add proper documentation
+ */
 export function SkeletonVideoCard() {
   return (
     <div className="bg-white rounded-md border border-neutral-200 overflow-hidden animate-pulse">
@@ -475,6 +472,10 @@ export function SkeletonVideoCard() {
 
 /**
  * Empty State Video Card
+ */
+/**
+ * EmptyVideoCard function
+ * @todo Add proper documentation
  */
 export function EmptyVideoCard() {
   return (
@@ -498,6 +499,10 @@ interface CompactVideoCardProps extends Omit<VideoCardProps, 'className'> {
   showDate?: boolean;
 }
 
+/**
+ * CompactVideoCard function
+ * @todo Add proper documentation
+ */
 export function CompactVideoCard({
   video,
   onClick,
@@ -517,7 +522,7 @@ export function CompactVideoCard({
       animate="visible"
       whileHover="hover"
       whileTap="tap"
-      variants={cardAnimations}
+      variants={CardAnimations}
       className={clsx(
         'group cursor-pointer',
         'flex gap-3 p-3',
@@ -572,7 +577,7 @@ export function CompactVideoCard({
         <div className="mt-1 space-y-1">
           {showFileSize && video.upload_type === 'direct' && video.file_size && (
             <p className="text-xs text-neutral-500">
-              {formatFileSize(video.file_size)}
+              {FormatFileSize(video.file_size)}
             </p>
           )}
           

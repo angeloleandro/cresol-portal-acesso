@@ -1,34 +1,54 @@
 /**
  * Video utilities - Essential functions only
  */
-import { supabase } from '@/lib/supabase';
 import {
   VIDEO_THUMBNAIL_CONFIG,
   VIDEO_FILE_CONFIG,
   YOUTUBE_CONFIG
 } from '@/lib/constants/video-ui';
+import { supabase } from '@/lib/supabase';
 
-export function extractYouTubeVideoId(url: string): string | null {
+/**
+ * extractYouTubeVideoId function
+ * @todo Add proper documentation
+ */
+export function ExtractYouTubeVideoId(url: string): string | null {
   const match = url.match(VIDEO_THUMBNAIL_CONFIG.youtube.urlPattern);
   return match ? match[1] : null;
 }
 
-export function getYouTubeThumbnail(
+/**
+ * getYouTubeThumbnail function
+ * @todo Add proper documentation
+ */
+export function GetYouTubeThumbnail(
   videoId: string, 
   quality: typeof VIDEO_THUMBNAIL_CONFIG.youtube.qualities[number] = VIDEO_THUMBNAIL_CONFIG.youtube.defaultQuality
 ): string {
   return `${YOUTUBE_CONFIG.thumbnail.baseUrl}/${videoId}/${quality}.jpg`;
 }
 
-export function isValidVideoFile(file: File): boolean {
-  return VIDEO_FILE_CONFIG.supportedMimeTypes.includes(file.type as any);
+/**
+ * isValidVideoFile function
+ * @todo Add proper documentation
+ */
+export function IsValidVideoFile(file: File): boolean {
+  return VIDEO_FILE_CONFIG.supportedMimeTypes.includes(file.type as (typeof VIDEO_FILE_CONFIG.supportedMimeTypes)[number]);
 }
 
-export function isValidVideoMimeType(mimeType: string): boolean {
-  return VIDEO_FILE_CONFIG.supportedMimeTypes.includes(mimeType as any);
+/**
+ * isValidVideoMimeType function
+ * @todo Add proper documentation
+ */
+export function IsValidVideoMimeType(mimeType: string): boolean {
+  return VIDEO_FILE_CONFIG.supportedMimeTypes.includes(mimeType as (typeof VIDEO_FILE_CONFIG.supportedMimeTypes)[number]);
 }
 
-export function formatFileSize(bytes: number): string {
+/**
+ * formatFileSize function
+ * @todo Add proper documentation
+ */
+export function FormatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -36,7 +56,11 @@ export function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-export function resolveVideoUrl(video: any): string {
+/**
+ * resolveVideoUrl function
+ * @todo Add proper documentation
+ */
+export function ResolveVideoUrl(video: { upload_type?: string; file_path?: string | null; video_url?: string }): string {
   if (video.upload_type === 'direct' && video.file_path) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     return `${supabaseUrl}/storage/v1/object/public/videos/${video.file_path}`;
@@ -44,10 +68,18 @@ export function resolveVideoUrl(video: any): string {
   return video.video_url || '';
 }
 
-export function getVideoUrl(video: any): string {
-  return resolveVideoUrl(video);
+/**
+ * getVideoUrl function
+ * @todo Add proper documentation
+ */
+export function GetVideoUrl(video: { upload_type?: string; file_path?: string | null; video_url?: string }): string {
+  return ResolveVideoUrl(video);
 }
 
+/**
+ * checkVideoUrlAccessibility function
+ * @todo Add proper documentation
+ */
 export async function checkVideoUrlAccessibility(url: string): Promise<boolean> {
   try {
     const response = await fetch(url, { method: 'HEAD' });
@@ -57,6 +89,10 @@ export async function checkVideoUrlAccessibility(url: string): Promise<boolean> 
   }
 }
 
+/**
+ * getAuthenticatedSession function
+ * @todo Add proper documentation
+ */
 export async function getAuthenticatedSession() {
   const { data: { session }, error } = await supabase.auth.getSession();
   
@@ -67,6 +103,10 @@ export async function getAuthenticatedSession() {
   return session;
 }
 
+/**
+ * makeAuthenticatedRequest function
+ * @todo Add proper documentation
+ */
 export async function makeAuthenticatedRequest(url: string, options: RequestInit = {}) {
   const session = await getAuthenticatedSession();
   

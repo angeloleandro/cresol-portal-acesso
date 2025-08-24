@@ -1,7 +1,9 @@
 // Componente de cabeçalho do setor com breadcrumb e ações
 
 import Link from 'next/link';
+
 import Breadcrumb from '@/app/components/Breadcrumb';
+
 import { Sector } from '../types/sector.types';
 
 interface SectorHeaderProps {
@@ -9,6 +11,10 @@ interface SectorHeaderProps {
   onLogout: () => Promise<void>;
 }
 
+/**
+ * SectorHeader function
+ * @todo Add proper documentation
+ */
 export function SectorHeader({ sector, onLogout }: SectorHeaderProps) {
   const breadcrumbItems = sector ? [
     { label: 'Admin', href: '/admin' },

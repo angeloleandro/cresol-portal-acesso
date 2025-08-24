@@ -6,6 +6,10 @@ interface PageTitleProps {
   gradient?: boolean;
 }
 
+/**
+ * PageTitle function
+ * @todo Add proper documentation
+ */
 export function PageTitle({ children, className = '', gradient = true }: PageTitleProps) {
   return (
     <h1 className={`
@@ -28,6 +32,10 @@ interface SectionTitleProps {
   subtitle?: string;
 }
 
+/**
+ * SectionTitle function
+ * @todo Add proper documentation
+ */
 export function SectionTitle({ children, className = '', subtitle }: SectionTitleProps) {
   return (
     <div className={`mb-6 ${className}`}>
@@ -51,6 +59,10 @@ interface MetricValueProps {
   animated?: boolean;
 }
 
+/**
+ * MetricValue function
+ * @todo Add proper documentation
+ */
 export function MetricValue({ 
   value, 
   className = '', 
@@ -86,6 +98,10 @@ interface MetricLabelProps {
   variant?: 'primary' | 'secondary' | 'muted';
 }
 
+/**
+ * MetricLabel function
+ * @todo Add proper documentation
+ */
 export function MetricLabel({ 
   children, 
   className = '', 
@@ -118,6 +134,10 @@ interface CardTitleProps {
   actions?: React.ReactNode;
 }
 
+/**
+ * CardTitle function
+ * @todo Add proper documentation
+ */
 export function CardTitle({ children, className = '', actions }: CardTitleProps) {
   return (
     <div className={`flex items-center justify-between mb-4 ${className}`}>
@@ -143,6 +163,10 @@ interface StatisticProps {
   className?: string;
 }
 
+/**
+ * Statistic function
+ * @todo Add proper documentation
+ */
 export function Statistic({ 
   label, 
   value, 
@@ -181,6 +205,10 @@ interface DescriptionTextProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
+/**
+ * DescriptionText function
+ * @todo Add proper documentation
+ */
 export function DescriptionText({ 
   children, 
   className = '', 
@@ -212,6 +240,10 @@ interface BadgeTextProps {
   variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error';
 }
 
+/**
+ * BadgeText function
+ * @todo Add proper documentation
+ */
 export function BadgeText({ 
   children, 
   className = '', 
@@ -253,6 +285,10 @@ interface GradientTextProps {
   to?: string;
 }
 
+/**
+ * GradientText function
+ * @todo Add proper documentation
+ */
 export function GradientText({ 
   children, 
   className = '',

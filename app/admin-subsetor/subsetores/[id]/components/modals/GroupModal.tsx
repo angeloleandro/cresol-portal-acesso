@@ -11,6 +11,10 @@ interface GroupModalProps {
   users: { id: string; full_name: string; email: string; }[];
 }
 
+/**
+ * GroupModal function
+ * @todo Add proper documentation
+ */
 export function GroupModal({
   isOpen,
   currentGroup,

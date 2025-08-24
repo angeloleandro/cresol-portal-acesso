@@ -1,13 +1,15 @@
 // Componente OTIMIZADO de gerenciamento de grupos de notificação - PADRONIZADO
 // Baseado no padrão do setor para manter consistência
 
-import React, { useState, memo, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import React, { memo, useState, useCallback } from 'react';
+
 import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { createClient } from '@/lib/supabase/client';
+import { FormatDate } from '@/lib/utils/formatters';
+
 import { Group, User, WorkLocation } from '../types/subsector.types';
-import { formatDate } from '@/lib/utils/formatters';
 import CreateGroupModal from './groups/CreateGroupModal';
 
 interface GroupsManagementProps {
@@ -27,12 +29,12 @@ const GroupsManagement = memo(function GroupsManagement({
   subsectorId,
   groups,
   automaticGroups,
-  workLocations,
-  userSearchTerm,
-  userLocationFilter,
-  filteredUsers,
-  onSearchTermChange,
-  onLocationFilterChange,
+  workLocations: _workLocations,
+  userSearchTerm: _userSearchTerm,
+  userLocationFilter: _userLocationFilter,
+  filteredUsers: _filteredUsers,
+  onSearchTermChange: _onSearchTermChange,
+  onLocationFilterChange: _onLocationFilterChange,
   onRefresh
 }: GroupsManagementProps) {
   const alert = useAlert();
@@ -176,7 +178,7 @@ const GroupsManagement = memo(function GroupsManagement({
                         {group.profiles?.full_name ? `Por ${group.profiles.full_name}` : 'Sistema'}
                       </span>
                     </div>
-                    <span>Criado em {formatDate(group.created_at)}</span>
+                    <span>Criado em {FormatDate(group.created_at)}</span>
                   </div>
                 </div>
               ))}
@@ -206,5 +208,7 @@ const GroupsManagement = memo(function GroupsManagement({
     </div>
   );
 });
+
+GroupsManagement.displayName = 'GroupsManagement';
 
 export { GroupsManagement };

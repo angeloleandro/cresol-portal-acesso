@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
-import { HTTP_STATUS, API_ERROR_MESSAGES, API_SUCCESS_MESSAGES, CONTENT_TYPES, API_VALIDATION } from '@/lib/constants/api-config';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+
+
+import { API_ERROR_MESSAGES, HTTP_STATUS, CONTENT_TYPES } from '@/lib/constants/api-config';
+import { CreateAdminSupabaseClient } from '@/lib/supabase/admin';
 
 
 // Função para criar cliente do servidor com autenticação
@@ -33,7 +35,7 @@ async function createAuthenticatedClient() {
 
 // Função para operações administrativas que usam Service Role Key (bypass RLS)
 function createAdminClient() {
-  return createAdminSupabaseClient();
+  return CreateAdminSupabaseClient();
 }
 
 // GET - Buscar notícias e eventos
@@ -161,7 +163,7 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('[API-GET] Erro crítico:', error.message);
+
     return NextResponse.json(
       { 
         error: 'Erro interno do servidor',
@@ -202,7 +204,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, action, data } = body;
     const operationType = action || type;
-    
 
     const supabase = await createAuthenticatedClient();
     
@@ -244,8 +245,7 @@ export async function POST(request: NextRequest) {
         { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
       );
     }
-    
-    
+
     if (!profile || (profile.role !== 'admin' && profile.role !== 'sector_admin' && profile.role !== 'subsector_admin')) {
       return NextResponse.json(
         { 
@@ -294,8 +294,7 @@ export async function POST(request: NextRequest) {
         mappedType = 'sector_messages'; // default para sector_messages
       }
     }
-    
-    
+
     // Validar campos obrigatórios para notícias
     if (mappedType === CONTENT_TYPES.sectorNews || mappedType === CONTENT_TYPES.subsectorNews) {
       if (!data.title || !data.summary || !data.content) {
@@ -554,7 +553,6 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const { type, id, data, sectorId, subsectorId } = body;
-    
 
     const supabase = await createAuthenticatedClient();
     
@@ -574,8 +572,7 @@ export async function PUT(request: NextRequest) {
       .select('role')
       .eq('id', user.id)
       .single();
-    
-    
+
     if (!profile || (profile.role !== 'admin' && profile.role !== 'sector_admin' && profile.role !== 'subsector_admin')) {
       return NextResponse.json(
         { error: API_ERROR_MESSAGES.permissionDenied },
@@ -584,7 +581,7 @@ export async function PUT(request: NextRequest) {
     }
     
     // Determinar o ID real e o tipo correto
-    let realId = id || data?.id;
+    const realId = id || data?.id;
     let realType = type;
     
     // Determinar o tipo correto baseado no contexto
@@ -621,8 +618,7 @@ export async function PUT(request: NextRequest) {
         type === CONTENT_TYPES.sectorDocuments || type === CONTENT_TYPES.subsectorDocuments) {
       realType = type;
     }
-    
-    
+
     // Validações com logging detalhado
     if (!realId) {
       return NextResponse.json(
@@ -871,7 +867,6 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     const id = searchParams.get('id');
-    
 
     const supabase = await createAuthenticatedClient();
     
@@ -891,8 +886,7 @@ export async function DELETE(request: NextRequest) {
       .select('role')
       .eq('id', user.id)
       .single();
-    
-    
+
     if (!profile || (profile.role !== 'admin' && profile.role !== 'sector_admin' && profile.role !== 'subsector_admin')) {
       return NextResponse.json(
         { error: API_ERROR_MESSAGES.permissionDenied },

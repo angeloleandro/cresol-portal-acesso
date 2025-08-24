@@ -1,7 +1,4 @@
-/**
- * Video System TypeScript Interfaces
- * Enterprise-grade type definitions for video upload system
- */
+
 
 export interface VideoUploadFormData {
   id?: string

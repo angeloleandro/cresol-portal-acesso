@@ -1,14 +1,15 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
-import { useRouter } from 'next/navigation';
 import { Icon } from '@/app/components/icons/Icon';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
 
 interface Position {
   id: string;
@@ -24,7 +25,7 @@ export default function PositionsAdmin() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [positions, setPositions] = useState<Position[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [_isAdmin, _setIsAdmin] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -54,7 +55,7 @@ export default function PositionsAdmin() {
         .eq('id', userData.user.id)
         .single();
       if (profile?.role === 'admin') {
-        setIsAdmin(true);
+        _setIsAdmin(true);
         fetchPositions();
       } else {
         router.replace('/home');

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode, InputHTMLAttributes, TextareaHTMLAttributes, forwardRef, useState } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 import { INPUT_CONFIG, CRESOL_TEXT_CONSTANTS } from '@/lib/design-tokens';
 
@@ -65,67 +66,6 @@ interface TextareaProps extends BaseInputProps, Omit<TextareaHTMLAttributes<HTML
 // União dos tipos
 export type StandardizedInputProps = InputProps | TextareaProps;
 
-/**
- * StandardizedInput - Componente Input baseado no Chakra UI v3
- * 
- * CHAKRA UI V3 FEATURES:
- * - Variantes: outline (padrão), filled, flushed, unstyled
- * - Tamanhos: xs, sm, md (padrão), lg
- * - InputGroup: startAddon, endAddon, startElement, endElement
- * - Field wrapper: label, help, error states
- * - Estados completos: invalid, disabled, readOnly, loading
- * - Acessibilidade WCAG 2.1 AA
- * 
- * FUNCIONALIDADES PRESERVADAS:
- * - Ícones clicáveis e elementos customizados
- * - Password visibility toggle
- * - Clear functionality
- * - Loading states com spinner
- * - Validação e mensagens de erro
- * - Support para textarea
- * - Design tokens Cresol
- * 
- * USAGE:
- * ```tsx
- * // Input básico
- * <StandardizedInput 
- *   label="E-mail" 
- *   variant="outline"
- *   size="md"
- *   type="email" 
- *   required 
- * />
- * 
- * // Com ícones
- * <StandardizedInput 
- *   label="Buscar"
- *   startIcon="search"
- *   variant="filled"
- * />
- * 
- * // Com addons
- * <StandardizedInput 
- *   label="Website"
- *   startAddon="https://"
- *   endAddon=".com"
- * />
- * 
- * // Password com toggle
- * <StandardizedInput 
- *   label="Senha"
- *   type="password"
- *   showPasswordToggle
- * />
- * 
- * // Textarea
- * <StandardizedInput 
- *   as="textarea"
- *   label="Descrição"
- *   rows={4}
- *   variant="outline"
- * />
- * ```
- */
 export const StandardizedInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, StandardizedInputProps>(
   function StandardizedInput(props, ref) {
     const {

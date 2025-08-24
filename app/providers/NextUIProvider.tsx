@@ -2,6 +2,10 @@
 
 import { NextUIProvider } from '@nextui-org/react';
 
+/**
+ * NextUIProviderWrapper function
+ * @todo Add proper documentation
+ */
 export function NextUIProviderWrapper({
   children,
 }: {

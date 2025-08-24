@@ -1,11 +1,17 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+
 import type { NextRequest } from 'next/server';
+
 
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
 
+/**
+ * POST function
+ * @todo Add proper documentation
+ */
 export async function POST(request: NextRequest) {
   const { email, password } = await request.json();
 
@@ -24,8 +30,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error('Login authentication failed:', error.message);
-      
+
       // Mensagem de erro mais amigável
       let errorMessage = 'Falha na autenticação';
       
@@ -46,7 +51,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (profileError) {
-      console.error('Failed to fetch user profile:', profileError.message);
+
     }
 
     const loginResult = {

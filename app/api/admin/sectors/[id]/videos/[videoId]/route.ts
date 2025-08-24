@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
+import { CreateClient } from '@/lib/supabase/server';
+
 
 // PUT /api/admin/sectors/[id]/videos/[videoId] - Atualizar vídeo
 export async function PUT(
@@ -10,17 +12,8 @@ export async function PUT(
     const sectorId = params.id;
     const videoId = params.videoId;
     const body = await request.json();
-    
-    console.log('[VIDEO-UPDATE] Iniciando update de vídeo:', {
-      sectorId,
-      videoId,
-      uploadType: body.upload_type,
-      hasTitle: !!body.title,
-      hasVideoUrl: !!body.video_url,
-      hasThumbnailUrl: !!body.thumbnail_url
-    });
-    
-    const supabase = createClient();
+
+    const supabase = CreateClient();
     
     // Verificar autenticação
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -52,15 +45,7 @@ export async function PUT(
       .eq('id', videoId)
       .eq('sector_id', sectorId)
       .single();
-      
-    console.log('[VIDEO-UPDATE] Vídeo existente encontrado:', {
-      exists: !!existingVideo,
-      uploadType: existingVideo?.upload_type,
-      hasVideoUrl: !!existingVideo?.video_url,
-      hasThumbnailUrl: !!existingVideo?.thumbnail_url,
-      hasFilePath: !!existingVideo?.file_path
-    });
-      
+
     if (checkError || !existingVideo) {
       return NextResponse.json(
         { error: 'Vídeo não encontrado' },
@@ -91,14 +76,7 @@ export async function PUT(
         thumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
       }
     }
-    
-    console.log('[VIDEO-UPDATE] Processando thumbnail:', {
-      originalThumbnail: body.thumbnail_url,
-      processedThumbnail: thumbnailUrl,
-      isYoutube: body.upload_type === 'youtube',
-      isDirectUpload: body.upload_type === 'upload'
-    });
-    
+
     // Atualizar vídeo
     const { data: updatedVideo, error } = await supabase
       .from('sector_videos')
@@ -117,27 +95,20 @@ export async function PUT(
       .single();
     
     if (error) {
-      console.error('[VIDEO-UPDATE] Erro ao atualizar vídeo:', error);
+
       return NextResponse.json(
         { error: 'Erro ao atualizar vídeo' },
         { status: 500 }
       );
     }
-    
-    console.log('[VIDEO-UPDATE] Vídeo atualizado com sucesso:', {
-      videoId: updatedVideo?.id,
-      title: updatedVideo?.title,
-      uploadType: updatedVideo?.upload_type,
-      thumbnailUrl: updatedVideo?.thumbnail_url
-    });
-    
+
     return NextResponse.json({
       success: true,
       data: updatedVideo
     });
     
   } catch (error) {
-    console.error('Erro ao atualizar vídeo:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -154,7 +125,7 @@ export async function DELETE(
     const sectorId = params.id;
     const videoId = params.videoId;
     
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar autenticação
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -222,7 +193,7 @@ export async function DELETE(
       .eq('id', videoId);
     
     if (error) {
-      console.error('Erro ao excluir vídeo:', error);
+
       return NextResponse.json(
         { error: 'Erro ao excluir vídeo' },
         { status: 500 }
@@ -235,7 +206,7 @@ export async function DELETE(
     });
     
   } catch (error) {
-    console.error('Erro ao excluir vídeo:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

@@ -1,30 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Tabs } from "@chakra-ui/react";
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import { useAlert } from '@/app/components/alerts';
+import { useEffect, useState } from 'react';
+import { LuFolder } from "react-icons/lu";
+
 import { 
   StandardizedAdminLayout, 
   StandardizedPageHeader, 
   StandardizedTabsList,
   StandardizedTabContent,
-  StandardizedCard,
   StandardizedEmptyState,
   type BreadcrumbItem
 } from '@/app/components/admin';
-import { Button } from '@/app/components/ui/Button';
-import { Tabs } from "@chakra-ui/react";
-import { LuFolder } from "react-icons/lu";
 import SectorCard from '@/app/components/admin/SectorCard';
 import SubsectorCard from '@/app/components/admin/SubsectorCard';
-import { Icon } from '../../components/icons';
+import { useAlert } from '@/app/components/alerts';
+import { FormSelect } from '@/app/components/forms/FormSelect';
+import { Button } from '@/app/components/ui/Button';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
-import { FormSelect } from '@/app/components/forms/FormSelect';
+import { supabase } from '@/lib/supabase';
+
+import { Icon } from '../../components/icons';
 
 interface Sector {
   id: string;
@@ -114,7 +114,7 @@ export default function SectorsManagement() {
       .order('name');
     
     if (error) {
-      console.error('Erro ao buscar setores:', error);
+
     } else {
       setSectors(data || []);
     }
@@ -130,7 +130,7 @@ export default function SectorsManagement() {
       .order('name');
     
     if (error) {
-      console.error('Erro ao buscar sub-setores:', error);
+
     } else {
       const formattedData = (data || []).map(subsector => ({
         ...subsector,
@@ -151,7 +151,7 @@ export default function SectorsManagement() {
       `);
     
     if (error) {
-      console.error('Erro ao buscar administradores de setor:', error);
+
     } else {
       const formattedData = (data || []).map(admin => ({
         ...admin,
@@ -203,7 +203,7 @@ export default function SectorsManagement() {
       resetSectorForm();
       fetchSectors();
     } catch (error) {
-      console.error('Erro ao salvar setor:', error);
+
       showError('Erro ao salvar setor', 'Tente novamente.');
     }
   };
@@ -247,7 +247,7 @@ export default function SectorsManagement() {
       resetSubsectorForm();
       fetchSubsectors();
     } catch (error) {
-      console.error('Erro ao salvar sub-setor:', error);
+
       showError('Erro ao salvar sub-setor', 'Tente novamente.');
     }
   };
@@ -290,7 +290,7 @@ export default function SectorsManagement() {
         fetchSubsectors();
       }
     } catch (error) {
-      console.error(`Erro ao excluir ${type}:`, error);
+
       showError(`Erro ao excluir ${type}`, 'Tente novamente.');
     } finally {
       setIsDeleteModalOpen(false);

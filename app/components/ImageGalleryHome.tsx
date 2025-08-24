@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
 import { supabase } from "@/lib/supabase";
+
+import { Icon } from "./icons/Icon";
 import { ImagePreviewWithGrid } from "./ImagePreview";
 import { BaseImage, baseImageToGalleryImage } from "./ImagePreview/ImagePreview.types";
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { Icon } from "./icons/Icon";
-import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
+
 
 interface GalleryImage {
   id: string;

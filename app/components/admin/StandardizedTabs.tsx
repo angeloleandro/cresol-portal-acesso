@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+
 import { Icon } from '../icons';
 
 interface Tab {
@@ -18,17 +19,6 @@ interface StandardizedTabsProps {
   className?: string;
 }
 
-/**
- * Componente de tabs padronizado seguindo o design system
- * 
- * Features:
- * - Underline ativa em laranja Cresol
- * - Ícones opcionais
- * - Contadores (badges) opcionais
- * - Estados hover consistentes
- * - Transições suaves
- * - Layout responsivo
- */
 export default function StandardizedTabs({
   tabs,
   activeTab,

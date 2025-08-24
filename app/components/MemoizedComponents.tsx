@@ -1,17 +1,73 @@
 'use client';
 
-import React, { memo, useMemo, useCallback } from 'react';
 import Image from 'next/image';
+import { memo, useMemo, useCallback } from 'react';
+
 import { NewsCard, CompactNewsCard, FeaturedNewsCard } from './NewsCard';
+
 import type { NewsItem } from './NewsCard';
 
-/**
- * Componentes memoizados para evitar re-renderizações desnecessárias
- * Melhora significativamente a performance em listas e componentes complexos
- */
+// ========================================
+// TYPE DEFINITIONS
+// ========================================
+
+/** Props para componentes de notícias */
+interface NewsCardProps {
+  news: NewsItem;
+  variant?: string;
+}
+
+/** Props para componente de banner */
+interface BannerItemProps {
+  id: string;
+  title: string | null;
+  image_url: string;
+  link: string | null;
+  isActive: boolean;
+  onNavigate?: (url: string) => void;
+}
+
+/** Props para componente de vídeo */
+interface VideoItemProps {
+  id: string;
+  title: string;
+  thumbnail_url: string | null;
+  video_url: string;
+  type: 'youtube' | 'file';
+  duration?: string;
+}
+
+/** Props para componente de galeria */
+interface GalleryItemProps {
+  id: string;
+  image_url: string;
+  title: string;
+  category?: string;
+  onClick?: () => void;
+}
+
+/** Props para componente de sistema lateral */
+interface SystemLinkProps {
+  id: string;
+  name: string;
+  url: string;
+  icon_url?: string;
+  description?: string;
+  is_active: boolean;
+}
+
+/** Props para lista de notícias */
+interface NewsListProps {
+  news: NewsItem[];
+  compact?: boolean;
+}
+
+// ========================================
+// MEMOIZED COMPONENTS
+// ========================================
 
 // Memoização do NewsCard com comparação customizada
-export const MemoizedNewsCard = memo(NewsCard, (prevProps, nextProps) => {
+export const MemoizedNewsCard = memo(NewsCard, (prevProps: NewsCardProps, nextProps: NewsCardProps) => {
   // Re-renderiza apenas se dados essenciais mudaram
   return (
     prevProps.news?.id === nextProps.news?.id &&
@@ -28,12 +84,6 @@ export const MemoizedCompactNewsCard = memo(CompactNewsCard);
 // Memoização do FeaturedNewsCard
 export const MemoizedFeaturedNewsCard = memo(FeaturedNewsCard);
 
-// Componente de lista de notícias otimizado
-interface NewsListProps {
-  news: NewsItem[];
-  compact?: boolean;
-}
-
 export const MemoizedNewsList = memo<NewsListProps>(function MemoizedNewsList({ news, compact = false }) {
   // Memoiza a renderização dos itens
   const newsItems = useMemo(
@@ -49,18 +99,8 @@ export const MemoizedNewsList = memo<NewsListProps>(function MemoizedNewsList({ 
   return <>{newsItems}</>;
 });
 
-// Componente de Banner memoizado
-interface BannerItemProps {
-  id: string;
-  title: string | null;
-  image_url: string;
-  link: string | null;
-  isActive: boolean;
-  onNavigate?: (url: string) => void;
-}
-
 export const MemoizedBannerItem = memo<BannerItemProps>(
-  function MemoizedBannerItem({ id, title, image_url, link, isActive, onNavigate }) {
+  function MemoizedBannerItem({ title, image_url, link, isActive, onNavigate }) {
     // Memoiza o handler de clique
     const handleClick = useCallback(() => {
       if (link && onNavigate) {
@@ -99,7 +139,7 @@ export const MemoizedBannerItem = memo<BannerItemProps>(
     );
   },
   // Comparação customizada para evitar re-render desnecessário
-  (prevProps, nextProps) => {
+  (prevProps: BannerItemProps, nextProps: BannerItemProps) => {
     return (
       prevProps.id === nextProps.id &&
       prevProps.isActive === nextProps.isActive &&
@@ -108,18 +148,8 @@ export const MemoizedBannerItem = memo<BannerItemProps>(
   }
 );
 
-// Componente de vídeo memoizado
-interface VideoItemProps {
-  id: string;
-  title: string;
-  thumbnail_url: string | null;
-  video_url: string;
-  type: 'youtube' | 'file';
-  duration?: string;
-}
-
 export const MemoizedVideoItem = memo<VideoItemProps>(
-  function MemoizedVideoItem({ id, title, thumbnail_url, video_url, type, duration }) {
+  function MemoizedVideoItem({ title, thumbnail_url, video_url, type, duration }) {
     // Memoiza a URL do thumbnail
     const thumbnailSrc = useMemo(() => {
       if (thumbnail_url) return thumbnail_url;
@@ -177,23 +207,36 @@ export const MemoizedVideoItem = memo<VideoItemProps>(
   }
 );
 
-// Hook para memoizar dados de lista
+// ========================================
+// CUSTOM HOOKS
+// ========================================
+
+/**
+ * Hook para memoizar dados de lista com dependências adicionais
+ * @param items - Array de itens a serem memoizados
+ * @param dependencies - Dependências adicionais para recalcular a memoização
+ * @returns Array memoizado dos itens
+ */
 export function useMemoizedList<T>(
   items: T[],
-  dependencies: any[] = []
+  dependencies: unknown[] = []
 ): T[] {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => items, [items, ...dependencies]);
 }
 
-// Hook para memoizar callbacks de lista
+/**
+ * Hook para memoizar callbacks de lista (clique e remoção)
+ * @param items - Array de itens da lista
+ * @returns Objeto com callbacks memoizados para clique e remoção
+ */
 export function useMemoizedListCallbacks<T>(items: T[]) {
   const handleItemClick = useCallback(
     (index: number) => {
-      const item = items[index];
+      const item: T = items[index];
       // Lógica de clique
       if (process.env.NODE_ENV !== 'production') {
-        console.debug('Item clicked:', item);
+        console.log('Item clicado:', item);
       }
     },
     [items]
@@ -202,7 +245,9 @@ export function useMemoizedListCallbacks<T>(items: T[]) {
   const handleItemRemove = useCallback(
     (index: number) => {
       // Lógica de remoção
-      console.log('Item removed at index:', index);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Item removido no índice:', index);
+      }
     },
     []
   );
@@ -213,17 +258,8 @@ export function useMemoizedListCallbacks<T>(items: T[]) {
   };
 }
 
-// Componente de galeria memoizado
-interface GalleryItemProps {
-  id: string;
-  image_url: string;
-  title: string;
-  category?: string;
-  onClick?: () => void;
-}
-
 export const MemoizedGalleryItem = memo<GalleryItemProps>(
-  function MemoizedGalleryItem({ id, image_url, title, category, onClick }) {
+  function MemoizedGalleryItem({ image_url, title, category, onClick }) {
     return (
       <div 
         className="gallery-item cursor-pointer hover:opacity-90 transition-opacity"
@@ -251,7 +287,7 @@ export const MemoizedGalleryItem = memo<GalleryItemProps>(
     );
   },
   // Re-renderiza apenas se propriedades visuais mudaram
-  (prevProps, nextProps) => {
+  (prevProps: GalleryItemProps, nextProps: GalleryItemProps) => {
     return (
       prevProps.id === nextProps.id &&
       prevProps.image_url === nextProps.image_url &&
@@ -260,18 +296,8 @@ export const MemoizedGalleryItem = memo<GalleryItemProps>(
   }
 );
 
-// Componente de sistema lateral memoizado
-interface SystemLinkProps {
-  id: string;
-  name: string;
-  url: string;
-  icon_url?: string;
-  description?: string;
-  is_active: boolean;
-}
-
 export const MemoizedSystemLink = memo<SystemLinkProps>(
-  function MemoizedSystemLink({ id, name, url, icon_url, description, is_active }) {
+  function MemoizedSystemLink({ name, url, icon_url, description, is_active }) {
     // Memoiza o handler de navegação
     const handleNavigate = useCallback(() => {
       if (is_active) {
@@ -313,11 +339,17 @@ export const MemoizedSystemLink = memo<SystemLinkProps>(
   }
 );
 
-// Exporta um hook para usar memoização condicional
+/**
+ * Hook para usar memoização condicional baseada em uma flag
+ * @param value - Valor a ser memoizado
+ * @param shouldMemoize - Se true, aplica memoização; se false, retorna valor direto
+ * @param dependencies - Dependências para recalcular a memoização
+ * @returns Valor memoizado condicionalmente
+ */
 export function useConditionalMemo<T>(
   value: T,
   shouldMemoize: boolean,
-  dependencies: any[] = []
+  dependencies: unknown[] = []
 ): T {
   // Usa diferentes estratégias de memoização baseado na flag
   // eslint-disable-next-line react-hooks/exhaustive-deps

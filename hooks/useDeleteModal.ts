@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 
+
 interface DeleteModalState {
   isOpen: boolean;
   itemToDelete: any | null;
@@ -7,6 +8,10 @@ interface DeleteModalState {
   itemType: string;
 }
 
+/**
+ * useDeleteModal function
+ * @todo Add proper documentation
+ */
 export function useDeleteModal(itemType: string = 'item') {
   const [modalState, setModalState] = useState<DeleteModalState>({
     isOpen: false,

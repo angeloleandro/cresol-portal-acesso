@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, ReactNode } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 interface ConfirmationModalProps {

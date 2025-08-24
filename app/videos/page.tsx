@@ -1,29 +1,31 @@
-/**
- * Videos Gallery Page - Modernized Version
- * Enterprise-grade video gallery with modern UI/UX patterns
- * WCAG 2.1 AA compliant with Cresol branding
- */
+
 
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import Breadcrumb from "../components/Breadcrumb";
-import { getSupabaseClient } from "@/lib/supabase";
-import { VideoGalleryHeader, AdvancedVideoGalleryHeader } from "../components/VideoGallery/VideoGallery.Header";
-import { VideoGalleryGrid } from "../components/VideoGallery/VideoGallery.Grid";
-import { VideoCleanModal } from "../components/VideoGallery/VideoGallery.CleanModal";
-import { VideoGalleryEmptyState } from "../components/VideoGallery/VideoGallery.EmptyState";
-import { EnhancedVideoCard } from "../components/VideoGallery/VideoGallery.Card";
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from "react";
+
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { DashboardVideo, VideoFilters } from "../types/video";
+import { getSupabaseClient } from "@/lib/supabase";
+
+import Breadcrumb from "../components/Breadcrumb";
 import { CollectionSection } from "../components/Collections/CollectionSection";
-import { useSearchParams } from 'next/navigation';
-import clsx from "clsx";
+import Footer from "../components/Footer";
 import { Icon } from "../components/icons/Icon";
+import Navbar from "../components/Navbar";
+
+
+import { EnhancedVideoCard } from "../components/VideoGallery/VideoGallery.Card";
+import { VideoCleanModal } from "../components/VideoGallery/VideoGallery.CleanModal";
+import { VideoGalleryEmptyState } from "../components/VideoGallery/VideoGallery.EmptyState";
+import { VideoGalleryGrid } from "../components/VideoGallery/VideoGallery.Grid";
+import { AdvancedVideoGalleryHeader } from "../components/VideoGallery/VideoGallery.Header";
+
+
+import { DashboardVideo, VideoFilters } from "../types/video";
 
 interface Collection {
   id: string;

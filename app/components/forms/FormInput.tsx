@@ -1,6 +1,7 @@
 'use client';
 
 import React, { forwardRef, useState } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 export interface FormInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -17,37 +18,6 @@ export interface FormInputProps extends Omit<React.InputHTMLAttributes<HTMLInput
   showPasswordToggle?: boolean;
 }
 
-/**
- * FormInput - Professional input component
- * 
- * Enterprise-grade input component based on Chakra UI v3 patterns with:
- * - Multiple variants: outline (default), filled, underline
- * - Three sizes: sm, md (default), lg
- * - Built-in icon support with click handlers
- * - Password visibility toggle
- * - Clear functionality
- * - Loading states with spinner
- * - Error and success states
- * - Full keyboard navigation
- * - WCAG 2.1 AA accessibility compliance
- * - Cresol design system colors and tokens
- * - React Hook Form compatibility
- * - TypeScript support with proper prop forwarding
- * 
- * Supports all standard input types: text, email, password, search, number, tel, url
- * 
- * @param variant - Visual style variant
- * @param size - Input size
- * @param isInvalid - Error state
- * @param isLoading - Loading state  
- * @param startIcon - Icon at start of input
- * @param endIcon - Icon at end of input
- * @param onIconClick - Icon click handler
- * @param fullWidth - Take full width of container
- * @param clearable - Show clear button when input has value
- * @param onClear - Clear button handler
- * @param showPasswordToggle - Show password visibility toggle for password inputs
- */
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
   variant = 'outline',
   size = 'md',

@@ -1,13 +1,13 @@
-/**
- * Status da geração assíncrona de thumbnail
- * Componente para mostrar progresso após upload do vídeo
- */
-
-import { memo } from 'react'
 import Image from 'next/image'
-import { Icon } from '../icons/Icon'
+import { memo } from 'react'
+
+
 import { useAsyncThumbnailGenerator } from '@/app/hooks/useAsyncThumbnailGenerator'
-import { CRESOL_UI_CONFIG } from '@/lib/design-tokens'
+
+import { Icon } from '../icons/Icon'
+
+
+
 
 interface AsyncThumbnailStatusProps {
   videoId: string

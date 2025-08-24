@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect, useCallback } from 'react';
+
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
-import { Icon } from '../../components/icons/Icon';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
+import { Icon } from '../../components/icons/Icon';
 
 interface UserActivity {
   id: string;
@@ -43,7 +44,7 @@ export default function MonitoringPage() {
         .limit(50);
 
       if (error) {
-        console.error('Erro ao carregar atividades:', error);
+
         // Fallback para dados mock em caso de erro
         const mockActivities: UserActivity[] = [
           {
@@ -70,7 +71,7 @@ export default function MonitoringPage() {
         setUserActivities(activities);
       }
     } catch (error) {
-      console.error('Erro ao carregar atividades de usuários:', error);
+
       setUserActivities([]);
     }
   }, []);

@@ -1,7 +1,9 @@
 // Hook para gerenciamento de dados do subsetor
 
 import { useState, useEffect, useCallback } from 'react';
+
 import { useSupabaseClient } from '@/hooks/useSupabaseClient';
+
 import { Subsector, SubsectorEvent, SubsectorNews, System, User, WorkLocation } from '../types/subsector.types';
 
 interface UseSubsectorDataReturn {
@@ -31,6 +33,10 @@ interface UseSubsectorDataReturn {
   refreshData: () => Promise<void>;
 }
 
+/**
+ * useSubsectorData function
+ * @todo Add proper documentation
+ */
 export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
   const supabase = useSupabaseClient();
   

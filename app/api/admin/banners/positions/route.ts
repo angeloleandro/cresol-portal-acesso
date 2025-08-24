@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { 
-  createAdminSupabaseClient, 
+  CreateAdminSupabaseClient, 
   authenticateAdminRequest, 
-  authorizeAdminOperation,
+  AuthorizeAdminOperation,
   AdminAPIResponses 
 } from '@/lib/supabase/admin';
 
@@ -18,14 +19,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!authorizeAdminOperation(auth.profile?.role)) {
+    if (!AuthorizeAdminOperation(auth.profile?.role)) {
       return NextResponse.json(
         AdminAPIResponses.forbidden(), 
         { status: 403 }
       );
     }
 
-    const supabaseAdmin = createAdminSupabaseClient();
+    const supabaseAdmin = CreateAdminSupabaseClient();
 
     // Obter todos os banners para análise de posições
     const { data: banners, error: bannersError } = await supabaseAdmin
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Calcular estatísticas
-    const usedPositions = banners?.map(b => b.order_index).sort((a, b) => a - b) || [];
+    const usedPositions = banners?.map((b: any) => b.order_index).sort((a: number, b: number) => a - b) || [];
     const maxPosition = Math.max(...usedPositions, -1);
     const gaps = [];
     
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     // Verificar se há lacunas
     const hasGaps = gaps.length > 0;
-    const isSequential = usedPositions.every((pos, index) => pos === index);
+    const isSequential = usedPositions.every((pos: number, index: number) => pos === index);
 
     return NextResponse.json(AdminAPIResponses.success({
       positioning: {
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
         isSequential,
         recommendCompaction: hasGaps && gaps.length > 1
       },
-      banners: banners?.map(b => ({
+      banners: banners?.map((b: any) => ({
         id: b.id,
         title: b.title,
         position: b.order_index
@@ -102,14 +103,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!authorizeAdminOperation(auth.profile?.role)) {
+    if (!AuthorizeAdminOperation(auth.profile?.role)) {
       return NextResponse.json(
         AdminAPIResponses.forbidden(), 
         { status: 403 }
       );
     }
 
-    const supabaseAdmin = createAdminSupabaseClient();
+    const supabaseAdmin = CreateAdminSupabaseClient();
 
     // Executar compactação de posições
     const { data: updatedCount, error: compactError } = await supabaseAdmin
@@ -142,7 +143,7 @@ export async function POST(request: NextRequest) {
         bannersUpdated: updatedCount,
         wasNeeded: updatedCount > 0
       },
-      banners: banners?.map(b => ({
+      banners: banners?.map((b: any) => ({
         id: b.id,
         title: b.title,
         position: b.order_index

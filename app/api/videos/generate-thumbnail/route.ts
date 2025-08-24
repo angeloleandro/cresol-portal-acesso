@@ -1,13 +1,16 @@
-/**
- * API Route para geração assíncrona de thumbnails de vídeos
- * POST /api/videos/generate-thumbnail
- */
-
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
-import { generateVideoThumbnailSimple } from '@/lib/thumbnail-generator'
-import { uploadThumbnailWithFallback } from '@/lib/supabase-storage'
 
+import { supabase } from '@/lib/supabase'
+import { uploadThumbnailWithFallback } from '@/lib/supabase-storage'
+import { generateVideoThumbnailSimple } from '@/lib/thumbnail-generator'
+
+
+
+
+/**
+ * POST function
+ * @todo Add proper documentation
+ */
 export async function POST(request: NextRequest) {
   try {
     const { videoId, videoUrl, timestamp = 1.0 } = await request.json()
@@ -71,7 +74,7 @@ export async function POST(request: NextRequest) {
         .eq('id', videoId)
 
       if (updateError) {
-        console.error('Erro ao atualizar vídeo com thumbnail:', updateError)
+
         throw new Error('Erro ao salvar thumbnail no banco de dados')
       }
 
@@ -83,8 +86,7 @@ export async function POST(request: NextRequest) {
       })
 
     } catch (thumbnailError) {
-      console.error('Erro na geração de thumbnail:', thumbnailError)
-      
+
       return NextResponse.json({
         success: false,
         error: thumbnailError instanceof Error ? thumbnailError.message : 'Erro ao gerar thumbnail',
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Erro na API de geração de thumbnail:', error)
+
     return NextResponse.json(
       { 
         error: error instanceof Error ? error.message : 'Erro interno do servidor',
@@ -137,7 +139,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erro ao verificar status de thumbnail:', error)
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

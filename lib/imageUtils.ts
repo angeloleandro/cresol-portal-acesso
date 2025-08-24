@@ -1,9 +1,7 @@
-/**
- * Utilitários para processamento de imagens do Supabase Storage
- * Otimizado para deployment na Vercel com Image Optimization
- */
-
 import { logger } from './production-logger';
+
+
+
 
 // Configurações do Supabase Storage
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -14,7 +12,11 @@ const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 /**
  * Valida se uma URL de imagem é válida para Vercel Image Optimization
  */
-export function isValidImageUrl(url: string | null | undefined): boolean {
+/**
+ * isValidImageUrl function
+ * @todo Add proper documentation
+ */
+export function IsValidImageUrl(url: string | null | undefined): boolean {
   if (!url) return false;
   
   try {
@@ -37,11 +39,15 @@ export function isValidImageUrl(url: string | null | undefined): boolean {
 /**
  * Processa URL do Supabase Storage para garantir que está correta
  */
-export function processSupabaseImageUrl(url: string | null | undefined): string | null {
+/**
+ * processSupabaseImageUrl function
+ * @todo Add proper documentation
+ */
+export function ProcessSupabaseImageUrl(url: string | null | undefined): string | null {
   if (!url || !SUPABASE_URL) return null;
 
   // Se já é uma URL completa válida, retorna ela
-  if (isValidImageUrl(url)) {
+  if (IsValidImageUrl(url)) {
     return url;
   }
 
@@ -58,7 +64,11 @@ export function processSupabaseImageUrl(url: string | null | undefined): string 
 /**
  * Gera URL de fallback para imagem padrão
  */
-export function getFallbackImageUrl(type: 'avatar' | 'gallery' | 'banner' = 'gallery'): string {
+/**
+ * getFallbackImageUrl function
+ * @todo Add proper documentation
+ */
+export function GetFallbackImageUrl(type: 'avatar' | 'gallery' | 'banner' = 'gallery'): string {
   // Retorna uma URL de imagem padrão baseada no tipo
   switch (type) {
     case 'avatar':
@@ -74,16 +84,20 @@ export function getFallbackImageUrl(type: 'avatar' | 'gallery' | 'banner' = 'gal
 /**
  * Otimiza URL de imagem para Vercel Image Optimization
  */
-export function optimizeSupabaseImage(
+/**
+ * optimizeSupabaseImage function
+ * @todo Add proper documentation
+ */
+export function OptimizeSupabaseImage(
   url: string | null | undefined,
-  options: {
+  _options: {
     width?: number;
     height?: number;
     quality?: number;
     format?: 'webp' | 'jpg' | 'png';
   } = {}
 ): string | null {
-  const processedUrl = processSupabaseImageUrl(url);
+  const processedUrl = ProcessSupabaseImageUrl(url);
   if (!processedUrl) return null;
 
   // Na Vercel, a otimização é feita automaticamente pelo Next.js
@@ -99,6 +113,10 @@ export function optimizeSupabaseImage(
 /**
  * Verifica se a imagem está acessível
  */
+/**
+ * checkImageAccessibility function
+ * @todo Add proper documentation
+ */
 export async function checkImageAccessibility(url: string): Promise<boolean> {
   try {
     const response = await fetch(url, { method: 'HEAD' });
@@ -111,12 +129,16 @@ export async function checkImageAccessibility(url: string): Promise<boolean> {
 /**
  * Hook para debug de imagens em desenvolvimento e Vercel
  */
-export function debugImageUrl(url: string | null | undefined, context?: string): void {
+/**
+ * debugImageUrl function
+ * @todo Add proper documentation
+ */
+export function DebugImageUrl(url: string | null | undefined, context?: string): void {
   if (process.env.NODE_ENV === 'development' || IS_VERCEL) {
     const debugInfo = {
       originalUrl: url,
-      processedUrl: processSupabaseImageUrl(url),
-      isValid: isValidImageUrl(url),
+      processedUrl: ProcessSupabaseImageUrl(url),
+      isValid: IsValidImageUrl(url),
       supabaseUrl: SUPABASE_URL,
       environment: {
         isVercel: IS_VERCEL,
@@ -128,7 +150,7 @@ export function debugImageUrl(url: string | null | undefined, context?: string):
     logger.debug(`Image Debug${context ? ` - ${context}` : ''}`, debugInfo);
     
     // Log adicional se a URL não for válida
-    if (!isValidImageUrl(url)) {
+    if (!IsValidImageUrl(url)) {
       logger.warn('URL inválida detectada', { url });
     }
   }
@@ -137,7 +159,11 @@ export function debugImageUrl(url: string | null | undefined, context?: string):
 /**
  * Função para verificar compatibilidade com Vercel Image Optimization
  */
-export function checkVercelCompatibility(url: string | null | undefined): {
+/**
+ * checkVercelCompatibility function
+ * @todo Add proper documentation
+ */
+export function CheckVercelCompatibility(url: string | null | undefined): {
   isCompatible: boolean;
   issues: string[];
   recommendations: string[];
@@ -182,3 +208,11 @@ export function checkVercelCompatibility(url: string | null | undefined): {
     recommendations
   };
 }
+
+// === COMPATIBILITY EXPORTS ===
+// Export camelCase versions for backward compatibility with existing imports
+export const processSupabaseImageUrl = ProcessSupabaseImageUrl;
+export const isValidImageUrl = IsValidImageUrl;  
+export const getFallbackImageUrl = GetFallbackImageUrl;
+export const optimizeSupabaseImage = OptimizeSupabaseImage;
+export const debugImageUrl = DebugImageUrl;

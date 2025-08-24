@@ -1,12 +1,5 @@
 'use client';
 
-import { useState, useCallback, memo, useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import GlobalSearch from './GlobalSearch';
-import { Icon } from './icons/Icon';
-import HeroUISectorsDropdown from './HeroUISectorsDropdown';
-import HeroUIAgenciesDropdown from './HeroUIAgenciesDropdown';
 import { 
   Dropdown, 
   DropdownTrigger, 
@@ -14,12 +7,21 @@ import {
   DropdownItem, 
   Button 
 } from '@nextui-org/react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState, useCallback, memo, useRef, useEffect } from 'react';
+
 import { 
   useOptimizedUser, 
   useOptimizedSectors, 
   useOptimizedAgencies,
   useOptimizedDropdown 
 } from '@/hooks/useOptimizedNavbar';
+
+import GlobalSearch from './GlobalSearch';
+import HeroUIAgenciesDropdown from './HeroUIAgenciesDropdown';
+import HeroUISectorsDropdown from './HeroUISectorsDropdown';
+import { Icon } from './icons/Icon';
 
 // Types
 interface Subsector {
@@ -35,7 +37,6 @@ interface Sector {
   description?: string;
   subsectors?: Subsector[];
 }
-
 
 // Skeleton loading component
 const NavbarSkeleton = memo(() => (
@@ -54,7 +55,6 @@ const NavbarSkeleton = memo(() => (
   </header>
 ));
   NavbarSkeleton.displayName = 'NavbarSkeleton';
-
 
 // Memoized Gallery Dropdown - Convertido para HeroUI
 const GalleryDropdown = memo(({ pathname }: {
@@ -183,7 +183,6 @@ const GalleryDropdown = memo(({ pathname }: {
 });
   GalleryDropdown.displayName = 'GalleryDropdown';
 
-
 // Memoized Admin Sector Dropdown
 const AdminSectorDropdown = memo(({ sectors, dropdown }: {
   sectors: Sector[];
@@ -280,7 +279,6 @@ const SearchButton = memo(({ isOpen, onToggle, user }: {
   );
 });
   SearchButton.displayName = 'SearchButton';
-
 
 // Memoized User Menu
 const UserMenu = memo(({ user, dropdown, onLogout }: {

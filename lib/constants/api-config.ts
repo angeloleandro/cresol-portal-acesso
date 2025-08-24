@@ -1,8 +1,4 @@
-/**
- * API Configuration Constants
- * Centralized configuration for all API routes and related functionality
- * Eliminates hardcoded values in API endpoints
- */
+
 
 // ===== HTTP STATUS CODES =====
 export const HTTP_STATUS = {
@@ -133,336 +129,8 @@ export const REQUEST_CONFIG = {
       json: 'application/json',
       any: '*/*'
     }
-  }
-} as const;
-
-// ===== RESPONSE FORMATS =====
-export const RESPONSE_FORMATS = {
-  success: {
-    data: 'data',
-    message: 'message',
-    status: 'status'
-  },
-  error: {
-    error: 'error',
-    message: 'message',
-    details: 'details',
-    code: 'code',
-    status: 'status'
-  }
-} as const;
-
-// ===== CONTENT TYPES =====
-export const CONTENT_TYPES = {
-  // Sector content
-  sectorNews: 'sector_news',
-  sectorEvents: 'sector_events',
-  sectorDocuments: 'sector_documents',
-  
-  // Subsector content
-  subsectorNews: 'subsector_news',
-  subsectorEvents: 'subsector_events',
-  subsectorDocuments: 'subsector_documents',
-  
-  // Actions
-  createNews: 'create_news',
-  updateNews: 'update_news',
-  deleteNews: 'delete_news',
-  createEvent: 'create_event',
-  updateEvent: 'update_event',
-  deleteEvent: 'delete_event',
-  createDocument: 'create_document',
-  updateDocument: 'update_document',
-  deleteDocument: 'delete_document',
-  
-  // Subsector actions
-  updateSubsectorNews: 'update_subsector_news',
-  updateSubsectorEvent: 'update_subsector_event'
-} as const;
-
-// ===== ERROR MESSAGES =====
-export const API_ERROR_MESSAGES = {
-  // Authentication errors
-  unauthorized: 'Não autorizado',
-  sessionExpired: 'Sessão expirada',
-  invalidCredentials: 'Credenciais inválidas',
-  permissionDenied: 'Permissão negada',
-  userNotFound: 'Usuário não encontrado na sessão',
-  
-  // Validation errors
-  missingFields: 'Campos obrigatórios faltando',
-  invalidData: 'Dados inválidos',
-  invalidType: 'Tipo inválido',
-  invalidId: 'ID é obrigatório para atualização',
-  
-  // Server errors
-  internalError: 'Erro interno do servidor',
-  networkError: 'Erro de conexão. Tente novamente.',
-  serviceUnavailable: 'Serviço temporariamente indisponível',
-  
-  // Content specific errors
-  newsNotFound: 'Notícia não encontrada',
-  eventNotFound: 'Evento não encontrado',
-  documentNotFound: 'Documento não encontrado',
-  systemNotFound: 'Sistema não encontrado',
-  sectorNotFound: 'Setor não encontrado',
-  subsectorNotFound: 'Subsetor não encontrado',
-  
-  // File errors
-  uploadFailed: 'Falha no upload do arquivo',
-  fileNotFound: 'Arquivo não encontrado',
-  invalidFileType: 'Tipo de arquivo não suportado',
-  fileTooLarge: 'Arquivo muito grande'
-} as const;
-
-// ===== SUCCESS MESSAGES =====
-export const API_SUCCESS_MESSAGES = {
-  // CRUD operations
-  created: 'Criado com sucesso',
-  updated: 'Atualizado com sucesso',
-  deleted: 'Excluído com sucesso',
-  
-  // Specific operations
-  newsCreated: 'Notícia criada com sucesso',
-  newsUpdated: 'Notícia atualizada com sucesso',
-  newsDeleted: 'Notícia excluída com sucesso',
-  
-  eventCreated: 'Evento criado com sucesso',
-  eventUpdated: 'Evento atualizado com sucesso',
-  eventDeleted: 'Evento excluído com sucesso',
-  
-  documentCreated: 'Documento criado com sucesso',
-  documentUpdated: 'Documento atualizado com sucesso',
-  documentDeleted: 'Documento excluído com sucesso',
-  
-  systemCreated: 'Sistema criado com sucesso',
-  systemUpdated: 'Sistema atualizado com sucesso',
-  systemDeleted: 'Sistema excluído com sucesso',
-  
-  // File operations
-  uploadSuccess: 'Upload realizado com sucesso',
-  imageProcessed: 'Imagem processada com sucesso'
-} as const;
-
-// ===== VALIDATION RULES =====
-export const API_VALIDATION = {
-  news: {
-    title: {
-      required: true,
-      minLength: 3,
-      maxLength: 255
-    },
-    summary: {
-      required: true,
-      minLength: 10,
-      maxLength: 500
-    },
-    content: {
-      required: true,
-      minLength: 20,
-      maxLength: 10000
-    }
   },
   
-  documents: {
-    title: {
-      required: true,
-      minLength: 3,
-      maxLength: 255
-    },
-    description: {
-      required: false,
-      maxLength: 1000
-    },
-    file_url: {
-      required: true
-    },
-    file_type: {
-      required: false,
-      maxLength: 50
-    },
-    file_size: {
-      required: false,
-      max: 10485760 // 10MB
-    }
-  },
-  
-  events: {
-    title: {
-      required: true,
-      minLength: 3,
-      maxLength: 255
-    },
-    description: {
-      required: true,
-      minLength: 10,
-      maxLength: 2000
-    },
-    startDate: {
-      required: true
-    },
-    location: {
-      maxLength: 255
-    }
-  },
-  
-  systems: {
-    name: {
-      required: true,
-      minLength: 2,
-      maxLength: 100
-    },
-    url: {
-      required: true,
-      pattern: /^https?:\/\/.+/
-    },
-    description: {
-      maxLength: 500
-    }
-  }
-} as const;
-
-// ===== RATE LIMITING =====
-export const RATE_LIMITS = {
-  default: {
-    requests: 100,
-    window: 900000 // 15 minutes
-  },
-  
-  auth: {
-    requests: 5,
-    window: 300000 // 5 minutes
-  },
-  
-  upload: {
-    requests: 10,
-    window: 3600000 // 1 hour
-  }
-} as const;
-
-// ===== CACHE CONFIGURATION =====
-export const CACHE_CONFIG = {
-  ttl: {
-    short: 300, // 5 minutes
-    medium: 1800, // 30 minutes
-    long: 3600, // 1 hour
-    extended: 86400 // 24 hours
-  },
-  
-  keys: {
-    sectors: 'sectors',
-    subsectors: 'subsectors',
-    users: 'users',
-    systems: 'systems',
-    news: 'news',
-    events: 'events',
-    documents: 'documents'
-  }
-} as const;
-
-// ===== PAGINATION =====
-export const PAGINATION_CONFIG = {
-  defaultLimit: 10,
-  maxLimit: 100,
-  defaultOffset: 0,
-  
-  params: {
-    limit: 'limit',
-    offset: 'offset',
-    page: 'page',
-    perPage: 'per_page'
-  }
-} as const;
-
-// ===== SORTING =====
-export const SORT_CONFIG = {
-  defaultOrder: 'desc',
-  defaultField: 'created_at',
-  
-  directions: {
-    asc: 'asc',
-    desc: 'desc'
-  },
-  
-  fields: {
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    title: 'title',
-    name: 'name',
-    startDate: 'start_date'
-  }
-} as const;
-
-// ===== FILTER OPTIONS =====
-export const FILTER_CONFIG = {
-  publication: {
-    all: 'all',
-    published: 'published',
-    draft: 'draft'
-  },
-  
-  status: {
-    active: 'active',
-    inactive: 'inactive'
-  },
-  
-  dateRange: {
-    today: 'today',
-    week: 'week',
-    month: 'month',
-    year: 'year',
-    custom: 'custom'
-  }
-} as const;
-
-// ===== LOGGING CONFIGURATION =====
-export const LOG_CONFIG = {
-  levels: {
-    error: 'error',
-    warn: 'warn',
-    info: 'info',
-    debug: 'debug'
-  },
-  
-  contexts: {
-    api: 'API',
-    auth: 'AUTH',
-    database: 'DB',
-    upload: 'UPLOAD',
-    validation: 'VALIDATION'
-  },
-  
-  format: {
-    timestamp: true,
-    context: true,
-    method: true,
-    url: true,
-    userAgent: false,
-    ip: false
-  }
-} as const;
-
-// ===== TYPE EXPORTS =====
-export type HttpStatus = typeof HTTP_STATUS;
-export type ApiEndpoints = typeof API_ENDPOINTS;
-export type RequestConfig = typeof REQUEST_CONFIG;
-export type ResponseFormats = typeof RESPONSE_FORMATS;
-export type ContentTypes = typeof CONTENT_TYPES;
-export type ApiErrorMessages = typeof API_ERROR_MESSAGES;
-export type ApiSuccessMessages = typeof API_SUCCESS_MESSAGES;
-export type ApiValidation = typeof API_VALIDATION;
-export type RateLimits = typeof RATE_LIMITS;
-export type CacheConfig = typeof CACHE_CONFIG;
-export type PaginationConfig = typeof PAGINATION_CONFIG;
-export type SortConfig = typeof SORT_CONFIG;
-export type FilterConfig = typeof FILTER_CONFIG;
-export type LogConfig = typeof LOG_CONFIG;
-
-// ===== HELPER FUNCTIONS =====
-export const API_HELPERS = {
-  /**
-   * Build query string from parameters
-   */
   buildQueryString: (params: Record<string, any>): string => {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
@@ -478,7 +146,7 @@ export const API_HELPERS = {
    */
   buildUrl: (endpoint: string, params?: Record<string, any>): string => {
     if (!params) return endpoint;
-    const queryString = API_HELPERS.buildQueryString(params);
+    const queryString = REQUEST_CONFIG.buildQueryString(params);
     return queryString ? `${endpoint}?${queryString}` : endpoint;
   },
 
@@ -501,5 +169,208 @@ export const API_HELPERS = {
    */
   isServerError: (status: number): boolean => {
     return status >= 500 && status < 600;
+  }
+} as const;
+
+// ===== EXPORT ALIASES =====
+// These exports maintain backwards compatibility with existing imports
+export const RESPONSE_FORMATS = {
+  json: REQUEST_CONFIG.headers.accept.json,
+  any: REQUEST_CONFIG.headers.accept.any
+} as const;
+
+// Content types for API content tables
+export const CONTENT_TYPES = {
+  // Basic table names
+  sectorNews: 'sector_news',
+  subsectorNews: 'subsector_news',
+  sectorEvents: 'sector_events',
+  subsectorEvents: 'subsector_events',
+  sectorDocuments: 'sector_documents',
+  subsectorDocuments: 'subsector_documents',
+  
+  // Operation types
+  createNews: 'create_news',
+  updateNews: 'update_news',
+  updateSubsectorNews: 'update_subsector_news',
+  updateEvent: 'update_event',
+  updateDocument: 'update_document',
+  
+  // HTTP content types
+  ...REQUEST_CONFIG.headers.contentType
+} as const;
+
+export const API_ERROR_MESSAGES = {
+  NETWORK_ERROR: 'Network error occurred. Please check your connection.',
+  TIMEOUT_ERROR: 'Request timed out. Please try again.',
+  UNAUTHORIZED: 'Authentication required. Please login.',
+  FORBIDDEN: 'You do not have permission to access this resource.',
+  NOT_FOUND: 'Resource not found.',
+  SERVER_ERROR: 'Server error occurred. Please try again later.',
+  VALIDATION_ERROR: 'Validation error. Please check your input.',
+  UNKNOWN_ERROR: 'An unexpected error occurred.',
+  
+  // Additional messages for sector-content API
+  unauthorized: 'Token de autorização necessário',
+  internalError: 'Erro interno do servidor',
+  invalidId: 'ID inválido fornecido',
+  userNotFound: 'Usuário não encontrado',
+  permissionDenied: 'Acesso negado - permissões insuficientes',
+  missingFields: 'Campos obrigatórios ausentes',
+  invalidType: 'Tipo de conteúdo inválido'
+} as const;
+
+export const DEFAULT_HEADERS = {
+  'Content-Type': REQUEST_CONFIG.headers.contentType.json,
+  'Accept': REQUEST_CONFIG.headers.accept.json
+} as const;
+
+export const API_TIMEOUTS = REQUEST_CONFIG.timeouts;
+
+export const RESPONSE_CODES = HTTP_STATUS;
+
+export const API_HELPERS = {
+  buildQueryString: REQUEST_CONFIG.buildQueryString,
+  buildUrl: REQUEST_CONFIG.buildUrl,
+  isSuccessStatus: REQUEST_CONFIG.isSuccessStatus,
+  isClientError: REQUEST_CONFIG.isClientError,
+  isServerError: REQUEST_CONFIG.isServerError
+} as const;
+
+// === MISSING EXPORTS IDENTIFIED ===
+// Exports que eram referenciados no index.ts mas não existiam
+
+export const API_SUCCESS_MESSAGES = {
+  OPERATION_SUCCESS: 'Operation completed successfully',
+  CREATED: 'Resource created successfully',
+  UPDATED: 'Resource updated successfully',
+  DELETED: 'Resource deleted successfully',
+  UPLOADED: 'File uploaded successfully',
+  AUTHENTICATED: 'Authentication successful',
+  VALIDATED: 'Validation passed'
+} as const;
+
+export const API_VALIDATION = {
+  rules: {
+    required: 'This field is required',
+    email: 'Invalid email format',
+    minLength: 'Minimum length not met',
+    maxLength: 'Maximum length exceeded',
+    pattern: 'Invalid format'
+  },
+  patterns: {
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    phone: /^\+?[\d\s\-\(\)]+$/,
+    url: /^https?:\/\/.+/
+  }
+} as const;
+
+export const RATE_LIMITS = {
+  requests: {
+    perMinute: 60,
+    perHour: 3600,
+    perDay: 86400
+  },
+  burst: {
+    size: 10,
+    refillRate: 1
+  },
+  endpoints: {
+    auth: { limit: 5, window: 900 }, // 5 requests per 15 minutes
+    upload: { limit: 10, window: 3600 }, // 10 uploads per hour
+    api: { limit: 100, window: 3600 } // 100 API calls per hour
+  }
+} as const;
+
+export const CACHE_CONFIG = {
+  ttl: {
+    short: 300,    // 5 minutes
+    medium: 1800,  // 30 minutes  
+    long: 3600,    // 1 hour
+    extended: 86400 // 24 hours
+  },
+  keys: {
+    user: 'user:',
+    session: 'session:',
+    api: 'api:',
+    static: 'static:'
+  },
+  strategies: {
+    memory: 'memory',
+    redis: 'redis',
+    filesystem: 'filesystem'
+  }
+} as const;
+
+export const PAGINATION_CONFIG = {
+  defaults: {
+    page: 1,
+    limit: 10,
+    maxLimit: 100,
+    offset: 0
+  },
+  params: {
+    page: 'page',
+    limit: 'limit', 
+    offset: 'offset',
+    total: 'total',
+    count: 'count'
+  }
+} as const;
+
+export const SORT_CONFIG = {
+  directions: {
+    asc: 'asc',
+    desc: 'desc',
+    ascending: 'ascending',
+    descending: 'descending'
+  },
+  params: {
+    sortBy: 'sortBy',
+    sortOrder: 'sortOrder',
+    orderBy: 'orderBy'
+  },
+  defaults: {
+    field: 'created_at',
+    direction: 'desc'
+  }
+} as const;
+
+export const FILTER_CONFIG = {
+  operators: {
+    eq: 'eq',      // equals
+    ne: 'ne',      // not equals
+    gt: 'gt',      // greater than
+    gte: 'gte',    // greater than or equal
+    lt: 'lt',      // less than
+    lte: 'lte',    // less than or equal
+    like: 'like',  // contains
+    in: 'in',      // in array
+    nin: 'nin'     // not in array
+  },
+  params: {
+    filter: 'filter',
+    search: 'search',
+    query: 'q'
+  }
+} as const;
+
+export const LOG_CONFIG = {
+  levels: {
+    error: 'error',
+    warn: 'warn', 
+    info: 'info',
+    debug: 'debug',
+    trace: 'trace'
+  },
+  formats: {
+    json: 'json',
+    text: 'text',
+    structured: 'structured'
+  },
+  destinations: {
+    console: 'console',
+    file: 'file',
+    remote: 'remote'
   }
 } as const;

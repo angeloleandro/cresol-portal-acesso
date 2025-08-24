@@ -1,9 +1,7 @@
-/**
- * VideoUploadForm State Reducer
- * Centralized state management using useReducer pattern
- */
-
 import { VideoUploadState, VideoUploadAction, VideoUploadFormData } from './VideoUploadForm.types'
+
+
+
 
 export const initialVideoUploadState: VideoUploadState = {
   formData: {
@@ -25,7 +23,11 @@ export const initialVideoUploadState: VideoUploadState = {
   fieldErrors: {},
 }
 
-export function videoUploadReducer(
+/**
+ * videoUploadReducer function
+ * @todo Add proper documentation
+ */
+export function VideoUploadReducer(
   state: VideoUploadState,
   action: VideoUploadAction
 ): VideoUploadState {

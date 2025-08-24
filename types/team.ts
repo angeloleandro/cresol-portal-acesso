@@ -1,7 +1,4 @@
-/**
- * Tipos compartilhados para funcionalidade de membros do time
- * Centraliza as definições de interface para evitar duplicação
- */
+
 
 export interface Profile {
   id: string;

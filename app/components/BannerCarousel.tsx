@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { cachedQueries } from "@/lib/supabase/cached-client";
-import { HeroImage } from "./OptimizedImageWithBlur";
+
 import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
 import { logger } from "@/lib/logger";
+import { cachedQueries } from "@/lib/supabase/cached-client";
+
+import { HeroImage } from "./OptimizedImageWithBlur";
 
 interface Banner {
   id: string;

@@ -1,7 +1,4 @@
-/**
- * Video System Types
- * Centralized type definitions for the video management system
- */
+
 
 export interface DashboardVideo {
   id: string;

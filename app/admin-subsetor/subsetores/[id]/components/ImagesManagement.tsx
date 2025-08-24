@@ -1,14 +1,16 @@
 // Componente de gerenciamento de imagens do subsetor - MODERNIZADO
 // Copiado do sector para manter consistência total
 
-import React, { useState } from 'react';
 import Image from 'next/image';
-import { useAlert } from '@/app/components/alerts';
-import { SubsectorImage } from '../types/subsector.types';
+import React, { useState } from 'react';
+
 import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
+import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
-import { formatDate } from '@/lib/utils/formatters';
+import { FormatDate, FormatFileSize } from '@/lib/utils/formatters';
+
+import { SubsectorImage } from '../types/subsector.types';
 
 interface ImagesManagementProps {
   subsectorId: string;
@@ -20,6 +22,10 @@ interface ImagesManagementProps {
   onDelete: (id: string) => Promise<void>;
 }
 
+/**
+ * ImagesManagement function
+ * @todo Add proper documentation
+ */
 export function ImagesManagement({
   subsectorId,
   images,
@@ -155,8 +161,7 @@ export function ImagesManagement({
       }
       
     } catch (error: any) {
-      console.error('Erro ao salvar imagem:', error);
-      
+
       const userMessage = error.message.includes('fetch')
         ? 'Erro de conexão. Verifique sua internet e tente novamente.'
         : error.message || 'Erro desconhecido ao salvar imagem. Tente novamente.';
@@ -222,7 +227,7 @@ export function ImagesManagement({
       alert.showSuccess('Imagem enviada', 'A imagem foi enviada e processada com sucesso.');
 
     } catch (error: any) {
-      console.error('Erro no upload:', error);
+
       setUploadError(error.message || 'Erro ao fazer upload da imagem');
       throw error;
     } finally {
@@ -235,18 +240,11 @@ export function ImagesManagement({
       await onDelete(imageToDelete.id);
       alert.showSuccess('Imagem excluída', 'A imagem foi removida com sucesso.');
     } catch (error) {
-      console.error('Erro ao deletar imagem:', error);
+
       alert.showError('Erro ao deletar imagem', error instanceof Error ? error.message : 'Erro desconhecido');
     }
   };
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-  };
 
   // Filtrar imagens baseado em showDrafts
   const filteredImages = showDrafts 
@@ -341,9 +339,9 @@ export function ImagesManagement({
                   </p>
                 )}
                 <div className="text-xs text-gray-500 mb-3">
-                  <p>{formatDate(image.created_at)}</p>
+                  <p>{FormatDate(image.created_at)}</p>
                   {image.file_size && (
-                    <p>{formatFileSize(image.file_size)}</p>
+                    <p>{FormatFileSize(image.file_size)}</p>
                   )}
                 </div>
                 

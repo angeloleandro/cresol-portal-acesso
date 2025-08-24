@@ -1,7 +1,5 @@
 'use client';
 
-import { useState, useCallback, memo, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { 
   Dropdown, 
   DropdownTrigger, 
@@ -10,7 +8,9 @@ import {
   Button 
 } from '@nextui-org/react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useState, useCallback, memo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+
 import { Icon } from './icons/Icon';
 
 // Types

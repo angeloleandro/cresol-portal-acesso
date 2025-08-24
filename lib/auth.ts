@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
-import type { SupabaseClient } from '@supabase/supabase-js';
+
 import { ADMIN_EMAIL, KNOWN_ADMIN_ID } from './constants';
 
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+
 // Create admin Supabase client with service role key
-export function createAdminSupabaseClient(): SupabaseClient {
+export function CreateAdminSupabaseClient(): SupabaseClient {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   

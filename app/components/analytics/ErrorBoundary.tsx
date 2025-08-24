@@ -1,6 +1,7 @@
 'use client';
 
 import { Component, ErrorInfo, ReactNode } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 interface Props {

@@ -1,15 +1,17 @@
-/**
- * ImagePreview Custom Hooks
- * Reusable hooks for image preview functionality
- */
+
 
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+
 import { GalleryImage, ImagePreviewHookReturn, ImageLoadingState } from './ImagePreview.types';
 
 /**
  * Main hook for managing image preview state and navigation
+ */
+/**
+ * useImagePreview function
+ * @todo Add proper documentation
  */
 export function useImagePreview(images: GalleryImage[]): ImagePreviewHookReturn {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -66,6 +68,10 @@ export function useImagePreview(images: GalleryImage[]): ImagePreviewHookReturn 
 /**
  * Hook for managing keyboard navigation
  */
+/**
+ * useKeyboardNavigation function
+ * @todo Add proper documentation
+ */
 export function useKeyboardNavigation(
   isOpen: boolean,
   onClose: () => void,
@@ -106,6 +112,10 @@ export function useKeyboardNavigation(
 
 /**
  * Hook for managing focus when modal opens/closes
+ */
+/**
+ * useFocusManagement function
+ * @todo Add proper documentation
  */
 export function useFocusManagement(isOpen: boolean) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -166,6 +176,10 @@ export function useFocusManagement(isOpen: boolean) {
 /**
  * Hook for managing body scroll when modal is open
  */
+/**
+ * useBodyScrollLock function
+ * @todo Add proper documentation
+ */
 export function useBodyScrollLock(isOpen: boolean) {
   useEffect(() => {
     if (isOpen) {
@@ -194,6 +208,10 @@ export function useBodyScrollLock(isOpen: boolean) {
 
 /**
  * Hook for managing image loading state
+ */
+/**
+ * useImageLoading function
+ * @todo Add proper documentation
  */
 export function useImageLoading(src: string): ImageLoadingState {
   const [loading, setLoading] = useState(true);
@@ -250,6 +268,10 @@ export function useImageLoading(src: string): ImageLoadingState {
 /**
  * Hook for lazy loading images with Intersection Observer
  */
+/**
+ * useLazyLoading function
+ * @todo Add proper documentation
+ */
 export function useLazyLoading() {
   const [inView, setInView] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -280,6 +302,10 @@ export function useLazyLoading() {
 
 /**
  * Hook for managing swipe gestures on touch devices
+ */
+/**
+ * useSwipeNavigation function
+ * @todo Add proper documentation
  */
 export function useSwipeNavigation(
   onNext?: () => void,
@@ -319,6 +345,10 @@ export function useSwipeNavigation(
 /**
  * Hook for preloading adjacent images for better performance
  */
+/**
+ * useImagePreloading function
+ * @todo Add proper documentation
+ */
 export function useImagePreloading(images: GalleryImage[], currentIndex: number) {
   useEffect(() => {
     const preloadImages = [];
@@ -344,6 +374,10 @@ export function useImagePreloading(images: GalleryImage[], currentIndex: number)
 
 /**
  * Hook for handling window resize and responsive behavior
+ */
+/**
+ * useResponsiveModal function
+ * @todo Add proper documentation
  */
 export function useResponsiveModal() {
   const [isMobile, setIsMobile] = useState(false);

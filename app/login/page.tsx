@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { Button } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
-import { useAuth } from '@/app/providers/AuthProvider';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { TIMINGS } from '@/lib/constants/timing';
 
 function LoginContent() {
   const router = useRouter();
@@ -51,7 +53,7 @@ function LoginContent() {
       // Sucesso - o useAuth hook já gerencia o estado
       
       // Aguardar um pouco mais para garantir que a sessão seja estabelecida
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, TIMINGS.animationNormal));
       
       // Redirecionar (será interceptado pelo useEffect se user estiver definido)
       router.push(redirectPath);

@@ -81,6 +81,10 @@ const easingFunctions = {
   'ease-in-out': (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 };
 
+/**
+ * ProgressRingPro function
+ * @todo Add proper documentation
+ */
 export function ProgressRingPro({
   value,
   from = 0,

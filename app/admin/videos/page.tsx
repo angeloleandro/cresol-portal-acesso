@@ -1,33 +1,30 @@
-/**
- * Admin Videos Management Page - Modernized Version
- * Enterprise-grade video management with modern UI/UX patterns
- * WCAG 2.1 AA compliant with Cresol branding
- */
+
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import clsx from 'clsx';
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import CollectionsManager from '@/app/admin/collections/components/CollectionsManager';
 import AdminHeader from "@/app/components/AdminHeader";
 import Breadcrumb from '@/app/components/Breadcrumb';
-import { supabase } from "@/lib/supabase";
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
+import { useCollections } from '@/app/contexts/CollectionsContext';
+import { Icon } from '@/app/components/icons/Icon';
+import Button from '@/app/components/ui/Button';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { AdvancedVideoGalleryHeader } from '@/app/components/VideoGallery/VideoGallery.Header';
 import { VideoGalleryGrid } from '@/app/components/VideoGallery/VideoGallery.Grid';
 import { VideoGalleryEmptyState } from '@/app/components/VideoGallery/VideoGallery.EmptyState';
 import { AdminVideoCard } from '@/app/components/VideoGallery/VideoGallery.Card';
 import { VideoModal } from '@/app/components/VideoGallery/VideoGallery.Modal';
+import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
 import { DashboardVideo, VideoFilters } from '@/app/types/video';
-import { Icon } from '@/app/components/icons/Icon';
-import clsx from 'clsx';
-import CollectionsManager from '@/app/admin/collections/components/CollectionsManager';
-import { useCollections } from '@/app/components/Collections/Collection.hooks';
-import { Collection } from '@/lib/types/collections';
-import Button from '@/app/components/ui/Button';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from "@/lib/supabase";
+// Removed unused Collection import
 
 interface AdminVideoFilters extends VideoFilters {
   status: 'all' | 'active' | 'inactive' | 'processing';

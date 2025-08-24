@@ -3,20 +3,21 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // [DEBUG] Component tracking
-let documentsPageRenderCount = 0;
-const documentsPageInstanceId = `documents-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-import { supabase } from '@/lib/supabase';
-import AdminHeader from '@/app/components/AdminHeader';
-import Breadcrumb from '@/app/components/Breadcrumb';
-import { useAlert } from '@/app/components/alerts';
-import { FormSelect } from '@/app/components/forms';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { Icon } from '@/app/components/icons/Icon';
-import { StandardizedButton } from '@/app/components/admin';
-import { DocumentForm } from './components/DocumentForm';
-import DeleteModal from '@/app/components/ui/DeleteModal';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
+let _documentsPageRenderCount = 0;
+const _documentsPageInstanceId = `documents-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
+import { StandardizedButton } from '@/app/components/admin';
+import AdminHeader from '@/app/components/AdminHeader';
+import { useAlert } from '@/app/components/alerts';
+import Breadcrumb from '@/app/components/Breadcrumb';
+import { FormSelect } from '@/app/components/forms';
+import { Icon } from '@/app/components/icons/Icon';
+import DeleteModal from '@/app/components/ui/DeleteModal';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { supabase } from '@/lib/supabase';
+
+import { DocumentForm } from './components/DocumentForm';
 
 // Tipos definidos inline seguindo padrão do news
 interface Document {
@@ -38,23 +39,6 @@ interface Document {
   subsector_id?: string;
 }
 
-interface DocumentStats {
-  total: number;
-  published: number;
-  drafts: number;
-  featured: number;
-  bySector: { [key: string]: number };
-  byType: { sector: number; subsector: number };
-}
-
-interface Filters {
-  search: string;
-  type: 'all' | 'sector' | 'subsector';
-  status: 'all' | 'published' | 'draft';
-  featured: 'all' | 'featured' | 'not_featured';
-  sector_id: string;
-  subsector_id: string;
-}
 
 // File type constants
 const FILE_TYPES = {
@@ -99,16 +83,11 @@ function getFileTypeLabel(mimeType?: string): string {
 
 export default function DocumentsAdminPage() {
   // [DEBUG] Component render tracking
-  documentsPageRenderCount++;
-  console.log(`[DEBUG-COMPONENT] DocumentsAdminPage - Render ${documentsPageRenderCount}:`, {
-    instanceId: documentsPageInstanceId,
-    renderCount: documentsPageRenderCount,
-    timestamp: new Date().toISOString(),
-    stackTrace: new Error().stack?.split('\n').slice(1, 4)
-  });
+  _documentsPageRenderCount++;
+  // Debug component render logging removed for production
 
   const alert = useAlert();
-  const { user, loading: authLoading } = useAdminAuth();
+  const { user, loading: _authLoading } = useAdminAuth();
   const { 
     data: documents, 
     loading, 
@@ -137,7 +116,6 @@ export default function DocumentsAdminPage() {
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-
   const loadInitialData = useCallback(async () => {
     try {
       // Carregar setores
@@ -156,10 +134,9 @@ export default function DocumentsAdminPage() {
       
       setSubsectors(subsectorsData || []);
     } catch (error) {
-      console.error('Erro ao carregar dados iniciais:', error);
+
     }
   }, []);
-
 
   // Carregar dados iniciais (setores e subsetores)
   useEffect(() => {
@@ -167,7 +144,6 @@ export default function DocumentsAdminPage() {
       loadInitialData();
     }
   }, [user, loadInitialData]);
-  
 
   const handleEdit = (document: Document) => {
     setEditingDocument(document);
@@ -217,7 +193,7 @@ export default function DocumentsAdminPage() {
         throw new Error(data.error);
       }
     } catch (error: any) {
-      console.error(`Erro na ação ${action}:`, error);
+
       alert.showError('Erro', error.message || `Erro ao executar ${action}`);
     } finally {
       setActionLoading(null);
@@ -256,7 +232,7 @@ export default function DocumentsAdminPage() {
         throw new Error(data.error);
       }
     } catch (error: any) {
-      console.error('Erro ao excluir:', error);
+
       alert.showError('Erro', error.message || 'Erro ao excluir documento');
     } finally {
       setActionLoading(null);
@@ -290,7 +266,7 @@ export default function DocumentsAdminPage() {
       
       // Check for allowed protocols
       if (!['https:', 'http:'].includes(url.protocol)) {
-        console.error('Invalid URL protocol:', url.protocol);
+
         return;
       }
       
@@ -301,7 +277,7 @@ export default function DocumentsAdminPage() {
       link.rel = 'noopener noreferrer';
       link.click();
     } catch (error) {
-      console.error('Invalid URL:', doc.file_url, error);
+
       // Optionally show user-friendly error
     }
   };

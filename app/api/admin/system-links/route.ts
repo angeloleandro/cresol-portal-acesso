@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { handleApiError, devLog } from '@/lib/error-handler';
+
 import { adminCORS } from '@/lib/cors-config';
+import { handleApiError, devLog } from '@/lib/error-handler';
+import { CreateClient } from '@/lib/supabase/server';
+
 
 interface SystemLink {
   id?: string;
@@ -15,7 +17,7 @@ interface SystemLink {
 // GET - Listar todos os links
 export const GET = adminCORS(async (request: NextRequest) => {
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar se usuário está autenticado
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -60,7 +62,7 @@ export const GET = adminCORS(async (request: NextRequest) => {
 // POST - Criar novo link
 export const POST = adminCORS(async (request: NextRequest) => {
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar se usuário está autenticado e é admin
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -119,7 +121,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
 // PUT - Atualizar link existente
 export const PUT = adminCORS(async (request: NextRequest) => {
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar se usuário está autenticado e é admin
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -178,7 +180,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
 // DELETE - Excluir link
 export const DELETE = adminCORS(async (request: NextRequest) => {
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar se usuário está autenticado e é admin
     const { data: { user }, error: authError } = await supabase.auth.getUser();

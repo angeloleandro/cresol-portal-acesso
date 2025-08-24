@@ -56,10 +56,6 @@ interface ChakraCardDescriptionProps {
   className?: string;
 }
 
-/**
- * Chakra Card Root Component
- * Main card container following Chakra UI v3 pattern
- */
 const ChakraCardRoot = ({ 
   children, 
   variant = 'outline', 
@@ -91,10 +87,6 @@ const ChakraCardRoot = ({
   );
 };
 
-/**
- * Chakra Card Header Component
- * Header section for title and top actions
- */
 const ChakraCardHeader = ({ children, className = '' }: ChakraCardHeaderProps) => {
   return (
     <Card.Header className={className}>
@@ -103,10 +95,6 @@ const ChakraCardHeader = ({ children, className = '' }: ChakraCardHeaderProps) =
   );
 };
 
-/**
- * Chakra Card Body Component
- * Main content area with optional gap
- */
 const ChakraCardBody = ({ children, gap = "4", className = '' }: ChakraCardBodyProps) => {
   return (
     <Card.Body gap={gap} className={className}>
@@ -115,10 +103,6 @@ const ChakraCardBody = ({ children, gap = "4", className = '' }: ChakraCardBodyP
   );
 };
 
-/**
- * Chakra Card Footer Component
- * Footer section for actions and buttons
- */
 const ChakraCardFooter = ({ 
   children, 
   justifyContent = 'flex-end', 
@@ -132,10 +116,6 @@ const ChakraCardFooter = ({
   );
 };
 
-/**
- * Chakra Card Title Component
- * Title text with proper spacing
- */
 const ChakraCardTitle = ({ children, mt, mb = "2", className = '' }: ChakraCardTitleProps) => {
   return (
     <Card.Title mt={mt} mb={mb} className={className}>
@@ -144,10 +124,6 @@ const ChakraCardTitle = ({ children, mt, mb = "2", className = '' }: ChakraCardT
   );
 };
 
-/**
- * Chakra Card Description Component
- * Description text with proper styling
- */
 const ChakraCardDescription = ({ children, className = '' }: ChakraCardDescriptionProps) => {
   return (
     <Card.Description className={className}>
@@ -156,10 +132,6 @@ const ChakraCardDescription = ({ children, className = '' }: ChakraCardDescripti
   );
 };
 
-/**
- * Complete Card component with all sub-components
- * Following Chakra UI v3 composable pattern
- */
 export const ChakraCard = {
   Root: ChakraCardRoot,
   Header: ChakraCardHeader,

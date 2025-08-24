@@ -1,17 +1,12 @@
-/**
- * Optimized Navbar Hooks
- * Hooks otimizados para o Navbar com memoização inteligente e cache
- */
-
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { logger } from '@/lib/production-logger';
-import { 
-  getCachedSectors, 
-  setCachedSectors,
-  getCachedUserProfile,
-  setCachedUserProfile
+import { supabase } from '@/lib/supabase';
+import {
+  GetCachedSectors, 
+  SetCachedSectors,
+  GetCachedUserProfile,
+  SetCachedUserProfile
 } from '@/lib/navbar-cache';
 
 // Types
@@ -46,6 +41,10 @@ interface UserProfile {
 /**
  * Hook otimizado para gerenciar estado do usuário
  */
+/**
+ * useOptimizedUser function
+ * @todo Add proper documentation
+ */
 export function useOptimizedUser() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -65,7 +64,7 @@ export function useOptimizedUser() {
       setUser(data.user);
 
       // Verificar cache primeiro
-      const cachedProfile = getCachedUserProfile(data.user.id);
+      const cachedProfile = GetCachedUserProfile(data.user.id);
       if (cachedProfile) {
         const userProfile: UserProfile = {
           role: cachedProfile.role,
@@ -92,7 +91,7 @@ export function useOptimizedUser() {
       setProfile(userProfile);
 
       // Salvar no cache
-      setCachedUserProfile({
+      SetCachedUserProfile({
         id: data.user.id,
         role: userProfile.role,
         email: data.user.email,
@@ -124,11 +123,8 @@ export function useOptimizedUser() {
 }
 
 /**
- * Hook otimizado para gerenciar setores
- * @param userRole - Role do usuário para filtrar setores (usado para admin)
- * @param userId - ID do usuário
- * @param excludeAgencies - Se deve excluir o setor de agências
- * @param forNavigation - Se true, busca todos os setores para navegação, ignorando role
+ * useOptimizedSectors function
+ * @todo Add proper documentation
  */
 export function useOptimizedSectors(
   userRole?: string, 
@@ -179,7 +175,7 @@ export function useOptimizedSectors(
           setSectors(sectorsData);
         }
       } catch (error) {
-        console.error('[NavbarHooks] Erro ao buscar setores para navegação:', error);
+
       } finally {
         setLoading(false);
       }
@@ -191,10 +187,10 @@ export function useOptimizedSectors(
 
     try {
       // Verificar cache primeiro
-      const cachedSectors = getCachedSectors(userRole, userId);
+      const cachedSectors = GetCachedSectors(userRole, userId);
       if (cachedSectors) {
         const filteredSectors = excludeAgencies 
-          ? cachedSectors.filter(sector => sector.id !== '5463d1ba-c290-428e-b39e-d7ad9c66eb71')
+          ? cachedSectors.filter((sector: Sector) => sector.id !== '5463d1ba-c290-428e-b39e-d7ad9c66eb71')
           : cachedSectors;
         setSectors(filteredSectors);
         setLoading(false);
@@ -218,10 +214,10 @@ export function useOptimizedSectors(
 
           let sectorsData = userSectors || [];
           if (excludeAgencies) {
-            sectorsData = sectorsData.filter(sector => sector.id !== '5463d1ba-c290-428e-b39e-d7ad9c66eb71');
+            sectorsData = sectorsData.filter((sector: Sector) => sector.id !== '5463d1ba-c290-428e-b39e-d7ad9c66eb71');
           }
           setSectors(sectorsData);
-          setCachedSectors(sectorsData, userRole, userId);
+          SetCachedSectors(sectorsData, userRole, userId);
         }
       } else {
         // Para outros usuários, buscar todos os setores
@@ -233,14 +229,14 @@ export function useOptimizedSectors(
         if (!error) {
           let sectorsData = data || [];
           if (excludeAgencies) {
-            sectorsData = sectorsData.filter(sector => sector.id !== '5463d1ba-c290-428e-b39e-d7ad9c66eb71');
+            sectorsData = sectorsData.filter((sector: Sector) => sector.id !== '5463d1ba-c290-428e-b39e-d7ad9c66eb71');
           }
           setSectors(sectorsData);
-          setCachedSectors(sectorsData, userRole, userId);
+          SetCachedSectors(sectorsData, userRole, userId);
         }
       }
     } catch (error) {
-      console.error('[NavbarHooks] Erro ao buscar setores:', error instanceof Error ? error.message : error);
+
     } finally {
       setLoading(false);
     }
@@ -255,6 +251,10 @@ export function useOptimizedSectors(
 
 /**
  * Hook otimizado para gerenciar agências (sub-setores do setor Agências)
+ */
+/**
+ * useOptimizedAgencies function
+ * @todo Add proper documentation
  */
 export function useOptimizedAgencies() {
   const [agencies, setAgencies] = useState<Subsector[]>([]);
@@ -294,7 +294,7 @@ export function useOptimizedAgencies() {
         }));
       }
     } catch (error) {
-      console.error('[useOptimizedAgencies] Erro ao buscar agências:', error);
+
     } finally {
       setLoading(false);
     }
@@ -309,6 +309,10 @@ export function useOptimizedAgencies() {
 
 /**
  * Hook otimizado para gerenciar dropdowns com timeout
+ */
+/**
+ * useOptimizedDropdown function
+ * @todo Add proper documentation
  */
 export function useOptimizedDropdown() {
   const [isOpen, setIsOpen] = useState(false);

@@ -11,9 +11,9 @@ export { default as CollectionEmptyState } from './Collection.EmptyState';
 // Loading component
 export { default as CollectionLoading } from './Collection.Loading';
 
-// Hooks
-export { useCollections } from './Collection.hooks';
+// Hooks - useCollections movido para @/app/contexts/CollectionsContext
 export { useCollectionItems } from './Collection.hooks';
+export { useCollections, useCollectionsStats } from '@/app/contexts/CollectionsContext';
 
 // Types from domain and component types
 export type {

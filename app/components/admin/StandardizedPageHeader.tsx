@@ -9,17 +9,6 @@ interface StandardizedPageHeaderProps {
   className?: string;
 }
 
-/**
- * Header padronizado para páginas administrativas seguindo o padrão da página /admin/users
- * 
- * Features:
- * - Fundo branco com borda cinza clara
- * - Título principal em laranja Cresol (#F58220)
- * - Subtítulo explicativo em cinza
- * - Botão de ação principal no canto superior direito
- * - Layout responsivo com flexbox
- * - Arredondamento e espaçamento consistentes
- */
 export default function StandardizedPageHeader({
   title,
   subtitle,

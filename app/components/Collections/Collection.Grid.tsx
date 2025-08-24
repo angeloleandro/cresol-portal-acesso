@@ -3,12 +3,13 @@
 // Collection Grid Component
 // Grid responsivo para exibição de múltiplas coleções
 
+import { CSS_CLASSES } from '@/lib/constants/collections';
+import { cn } from '@/lib/utils/cn';
+
 import CollectionCard from './Collection.Card';
 import CollectionEmptyState from './Collection.EmptyState';
 import CollectionLoading from './Collection.Loading';
 import { CollectionGridProps } from './Collection.types';
-import { cn } from '@/lib/utils/cn';
-import { CSS_CLASSES } from '@/lib/constants/collections';
 
 const CollectionGrid: React.FC<CollectionGridProps> = ({
   collections,

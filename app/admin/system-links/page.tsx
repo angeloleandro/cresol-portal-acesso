@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useEffect, useState, useCallback } from 'react';
+
 import { 
   StandardizedAdminLayout, 
   StandardizedPageHeader, 
@@ -11,12 +11,13 @@ import {
   StandardizedEmptyState,
   type BreadcrumbItem
 } from '@/app/components/admin';
-import { handleComponentError, devLog } from '@/lib/error-handler';
+import { Icon } from '@/app/components/icons';
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import ErrorMessage from '@/app/components/ui/ErrorMessage';
-import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import { Icon } from '@/app/components/icons';
+import { handleComponentError, devLog } from '@/lib/error-handler';
+import { supabase } from '@/lib/supabase';
 
 interface SystemLink {
   id?: string;

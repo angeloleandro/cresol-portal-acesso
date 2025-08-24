@@ -15,6 +15,10 @@ interface MemoryManager {
   cleanupResources: () => void;
 }
 
+/**
+ * useMemoryManagement function
+ * @todo Add proper documentation
+ */
 export function useMemoryManagement(
   options: UseMemoryManagementOptions = {}
 ): MemoryManager {

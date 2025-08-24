@@ -1,7 +1,9 @@
 // Hook para gerenciamento de dados do setor e subsetores
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+
 import { createClient } from '@/lib/supabase/client';
+
 import { Sector, Subsector } from '../types/sector.types';
 
 interface UseSectorDataReturn {
@@ -14,6 +16,10 @@ interface UseSectorDataReturn {
   refreshData: () => Promise<void>;
 }
 
+/**
+ * useSectorData function
+ * @todo Add proper documentation
+ */
 export function useSectorData(sectorId: string): UseSectorDataReturn {
   const [sector, setSector] = useState<Sector | null>(null);
   const [subsectors, setSubsectors] = useState<Subsector[]>([]);

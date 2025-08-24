@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+
+
 import { adminCORS } from '@/lib/cors-config';
+
+import type { NextRequest } from 'next/server';
+
 
 export const POST = adminCORS(async (request: NextRequest) => {
   const requestCookies = cookies();

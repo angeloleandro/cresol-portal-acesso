@@ -1,6 +1,5 @@
 'use client';
 
-import React, { forwardRef, useMemo } from 'react';
 import {
   Portal,
   Select,
@@ -8,6 +7,7 @@ import {
   Spinner,
   createListCollection
 } from "@chakra-ui/react";
+import React, { forwardRef, useMemo } from 'react';
 
 export interface ChakraSelectOption {
   value: string;
@@ -41,25 +41,6 @@ export interface ChakraSelectProps {
   className?: string;
 }
 
-/**
- * ChakraSelect - Componente Select padronizado baseado no Chakra UI v3
- * 
- * Implementa o Select seguindo a documentação oficial do Chakra UI v3,
- * adaptado para usar as cores do sistema de design Cresol:
- * - Primary: #F58220 (laranja Cresol)
- * - Grays: #727176, #D0D0CE, #4A4A4A
- * - Borders: #d1d5db
- * 
- * Features:
- * - Suporte a grupos de opções
- * - Busca/filtro (quando searchable=true)
- * - Multi-seleção (quando multiple=true)
- * - Clear trigger (quando clearable=true)
- * - Estados: disabled, loading, invalid
- * - Tamanhos: xs, sm, md, lg
- * - Variantes: outline, subtle
- * - Acessibilidade completa (WCAG 2.1 AA)
- */
 export const ChakraSelect = forwardRef<HTMLSelectElement, ChakraSelectProps>(({
   options = [],
   onChange,

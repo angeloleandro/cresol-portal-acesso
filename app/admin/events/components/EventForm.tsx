@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useAlert } from '@/app/components/alerts';
-import { Icon } from '@/app/components/icons/Icon';
+
 import { StandardizedButton } from '@/app/components/admin';
-import { FormSelect, type SelectOption } from '@/app/components/forms';
+import { useAlert } from '@/app/components/alerts';
+import { FormSelect } from '@/app/components/forms';
+import { Icon } from '@/app/components/icons/Icon';
+import { supabase } from '@/lib/supabase';
 
 interface Event {
   id: string;
@@ -56,6 +57,10 @@ interface FormData {
   is_published: boolean;
 }
 
+/**
+ * EventForm function
+ * @todo Add proper documentation
+ */
 export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps) {
   const alert = useAlert();
   const [loading, setLoading] = useState(false);
@@ -78,7 +83,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
   // Carregar dados iniciais
   useEffect(() => {
     if (isOpen) {
-      const timestamp = new Date().toISOString();
+      const _timestamp = new Date().toISOString();
       
       loadInitialData();
       
@@ -114,7 +119,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
   }, [isOpen, event]);
 
   const loadInitialData = async () => {
-    const timestamp = new Date().toISOString();
+    const _timestamp = new Date().toISOString();
         
     try {
       // Carregar setores
@@ -124,14 +129,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
         .order('name');
       
       if (sectorsError) {
-        console.error(`[SUPABASE-ERROR] ${timestamp} - Erro ao carregar setores:`, {
-          error: sectorsError,
-          message: sectorsError.message,
-          details: sectorsError.details,
-          hint: sectorsError.hint,
-          code: sectorsError.code,
-          timestamp
-        });
+
         throw sectorsError;
       }
 
@@ -144,27 +142,14 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
         .order('name');
       
       if (subsectorsError) {
-        console.error(`[SUPABASE-ERROR] ${timestamp} - Erro ao carregar subsetores:`, {
-          error: subsectorsError,
-          message: subsectorsError.message,
-          details: subsectorsError.details,
-          hint: subsectorsError.hint,
-          code: subsectorsError.code,
-          timestamp
-        });
+
         throw subsectorsError;
       }
 
       setSubsectors((subsectorsData || []) as unknown as Subsector[]);
       
     } catch (error: any) {
-      console.error(`[SUPABASE-ERROR] ${timestamp} - Erro fatal ao carregar dados iniciais:`, {
-        error: error,
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-        timestamp
-      });
+
     }
   };
 
@@ -175,31 +160,13 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const timestamp = new Date().toISOString();
+    const _timestamp = new Date().toISOString();
     
-    console.log(`[FORM-SUBMISSION] ${timestamp} - Iniciando submissão do formulário`, {
-      title: formData.title.trim().length > 0
-        ? `${formData.title.trim().substring(0, 50)}...` : '[VAZIO]',
-      descriptionLength: formData.description.trim().length,
-      locationLength: formData.location.trim().length,
-      type: formData.type,
-      sector_id: formData.sector_id,
-      subsector_id: formData.subsector_id,
-      start_date: formData.start_date,
-      end_date: formData.end_date,
-      is_published: formData.is_published,
-      is_featured: formData.is_featured,
-      isEditing: !!event,
-      timestamp
-    });
+    // Debug form submission logging removed for production
     
     // Validações
     if (!formData.title.trim()) {
-      console.error(`[FORM-VALIDATION] ${timestamp} - Erro de validação: título vazio`, {
-        title: formData.title,
-        trimmedTitle: formData.title.trim(),
-        timestamp
-      });
+      // Erro de validação: título vazio
       alert.showError('Campo obrigatório', 'Título é obrigatório');
       return;
     }
@@ -210,12 +177,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
     }
     
     if (!formData.description.trim()) {
-      console.error(`[FORM-VALIDATION] ${timestamp} - Erro de validação: descrição vazia`, {
-        description: formData.description,
-        descriptionLength: formData.description.length,
-        trimmedLength: formData.description.trim().length,
-        timestamp
-      });
+      // Erro de validação: descrição vazia
       alert.showError('Campo obrigatório', 'Descrição é obrigatória');
       return;
     }
@@ -226,12 +188,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
     }
 
     if (!formData.location.trim()) {
-      console.error(`[FORM-VALIDATION] ${timestamp} - Erro de validação: local vazio`, {
-        location: formData.location,
-        locationLength: formData.location.length,
-        trimmedLength: formData.location.trim().length,
-        timestamp
-      });
+      // Erro de validação: local vazio
       alert.showError('Campo obrigatório', 'Local é obrigatório');
       return;
     }
@@ -242,10 +199,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
     }
     
     if (!formData.start_date) {
-      console.error(`[FORM-VALIDATION] ${timestamp} - Erro de validação: data de início vazia`, {
-        start_date: formData.start_date,
-        timestamp
-      });
+
       alert.showError('Campo obrigatório', 'Data de início é obrigatória');
       return;
     }
@@ -257,33 +211,18 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
     }
 
     if (formData.type === 'sector' && !formData.sector_id) {
-      console.error(`[FORM-VALIDATION] ${timestamp} - Erro de validação: setor obrigatório`, {
-        type: formData.type,
-        sector_id: formData.sector_id,
-        timestamp
-      });
+
       alert.showError('Campo obrigatório', 'Setor é obrigatório para eventos de setor');
       return;
     }
 
     if (formData.type === 'subsector' && !formData.subsector_id) {
-      console.error(`[FORM-VALIDATION] ${timestamp} - Erro de validação: subsetor obrigatório`, {
-        type: formData.type,
-        subsector_id: formData.subsector_id,
-        timestamp
-      });
+
       alert.showError('Campo obrigatório', 'Subsetor é obrigatório para eventos de subsetor');
       return;
     }
 
-    console.log(`[FORM-VALIDATION] ${timestamp} - Validações básicas concluídas:`, {
-      titleLength: formData.title.trim().length,
-      descriptionLength: formData.description.trim().length,
-      locationLength: formData.location.trim().length,
-      type: formData.type,
-      locationId: formData.type === 'sector' ? formData.sector_id : formData.subsector_id,
-      timestamp
-    });
+    // Debug form validation logging removed for production
 
     setLoading(true);
     
@@ -291,20 +230,13 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
             const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
-        console.error(`[SUPABASE-AUTH] ${timestamp} - Erro ao obter sessão:`, {
-          error: sessionError,
-          message: sessionError.message,
-          timestamp
-        });
+
         alert.showError('Erro de autenticação', 'Erro ao verificar sessão');
         return;
       }
       
       if (!session) {
-        console.error(`[SUPABASE-AUTH] ${timestamp} - Sessão não encontrada`, {
-          session: session,
-          timestamp
-        });
+
         alert.showError('Sessão expirada', 'Faça login novamente');
         return;
       }
@@ -325,7 +257,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
         ),
       };
 
-      let url = '/api/admin/events';
+      const url = '/api/admin/events';
       let method = 'POST';
       
       if (event) {
@@ -335,16 +267,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
         requestData.type = event.type; // Manter tipo original
       }
 
-      console.log(`[API-REQUEST] ${timestamp} - Preparando requisição:`, {
-        method,
-        url,
-        title: `${requestData.title.substring(0, 50)}...`,
-        description: `${requestData.description.substring(0, 50)}...`,
-        location: `${requestData.location.substring(0, 50)}...`,
-        start_date: requestData.start_date,
-        end_date: requestData.end_date || '[NULL]',
-        timestamp
-      });
+      // Debug API request logging removed for production
 
       const response = await fetch(url, {
         method,
@@ -356,25 +279,13 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
       });
 
       if (!response.ok) {
-        console.error(`[API-REQUEST] ${timestamp} - Response não OK, processando erro`, {
-          status: response.status,
-          statusText: response.statusText,
-          timestamp
-        });
 
         let errorData;
         try {
           errorData = await response.json();
-          console.error(`[API-REQUEST] ${timestamp} - Dados de erro da API:`, {
-            errorData,
-            timestamp
-          });
+
         } catch (parseError) {
-          console.error(`[API-REQUEST] ${timestamp} - Erro ao parsear response de erro:`, {
-            parseError,
-            responseText: await response.text(),
-            timestamp
-          });
+          // Erro ao parsear response de erro
           errorData = { error: 'Erro desconhecido na API' };
         }
 
@@ -385,10 +296,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
       try {
         result = await response.json();
       } catch (parseError) {
-        console.error(`[API-REQUEST] ${timestamp} - Erro ao parsear response de sucesso:`, {
-          parseError,
-          timestamp
-        });
+
         throw new Error('Erro ao processar resposta da API');
       }
 
@@ -401,42 +309,21 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
         onSuccess();
         onClose();
       } else {
-        console.error(`[API-REQUEST] ${timestamp} - API retornou success=false`, {
-          result,
-          error: result.error,
-          timestamp
-        });
+
         throw new Error(result.error || 'Erro desconhecido');
       }
     } catch (error: any) {
-      const errorTimestamp = new Date().toISOString();
-      console.error(`[SUPABASE-ERROR] ${errorTimestamp} - Erro fatal no processo de envio:`, {
-        error: error,
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-        operation: event ? 'update' : 'create',
-        eventId: event?.id,
-        formData: {
-          type: formData.type,
-          titleLength: formData.title.length,
-          descriptionLength: formData.description.length,
-          locationLength: formData.location.length,
-          sector_id: formData.sector_id,
-          subsector_id: formData.subsector_id,
-        },
-        timestamp: errorTimestamp
-      });
+      const _errorTimestamp = new Date().toISOString();
 
       alert.showError('Erro', error.message || 'Erro ao salvar evento');
     } finally {
-      const finalTimestamp = new Date().toISOString();
+      const _finalTimestamp = new Date().toISOString();
             setLoading(false);
     }
   };
 
   const handleTypeChange = (newType: 'sector' | 'subsector') => {
-    const timestamp = new Date().toISOString();
+    const _timestamp = new Date().toISOString();
     
     setFormData({
       ...formData,
@@ -448,8 +335,8 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
       };
 
   const handleSectorChange = (sectorId: string) => {
-    const timestamp = new Date().toISOString();
-    const selectedSector = sectors.find(s => s.id === sectorId);
+    const _timestamp = new Date().toISOString();
+    const _selectedSector = sectors.find(s => s.id === sectorId);
 
     setFormData({
       ...formData,
@@ -540,8 +427,8 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
                   <FormSelect
                     value={formData.subsector_id}
                     onChange={(e) => {
-                      const timestamp = new Date().toISOString();
-                      const selectedSubsector = subsectors.find(s => s.id === e.currentTarget.value);
+                      const _timestamp = new Date().toISOString();
+                      const _selectedSubsector = subsectors.find(s => s.id === e.currentTarget.value);
                       setFormData({ ...formData, subsector_id: e.currentTarget.value });
                     }}
                     disabled={loading || !formData.sector_id}
@@ -676,7 +563,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
                   type="checkbox"
                   checked={formData.is_featured}
                   onChange={(e) => {
-                    const timestamp = new Date().toISOString();
+                    const _timestamp = new Date().toISOString();
                                         setFormData({ ...formData, is_featured: e.target.checked });
                   }}
                   disabled={loading}
@@ -697,7 +584,7 @@ export function EventForm({ event, isOpen, onClose, onSuccess }: EventFormProps)
                   type="checkbox"
                   checked={formData.is_published}
                   onChange={(e) => {
-                    const timestamp = new Date().toISOString();
+                    const _timestamp = new Date().toISOString();
                                         setFormData({ ...formData, is_published: e.target.checked });
                   }}
                   disabled={loading}

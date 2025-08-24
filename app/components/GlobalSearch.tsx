@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { usePathname } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+import { supabase } from '@/lib/supabase';
+
+
 import AdvancedSearch from './AdvancedSearch';
 import { Icon } from './icons/Icon';
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { CRESOL_COLORS } from '@/lib/design-tokens';
 
 interface QuickResult {
   id: string;
@@ -231,7 +232,7 @@ export default function GlobalSearch({
       if (process.env.NODE_ENV === 'development') {
         searchResults.forEach((result, index) => {
           if (result.status === 'rejected') {
-            console.error(`Query ${index} falhou:`, result.reason);
+
           }
         });
       }
@@ -241,7 +242,7 @@ export default function GlobalSearch({
       setSelectedIndex(-1);
 
     } catch (error) {
-      console.error('Erro na busca rápida:', error);
+
       // Em caso de erro, limpar resultados e mostrar estado adequado
       setQuickResults([]);
       setShowResults(false);
@@ -268,7 +269,7 @@ export default function GlobalSearch({
       setRecentSearches(updated);
       localStorage.setItem('recent_searches', JSON.stringify(updated));
     } catch (error) {
-      console.error('Erro ao salvar busca recente:', error);
+
     }
   }, [recentSearches]);
 
@@ -300,7 +301,7 @@ export default function GlobalSearch({
         setRecentSearches(Array.isArray(recent) ? recent.slice(0, 5) : []);
       }
     } catch (error) {
-      console.error('Erro ao carregar buscas recentes:', error);
+
     }
   }, []);
 

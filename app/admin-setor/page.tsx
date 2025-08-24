@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
 
 interface Sector {
   id: string;
@@ -15,11 +16,7 @@ interface Sector {
   created_at: string;
 }
 
-interface SectorAdmin {
-  id: string;
-  user_id: string;
-  sector_id: string;
-}
+// Removed unused SectorAdmin interface
 
 interface AdminUser {
   id: string;

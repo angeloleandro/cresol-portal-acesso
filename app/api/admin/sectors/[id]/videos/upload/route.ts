@@ -1,31 +1,27 @@
 // Sector Videos Upload API - Following Gallery Pattern
 // Upload direto de vídeos para setores seguindo padrão da galeria
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server';
+
 import { VIDEO_CONFIG, STORAGE_CONFIG } from '@/lib/constants';
+import { CreateClient } from '@/lib/supabase/server';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-function formatFileSize(bytes: number): string {
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  if (bytes === 0) return '0 Bytes';
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-}
+// Removed unused function formatFileSize
 
 // POST /api/admin/sectors/[id]/videos/upload
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const startTime = Date.now();
+  const _startTime = Date.now();
   const sectorId = params.id;
   
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Auth check
     const authHeader = request.headers.get('authorization');
@@ -75,8 +71,8 @@ export async function POST(
     const description = formData.get('description') as string | null;
     const isPublished = formData.get('is_published') === 'true';
     const isFeatured = formData.get('is_featured') === 'true';
-    const uploadType = formData.get('upload_type') as string;
-    const thumbnailMode = formData.get('thumbnail_mode') as string | null;
+    const _uploadType = formData.get('upload_type') as string;
+    const _thumbnailMode = formData.get('thumbnail_mode') as string | null;
     const thumbnailTimestamp = formData.get('thumbnail_timestamp') ? 
       parseFloat(formData.get('thumbnail_timestamp') as string) : null;
 
@@ -104,14 +100,10 @@ export async function POST(
     const fileName = `${uuid}_${sanitizedOriginalName}`;
     const filePath = `uploads/sectors/${sectorId}/${timestamp}/${fileName}`;
     
-    console.log('[SECTOR-VIDEO-UPLOAD] Uploading video:', {
-      filePath,
-      fileSize: formatFileSize(videoFile.size),
-      mimeType: videoFile.type
-    });
+    // Debug upload logging removed for production
 
     // Upload video file
-    const { data: uploadData, error: uploadError } = await serviceClient.storage
+    const { data: _uploadData, error: uploadError } = await serviceClient.storage
       .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
       .upload(filePath, videoFile, {
         contentType: videoFile.type,
@@ -120,7 +112,7 @@ export async function POST(
       });
 
     if (uploadError) {
-      console.error('[SECTOR-VIDEO-UPLOAD] Storage upload error:', uploadError);
+
       return NextResponse.json({ 
         error: `Erro no upload: ${uploadError.message}` 
       }, { status: 500 });
@@ -144,14 +136,9 @@ export async function POST(
       const thumbExtension = thumbnailFile.type.split('/')[1] || 'jpg';
       const thumbFileName = `${thumbUuid}.${thumbExtension}`;
       const thumbPath = `thumbnails/sectors/${sectorId}/${thumbFileName}`;
-      
-      console.log('[SECTOR-VIDEO-UPLOAD] Uploading thumbnail:', {
-        thumbPath,
-        fileSize: formatFileSize(thumbnailFile.size)
-      });
 
       // Upload thumbnail to images bucket
-      const { data: thumbUploadData, error: thumbUploadError } = await serviceClient.storage
+      const { data: _thumbUploadData, error: thumbUploadError } = await serviceClient.storage
         .from(STORAGE_CONFIG.BUCKETS.IMAGES)
         .upload(thumbPath, thumbnailFile, {
           contentType: thumbnailFile.type,
@@ -165,9 +152,6 @@ export async function POST(
           .getPublicUrl(thumbPath);
         
         thumbnailUrl = thumbUrlData.publicUrl;
-        console.log('[SECTOR-VIDEO-UPLOAD] Thumbnail uploaded:', thumbnailUrl);
-      } else {
-        console.error('[SECTOR-VIDEO-UPLOAD] Thumbnail upload error:', thumbUploadError);
       }
     }
 
@@ -213,8 +197,6 @@ export async function POST(
       .single();
 
     if (dbError) {
-      console.error('[SECTOR-VIDEO-UPLOAD] Database error:', dbError);
-      
       // Cleanup on error
       await serviceClient.storage
         .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
@@ -232,11 +214,7 @@ export async function POST(
       }, { status: 500 });
     }
 
-    console.log('[SECTOR-VIDEO-UPLOAD] Video uploaded successfully:', {
-      id: videoRecord.id,
-      title: videoRecord.title,
-      uploadDuration: `${Date.now() - startTime}ms`
-    });
+    // Debug success logging removed for production
 
     // Return response matching gallery pattern
     return NextResponse.json({
@@ -252,7 +230,6 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('[SECTOR-VIDEO-UPLOAD] Unexpected error:', error);
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : 'Erro interno do servidor'
     }, { status: 500 });

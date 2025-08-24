@@ -1,10 +1,5 @@
-/**
- * VideoThumbnail Hooks
- * Custom hooks for thumbnail management, performance optimization, and state handling
- */
-
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { DashboardVideo } from '../VideoGallery/VideoGallery.types';
+
 import {
   UseThumbnailReturn,
   UseThumbnailGeneratorReturn,
@@ -23,9 +18,14 @@ import {
   calculateThumbnailMetrics,
   generateThumbnailCacheKey
 } from './VideoThumbnail.utils';
+import { DashboardVideo } from '../VideoGallery/VideoGallery.types';
 
 /**
  * Hook para gerenciar estado e carregamento de thumbnail individual
+ */
+/**
+ * useThumbnail function
+ * @todo Add proper documentation
  */
 export function useThumbnail(
   video: DashboardVideo,
@@ -196,6 +196,10 @@ export function useThumbnail(
 /**
  * Hook para lazy loading de thumbnails
  */
+/**
+ * useThumbnailLazyLoading function
+ * @todo Add proper documentation
+ */
 export function useThumbnailLazyLoading(
   elementRef: React.RefObject<HTMLElement>,
   config: LazyLoadingConfig = {
@@ -257,6 +261,10 @@ export function useThumbnailLazyLoading(
 
 /**
  * Hook para geração de thumbnails
+ */
+/**
+ * useThumbnailGenerator function
+ * @todo Add proper documentation
  */
 export function useThumbnailGenerator(): UseThumbnailGeneratorReturn {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -370,6 +378,10 @@ export function useThumbnailGenerator(): UseThumbnailGeneratorReturn {
 /**
  * Hook para cache de thumbnails
  */
+/**
+ * useThumbnailCache function
+ * @todo Add proper documentation
+ */
 export function useThumbnailCache(maxSize = 50, ttl = 3600000) { // 1 hora TTL
   const cacheRef = useRef(new Map<string, {
     data: string;
@@ -449,6 +461,10 @@ export function useThumbnailCache(maxSize = 50, ttl = 3600000) { // 1 hora TTL
 
 /**
  * Hook para precarregamento inteligente de thumbnails
+ */
+/**
+ * useThumbnailPreloading function
+ * @todo Add proper documentation
  */
 export function useThumbnailPreloading(
   videos: DashboardVideo[],

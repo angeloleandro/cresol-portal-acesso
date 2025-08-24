@@ -1,18 +1,20 @@
 "use client";
 
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import Breadcrumb from "../components/Breadcrumb";
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from "react";
-import { getSupabaseClient } from "@/lib/supabase";
-import { Icon } from "../components/icons/Icon";
+
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
+import { getSupabaseClient } from "@/lib/supabase";
+
+import Breadcrumb from "../components/Breadcrumb";
 import { CollectionSection } from "../components/Collections/CollectionSection";
-import { useSearchParams } from 'next/navigation';
+import Footer from "../components/Footer";
+import { Icon } from "../components/icons/Icon";
 import { ImagePreviewWithGrid } from "../components/ImagePreview";
 import { BaseImage, baseImageToGalleryImage } from "../components/ImagePreview/ImagePreview.types";
-import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
+import Navbar from "../components/Navbar";
 
 interface GalleryImage {
   id: string;

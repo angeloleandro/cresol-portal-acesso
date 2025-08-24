@@ -3,14 +3,17 @@
 // Collections Admin Manager
 // Interface administrativa principal para coleções - Portal Cresol
 
-import type React from 'react';
 import { useState, useEffect } from 'react';
+
 import { useAlert } from '@/app/components/alerts';
 import CollectionList from '@/app/components/Collections/Collection.List';
+import { useCollections } from '@/app/contexts/CollectionsContext';
+import { Collection } from '@/lib/types/collections';
+
 import CollectionModal from './CollectionModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
-import { Collection } from '@/lib/types/collections';
-import { useCollections } from '@/app/components/Collections/Collection.hooks';
+
+import type React from 'react';
 
 interface CollectionsManagerProps {
   showCreateCollection?: boolean;
@@ -30,12 +33,12 @@ const CollectionsManager: React.FC<CollectionsManagerProps> = ({
   // Hooks
   const alert = useAlert();
   const {
-    collections,
-    loading,
-    error,
-    stats,
+    collections: _collections,
+    loading: _loading,
+    error: _error,
+    stats: _stats,
     actions: {
-      refresh,
+      refresh: _refresh,
       createCollection,
       updateCollection,
       deleteCollection,
@@ -58,26 +61,27 @@ const CollectionsManager: React.FC<CollectionsManagerProps> = ({
   };
 
   // Handle edit collection
-  const handleEditCollection = (collection: Collection) => {
+  const _handleEditCollection = (collection: Collection) => {
     setSelectedCollection(collection);
     setFormMode('edit');
     setIsFormModalOpen(true);
   };
 
   // Handle delete collection
-  const handleDeleteCollection = (collection: Collection) => {
+  const _handleDeleteCollection = (collection: Collection) => {
     setSelectedCollection(collection);
     setIsDeleteModalOpen(true);
   };
 
   // Handle toggle status
-  const handleToggleStatus = async (collection: Collection) => {
+  const _handleToggleStatus = async (collection: Collection) => {
     try {
       await toggleCollectionStatus(collection.id, !collection.is_active);
       alert.collections.statusChanged(!collection.is_active);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro inesperado';
       alert.showError('Erro ao alterar status da coleção', errorMessage);
+      // eslint-disable-next-line no-console
       console.error(error);
     }
   };

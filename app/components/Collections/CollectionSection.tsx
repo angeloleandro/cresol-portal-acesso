@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Collection } from '@/lib/types/collections';
-import { getSupabaseClient } from '@/lib/supabase';
-import { Icon } from '../icons/Icon';
+import { useMemo, memo } from 'react';
+
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { CRESOL_COLORS } from '@/lib/design-tokens';
+import { Collection } from '@/lib/types/collections';
+import { useCollections } from '@/app/contexts/CollectionsContext';
+
+import Icon from '../icons/Icon';
 import OptimizedImage from '../OptimizedImage';
+
 
 interface CollectionSectionProps {
   type?: 'images' | 'videos' | 'mixed' | 'all';
@@ -15,51 +19,31 @@ interface CollectionSectionProps {
   showEmptyState?: boolean;
 }
 
-export function CollectionSection({ 
+/**
+ * CollectionSection - Otimizada com contexto centralizado
+ * Componente responsável por exibir coleções filtradas por tipo
+ */
+export const CollectionSection = memo<CollectionSectionProps>(({ 
   type = 'all', 
   title = 'Coleções',
   showEmptyState = true 
-}: CollectionSectionProps) {
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [loading, setLoading] = useState(true);
+}) => {
+  // Usar contexto centralizado ao invés de queries diretas
+  const { collections: allCollections, loading } = useCollections();
 
-  useEffect(() => {
-    const fetchCollections = async () => {
-      try {
-        let query = getSupabaseClient()
-          .from('collections')
-          .select(`
-            *,
-            collection_items(count)
-          `)
-          .eq('is_active', true)
-          .order('order_index', { ascending: true });
-
-        // Filter by type if specified
-        if (type !== 'all') {
-          query = query.or(`type.eq.${type},type.eq.mixed`);
-        }
-
-        const { data, error } = await query;
-        
-        if (error) throw error;
-
-        // Map data to include item count
-        const collectionsWithCount = (data || []).map((col: any) => ({
-          ...col,
-          item_count: col.collection_items?.[0]?.count || 0
-        }));
-
-        setCollections(collectionsWithCount);
-      } catch (error) {
-        console.error('Erro ao buscar coleções:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCollections();
-  }, [type]);
+  // Filtrar coleções baseado no tipo - memoizado para performance
+  const filteredCollections = useMemo(() => {
+    return allCollections.filter(collection => {
+      // Mostrar apenas coleções ativas
+      if (!collection.is_active) return false;
+      
+      // Se type é 'all', mostrar todas
+      if (type === 'all') return true;
+      
+      // Se type é específico, incluir esse tipo e 'mixed'
+      return collection.type === type || collection.type === 'mixed';
+    });
+  }, [allCollections, type]);
 
   if (loading) {
     return (
@@ -71,11 +55,11 @@ export function CollectionSection({
     );
   }
 
-  if (collections.length === 0 && !showEmptyState) {
+  if (filteredCollections.length === 0 && !showEmptyState) {
     return null;
   }
 
-  if (collections.length === 0 && showEmptyState) {
+  if (filteredCollections.length === 0 && showEmptyState) {
     return (
       <div className="mb-8">
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
@@ -128,7 +112,7 @@ export function CollectionSection({
 
       {/* Collections Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {collections.map((collection) => (
+        {filteredCollections.map((collection) => (
           <Link
             key={collection.id}
             href={getCollectionLink(collection)}
@@ -150,14 +134,14 @@ export function CollectionSection({
                     <div 
                       className="w-24 h-24 rounded-full flex items-center justify-center"
                       style={{
-                        backgroundColor: collection.color_theme || '#F58220',
+                        backgroundColor: collection.color_theme || CRESOL_COLORS.primary.DEFAULT,
                         opacity: 0.1
                       }}
                     >
                       <Icon 
                         name={getCollectionIcon(collection.type)} 
                         className="h-12 w-12"
-                        style={{ color: collection.color_theme || '#F58220' }}
+                        style={{ color: collection.color_theme || CRESOL_COLORS.primary.DEFAULT }}
                       />
                     </div>
                   </div>
@@ -209,4 +193,6 @@ export function CollectionSection({
       </div>
     </div>
   );
-}
+});
+
+CollectionSection.displayName = 'CollectionSection';

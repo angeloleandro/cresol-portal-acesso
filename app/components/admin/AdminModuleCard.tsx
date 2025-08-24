@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+
 import { Icon, IconName } from '../icons/Icon';
 
 interface AdminModuleCardProps {

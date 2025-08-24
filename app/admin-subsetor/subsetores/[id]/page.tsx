@@ -1,24 +1,25 @@
 'use client';
 
-import React, { useState, lazy, Suspense, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useState, lazy, Suspense } from 'react';
+
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 
 // Context Provider
-import { SubsectorDataProvider, useSubsectorDataContext } from './contexts/SubsectorDataContext';
 
 // Types
-import { TabType } from './types/subsector.types';
 
 // Hooks
-import { useSubsectorData } from './hooks/useSubsectorData';
-import { useSubsectorContent } from './SubsectorContentManager';
 import { useAuth } from '@/app/providers/AuthProvider';
 
 // Components - Lazy loading para otimização
 import { TabNavigation } from './components/TabNavigation';
+import { SubsectorDataProvider, useSubsectorDataContext } from './contexts/SubsectorDataContext';
+import { useSubsectorData } from './hooks/useSubsectorData';
+import { useSubsectorContent } from './SubsectorContentManager';
+import { TabType } from './types/subsector.types';
 const NewsManagement = lazy(() => import('./components/NewsManagement').then(m => ({ default: m.NewsManagement })));
 const EventsManagement = lazy(() => import('./components/EventsManagement').then(m => ({ default: m.EventsManagement })));
 const DocumentsManagement = lazy(() => import('./components/DocumentsManagement').then(m => ({ default: m.DocumentsManagement })));
@@ -26,7 +27,6 @@ const VideosManagement = lazy(() => import('./components/VideosManagement').then
 const ImagesManagement = lazy(() => import('./components/ImagesManagement').then(m => ({ default: m.ImagesManagement })));
 const MessagesManagement = lazy(() => import('./components/MessagesManagement').then(m => ({ default: m.MessagesManagement })));
 const GroupsManagement = lazy(() => import('./components/GroupsManagement').then(m => ({ default: m.GroupsManagement })));
-
 
 // Componente interno que usa o contexto
 function SubsectorDashboardContent() {
@@ -96,7 +96,7 @@ function SubsectorDashboardContent() {
       // Refresh images list
       await refreshImages();
     } catch (error) {
-      console.error('Erro ao deletar imagem:', error);
+
       throw error;
     }
   };
@@ -113,7 +113,7 @@ function SubsectorDashboardContent() {
         setTotalDraftImagesCount(data.draftCount || 0);
       }
     } catch (error) {
-      console.error('Erro ao carregar imagens:', error);
+
     }
   };
 

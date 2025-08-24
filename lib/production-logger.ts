@@ -7,14 +7,14 @@
  * - Permite logging condicional baseado em environment
  */
 
-const isProduction = process.env.NODE_ENV === 'production';
+const _isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 interface LogContext {
   operation?: string;
   module?: string;
   userId?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 class ProductionLogger {
@@ -22,10 +22,11 @@ class ProductionLogger {
    * Log de erro crítico - sempre executado
    * Para erros que precisam ser registrados em produção
    */
-  error(message: string, error?: Error | any, context?: LogContext): void {
+  error(message: string, error?: Error | unknown, context?: LogContext): void {
     const timestamp = new Date().toISOString();
     const logMessage = `[ERROR] ${timestamp} - ${message}`;
     
+    // eslint-disable-next-line no-console
     console.error(logMessage, error || '', context ? `Context: ${JSON.stringify(context)}` : '');
   }
 
@@ -33,10 +34,11 @@ class ProductionLogger {
    * Log de warning - sempre executado 
    * Para situações que não são erros mas precisam de atenção
    */
-  warn(message: string, data?: any, context?: LogContext): void {
+  warn(message: string, data?: unknown, context?: LogContext): void {
     const timestamp = new Date().toISOString();
     const logMessage = `[WARN] ${timestamp} - ${message}`;
     
+    // eslint-disable-next-line no-console
     console.warn(logMessage, data || '', context ? `Context: ${JSON.stringify(context)}` : '');
   }
 
@@ -44,11 +46,12 @@ class ProductionLogger {
    * Log de informação - apenas em desenvolvimento
    * Para informações úteis durante desenvolvimento
    */
-  info(message: string, data?: any, context?: LogContext): void {
+  info(message: string, data?: unknown, context?: LogContext): void {
     if (isDevelopment) {
       const timestamp = new Date().toISOString();
       const logMessage = `[INFO] ${timestamp} - ${message}`;
       
+      // eslint-disable-next-line no-console
       console.log(logMessage, data || '', context ? `Context: ${JSON.stringify(context)}` : '');
     }
   }
@@ -57,11 +60,12 @@ class ProductionLogger {
    * Log de debug - apenas em desenvolvimento
    * Para debugging detalhado
    */
-  debug(message: string, data?: any, context?: LogContext): void {
+  debug(message: string, data?: unknown, context?: LogContext): void {
     if (isDevelopment) {
       const timestamp = new Date().toISOString();
       const logMessage = `[DEBUG] ${timestamp} - ${message}`;
       
+      // eslint-disable-next-line no-console
       console.debug(logMessage, data || '', context ? `Context: ${JSON.stringify(context)}` : '');
     }
   }
@@ -70,13 +74,14 @@ class ProductionLogger {
    * Log condicional - apenas quando flag específica está ativada
    * Para logs que podem ser ativados via environment variable
    */
-  conditional(flag: string, message: string, data?: any, context?: LogContext): void {
+  conditional(flag: string, message: string, data?: unknown, context?: LogContext): void {
     const shouldLog = process.env[`LOG_${flag.toUpperCase()}`] === 'true' || isDevelopment;
     
     if (shouldLog) {
       const timestamp = new Date().toISOString();
       const logMessage = `[${flag.toUpperCase()}] ${timestamp} - ${message}`;
       
+      // eslint-disable-next-line no-console
       console.log(logMessage, data || '', context ? `Context: ${JSON.stringify(context)}` : '');
     }
   }
@@ -84,11 +89,12 @@ class ProductionLogger {
   /**
    * Log de API - para debugging de API calls
    */
-  api(operation: string, status: string, data?: any): void {
+  api(operation: string, status: string, data?: unknown): void {
     if (isDevelopment || process.env.LOG_API === 'true') {
       const timestamp = new Date().toISOString();
       const logMessage = `[API] ${timestamp} - ${operation} - ${status}`;
       
+      // eslint-disable-next-line no-console
       console.log(logMessage, data ? JSON.stringify(data, null, 2) : '');
     }
   }
@@ -101,6 +107,7 @@ class ProductionLogger {
       const timestamp = new Date().toISOString();
       const logMessage = `[PERF] ${timestamp} - ${operation} completed in ${duration}ms`;
       
+      // eslint-disable-next-line no-console
       console.log(logMessage, context ? `Context: ${JSON.stringify(context)}` : '');
     }
   }

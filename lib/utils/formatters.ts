@@ -1,9 +1,9 @@
+
 /**
- * Format file size from bytes to human-readable format
- * @param bytes - Size in bytes (can be null)
- * @returns Formatted string (e.g., "1.5 MB", "0 B" for null/0/negative/NaN)
+ * formatFileSize function
+ * @todo Add proper documentation
  */
-export function formatFileSize(bytes: number | null): string {
+export function FormatFileSize(bytes: number | null): string {
   if (bytes == null || bytes <= 0 || isNaN(bytes)) return '0 B';
   
   const k = 1024;
@@ -16,11 +16,10 @@ export function formatFileSize(bytes: number | null): string {
 // ========== Date Formatting Utilities ==========
 
 /**
- * Format date with full date and time
- * @param dateStr - Date string or null/undefined
- * @returns Formatted string (e.g., "15 de dezembro de 2024, 14:30")
+ * formatDate function
+ * @todo Add proper documentation
  */
-export function formatDate(dateStr: string | null | undefined): string {
+export function FormatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
   
   try {
@@ -41,11 +40,10 @@ export function formatDate(dateStr: string | null | undefined): string {
 }
 
 /**
- * Format date without time
- * @param dateStr - Date string
- * @returns Formatted string (e.g., "15 de dezembro de 2024")
+ * formatDateSimple function
+ * @todo Add proper documentation
  */
-export function formatDateSimple(dateStr: string): string {
+export function FormatDateSimple(dateStr: string): string {
   if (!dateStr) return '';
   
   try {
@@ -64,11 +62,10 @@ export function formatDateSimple(dateStr: string): string {
 }
 
 /**
- * Format date with only day and month
- * @param dateStr - Date string
- * @returns Formatted string (e.g., "15 dez")
+ * formatDateShort function
+ * @todo Add proper documentation
  */
-export function formatDateShort(dateStr: string): string {
+export function FormatDateShort(dateStr: string): string {
   if (!dateStr) return '';
   
   try {
@@ -85,11 +82,10 @@ export function formatDateShort(dateStr: string): string {
 }
 
 /**
- * Format time only
- * @param dateStr - Date string
- * @returns Formatted string (e.g., "14:30")
+ * formatTime function
+ * @todo Add proper documentation
  */
-export function formatTime(dateStr: string): string {
+export function FormatTime(dateStr: string): string {
   if (!dateStr) return '';
   
   try {
@@ -106,12 +102,10 @@ export function formatTime(dateStr: string): string {
 }
 
 /**
- * Format event period
- * @param startDate - Start date string
- * @param endDate - End date string or null
- * @returns Formatted period string
+ * formatEventPeriod function
+ * @todo Add proper documentation
  */
-export function formatEventPeriod(startDate: string, endDate: string | null): string {
+export function FormatEventPeriod(startDate: string, endDate: string | null): string {
   if (!startDate) return '';
   
   try {
@@ -119,7 +113,7 @@ export function formatEventPeriod(startDate: string, endDate: string | null): st
     
     if (isNaN(start.getTime())) return '';
     
-    const startFormatted = formatDateSimple(startDate);
+    const startFormatted = FormatDateSimple(startDate);
     
     if (!endDate) {
       return startFormatted;
@@ -133,10 +127,10 @@ export function formatEventPeriod(startDate: string, endDate: string | null): st
     
     // Check if it's the same day
     if (start.toDateString() === end.toDateString()) {
-      return `${formatDateSimple(startDate)} das ${formatTime(startDate)} às ${formatTime(endDate)}`;
+      return `${FormatDateSimple(startDate)} das ${FormatTime(startDate)} às ${FormatTime(endDate)}`;
     }
     
-    const endFormatted = formatDateSimple(endDate);
+    const endFormatted = FormatDateSimple(endDate);
     
     return `${startFormatted} até ${endFormatted}`;
   } catch {
@@ -145,11 +139,10 @@ export function formatEventPeriod(startDate: string, endDate: string | null): st
 }
 
 /**
- * Format relative time (e.g., "há 2 horas", "em 3 dias")
- * @param dateStr - Date string
- * @returns Relative time string
+ * formatRelativeTime function
+ * @todo Add proper documentation
  */
-export function formatRelativeTime(dateStr: string): string {
+export function FormatRelativeTime(dateStr: string): string {
   if (!dateStr) return '';
   
   try {
@@ -174,7 +167,7 @@ export function formatRelativeTime(dateStr: string): string {
       } else if (absDiffInDays < 7) {
         return `em ${absDiffInDays} ${absDiffInDays === 1 ? 'dia' : 'dias'}`;
       } else {
-        return formatDateSimple(dateStr);
+        return FormatDateSimple(dateStr);
       }
     }
     
@@ -193,7 +186,7 @@ export function formatRelativeTime(dateStr: string): string {
     } else if (diffInDays < 7) {
       return `há ${diffInDays} ${diffInDays === 1 ? 'dia' : 'dias'}`;
     } else {
-      return formatDateSimple(dateStr);
+      return FormatDateSimple(dateStr);
     }
   } catch {
     return '';
@@ -201,11 +194,10 @@ export function formatRelativeTime(dateStr: string): string {
 }
 
 /**
- * Format event date with relative description
- * @param dateStr - Date string
- * @returns Formatted string (e.g., "Hoje", "Amanhã", "Em 3 dias")
+ * formatEventDate function
+ * @todo Add proper documentation
  */
-export function formatEventDate(dateStr: string): string {
+export function FormatEventDate(dateStr: string): string {
   if (!dateStr) return '';
   
   try {
@@ -225,7 +217,7 @@ export function formatEventDate(dateStr: string): string {
     } else if (diffDays < 0 && diffDays >= -7) {
       return `Há ${Math.abs(diffDays)} dias`;
     } else {
-      return formatDateShort(dateStr);
+      return FormatDateShort(dateStr);
     }
   } catch {
     return '';
@@ -233,11 +225,10 @@ export function formatEventDate(dateStr: string): string {
 }
 
 /**
- * Format date for datetime-local input
- * @param dateStr - Date string or null/undefined
- * @returns Formatted string for input (e.g., "2024-12-15T14:30")
+ * formatForDateTimeInput function
+ * @todo Add proper documentation
  */
-export function formatForDateTimeInput(dateStr: string | null | undefined): string {
+export function FormatForDateTimeInput(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
   
   try {
@@ -258,11 +249,10 @@ export function formatForDateTimeInput(dateStr: string | null | undefined): stri
 }
 
 /**
- * Check if a date has passed
- * @param dateStr - Date string
- * @returns Boolean indicating if date is in the past
+ * isPastDate function
+ * @todo Add proper documentation
  */
-export function isPastDate(dateStr: string): boolean {
+export function IsPastDate(dateStr: string): boolean {
   try {
     return new Date(dateStr) < new Date();
   } catch {
@@ -271,10 +261,10 @@ export function isPastDate(dateStr: string): boolean {
 }
 
 /**
- * Get default expiration date (30 days from now)
- * @returns ISO date string
+ * getDefaultExpirationDate function
+ * @todo Add proper documentation
  */
-export function getDefaultExpirationDate(): string {
+export function GetDefaultExpirationDate(): string {
   const date = new Date();
   date.setDate(date.getDate() + 30);
   return date.toISOString();

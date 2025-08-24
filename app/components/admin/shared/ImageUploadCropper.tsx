@@ -29,6 +29,10 @@ interface ImageUploadCropperProps {
   onRemoveImage: () => void;
 }
 
+/**
+ * ImageUploadCropper function
+ * @todo Add proper documentation
+ */
 export function ImageUploadCropper({
   originalImage,
   imagePreview,

@@ -1,12 +1,7 @@
-/**
- * CRESOL PORTAL - CONFIGURAÇÕES DE COMPONENTES UI
- * 
- * Configurações específicas de componentes baseadas no sistema de design tokens
- * Elimina magic numbers e padroniza comportamentos de UI
- * Baseado na análise de componentes padronizados existentes
- */
-
 import { CRESOL_COLORS } from './design-tokens';
+
+
+
 
 // === DESIGN TOKENS CSS VARIABLES ===
 // Converte design tokens para CSS variables para uso consistente

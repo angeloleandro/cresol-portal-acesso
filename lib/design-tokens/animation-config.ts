@@ -1,12 +1,7 @@
-/**
- * CRESOL PORTAL - CONFIGURAÇÕES DE ANIMAÇÃO
- * 
- * Centralização de todas as animações, transições e micro-interações
- * Elimina hardcode de "transition-all duration-200", "animate-spin", etc.
- * Baseado na análise de 15+ ocorrências de transições hardcoded
- */
-
 import { CRESOL_DESIGN_TOKENS } from './design-tokens';
+
+
+
 
 // === DURAÇÕES PADRONIZADAS ===
 // Consolidação de durações encontradas hardcoded (200ms, 150ms, 300ms, etc.)

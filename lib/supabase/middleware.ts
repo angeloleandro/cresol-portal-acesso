@@ -1,8 +1,14 @@
 import { createServerClient } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
 import type { CookieOptions } from '@supabase/ssr';
 
-export function updateSession(request: NextRequest) {
+
+/**
+ * updateSession function
+ * @todo Add proper documentation
+ */
+export function UpdateSession(request: NextRequest) {
   // Criar uma resposta inicial
   let response = NextResponse.next({
     request: {
@@ -76,4 +82,8 @@ export function updateSession(request: NextRequest) {
   );
 
   return { supabase, response };
-} 
+}
+
+// === COMPATIBILITY EXPORTS ===
+// Export camelCase version for backward compatibility
+export const updateSession = UpdateSession; 

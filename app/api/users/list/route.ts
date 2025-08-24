@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateAdminRequest, authorizeAdminOperation } from '@/lib/supabase/admin';
+
 import { logger } from '@/lib/logger';
+import { authenticateAdminRequest, AuthorizeAdminOperation } from '@/lib/supabase/admin';
+
 
 // GET - Listar todos os usuários (profiles)
 export async function GET(request: NextRequest) {
@@ -26,7 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Verificar se é admin ou sector_admin
-    if (!authorizeAdminOperation(profile.role, ['admin', 'sector_admin'])) {
+    if (!AuthorizeAdminOperation(profile.role, ['admin', 'sector_admin'])) {
       logger.apiEnd(apiTimer);
       logger.warn('Permissão negada para listar usuários', { userId: user.id, role: profile.role });
       return NextResponse.json({ error: 'Permissão negada' }, { status: 403 });

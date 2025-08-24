@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+
+
 import { HTTP_STATUS, API_ERROR_MESSAGES } from '@/lib/constants/api-config';
+import { CreateAdminSupabaseClient } from '@/lib/supabase/admin';
+
 
 // Força renderização dinâmica para usar request.url e cookies
 export const dynamic = 'force-dynamic';
@@ -35,7 +38,7 @@ async function createAuthenticatedClient() {
 
 // Função para operações administrativas que usam Service Role Key (bypass RLS)
 function createAdminClient() {
-  return createAdminSupabaseClient();
+  return CreateAdminSupabaseClient();
 }
 
 // GET - Buscar todo conteúdo do subsetor em batch (notícias + eventos + mensagens + contadores)
@@ -54,12 +57,10 @@ export async function GET(request: NextRequest) {
         { status: HTTP_STATUS.BAD_REQUEST }
       );
     }
-    
-    
+
     const authClient = await createAuthenticatedClient();
     const { data: { user }, error: authError } = await authClient.auth.getUser();
-    
-    
+
     if (authError || !user) {
       return NextResponse.json(
         { error: API_ERROR_MESSAGES.unauthorized },
@@ -67,14 +68,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-
     const { data: profile, error: profileError } = await authClient
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
-    
-    
+
     if (profileError) {
       return NextResponse.json(
         { error: API_ERROR_MESSAGES.internalError },
@@ -84,8 +83,7 @@ export async function GET(request: NextRequest) {
 
     const isAuthorizedAdmin = profile && ['admin', 'sector_admin', 'subsector_admin'].includes(profile.role);
     const shouldUseAdminClient = includeUnpublished && isAuthorizedAdmin;
-    
-    
+
     const supabase = shouldUseAdminClient ? createAdminClient() : authClient;
 
     // FAZER TODAS AS CONSULTAS EM PARALELO
@@ -95,8 +93,7 @@ export async function GET(request: NextRequest) {
       .from('subsector_news')
       .select('*')
       .eq('subsector_id', subsectorId);
-    
-    
+
     if (!includeUnpublished) {
       newsQuery = newsQuery.eq('is_published', true);
     }
@@ -106,8 +103,7 @@ export async function GET(request: NextRequest) {
       .from('subsector_events')
       .select('*')
       .eq('subsector_id', subsectorId);
-    
-    
+
     if (!includeUnpublished) {
       eventsQuery = eventsQuery.eq('is_published', true);
     }
@@ -117,8 +113,7 @@ export async function GET(request: NextRequest) {
       .from('subsector_messages')
       .select('*')
       .eq('subsector_id', subsectorId);
-    
-    
+
     if (!includeUnpublished) {
       messagesQuery = messagesQuery.eq('is_published', true);
     }
@@ -209,7 +204,6 @@ export async function GET(request: NextRequest) {
         .eq('subsector_id', subsectorId) : Promise.resolve({ data: [], error: null })
     ];
 
-
     const promiseStartTime = Date.now();
     const [
       { data: filteredNews, error: newsError },
@@ -227,14 +221,13 @@ export async function GET(request: NextRequest) {
     ] = await Promise.all(promises);
     const promiseEndTime = Date.now();
 
-
     // Verificar erros críticos
     const hasErrors = newsError || eventsError || messagesError || documentsError || videosError || imagesError;
     
     if (hasErrors) {
       const firstError = newsError || eventsError || messagesError || documentsError || videosError || imagesError;
       if (firstError) {
-        console.error('[SUBSECTOR-BATCH] Erro ao buscar dados:', firstError.message);
+
         return NextResponse.json(
           { error: `Erro ao buscar dados: ${firstError.message}` },
           { status: HTTP_STATUS.BAD_REQUEST }
@@ -297,8 +290,6 @@ export async function GET(request: NextRequest) {
       subsectorId
     };
 
-
-
     return NextResponse.json({
       data: responseData,
       success: true,
@@ -306,7 +297,7 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('[SUBSECTOR-BATCH] Erro crítico:', error.message);
+
     return NextResponse.json(
       { 
         error: 'Erro interno do servidor',

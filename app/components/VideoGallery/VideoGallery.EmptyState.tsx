@@ -1,16 +1,15 @@
-/**
- * VideoGallery Empty States
- * Enterprise-grade empty state components with actions
- */
+
 
 "use client";
 
-import { motion } from 'framer-motion';
-import Button from '@/app/components/ui/Button';
 import clsx from 'clsx';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Icon, IconName } from '../icons/Icon';
+
+import Button from '@/app/components/ui/Button';
+
 import { scrollAnimations } from './VideoGallery.animations';
+import { Icon, IconName } from '../icons/Icon';
 
 interface EmptyStateConfig {
   icon: IconName;
@@ -36,6 +35,10 @@ interface EmptyStateProps {
 
 /**
  * Main Empty State Component
+ */
+/**
+ * VideoGalleryEmptyState function
+ * @todo Add proper documentation
  */
 export function VideoGalleryEmptyState({
   variant = 'default',
@@ -337,6 +340,10 @@ interface CompactEmptyStateProps {
   className?: string;
 }
 
+/**
+ * CompactEmptyState function
+ * @todo Add proper documentation
+ */
 export function CompactEmptyState({
   message = 'Nenhum vídeo encontrado',
   actionLabel,
@@ -370,6 +377,10 @@ export function CompactEmptyState({
 /**
  * Inline Empty State (for list items)
  */
+/**
+ * InlineEmptyState function
+ * @todo Add proper documentation
+ */
 export function InlineEmptyState({ 
   message = 'Lista vazia',
   className 
@@ -399,6 +410,10 @@ interface ErrorRecoveryProps {
   className?: string;
 }
 
+/**
+ * ErrorRecoveryEmptyState function
+ * @todo Add proper documentation
+ */
 export function ErrorRecoveryEmptyState({
   error,
   onRetry,

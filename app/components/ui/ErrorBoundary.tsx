@@ -1,8 +1,9 @@
 'use client';
 
 import React, { Component, ReactNode } from 'react';
-import { Icon } from '@/app/components/icons/Icon';
+
 import { StandardizedButton } from '@/app/components/admin';
+import { Icon } from '@/app/components/icons/Icon';
 
 interface Props {
   children: ReactNode;

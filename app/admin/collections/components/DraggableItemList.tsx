@@ -3,12 +3,12 @@
 // Draggable Item List Component
 // Lista de itens com funcionalidade de drag & drop para reordenação - Portal Cresol
 
-import type React from 'react';
-import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import React, { useState, useRef } from 'react';
+
+import Icon from '@/app/components/icons/Icon';
 import { CollectionItem } from '@/lib/types/collections';
 import { cn } from '@/lib/utils/cn';
-import Icon from '@/app/components/icons/Icon';
 
 interface DraggableItemListProps {
   items: CollectionItem[];
@@ -48,7 +48,7 @@ const DraggableItemList: React.FC<DraggableItemListProps> = ({
   };
 
   // Handle drag end
-  const handleDragEnd = (e: React.DragEvent) => {
+  const handleDragEnd = (_e: React.DragEvent) => {
     setDraggedItem(null);
     setDraggedOver(null);
     dragCounterRef.current = 0;
@@ -71,7 +71,7 @@ const DraggableItemList: React.FC<DraggableItemListProps> = ({
   };
 
   // Handle drag leave
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = (_e: React.DragEvent) => {
     dragCounterRef.current--;
     if (dragCounterRef.current === 0) {
       setDraggedOver(null);
@@ -114,8 +114,8 @@ const DraggableItemList: React.FC<DraggableItemListProps> = ({
 
     try {
       await onReorder(updatedItems);
-    } catch (error) {
-      console.error('Error reordering items:', error);
+    } catch (_error) {
+      // Error handling is done by the parent component
     } finally {
       setIsReordering(false);
     }
@@ -146,8 +146,8 @@ const DraggableItemList: React.FC<DraggableItemListProps> = ({
     setIsReordering(true);
     try {
       await onReorder(updatedItems);
-    } catch (error) {
-      console.error('Error reordering items:', error);
+    } catch (_error) {
+      // Error handling is done by the parent component
     } finally {
       setIsReordering(false);
     }

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getSupabaseClient } from '@/lib/supabase';
+
 import { useAlert } from '@/app/components/alerts';
 import { FormSelect } from '@/app/components/forms/FormSelect';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { getSupabaseClient } from '@/lib/supabase';
 
 interface Sector {
   id: string;
@@ -72,10 +72,10 @@ export default function RoleModal({
       const { error: deleteSubsectorError } = await getSupabaseClient().from('subsector_admins').delete().eq('user_id', userId);
       
       if (deleteSectorError) {
-        console.error('Erro ao deletar associações de setor:', deleteSectorError);
+
       }
       if (deleteSubsectorError) {
-        console.error('Erro ao deletar associações de sub-setor:', deleteSubsectorError);
+
       }
       
       // Adicionar novas associações
@@ -109,7 +109,7 @@ export default function RoleModal({
       onSuccess();
       
     } catch (error) {
-      console.error('Erro detalhado ao salvar alterações de role:', error);
+
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       alert.showError('Erro ao salvar alterações', errorMessage);
     }
@@ -132,7 +132,7 @@ export default function RoleModal({
       if (error) throw error;
       onRefreshSubsectors(sectorId);
     } catch (error) {
-      console.error('Erro ao buscar sub-setores:', error);
+
       alert.showError('Erro ao carregar subsetores');
     } finally {
       setLoadingSubsectors(false);

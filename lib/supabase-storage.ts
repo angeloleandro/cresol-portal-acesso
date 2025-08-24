@@ -2,9 +2,9 @@
  * Supabase Storage utilities for video thumbnails
  */
 
+import { logger } from './production-logger';
 import { supabase } from "./supabase";
 
-import { logger } from './production-logger';
 export const STORAGE_BUCKETS = {
   videos: 'videos',
   banners: 'banners'
@@ -12,6 +12,10 @@ export const STORAGE_BUCKETS = {
 
 /**
  * Ensures the videos bucket exists for thumbnail storage
+ */
+/**
+ * ensureVideosBucket function
+ * @todo Add proper documentation
  */
 export async function ensureVideosBucket(): Promise<boolean> {
   try {
@@ -28,7 +32,6 @@ export async function ensureVideosBucket(): Promise<boolean> {
       });
       
       if (error) {
-        console.error('Failed to create videos bucket:', error);
         return false;
       }
       
@@ -36,13 +39,16 @@ export async function ensureVideosBucket(): Promise<boolean> {
     
     return true;
   } catch (error) {
-    console.error('Error checking/creating videos bucket:', error);
     return false;
   }
 }
 
 /**
  * Upload thumbnail to storage with proper error handling
+ */
+/**
+ * uploadThumbnailWithFallback function
+ * @todo Add proper documentation
  */
 export async function uploadThumbnailWithFallback(
   thumbnailBlob: Blob,
@@ -58,7 +64,7 @@ export async function uploadThumbnailWithFallback(
   
   try {
     // First try to upload to preferred bucket (videos)
-    let { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from(preferredBucket)
       .upload(thumbnailPath, thumbnailBlob, {
         contentType: 'image/jpeg',
@@ -95,7 +101,6 @@ export async function uploadThumbnailWithFallback(
     return publicUrl;
     
   } catch (error) {
-    console.error('Thumbnail upload error:', error);
     throw error;
   }
 }
@@ -103,18 +108,25 @@ export async function uploadThumbnailWithFallback(
 /**
  * List storage buckets for debugging
  */
+/**
+ * listStorageBuckets function
+ * @todo Add proper documentation
+ */
 export async function listStorageBuckets(): Promise<string[]> {
   try {
     const { data: buckets } = await supabase.storage.listBuckets();
     return buckets?.map(bucket => bucket.name) || [];
   } catch (error) {
-    console.error('Error listing buckets:', error);
     return [];
   }
 }
 
 /**
  * Check if bucket has proper permissions for public access
+ */
+/**
+ * checkBucketPermissions function
+ * @todo Add proper documentation
  */
 export async function checkBucketPermissions(bucketName: string): Promise<boolean> {
   try {
@@ -125,7 +137,6 @@ export async function checkBucketPermissions(bucketName: string): Promise<boolea
       
     return !error;
   } catch (error) {
-    console.error(`Error checking ${bucketName} permissions:`, error);
     return false;
   }
 }

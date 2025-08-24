@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
+import { useState, useEffect } from 'react';
+
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
+import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
+
 
 interface EventItem {
   id: string;

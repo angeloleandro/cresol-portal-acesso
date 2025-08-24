@@ -3,30 +3,32 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import clsx from 'clsx';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
-import { supabase } from '@/lib/supabase';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import CollectionsManager from './components/CollectionsManager';
-import { useCollections } from '@/app/components/Collections/Collection.hooks';
 import Icon from '@/app/components/icons/Icon';
-import clsx from 'clsx';
 import Button from '@/app/components/ui/Button';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useCollectionsStats } from '@/app/contexts/CollectionsContext';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
+import CollectionsManager from './components/CollectionsManager';
 
 export default function AdminCollectionsPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, _setError] = useState<string | null>(null);
   const [showCreateCollection, setShowCreateCollection] = useState(false);
 
-  // Collections hook for statistics
-  const { collections, stats } = useCollections();
+  // Collections stats para dashboard
+  const { stats: _stats } = useCollectionsStats();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -69,7 +71,7 @@ export default function AdminCollectionsPage() {
   }
 
   // Error Banner
-  const ErrorBanner = () => error && (
+  const ErrorBanner = () => _error && (
     <motion.div 
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -80,7 +82,7 @@ export default function AdminCollectionsPage() {
         <Icon name="triangle-alert" className="w-5 h-5 text-red-600" />
         <div>
           <h3 className="font-medium text-red-800">Erro</h3>
-          <p className="text-red-600 text-sm">{error}</p>
+          <p className="text-red-600 text-sm">{_error}</p>
         </div>
       </div>
     </motion.div>

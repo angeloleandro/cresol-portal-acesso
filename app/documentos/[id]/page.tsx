@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import Footer from '@/app/components/Footer';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import Breadcrumb from '@/app/components/Breadcrumb';
+import Footer from '@/app/components/Footer';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
 // Helper functions movidas para inline
 function formatFileSize(bytes?: number): string {
   if (!bytes) return '0 Bytes';
@@ -144,7 +145,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
           setNotFound(true);
         }
       } catch (err) {
-        console.error('Erro ao carregar documento:', err);
+        
         setNotFound(true);
       } finally {
         setLoading(false);

@@ -1,9 +1,11 @@
 // Hook para gerenciar dados de mensagens/notificações
 // CORREÇÃO SUPABASE: Uso consistente de authenticated client com fallback para admin
 import { useState, useCallback, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { Message } from '../types/sector.types';
+
 import { CONTENT_DEFAULTS } from '@/lib/constants/content-defaults';
+import { createClient } from '@/lib/supabase/client';
+
+import { Message } from '../types/sector.types';
 
 interface UseMessagesDataReturn {
   messages: Message[];
@@ -16,6 +18,10 @@ interface UseMessagesDataReturn {
   deleteMessage: (id: string) => Promise<void>;
 }
 
+/**
+ * useMessagesData function
+ * @todo Add proper documentation
+ */
 export function useMessagesData(sectorId: string): UseMessagesDataReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showDrafts, setShowDrafts] = useState<boolean>(CONTENT_DEFAULTS.SHOW_DRAFTS_INITIAL);

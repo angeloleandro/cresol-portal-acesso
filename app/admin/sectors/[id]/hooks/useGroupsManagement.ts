@@ -16,7 +16,11 @@ interface UseGroupsManagementReturn {
   filteredUsers: any[];
 }
 
-export function useGroupsManagement(sectorId: string): UseGroupsManagementReturn {
+/**
+ * useGroupsManagement function
+ * @todo Add proper documentation
+ */
+export function useGroupsManagement(_sectorId: string): UseGroupsManagementReturn {
   // Usar dados compartilhados do contexto ao invés de fazer requisições duplicadas
   const {
     groups,

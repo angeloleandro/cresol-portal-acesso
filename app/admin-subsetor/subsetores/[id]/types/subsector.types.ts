@@ -1,7 +1,5 @@
 // Types centralizados para o módulo de gerenciamento de subsetores
 
-import { CropArea } from '@/lib/types/common';
-
 export interface Profile {
   id: string;
   role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';

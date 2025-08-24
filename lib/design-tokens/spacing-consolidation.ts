@@ -1,17 +1,4 @@
-/**
- * CRESOL PORTAL - CONSOLIDAÇÃO DE SPACING
- * 
- * Mapeamento sistemático de espaçamentos inconsistentes encontrados na auditoria
- * para design tokens centralizados. Elimina hardcoded spacing e gaps em toda aplicação.
- * 
- * ANTES vs DEPOIS:
- * - p-3, p-4, p-6, p-8, p-12 → CARD_CONFIG.padding.{sm,md,lg,xl}
- * - gap-2, gap-3, gap-4, gap-6 → SPACING_CONFIG.gap.{sm,md,lg,xl}
- * - mb-3, mb-4, mb-6, mb-8 → SPACING_CONFIG.margin.{sm,md,lg,xl}
- * - px-3 py-2, px-4 py-2.5, px-6 py-3 → BUTTON_CONFIG.sizes.{sm,md,lg}
- */
 
-import { CRESOL_SPACING } from './design-tokens';
 
 // === CONSOLIDAÇÃO DE SPACING MAIS GRANULAR ===
 export const SPACING_CONFIG = {

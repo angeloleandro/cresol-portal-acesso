@@ -1,21 +1,21 @@
-/**
- * Clean Video Modal System
- * Simplified modal with focus on content and reduced visual noise
- */
+
 
 "use client";
 
-import { useEffect, useCallback, memo, useRef, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Icon } from '../icons/Icon';
-import { formatFileSize } from '@/lib/video-utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useCallback, memo, useRef, useMemo } from 'react';
+
+
 import { 
   useOptimizedFocusManagement, 
   useOptimizedEscapeKey 
 } from '@/hooks/useOptimizedVideoGallery';
+import { FormatFileSize as formatFileSize } from '@/lib/video-utils';
+
 import { VideoModalProps, DashboardVideo } from './VideoGallery.types';
+import { Icon } from '../icons/Icon';
 
 /**
  * Clean Video Modal Component

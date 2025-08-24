@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+
+import { FormSelect } from '@/app/components/forms/FormSelect';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { Button } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
-import { FormSelect } from '@/app/components/forms/FormSelect';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export default function Signup() {

@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
-import Footer from '../components/Footer';
-import Breadcrumb from '../components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
+import Breadcrumb from '../components/Breadcrumb';
+import Footer from '../components/Footer';
 
 interface NewsItem {
   id: string;
@@ -47,7 +49,7 @@ export default function NoticiasPage() {
           .order('created_at', { ascending: false });
           
         if (error) {
-          console.error('Erro ao buscar notícias:', error);
+          
           setNews([]);
         } else {
           // Formatar dados do Supabase
@@ -64,7 +66,7 @@ export default function NoticiasPage() {
         const uniqueCategories = Array.from(new Set(formattedNewsForCategories.map((item: any) => item.category)));
         setCategories(uniqueCategories);
       } catch (err) {
-        console.error('Erro:', err);
+        
         setNews([]);
         setCategories([]);
       } finally {

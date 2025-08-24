@@ -1,17 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import OptimizedImage from '@/app/components/OptimizedImage';
-import Breadcrumb from '@/app/components/Breadcrumb';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import Breadcrumb from '@/app/components/Breadcrumb';
+import { FormSelect } from '@/app/components/forms/FormSelect';
 import { Icon } from '@/app/components/icons/Icon';
+import OptimizedImage from '@/app/components/OptimizedImage';
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
-import { FormSelect } from '@/app/components/forms/FormSelect';
+import { supabase } from '@/lib/supabase';
 
 interface System {
   id: string;

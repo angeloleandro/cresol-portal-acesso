@@ -1,13 +1,14 @@
-/**
- * VideoUploadForm Clean YouTube Input Component
- * Minimalist URL input without decorative elements
- */
-
-import { memo, useCallback, useState, useEffect } from 'react'
 import Image from 'next/image'
-import { YouTubeInputProps } from './VideoUploadForm.types'
-import { VIDEO_HELPERS } from '@/lib/constants/video-ui'
+import { memo, useCallback, useState, useEffect } from 'react'
+
+
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput'
+import { VIDEO_HELPERS } from '@/lib/constants/video-ui'
+
+import { YouTubeInputProps } from './VideoUploadForm.types'
+
+
+
 
 // Consolidated YouTube helper functions using VIDEO_HELPERS
 function getYouTubeThumbnail(url: string): string | null {

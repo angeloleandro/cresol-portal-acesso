@@ -1,22 +1,24 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-
 // [DEBUG] Component tracking
-let messagesPageRenderCount = 0;
-const messagesPageInstanceId = `messages-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-import { supabase } from '@/lib/supabase';
-import AdminHeader from '@/app/components/AdminHeader';
-import Breadcrumb from '@/app/components/Breadcrumb';
-import { useAlert } from '@/app/components/alerts';
-import { FormSelect } from '@/app/components/forms';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { Icon } from '@/app/components/icons/Icon';
-import { StandardizedButton } from '@/app/components/admin';
-import { MessageForm } from './components/MessageForm';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
-import DeleteModal from '@/app/components/ui/DeleteModal';
+let _messagesPageRenderCount = 0;
+const _messagesPageInstanceId = `messages-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+import React, { useState, useEffect } from 'react';
+
 import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
+import { StandardizedButton } from '@/app/components/admin';
+import AdminHeader from '@/app/components/AdminHeader';
+import { useAlert } from '@/app/components/alerts';
+import Breadcrumb from '@/app/components/Breadcrumb';
+import { FormSelect } from '@/app/components/forms';
+import { Icon } from '@/app/components/icons/Icon';
+import DeleteModal from '@/app/components/ui/DeleteModal';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { supabase } from '@/lib/supabase';
+
+import { MessageForm } from './components/MessageForm';
 
 interface Message {
   id: string;
@@ -34,34 +36,14 @@ interface Message {
   group_color?: string;
 }
 
-interface MessageStats {
-  total: number;
-  published: number;
-  drafts: number;
-  bySector: { [key: string]: number };
-  byType: { sector: number; subsector: number };
-}
-
-interface Filters {
-  search: string;
-  type: 'all' | 'sector' | 'subsector';
-  status: 'all' | 'published' | 'draft';
-  sector_id: string;
-  subsector_id: string;
-}
 
 export default function MessagesAdminPage() {
   // [DEBUG] Component render tracking
-  messagesPageRenderCount++;
-  console.log(`[DEBUG-COMPONENT] MessagesAdminPage - Render ${messagesPageRenderCount}:`, {
-    instanceId: messagesPageInstanceId,
-    renderCount: messagesPageRenderCount,
-    timestamp: new Date().toISOString(),
-    stackTrace: new Error().stack?.split('\n').slice(1, 4)
-  });
+  _messagesPageRenderCount++;
+  // Debug component render logging removed for production
 
   const alert = useAlert();
-  const { user, loading: authLoading } = useAdminAuth();
+  const { user, loading: _authLoading } = useAdminAuth();
   const { 
     data: messages, 
     loading, 
@@ -92,7 +74,6 @@ export default function MessagesAdminPage() {
   const deleteModal = useDeleteModal('mensagem');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-
   const loadInitialData = async () => {
     try {
       // Carregar setores
@@ -111,10 +92,9 @@ export default function MessagesAdminPage() {
       
       setSubsectors(subsectorsData || []);
     } catch (error) {
-      console.error('Erro ao carregar dados iniciais:', error);
+
     }
   };
-
 
   // Carregar dados iniciais (setores e subsetores)
   useEffect(() => {
@@ -122,7 +102,6 @@ export default function MessagesAdminPage() {
       loadInitialData();
     }
   }, [user]);
-
 
   const handleToggleStatus = async (message: Message) => {
     const action = message.is_published ? 'unpublish' : 'publish';
@@ -163,7 +142,7 @@ export default function MessagesAdminPage() {
         throw new Error(result.error || 'Erro desconhecido');
       }
     } catch (error: any) {
-      console.error('Erro ao alterar status:', error);
+
       alert.showError('Erro', error.message || 'Erro ao alterar status da mensagem');
     } finally {
       setActionLoading(null);
@@ -209,7 +188,7 @@ export default function MessagesAdminPage() {
         throw new Error(result.error || 'Erro desconhecido');
       }
     } catch (error: any) {
-      console.error('Erro ao excluir mensagem:', error);
+
       alert.showError('Erro', error.message || 'Erro ao excluir mensagem');
     } finally {
       setActionLoading(null);
@@ -251,7 +230,7 @@ export default function MessagesAdminPage() {
         throw new Error(result.error || 'Erro desconhecido');
       }
     } catch (error: any) {
-      console.error('Erro ao duplicar mensagem:', error);
+
       alert.showError('Erro', error.message || 'Erro ao duplicar mensagem');
     } finally {
       setActionLoading(null);
@@ -277,7 +256,7 @@ export default function MessagesAdminPage() {
 
   const getFilteredSubsectors = () => {
     if (!filters.sector_id) return subsectors;
-    return subsectors.filter(sub => sub.sector_id === filters.sector_id);
+    return subsectors.filter((sub: any) => sub.sector_id === filters.sector_id);
   };
 
   return (
@@ -442,7 +421,7 @@ export default function MessagesAdminPage() {
                 })}
                 options={[
                   { value: '', label: 'Todos os setores' },
-                  ...sectors.map(sector => ({
+                  ...sectors.map((sector: any) => ({
                     value: sector.id,
                     label: sector.name
                   }))
@@ -459,7 +438,7 @@ export default function MessagesAdminPage() {
                 onChange={(e) => updateFilters({ subsector_id: e.target.value })}
                 options={[
                   { value: '', label: 'Todos os subsetores' },
-                  ...getFilteredSubsectors().map(subsector => ({
+                  ...getFilteredSubsectors().map((subsector: any) => ({
                     value: subsector.id,
                     label: subsector.name
                   }))
@@ -517,7 +496,7 @@ export default function MessagesAdminPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((message) => {
+            {messages.map((message: any) => {
               const messageKey = `${message.type}-${message.id}`;
               const isLoading = actionLoading === messageKey;
               

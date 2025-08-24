@@ -1,228 +1,20 @@
-// Collection Hooks - Portal Cresol
-// Simplified hooks following portal patterns with proper auth
+// Collection Hooks - Portal Cresol - DEPRECATED
+// ⚠️ ESTE ARQUIVO FOI DEPRECIADO - Use @/app/contexts/CollectionsContext em vez do useCollections
+// Apenas useCollectionItems e useCollectionUpload ainda estão em uso
 
-import { useState, useEffect, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useState, useEffect, useCallback } from 'react';
+
+import { COLLECTION_CONFIG } from '@/lib/constants/collections';
 import { 
   Collection, 
   CollectionItem, 
   CollectionFilters, 
   CollectionStats
 } from '@/lib/types/collections';
-import { COLLECTION_CONFIG } from '@/lib/constants/collections';
 
-// Hook principal para gerenciar coleções - Pattern com auth
-export function useCollections(initialFilters?: Partial<CollectionFilters>) {
-  const supabase = createClientComponentClient();
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState<CollectionStats | null>(null);
-  const [hasMore, setHasMore] = useState(false);
-  
-  const [filters, setFilters] = useState<CollectionFilters>({
-    search: '',
-    type: 'all',
-    status: 'all',
-    sort_by: 'order_index',
-    sort_order: 'asc',
-    page: 1,
-    limit: COLLECTION_CONFIG.DEFAULT_PAGE_SIZE,
-    ...initialFilters,
-  });
-
-  // Fetch collections via API with auth headers
-  const fetchCollections = useCallback(async (newFilters?: Partial<CollectionFilters>) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Get auth session for headers
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const currentFilters = { ...filters, ...newFilters };
-      const searchParams = new URLSearchParams();
-      
-      Object.entries(currentFilters).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== 'all') {
-          searchParams.append(key, value.toString());
-        }
-      });
-      
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (session?.access_token) {
-        headers.Authorization = `Bearer ${session.access_token}`;
-      }
-      
-      const response = await fetch(`/api/collections?${searchParams}`, {
-        headers,
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Erro ao buscar coleções');
-      }
-      
-      const data = await response.json();
-      setCollections(data.collections || []);
-      setHasMore(data.has_more || false);
-      setFilters(currentFilters);
-      
-    } catch (error) {
-      console.error('Erro ao buscar coleções:', error);
-      setError(error instanceof Error ? error.message : 'Erro desconhecido');
-      setCollections([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, supabase]);
-
-  // Fetch stats via API with auth
-  const fetchStats = useCallback(async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (session?.access_token) {
-        headers.Authorization = `Bearer ${session.access_token}`;
-      }
-      
-      const response = await fetch('/api/admin/collections/stats', {
-        headers,
-      });
-      
-      if (response.ok) {
-        const statsData = await response.json();
-        setStats(statsData);
-      }
-    } catch (error) {
-      console.info('Stats indisponíveis');
-    }
-  }, [supabase]);
-
-  // Update filters
-  const updateFilters = useCallback((newFilters: Partial<CollectionFilters>) => {
-    fetchCollections({ ...newFilters, page: 1 });
-  }, [fetchCollections]);
-
-  // Refresh collections
-  const refresh = useCallback(async () => {
-    await fetchCollections();
-    fetchStats();
-  }, [fetchCollections, fetchStats]);
-
-  // CRUD Operations - With auth
-  const createCollection = useCallback(async (data: any) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (session?.access_token) {
-      headers.Authorization = `Bearer ${session.access_token}`;
-    }
-
-    const response = await fetch('/api/collections', {
-      headers,
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Erro ao criar coleção');
-    }
-
-    await refresh();
-    return response.json();
-  }, [refresh, supabase]);
-
-  const updateCollection = useCallback(async (id: string, data: any) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (session?.access_token) {
-      headers.Authorization = `Bearer ${session.access_token}`;
-    }
-
-    const response = await fetch(`/api/collections/${id}`, {
-      headers,
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Erro ao atualizar coleção');
-    }
-
-    await refresh();
-    return response.json();
-  }, [refresh, supabase]);
-
-  const deleteCollection = useCallback(async (id: string) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (session?.access_token) {
-      headers.Authorization = `Bearer ${session.access_token}`;
-    }
-
-    const response = await fetch(`/api/collections/${id}`, { 
-      headers,
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Erro ao excluir coleção');
-    }
-
-    await refresh();
-  }, [refresh, supabase]);
-
-  const toggleCollectionStatus = useCallback(async (id: string, isActive: boolean) => {
-    await updateCollection(id, { is_active: isActive });
-  }, [updateCollection]);
-
-  const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      fetchCollections({ ...filters, page: filters.page + 1 });
-    }
-  }, [loading, hasMore, filters, fetchCollections]);
-
-  // Initial load
-  useEffect(() => {
-    fetchCollections();
-    fetchStats();
-  }, [fetchCollections, fetchStats]);
-
-  return {
-    collections,
-    loading,
-    error,
-    stats,
-    filters,
-    hasMore,
-    actions: {
-      updateFilters,
-      refresh,
-      createCollection,
-      updateCollection,
-      deleteCollection,
-      toggleCollectionStatus,
-      loadMore,
-    },
-  };
-}
+// ⚠️ useCollections foi MOVIDO para @/app/contexts/CollectionsContext 
+// Este hook não deve mais ser usado - causava re-renders excessivos
 
 // Hook para gerenciar itens de uma coleção with auth
 export function useCollectionItems(collectionId: string | null) {
@@ -284,6 +76,7 @@ export function useCollectionItems(collectionId: string | null) {
     }
 
     const response = await fetch(`/api/collections/${collectionId}/items`, {
+      method: 'POST',
       headers,
       body: JSON.stringify({ item_id: itemId, item_type: itemType }),
     });
@@ -311,6 +104,7 @@ export function useCollectionItems(collectionId: string | null) {
     }
 
     const response = await fetch(`/api/collections/${collectionId}/items/${itemId}`, {
+      method: 'DELETE',
       headers,
     });
 
@@ -362,7 +156,9 @@ export function useCollectionUpload() {
       }
 
       const response = await fetch('/api/collections/upload/cover', {
+        method: 'POST',
         headers,
+        body: formData,
       });
 
       if (!response.ok) {

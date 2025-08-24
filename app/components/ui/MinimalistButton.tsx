@@ -5,9 +5,11 @@
 // from @/app/components/ui/Button for consistency across the application
 // =============================================================================
 
-import { Button as UnifiedButton, ButtonProps } from '@/app/components/ui/Button';
-import { IconName } from '@/app/components/icons/Icon';
 import { ReactNode, forwardRef } from 'react';
+
+import { IconName } from '@/app/components/icons/Icon';
+
+import Button from './Button';
 
 interface MinimalistButtonProps {
   variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
@@ -34,14 +36,6 @@ const mapMinimalistVariant = (variant: MinimalistButtonProps['variant']): 'prima
   }
 };
 
-/**
- * Minimalist Button Component
- * 
- * @deprecated Use Button from '@/app/components/ui/Button' directly
- * 
- * This wrapper provides backwards compatibility for existing MinimalistButton usage
- * while using the unified Chakra UI v3 Button implementation.
- */
 export const MinimalistButton = forwardRef<HTMLButtonElement, MinimalistButtonProps>(
   (
     {
@@ -60,7 +54,7 @@ export const MinimalistButton = forwardRef<HTMLButtonElement, MinimalistButtonPr
     const newVariant = mapMinimalistVariant(variant);
 
     return (
-      <UnifiedButton
+      <Button
         ref={ref}
         variant={newVariant}
         size={size}
@@ -71,7 +65,7 @@ export const MinimalistButton = forwardRef<HTMLButtonElement, MinimalistButtonPr
         iconPosition={iconPosition}
       >
         {children}
-      </UnifiedButton>
+      </Button>
     );
   }
 );

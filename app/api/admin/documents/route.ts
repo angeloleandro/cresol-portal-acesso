@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { z } from 'zod';
+
+import { CreateAdminSupabaseClient } from '@/lib/supabase/admin';
+
 
 // Schema de validação para criação/edição de documento
 const documentSchema = z.object({
@@ -53,7 +55,7 @@ const searchFiltersSchema = z.object({
 
 // Função auxiliar para verificar permissões de admin
 async function checkAdminPermissions(userId: string) {
-  const supabase = createAdminSupabaseClient();
+  const supabase = CreateAdminSupabaseClient();
   
   const { data: profile } = await supabase
     .from('profiles')
@@ -87,7 +89,7 @@ export async function GET(request: NextRequest) {
     
     const filters = searchFiltersSchema.parse(cleanedFilters);
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
 
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -342,7 +344,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = documentSchema.parse(body);
     
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -434,7 +436,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao criar documento de subsetor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao criar documento' },
           { status: 500 }
@@ -466,7 +468,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Erro no POST documents:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -481,7 +482,7 @@ export async function PUT(request: NextRequest) {
     const validatedData = updateDocumentSchema.parse(body);
     const { id, type, ...updateData } = validatedData;
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -534,7 +535,7 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao atualizar documento de setor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao atualizar documento' },
           { status: 500 }
@@ -558,7 +559,7 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao atualizar documento de subsetor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao atualizar documento' },
           { status: 500 }
@@ -590,7 +591,6 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.error('Erro no PUT documents:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -619,7 +619,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -659,7 +659,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (error) {
-      console.error(`Erro ao excluir documento de ${type}:`, error);
+
       return NextResponse.json(
         { error: 'Erro ao excluir documento' },
         { status: 500 }
@@ -672,7 +672,7 @@ export async function DELETE(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Erro no DELETE documents:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -709,7 +709,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -778,7 +778,7 @@ export async function PATCH(request: NextRequest) {
         .single();
 
       if (duplicateError) {
-        console.error('Erro ao duplicar documento:', duplicateError);
+
         return NextResponse.json(
           { error: 'Erro ao duplicar documento' },
           { status: 500 }
@@ -815,7 +815,7 @@ export async function PATCH(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error(`Erro ao ${action} documento:`, error);
+
         return NextResponse.json(
           { error: `Erro ao executar ação ${action}` },
           { status: 500 }
@@ -837,7 +837,7 @@ export async function PATCH(request: NextRequest) {
     }
 
   } catch (error: any) {
-    console.error('Erro no PATCH documents:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

@@ -1,17 +1,23 @@
-/**
- * ImagePreview Modal Component
- * Enterprise-grade modal with navigation, zoom, and accessibility
- */
+
 
 "use client";
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import clsx from 'clsx';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import clsx from 'clsx';
+import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useCallback, useEffect } from 'react';
+
 import { Icon } from '../icons/Icon';
 import OptimizedImage from '../OptimizedImage';
+import { 
+  backdropVariants, 
+  GetResponsiveModalVariants,
+  imageLoadingVariants,
+  navButtonVariants,
+  infoOverlayVariants,
+  zoomVariants
+} from './ImagePreview.animations';
 import { 
   useFocusManagement, 
   useBodyScrollLock, 
@@ -20,18 +26,14 @@ import {
   useResponsiveModal,
   useImagePreloading
 } from './ImagePreview.hooks';
-import { 
-  backdropVariants, 
-  getResponsiveModalVariants,
-  imageLoadingVariants,
-  navButtonVariants,
-  infoOverlayVariants,
-  zoomVariants
-} from './ImagePreview.animations';
 import { ImageModalProps, GalleryImage } from './ImagePreview.types';
 
 /**
  * Main Image Modal Component
+ */
+/**
+ * ImageModal function
+ * @todo Add proper documentation
  */
 export function ImageModal({ 
   image, 
@@ -99,7 +101,7 @@ export function ImageModal({
 
   if (!image) return null;
 
-  const modalVariants = getResponsiveModalVariants(isMobile);
+  const modalVariants = GetResponsiveModalVariants(isMobile);
 
   return (
     <AnimatePresence mode="wait">

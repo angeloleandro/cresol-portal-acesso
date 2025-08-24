@@ -1,24 +1,8 @@
 'use client';
 
-import { Icon, type IconName } from '@/app/components/icons';
+import { Icon } from '@/app/components/icons/Icon';
 
-/**
- * STANDARDIZED METRICS CARD COMPONENT
- * 
- * Card de métricas padronizado seguindo o design system Cresol.
- * Usado em dashboards e páginas administrativas para exibir estatísticas.
- * 
- * Features:
- * - Design clean e minimalista
- * - Cores da paleta Cresol
- * - Sistema de ícones integrado
- * - Trends opcionais (crescimento/decrescimento)
- * - Variants de cor: primary, secondary, info, success, warning, danger
- * - Sizes: sm, md (padrão), lg
- * - Hover states e animations
- * - Responsivo e acessível
- * - TypeScript completo
- */
+import type { IconName } from '@/app/components/icons/Icon';
 
 interface TrendData {
   value: number;
@@ -230,10 +214,6 @@ export const StandardizedMetricsCard: React.FC<StandardizedMetricsCardProps> = (
   );
 };
 
-/**
- * Grid container para cards de métricas
- * Responsivo e com espaçamento padronizado
- */
 export const StandardizedMetricsGrid: React.FC<{
   children: React.ReactNode;
   columns?: 1 | 2 | 3 | 4;

@@ -1,7 +1,4 @@
-/**
- * VideoGallery Type Definitions
- * Enterprise-grade TypeScript interfaces for video gallery system
- */
+
 
 // Import centralized video types to eliminate duplication  
 import type { DashboardVideo } from '@/app/types/video';

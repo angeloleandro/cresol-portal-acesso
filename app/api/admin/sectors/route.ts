@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateAdminRequest } from '@/lib/supabase/admin';
+
 import { adminCORS } from '@/lib/cors-config';
+import { authenticateAdminRequest } from '@/lib/supabase/admin';
+
 
 // GET - Listar setores
 export const GET = adminCORS(async (request: NextRequest) => {

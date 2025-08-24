@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { z } from 'zod';
+
+import { CreateAdminSupabaseClient } from '@/lib/supabase/admin';
+
 
 // Schema de validação para criação/edição de notícia
 const newsSchema = z.object({
@@ -50,7 +52,7 @@ const searchFiltersSchema = z.object({
 
 // Função auxiliar para verificar permissões de admin
 async function checkAdminPermissions(userId: string) {
-  const supabase = createAdminSupabaseClient();
+  const supabase = CreateAdminSupabaseClient();
   
   const { data: profile } = await supabase
     .from('profiles')
@@ -84,7 +86,7 @@ export async function GET(request: NextRequest) {
     
     const filters = searchFiltersSchema.parse(cleanedFilters);
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
 
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -170,10 +172,10 @@ export async function GET(request: NextRequest) {
             const { data: sectorData, count: sectorCount } = await sectorQuery
         .order(filters.order_by, { ascending: filters.order_direction === 'asc' });
 
-      sectorNews = (sectorData || []).map(news => ({
+      sectorNews = (sectorData || []).map((news: any) => ({
         ...news,
         type: 'sector',
-        location_name: (news as any).sectors?.name,
+        location_name: news.sectors?.name,
         location_id: news.sector_id,
       }));
       
@@ -234,12 +236,12 @@ export async function GET(request: NextRequest) {
             const { data: subsectorData, count: subsectorCount } = await subsectorQuery
         .order(filters.order_by, { ascending: filters.order_direction === 'asc' });
 
-      subsectorNews = (subsectorData || []).map(news => ({
+      subsectorNews = (subsectorData || []).map((news: any) => ({
         ...news,
         type: 'subsector',
-        location_name: (news as any).subsectors?.name,
+        location_name: news.subsectors?.name,
         location_id: news.subsector_id,
-        sector_name: (news as any).subsectors?.sectors?.name,
+        sector_name: news.subsectors?.sectors?.name,
       }));
       
       totalCount += subsectorCount || 0;
@@ -274,7 +276,6 @@ export async function GET(request: NextRequest) {
     const published = allNews.filter(n => n.is_published).length;
     const drafts = allNews.filter(n => !n.is_published).length;
     const featured = allNews.filter(n => n.is_featured).length;
-
 
     return NextResponse.json({
       success: true,
@@ -329,7 +330,7 @@ export async function POST(request: NextRequest) {
         
     const validatedData = newsSchema.parse(body);
     
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -416,7 +417,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao criar notícia de subsetor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao criar notícia' },
           { status: 500 }
@@ -442,7 +443,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Erro no POST news:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -457,7 +457,7 @@ export async function PUT(request: NextRequest) {
     const validatedData = updateNewsSchema.parse(body);
     const { id, type, ...updateData } = validatedData;
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -510,7 +510,7 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao atualizar notícia de setor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao atualizar notícia' },
           { status: 500 }
@@ -532,7 +532,7 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao atualizar notícia de subsetor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao atualizar notícia' },
           { status: 500 }
@@ -558,7 +558,6 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.error('Erro no PUT news:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -587,7 +586,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -627,7 +626,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (error) {
-      console.error(`Erro ao excluir notícia de ${type}:`, error);
+
       return NextResponse.json(
         { error: 'Erro ao excluir notícia' },
         { status: 500 }
@@ -639,7 +638,7 @@ export async function DELETE(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Erro no DELETE news:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -676,7 +675,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -743,7 +742,7 @@ export async function PATCH(request: NextRequest) {
         .single();
 
       if (duplicateError) {
-        console.error('Erro ao duplicar notícia:', duplicateError);
+
         return NextResponse.json(
           { error: 'Erro ao duplicar notícia' },
           { status: 500 }
@@ -778,7 +777,7 @@ export async function PATCH(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error(`Erro ao ${action} notícia:`, error);
+
         return NextResponse.json(
           { error: `Erro ao executar ação ${action}` },
           { status: 500 }
@@ -796,7 +795,7 @@ export async function PATCH(request: NextRequest) {
     }
 
   } catch (error: any) {
-    console.error('Erro no PATCH news:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

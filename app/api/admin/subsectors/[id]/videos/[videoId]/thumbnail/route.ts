@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server';
+
+
+import { CreateClient } from '@/lib/supabase/server';
+
 
 // POST /api/admin/subsectors/[id]/videos/[videoId]/thumbnail - Upload de thumbnail
 export async function POST(
@@ -10,13 +13,8 @@ export async function POST(
   try {
     const subsectorId = params.id;
     const videoId = params.videoId;
-    
-    console.log('[THUMBNAIL-UPLOAD] Iniciando upload de thumbnail:', {
-      subsectorId,
-      videoId
-    });
-    
-    const supabase = createClient();
+
+    const supabase = CreateClient();
     
     // Verificar autenticação
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -60,15 +58,7 @@ export async function POST(
         { status: 400 }
       );
     }
-    
-    console.log('[THUMBNAIL-UPLOAD] Arquivo recebido:', {
-      fileName: thumbnailFile.name,
-      fileSize: thumbnailFile.size,
-      fileType: thumbnailFile.type,
-      thumbnailMode,
-      thumbnailTimestamp
-    });
-    
+
     // Verificar se o vídeo existe
     const { data: existingVideo, error: checkError } = await serviceClient
       .from('subsector_videos')
@@ -88,7 +78,7 @@ export async function POST(
     if (existingVideo.thumbnail_url && existingVideo.thumbnail_url.includes('supabase')) {
       const oldPath = existingVideo.thumbnail_url.split('/').pop();
       if (oldPath) {
-        console.log('[THUMBNAIL-UPLOAD] Removendo thumbnail antiga:', oldPath);
+
         await serviceClient.storage
           .from('images')
           .remove([`thumbnails/subsectors/${subsectorId}/${oldPath}`]);
@@ -100,9 +90,7 @@ export async function POST(
     const fileExt = thumbnailFile.type.split('/')[1] || 'jpg';
     const fileName = `${uuid}.${fileExt}`;
     const filePath = `thumbnails/subsectors/${subsectorId}/${fileName}`;
-    
-    console.log('[THUMBNAIL-UPLOAD] Fazendo upload para bucket images:', filePath);
-    
+
     const { data: uploadData, error: uploadError } = await serviceClient.storage
       .from('images')
       .upload(filePath, thumbnailFile, {
@@ -112,7 +100,7 @@ export async function POST(
       });
     
     if (uploadError) {
-      console.error('[THUMBNAIL-UPLOAD] Erro no upload:', uploadError);
+
       return NextResponse.json(
         { error: `Erro ao fazer upload do thumbnail: ${uploadError.message}` },
         { status: 500 }
@@ -130,9 +118,7 @@ export async function POST(
         { status: 500 }
       );
     }
-    
-    console.log('[THUMBNAIL-UPLOAD] Upload concluído, URL gerada:', urlData.publicUrl);
-    
+
     // Atualizar vídeo com o novo thumbnail
     const { data: updatedVideo, error: updateError } = await serviceClient
       .from('subsector_videos')
@@ -147,8 +133,7 @@ export async function POST(
       .single();
     
     if (updateError) {
-      console.error('[THUMBNAIL-UPLOAD] Erro ao atualizar vídeo:', updateError);
-      
+
       // Limpar arquivo do storage em caso de erro
       await serviceClient.storage
         .from('images')
@@ -159,13 +144,7 @@ export async function POST(
         { status: 500 }
       );
     }
-    
-    console.log('[THUMBNAIL-UPLOAD] Vídeo atualizado com sucesso:', {
-      videoId: updatedVideo?.id,
-      thumbnailUrl: updatedVideo?.thumbnail_url,
-      thumbnailMode: updatedVideo?.thumbnail_mode
-    });
-    
+
     return NextResponse.json({
       success: true,
       data: {
@@ -177,7 +156,7 @@ export async function POST(
     });
     
   } catch (error) {
-    console.error('[THUMBNAIL-UPLOAD] Erro geral:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

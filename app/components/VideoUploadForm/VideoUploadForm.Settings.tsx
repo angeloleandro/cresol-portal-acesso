@@ -1,11 +1,11 @@
-/**
- * VideoUploadForm Clean Settings Component
- * Minimalist active status and order configuration
- */
-
 import { memo, useCallback } from 'react'
-import { VideoSettingsProps } from './VideoUploadForm.types'
+
 import { VIDEO_UI_CLASSES } from '@/lib/constants/video-ui'
+
+import { VideoSettingsProps } from './VideoUploadForm.types'
+
+
+
 
 export const VideoUploadFormSettings = memo(({ 
   isActive,

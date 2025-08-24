@@ -1,7 +1,4 @@
-/**
- * Navbar Cache and Optimization System
- * Cache otimizado para dados do Navbar (setores, notificações, usuário)
- */
+
 
 interface SectorData {
   id: string;
@@ -64,7 +61,11 @@ function cleanExpiredCache<T>(cache: Map<string, CacheEntry<T>>): void {
 /**
  * SECTORS CACHE
  */
-export function getCachedSectors(userRole: string, userId?: string): SectorData[] | null {
+/**
+ * getCachedSectors function
+ * @todo Add proper documentation
+ */
+export function GetCachedSectors(userRole: string, userId?: string): SectorData[] | null {
   cleanExpiredCache(sectorsCache);
   
   const cacheKey = userRole === 'sector_admin' && userId ? `${userRole}-${userId}` : userRole;
@@ -78,7 +79,11 @@ export function getCachedSectors(userRole: string, userId?: string): SectorData[
   return cached.data;
 }
 
-export function setCachedSectors(
+/**
+ * setCachedSectors function
+ * @todo Add proper documentation
+ */
+export function SetCachedSectors(
   sectors: SectorData[], 
   userRole: string, 
   userId?: string
@@ -98,7 +103,11 @@ export function setCachedSectors(
 /**
  * USER PROFILE CACHE
  */
-export function getCachedUserProfile(userId: string): UserProfileData | null {
+/**
+ * getCachedUserProfile function
+ * @todo Add proper documentation
+ */
+export function GetCachedUserProfile(userId: string): UserProfileData | null {
   cleanExpiredCache(userProfileCache);
   
   const cached = userProfileCache.get(userId);
@@ -111,7 +120,11 @@ export function getCachedUserProfile(userId: string): UserProfileData | null {
   return cached.data;
 }
 
-export function setCachedUserProfile(profile: UserProfileData): void {
+/**
+ * setCachedUserProfile function
+ * @todo Add proper documentation
+ */
+export function SetCachedUserProfile(profile: UserProfileData): void {
   cleanExpiredCache(userProfileCache);
   
   const expiresAt = Date.now() + CACHE_DURATION.userProfile;
@@ -126,7 +139,11 @@ export function setCachedUserProfile(profile: UserProfileData): void {
 /**
  * CACHE INVALIDATION
  */
-export function invalidateSectorsCache(userRole?: string, userId?: string): void {
+/**
+ * invalidateSectorsCache function
+ * @todo Add proper documentation
+ */
+export function InvalidateSectorsCache(userRole?: string, userId?: string): void {
   if (userRole && userId) {
     const cacheKey = userRole === 'sector_admin' ? `${userRole}-${userId}` : userRole;
     sectorsCache.delete(cacheKey);
@@ -135,7 +152,11 @@ export function invalidateSectorsCache(userRole?: string, userId?: string): void
   }
 }
 
-export function invalidateUserProfileCache(userId?: string): void {
+/**
+ * invalidateUserProfileCache function
+ * @todo Add proper documentation
+ */
+export function InvalidateUserProfileCache(userId?: string): void {
   if (userId) {
     userProfileCache.delete(userId);
   } else {
@@ -143,7 +164,11 @@ export function invalidateUserProfileCache(userId?: string): void {
   }
 }
 
-export function clearAllNavbarCache(): void {
+/**
+ * clearAllNavbarCache function
+ * @todo Add proper documentation
+ */
+export function ClearAllNavbarCache(): void {
   sectorsCache.clear();
   userProfileCache.clear();
 }
@@ -151,7 +176,11 @@ export function clearAllNavbarCache(): void {
 /**
  * CACHE STATISTICS (para debugging)
  */
-export function getNavbarCacheStats(): {
+/**
+ * getNavbarCacheStats function
+ * @todo Add proper documentation
+ */
+export function GetNavbarCacheStats(): {
   sectors: { size: number; oldestEntry?: number };
   userProfiles: { size: number; oldestEntry?: number };
 } {

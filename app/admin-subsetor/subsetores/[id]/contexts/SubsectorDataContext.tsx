@@ -1,7 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+
 import { createClient } from '@/lib/supabase/client';
+
 import { Group, User, WorkLocation, Subsector } from '../types/subsector.types';
 
 interface FilterOption {
@@ -54,6 +56,10 @@ interface SubsectorDataProviderProps {
   children: React.ReactNode;
 }
 
+/**
+ * SubsectorDataProvider function
+ * @todo Add proper documentation
+ */
 export function SubsectorDataProvider({ subsectorId, children }: SubsectorDataProviderProps) {
   // Estados dos dados
   const [subsector, setSubsector] = useState<Subsector | null>(null);
@@ -80,7 +86,6 @@ export function SubsectorDataProvider({ subsectorId, children }: SubsectorDataPr
     positions?: { data: FilterOption[]; timestamp: number };
     allUsers?: { data: User[]; timestamp: number };
   }>({});
-  
 
   // Buscar dados do subsetor
   const fetchSubsectorData = useCallback(async () => {
@@ -397,7 +402,7 @@ export function SubsectorDataProvider({ subsectorId, children }: SubsectorDataPr
     .then(() => {
       // Sucesso silencioso
     })
-    .catch((err) => {
+    .catch((_err) => {
       if (mountedRef.current) {
         setError('Erro ao carregar dados do subsetor');
       }

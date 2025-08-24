@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ImagePreviewGrid } from "./ImagePreview";
-import { BaseImage, baseImageToGalleryImage } from "./ImagePreview/ImagePreview.types";
-import OptimizedImage from "./OptimizedImage";
+
+import { ProcessSupabaseImageUrl, DebugImageUrl } from "@/lib/imageUtils";
+
 import { Icon } from "./icons/Icon";
+import { ImagePreviewGrid } from "./ImagePreview";
+import { BaseImage, BaseImageToGalleryImage } from "./ImagePreview/ImagePreview.types";
+import OptimizedImage from "./OptimizedImage";
 import UnifiedLoadingSpinner from "./ui/UnifiedLoadingSpinner";
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
+
 
 interface GalleryImage {
   id: string;
@@ -38,11 +40,11 @@ export default function AdminImageGallery({
   // Processar imagens para o componente ImagePreview
   useEffect(() => {
     const processedImages = images.map(img => {
-      const processedUrl = processSupabaseImageUrl(img.image_url) || img.image_url;
+      const processedUrl = ProcessSupabaseImageUrl(img.image_url) || img.image_url;
       
       // Debug das URLs em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
-        debugImageUrl(processedUrl, `Admin Gallery Image: ${img.title}`);
+        DebugImageUrl(processedUrl, `Admin Gallery Image: ${img.title}`);
       }
       
       return {
@@ -107,10 +109,10 @@ export default function AdminImageGallery({
       {showPreview ? (
         /* Modo Preview - usa o ImagePreviewGrid */
         <ImagePreviewGrid
-          images={previewImages.map(baseImageToGalleryImage)}
+          images={previewImages.map(BaseImageToGalleryImage)}
           onImageClick={(image, index) => {
             // Preview mode - apenas visualização
-            console.log('Imagem clicada no preview:', image, index);
+
           }}
           columns={{ xs: 2, sm: 3, md: 4, lg: 4, xl: 4 }}
           aspectRatio="4:3"
@@ -123,7 +125,7 @@ export default function AdminImageGallery({
               <div className="relative w-full h-48 bg-cresol-gray-light">
                 {img.image_url ? (
                   <OptimizedImage 
-                    src={processSupabaseImageUrl(img.image_url) || img.image_url} 
+                    src={ProcessSupabaseImageUrl(img.image_url) || img.image_url} 
                     alt={img.title || "Imagem da galeria"} 
                     fill 
                     className="object-cover"

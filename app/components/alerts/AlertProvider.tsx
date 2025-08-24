@@ -1,13 +1,7 @@
 'use client';
 
-/**
- * AlertProvider - Gerenciador Global de Alertas
- * 
- * Context provider que gerencia estado global dos alertas
- * Inclui configurações, fila de alertas e métodos de conveniência
- */
-
 import React, { createContext, useCallback, useReducer, useMemo } from 'react';
+
 import type { 
   AlertContextValue, 
   AlertOptions, 

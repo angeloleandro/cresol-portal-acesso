@@ -1,14 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { supabase } from '@/lib/supabase';
-import Navbar from '../components/Navbar';
+
+import Breadcrumb from '../components/Breadcrumb';
 import Footer from '../components/Footer';
 import { Icon } from '../components/icons/Icon';
+import Navbar from '../components/Navbar';
 import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import Breadcrumb from '../components/Breadcrumb';
+
+
 
 interface Message {
   id: string;

@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import Navbar from '../components/Navbar';
-import { handleComponentError, devLog } from '@/lib/error-handler';
-import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
+import { useState, useEffect, useCallback, lazy } from 'react';
+
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { Icon } from '../components/icons';
 import { logger } from '@/lib/logger';
+import { supabase } from '@/lib/supabase';
+
+import Navbar from '../components/Navbar';
 import { InlineSuspense } from '../components/OptimizedSuspense';
+import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
 
 // Lazy load componentes pesados para melhorar o tempo de carregamento inicial
 const BannerCarousel = lazy(() => import('@/app/components/BannerCarousel'));

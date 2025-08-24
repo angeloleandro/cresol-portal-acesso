@@ -1,8 +1,8 @@
 // Adapter para usar VideoPlayer com SectorVideo
 
-import React from 'react';
 import { VideoModal } from '@/app/components/VideoGallery/VideoGallery.Modal';
 import { DashboardVideo } from '@/app/components/VideoGallery/VideoGallery.types';
+
 import { SectorVideo } from '../types/sector.types';
 
 interface VideoPlayerAdapterProps {
@@ -10,6 +10,10 @@ interface VideoPlayerAdapterProps {
   onClose: () => void;
 }
 
+/**
+ * VideoPlayer function
+ * @todo Add proper documentation
+ */
 export function VideoPlayer({ video, onClose }: VideoPlayerAdapterProps) {
   if (!video) return null;
 

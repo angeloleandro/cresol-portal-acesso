@@ -1,11 +1,7 @@
-/**
- * Mensagens Padronizadas do Sistema de Alertas Cresol
- * 
- * Todas as mensagens estão em português brasileiro (pt-BR)
- * Organizadas por tipo de operação para consistência
- */
-
 import type { AlertMessage, CrudOperation, OperationResult, EntityContext } from './types';
+
+
+
 
 /**
  * Mensagens para operações CRUD
@@ -283,7 +279,11 @@ export const SYSTEM_MESSAGES = {
 /**
  * Função helper para gerar mensagem dinâmica
  */
-export function generateCrudMessage(
+/**
+ * generateCrudMessage function
+ * @todo Add proper documentation
+ */
+export function GenerateCrudMessage(
   operation: CrudOperation,
   result: OperationResult,
   entity: string,
@@ -295,7 +295,11 @@ export function generateCrudMessage(
 /**
  * Função helper para mensagens com contexto de entidade
  */
-export function generateEntityMessage(
+/**
+ * generateEntityMessage function
+ * @todo Add proper documentation
+ */
+export function GenerateEntityMessage(
   operation: CrudOperation,
   result: OperationResult,
   context: EntityContext,

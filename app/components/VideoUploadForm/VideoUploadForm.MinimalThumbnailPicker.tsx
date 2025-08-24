@@ -1,9 +1,7 @@
-/**
- * Seletor de thumbnail minimalista com geração automática
- * Design limpo e funcional para melhor UX
- */
-
 import { memo, useState, useRef, useCallback, useEffect } from 'react'
+
+
+
 
 interface MinimalThumbnailPickerProps {
   videoFile?: File | null

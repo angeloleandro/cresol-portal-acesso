@@ -1,7 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode } from 'react';
+
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
+
 import type { AuthState, UserProfile } from '@/hooks/useSupabaseAuth';
 import type { User, Session } from '@supabase/supabase-js';
 

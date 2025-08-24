@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
+import { CreateClient } from '@/lib/supabase/server';
+
 
 // Força renderização dinâmica para usar cookies via createClient
 export const dynamic = 'force-dynamic';
 
 // GET - Listar todos os locais de trabalho
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {

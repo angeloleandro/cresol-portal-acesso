@@ -40,6 +40,10 @@ interface UseAccessibleFocusReturn {
   getCurrentIndex: () => number;
 }
 
+/**
+ * useAccessibleFocus function
+ * @todo Add proper documentation
+ */
 export function useAccessibleFocus(options: UseAccessibleFocusOptions = {}): UseAccessibleFocusReturn {
   const {
     rovingTabindex = false,

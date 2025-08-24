@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createServerClient } from '@/lib/supabase/server';
+
+
 import { handleApiError, devLog } from '@/lib/error-handler';
+import { CreateClient as createServerClient } from '@/lib/supabase/server';
+
 
 // GET /api/admin/videos - Listar vídeos da galeria
 export async function GET(request: NextRequest) {
@@ -56,6 +59,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST function
+ * @todo Add proper documentation
+ */
 export async function POST(request: NextRequest) {
   try {
     // Criar cliente do Supabase com a chave de serviço
@@ -89,14 +96,12 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-
     if (profileError || !['admin', 'sector_admin'].includes(profile?.role)) {
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const requestBody = await request.json();
     const { title, video_url, thumbnail_url, is_active, order_index, upload_type, thumbnail_timestamp } = requestBody;
-    
 
     if (!title || !video_url) {
       return NextResponse.json({ error: 'Título e URL são obrigatórios' }, { status: 400 });
@@ -133,14 +138,12 @@ export async function POST(request: NextRequest) {
       upload_type: upload_type || 'youtube',
       thumbnail_timestamp: thumbnail_timestamp || null
     };
-    
-    
+
     const { data: newVideo, error: insertError } = await supabaseAdmin
       .from('dashboard_videos')
       .insert([insertData])
       .select()
       .single();
-
 
     if (insertError) {
       return NextResponse.json({ error: `Erro ao criar vídeo: ${insertError.message}` }, { status: 500 });
@@ -158,6 +161,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * PUT function
+ * @todo Add proper documentation
+ */
 export async function PUT(request: NextRequest) {
   try {
     // Criar cliente do Supabase com a chave de serviço
@@ -249,8 +256,7 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('Erro na atualização:', updateError);
-      
+
       // Tratamento específico para ordem duplicada
       if (updateError.code === '23505' && updateError.message.includes('order_index')) {
         
@@ -263,8 +269,7 @@ export async function PUT(request: NextRequest) {
           .single();
 
         const nextOrderIndex = (maxOrder?.order_index || 0) + 1;
-        
-        
+
         // Nova tentativa com order_index corrigido
         const { data: updatedVideo2, error: updateError2 } = await supabaseAdmin
           .from('dashboard_videos')
@@ -311,6 +316,10 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+/**
+ * DELETE function
+ * @todo Add proper documentation
+ */
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');

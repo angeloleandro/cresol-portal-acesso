@@ -1,19 +1,20 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { 
-  generateVideoThumbnail, 
-  generateVideoThumbnailSimple,
-  uploadThumbnailToStorage, 
-  checkThumbnailSupport,
-  cleanupObjectUrls,
-  ThumbnailResult,
-  ThumbnailOptions 
-} from "@/lib/thumbnail-generator";
+
 import {
   VIDEO_THUMBNAIL_CONFIG,
   VIDEO_MESSAGES
 } from '@/lib/constants/video-ui';
+import { 
+  generateVideoThumbnail, 
+  generateVideoThumbnailSimple,
+  uploadThumbnailToStorage, 
+  CheckThumbnailSupport as checkThumbnailSupport,
+  CleanupObjectUrls as cleanupObjectUrls,
+  ThumbnailResult,
+  ThumbnailOptions 
+} from "@/lib/thumbnail-generator";
 
 interface UseThumbnailGeneratorProps {
   videoFile: File | null;
@@ -32,6 +33,10 @@ interface ThumbnailState {
   isSupported: boolean;
 }
 
+/**
+ * useThumbnailGenerator function
+ * @todo Add proper documentation
+ */
 export function useThumbnailGenerator({
   videoFile,
   videoUrl,

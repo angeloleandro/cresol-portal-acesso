@@ -17,6 +17,10 @@ interface UsePerformanceMonitorOptions {
   trackReRenders?: boolean;
 }
 
+/**
+ * usePerformanceMonitor function
+ * @todo Add proper documentation
+ */
 export function usePerformanceMonitor(
   componentName: string,
   options: UsePerformanceMonitorOptions = {}
@@ -164,10 +168,7 @@ export function useBundleMonitor(componentName: string) {
       const estimate = document.querySelectorAll(`[data-component="${componentName}"]`).length;
       
       if (estimate > 10) {
-        console.info(
-          `Bundle impact warning for ${componentName}:`,
-          `${estimate} instances detected`
-        );
+
       }
     }
   }, [componentName]);

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
-import { adminCORS } from '@/lib/cors-config';
 import { z } from 'zod';
+
+import { adminCORS } from '@/lib/cors-config';
+import { CreateAdminSupabaseClient } from '@/lib/supabase/admin';
+
 
 // Schema de validação para criação de grupo
 const createGroupSchema = z.object({
@@ -31,7 +33,7 @@ const updateGroupSchema = z.object({
 
 // Função auxiliar para verificar permissões
 async function checkPermissions(userId: string, sectorId?: string, subsectorId?: string) {
-  const supabase = createAdminSupabaseClient();
+  const supabase = CreateAdminSupabaseClient();
   
   // Verificar se é admin geral
   const { data: profile } = await supabase
@@ -85,7 +87,7 @@ async function checkPermissions(userId: string, sectorId?: string, subsectorId?:
 // GET - Listar grupos
 export const GET = adminCORS(async (request: NextRequest) => {
   try {
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     const { searchParams } = new URL(request.url);
     const sectorId = searchParams.get('sector_id');
     const subsectorId = searchParams.get('subsector_id');
@@ -115,7 +117,7 @@ export const GET = adminCORS(async (request: NextRequest) => {
     const { data: groups, error } = await query;
 
     if (error) {
-      console.error('Erro ao buscar grupos:', error);
+
       return NextResponse.json(
         { error: 'Erro ao buscar grupos' },
         { status: 500 }
@@ -124,7 +126,7 @@ export const GET = adminCORS(async (request: NextRequest) => {
 
     // Buscar membros de cada grupo
     const groupsWithMembers = await Promise.all(
-      (groups || []).map(async (group) => {
+      (groups || []).map(async (group: any) => {
         const { data: members } = await supabase
           .from('message_group_members')
           .select('user_id')
@@ -132,7 +134,7 @@ export const GET = adminCORS(async (request: NextRequest) => {
         
         return {
           ...group,
-          members: members?.map(m => m.user_id) || []
+          members: members?.map((m: any) => m.user_id) || []
         };
       })
     );
@@ -143,7 +145,7 @@ export const GET = adminCORS(async (request: NextRequest) => {
     });
 
   } catch (error: any) {
-    console.error('Erro no GET message-groups:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -157,7 +159,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
     const body = await request.json();
     const validatedData = createGroupSchema.parse(body);
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Obter usuário autenticado
     const authHeader = request.headers.get('authorization');
@@ -213,7 +215,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
       .single();
 
     if (error) {
-      console.error('Erro ao criar grupo:', error);
+
       return NextResponse.json(
         { error: 'Erro ao criar grupo' },
         { status: 500 }
@@ -233,7 +235,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
         .insert(memberInserts);
 
       if (memberError) {
-        console.error('Erro ao adicionar membros ao grupo:', memberError);
+
         // Não retornar erro, apenas log - o grupo foi criado com sucesso
       }
     }
@@ -248,7 +250,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
       success: true,
       group: {
         ...newGroup,
-        members: groupMembers?.map(m => m.user_id) || []
+        members: groupMembers?.map((m: any) => m.user_id) || []
       }
     }, { status: 201 });
 
@@ -263,7 +265,6 @@ export const POST = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    console.error('Erro no POST message-groups:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -278,7 +279,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
     const validatedData = updateGroupSchema.parse(body);
     const { id, members, ...updateData } = validatedData;
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Obter usuário autenticado
     const authHeader = request.headers.get('authorization');
@@ -342,7 +343,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
       .single();
 
     if (error) {
-      console.error('Erro ao atualizar grupo:', error);
+
       return NextResponse.json(
         { error: 'Erro ao atualizar grupo' },
         { status: 500 }
@@ -358,7 +359,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
         .eq('group_id', id);
 
       if (deleteError) {
-        console.error('Erro ao remover membros antigos:', deleteError);
+
       }
 
       // Adicionar novos membros
@@ -374,7 +375,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
           .insert(memberInserts);
 
         if (memberError) {
-          console.error('Erro ao adicionar novos membros:', memberError);
+
         }
       }
     }
@@ -389,7 +390,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
       success: true,
       group: {
         ...updatedGroup,
-        members: groupMembers?.map(m => m.user_id) || []
+        members: groupMembers?.map((m: any) => m.user_id) || []
       }
     });
 
@@ -404,7 +405,6 @@ export const PUT = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    console.error('Erro no PUT message-groups:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -425,7 +425,7 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Obter usuário autenticado
     const authHeader = request.headers.get('authorization');
@@ -487,7 +487,7 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
       .eq('group_id', id);
 
     if (countError || subsectorCountError) {
-      console.error('Erro ao verificar mensagens:', countError || subsectorCountError);
+
     }
 
     const totalMessages = (messagesCount || 0) + (subsectorMessagesCount || 0);
@@ -500,7 +500,7 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
         .eq('id', id);
 
       if (updateError) {
-        console.error('Erro ao desativar grupo:', updateError);
+
         return NextResponse.json(
           { error: 'Erro ao desativar grupo' },
           { status: 500 }
@@ -519,7 +519,7 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
         .eq('id', id);
 
       if (deleteError) {
-        console.error('Erro ao excluir grupo:', deleteError);
+
         return NextResponse.json(
           { error: 'Erro ao excluir grupo' },
           { status: 500 }
@@ -533,7 +533,7 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
     }
 
   } catch (error: any) {
-    console.error('Erro no DELETE message-groups:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

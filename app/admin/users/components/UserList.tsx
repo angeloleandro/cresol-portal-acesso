@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
+
 import { useAlert } from '@/app/components/alerts';
-import UserEditModal from './UserEditModal';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal'; // Importe o modal
+
+import UserEditModal from './UserEditModal';
+
 
 interface UserProfile {
   id: string;

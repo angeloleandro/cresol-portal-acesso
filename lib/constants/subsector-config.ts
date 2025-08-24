@@ -1,8 +1,4 @@
-/**
- * Subsector Configuration Constants
- * Centralized configuration specific to subsector management
- * Eliminates hardcoded values in subsector components
- */
+
 
 // ===== SUBSECTOR ROLES =====
 export const SUBSECTOR_ROLES = {

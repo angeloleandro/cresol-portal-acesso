@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
+
 import { supabase } from '@/lib/supabase';
+
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface DocumentItem {
   id: string;
@@ -95,7 +96,7 @@ export default function DocumentosDestaque({ compact = false, limit = 4 }: Docum
         
         setDocuments(allDocuments.slice(0, limit));
       } catch (error) {
-        console.error('Erro ao buscar documentos:', error);
+
         setDocuments([]);
       } finally {
         setIsLoading(false);

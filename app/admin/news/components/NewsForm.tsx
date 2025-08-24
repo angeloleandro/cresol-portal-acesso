@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
-import { useAlert } from '@/app/components/alerts';
-import { Icon } from '@/app/components/icons/Icon';
+import React, { useState, useEffect } from 'react';
+
 import { StandardizedButton } from '@/app/components/admin';
-import { FormSelect, type SelectOption } from '@/app/components/forms';
+import { useAlert } from '@/app/components/alerts';
+import { FormSelect } from '@/app/components/forms';
+import { Icon } from '@/app/components/icons/Icon';
+import { supabase } from '@/lib/supabase';
 
 interface News {
   id: string;
@@ -55,6 +56,10 @@ interface FormData {
   is_published: boolean;
 }
 
+/**
+ * NewsForm function
+ * @todo Add proper documentation
+ */
 export function NewsForm({ news, isOpen, onClose, onSuccess }: NewsFormProps) {
   const alert = useAlert();
   const [loading, setLoading] = useState(false);
@@ -141,7 +146,7 @@ export function NewsForm({ news, isOpen, onClose, onSuccess }: NewsFormProps) {
       setSubsectors((subsectorsData || []) as unknown as Subsector[]);
       
     } catch (error: any) {
-      console.error('Erro ao carregar dados:', error);
+
     }
   };
 
@@ -196,7 +201,7 @@ export function NewsForm({ news, isOpen, onClose, onSuccess }: NewsFormProps) {
         });
 
       if (error) {
-        console.error('Erro no upload da imagem:', error);
+
         throw error;
       }
 
@@ -207,7 +212,7 @@ export function NewsForm({ news, isOpen, onClose, onSuccess }: NewsFormProps) {
 
       return publicUrl;
     } catch (error: any) {
-      console.error('Erro ao fazer upload da imagem:', error);
+
       throw new Error('Erro ao fazer upload da imagem');
     }
   };
@@ -291,7 +296,7 @@ export function NewsForm({ news, isOpen, onClose, onSuccess }: NewsFormProps) {
         ),
       };
 
-      let url = '/api/admin/news';
+      const url = '/api/admin/news';
       let method = 'POST';
       
       if (news) {
@@ -561,12 +566,8 @@ export function NewsForm({ news, isOpen, onClose, onSuccess }: NewsFormProps) {
                       type="file"
                       accept="image/*"
                       onChange={handleImageChange}
-                      disabled={loading}
-                      className="input"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Clique para alterar a imagem (máximo 5MB)
-                    </p>
                   </div>
                 </div>
               ) : (
@@ -575,17 +576,12 @@ export function NewsForm({ news, isOpen, onClose, onSuccess }: NewsFormProps) {
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
-                    disabled={loading}
-                    className="input"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Selecione uma imagem (opcional, máximo 5MB)
-                  </p>
                 </div>
               )}
             </div>
 
-            {/* Opções */}
             <div className="card p-4 space-y-4">
               <h3 className="text-sm font-medium text-gray-900">Opções de Publicação</h3>
               

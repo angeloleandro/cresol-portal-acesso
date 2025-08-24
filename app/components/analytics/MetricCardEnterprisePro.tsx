@@ -1,7 +1,9 @@
 'use client';
 
 import { ReactNode, useEffect, useState, memo, useCallback, useMemo } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
+
 import { NumberTicker } from './NumberTicker';
 
 interface MetricCardEnterpriseProProps {
@@ -126,7 +128,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
   // Memoized handlers para evitar re-renders desnecessários
   const handleClick = useCallback(() => onClick?.(), [onClick]);
 
-
   const getFormattedSuffix = useMemo(() => {
     return (num: number): string => {
       if (formatOptions) return suffix;
@@ -140,7 +141,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
     };
   }, [formatOptions, suffix]);
 
-
   // Map variant to default color palette (Cresol semantic approach)
   const getDefaultPaletteForVariant = (variant: string) => {
     switch (variant) {
@@ -153,7 +153,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
       default: return 'gray';
     }
   };
-
 
   // Professional hover effects - subtle and clean
   const hoverEffectStyles = useMemo(() => {
@@ -363,7 +362,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
             )}
           </div>
         </div>
-        
 
         {/* Extra Content */}
         {extra && (
@@ -388,7 +386,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
             className="font-bold tracking-tight"
           />
         </div>
-
 
         {/* Professional Description */}
         {description && (

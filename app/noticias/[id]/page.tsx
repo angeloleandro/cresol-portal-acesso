@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
-import Breadcrumb from '../../components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
+import Breadcrumb from '../../components/Breadcrumb';
 
 interface NewsItem {
   id: string;
@@ -49,7 +51,7 @@ export default function NoticiaDetalhePage() {
           .single();
           
         if (error) {
-          console.error('Erro ao buscar notícia:', error);
+          
           router.push('/noticias');
           return;
         } else {
@@ -85,7 +87,7 @@ export default function NoticiaDetalhePage() {
           }
         }
       } catch (error) {
-        console.error('Erro geral:', error);
+        
         router.push('/noticias');
         return;
       } finally {

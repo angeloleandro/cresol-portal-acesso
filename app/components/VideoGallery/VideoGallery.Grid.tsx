@@ -1,12 +1,12 @@
-/**
- * VideoGallery Grid System
- * Intelligent grid layout system with adaptive responsiveness
- */
 
-import { ReactNode } from 'react';
-import { motion, Variants } from 'framer-motion';
 import clsx from 'clsx';
+import { motion, Variants } from 'framer-motion';
+import { ReactNode } from 'react';
+
 import { GridLayoutType, GridLayoutConfig } from './VideoGallery.types';
+
+
+
 
 interface VideoGalleryGridProps {
   children: ReactNode;
@@ -87,6 +87,10 @@ const containerVariants = {
 /**
  * Componente principal do sistema de grid
  */
+/**
+ * VideoGalleryGrid function
+ * @todo Add proper documentation
+ */
 export function VideoGalleryGrid({
   children,
   videoCount,
@@ -132,6 +136,10 @@ export function VideoGalleryGrid({
 /**
  * Hook para obter configuração de layout
  */
+/**
+ * useGridLayout function
+ * @todo Add proper documentation
+ */
 export function useGridLayout(videoCount: number, limit?: number) {
   const layoutType = GridSystem.getGridLayout(videoCount, limit);
   const layoutConfig = GridSystem.layouts[layoutType];
@@ -152,6 +160,10 @@ interface SpecializedGridProps {
   className?: string;
 }
 
+/**
+ * SingleCenteredGrid function
+ * @todo Add proper documentation
+ */
 export function SingleCenteredGrid({ children, className }: SpecializedGridProps) {
   return (
     <motion.div
@@ -171,6 +183,10 @@ export function SingleCenteredGrid({ children, className }: SpecializedGridProps
   );
 }
 
+/**
+ * DualColumnsGrid function
+ * @todo Add proper documentation
+ */
 export function DualColumnsGrid({ children, className }: SpecializedGridProps) {
   return (
     <motion.div
@@ -189,6 +205,10 @@ export function DualColumnsGrid({ children, className }: SpecializedGridProps) {
   );
 }
 
+/**
+ * AsymmetricGrid function
+ * @todo Add proper documentation
+ */
 export function AsymmetricGrid({ children, className }: SpecializedGridProps) {
   return (
     <motion.div
@@ -207,6 +227,10 @@ export function AsymmetricGrid({ children, className }: SpecializedGridProps) {
   );
 }
 
+/**
+ * ResponsiveGrid function
+ * @todo Add proper documentation
+ */
 export function ResponsiveGrid({ children, className }: SpecializedGridProps) {
   return (
     <motion.div
@@ -248,6 +272,10 @@ const itemVariants: Variants = {
   }
 };
 
+/**
+ * GridItem function
+ * @todo Add proper documentation
+ */
 export function GridItem({ 
   children, 
   index = 0, 
@@ -295,6 +323,10 @@ interface AdaptiveGridProps {
   className?: string;
 }
 
+/**
+ * AdaptiveGrid function
+ * @todo Add proper documentation
+ */
 export function AdaptiveGrid({ 
   children, 
   videoCount,

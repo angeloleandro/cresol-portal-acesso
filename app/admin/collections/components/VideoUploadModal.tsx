@@ -1,18 +1,12 @@
 'use client';
 
-/**
- * VideoUploadModal Component - Collections Integration
- * Modal que integra o VideoUploadFormRoot com o sistema de coleções
- * Replica funcionalidade completa da galeria de vídeos para coleções
- * Inclui suporte completo para geração de thumbnails com timestamp personalizado
- */
-
-import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
-import { Collection } from '@/lib/types/collections';
-import { createClient } from '@/lib/supabase/client';
+import { useState, useCallback } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
+import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
+import { createClient } from '@/lib/supabase/client';
+import { Collection } from '@/lib/types/collections';
 
 interface VideoUploadModalProps {
   isOpen: boolean;

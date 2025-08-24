@@ -1,7 +1,9 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
+
 import { NumberTicker } from './NumberTicker';
 
 interface MetricCardEnterpriseProps {

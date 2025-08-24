@@ -1,5 +1,6 @@
-import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { IconName } from '../icons/Icon';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+
 
 export interface BreadcrumbItem {
   label: string;

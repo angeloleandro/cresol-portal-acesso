@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
 import {
   Dropdown,
   DropdownTrigger,
@@ -9,13 +8,15 @@ import {
   Button,
   Input
 } from '@nextui-org/react';
-import { Icon } from '@/app/components/icons/Icon';
+import { useState, useEffect, useMemo } from 'react';
+
 import { useAlert } from '@/app/components/alerts';
+import { FormSelect } from '@/app/components/forms';
+import { Icon } from '@/app/components/icons/Icon';
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
 import { Button as CButton } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
-import { FormSelect, type SelectOption } from '@/app/components/forms';
+import { supabase } from '@/lib/supabase';
 
 interface UserProfile {
   id: string;
@@ -181,7 +182,7 @@ export default function UserEditModal({
       
       return publicUrl;
     } catch (error) {
-      console.error('Erro ao fazer upload da imagem:', error);
+
       throw error;
     } finally {
       setIsUploading(false);
@@ -224,7 +225,7 @@ export default function UserEditModal({
       setResetPasswordSuccess(newPassword);
       alert.users.passwordReset();
     } catch (error: unknown) {
-      console.error('Erro ao resetar senha:', error);
+
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       setResetPasswordError(`Erro ao resetar senha: ${errorMessage}`);
       alert.showError('Erro ao resetar senha', errorMessage);
@@ -283,7 +284,7 @@ export default function UserEditModal({
             .eq('user_id', user.id);
 
           if (removeOldGroupsError) {
-            console.error('Erro ao remover usuário de grupos antigos:', removeOldGroupsError);
+
           }
         }
 
@@ -331,11 +332,11 @@ export default function UserEditModal({
             .insert(memberData);
 
           if (membersError) {
-            console.error('Erro ao adicionar usuário aos grupos automáticos:', membersError);
+
           }
         }
       } catch (groupError) {
-        console.error('Erro ao processar grupos automáticos:', groupError);
+
       }
       
       // Atualizar setores ou sub-setores administrados pelo usuário
@@ -356,7 +357,7 @@ export default function UserEditModal({
             .insert(sectorInserts);
           
           if (insertError) {
-            console.error('Erro ao atualizar setores administrados:', insertError);
+
           }
         }
       } else if (user.role === 'subsector_admin') {
@@ -376,7 +377,7 @@ export default function UserEditModal({
             .insert(subsectorInserts);
           
           if (insertError) {
-            console.error('Erro ao atualizar sub-setores administrados:', insertError);
+
           }
         }
       }
@@ -389,7 +390,7 @@ export default function UserEditModal({
       onSave();
       onClose();
     } catch (error: unknown) {
-      console.error('Erro ao salvar edição:', error);
+
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       alert.showError('Erro ao salvar alterações', errorMessage);
     }
@@ -775,7 +776,7 @@ export default function UserEditModal({
                   </label>
                   <FormSelect
                     value={selectedSectorForSubsectors}
-                    onChange={(e) => setSelectedSectorForSubsectors(e.currentTarget.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedSectorForSubsectors(e.currentTarget.value)}
                     placeholder="Todos os setores"
                     options={[
                       { value: '', label: 'Todos os setores' },

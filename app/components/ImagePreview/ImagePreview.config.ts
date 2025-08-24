@@ -1,9 +1,7 @@
-/**
- * ImagePreview Configuration and Utilities
- * Default configurations and helper functions
- */
-
 import { ImagePreviewConfig } from './ImagePreview.types';
+
+
+
 
 /**
  * Default configuration for ImagePreview components
@@ -137,7 +135,11 @@ export const themes = {
 /**
  * File size formatting utility
  */
-export function formatFileSize(bytes: number): string {
+/**
+ * formatFileSize function
+ * @todo Add proper documentation
+ */
+export function FormatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B';
   
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -150,7 +152,11 @@ export function formatFileSize(bytes: number): string {
 /**
  * Get optimal grid columns based on screen width
  */
-export function getOptimalColumns(width: number) {
+/**
+ * getOptimalColumns function
+ * @todo Add proper documentation
+ */
+export function GetOptimalColumns(width: number) {
   if (width < breakpoints.sm) return defaultConfig.defaultColumns.xs;
   if (width < breakpoints.md) return defaultConfig.defaultColumns.sm;
   if (width < breakpoints.lg) return defaultConfig.defaultColumns.md;
@@ -161,7 +167,11 @@ export function getOptimalColumns(width: number) {
 /**
  * Get image dimensions for optimal loading
  */
-export function getImageDimensions(
+/**
+ * getImageDimensions function
+ * @todo Add proper documentation
+ */
+export function GetImageDimensions(
   aspectRatio: string,
   containerWidth: number,
   maxHeight: number = 800
@@ -191,7 +201,11 @@ export function getImageDimensions(
 /**
  * Generate blur placeholder data URL
  */
-export function generateBlurPlaceholder(
+/**
+ * generateBlurPlaceholder function
+ * @todo Add proper documentation
+ */
+export function GenerateBlurPlaceholder(
   width: number = 8, 
   height: number = 6,
   color: string = '#f3f4f6'
@@ -216,7 +230,11 @@ export function generateBlurPlaceholder(
 /**
  * Detect user's motion preference
  */
-export function getMotionPreference(): keyof typeof animationPresets {
+/**
+ * getMotionPreference function
+ * @todo Add proper documentation
+ */
+export function GetMotionPreference(): keyof typeof animationPresets {
   if (typeof window === 'undefined') return 'standard';
   
   const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -234,7 +252,11 @@ export function getMotionPreference(): keyof typeof animationPresets {
 /**
  * Check if device supports touch
  */
-export function isTouchDevice(): boolean {
+/**
+ * isTouchDevice function
+ * @todo Add proper documentation
+ */
+export function IsTouchDevice(): boolean {
   if (typeof window === 'undefined') return false;
   
   return (
@@ -247,7 +269,11 @@ export function isTouchDevice(): boolean {
 /**
  * Get optimal image quality based on connection speed
  */
-export function getOptimalQuality(): { grid: number; modal: number } {
+/**
+ * getOptimalQuality function
+ * @todo Add proper documentation
+ */
+export function GetOptimalQuality(): { grid: number; modal: number } {
   if (typeof navigator === 'undefined') {
     return { grid: 75, modal: 90 };
   }
@@ -274,7 +300,11 @@ export function getOptimalQuality(): { grid: number; modal: number } {
 /**
  * Preload image utility
  */
-export function preloadImage(src: string): Promise<HTMLImageElement> {
+/**
+ * preloadImage function
+ * @todo Add proper documentation
+ */
+export function PreloadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
@@ -286,7 +316,11 @@ export function preloadImage(src: string): Promise<HTMLImageElement> {
 /**
  * Get responsive sizes attribute for images
  */
-export function getResponsiveSizes(
+/**
+ * getResponsiveSizes function
+ * @todo Add proper documentation
+ */
+export function GetResponsiveSizes(
   context: 'grid' | 'modal' | 'thumbnail',
   columns?: { xs?: number; sm?: number; md?: number; lg?: number; xl?: number }
 ): string {
@@ -360,7 +394,7 @@ export class ImagePreviewPerformance {
   
   static logMetric(operation: string, duration: number): void {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`ImagePreview: ${operation} completed in ${duration}ms`);
+
     }
   }
 }

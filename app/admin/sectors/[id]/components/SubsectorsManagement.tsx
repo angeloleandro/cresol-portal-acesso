@@ -1,12 +1,14 @@
 // Componente de gerenciamento de subsetores
 
-import React, { useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-import { Subsector } from '../types/sector.types';
-import { formatDate } from '@/lib/utils/formatters';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
+import React, { useState } from 'react';
+
 import DeleteModal from '@/app/components/ui/DeleteModal';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { createClient } from '@/lib/supabase/client';
+import { FormatDate } from '@/lib/utils/formatters';
+
+import { Subsector } from '../types/sector.types';
 
 interface SubsectorsManagementProps {
   sectorId: string;
@@ -14,6 +16,10 @@ interface SubsectorsManagementProps {
   onRefresh: () => Promise<void>;
 }
 
+/**
+ * SubsectorsManagement function
+ * @todo Add proper documentation
+ */
 export function SubsectorsManagement({
   sectorId,
   subsectors,
@@ -226,7 +232,7 @@ export function SubsectorsManagement({
               
               <div className="flex justify-between items-center pt-3 border-t">
                 <p className="text-xs text-gray-500">
-                  Criado em {formatDate(subsector.created_at)}
+                  Criado em {FormatDate(subsector.created_at)}
                 </p>
                 <Link
                   href={`/admin-subsetor/subsetores/${subsector.id}`}

@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
-import Breadcrumb from '../../components/Breadcrumb';
+import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import Navbar from '../../components/Navbar';
+import { supabase } from '@/lib/supabase';
+
+import Breadcrumb from '../../components/Breadcrumb';
 import Footer from '../../components/Footer';
+import Navbar from '../../components/Navbar';
 
 interface MessageItem {
   id: string;
@@ -175,7 +175,7 @@ export default function MensagemDetalhePage() {
         setRelatedMessages(relatedList.slice(0, 3));
 
       } catch (error) {
-        console.error('Erro geral:', error);
+
         router.push('/mensagens');
         return;
       } finally {

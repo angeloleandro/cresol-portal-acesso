@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useAlert } from '@/app/components/alerts';
-import { Icon } from '@/app/components/icons/Icon';
+
 import { StandardizedButton } from '@/app/components/admin';
+import { useAlert } from '@/app/components/alerts';
 import { FormSelect } from '@/app/components/forms/FormSelect';
+import { Icon } from '@/app/components/icons/Icon';
+import { supabase } from '@/lib/supabase';
 
 interface Message {
   id: string;
@@ -60,6 +61,10 @@ interface FormData {
   is_published: boolean;
 }
 
+/**
+ * MessageForm function
+ * @todo Add proper documentation
+ */
 export function MessageForm({ message, isOpen, onClose, onSuccess }: MessageFormProps) {
   const alert = useAlert();
   const [loading, setLoading] = useState(false);
@@ -110,8 +115,8 @@ export function MessageForm({ message, isOpen, onClose, onSuccess }: MessageForm
   }, [alert]);
 
   const loadMessageGroups = useCallback(async () => {
-    const filterValue = formData.type === 'sector' ? formData.sector_id : formData.subsector_id;
-    const filterColumn = formData.type === 'sector' ? 'sector_id' : 'subsector_id';
+    const _filterValue = formData.type === 'sector' ? formData.sector_id : formData.subsector_id;
+    const _filterColumn = formData.type === 'sector' ? 'sector_id' : 'subsector_id';
 
     try {
       const { data: groupsData, error: groupsError } = await supabase
@@ -230,7 +235,7 @@ export function MessageForm({ message, isOpen, onClose, onSuccess }: MessageForm
         ...(formData.group_id && { group_id: formData.group_id }),
       };
 
-      let url = '/api/admin/messages';
+      const url = '/api/admin/messages';
       let method = 'POST';
       
       if (message) {
@@ -295,7 +300,7 @@ export function MessageForm({ message, isOpen, onClose, onSuccess }: MessageForm
   };
 
   const handleSectorChange = (sectorId: string) => {
-    const selectedSector = sectors.find(s => s.id === sectorId);
+    const _selectedSector = sectors.find(s => s.id === sectorId);
 
     setFormData({
       ...formData,
@@ -388,7 +393,7 @@ export function MessageForm({ message, isOpen, onClose, onSuccess }: MessageForm
                   <FormSelect
                     value={formData.subsector_id}
                     onChange={(e) => {
-                      const selectedSubsector = subsectors.find(s => s.id === e.target.value);
+                      const _selectedSubsector = subsectors.find(s => s.id === e.target.value);
                       setFormData({ ...formData, subsector_id: e.target.value, group_id: '' });
                     }}
                     disabled={loading || !formData.sector_id}
@@ -412,7 +417,7 @@ export function MessageForm({ message, isOpen, onClose, onSuccess }: MessageForm
                   <FormSelect
                     value={formData.group_id}
                     onChange={(e) => {
-                      const selectedGroup = messageGroups.find(g => g.id === e.target.value);
+                      const _selectedGroup = messageGroups.find(g => g.id === e.target.value);
                       setFormData({ ...formData, group_id: e.target.value });
                     }}
                     disabled={loading}

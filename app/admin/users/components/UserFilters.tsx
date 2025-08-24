@@ -1,4 +1,3 @@
-import React, { useMemo, useCallback } from 'react';
 import {
   Dropdown,
   DropdownTrigger,
@@ -6,6 +5,8 @@ import {
   DropdownItem,
   Button
 } from '@nextui-org/react';
+import { useMemo, useCallback } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 interface WorkLocation {

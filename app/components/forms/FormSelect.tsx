@@ -1,6 +1,7 @@
 'use client';
 
 import React, { forwardRef, useMemo } from 'react';
+
 import { ChakraSelect, ChakraSelectProps, ChakraSelectOption } from './ChakraSelect';
 
 // Manter interface SelectOption original para compatibilidade
@@ -31,21 +32,6 @@ export interface FormSelectProps extends Omit<React.SelectHTMLAttributes<HTMLSel
   placeholder?: string;
 }
 
-/**
- * FormSelect - Wrapper de compatibilidade para ChakraSelect
- * 
- * Mantém 100% da API original do FormSelect mas utiliza internamente
- * o ChakraSelect padronizado com Chakra UI v3 e cores Cresol.
- * 
- * - Zero breaking changes para código existente
- * - API idêntica à versão anterior
- * - Performance e acessibilidade melhoradas
- * - Design system Cresol aplicado
- * - Suporte completo a todas as features
- * 
- * Nota: Para novos componentes, considere usar ChakraSelect diretamente
- * Esta é uma camada de compatibilidade para código existente
- */
 export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
   options = [],
   variant = 'outline',
@@ -93,7 +79,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(({
   const handleChange = (newValue: string | string[]) => {
     if (typeof newValue === 'string') {
       if (!onChange) {
-        console.error('FormSelect: onChange handler is missing. Cannot update value.');
+
         return;
       }
       

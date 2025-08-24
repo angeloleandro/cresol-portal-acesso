@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseClient } from '@/lib/supabase';
-import AdminHeader from '../AdminHeader';
-import Breadcrumb from '../Breadcrumb';
-import StatisticsGrid from './StatisticsGrid';
-import AdminModulesGrid from './AdminModulesGrid';
+import { useEffect, useState } from 'react';
+
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { getSupabaseClient } from '@/lib/supabase';
+
+import AdminHeader from '../AdminHeader';
+import Breadcrumb from '../Breadcrumb';
+import AdminModulesGrid from './AdminModulesGrid';
+import StatisticsGrid from './StatisticsGrid';
 
 interface DashboardStats {
   totalUsers: number;

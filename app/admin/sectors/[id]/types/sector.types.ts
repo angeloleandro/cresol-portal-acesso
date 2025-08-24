@@ -1,7 +1,5 @@
 // Types centralizados para o módulo de gerenciamento de setores
 
-import { CropArea } from '@/lib/types/common';
-
 export interface Sector {
   id: string;
   name: string;

@@ -1,8 +1,8 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+
 import UnifiedLoadingSpinner from './UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface LoadingSpinnerProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -17,24 +17,17 @@ interface LoadingSpinnerProps {
   ariaLabel?: string;
 }
 
-/**
- * Smart Loading Spinner that automatically detects context
- * and applies appropriate styling (orange for home, gray for admin)
- * 
- * Maintains backward compatibility with existing color prop
- * while migrating to new standardized Chakra UI spinners
- */
 export default function LoadingSpinner({ 
   size = 'md', 
   message, 
   fullScreen = false,
-  overlay = false,
-  centered = true,
+  overlay: _overlay = false,
+  centered: _centered = true,
   className = '',
   color = 'primary',
   variant,
-  type = 'chakra',
-  ariaLabel
+  type: _type = 'chakra',
+  ariaLabel: _ariaLabel
 }: LoadingSpinnerProps) {
   const pathname = usePathname();
   
@@ -63,8 +56,8 @@ export default function LoadingSpinner({
     return undefined; // Use variant defaults
   };
 
-  const selectedVariant = getVariant();
-  const spinnerColor = getSpinnerColor();
+  const _selectedVariant = getVariant();
+  const _spinnerColor = getSpinnerColor();
   
   return (
     <UnifiedLoadingSpinner

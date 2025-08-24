@@ -1,19 +1,18 @@
-/**
- * VideoThumbnail Utilities
- * Comprehensive utilities for thumbnail generation, optimization, and management
- */
-
-import { DashboardVideo } from '../VideoGallery/VideoGallery.types';
-import { 
+import {
   YouTubeThumbnailConfig, 
   DirectThumbnailConfig, 
   ThumbnailSize, 
   AspectRatio,
   ThumbnailMetrics 
 } from './VideoThumbnail.types';
+import { DashboardVideo } from '../VideoGallery/VideoGallery.types';
 
 /**
  * Extract YouTube video ID from various URL formats
+ */
+/**
+ * extractYouTubeVideoId function
+ * @todo Add proper documentation
  */
 export function extractYouTubeVideoId(url: string): string | null {
   const patterns = [
@@ -40,6 +39,10 @@ export function extractYouTubeVideoId(url: string): string | null {
 /**
  * Generate YouTube thumbnail URL
  */
+/**
+ * getYouTubeThumbnailUrl function
+ * @todo Add proper documentation
+ */
 export function getYouTubeThumbnailUrl(
   videoId: string, 
   quality: YouTubeThumbnailConfig['quality'] = 'hqdefault'
@@ -49,6 +52,10 @@ export function getYouTubeThumbnailUrl(
 
 /**
  * Get multiple YouTube thumbnail qualities for fallback
+ */
+/**
+ * getYouTubeThumbnailUrls function
+ * @todo Add proper documentation
  */
 export function getYouTubeThumbnailUrls(videoId: string): Array<{
   url: string;
@@ -86,6 +93,10 @@ export function getYouTubeThumbnailUrls(videoId: string): Array<{
 
 /**
  * Extract thumbnail from video element using canvas
+ */
+/**
+ * extractVideoFrame function
+ * @todo Add proper documentation
  */
 export async function extractVideoFrame(
   videoElement: HTMLVideoElement,
@@ -143,6 +154,10 @@ export async function extractVideoFrame(
 /**
  * Generate thumbnail for direct upload videos
  */
+/**
+ * generateDirectThumbnail function
+ * @todo Add proper documentation
+ */
 export async function generateDirectThumbnail(
   videoUrl: string,
   config: DirectThumbnailConfig
@@ -190,6 +205,10 @@ export async function generateDirectThumbnail(
 /**
  * Get optimal thumbnail URL for video
  */
+/**
+ * getThumbnailUrl function
+ * @todo Add proper documentation
+ */
 export function getThumbnailUrl(video: DashboardVideo): string | null {
   // Check if already has thumbnail URL
   if (video.thumbnail_url) {
@@ -212,6 +231,10 @@ export function getThumbnailUrl(video: DashboardVideo): string | null {
 /**
  * Get thumbnail size configuration
  */
+/**
+ * getThumbnailSizeConfig function
+ * @todo Add proper documentation
+ */
 export function getThumbnailSizeConfig(size: ThumbnailSize): {
   width: number;
   height: number;
@@ -233,6 +256,10 @@ export function getThumbnailSizeConfig(size: ThumbnailSize): {
 /**
  * Get aspect ratio CSS class
  */
+/**
+ * getAspectRatioClass function
+ * @todo Add proper documentation
+ */
 export function getAspectRatioClass(aspectRatio: AspectRatio): string {
   const ratios = {
     '16/9': 'aspect-video',
@@ -248,6 +275,10 @@ export function getAspectRatioClass(aspectRatio: AspectRatio): string {
 
 /**
  * Calculate optimal sizes attribute for responsive images
+ */
+/**
+ * calculateOptimalSizes function
+ * @todo Add proper documentation
  */
 export function calculateOptimalSizes(
   size: ThumbnailSize,
@@ -283,6 +314,10 @@ export function calculateOptimalSizes(
 /**
  * Check if image format is supported
  */
+/**
+ * isFormatSupported function
+ * @todo Add proper documentation
+ */
 export function isFormatSupported(format: string): boolean {
   const canvas = document.createElement('canvas');
   const supported = canvas.toDataURL(`image/${format}`).indexOf(`image/${format}`) === 5;
@@ -292,6 +327,10 @@ export function isFormatSupported(format: string): boolean {
 /**
  * Get WebP fallback URL
  */
+/**
+ * getWebPFallback function
+ * @todo Add proper documentation
+ */
 export function getWebPFallback(originalUrl: string): string {
   // Implement WebP conversion logic here
   // For now, return original URL
@@ -300,6 +339,10 @@ export function getWebPFallback(originalUrl: string): string {
 
 /**
  * Optimize thumbnail URL with parameters
+ */
+/**
+ * optimizeThumbnailUrl function
+ * @todo Add proper documentation
  */
 export function optimizeThumbnailUrl(
   url: string,
@@ -337,6 +380,10 @@ export function optimizeThumbnailUrl(
 /**
  * Calculate thumbnail metrics
  */
+/**
+ * calculateThumbnailMetrics function
+ * @todo Add proper documentation
+ */
 export function calculateThumbnailMetrics(
   imageData: string,
   loadStartTime: number
@@ -364,6 +411,10 @@ export function calculateThumbnailMetrics(
 /**
  * Generate cache key for thumbnail
  */
+/**
+ * generateThumbnailCacheKey function
+ * @todo Add proper documentation
+ */
 export function generateThumbnailCacheKey(
   video: DashboardVideo,
   options: {
@@ -386,6 +437,10 @@ export function generateThumbnailCacheKey(
 /**
  * Validate thumbnail URL
  */
+/**
+ * validateThumbnailUrl function
+ * @todo Add proper documentation
+ */
 export async function validateThumbnailUrl(url: string): Promise<boolean> {
   try {
     const response = await fetch(url, { method: 'HEAD' });
@@ -399,6 +454,10 @@ export async function validateThumbnailUrl(url: string): Promise<boolean> {
 /**
  * Preload image for better UX
  */
+/**
+ * preloadImage function
+ * @todo Add proper documentation
+ */
 export function preloadImage(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -410,6 +469,10 @@ export function preloadImage(src: string): Promise<void> {
 
 /**
  * Get gradient CSS for placeholder
+ */
+/**
+ * getPlaceholderGradient function
+ * @todo Add proper documentation
  */
 export function getPlaceholderGradient(
   from: string = '#F58220',

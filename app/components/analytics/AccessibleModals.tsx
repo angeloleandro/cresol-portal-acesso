@@ -1,7 +1,8 @@
 'use client';
 
-import { Fragment, ReactNode, useRef, useEffect, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { Fragment, ReactNode, useRef, useEffect, useState } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 interface BaseModalProps {

@@ -1,10 +1,9 @@
-/**
- * VideoThumbnail Performance Components
- * Advanced performance optimizations for thumbnail system
- */
+
 
 "use client";
 
+import clsx from 'clsx';
+import { motion } from 'framer-motion';
 import { 
   useState, 
   useEffect, 
@@ -15,8 +14,8 @@ import {
   useContext,
   ReactNode 
 } from 'react';
-import { motion } from 'framer-motion';
-import clsx from 'clsx';
+
+import { useThumbnailCache } from './VideoThumbnail.hooks';
 import { 
   ThumbnailPerformanceConfig,
   ThumbnailProviderValue,
@@ -24,14 +23,13 @@ import {
   ThumbnailMetrics,
   ThumbnailError
 } from './VideoThumbnail.types';
-import { DashboardVideo } from '../VideoGallery/VideoGallery.types';
 import { 
   generateThumbnailCacheKey,
   isFormatSupported,
   preloadImage,
   calculateThumbnailMetrics
 } from './VideoThumbnail.utils';
-import { useThumbnailCache } from './VideoThumbnail.hooks';
+import { DashboardVideo } from '../VideoGallery/VideoGallery.types';
 
 // Default performance configuration
 const defaultPerformanceConfig: ThumbnailPerformanceConfig = {
@@ -74,6 +72,10 @@ const ThumbnailPerformanceContext = createContext<ThumbnailProviderValue | null>
 
 /**
  * Performance Provider Component
+ */
+/**
+ * ThumbnailPerformanceProvider function
+ * @todo Add proper documentation
  */
 export function ThumbnailPerformanceProvider({
   children,
@@ -211,6 +213,10 @@ export function ThumbnailPerformanceProvider({
 /**
  * Hook to use performance context
  */
+/**
+ * useThumbnailPerformance function
+ * @todo Add proper documentation
+ */
 export function useThumbnailPerformance() {
   const context = useContext(ThumbnailPerformanceContext);
   if (!context) {
@@ -233,6 +239,10 @@ interface ProgressiveImageProps {
   onError?: (error: Error) => void;
 }
 
+/**
+ * ProgressiveImage function
+ * @todo Add proper documentation
+ */
 export function ProgressiveImage({
   src,
   alt,
@@ -382,6 +392,10 @@ interface BatchPreloaderProps {
   concurrency?: number;
 }
 
+/**
+ * useBatchThumbnailPreloader function
+ * @todo Add proper documentation
+ */
 export function useBatchThumbnailPreloader({
   videos,
   onProgress,
@@ -457,6 +471,10 @@ interface PerformanceMonitorProps {
   }) => void;
 }
 
+/**
+ * ThumbnailPerformanceMonitor function
+ * @todo Add proper documentation
+ */
 export function ThumbnailPerformanceMonitor({
   children,
   onMetrics

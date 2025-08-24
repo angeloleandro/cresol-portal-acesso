@@ -1,22 +1,10 @@
-/**
- * VideoGallery Component - Modernized
- * Enterprise-grade video gallery with modular architecture
- */
+
 
 "use client";
 
-import { VideoGalleryRoot } from './VideoGallery/';
 import HomeVideoGallery from './HomeVideoGallery';
+import { VideoGalleryRoot } from './VideoGallery/';
 
-/**
- * Main VideoGallery Component
- * 
- * This component now uses the new modular VideoGallery system
- * with enhanced features, accessibility, and performance optimizations.
- * 
- * For home page (limit=3), uses clean Chakra UI-inspired cards
- * For other pages, uses the full-featured VideoGalleryRoot
- */
 interface VideoGalleryProps {
   limit?: number;
 }

@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+
+import { CRESOL_COLORS } from '@/lib/design-tokens';
+
 import { 
   NumberTicker, 
   MetricCardEnterprise, 
@@ -10,8 +13,8 @@ import {
 } from './';
 
 const sampleChartData = [
-  { label: 'Jan', value: 4000, color: '#F58220' },
-  { label: 'Fev', value: 3000, color: '#005C46' },
+  { label: 'Jan', value: 4000, color: CRESOL_COLORS.primary.DEFAULT },
+  { label: 'Fev', value: 3000, color: CRESOL_COLORS.secondary.DEFAULT },
   { label: 'Mar', value: 5000, color: '#FF9A4D' },
   { label: 'Abr', value: 4500, color: '#007F57' },
   { label: 'Mai', value: 6000, color: '#E6731C' }
@@ -246,7 +249,7 @@ export default function AnalyticsShowcase() {
               key={`custom-${refreshTrigger}`}
               value={Math.random() * 100}
               customSize={100}
-              gradientColors={['#F58220', '#005C46']}
+              gradientColors={[CRESOL_COLORS.primary.DEFAULT, CRESOL_COLORS.secondary.DEFAULT]}
               showValueText={true}
               customThickness={8}
               valueText={<div className="text-xs font-bold">TOP</div>}
@@ -396,11 +399,11 @@ export default function AnalyticsShowcase() {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-orange-500 rounded-sm"></div>
-              <span className="text-sm text-gray-700">#F58220 (Laranja Principal)</span>
+              <span className="text-sm text-gray-700">{CRESOL_COLORS.primary.DEFAULT} (Laranja Principal)</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-green-600 rounded-sm"></div>
-              <span className="text-sm text-gray-700">#005C46 (Verde Secundário)</span>
+              <span className="text-sm text-gray-700">{CRESOL_COLORS.secondary.DEFAULT} (Verde Secundário)</span>
             </div>
           </div>
         </div>

@@ -19,17 +19,6 @@ interface StandardizedCardProps {
   variant?: 'default' | 'elevated' | 'subtle' | 'outline';
 }
 
-/**
- * Card padronizado seguindo o design system da página /admin/users
- * 
- * Features:
- * - Fundo branco com borda cinza clara (60% opacidade)
- * - Arredondamento consistente (rounded-lg)
- * - Hover com intensificação da borda (100% opacidade)
- * - Estados hover opcionais
- * - Padding configurável
- * - Layout flexível
- */
 export default function StandardizedCard({
   children,
   className = '',

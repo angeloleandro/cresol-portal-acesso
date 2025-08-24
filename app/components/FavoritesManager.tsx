@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
-import OptimizedImage from './OptimizedImage';
+
 import { supabase } from '@/lib/supabase';
-import { CRESOL_UI_CONFIG } from '@/lib/design-tokens';
+
+import OptimizedImage from './OptimizedImage';
 
 interface FavoriteItem {
   id: string;
@@ -36,6 +37,10 @@ interface FavoritesProviderProps {
   userId?: string;
 }
 
+/**
+ * FavoritesProvider function
+ * @todo Add proper documentation
+ */
 export function FavoritesProvider({ children, userId }: FavoritesProviderProps) {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +55,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
         setFavorites([]);
       }
     } catch (error) {
-      console.error('Erro ao carregar favoritos do localStorage:', error);
+
       setFavorites([]);
     }
   };
@@ -67,7 +72,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
           .order('created_at', { ascending: false });
 
         if (error) {
-          console.error('Erro ao carregar favoritos do Supabase:', error);
+
           loadLocalFavorites();
         } else {
           setFavorites(data || []);
@@ -76,7 +81,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
         loadLocalFavorites();
       }
     } catch (error) {
-      console.error('Erro ao carregar favoritos:', error);
+
       loadLocalFavorites();
     } finally {
       setLoading(false);
@@ -95,7 +100,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
     try {
       localStorage.setItem('cresol_favorites', JSON.stringify(newFavorites));
     } catch (error) {
-      console.error('Erro ao salvar favoritos locais:', error);
+
     }
   };
 
@@ -117,7 +122,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
           });
 
         if (error) {
-          console.error('Erro ao salvar favorito no Supabase:', error);
+
           throw error;
         }
       }
@@ -129,7 +134,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
 
       return true;
     } catch (error) {
-      console.error('Erro ao adicionar favorito:', error);
+
       return false;
     }
   };
@@ -145,7 +150,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
           .eq('id', itemId);
 
         if (error) {
-          console.error('Erro ao remover favorito do Supabase:', error);
+
           throw error;
         }
       }
@@ -157,7 +162,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
 
       return true;
     } catch (error) {
-      console.error('Erro ao remover favorito:', error);
+
       return false;
     }
   };
@@ -179,7 +184,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
           .eq('user_id', userId);
 
         if (error) {
-          console.error('Erro ao limpar favoritos do Supabase:', error);
+
           throw error;
         }
       }
@@ -188,7 +193,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
       saveToLocal([]);
       return true;
     } catch (error) {
-      console.error('Erro ao limpar favoritos:', error);
+
       return false;
     }
   };
@@ -207,7 +212,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Erro ao exportar favoritos:', error);
+
     }
   };
 
@@ -239,7 +244,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
           );
 
         if (error) {
-          console.error('Erro ao importar favoritos no Supabase:', error);
+
           throw error;
         }
       }
@@ -251,7 +256,7 @@ export function FavoritesProvider({ children, userId }: FavoritesProviderProps) 
 
       return true;
     } catch (error) {
-      console.error('Erro ao importar favoritos:', error);
+
       return false;
     }
   };
@@ -291,6 +296,10 @@ interface FavoriteButtonProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
+/**
+ * FavoriteButton function
+ * @todo Add proper documentation
+ */
 export function FavoriteButton({ 
   item, 
   className = '', 
@@ -318,7 +327,7 @@ export function FavoriteButton({
         await addToFavorites(item);
       }
     } catch (error) {
-      console.error('Erro ao alterar favorito:', error);
+
     } finally {
       setIsLoading(false);
     }
@@ -383,6 +392,10 @@ interface FavoritesListProps {
   className?: string;
 }
 
+/**
+ * FavoritesList function
+ * @todo Add proper documentation
+ */
 export function FavoritesList({ 
   type, 
   limit, 

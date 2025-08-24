@@ -1,7 +1,4 @@
-/**
- * Admin UI Configuration Constants
- * Centralizes all UI-related configuration values
- */
+
 
 // Layout Constants
 export const LAYOUT = {

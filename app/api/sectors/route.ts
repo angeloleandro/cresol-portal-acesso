@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { authenticateAdminRequest } from '@/lib/supabase/admin';
+
 import { logger } from '@/lib/logger';
+import { authenticateAdminRequest } from '@/lib/supabase/admin';
+import { CreateClient } from '@/lib/supabase/server';
+
 
 // GET - Listar todos os setores
 export async function GET(request: NextRequest) {
@@ -23,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     // Timer para criação do client
     const clientTimer = logger.dbStart('Create Supabase Client');
-    const supabase = createClient();
+    const supabase = CreateClient();
     logger.dbEnd(clientTimer);
 
     // Buscar setores

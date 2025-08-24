@@ -1,10 +1,4 @@
-/**
- * CRESOL PORTAL - CONSTANTES DE TEXTO REUTILIZÁVEIS
- * 
- * Centralização de strings comuns encontradas duplicadas no sistema
- * Elimina hardcode de textos como "Carregando...", "Erro ao carregar dados", etc.
- * Base para futura internacionalização (i18n)
- */
+
 
 // === MENSAGENS GERAIS DE SISTEMA ===
 export const SYSTEM_MESSAGES = {

@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+
 import { handleComponentError, devLog } from '@/lib/error-handler';
-import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import ErrorMessage from './ui/ErrorMessage';
+
 import { Icon } from './icons';
+import ErrorMessage from './ui/ErrorMessage';
 
 interface SystemLink {
   id: string;

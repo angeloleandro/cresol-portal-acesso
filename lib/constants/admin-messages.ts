@@ -1,7 +1,4 @@
-/**
- * Admin Messages Constants
- * Centralizes all user-facing messages and error texts
- */
+
 
 // Success Messages
 export const SUCCESS_MESSAGES = {

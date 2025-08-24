@@ -1,19 +1,40 @@
-// Subsector Videos Upload API - Following Gallery Pattern
-// Upload direto de vídeos para subsetores seguindo padrão da galeria
+/**
+ * Subsector Videos Upload API - Following Gallery Pattern
+ * Upload direto de vídeos para subsetores seguindo padrão da galeria
+ * Otimizado segundo padrões da codebase Cresol
+ */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
-import { VIDEO_CONFIG, STORAGE_CONFIG } from '@/lib/constants';
+import { NextRequest, NextResponse } from 'next/server';
+
+import { VIDEO_FILE_CONFIG, VIDEO_STORAGE_CONFIG } from '../../../../../../../lib/constants/video-ui';
+import { CreateClient } from '../../../../../../../lib/supabase/server';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-function formatFileSize(bytes: number): string {
+/**
+ * Formata tamanho do arquivo para display
+ * @param bytes - Tamanho em bytes
+ * @returns String formatada (ex: "1.5 MB")
+ */
+// Removed unused function formatFileSize
+function _formatFileSize(bytes: number): string {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   if (bytes === 0) return '0 Bytes';
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+/**
+ * Valida se o arquivo é um vídeo válido
+ * @param file - Arquivo a ser validado
+ * @returns boolean
+ */
+function isValidVideoFile(file: File): boolean {
+  return VIDEO_FILE_CONFIG.supportedMimeTypes.includes(file.type as any) && 
+         file.size <= VIDEO_FILE_CONFIG.maxSize && 
+         file.size > 0;
 }
 
 // POST /api/admin/subsectors/[id]/videos/upload
@@ -25,7 +46,7 @@ export async function POST(
   const subsectorId = params.id;
   
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Auth check
     const authHeader = request.headers.get('authorization');
@@ -80,20 +101,29 @@ export async function POST(
     const thumbnailTimestamp = formData.get('thumbnail_timestamp') ? 
       parseFloat(formData.get('thumbnail_timestamp') as string) : null;
 
-    // Validation
-    if (!videoFile || !title) {
-      return NextResponse.json({ error: 'Arquivo e título são obrigatórios' }, { status: 400 });
-    }
-
-    if (!VIDEO_CONFIG.ALLOWED_MIME_TYPES.includes(videoFile.type as any)) {
+    // Enhanced validation
+    if (!videoFile || !title?.trim()) {
       return NextResponse.json({ 
-        error: 'Tipo de arquivo não suportado. Use MP4, WebM, MOV ou AVI.' 
+        error: 'Arquivo e título são obrigatórios' 
       }, { status: 400 });
     }
 
-    if (videoFile.size > VIDEO_CONFIG.MAX_FILE_SIZE) {
+    if (!isValidVideoFile(videoFile)) {
       return NextResponse.json({ 
-        error: `Arquivo muito grande. Máximo: ${(VIDEO_CONFIG.MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB` 
+        error: `Arquivo inválido. Use ${VIDEO_FILE_CONFIG.supportedFormats.join(', ')} (máximo: ${(VIDEO_FILE_CONFIG.maxSize / 1024 / 1024).toFixed(0)}MB)` 
+      }, { status: 400 });
+    }
+
+    // Additional validations
+    if (title.trim().length > 255) {
+      return NextResponse.json({ 
+        error: 'Título muito longo (máximo: 255 caracteres)' 
+      }, { status: 400 });
+    }
+
+    if (description && description.length > 1000) {
+      return NextResponse.json({ 
+        error: 'Descrição muito longa (máximo: 1000 caracteres)' 
       }, { status: 400 });
     }
 
@@ -104,23 +134,19 @@ export async function POST(
     const fileName = `${uuid}_${sanitizedOriginalName}`;
     const filePath = `uploads/subsectors/${subsectorId}/${timestamp}/${fileName}`;
     
-    console.log('[SUBSECTOR-VIDEO-UPLOAD] Uploading video:', {
-      filePath,
-      fileSize: formatFileSize(videoFile.size),
-      mimeType: videoFile.type
-    });
+    // Debug upload start logging removed for production
 
     // Upload video file
     const { data: uploadData, error: uploadError } = await serviceClient.storage
-      .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
+      .from(VIDEO_STORAGE_CONFIG.buckets.videos)
       .upload(filePath, videoFile, {
         contentType: videoFile.type,
         upsert: false,
-        cacheControl: VIDEO_CONFIG.CACHE_CONTROL
+        cacheControl: VIDEO_FILE_CONFIG.cacheControl
       });
 
     if (uploadError) {
-      console.error('[SUBSECTOR-VIDEO-UPLOAD] Storage upload error:', uploadError);
+
       return NextResponse.json({ 
         error: `Erro no upload: ${uploadError.message}` 
       }, { status: 500 });
@@ -128,7 +154,7 @@ export async function POST(
 
     // Get public URL for video
     const { data: urlData } = serviceClient.storage
-      .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
+      .from(VIDEO_STORAGE_CONFIG.buckets.videos)
       .getPublicUrl(filePath);
 
     if (!urlData.publicUrl) {
@@ -140,34 +166,29 @@ export async function POST(
     // Handle thumbnail upload if provided
     let thumbnailUrl = null;
     if (thumbnailFile && thumbnailFile.size > 0) {
+      // Type narrowing: thumbnailFile is guaranteed to be File at this point
+      const validThumbnailFile = thumbnailFile as File;
+      
       const thumbUuid = crypto.randomUUID();
-      const thumbExtension = thumbnailFile.type.split('/')[1] || 'jpg';
+      const thumbExtension = validThumbnailFile.type.split('/')[1] || 'jpg';
       const thumbFileName = `${thumbUuid}.${thumbExtension}`;
       const thumbPath = `thumbnails/subsectors/${subsectorId}/${thumbFileName}`;
-      
-      console.log('[SUBSECTOR-VIDEO-UPLOAD] Uploading thumbnail:', {
-        thumbPath,
-        fileSize: formatFileSize(thumbnailFile.size)
-      });
 
       // Upload thumbnail to images bucket
       const { data: thumbUploadData, error: thumbUploadError } = await serviceClient.storage
-        .from(STORAGE_CONFIG.BUCKETS.IMAGES)
-        .upload(thumbPath, thumbnailFile, {
-          contentType: thumbnailFile.type,
+        .from(VIDEO_STORAGE_CONFIG.buckets.thumbnails)
+        .upload(thumbPath, validThumbnailFile, {
+          contentType: validThumbnailFile.type,
           upsert: false,
           cacheControl: '3600'
         });
 
       if (!thumbUploadError) {
         const { data: thumbUrlData } = serviceClient.storage
-          .from(STORAGE_CONFIG.BUCKETS.IMAGES)
+          .from(VIDEO_STORAGE_CONFIG.buckets.thumbnails)
           .getPublicUrl(thumbPath);
         
         thumbnailUrl = thumbUrlData.publicUrl;
-        console.log('[SUBSECTOR-VIDEO-UPLOAD] Thumbnail uploaded:', thumbnailUrl);
-      } else {
-        console.error('[SUBSECTOR-VIDEO-UPLOAD] Thumbnail upload error:', thumbUploadError);
       }
     }
 
@@ -213,17 +234,15 @@ export async function POST(
       .single();
 
     if (dbError) {
-      console.error('[SUBSECTOR-VIDEO-UPLOAD] Database error:', dbError);
-      
       // Cleanup on error
       await serviceClient.storage
-        .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
+        .from(VIDEO_STORAGE_CONFIG.buckets.videos)
         .remove([filePath]);
       
       if (thumbnailUrl) {
         const thumbPath = thumbnailUrl.split('/').slice(-2).join('/');
         await serviceClient.storage
-          .from(STORAGE_CONFIG.BUCKETS.IMAGES)
+          .from(VIDEO_STORAGE_CONFIG.buckets.thumbnails)
           .remove([`thumbnails/subsectors/${subsectorId}/${thumbPath}`]);
       }
 
@@ -232,11 +251,7 @@ export async function POST(
       }, { status: 500 });
     }
 
-    console.log('[SUBSECTOR-VIDEO-UPLOAD] Video uploaded successfully:', {
-      id: videoRecord.id,
-      title: videoRecord.title,
-      uploadDuration: `${Date.now() - startTime}ms`
-    });
+    // Debug upload success logging removed for production
 
     // Return response matching gallery pattern
     return NextResponse.json({
@@ -252,7 +267,6 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('[SUBSECTOR-VIDEO-UPLOAD] Unexpected error:', error);
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : 'Erro interno do servidor'
     }, { status: 500 });

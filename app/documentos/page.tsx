@@ -1,13 +1,16 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import Footer from '../components/Footer';
-import Breadcrumb from '../components/Breadcrumb';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, useMemo } from 'react';
+
+import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
+import Breadcrumb from '../components/Breadcrumb';
+import Footer from '../components/Footer';
 // Helper functions movidas para inline
 function formatFileSize(bytes?: number): string {
   if (!bytes) return '0 Bytes';
@@ -36,7 +39,7 @@ function getFileTypeLabel(mimeType?: string): string {
   return FILE_TYPE_LABELS[mimeType as keyof typeof FILE_TYPE_LABELS] || 'Arquivo';
 }
 import Icon from '../components/icons/Icon';
-import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
+
 
 interface DocumentItem {
   id: string;
@@ -116,7 +119,7 @@ export default function DocumentosPage() {
         setDocuments(allDocuments);
         setFilteredDocuments(allDocuments);
       } catch (err) {
-        console.error('Erro ao carregar documentos:', err);
+        
         setDocuments([]);
         setFilteredDocuments([]);
       } finally {
@@ -195,7 +198,7 @@ export default function DocumentosPage() {
     try {
       window.open(document.file_url, '_blank');
     } catch (error) {
-      console.error('Erro ao baixar documento:', error);
+      
     }
   };
 

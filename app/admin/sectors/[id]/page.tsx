@@ -1,24 +1,25 @@
 'use client';
 
-import React, { useState, lazy, Suspense } from 'react';
 import { useParams } from 'next/navigation';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { lazy, Suspense, useState } from 'react';
+
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 
 // Context Provider
+import { TabNavigation } from './components/TabNavigation';
 import { SectorDataProvider, useSectorDataContext } from './contexts/SectorDataContext';
 
 // Types
-import { TabType } from './types/sector.types';
 
 // Hooks
 import { useSectorAuth } from './hooks/useSectorAuth';
 import { useSectorData } from './hooks/useSectorData';
 import { useSectorContent } from './SectorContentManager';
+import { TabType } from './types/sector.types';
 
 // Components - Lazy loading para otimização
-import { TabNavigation } from './components/TabNavigation';
 const NewsManagement = lazy(() => import('./components/NewsManagement').then(m => ({ default: m.NewsManagement })));
 const EventsManagement = lazy(() => import('./components/EventsManagement').then(m => ({ default: m.EventsManagement })));
 const DocumentsManagement = lazy(() => import('./components/DocumentsManagement').then(m => ({ default: m.DocumentsManagement })));
@@ -84,7 +85,6 @@ function SectorDashboardContent() {
     deleteVideo,
     deleteImage
   } = useSectorContent(sectorId);
-
 
   // Loading state - mais permissivo para evitar travamento
   if (authLoading) {

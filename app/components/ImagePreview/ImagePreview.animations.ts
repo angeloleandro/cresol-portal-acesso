@@ -1,9 +1,7 @@
-/**
- * ImagePreview Animation Configurations
- * Optimized animations using Framer Motion for smooth 60fps performance
- */
-
 import { Variants, Transition } from 'framer-motion';
+
+
+
 
 // Easing functions optimized for perceived performance
 export const easings = {
@@ -370,7 +368,11 @@ export const focusRingVariants: Variants = {
 /**
  * Utility function to get responsive animation config
  */
-export function getResponsiveModalVariants(isMobile: boolean): Variants {
+/**
+ * GetResponsiveModalVariants function
+ * @todo Add proper documentation
+ */
+export function GetResponsiveModalVariants(isMobile: boolean): Variants {
   return isMobile ? mobileModalVariants : modalVariants;
 }
 

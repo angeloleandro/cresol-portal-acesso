@@ -1,9 +1,11 @@
 'use client';
 
-import Link from 'next/link';
-import { Icon, IconName } from '../icons/Icon';
-import { Button } from "../ui/Button";
 import { Badge, Box, HStack, Stack, Text } from "@chakra-ui/react";
+import Link from 'next/link';
+
+import { Icon } from '@/app/components/icons/Icon';
+
+import { Button } from "../ui/Button";
 
 interface SectorCardProps {
   sector: {
@@ -112,7 +114,6 @@ export default function SectorCard({
             </Badge>
           </HStack>
         </Stack>
-
 
         {/* Lista de sub-setores */}
         {limitedSubsectors.length > 0 && (

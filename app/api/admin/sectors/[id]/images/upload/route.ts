@@ -2,8 +2,9 @@
 // Upload direto de imagens para setores - Portal Cresol
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
 import { handleApiError, devLog } from '@/lib/error-handler';
+import { CreateClient } from '@/lib/supabase/server';
 
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
@@ -15,7 +16,7 @@ export async function POST(
 ) {
   try {
     const sectorId = params.id;
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar se usuário está autenticado e tem permissão
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -139,8 +140,8 @@ export async function POST(
     }
 
     // Extrair dimensões da imagem (para implementar futuramente com library de processamento)
-    let width = null;
-    let height = null;
+    const width = null;
+    const height = null;
 
     // Inserir registro na tabela sector_images
     const { data: imageRecord, error: insertError } = await supabase

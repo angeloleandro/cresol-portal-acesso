@@ -1,17 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import OptimizedImage from '@/app/components/OptimizedImage';
-import AuthDebugPanel from '@/app/components/AuthDebugPanel';
 import Link from 'next/link';
-import { useSupabaseClient } from '@/hooks/useSupabaseClient';
-import { useAuth } from '@/app/providers/AuthProvider';
+import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+
 import { useAlert } from '@/app/components/alerts';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
+import AuthDebugPanel from '@/app/components/AuthDebugPanel';
+import OptimizedImage from '@/app/components/OptimizedImage';
 import DeleteModal from '@/app/components/ui/DeleteModal';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { useSupabaseClient } from '@/hooks/useSupabaseClient';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface Sector {
   id: string;
@@ -185,7 +186,7 @@ export default function SectorContentManagement() {
         setTeamMembers(data.teamMembers || []);
       }
     } catch (error) {
-      console.error('Erro ao buscar equipe:', error);
+
     }
   }, [sectorId]);
 
@@ -333,7 +334,6 @@ export default function SectorContentManagement() {
     e.preventDefault();
     
     // Authentication info available in user and profile objects
-    
 
     try {
       let imageUrl = newsForm.image_url;
@@ -351,8 +351,7 @@ export default function SectorContentManagement() {
         is_published: newsForm.is_published,
         image_url: imageUrl
       };
-      
-      
+
       if (newsForm.id) {
         // Atualizar notícia existente via API
         const response = await fetch('/api/admin/sector-content', {
@@ -389,8 +388,7 @@ export default function SectorContentManagement() {
           credentials: 'include', // Garante envio de cookies
           body: JSON.stringify(requestBody)
         });
-        
-        
+
         const responseText = await response.text();
         
         let result;

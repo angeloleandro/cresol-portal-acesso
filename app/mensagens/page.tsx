@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import { FormSelect } from '@/app/components/forms/FormSelect';
-import Footer from '../components/Footer';
+import { supabase } from '@/lib/supabase';
+
 import Breadcrumb from '../components/Breadcrumb';
-import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
+import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
 
 interface MessageItem {
   id: string;
@@ -112,7 +113,7 @@ export default function MensagensPage() {
         setMessages(allMessages);
         setFilteredMessages(allMessages);
       } catch (err) {
-        console.error('Erro:', err);
+
         setMessages([]);
         setFilteredMessages([]);
       } finally {

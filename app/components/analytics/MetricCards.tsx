@@ -1,6 +1,7 @@
 'use client';
 
-import { memo, ReactNode } from 'react';
+import { memo } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 interface MetricCardData {

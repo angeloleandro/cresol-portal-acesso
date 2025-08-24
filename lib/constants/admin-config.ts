@@ -1,8 +1,4 @@
-/**
- * Admin Configuration Constants
- * Centralized configuration for admin-setor and admin-subsetor modules
- * Eliminates hardcoded values and ensures consistency
- */
+
 
 // ===== LAYOUT & STYLING =====
 export const ADMIN_LAYOUT = {

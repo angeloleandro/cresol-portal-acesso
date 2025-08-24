@@ -1,15 +1,18 @@
-/**
- * VideoUploadForm Simple Thumbnail Component
- * Redesigned for minimal complexity and clear user flow
- */
-
-import { memo, useCallback, useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
+import { memo, useCallback, useState, useRef, useEffect } from 'react'
+
+
+import { useThumbnailGenerator } from '@/app/hooks/useThumbnailGenerator'
+import { VIDEO_HELPERS } from '@/lib/constants/video-ui'
+
+import { VideoUploadFormThumbnailTimePicker } from './VideoUploadForm.ThumbnailTimePicker'
 import { ThumbnailConfigProps } from './VideoUploadForm.types'
 import { Icon } from '../icons/Icon'
-import { useThumbnailGenerator } from '@/app/hooks/useThumbnailGenerator'
-import { VideoUploadFormThumbnailTimePicker } from './VideoUploadForm.ThumbnailTimePicker'
-import { VIDEO_HELPERS } from '@/lib/constants/video-ui'
+
+
+
+
+
 
 // Consolidated YouTube thumbnail helper
 function getYouTubeThumbnail(url: string): string | null {
@@ -103,7 +106,6 @@ export const VideoUploadFormSimpleThumbnail = memo(({
       fileInputRef.current.click()
     }
   }, [disabled])
-
 
   // Auto thumbnail URL (YouTube ou gerada do vídeo direto)
   const autoThumbnailUrl = uploadType === 'youtube' && videoUrl 
@@ -207,49 +209,17 @@ export const VideoUploadFormSimpleThumbnail = memo(({
               ref={fileInputRef}
               type="file"
               accept="image/*"
+              className="hidden"
               onChange={handleFileChange}
-              disabled={disabled}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
-            
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto">
-                <Icon name="image" className="w-8 h-8 text-neutral-400" />
-              </div>
-              
-              <div>
-                <p className="text-base font-medium text-neutral-700 mb-1">
-                  Clique ou arraste uma imagem
-                </p>
-                <p className="text-sm text-neutral-500">
-                  PNG, JPG até 5MB • Recomendado: 1280×720px
-                </p>
-              </div>
-              
-              <button
-                type="button"
-                onClick={openFileDialog}
-                disabled={disabled}
-                className="
-                  px-6 py-2 bg-white border border-neutral-300 rounded-lg 
-                  text-sm font-medium text-neutral-700 
-                  hover:bg-neutral-50 hover:border-neutral-400 
-                  focus:outline-none focus:ring-2 focus:ring-primary/20
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-all
-                "
-              >
-                Selecionar Arquivo
-              </button>
-            </div>
           </div>
 
-          {/* Custom Thumbnail Preview */}
+          {/* Preview Section */}
           {thumbnailPreview && (
             <div className="space-y-3">
               <div className="relative w-full aspect-video bg-neutral-100 rounded-lg overflow-hidden">
                 <Image
-                  src={thumbnailPreview}
+                  src={thumbnailPreview || ''}
                   alt="Preview da thumbnail"
                   fill
                   className="object-cover"
@@ -365,7 +335,7 @@ export const VideoUploadFormSimpleThumbnail = memo(({
                       lastGeneratedTimestamp.current = timestamp;
                     }
                   } catch (error) {
-                    console.error('Erro ao gerar thumbnail:', error);
+
                   } finally {
                     isGeneratingRef.current = false;
                   }
@@ -423,7 +393,6 @@ export const VideoUploadFormSimpleThumbnail = memo(({
           )}
         </div>
       )}
-
 
       {/* No Thumbnail State */}
       {mode === 'none' && (

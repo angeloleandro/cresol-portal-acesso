@@ -29,8 +29,8 @@ interface ParallelFetchResult {
 }
 
 /**
- * Hook para carregamento paralelo de múltiplos dados
- * Reduz significativamente o tempo de carregamento fazendo todas as requisições simultaneamente
+ * useParallelDataFetch function
+ * @todo Add proper documentation
  */
 export function useParallelDataFetch(config: ParallelFetchConfig): ParallelFetchResult {
   const [data, setData] = useState<ParallelFetchResult>({
@@ -138,6 +138,10 @@ export function useParallelDataFetch(config: ParallelFetchConfig): ParallelFetch
 /**
  * Hook para página home que carrega todos os dados necessários em paralelo
  */
+/**
+ * useHomePageData function
+ * @todo Add proper documentation
+ */
 export function useHomePageData() {
   return useParallelDataFetch({
     banners: true,
@@ -151,6 +155,10 @@ export function useHomePageData() {
 
 /**
  * Hook para páginas de setor que carrega dados específicos
+ */
+/**
+ * useSectorPageData function
+ * @todo Add proper documentation
  */
 export function useSectorPageData(sectorId: string) {
   const [sectorData, setSectorData] = useState<any>(null);
@@ -187,6 +195,10 @@ export function useSectorPageData(sectorId: string) {
 
 /**
  * Hook para pré-carregar dados antes da navegação
+ */
+/**
+ * usePrefetchData function
+ * @todo Add proper documentation
  */
 export function usePrefetchData(config: ParallelFetchConfig) {
   const prefetch = useCallback(() => {

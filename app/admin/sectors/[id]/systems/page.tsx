@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+
+import OptimizedImage from '@/app/components/OptimizedImage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
 import type { User } from '@supabase/supabase-js';
 
 interface System {
@@ -65,7 +66,7 @@ export default function SectorSystemsManagement() {
       .single();
     
     if (error) {
-      console.error('Erro ao buscar setor:', error);
+
     } else {
       setSector(data);
     }
@@ -82,7 +83,7 @@ export default function SectorSystemsManagement() {
       .order('name', { ascending: true });
     
     if (error) {
-      console.error('Erro ao buscar sistemas:', error);
+
     } else {
       // O Supabase retorna 'sector' como um array, precisamos transformar para objeto
       const formattedData = (data || []).map(system => ({
@@ -163,7 +164,7 @@ export default function SectorSystemsManagement() {
       setIsAddModalOpen(false);
       fetchSystems();
     } catch (error) {
-      console.error('Erro ao adicionar sistema:', error);
+
     }
   };
 
@@ -187,7 +188,7 @@ export default function SectorSystemsManagement() {
       setIsEditModalOpen(false);
       fetchSystems();
     } catch (error) {
-      console.error('Erro ao editar sistema:', error);
+
     }
   };
 
@@ -211,7 +212,7 @@ export default function SectorSystemsManagement() {
       setShowDeleteModal(false);
       setSystemToDelete(null);
     } catch (error) {
-      console.error('Erro ao excluir sistema:', error);
+
     } finally {
       setIsDeleting(false);
     }

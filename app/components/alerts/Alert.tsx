@@ -1,15 +1,9 @@
 'use client';
 
-/**
- * Componente Alert Base - Sistema Cresol
- * 
- * Implementa alertas seguindo padrões Chakra UI v3
- * Suporta modos toast (flutuante) e inline (estático)
- */
-
-import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Alert as ChakraAlert, CloseButton, Box } from '@chakra-ui/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+
 import type { AlertProps, AlertStatus } from './types';
 
 /**

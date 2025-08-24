@@ -1,22 +1,17 @@
 'use client';
 
-/**
- * Hook useAlert - Interface Principal do Sistema de Alertas
- * 
- * Fornece métodos convenientes para usar alertas nos componentes
- * Integra com mensagens padronizadas e operações CRUD
- */
-
 import { useContext, useCallback, useMemo } from 'react';
+
 import { AlertContext } from './AlertProvider';
 import { 
   CRUD_MESSAGES, 
   MODULE_MESSAGES, 
   SYSTEM_MESSAGES, 
   ERROR_MESSAGES,
-  generateCrudMessage,
-  generateEntityMessage
+  GenerateCrudMessage,
+  GenerateEntityMessage
 } from './messages';
+
 import type { 
   AlertContextValue, 
   AlertOptions, 
@@ -174,7 +169,7 @@ export const useAlert = (): UseAlertReturn => {
     entity: string,
     details?: string
   ) => {
-    const message = generateCrudMessage(operation, result, entity, details);
+    const message = GenerateCrudMessage(operation, result, entity, details);
     
     return context.showAlert({
       status: result === 'success' ? 'success' : result === 'error' ? 'error' : 'info',
@@ -192,7 +187,7 @@ export const useAlert = (): UseAlertReturn => {
     entityContext: EntityContext,
     details?: string
   ) => {
-    const message = generateEntityMessage(operation, result, entityContext, details);
+    const message = GenerateEntityMessage(operation, result, entityContext, details);
     
     return context.showAlert({
       status: result === 'success' ? 'success' : result === 'error' ? 'error' : 'info',

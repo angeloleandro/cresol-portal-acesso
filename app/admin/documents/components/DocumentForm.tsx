@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useAlert } from '@/app/components/alerts';
-import { Icon } from '@/app/components/icons/Icon';
+
 import { StandardizedButton } from '@/app/components/admin';
-import { FormSelect, type SelectOption } from '@/app/components/forms';
+import { useAlert } from '@/app/components/alerts';
+import { FormSelect } from '@/app/components/forms';
+import { Icon } from '@/app/components/icons/Icon';
+import { FILE_LIMITS } from '@/lib/constants/dimensions';
+import { supabase } from '@/lib/supabase';
 // Tipos e constantes movidos para inline (seguindo padrão)
 const FILE_TYPES = {
   PDF: 'application/pdf',
@@ -32,8 +34,8 @@ const FILE_TYPE_LABELS = {
 } as const;
 
 const ALLOWED_FILE_TYPES = Object.values(FILE_TYPES);
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_FILE_SIZE_LABEL = '10MB';
+const MAX_FILE_SIZE = FILE_LIMITS.document.maxSizeBytes;
+const MAX_FILE_SIZE_LABEL = FILE_LIMITS.document.label;
 
 // Helper functions
 function formatFileSize(bytes?: number): string {
@@ -102,6 +104,10 @@ interface FormData {
   is_published: boolean;
 }
 
+/**
+ * DocumentForm function
+ * @todo Add proper documentation
+ */
 export function DocumentForm({ document, isOpen, onClose, onSuccess }: DocumentFormProps) {
   const alert = useAlert();
   const [loading, setLoading] = useState(false);
@@ -187,8 +193,8 @@ export function DocumentForm({ document, isOpen, onClose, onSuccess }: DocumentF
       
       setSubsectors((subsectorsData || []) as unknown as Subsector[]);
       
-    } catch (error: any) {
-      console.error('Erro ao carregar dados:', error);
+    } catch (error) {
+      // Error loading subsectors - silent fail for now
     }
   };
 
@@ -201,7 +207,7 @@ export function DocumentForm({ document, isOpen, onClose, onSuccess }: DocumentF
     const file = e.target.files?.[0];
     if (file) {
       // Validar tipo de arquivo
-      if (!ALLOWED_FILE_TYPES.includes(file.type as any)) {
+      if (!ALLOWED_FILE_TYPES.includes(file.type as (typeof ALLOWED_FILE_TYPES)[number])) {
         alert.showError('Arquivo inválido', 'Por favor, selecione um arquivo permitido (PDF, Word, Excel, PowerPoint, TXT, CSV)');
         return;
       }
@@ -252,7 +258,7 @@ export function DocumentForm({ document, isOpen, onClose, onSuccess }: DocumentF
         const allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'csv'];
         
         if (!allowedExtensions.includes(extension)) {
-          console.warn(`Unsupported file extension: ${extension}, defaulting to .bin`);
+
           extension = 'bin';
         }
         
@@ -265,14 +271,14 @@ export function DocumentForm({ document, isOpen, onClose, onSuccess }: DocumentF
       const fileName = `documents-${uniqueId}.${extension}`;
       const filePath = `uploads/${fileName}`;
 
-      const { data, error } = await supabase.storage
+      const { data: _uploadData, error } = await supabase.storage
         .from('images')
         .upload(filePath, documentFile, {
           upsert: false
         });
 
       if (error) {
-        console.error('Erro no upload do arquivo:', error);
+
         throw error;
       }
 
@@ -282,8 +288,8 @@ export function DocumentForm({ document, isOpen, onClose, onSuccess }: DocumentF
         .getPublicUrl(filePath);
 
       return publicUrl;
-    } catch (error: any) {
-      console.error('Erro ao fazer upload do arquivo:', error);
+    } catch (error) {
+      // Upload error - rethrow with generic message
       throw new Error('Erro ao fazer upload do arquivo');
     }
   };
@@ -350,7 +356,7 @@ export function DocumentForm({ document, isOpen, onClose, onSuccess }: DocumentF
       }
 
       // Preparar dados para envio
-      const requestData: any = {
+      const requestData: Record<string, unknown> = {
         title: formData.title,
         description: formData.description || null,
         file_url: finalFileUrl,
@@ -364,7 +370,7 @@ export function DocumentForm({ document, isOpen, onClose, onSuccess }: DocumentF
         ),
       };
 
-      let url = '/api/admin/documents';
+      const url = '/api/admin/documents';
       let method = 'POST';
       
       if (document) {
@@ -411,8 +417,8 @@ export function DocumentForm({ document, isOpen, onClose, onSuccess }: DocumentF
       } else {
         throw new Error(result.error || 'Erro desconhecido');
       }
-    } catch (error: any) {
-      alert.showError('Erro', error.message || 'Erro ao salvar documento');
+    } catch (error) {
+      alert.showError('Erro', error instanceof Error ? error.message : 'Erro ao salvar documento');
     } finally {
       setLoading(false);
     }

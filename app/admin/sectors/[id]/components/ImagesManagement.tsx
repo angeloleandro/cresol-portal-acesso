@@ -1,13 +1,15 @@
 // Componente de gerenciamento de imagens do setor
 
-import React, { useState } from 'react';
 import Image from 'next/image';
-import { useAlert } from '@/app/components/alerts';
-import { SectorImage } from '../types/sector.types';
+import React, { useState } from 'react';
+
 import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
+import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
-import { formatDate } from '@/lib/utils/formatters';
+import { FormatDate } from '@/lib/utils/formatters';
+
+import { SectorImage } from '../types/sector.types';
 // Componente simples de upload inline
 
 interface ImagesManagementProps {
@@ -20,6 +22,10 @@ interface ImagesManagementProps {
   onDelete: (id: string) => Promise<void>;
 }
 
+/**
+ * ImagesManagement function
+ * @todo Add proper documentation
+ */
 export function ImagesManagement({
   sectorId,
   images,
@@ -155,8 +161,7 @@ export function ImagesManagement({
       }
       
     } catch (error: any) {
-      console.error('Erro ao salvar imagem:', error);
-      
+
       const userMessage = error.message.includes('fetch')
         ? 'Erro de conexão. Verifique sua internet e tente novamente.'
         : error.message || 'Erro desconhecido ao salvar imagem. Tente novamente.';
@@ -222,7 +227,7 @@ export function ImagesManagement({
       alert.showSuccess('Imagem enviada', 'A imagem foi enviada e processada com sucesso.');
 
     } catch (error: any) {
-      console.error('Erro no upload:', error);
+
       setUploadError(error.message || 'Erro ao fazer upload da imagem');
       throw error;
     } finally {
@@ -235,7 +240,7 @@ export function ImagesManagement({
       await onDelete(imageToDelete.id);
       alert.showSuccess('Imagem excluída', 'A imagem foi removida com sucesso.');
     } catch (error) {
-      console.error('Erro ao deletar imagem:', error);
+
       alert.showError('Erro ao deletar imagem', error instanceof Error ? error.message : 'Erro desconhecido');
     }
   };
@@ -336,7 +341,7 @@ export function ImagesManagement({
                   </p>
                 )}
                 <div className="text-xs text-gray-500 mb-3">
-                  <p>{formatDate(image.created_at)}</p>
+                  <p>{FormatDate(image.created_at)}</p>
                   {image.file_size && (
                     <p>{formatFileSize(image.file_size)}</p>
                   )}

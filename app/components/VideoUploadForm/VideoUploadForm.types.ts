@@ -1,7 +1,4 @@
-/**
- * Local VideoUploadForm component types
- * Extends the main video system types for component-specific use
- */
+
 
 export * from '@/lib/types/video-system'
 

@@ -1,12 +1,14 @@
 // Componente de gerenciamento de documentos do subsetor
 
 import React, { useState, useMemo } from 'react';
-import { SubsectorDocument } from '../types/subsector.types';
+
 import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
-import DeleteModal from '@/app/components/ui/DeleteModal';
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
-import { formatFileSize } from '@/lib/utils/formatters';
+import DeleteModal from '@/app/components/ui/DeleteModal';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { FormatFileSize } from '@/lib/utils/formatters';
+
+import { SubsectorDocument } from '../types/subsector.types';
 
 interface DocumentsManagementProps {
   subsectorId: string;
@@ -18,6 +20,10 @@ interface DocumentsManagementProps {
   onDelete: (id: string) => Promise<void>;
 }
 
+/**
+ * DocumentsManagement function
+ * @todo Add proper documentation
+ */
 export function DocumentsManagement({
   subsectorId,
   documents,
@@ -197,10 +203,9 @@ export function DocumentsManagement({
       await onDelete(documentItem.id);
       // onDelete já chama refreshContent internamente
     } catch (error) {
-      console.error('Erro ao deletar documento:', error);
+
     }
   };
-
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
@@ -267,7 +272,7 @@ export function DocumentsManagement({
                       </span>
                     )}
                     {item.file_size && (
-                      <span>{formatFileSize(item.file_size)}</span>
+                      <span>{FormatFileSize(item.file_size)}</span>
                     )}
                   </div>
                 </div>

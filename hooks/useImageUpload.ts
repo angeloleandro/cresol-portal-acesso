@@ -5,7 +5,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { supabase } from '@/lib/supabase';
 import { useAlert } from '@/app/components/alerts';
-import { getCroppedImg, uploadImageToSupabase, validateImageFile } from '@/lib/utils/imageProcessing';
+import { getCroppedImg, uploadImageToSupabase, ValidateImageFile } from '@/lib/utils/imageProcessing';
 import { CropArea } from '@/lib/types/common';
 
 interface UseImageUploadOptions {
@@ -38,6 +38,10 @@ interface UseImageUploadReturn {
   uploadImage: (file: File) => Promise<string>;
 }
 
+/**
+ * useImageUpload function
+ * @todo Add proper documentation
+ */
 export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUploadReturn {
   const {
     bucket = 'images',
@@ -140,7 +144,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     if (!file) return;
 
     // Validate file
-    const validation = validateImageFile(file);
+    const validation = ValidateImageFile(file);
     if (!validation.valid) {
       showWarning(validation.error || 'Arquivo inválido');
       return;

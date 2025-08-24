@@ -1,38 +1,40 @@
 "use client";
 
-/**
- * VideoUploadForm Root Component
- * Enterprise-grade video upload form with modular architecture
- */
-
-import { useReducer, useCallback, useEffect, useMemo, memo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { VideoFormProps, VideoUploadFormInternalState } from './VideoUploadForm.types'
-import { 
-  videoUploadReducer, 
-  initialVideoUploadState, 
-  videoUploadSelectors, 
-  videoUploadActions 
-} from './VideoUploadForm.reducer'
-// Import subcomponents
-import { VideoUploadFormHeader } from './VideoUploadForm.Header'
-import { VideoUploadFormTypeSelect } from './VideoUploadForm.TypeSelect'
-import { VideoUploadFormYouTubeInput } from './VideoUploadForm.YouTubeInput'
-import { VideoUploadFormFileUpload } from './VideoUploadForm.FileUpload'
-import { VideoUploadFormSimpleThumbnail } from './VideoUploadForm.SimpleThumbnail'
-import { VideoUploadFormAsyncThumbnailStatus } from './VideoUploadForm.AsyncThumbnailStatus'
-import { VideoUploadFormSettings } from './VideoUploadForm.Settings'
+import { useReducer, useCallback, useEffect, useMemo, memo, useState } from 'react'
 
-// API functions
-import { supabase } from '@/lib/supabase'
-import { getAuthenticatedSession, makeAuthenticatedRequest } from '@/lib/video-utils'
-import { Icon } from '../icons/Icon'
 import {
   VIDEO_API_CONFIG,
   VIDEO_UI_CONFIG,
   VIDEO_MESSAGES,
   VIDEO_HELPERS
 } from '@/lib/constants/video-ui'
+import { supabase } from '@/lib/supabase'
+import { getAuthenticatedSession, makeAuthenticatedRequest } from '@/lib/video-utils'
+
+import { VideoUploadFormAsyncThumbnailStatus } from './VideoUploadForm.AsyncThumbnailStatus'
+import { VideoUploadFormFileUpload } from './VideoUploadForm.FileUpload'
+import { VideoUploadFormHeader } from './VideoUploadForm.Header'
+import { 
+  VideoUploadReducer as videoUploadReducer, 
+  initialVideoUploadState, 
+  videoUploadSelectors, 
+  videoUploadActions 
+} from './VideoUploadForm.reducer'
+
+
+// Import subcomponents
+import { VideoUploadFormSimpleThumbnail } from './VideoUploadForm.SimpleThumbnail'
+import { VideoUploadFormTypeSelect } from './VideoUploadForm.TypeSelect'
+import { VideoUploadFormYouTubeInput } from './VideoUploadForm.YouTubeInput'
+import { VideoUploadFormSettings } from './VideoUploadForm.Settings'
+
+// API functions
+
+import { Icon } from '../icons/Icon'
+
+import type { VideoFormProps, VideoUploadFormInternalState } from './VideoUploadForm.types'
+
 
 export const VideoUploadFormRoot = memo(({ 
   initialData, 
@@ -131,8 +133,7 @@ export const VideoUploadFormRoot = memo(({
   const isUploading = useMemo(() => videoUploadSelectors.isUploading(state), [state])
   const canSave = useMemo(() => videoUploadSelectors.canSave(state), [state])
   const generalError = useMemo(() => videoUploadSelectors.getGeneralError(state), [state])
-  
-  
+
   // Form handlers
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(videoUploadActions.setFormData({ title: e.target.value }))
@@ -498,7 +499,6 @@ export const VideoUploadFormRoot = memo(({
               upload_type: 'youtube',
               thumbnail_timestamp: finalThumbnailTimestamp
             }
-
 
         if (initialData?.id) {
           

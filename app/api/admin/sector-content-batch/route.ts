@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 
+import { CreateAdminSupabaseClient } from '@/lib/supabase/admin';
+
+
+/**
+ * GET function
+ * @todo Add proper documentation
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -14,7 +20,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
 
     // Buscar notícias do setor
     let newsQuery = supabase
@@ -118,19 +124,7 @@ export async function GET(request: NextRequest) {
     const videosData = videosResult.data || [];
     const imagesData = imagesResult.data || [];
     
-    // Log para debug de vídeos
-    console.log('[SECTOR-BATCH] Vídeos retornados:', {
-      count: videosData.length,
-      videos: videosData.map(v => ({
-        id: v.id,
-        title: v.title,
-        upload_type: v.upload_type,
-        thumbnail_url: v.thumbnail_url,
-        thumbnail_mode: v.thumbnail_mode,
-        thumbnail_timestamp: v.thumbnail_timestamp,
-        is_published: v.is_published
-      }))
-    });
+    // Debug video logging removed for production
 
     const draftNewsCount = newsData.filter(item => !item.is_published).length;
     const draftEventsCount = eventsData.filter(item => !item.is_published).length;
@@ -183,7 +177,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
 
     let result;
     switch (type) {
@@ -255,7 +249,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
 
     let result;
     switch (type) {
@@ -331,7 +325,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
 
     let result;
     switch (type) {

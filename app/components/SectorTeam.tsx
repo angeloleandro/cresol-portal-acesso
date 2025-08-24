@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import OptimizedImage from './OptimizedImage';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+
 import { Icon } from './icons';
+import OptimizedImage from './OptimizedImage';
+
 import type { SectorTeamMember } from '@/types/team';
 
 interface SectorTeamProps {

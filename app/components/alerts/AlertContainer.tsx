@@ -1,20 +1,14 @@
 'use client';
 
-/**
- * AlertContainer - Renderizador de Toasts
- * 
- * Responsável por posicionar e gerenciar toasts na tela
- * Suporta diferentes posições e stacking automático
- */
-
-import React, { useContext } from 'react';
 import { Box, Portal } from '@chakra-ui/react';
 import { AnimatePresence, motion } from 'framer-motion';
+import React, { useContext } from 'react';
+
 import { Alert } from './Alert';
 import { AlertContext } from './AlertProvider';
-import type { AlertContainerProps, AlertPosition } from './types';
-
 import { logger } from '../../../lib/production-logger';
+
+import type { AlertContainerProps, AlertPosition } from './types';
 /**
  * Configurações de posicionamento por posição
  */

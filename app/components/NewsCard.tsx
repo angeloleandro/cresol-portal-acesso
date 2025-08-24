@@ -1,10 +1,11 @@
 'use client';
 
-import { memo, useCallback } from 'react';
+import clsx from 'clsx';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import Link from 'next/link';
-import clsx from 'clsx';
+import { memo, useCallback } from 'react';
+
 import OptimizedImage from './OptimizedImage';
 
 /**
@@ -33,10 +34,6 @@ export interface NewsCardProps {
   showImage?: boolean;
 }
 
-/**
- * Horizontal News Card Component
- * Adapts Chakra UI Card horizontal pattern for news content
- */
 export const HorizontalNewsCard = memo(({
   news,
   className,
@@ -140,10 +137,6 @@ export const HorizontalNewsCard = memo(({
 
 HorizontalNewsCard.displayName = 'HorizontalNewsCard';
 
-/**
- * Compact News Card Component
- * For sidebar or reduced space layouts
- */
 export const CompactNewsCard = memo(({
   news,
   className,
@@ -187,10 +180,6 @@ export const CompactNewsCard = memo(({
 
 CompactNewsCard.displayName = 'CompactNewsCard';
 
-/**
- * Featured News Card Component
- * Larger card for highlighting important news
- */
 export const FeaturedNewsCard = memo(({
   news,
   className,

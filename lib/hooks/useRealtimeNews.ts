@@ -1,12 +1,12 @@
-/**
- * Hook para subscription realtime de notícias e eventos
- * Otimizado para performance com filtros seletivos
- */
-
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
+
 import { logger } from '../production-logger';
+
+
+
 
 interface RealtimeNewsOptions {
   sectorId?: string;
@@ -41,6 +41,10 @@ interface EventItem {
   updated_at: string;
 }
 
+/**
+ * useRealtimeNews function
+ * @todo Add proper documentation
+ */
 export function useRealtimeNews(options: RealtimeNewsOptions = {}) {
   const {
     sectorId,

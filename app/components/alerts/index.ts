@@ -1,18 +1,11 @@
-/**
- * Sistema de Alertas Cresol - Exports Centralizados
- * 
- * Ponto único de importação para todos os componentes e utilitários
- * do sistema de alertas baseado em Chakra UI v3
- * 
- * Uso:
- * ```
- * import { useAlert, AlertProvider, AlertContainer } from '@/app/components/alerts';
- * ```
- */
-
 import React from 'react';
+
 import { AlertProvider } from './AlertProvider';
+
 import type { AlertPosition, AlertStatus, AlertVariant } from './types';
+
+
+
 
 // =====================================================
 // COMPONENTES PRINCIPAIS
@@ -56,8 +49,8 @@ export {
   MODULE_MESSAGES,
   SYSTEM_MESSAGES,
   ERROR_MESSAGES,
-  generateCrudMessage,
-  generateEntityMessage
+  GenerateCrudMessage,
+  GenerateEntityMessage
 } from './messages';
 
 // =====================================================
@@ -195,54 +188,3 @@ export type { ReactNode } from 'react';
 // DOCUMENTAÇÃO DE USO
 // =====================================================
 
-/**
- * GUIA DE INÍCIO RÁPIDO
- * 
- * 1. Instalar no layout principal:
- * ```tsx
- * import { AlertProvider, AlertContainer } from '@/app/components/alerts';
- * 
- * function Layout({ children }) {
- *   return (
- *     <AlertProvider>
- *       {children}
- *       <AlertContainer />
- *     </AlertProvider>
- *   );
- * }
- * ```
- * 
- * 2. Usar em componentes:
- * ```tsx
- * import { useAlert } from '@/app/components/alerts';
- * 
- * function MyComponent() {
- *   const alert = useAlert();
- *   
- *   const handleSave = async () => {
- *     try {
- *       await saveData();
- *       alert.showSuccess('Dados salvos com sucesso!');
- *     } catch (error) {
- *       alert.showError('Erro ao salvar dados', error.message);
- *     }
- *   };
- * }
- * ```
- * 
- * 3. Usar mensagens padronizadas:
- * ```tsx
- * const alert = useAlert();
- * 
- * // Sucesso em operações CRUD
- * alert.users.created();
- * alert.collections.statusChanged(true);
- * 
- * // Operações assíncronas com loading
- * await alert.handleAsyncOperation(
- *   () => uploadFile(),
- *   'Enviando arquivo...',
- *   'Arquivo enviado com sucesso!'
- * );
- * ```
- */

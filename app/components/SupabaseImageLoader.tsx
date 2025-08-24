@@ -3,11 +3,8 @@
 import { ImageLoaderProps } from 'next/image';
 
 import { logger } from '../../lib/production-logger';
-/**
- * Loader customizado para imagens do Supabase Storage
- * Otimiza URLs e adiciona parâmetros de transformação quando disponível
- */
-export default function supabaseImageLoader({ src, width, quality }: ImageLoaderProps): string {
+
+export default function SupabaseImageLoader({ src, width, quality }: ImageLoaderProps): string {
   // Se já é uma URL completa válida, use como está
   if (src.startsWith('https://') && src.includes('supabase.co')) {
     return src;
@@ -58,5 +55,5 @@ export default function supabaseImageLoader({ src, width, quality }: ImageLoader
  * Hook para usar o loader do Supabase com Next.js Image
  */
 export const useSupabaseLoader = () => {
-  return supabaseImageLoader;
+  return SupabaseImageLoader;
 };

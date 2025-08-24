@@ -1,18 +1,15 @@
-/**
- * ImagePreview - Complete Image Preview System
- * Main component that combines grid, modal, and all features
- */
+
 
 "use client";
 
-import { useImagePreview, useImagePreloading } from './ImagePreview.hooks';
 import { ImageGrid, ImageMasonryGrid } from './ImagePreview.Grid';
+import { useImagePreview, useImagePreloading } from './ImagePreview.hooks';
 import { ImageModal } from './ImagePreview.Modal';
 import { ImagePreviewProps, ImagePreviewWithGridProps, GalleryImage } from './ImagePreview.types';
 
 /**
- * Complete ImagePreview System
- * Includes grid display and modal preview with navigation
+ * ImagePreview function
+ * @todo Add proper documentation
  */
 export function ImagePreview({
   images,
@@ -22,18 +19,14 @@ export function ImagePreview({
   onImageChange,
   showNavigation = true,
   showInfo = true,
-  closeOnBackdrop = true,
-  enableKeyboard = true,
-  quality = 90
+  closeOnBackdrop: _closeOnBackdrop = true,
+  enableKeyboard: _enableKeyboard = true,
+  quality: _quality = 90
 }: ImagePreviewProps) {
   const {
-    currentImage,
     currentIndex: internalCurrentIndex,
     isOpen: internalIsOpen,
-    openModal,
     closeModal,
-    nextImage,
-    previousImage,
     goToImage
   } = useImagePreview(images);
 
@@ -85,8 +78,8 @@ export function ImagePreview({
 }
 
 /**
- * ImagePreview with Grid Display
- * Complete solution with both grid and modal
+ * ImagePreviewWithGrid function
+ * @todo Add proper documentation
  */
 export function ImagePreviewWithGrid({
   images,
@@ -104,8 +97,8 @@ export function ImagePreviewWithGrid({
   thumbnailQuality = 75,
   showNavigation = true,
   showInfo = true,
-  enableKeyboard = true,
-  modalQuality = 90,
+  enableKeyboard: _enableKeyboard = true,
+  modalQuality: _modalQuality = 90,
   layout = 'grid'
 }: ImagePreviewWithGridProps) {
   const {
@@ -152,8 +145,8 @@ export function ImagePreviewWithGrid({
 }
 
 /**
- * Lightweight Image Grid Only (without modal)
- * For cases where you want to handle modal externally
+ * ImagePreviewGrid function
+ * @todo Add proper documentation
  */
 export function ImagePreviewGrid({
   images,
@@ -209,8 +202,8 @@ export function ImagePreviewGrid({
 }
 
 /**
- * Modal Only Component
- * For cases where you have your own grid implementation
+ * ImagePreviewModal function
+ * @todo Add proper documentation
  */
 export function ImagePreviewModal({
   image,

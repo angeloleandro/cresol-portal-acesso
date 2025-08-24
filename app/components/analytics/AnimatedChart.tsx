@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, memo, useCallback, useMemo } from 'react';
+import { memo, useState, useEffect } from 'react';
+
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface ChartData {
   label: string;
@@ -52,8 +52,8 @@ const AnimatedChart = memo(function AnimatedChart({
       const progress = Math.min(currentStep / steps, 1);
       const easeOutCubic = 1 - Math.pow(1 - progress, 3);
 
-      setAnimatedData(prevData =>
-        data.map((item, index) => ({
+      setAnimatedData((prevData: ChartData[]) =>
+        data.map((item: ChartData, index: number) => ({
           ...item,
           value: item.value * easeOutCubic
         }))
@@ -81,7 +81,7 @@ const AnimatedChart = memo(function AnimatedChart({
 
   const renderBarChart = () => (
     <div className="space-y-6">
-      {animatedData.map((item, index) => (
+      {animatedData.map((item: ChartData, index: number) => (
         <div key={item.label} className="group">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700 truncate">
@@ -132,13 +132,13 @@ const AnimatedChart = memo(function AnimatedChart({
 
     if (!mounted) return <div className="h-[200px] bg-gray-100 rounded-lg animate-pulse"></div>;
 
-    const points = animatedData.map((item, index) => {
+    const points = animatedData.map((item: ChartData, index: number) => {
       const x = (index / (animatedData.length - 1)) * (chartWidth - padding * 2) + padding;
       const y = chartHeight - ((item.value / maxValue) * (chartHeight - padding * 2)) - padding;
       return { x, y, ...item };
     });
 
-    const pathD = points.reduce((path, point, index) => {
+    const pathD = points.reduce((path: string, point: { x: number; y: number } & ChartData, index: number) => {
       if (index === 0) {
         return `M ${point.x} ${point.y}`;
       } else {
@@ -202,7 +202,7 @@ const AnimatedChart = memo(function AnimatedChart({
             />
 
             {/* Data Points */}
-            {points.map((point, index) => (
+            {points.map((point: { x: number; y: number } & ChartData, index: number) => (
               <g key={index}>
                 <circle
                   cx={point.x}
@@ -225,7 +225,7 @@ const AnimatedChart = memo(function AnimatedChart({
 
           {/* Value Labels */}
           <div className="absolute inset-0 pointer-events-none">
-            {points.map((point, index) => (
+            {points.map((point: { x: number; y: number } & ChartData, index: number) => (
               <div
                 key={index}
                 className="absolute transform -translate-x-1/2 -translate-y-8 opacity-0 hover:opacity-100 transition-opacity"

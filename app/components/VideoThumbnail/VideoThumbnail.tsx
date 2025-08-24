@@ -1,21 +1,17 @@
-/**
- * VideoThumbnail Component
- * Enterprise-grade thumbnail system with performance optimizations and elegant fallbacks
- */
+
 
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
-import OptimizedImage from '../OptimizedImage';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef, useCallback } from 'react';
+
 import { Icon } from '../icons/Icon';
+import OptimizedImage from '../OptimizedImage';
 import { 
-  VideoThumbnailProps, 
-  ThumbnailVariant,
-  AspectRatio,
-  OverlayVariant
-} from './VideoThumbnail.types';
+  useThumbnail,
+  useThumbnailLazyLoading
+} from './VideoThumbnail.hooks';
 import { 
   ThumbnailPlaceholder,
   LoadingThumbnailPlaceholder,
@@ -23,9 +19,11 @@ import {
   CompactThumbnailPlaceholder
 } from './VideoThumbnail.Placeholder';
 import { 
-  useThumbnail,
-  useThumbnailLazyLoading
-} from './VideoThumbnail.hooks';
+  VideoThumbnailProps, 
+  ThumbnailVariant,
+  AspectRatio,
+  OverlayVariant
+} from './VideoThumbnail.types';
 import { 
   getThumbnailSizeConfig,
   getAspectRatioClass,
@@ -34,6 +32,10 @@ import {
 
 /**
  * Main VideoThumbnail Component
+ */
+/**
+ * VideoThumbnail function
+ * @todo Add proper documentation
  */
 export function VideoThumbnail({
   video,
@@ -216,7 +218,6 @@ function ThumbnailContent({
       <ThumbnailPlaceholder
         variant={placeholder?.variant || 'gradient'}
         aspectRatio={aspectRatio}
-        size={variant}
         config={placeholder}
         animated={placeholder?.animated !== false}
       />

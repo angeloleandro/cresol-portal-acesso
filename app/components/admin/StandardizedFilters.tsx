@@ -1,8 +1,9 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { CRESOL_UI_CONFIG, CRESOL_SPACING_SYSTEM } from '@/lib/design-tokens';
+
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
+import { CRESOL_UI_CONFIG, CRESOL_SPACING_SYSTEM } from '@/lib/design-tokens';
 
 interface Filter {
   id: string;
@@ -24,17 +25,6 @@ interface StandardizedFiltersProps {
   className?: string;
 }
 
-/**
- * Componente de filtros padronizado seguindo o padrão da página /admin/users
- * 
- * Features:
- * - Layout flexível com suporte a múltiplos filtros
- * - Campo de busca com ícone de lupa
- * - Selects padronizados com estilos consistentes
- * - Estatísticas de contagem (total/filtrado)
- * - Responsividade para mobile
- * - Estados focus consistentes
- */
 export default function StandardizedFilters({
   filters,
   stats,

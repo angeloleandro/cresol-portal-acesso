@@ -1,7 +1,4 @@
-/**
- * Environment Variables Validator
- * Valida todas as variáveis de ambiente necessárias para produção
- */
+
 
 interface EnvConfig {
   name: string;
@@ -115,6 +112,10 @@ interface ValidationResult {
 /**
  * Valida todas as variáveis de ambiente
  */
+/**
+ * validateEnvironment function
+ * @todo Add proper documentation
+ */
 export function validateEnvironment(): ValidationResult {
   const result: ValidationResult = {
     isValid: true,
@@ -224,6 +225,10 @@ export function validateEnvironment(): ValidationResult {
 /**
  * Gera relatório formatado de validação
  */
+/**
+ * generateValidationReport function
+ * @todo Add proper documentation
+ */
 export function generateValidationReport(result: ValidationResult): string {
   const lines: string[] = [];
   
@@ -273,9 +278,13 @@ export function generateValidationReport(result: ValidationResult): string {
 /**
  * Hook para usar validação em componentes React
  */
+/**
+ * useEnvironmentValidation function
+ * @todo Add proper documentation
+ */
 export function useEnvironmentValidation() {
   if (typeof window !== 'undefined') {
-    console.warn('Environment validation should only run on the server side');
+
     return { isValid: true, errors: [], warnings: [], missing: [], invalid: [], suggestions: [] };
   }
   
@@ -284,6 +293,10 @@ export function useEnvironmentValidation() {
 
 /**
  * Middleware para validar ambiente na inicialização
+ */
+/**
+ * validateEnvironmentOnStartup function
+ * @todo Add proper documentation
  */
 export function validateEnvironmentOnStartup(): void {
   if (typeof window !== 'undefined') return; // Só no servidor
@@ -294,12 +307,12 @@ export function validateEnvironmentOnStartup(): void {
     console.error('\n' + generateValidationReport(result));
     
     if (process.env.NODE_ENV === 'production') {
-      console.error('\n🚫 ABORTING: Cannot start in production with invalid environment');
+
       process.exit(1);
     } else {
-      console.warn('\n⚠️  WARNING: Development server starting with environment issues');
+
     }
   } else {
-    console.log('\n✅ Environment validation passed - All required variables configured');
+
   }
 }

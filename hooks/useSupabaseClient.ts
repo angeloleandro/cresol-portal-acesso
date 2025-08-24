@@ -5,10 +5,6 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { logger } from '@/lib/production-logger';
 
-/**
- * Hook que retorna um cliente Supabase autenticado
- * Este hook garante que o cliente Supabase sempre tenha a sessão atual
- */
 export const useSupabaseClient = () => {
   const { session } = useAuth();
   

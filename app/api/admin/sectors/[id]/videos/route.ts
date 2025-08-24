@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
+import { CreateClient } from '@/lib/supabase/server';
+
 
 // GET /api/admin/sectors/[id]/videos - Listar vídeos do setor
 export async function GET(
@@ -11,7 +13,7 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams;
     const includeUnpublished = searchParams.get('includeUnpublished') === 'true';
     
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar autenticação
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -91,7 +93,7 @@ export async function POST(
     const sectorId = params.id;
     const body = await request.json();
     
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar autenticação
     const { data: { user }, error: authError } = await supabase.auth.getUser();

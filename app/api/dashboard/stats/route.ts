@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+
+
 
 // Força renderização dinâmica para usar cookies
 export const dynamic = 'force-dynamic';
@@ -39,7 +41,7 @@ async function createAuthenticatedClient() {
 }
 
 // GET - Buscar estatísticas do dashboard em batch (1 chamada otimizada)
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const supabase = await createAuthenticatedClient();
     
@@ -52,7 +54,6 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
-
 
     // Datas para filtros de 30 dias
     const now = new Date();
@@ -185,7 +186,6 @@ export async function GET(request: NextRequest) {
       recentSystems: (recentSystemsResult as any)?.data || []
     };
 
-
     return NextResponse.json({
       success: true,
       data: stats,
@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[Dashboard-Stats] ❌ Erro crítico:', error.message);
+
     return NextResponse.json(
       { 
         error: 'Erro interno do servidor',

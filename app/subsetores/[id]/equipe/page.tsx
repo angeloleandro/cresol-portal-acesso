@@ -1,16 +1,19 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
-import { Icon } from '../../../components/icons';
-import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import Breadcrumb from '../../../components/Breadcrumb';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+
 import { useAlert } from '@/app/components/alerts';
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
+import OptimizedImage from '@/app/components/OptimizedImage';
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
+import Breadcrumb from '../../../components/Breadcrumb';
+import { Icon } from '../../../components/icons';
+
 
 interface User {
   id: string;

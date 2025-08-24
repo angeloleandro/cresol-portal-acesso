@@ -1,8 +1,10 @@
 'use client';
 
-import { ReactNode, useEffect, useState, useRef } from 'react';
 import { Disclosure } from '@headlessui/react';
+import { ReactNode, useEffect, useState, useRef } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
+
 import { NumberTicker } from './NumberTicker';
 
 interface AccessibleMetricCardProps {

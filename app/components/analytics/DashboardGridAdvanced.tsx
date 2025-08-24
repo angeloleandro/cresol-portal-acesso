@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useEffect, memo, useCallback, useMemo } from 'react';
+import { ReactNode, memo, useState, useEffect } from 'react';
 
 interface DashboardGridAdvancedProps {
   children: ReactNode;
@@ -487,6 +487,10 @@ interface MetricsGridAdvancedProps extends Omit<DashboardGridAdvancedProps, 'lay
   metrics?: 'compact' | 'standard' | 'detailed';
 }
 
+/**
+ * MetricsGridAdvanced function
+ * @todo Add proper documentation
+ */
 export function MetricsGridAdvanced({ 
   metrics = 'standard', 
   columns = { xs: 1, sm: 2, md: 2, lg: 4, xl: 4, '2xl': 6 },
@@ -513,6 +517,10 @@ interface ChartsGridAdvancedProps extends Omit<DashboardGridAdvancedProps, 'layo
   chartSize?: 'small' | 'medium' | 'large';
 }
 
+/**
+ * ChartsGridAdvanced function
+ * @todo Add proper documentation
+ */
 export function ChartsGridAdvanced({ 
   chartSize = 'medium',
   columns = { xs: 1, sm: 1, md: 2, lg: 2, xl: 3, '2xl': 3 },

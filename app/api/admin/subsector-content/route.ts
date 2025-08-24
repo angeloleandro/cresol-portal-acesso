@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+
+
 import { HTTP_STATUS, API_ERROR_MESSAGES } from '@/lib/constants/api-config';
+import { CreateAdminSupabaseClient } from '@/lib/supabase/admin';
+
 
 // Função para criar cliente do servidor com autenticação
 async function createAuthenticatedClient() {
@@ -32,7 +35,7 @@ async function createAuthenticatedClient() {
 
 // Função para operações administrativas  
 function createAdminClient() {
-  return createAdminSupabaseClient();
+  return CreateAdminSupabaseClient();
 }
 
 // POST - Criar novo conteúdo do subsetor (notícia, evento ou mensagem)

@@ -1,7 +1,4 @@
-/**
- * VideoGallery Module Exports
- * Enterprise-grade video gallery system
- */
+
 
 // Main Components
 export { VideoGalleryRoot as default } from './VideoGallery.Root';
@@ -10,6 +7,8 @@ export { CompactVideoGallery } from './VideoGallery.Root';
 
 // Sub-components
 export { VideoGalleryGrid, GridSystem, useGridLayout } from './VideoGallery.Grid';
+import { createContext, useContext } from 'react';
+
 import { GridSystem } from './VideoGallery.Grid';
 import { DashboardVideo } from '../../types/video';
 export { 
@@ -78,7 +77,7 @@ export type { AdminVideoCardProps } from './VideoGallery.Card';
 
 // Animations
 export {
-  cardAnimations,
+  CardAnimations,
   modalAnimations,
   containerAnimations,
   headerAnimations,
@@ -196,7 +195,6 @@ export const videoGalleryUtils = {
 /**
  * VideoGallery Context Provider (optional)
  */
-import { createContext, useContext } from 'react';
 
 interface VideoGalleryContextValue {
   enableAnimations: boolean;
@@ -215,7 +213,7 @@ export const useVideoGalleryContext = () => {
       errorReporting: (error: Error, context: string) => {
         // Production error reporting should be handled by error tracking service
         if (process.env.NODE_ENV === 'development') {
-          console.error(`VideoGallery Error [${context}]:`, error);
+
         }
       }
     };

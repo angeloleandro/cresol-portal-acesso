@@ -1,17 +1,18 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useEffect, useState, useCallback } from 'react';
+
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
-import { handleComponentError, devLog } from '@/lib/error-handler';
+import { FormSelect } from '@/app/components/forms/FormSelect';
+import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
+import ErrorMessage from '@/app/components/ui/ErrorMessage';
+import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import ErrorMessage from '@/app/components/ui/ErrorMessage';
-import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
-import { FormSelect } from '@/app/components/forms/FormSelect';
+import { handleComponentError, devLog } from '@/lib/error-handler';
+import { supabase } from '@/lib/supabase';
 
 interface EconomicIndicator {
   id?: string;

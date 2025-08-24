@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 export interface FormFieldProps {
@@ -19,34 +20,6 @@ export interface FormFieldProps {
   onIconClick?: () => void;
 }
 
-/**
- * FormField - Professional form field wrapper
- * 
- * Enterprise-grade form field component that provides:
- * - Consistent styling across all form elements
- * - Integrated label, error, and help text handling
- * - Icon support with click handlers
- * - Responsive layout management
- * - Full WCAG 2.1 AA accessibility compliance
- * - Loading and error states
- * - Cresol design system integration
- * 
- * Based on Chakra UI v3 patterns with React Hook Form compatibility
- * 
- * @param children - Form input element (FormInput, FormSelect, etc.)
- * @param label - Field label text
- * @param error - Error message to display
- * @param helpText - Additional help text
- * @param required - Whether field is required
- * @param className - Additional CSS classes
- * @param id - Field ID for accessibility
- * @param disabled - Whether field is disabled
- * @param loading - Loading state
- * @param success - Success state
- * @param startIcon - Icon name for start position
- * @param endIcon - Icon name for end position
- * @param onIconClick - Icon click handler
- */
 export const FormField: React.FC<FormFieldProps> = ({
   children,
   label,

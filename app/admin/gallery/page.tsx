@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { StandardizedButton } from "@/app/components/admin";
+import { useEffect, useState } from "react";
+
 import { supabase } from "@/lib/supabase";
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import CollectionsManager from '@/app/admin/collections/components/CollectionsManager';
+import { StandardizedButton } from "@/app/components/admin";
 import AdminHeader from "@/app/components/AdminHeader";
+import AdminImageGallery from '@/app/components/AdminImageGallery';
 import Breadcrumb from "@/app/components/Breadcrumb";
+import { useCollections } from '@/app/contexts/CollectionsContext';
+import Icon from '@/app/components/icons/Icon';
 import ImageUploadForm from "@/app/components/ImageUploadForm";
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import CollectionsManager from '@/app/admin/collections/components/CollectionsManager';
-import { useCollections } from '@/app/components/Collections/Collection.hooks';
-import Icon from '@/app/components/icons/Icon';
-import AdminImageGallery from '@/app/components/AdminImageGallery';
 // (Você pode criar um ImageUploadForm.tsx depois, por enquanto use um placeholder)
 
 interface GalleryImage {

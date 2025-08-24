@@ -1,5 +1,7 @@
 import { createSystem, defaultConfig } from "@chakra-ui/react";
+
 import { CRESOL_COLORS, CRESOL_SHADOWS, CRESOL_RADIUS } from "@/lib/design-tokens/design-tokens";
+
 
 // Mapear design tokens Cresol para paleta Chakra UI v3 (com estrutura { value: string })
 const cresolColors = {

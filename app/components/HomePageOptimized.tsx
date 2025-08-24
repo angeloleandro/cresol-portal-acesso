@@ -1,11 +1,13 @@
 'use client';
 
 import { lazy } from 'react';
+
 import { useHomePageData } from '@/hooks/useParallelDataFetch';
-import Navbar from './Navbar';
-import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
-import { InlineSuspense } from './OptimizedSuspense';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+
+import Navbar from './Navbar';
+import { InlineSuspense } from './OptimizedSuspense';
+import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 
 // Lazy load componentes pesados
 const BannerCarousel = lazy(() => import('./BannerCarousel'));
@@ -19,16 +21,9 @@ const GlobalSearch = lazy(() => import('./GlobalSearch'));
 const SistemasLateral = lazy(() => import('./SistemasLateral'));
 const ParecerSolicitacao = lazy(() => import('./ParecerSolicitacao'));
 
-/**
- * Versão otimizada da página home com:
- * - Carregamento paralelo de todos os dados
- * - Lazy loading de componentes
- * - Suspense boundaries otimizados
- * - Cache integrado
- */
 export default function HomePageOptimized() {
   // Carrega todos os dados em paralelo
-  const { loading, error, banners, news, events, videos, gallery, systemLinks } = useHomePageData();
+  const { loading, error, banners: _banners, news: _news, events: _events, videos: _videos, gallery: _gallery, systemLinks: _systemLinks } = useHomePageData();
   
   // Se ainda está carregando dados críticos, mostra loading
   if (loading) {

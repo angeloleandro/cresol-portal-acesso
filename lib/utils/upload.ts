@@ -2,6 +2,7 @@
 // Utilitários para gerenciamento de upload de arquivos
 
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+
 import { COLLECTION_CONFIG, ERROR_MESSAGES } from '@/lib/constants/collections';
 
 export interface UploadProgress {
@@ -31,7 +32,7 @@ export async function uploadCollectionCover(
       return { success: false, error: ERROR_MESSAGES.FILE_TOO_LARGE };
     }
 
-    if (!COLLECTION_CONFIG.ALLOWED_IMAGE_TYPES.includes(file.type as any)) {
+    if (!COLLECTION_CONFIG.ALLOWED_IMAGE_TYPES.includes(file.type as (typeof COLLECTION_CONFIG.ALLOWED_IMAGE_TYPES)[number])) {
       return { success: false, error: ERROR_MESSAGES.INVALID_FILE_TYPE };
     }
 
@@ -75,7 +76,6 @@ export async function uploadCollectionCover(
     };
 
   } catch (error) {
-    console.error('Erro no upload:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR 
@@ -104,7 +104,6 @@ export async function removeCollectionCover(filePath: string): Promise<boolean> 
 
     return response.ok;
   } catch (error) {
-    console.error('Erro ao remover arquivo:', error);
     return false;
   }
 }
@@ -125,7 +124,7 @@ export async function uploadToSupabaseStorage(
     const uint8Array = new Uint8Array(fileBuffer);
 
     // Upload
-    const { data, error } = await supabase.storage
+    const { data: _data, error } = await supabase.storage
       .from(bucket)
       .upload(path, uint8Array, {
         contentType: file.type,
@@ -151,7 +150,6 @@ export async function uploadToSupabaseStorage(
     };
 
   } catch (error) {
-    console.error('Erro no upload direto:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR 
@@ -160,7 +158,7 @@ export async function uploadToSupabaseStorage(
 }
 
 // Validar múltiplos arquivos
-export function validateFiles(files: File[]): { valid: File[]; invalid: { file: File; error: string }[] } {
+export function ValidateFiles(files: File[]): { valid: File[]; invalid: { file: File; error: string }[] } {
   const valid: File[] = [];
   const invalid: { file: File; error: string }[] = [];
 
@@ -177,7 +175,7 @@ export function validateFiles(files: File[]): { valid: File[]; invalid: { file: 
       ...COLLECTION_CONFIG.ALLOWED_VIDEO_TYPES,
     ];
 
-    if (!allAllowedTypes.includes(file.type as any)) {
+    if (!allAllowedTypes.includes(file.type as (typeof allAllowedTypes)[number])) {
       invalid.push({ file, error: ERROR_MESSAGES.INVALID_FILE_TYPE });
       return;
     }
@@ -189,7 +187,7 @@ export function validateFiles(files: File[]): { valid: File[]; invalid: { file: 
 }
 
 // Gerar nome único de arquivo
-export function generateUniqueFileName(originalName: string, prefix = ''): string {
+export function GenerateUniqueFileName(originalName: string, prefix = ''): string {
   const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 15);
   const extension = originalName.split('.').pop() || '';
@@ -203,20 +201,20 @@ export function generateUniqueFileName(originalName: string, prefix = ''): strin
 }
 
 // Obter informações do arquivo
-export function getFileInfo(file: File) {
+export function GetFileInfo(file: File) {
   return {
     name: file.name,
     size: file.size,
     type: file.type,
     lastModified: file.lastModified,
-    sizeFormatted: formatFileSize(file.size),
+    sizeFormatted: FormatFileSize(file.size),
     isImage: file.type.startsWith('image/'),
     isVideo: file.type.startsWith('video/'),
   };
 }
 
 // Formatar tamanho do arquivo
-export function formatFileSize(bytes: number): string {
+export function FormatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B';
 
   const k = 1024;
@@ -227,7 +225,7 @@ export function formatFileSize(bytes: number): string {
 }
 
 // Criar preview de imagem
-export function createImagePreview(file: File): Promise<string> {
+export function CreateImagePreview(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => resolve(e.target?.result as string);
@@ -237,12 +235,12 @@ export function createImagePreview(file: File): Promise<string> {
 }
 
 // Verificar se arquivo é suportado
-export function isSupportedFile(file: File): boolean {
+export function IsSupportedFile(file: File): boolean {
   const supportedTypes = [
     ...COLLECTION_CONFIG.ALLOWED_IMAGE_TYPES,
     ...COLLECTION_CONFIG.ALLOWED_VIDEO_TYPES,
   ];
 
-  return supportedTypes.includes(file.type as any) && 
+  return supportedTypes.includes(file.type as (typeof supportedTypes)[number]) && 
          file.size <= COLLECTION_CONFIG.MAX_FILE_SIZE;
 }

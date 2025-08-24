@@ -1,23 +1,25 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 
 // [DEBUG] Component tracking
-let newsPageRenderCount = 0;
-const newsPageInstanceId = `news-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
-import AdminHeader from '@/app/components/AdminHeader';
-import Breadcrumb from '@/app/components/Breadcrumb';
-import { useAlert } from '@/app/components/alerts';
-import { FormSelect } from '@/app/components/forms';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { Icon } from '@/app/components/icons/Icon';
-import { StandardizedButton } from '@/app/components/admin';
-import { NewsForm } from './components/NewsForm';
-import DeleteModal from '@/app/components/ui/DeleteModal';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
+let _newsPageRenderCount = 0;
+const _newsPageInstanceId = `news-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
 import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
+import { StandardizedButton } from '@/app/components/admin';
+import AdminHeader from '@/app/components/AdminHeader';
+import { useAlert } from '@/app/components/alerts';
+import Breadcrumb from '@/app/components/Breadcrumb';
+import { FormSelect } from '@/app/components/forms';
+import { Icon } from '@/app/components/icons/Icon';
+import DeleteModal from '@/app/components/ui/DeleteModal';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { supabase } from '@/lib/supabase';
+
+import { NewsForm } from './components/NewsForm';
 
 interface News {
   id: string;
@@ -37,13 +39,8 @@ interface News {
 
 export default function NewsAdminPage() {
   // [DEBUG] Component render tracking
-  newsPageRenderCount++;
-  console.log(`[DEBUG-COMPONENT] NewsAdminPage - Render ${newsPageRenderCount}:`, {
-    instanceId: newsPageInstanceId,
-    renderCount: newsPageRenderCount,
-    timestamp: new Date().toISOString(),
-    stackTrace: new Error().stack?.split('\n').slice(1, 4)
-  });
+  _newsPageRenderCount++;
+  // Debug component render logging removed for production
 
   const alert = useAlert();
   const { user } = useAdminAuth();

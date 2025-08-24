@@ -1,9 +1,4 @@
-/**
- * CRESOL PORTAL - DESIGN TOKENS INDEX
- * 
- * Export central de todos os design tokens do sistema
- * Facilita importação e mantém consistência
- */
+
 
 // === DESIGN TOKENS PRINCIPAIS ===
 export {

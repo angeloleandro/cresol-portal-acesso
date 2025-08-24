@@ -1,11 +1,18 @@
-import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import './globals.css'
+
+import { CRESOL_COLORS as COLORS } from '@/lib/design-tokens'
+
+import { AlertContainer } from './components/alerts/AlertContainer'
+import { AlertProvider } from './components/alerts/AlertProvider'
+import { CollectionsProvider } from './contexts/CollectionsContext'
+import { AuthProvider } from './providers/AuthProvider'
 import { ChakraUIProvider } from './providers/ChakraProvider'
 import { NextUIProviderWrapper } from './providers/NextUIProvider'
-import { AuthProvider } from './providers/AuthProvider'
-import { AlertProvider } from './components/alerts/AlertProvider'
-import { AlertContainer } from './components/alerts/AlertContainer'
+
+import type { Metadata } from 'next'
+
+import './globals.css'
+
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -42,9 +49,13 @@ export const metadata: Metadata = {
   },
 }
 
-export function generateViewport() {
+/**
+ * generateViewport function
+ * @todo Add proper documentation
+ */
+export function GenerateViewport() {
   return {
-    themeColor: '#F58220',
+    themeColor: COLORS.primary.DEFAULT,
     colorScheme: 'light',
     width: 'device-width',
     initialScale: 1,
@@ -63,10 +74,12 @@ export default function RootLayout({
           <ChakraUIProvider>
             <AlertProvider>
               <AuthProvider>
-                <main className="min-h-screen bg-gray-50">
-                  {children}
-                </main>
-                <AlertContainer position="top-right" />
+                <CollectionsProvider>
+                  <main className="min-h-screen bg-gray-50">
+                    {children}
+                  </main>
+                  <AlertContainer position="top-right" />
+                </CollectionsProvider>
               </AuthProvider>
             </AlertProvider>
           </ChakraUIProvider>

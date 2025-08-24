@@ -1,16 +1,18 @@
 // Componente de gerenciamento de vídeos do setor
 
-import React, { useState } from 'react';
 import Image from 'next/image';
-import { useAlert } from '@/app/components/alerts';
-import { SectorVideo } from '../types/sector.types';
+import React, { useState } from 'react';
+
 import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
+import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
-import { VideoPlayer } from './VideoPlayerAdapter';
-import { formatDate } from '@/lib/utils/formatters';
 import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { VIDEO_HELPERS } from '@/lib/constants/video-ui';
+import { FormatDate } from '@/lib/utils/formatters';
+
+import { VideoPlayer } from './VideoPlayerAdapter';
+import { SectorVideo } from '../types/sector.types';
 
 interface VideosManagementProps {
   sectorId: string;
@@ -22,6 +24,10 @@ interface VideosManagementProps {
   onDelete: (id: string) => Promise<void>;
 }
 
+/**
+ * VideosManagement function
+ * @todo Add proper documentation
+ */
 export function VideosManagement({
   sectorId,
   videos,
@@ -52,7 +58,7 @@ export function VideosManagement({
       await onDelete(videoToDelete.id);
       alert.showSuccess('Vídeo excluído', 'O vídeo foi removido com sucesso.');
     } catch (error) {
-      console.error('Erro ao deletar vídeo:', error);
+
       alert.showError('Erro ao deletar vídeo', error instanceof Error ? error.message : 'Erro desconhecido');
     }
   };
@@ -162,7 +168,7 @@ export function VideosManagement({
                   </p>
                 )}
                 <p className="text-xs text-gray-500 mb-3">
-                  {formatDate(video.created_at)}
+                  {FormatDate(video.created_at)}
                 </p>
                 
                 {/* Actions */}

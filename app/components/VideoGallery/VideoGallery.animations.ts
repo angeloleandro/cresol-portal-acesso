@@ -1,14 +1,12 @@
-/**
- * VideoGallery Animation System
- * Enterprise-grade animation variants and micro-interactions
- */
-
 import { Variants } from 'framer-motion';
+
+
+
 
 /**
  * Card animation variants with stagger support
  */
-export const cardAnimations: Variants = {
+export const CardAnimations: Variants = {
   hidden: { 
     opacity: 0, 
     y: 20, 
@@ -461,7 +459,7 @@ export const animationPresets = {
 };
 
 const animations = {
-  cardAnimations,
+  CardAnimations,
   modalAnimations,
   containerAnimations,
   headerAnimations,

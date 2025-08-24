@@ -1,12 +1,16 @@
 'use client';
 
-import { useState, useEffect, useMemo, memo } from 'react';
 import Link from 'next/link';
-import { cachedQueries } from '@/lib/supabase/cached-client';
-import { MemoizedNewsCard, MemoizedCompactNewsCard, MemoizedFeaturedNewsCard } from './MemoizedComponents';
-import type { NewsItem } from './NewsCard';
-import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
+import React, { useState, useEffect, memo } from 'react';
+
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { cachedQueries } from '@/lib/supabase/cached-client';
+
+import { MemoizedCompactNewsCard, MemoizedFeaturedNewsCard } from './MemoizedComponents';
+import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
+
+import type { NewsItem } from './NewsCard';
+
 
 interface NoticiasDestaqueProps {
   compact?: boolean;
@@ -41,7 +45,7 @@ function NoticiasDestaque({ compact = false, limit = 4, preloadedData }: Noticia
 
         setFeaturedNews(finalNews);
       } catch (error) {
-        console.error('Erro ao buscar notícias:', error);
+
         setFeaturedNews([]);
       } finally {
         setIsLoading(false);
@@ -125,4 +129,7 @@ function NoticiasDestaque({ compact = false, limit = 4, preloadedData }: Noticia
 }
 
 // Exporta versão memoizada do componente
-export default memo(NoticiasDestaque); 
+const NoticiasDestaqueMemo = memo(NoticiasDestaque);
+NoticiasDestaqueMemo.displayName = 'NoticiasDestaque';
+
+export default NoticiasDestaqueMemo; 

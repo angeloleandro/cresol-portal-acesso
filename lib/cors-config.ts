@@ -1,9 +1,7 @@
-/**
- * CORS Configuration para Next.js API Routes
- * Configuração segura para produção
- */
-
 import { NextRequest, NextResponse } from 'next/server';
+
+
+
 
 export interface CORSOptions {
   origin: string | string[] | boolean;
@@ -36,8 +34,7 @@ const CORS_CONFIGS = {
   production: {
     origin: [
       'https://cresol-portal.vercel.app',
-      'https://hub.cresol.com.br',
-      'https://*.cresol.com.br',
+      'https://hub.cresol.com.br'
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
@@ -46,23 +43,14 @@ const CORS_CONFIGS = {
       'X-Requested-With',
       'Accept',
       'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
     ],
     credentials: true,
-    maxAge: 3600, // 1 hora
-  } as CORSOptions,
-
-  restrictive: {
-    origin: false, // Nenhuma origem externa permitida
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false,
-    maxAge: 300, // 5 minutos
-  } as CORSOptions,
+    maxAge: 86400, // 24 horas
+  } as CORSOptions
 };
 
-/**
- * Verifica se uma origem é permitida
- */
 function isOriginAllowed(origin: string | null | undefined, allowedOrigins: string | string[] | boolean): boolean {
   if (!origin) return true; // Requisições same-origin
 
@@ -90,7 +78,11 @@ function isOriginAllowed(origin: string | null | undefined, allowedOrigins: stri
 /**
  * Aplica configuração CORS em uma response
  */
-export function applyCORSHeaders(
+/**
+ * applyCORSHeaders function
+ * @todo Add proper documentation
+ */
+export function ApplyCORSHeaders(
   request: NextRequest,
   response: NextResponse,
   options: CORSOptions
@@ -129,7 +121,11 @@ export function applyCORSHeaders(
 /**
  * Middleware CORS para API routes
  */
-export function withCORS(
+/**
+ * withCORS function
+ * @todo Add proper documentation
+ */
+export function WithCORS(
   handler: (request: NextRequest) => Promise<NextResponse>,
   options?: Partial<CORSOptions>
 ) {
@@ -144,20 +140,20 @@ export function withCORS(
     // Tratar requisições OPTIONS (preflight)
     if (request.method === 'OPTIONS') {
       const response = new NextResponse(null, { status: 200 });
-      return applyCORSHeaders(request, response, corsOptions);
+      return ApplyCORSHeaders(request, response, corsOptions);
     }
 
     // Executar handler e aplicar CORS
     try {
       const response = await handler(request);
-      return applyCORSHeaders(request, response, corsOptions);
+      return ApplyCORSHeaders(request, response, corsOptions);
     } catch (error) {
       // Em caso de erro, ainda aplicar CORS
       const errorResponse = NextResponse.json(
         { error: 'Internal Server Error' },
         { status: 500 }
       );
-      return applyCORSHeaders(request, errorResponse, corsOptions);
+      return ApplyCORSHeaders(request, errorResponse, corsOptions);
     }
   };
 }
@@ -166,7 +162,7 @@ export function withCORS(
  * CORS para APIs públicas (mais permissivo)
  */
 export const publicCORS = (handler: (request: NextRequest) => Promise<NextResponse>) =>
-  withCORS(handler, {
+  WithCORS(handler, {
     origin: true, // Permitir todas as origens
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: false,
@@ -176,7 +172,7 @@ export const publicCORS = (handler: (request: NextRequest) => Promise<NextRespon
  * CORS para APIs admin (mais restritivo)
  */
 export const adminCORS = (handler: (request: NextRequest) => Promise<NextResponse>) =>
-  withCORS(handler, {
+  WithCORS(handler, {
     origin: process.env.NODE_ENV === 'production' 
       ? CORS_CONFIGS.production.origin 
       : CORS_CONFIGS.development.origin,
@@ -188,7 +184,7 @@ export const adminCORS = (handler: (request: NextRequest) => Promise<NextRespons
  * CORS para APIs de autenticação (mais restritivo)
  */
 export const authCORS = (handler: (request: NextRequest) => Promise<NextResponse>) =>
-  withCORS(handler, {
+  WithCORS(handler, {
     origin: process.env.NODE_ENV === 'production' 
       ? CORS_CONFIGS.production.origin 
       : CORS_CONFIGS.development.origin,
@@ -201,7 +197,7 @@ export const authCORS = (handler: (request: NextRequest) => Promise<NextResponse
  * CORS para upload de arquivos
  */
 export const uploadCORS = (handler: (request: NextRequest) => Promise<NextResponse>) =>
-  withCORS(handler, {
+  WithCORS(handler, {
     origin: process.env.NODE_ENV === 'production' 
       ? CORS_CONFIGS.production.origin 
       : CORS_CONFIGS.development.origin,
@@ -221,15 +217,23 @@ export const uploadCORS = (handler: (request: NextRequest) => Promise<NextRespon
 /**
  * Configuração CORS personalizada para necessidades específicas
  */
-export function customCORS(options: Partial<CORSOptions>) {
+/**
+ * customCORS function
+ * @todo Add proper documentation
+ */
+export function CustomCORS(options: Partial<CORSOptions>) {
   return (handler: (request: NextRequest) => Promise<NextResponse>) =>
-    withCORS(handler, options);
+    WithCORS(handler, options);
 }
 
 /**
  * Helper para adicionar apenas cabeçalhos CORS básicos
  */
-export function addBasicCORS(response: NextResponse, request: NextRequest): NextResponse {
+/**
+ * addBasicCORS function
+ * @todo Add proper documentation
+ */
+export function AddBasicCORS(response: NextResponse, request: NextRequest): NextResponse {
   const origin = request.headers.get('origin');
   
   if (process.env.NODE_ENV === 'development') {
@@ -245,15 +249,19 @@ export function addBasicCORS(response: NextResponse, request: NextRequest): Next
 /**
  * Validar configuração CORS
  */
-export function validateCORSConfig(options: CORSOptions): boolean {
+/**
+ * validateCORSConfig function
+ * @todo Add proper documentation
+ */
+export function ValidateCORSConfig(options: CORSOptions): boolean {
   // Verificar se há configurações inseguras
   if (options.origin === true && process.env.NODE_ENV === 'production') {
-    console.warn('⚠️  AVISO: CORS configurado para permitir todas as origens em produção!');
+    console.warn('CORS: Allowing all origins in production is unsafe');
     return false;
   }
 
   if (options.credentials && options.origin === true) {
-    console.warn('⚠️  AVISO: Credentials habilitado com origin wildcard é inseguro!');
+    console.warn('CORS: Using credentials with wildcard origin is not allowed');
     return false;
   }
 
@@ -263,14 +271,15 @@ export function validateCORSConfig(options: CORSOptions): boolean {
 /**
  * Log de configuração CORS para debugging
  */
-export function logCORSConfig() {
+/**
+ * logCORSConfig function
+ * @todo Add proper documentation
+ */
+export function LogCORSConfig() {
   const env = process.env.NODE_ENV || 'development';
   const config = env === 'production' ? CORS_CONFIGS.production : CORS_CONFIGS.development;
   
-  console.log(`🌐 CORS configurado para ${env}:`, {
-    origin: config.origin,
-    credentials: config.credentials,
-    methods: config.methods.length,
-    headers: config.allowedHeaders.length,
-  });
+  if (process.env.NODE_ENV === 'development') {
+    console.log('CORS Configuration:', config);
+  }
 }

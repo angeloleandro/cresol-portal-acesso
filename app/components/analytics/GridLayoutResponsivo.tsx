@@ -73,6 +73,10 @@ interface MetricsGridProps {
   style?: React.CSSProperties;
 }
 
+/**
+ * MetricsGrid function
+ * @todo Add proper documentation
+ */
 export function MetricsGrid({ children, className = '', style }: MetricsGridProps) {
   return (
     <div 
@@ -95,6 +99,10 @@ interface DashboardLayoutProps {
   style?: React.CSSProperties;
 }
 
+/**
+ * DashboardLayout function
+ * @todo Add proper documentation
+ */
 export function DashboardLayout({ children, className = '', style }: DashboardLayoutProps) {
   return (
     <div 
@@ -115,6 +123,10 @@ interface MainSectionProps {
   className?: string;
 }
 
+/**
+ * MainSection function
+ * @todo Add proper documentation
+ */
 export function MainSection({ children, className = '' }: MainSectionProps) {
   return (
     <div className={`
@@ -132,6 +144,10 @@ interface SidebarSectionProps {
   className?: string;
 }
 
+/**
+ * SidebarSection function
+ * @todo Add proper documentation
+ */
 export function SidebarSection({ children, className = '' }: SidebarSectionProps) {
   return (
     <div className={`
@@ -152,6 +168,10 @@ interface ResponsiveContainerProps {
   padding?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
+/**
+ * ResponsiveContainer function
+ * @todo Add proper documentation
+ */
 export function ResponsiveContainer({
   children,
   className = '',

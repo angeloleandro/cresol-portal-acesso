@@ -1,14 +1,17 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { useAlert } from '@/app/components/alerts';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import AdminHeader from '@/app/components/AdminHeader';
+import { useAlert } from '@/app/components/alerts';
 import Breadcrumb from '@/app/components/Breadcrumb';
+import { FormSelect } from '@/app/components/forms/FormSelect';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { FormSelect } from '@/app/components/forms/FormSelect';
+import { supabase } from '@/lib/supabase';
+
+import type { User } from '@supabase/supabase-js';
 
 interface AccessRequest {
   id: string;
@@ -41,7 +44,7 @@ interface EditableAccessData {
 export default function AccessRequests() {
   const router = useRouter();
   const { showSuccess, showError, showWarning, users } = useAlert();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [allRequests, setAllRequests] = useState<AccessRequest[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -67,7 +70,7 @@ export default function AccessRequests() {
     if (!mountedRef.current) return;
     
     if (error) {
-      console.error('Erro ao buscar solicitações:', error);
+      // Error loading requests
     } else {
       setAllRequests(data || []);
       // Preencher dados editáveis, incluindo o email
@@ -177,7 +180,6 @@ export default function AccessRequests() {
         .single();
       
       if (requestError || !requestData) {
-        console.error('Erro ao buscar solicitação para atualização:', requestError)
         throw new Error('Solicitação não encontrada ou erro ao buscar.');
       }
       
@@ -193,7 +195,6 @@ export default function AccessRequests() {
         .eq('id', id);
 
       if (updateAccessRequestError) {
-        console.error('Erro ao atualizar access_request:', updateAccessRequestError);
         throw new Error('Falha ao atualizar dados da solicitação.');
       }
       
@@ -210,9 +211,8 @@ export default function AccessRequests() {
           }, { onConflict: 'email' }); // Usar email como onConflict para profiles
 
         if (profileUpsertError) {
-          console.error('Erro ao fazer upsert no perfil durante a atualização da solicitação:', profileUpsertError);
           // Não lançar erro aqui necessariamente, pois a principal operação (access_requests) pode ter sido bem-sucedida.
-          // Apenas logar ou notificar de forma não bloqueante.
+          // Apenas notificar de forma não bloqueante.
           showWarning('Dados da solicitação atualizados, mas houve um problema ao sincronizar com o perfil do usuário.');
         }
       }
@@ -220,9 +220,9 @@ export default function AccessRequests() {
       fetchAllRequests(); // Recarregar a lista para refletir as mudanças
       users.updated();
 
-    } catch (error: any) {
-      console.error('Erro ao atualizar solicitação:', error);
-      showError('Erro ao atualizar solicitação', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      showError('Erro ao atualizar solicitação', message);
     }
   };
 
@@ -231,7 +231,6 @@ export default function AccessRequests() {
     const editedRequestUIData = editData[id];
 
     if (!currentRequestOriginalData) {
-        console.error('Dados originais da solicitação não encontrados para processamento.');
         showError('Erro interno', 'Não foi possível encontrar os dados originais da solicitação.');
         return;
     }
@@ -266,14 +265,11 @@ export default function AccessRequests() {
         const result = await response.json();
 
         if (!response.ok) {
-          console.error('Falha ao aprovar solicitação (API):', result.error);
           showError('Erro ao aprovar', result.error || 'Erro desconhecido');
         } else {
-          console.log('Aprovação bem-sucedida:', result.message);
           users.created();
         }
       } catch (error) {
-        console.error('Erro de rede ou inesperado ao chamar API de aprovação:', error);
         showError('Erro de comunicação', 'Ocorreu um erro ao tentar aprovar a solicitação.');
       }
     } else { // status === 'rejected'
@@ -296,14 +292,11 @@ export default function AccessRequests() {
         const result = await response.json();
 
         if (!response.ok) {
-          console.error('Falha ao rejeitar solicitação (API):', result.error);
           showError('Erro ao rejeitar', result.error || 'Erro desconhecido');
         } else {
-          console.log('Solicitação rejeitada com sucesso:', result.message);
           showSuccess('Solicitação rejeitada com sucesso!');
         }
       } catch (error) {
-        console.error('Erro de rede ou inesperado ao chamar API de rejeição:', error);
         showError('Erro de comunicação', 'Ocorreu um erro ao tentar rejeitar a solicitação.');
       }
     }

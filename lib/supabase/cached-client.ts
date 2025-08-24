@@ -1,11 +1,6 @@
 import { createClient } from './client';
 import { supabaseCache } from '../supabase-cache';
-import { logger } from '../production-logger';
 
-/**
- * Cliente Supabase com cache integrado
- * Fornece métodos otimizados para queries comuns
- */
 
 const supabase = createClient();
 

@@ -1,9 +1,7 @@
-/**
- * Canvas API Thumbnail Generator
- * Gera thumbnails automáticos de vídeos usando Canvas API
- */
-
 import { logger } from './production-logger';
+
+
+
 
 export interface ThumbnailOptions {
   seekTime?: number; // Tempo em segundos para capturar (default: auto)
@@ -26,6 +24,10 @@ export interface ThumbnailResult {
 /**
  * Gera thumbnail do vídeo usando Canvas API
  */
+/**
+ * generateVideoThumbnail function
+ * @todo Add proper documentation
+ */
 export async function generateVideoThumbnail(
   videoFile: File,
   options: ThumbnailOptions = {}
@@ -46,7 +48,7 @@ export async function generateVideoThumbnail(
   }
 
   // Verificar suporte do navegador
-  const support = checkThumbnailSupport();
+  const support = CheckThumbnailSupport();
   if (!support.supported) {
     throw new Error(`Navegador não suporta geração de thumbnails: ${support.reasons.join(', ')}`);
   }
@@ -69,7 +71,7 @@ export async function generateVideoThumbnail(
     }
 
     let isResolved = false;
-    let videoUrl: string;
+    const videoUrl = URL.createObjectURL(videoFile);
 
     // Timeout de segurança reduzido
     const timeout = setTimeout(() => {
@@ -273,7 +275,6 @@ export async function generateVideoThumbnail(
     // Não usar crossOrigin para arquivos locais
     // video.crossOrigin = 'anonymous';
     
-    videoUrl = URL.createObjectURL(videoFile);
     video.src = videoUrl;
     
     logger.debug('Iniciando processo de carregamento do vídeo', {
@@ -290,6 +291,10 @@ export async function generateVideoThumbnail(
 /**
  * Versão alternativa simples de geração de thumbnail para casos problemáticos
  */
+/**
+ * generateVideoThumbnailSimple function
+ * @todo Add proper documentation
+ */
 export async function generateVideoThumbnailSimple(
   videoSource: File | string,
   options: ThumbnailOptions = {}
@@ -297,7 +302,7 @@ export async function generateVideoThumbnailSimple(
   logger.debug('Tentando geração simples de thumbnail...');
   
   return new Promise((resolve, reject) => {
-    const startTime = Date.now();
+    const _startTime = Date.now();
     const video = document.createElement('video');
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -405,6 +410,10 @@ export async function generateVideoThumbnailSimple(
 /**
  * Gera múltiplos thumbnails em timestamps diferentes
  */
+/**
+ * generateMultipleThumbnails function
+ * @todo Add proper documentation
+ */
 export async function generateMultipleThumbnails(
   videoFile: File,
   timestamps: number[],
@@ -442,6 +451,10 @@ export async function generateMultipleThumbnails(
 /**
  * Upload de thumbnail para Supabase Storage
  */
+/**
+ * uploadThumbnailToStorage function
+ * @todo Add proper documentation
+ */
 export async function uploadThumbnailToStorage(
   thumbnailBlob: Blob,
   videoFileName: string
@@ -458,7 +471,11 @@ export async function uploadThumbnailToStorage(
 /**
  * Verifica se o browser suporta Canvas API para thumbnails
  */
-export function checkThumbnailSupport(): {
+/**
+ * checkThumbnailSupport function
+ * @todo Add proper documentation
+ */
+export function CheckThumbnailSupport(): {
   supported: boolean;
   reasons: string[];
 } {
@@ -558,7 +575,11 @@ export function checkThumbnailSupport(): {
 /**
  * Cleanup de URLs de objeto criadas
  */
-export function cleanupObjectUrls(urls: string[]): void {
+/**
+ * cleanupObjectUrls function
+ * @todo Add proper documentation
+ */
+export function CleanupObjectUrls(urls: string[]): void {
   urls.forEach(url => {
     try {
       URL.revokeObjectURL(url);

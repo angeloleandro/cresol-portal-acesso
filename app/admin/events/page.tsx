@@ -1,22 +1,24 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-
 // [DEBUG] Component tracking
-let eventsPageRenderCount = 0;
-const eventsPageInstanceId = `events-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-import { supabase } from '@/lib/supabase';
-import AdminHeader from '@/app/components/AdminHeader';
-import Breadcrumb from '@/app/components/Breadcrumb';
-import { useAlert } from '@/app/components/alerts';
-import { FormSelect } from '@/app/components/forms';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { Icon } from '@/app/components/icons/Icon';
-import { StandardizedButton } from '@/app/components/admin';
-import { EventForm } from './components/EventForm';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
-import DeleteModal from '@/app/components/ui/DeleteModal';
+let _eventsPageRenderCount = 0;
+const _eventsPageInstanceId = `events-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+import React, { useState } from 'react';
+
 import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
+import { StandardizedButton } from '@/app/components/admin';
+import AdminHeader from '@/app/components/AdminHeader';
+import { useAlert } from '@/app/components/alerts';
+import Breadcrumb from '@/app/components/Breadcrumb';
+import { FormSelect } from '@/app/components/forms';
+import { Icon } from '@/app/components/icons/Icon';
+import DeleteModal from '@/app/components/ui/DeleteModal';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { supabase } from '@/lib/supabase';
+
+import { EventForm } from './components/EventForm';
 
 interface Event {
   id: string;
@@ -35,46 +37,13 @@ interface Event {
   sector_name?: string;
 }
 
-interface EventsResponse {
-  success: boolean;
-  data: {
-    events: Event[];
-    pagination: {
-      currentPage: number;
-      totalPages: number;
-      totalCount: number;
-      limit: number;
-      hasNextPage: boolean;
-      hasPrevPage: boolean;
-    };
-    stats: {
-      total: number;
-      published: number;
-      drafts: number;
-      featured: number;
-      upcoming: number;
-      past: number;
-      byType: {
-        sector: number;
-        subsector: number;
-      };
-    };
-    filters: any;
-  };
-}
-
 export default function EventsPage() {
   // [DEBUG] Component render tracking
-  eventsPageRenderCount++;
-  console.log(`[DEBUG-COMPONENT] EventsPage - Render ${eventsPageRenderCount}:`, {
-    instanceId: eventsPageInstanceId,
-    renderCount: eventsPageRenderCount,
-    timestamp: new Date().toISOString(),
-    stackTrace: new Error().stack?.split('\n').slice(1, 4)
-  });
+  _eventsPageRenderCount++;
+  // Debug component render logging removed for production
 
   const alert = useAlert();
-  const { user, loading: authLoading } = useAdminAuth();
+  const { user, loading: _authLoading } = useAdminAuth();
   const { 
     data: events, 
     loading, 
@@ -148,7 +117,7 @@ export default function EventsPage() {
         throw new Error(result.error || 'Erro desconhecido');
       }
     } catch (error: any) {
-      console.error('Erro ao excluir evento:', error);
+
       alert.showError('Erro', error.message || 'Erro ao excluir evento');
     } finally {
       setActionLoading(null);
@@ -194,7 +163,7 @@ export default function EventsPage() {
         throw new Error(result.error || 'Erro desconhecido');
       }
     } catch (error: any) {
-      console.error('Erro ao alterar status:', error);
+
       alert.showError('Erro', error.message || 'Erro ao alterar status do evento');
     } finally {
       setActionLoading(null);
@@ -240,7 +209,7 @@ export default function EventsPage() {
         throw new Error(result.error || 'Erro desconhecido');
       }
     } catch (error: any) {
-      console.error('Erro ao alterar destaque:', error);
+
       alert.showError('Erro', error.message || 'Erro ao alterar destaque do evento');
     } finally {
       setActionLoading(null);
@@ -282,7 +251,7 @@ export default function EventsPage() {
         throw new Error(result.error || 'Erro desconhecido');
       }
     } catch (error: any) {
-      console.error('Erro ao duplicar evento:', error);
+
       alert.showError('Erro', error.message || 'Erro ao duplicar evento');
     } finally {
       setActionLoading(null);

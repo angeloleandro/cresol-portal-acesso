@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { z } from 'zod';
+
 import { adminCORS } from '@/lib/cors-config';
+import { CreateAdminSupabaseClient } from '@/lib/supabase/admin';
+
 
 // Schema de validação para criação/edição de mensagem
 const messageSchema = z.object({
@@ -51,7 +53,7 @@ const searchFiltersSchema = z.object({
 
 // Função auxiliar para verificar permissões de admin
 async function checkAdminPermissions(userId: string) {
-  const supabase = createAdminSupabaseClient();
+  const supabase = CreateAdminSupabaseClient();
   
   const { data: profile } = await supabase
     .from('profiles')
@@ -73,7 +75,7 @@ export const GET = adminCORS(async (request: NextRequest) => {
     const { searchParams } = new URL(request.url);
     const filters = searchFiltersSchema.parse(Object.fromEntries(searchParams));
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
 
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -342,7 +344,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
         
     const validatedData = messageSchema.parse(body);
     
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -439,7 +441,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
         .single();
 
       if (error) {
-        console.error('Erro ao criar mensagem de subsetor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao criar mensagem' },
           { status: 500 }
@@ -474,7 +476,6 @@ export const POST = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    console.error('Erro no POST messages:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -489,7 +490,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
     const validatedData = updateMessageSchema.parse(body);
     const { id, type, ...updateData } = validatedData;
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -543,7 +544,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
         .single();
 
       if (error) {
-        console.error('Erro ao atualizar mensagem de setor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao atualizar mensagem' },
           { status: 500 }
@@ -572,7 +573,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
         .single();
 
       if (error) {
-        console.error('Erro ao atualizar mensagem de subsetor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao atualizar mensagem' },
           { status: 500 }
@@ -607,7 +608,6 @@ export const PUT = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    console.error('Erro no PUT messages:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -636,7 +636,7 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -676,7 +676,7 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
       .eq('id', id);
 
     if (error) {
-      console.error(`Erro ao excluir mensagem de ${type}:`, error);
+
       return NextResponse.json(
         { error: 'Erro ao excluir mensagem' },
         { status: 500 }
@@ -689,7 +689,7 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
     });
 
   } catch (error: any) {
-    console.error('Erro no DELETE messages:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -726,7 +726,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -792,7 +792,7 @@ export async function PATCH(request: NextRequest) {
         .single();
 
       if (duplicateError) {
-        console.error('Erro ao duplicar mensagem:', duplicateError);
+
         return NextResponse.json(
           { error: 'Erro ao duplicar mensagem' },
           { status: 500 }
@@ -819,7 +819,7 @@ export async function PATCH(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error(`Erro ao ${action} mensagem:`, error);
+
         return NextResponse.json(
           { error: `Erro ao ${action === 'publish' ? 'publicar' : 'despublicar'} mensagem` },
           { status: 500 }
@@ -834,7 +834,7 @@ export async function PATCH(request: NextRequest) {
     }
 
   } catch (error: any) {
-    console.error('Erro no PATCH messages:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

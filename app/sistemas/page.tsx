@@ -1,17 +1,19 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect, useCallback } from 'react';
+
 import { StandardizedButton } from '@/app/components/admin';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import Breadcrumb from '../components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import ErrorMessage from '../components/ui/ErrorMessage';
-import { Icon } from '../components/icons';
 import { handleComponentError, devLog } from '@/lib/error-handler';
+import { supabase } from '@/lib/supabase';
+
+import Breadcrumb from '../components/Breadcrumb';
+import Footer from '../components/Footer';
+import { Icon } from '../components/icons';
+import Navbar from '../components/Navbar';
+import ErrorMessage from '../components/ui/ErrorMessage';
 
 interface SystemLink {
   id: string;
@@ -119,7 +121,7 @@ export default function SistemasPage() {
         setFavorites(new Set(JSON.parse(savedFavorites)));
       }
     } catch (error) {
-      console.error('Erro ao carregar favoritos:', error);
+      
     }
   };
 
@@ -137,7 +139,7 @@ export default function SistemasPage() {
     try {
       localStorage.setItem(`favorites_${user?.id}`, JSON.stringify(Array.from(newFavorites)));
     } catch (error) {
-      console.error('Erro ao salvar favoritos:', error);
+      
     }
   };
 

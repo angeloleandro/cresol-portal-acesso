@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server';
+
+
 import { VIDEO_CONFIG, STORAGE_CONFIG } from '@/lib/constants';
+import { CreateClient } from '@/lib/supabase/server';
+
 
 function formatFileSize(bytes: number): string {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -10,9 +13,13 @@ function formatFileSize(bytes: number): string {
   return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
 }
 
+/**
+ * POST function
+ * @todo Add proper documentation
+ */
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  let uploadMetrics = {
+  const uploadMetrics = {
     fileSize: 0,
     uploadDuration: 0,
     processingDuration: 0,
@@ -20,7 +27,7 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     const authHeader = request.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -56,7 +63,6 @@ export async function POST(request: NextRequest) {
     const orderIndex = parseInt(formData.get('orderIndex') as string) || 0;
     const thumbnailTimestamp = formData.get('thumbnailTimestamp') ? parseFloat(formData.get('thumbnailTimestamp') as string) : null;
     const collectionId = formData.get('collection_id') as string | null; // Optional collection integration
-
 
     if (!videoFile || !title) {
       return NextResponse.json({ error: 'Arquivo de vídeo e título são obrigatórios' }, { status: 400 });
@@ -102,8 +108,7 @@ export async function POST(request: NextRequest) {
     const sanitizedOriginalName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
     const fileName = `${uuid}_${sanitizedOriginalName}`;
     const filePath = `${STORAGE_CONFIG.FOLDERS.VIDEO_UPLOADS}/${timestamp}/${fileName}`;
-    
-    
+
     const { data: uploadData, error: uploadError } = await serviceClient.storage
       .from(STORAGE_CONFIG.BUCKETS.VIDEOS)
       .upload(filePath, videoFile, {
@@ -261,12 +266,12 @@ export async function POST(request: NextRequest) {
             });
 
           if (collectionItemError) {
-            console.error('Erro ao adicionar vídeo à coleção:', collectionItemError);
+
             // Continue sem falhar o upload
           }
         }
       } catch (error) {
-        console.error('Erro na integração com coleção:', error);
+
         // Continue sem falhar o upload
       }
     }
@@ -286,7 +291,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Video upload error:', error);
+
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : 'Erro interno do servidor'
     }, { status: 500 });

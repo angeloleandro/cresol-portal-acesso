@@ -1,7 +1,4 @@
-/**
- * VideoUploadForm Clean Design System Styles
- * Ultra-minimalist CSS design tokens with neutral color palette
- */
+
 
 export const cleanVideoStyles = {
   // Core neutral color palette

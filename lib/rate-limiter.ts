@@ -1,9 +1,7 @@
-/**
- * Rate Limiter para APIs
- * Implementa limitação de taxa de requisições por IP e por usuário
- */
-
 import { NextRequest } from 'next/server';
+
+
+
 
 interface RateLimiterOptions {
   windowMs: number; // Janela de tempo em milissegundos
@@ -72,14 +70,22 @@ function defaultKeyGenerator(request: NextRequest): string {
 /**
  * Gera chave baseada no usuário autenticado
  */
-export function userKeyGenerator(userId: string): string {
+/**
+ * userKeyGenerator function
+ * @todo Add proper documentation
+ */
+export function UserKeyGenerator(userId: string): string {
   return `user:${userId}`;
 }
 
 /**
  * Gera chave baseada no IP apenas
  */
-export function ipKeyGenerator(request: NextRequest): string {
+/**
+ * ipKeyGenerator function
+ * @todo Add proper documentation
+ */
+export function IpKeyGenerator(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const ip = forwarded ? forwarded.split(',')[0] : 
              request.headers.get('x-real-ip') || 
@@ -102,7 +108,11 @@ function cleanupExpiredEntries(): void {
 /**
  * Verifica se uma requisição deve ser limitada
  */
-export function checkRateLimit(
+/**
+ * checkRateLimit function
+ * @todo Add proper documentation
+ */
+export function CheckRateLimit(
   request: NextRequest,
   options: RateLimiterOptions
 ): {
@@ -166,44 +176,64 @@ export function checkRateLimit(
 /**
  * Rate limiter para APIs admin
  */
-export function adminRateLimit(request: NextRequest) {
-  return checkRateLimit(request, RATE_LIMIT_CONFIGS.admin);
+/**
+ * adminRateLimit function
+ * @todo Add proper documentation
+ */
+export function AdminRateLimit(request: NextRequest) {
+  return CheckRateLimit(request, RATE_LIMIT_CONFIGS.admin);
 }
 
 /**
  * Rate limiter para autenticação
  */
-export function authRateLimit(request: NextRequest) {
-  return checkRateLimit(request, {
+/**
+ * authRateLimit function
+ * @todo Add proper documentation
+ */
+export function AuthRateLimit(request: NextRequest) {
+  return CheckRateLimit(request, {
     ...RATE_LIMIT_CONFIGS.auth,
-    keyGenerator: ipKeyGenerator // Usar apenas IP para auth
+    keyGenerator: IpKeyGenerator // Usar apenas IP para auth
   });
 }
 
 /**
  * Rate limiter para APIs públicas
  */
-export function publicRateLimit(request: NextRequest) {
-  return checkRateLimit(request, RATE_LIMIT_CONFIGS.public);
+/**
+ * publicRateLimit function
+ * @todo Add proper documentation
+ */
+export function PublicRateLimit(request: NextRequest) {
+  return CheckRateLimit(request, RATE_LIMIT_CONFIGS.public);
 }
 
 /**
  * Rate limiter para upload de arquivos
  */
-export function uploadRateLimit(request: NextRequest) {
-  return checkRateLimit(request, RATE_LIMIT_CONFIGS.upload);
+/**
+ * uploadRateLimit function
+ * @todo Add proper documentation
+ */
+export function UploadRateLimit(request: NextRequest) {
+  return CheckRateLimit(request, RATE_LIMIT_CONFIGS.upload);
 }
 
 /**
  * Rate limiter baseado no usuário
  */
-export function userRateLimit(userId: string, config: Partial<RateLimiterOptions> = {}) {
+/**
+ * userRateLimit function
+ * @todo Add proper documentation
+ */
+export function UserRateLimit(userId: string, config: Partial<RateLimiterOptions> = {}) {
   const mockRequest = {} as NextRequest;
   
-  return checkRateLimit(mockRequest, {
+  return CheckRateLimit(mockRequest, {
     windowMs: 15 * 60 * 1000, // 15 minutos
     maxRequests: 100,
-    keyGenerator: () => userKeyGenerator(userId),
+    keyGenerator: () => UserKeyGenerator(userId),
     ...config
   });
 }
@@ -211,7 +241,11 @@ export function userRateLimit(userId: string, config: Partial<RateLimiterOptions
 /**
  * Headers de rate limit para resposta
  */
-export function getRateLimitHeaders(result: ReturnType<typeof checkRateLimit>) {
+/**
+ * getRateLimitHeaders function
+ * @todo Add proper documentation
+ */
+export function GetRateLimitHeaders(result: ReturnType<typeof CheckRateLimit>) {
   return {
     'X-RateLimit-Limit': result.limit.toString(),
     'X-RateLimit-Remaining': result.remaining.toString(),
@@ -225,9 +259,13 @@ export function getRateLimitHeaders(result: ReturnType<typeof checkRateLimit>) {
 /**
  * Middleware helper para aplicar rate limiting
  */
+/**
+ * withRateLimit function
+ * @todo Add proper documentation
+ */
 export async function withRateLimit<T>(
   request: NextRequest,
-  rateLimitFn: (req: NextRequest) => ReturnType<typeof checkRateLimit>,
+  rateLimitFn: (req: NextRequest) => ReturnType<typeof CheckRateLimit>,
   handler: () => Promise<T>
 ): Promise<T | Response> {
   const result = rateLimitFn(request);
@@ -246,7 +284,7 @@ export async function withRateLimit<T>(
         status: 429,
         headers: {
           'Content-Type': 'application/json',
-          ...getRateLimitHeaders(result)
+          ...GetRateLimitHeaders(result)
         }
       }
     );
@@ -257,9 +295,9 @@ export async function withRateLimit<T>(
   
   // Se response é um Response object, adicionar headers
   if (response instanceof Response) {
-    const headers = getRateLimitHeaders(result);
+    const headers = GetRateLimitHeaders(result);
     Object.entries(headers).forEach(([key, value]) => {
-      response.headers.set(key, value);
+      response.headers.set(key, String(value));
     });
   }
   
@@ -269,7 +307,11 @@ export async function withRateLimit<T>(
 /**
  * Rate limiter para desenvolvimento (mais permissivo)
  */
-export function devRateLimit(request: NextRequest) {
+/**
+ * devRateLimit function
+ * @todo Add proper documentation
+ */
+export function DevRateLimit(request: NextRequest) {
   if (process.env.NODE_ENV === 'development') {
     return {
       allowed: true,
@@ -279,13 +321,17 @@ export function devRateLimit(request: NextRequest) {
     };
   }
   
-  return publicRateLimit(request);
+  return PublicRateLimit(request);
 }
 
 /**
  * Estatísticas do rate limiter
  */
-export function getRateLimitStats() {
+/**
+ * getRateLimitStats function
+ * @todo Add proper documentation
+ */
+export function GetRateLimitStats() {
   const now = Date.now();
   const activeEntries = Array.from(rateLimitStore.entries())
     .filter(([_, entry]) => now <= entry.resetTime);
@@ -301,6 +347,10 @@ export function getRateLimitStats() {
 /**
  * Limpar cache manualmente (útil para testes)
  */
-export function clearRateLimitCache() {
+/**
+ * clearRateLimitCache function
+ * @todo Add proper documentation
+ */
+export function ClearRateLimitCache() {
   rateLimitStore.clear();
 }

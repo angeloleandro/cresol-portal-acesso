@@ -1,26 +1,5 @@
 'use client';
 
-/**
- * Professional Login Form - Replacement Example
- * 
- * This example shows how to replace the amateur login form inputs
- * with the new professional FormInput components.
- * 
- * BEFORE: Basic HTML inputs with manual styling
- * AFTER: Professional FormField + FormInput components
- * 
- * Benefits of the upgrade:
- * - Consistent professional appearance
- * - Built-in error handling and validation states
- * - WCAG 2.1 AA accessibility compliance  
- * - Password visibility toggle
- * - Clear functionality
- * - Loading states
- * - Icon support
- * - Mobile-first responsive design
- * - Keyboard navigation support
- */
-
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -155,19 +134,7 @@ function ProfessionalLoginForm() {
         )}
         
         <form onSubmit={handleLogin} className="space-y-6">
-          {/* 
-            PROFESSIONAL FORM FIELDS
-            
-            Key improvements over amateur implementation:
-            - FormField wrapper provides consistent label, error, help text styling
-            - FormInput provides professional styling, states, and functionality
-            - Built-in validation state handling
-            - Accessibility attributes automatically applied
-            - Icon support for better UX
-            - Clear functionality for better usability
-            - Password toggle for security UX
-            - Loading states for better feedback
-          */}
+          {}
           
           <FormField 
             label="E-mail" 
@@ -269,95 +236,3 @@ function ProfessionalLoginForm() {
 
 export default ProfessionalLoginForm;
 
-/* 
-COMPARISON: BEFORE vs AFTER
-
-BEFORE (Amateur Implementation):
-```tsx
-<div>
-  <label htmlFor="email" className="form-label">
-    E-mail
-  </label>
-  <input
-    id="email"
-    type="email"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    required
-    className="input"
-    placeholder="Email@cresol.com.br"
-  />
-</div>
-
-<div>
-  <label htmlFor="password" className="form-label">
-    Senha
-  </label>
-  <input
-    id="password"
-    type="password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    required
-    className="input"
-    placeholder="••••••••"
-  />
-</div>
-```
-
-AFTER (Professional Implementation):
-```tsx
-<FormField 
-  label="E-mail" 
-  error={validationErrors.email}
-  helpText="Digite seu e-mail corporativo"
-  required
->
-  <FormInput
-    type="email"
-    value={email}
-    onChange={handleEmailChange}
-    placeholder="seu@cresol.com.br"
-    startIcon="Mail"
-    clearable
-    disabled={loading}
-  />
-</FormField>
-
-<FormField 
-  label="Senha" 
-  error={validationErrors.password}
-  required
->
-  <FormInput
-    type="password"
-    value={password}
-    onChange={handlePasswordChange}
-    placeholder="Digite sua senha..."
-    showPasswordToggle
-    disabled={loading}
-  />
-</FormField>
-```
-
-IMPROVEMENTS ACHIEVED:
-✅ Consistent professional styling
-✅ Built-in error state handling  
-✅ Loading state management
-✅ Icon integration (Mail icon, Password toggle)
-✅ Clear functionality
-✅ Help text support
-✅ WCAG 2.1 AA accessibility
-✅ Better mobile experience
-✅ TypeScript type safety
-✅ Reduced code complexity
-✅ Better user experience
-
-MIGRATION EFFORT: 
-- Replace basic input elements with FormField + FormInput
-- Add error handling state
-- Update change handlers to clear errors
-- Add loading state handling
-- Total time: ~30 minutes per form
-- Significant UX improvement with minimal effort
-*/

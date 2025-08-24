@@ -1,17 +1,18 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import Navbar from '../../components/Navbar';
-import SubsectorTeam from '../../components/SubsectorTeam';
-import SectorTeam from '../../components/SectorTeam';
-import { Icon } from '../../components/icons';
-import Breadcrumb from '../../components/Breadcrumb';
+import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+
+import Button from '@/app/components/ui/Button';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import Button from '@/app/components/ui/Button';
+import { supabase } from '@/lib/supabase';
+
+import Breadcrumb from '../../components/Breadcrumb';
+import { Icon } from '../../components/icons';
+import Navbar from '../../components/Navbar';
+import SectorTeam from '../../components/SectorTeam';
 
 interface Sector {
   id: string;
@@ -86,7 +87,7 @@ export default function SetorDetalhesPage() {
       .single();
     
     if (error) {
-      console.error('[SetorDetalhes] Erro ao buscar setor:', error.message || error);
+
       router.replace('/setores');
       return;
     }
@@ -102,7 +103,7 @@ export default function SetorDetalhesPage() {
       .order('name');
     
     if (error) {
-      console.error('[SetorDetalhes] Erro ao buscar sub-setores:', error.message || error);
+
       return;
     }
     
@@ -120,7 +121,7 @@ export default function SetorDetalhesPage() {
       .limit(3);
     
     if (error) {
-      console.error('[SetorDetalhes] Erro ao buscar notícias:', error.message || error);
+
       return;
     }
     
@@ -139,7 +140,7 @@ export default function SetorDetalhesPage() {
       .limit(3);
     
     if (error) {
-      console.error('[SetorDetalhes] Erro ao buscar eventos:', error.message || error);
+
       return;
     }
     
@@ -157,7 +158,7 @@ export default function SetorDetalhesPage() {
       .limit(3);
     
     if (error) {
-      console.error('[SetorDetalhes] Erro ao buscar mensagens:', error.message || error);
+
       return;
     }
     
@@ -200,7 +201,6 @@ export default function SetorDetalhesPage() {
 
     checkUser();
   }, [sectorId, router, fetchSector, fetchSubsectors, fetchNews, fetchEvents, fetchMessages]);
-
 
   if (loading) {
     return <UnifiedLoadingSpinner fullScreen message={LOADING_MESSAGES.sectors} size="large" />;

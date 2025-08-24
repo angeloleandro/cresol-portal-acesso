@@ -1,7 +1,7 @@
 'use client';
 
-import AdminDashboard from './components/admin/AdminDashboard';
 import { mockRootProps } from './adminDashboardMockData';
+import AdminDashboard from './components/admin/AdminDashboard';
 
 export default function AdminDashboardPreview() {
   return (

@@ -1,23 +1,26 @@
 'use client';
 
-// Collection List Component
-// Componente principal de listagem de coleções com filtros
+// Collection List Component - Otimizado
+// Componente principal de listagem de coleções com filtros e cache inteligente
 
-import React, { useState, useMemo } from 'react';
-import CollectionGrid from './Collection.Grid';
-import CollectionEmptyState from './Collection.EmptyState';
-import CollectionLoading from './Collection.Loading';
-import { CollectionListProps } from './Collection.types';
-import { useCollections } from './Collection.hooks';
-import { cn } from '@/lib/utils/cn';
+import React, { useState, useMemo, useCallback, memo } from 'react';
+
+import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 import { 
   COLLECTION_CONFIG, 
   SORT_LABELS, 
   COLLECTION_TYPE_LABELS 
 } from '@/lib/constants/collections';
-import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
+import { cn } from '@/lib/utils/cn';
+import { useCollections } from '@/app/contexts/CollectionsContext';
 
-const CollectionList: React.FC<CollectionListProps> = ({
+import CollectionEmptyState from './Collection.EmptyState';
+import CollectionGrid from './Collection.Grid';
+import CollectionLoading from './Collection.Loading';
+import { CollectionListProps } from './Collection.types';
+
+
+const CollectionList: React.FC<CollectionListProps> = memo(({
   limit,
   showHeader = true,
   showFilters = true,
@@ -26,7 +29,7 @@ const CollectionList: React.FC<CollectionListProps> = ({
   className,
   onCollectionClick,
 }) => {
-  // State management using custom hook
+  // State management usando contexto otimizado
   const {
     collections,
     loading,
@@ -34,11 +37,7 @@ const CollectionList: React.FC<CollectionListProps> = ({
     filters,
     stats,
     hasMore,
-    actions: {
-      updateFilters,
-      loadMore,
-      refresh,
-    }
+    actions
   } = useCollections({ limit });
 
   // Local state for UI
@@ -80,29 +79,37 @@ const CollectionList: React.FC<CollectionListProps> = ({
     { value: 'created_at-asc', label: SORT_LABELS['created_at-asc'] }
   ], []);
 
-  // Handle search
-  const handleSearchChange = (search: string) => {
-    updateFilters({ search, page: 1 });
-  };
+  // Memoized handlers para evitar re-renders
+  const handleSearchChange = useCallback((search: string) => {
+    actions.updateFilters({ search, page: 1 });
+  }, [actions]);
 
-  // Handle filter changes
-  const handleTypeFilter = (type: string) => {
-    updateFilters({ type: type as any, page: 1 });
-  };
+  const handleTypeFilter = useCallback((type: string) => {
+    actions.updateFilters({ type: type as any, page: 1 });
+  }, [actions]);
 
-  const handleStatusFilter = (status: string) => {
-    updateFilters({ status: status as any, page: 1 });
-  };
+  const handleStatusFilter = useCallback((status: string) => {
+    actions.updateFilters({ status: status as any, page: 1 });
+  }, [actions]);
 
-  const handleSortChange = (sortBy: string, sortOrder: 'asc' | 'desc') => {
-    updateFilters({ sort_by: sortBy as any, sort_order: sortOrder, page: 1 });
-  };
+  const handleSortChange = useCallback((sortBy: string, sortOrder: 'asc' | 'desc') => {
+    actions.updateFilters({ sort_by: sortBy as any, sort_order: sortOrder, page: 1 });
+  }, [actions]);
 
-  // Handle create collection
-  const handleCreateClick = () => {
+  const handleCreateClick = useCallback(() => {
     setIsCreating(true);
     // This will be handled by parent component or routing
-  };
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    actions.refresh();
+  }, [actions]);
+
+  const handleLoadMore = useCallback(() => {
+    if (actions.loadMore) {
+      actions.loadMore();
+    }
+  }, [actions]);
 
   return (
     <div className={cn("space-y-6", className)}>
@@ -141,7 +148,7 @@ const CollectionList: React.FC<CollectionListProps> = ({
             )}
             
             <button
-              onClick={refresh}
+              onClick={handleRefresh}
               disabled={loading}
               className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-50"
             >
@@ -245,7 +252,7 @@ const CollectionList: React.FC<CollectionListProps> = ({
             </div>
           </div>
           <button
-            onClick={refresh}
+            onClick={handleRefresh}
             className="mt-3 bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded text-sm font-medium transition-colors"
           >
             Tentar Novamente
@@ -278,7 +285,7 @@ const CollectionList: React.FC<CollectionListProps> = ({
             {hasMore && !limit && (
               <div className="flex justify-center mt-8">
                 <button
-                  onClick={loadMore}
+                  onClick={handleLoadMore}
                   disabled={loading}
                   className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-50"
                 >
@@ -307,6 +314,8 @@ const CollectionList: React.FC<CollectionListProps> = ({
       )}
     </div>
   );
-};
+});
+
+CollectionList.displayName = 'CollectionList';
 
 export default CollectionList;

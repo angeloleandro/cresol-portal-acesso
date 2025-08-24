@@ -1,14 +1,18 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { type SupabaseClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { createAdminSupabaseClient } from '@/lib/auth';
-import { validateCrescolEmail } from '@/lib/constants';
 
+import { CreateAdminSupabaseClient } from '@/lib/auth';
+import { ValidateCrescolEmail } from '@/lib/constants';
+
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { NextRequest } from 'next/server';
+
+
+/**
+ * POST function
+ * @todo Add proper documentation
+ */
 export async function POST(request: NextRequest) {
   const { email, password, fullName, position, workLocationId } = await request.json();
-
 
   if (!email || !fullName || !password) {
     return NextResponse.json({
@@ -17,7 +21,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Validar domínio de e-mail da Cresol
-  if (!validateCrescolEmail(email)) {
+  if (!ValidateCrescolEmail(email)) {
     return NextResponse.json({
       error: 'Por favor, utilize um e-mail corporativo da Cresol.'
     }, { status: 400 });
@@ -25,9 +29,9 @@ export async function POST(request: NextRequest) {
 
   let supabaseAdminClient: SupabaseClient;
   try {
-    supabaseAdminClient = createAdminSupabaseClient();
+    supabaseAdminClient = CreateAdminSupabaseClient();
   } catch (e) {
-    console.error('Falha ao inicializar Supabase Admin Client:', e);
+
     return NextResponse.json({ 
       error: 'Erro na configuração do servidor.' 
     }, { status: 500 });
@@ -97,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (accessRequestError) {
-      console.error('Erro ao criar solicitação de acesso:', accessRequestError);
+
       return NextResponse.json({
         error: `Falha ao registrar solicitação de acesso: ${accessRequestError.message}`
       }, { status: 500 });
@@ -109,7 +113,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Erro geral na API de signup:', error);
+
     return NextResponse.json({ 
       error: error.message || 'Erro interno do servidor' 
     }, { status: 500 });

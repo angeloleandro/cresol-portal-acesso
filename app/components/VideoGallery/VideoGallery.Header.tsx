@@ -1,15 +1,13 @@
-/**
- * VideoGallery Header Component
- * Responsive header with title and navigation
- */
+
 
 "use client";
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import { Icon, IconName } from '../icons/Icon';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+
 import { headerAnimations } from './VideoGallery.animations';
+import { Icon, IconName } from '../icons/Icon';
 
 interface VideoGalleryHeaderProps {
   title?: string;
@@ -22,6 +20,10 @@ interface VideoGalleryHeaderProps {
   enableAnimations?: boolean;
 }
 
+/**
+ * VideoGalleryHeader function
+ * @todo Add proper documentation
+ */
 export function VideoGalleryHeader({
   title = "Vídeos em destaque",
   subtitle = "Assista aos conteúdos mais relevantes",
@@ -120,6 +122,10 @@ interface CompactHeaderProps {
   className?: string;
 }
 
+/**
+ * CompactVideoGalleryHeader function
+ * @todo Add proper documentation
+ */
 export function CompactVideoGalleryHeader({
   title,
   count,
@@ -170,6 +176,10 @@ interface AdvancedHeaderProps extends VideoGalleryHeaderProps {
   showSearch?: boolean;
 }
 
+/**
+ * AdvancedVideoGalleryHeader function
+ * @todo Add proper documentation
+ */
 export function AdvancedVideoGalleryHeader({
   title,
   subtitle,
@@ -252,6 +262,10 @@ interface StatsHeaderProps {
   className?: string;
 }
 
+/**
+ * VideoGalleryStatsHeader function
+ * @todo Add proper documentation
+ */
 export function VideoGalleryStatsHeader({
   title,
   stats,

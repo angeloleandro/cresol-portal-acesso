@@ -14,6 +14,10 @@ interface TabNavigationProps {
   totalDraftMessagesCount?: number;
 }
 
+/**
+ * TabNavigation function
+ * @todo Add proper documentation
+ */
 export function TabNavigation({ 
   activeTab, 
   onTabChange,

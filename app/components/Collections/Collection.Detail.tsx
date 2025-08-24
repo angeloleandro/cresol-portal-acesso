@@ -3,18 +3,21 @@
 // Collection Detail Component
 // Visualização detalhada de coleção com itens - Portal Cresol
 
-import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { CollectionDetailProps } from './Collection.types';
-import { CollectionWithItems } from '@/lib/types/collections';
-import { useCollectionItems } from './Collection.hooks';
-import CollectionLoading from './Collection.Loading';
-import CollectionEmptyState from './Collection.EmptyState';
-import { formatCollection } from '@/lib/utils/collections';
-import { cn } from '@/lib/utils/cn';
+import React, { useMemo, useState } from 'react';
+
+
 import Icon from '@/app/components/icons/Icon';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { CollectionWithItems } from '@/lib/types/collections';
+import { cn } from '@/lib/utils/cn';
+import { formatCollection } from '@/lib/utils/collections';
+
+import CollectionEmptyState from './Collection.EmptyState';
+import { useCollectionItems } from './Collection.hooks';
+import CollectionLoading from './Collection.Loading';
+import { CollectionDetailProps } from './Collection.types';
 
 // Conditional import for admin functionality
 let DraggableItemList: React.ComponentType<any> | null = null;

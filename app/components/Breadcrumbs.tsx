@@ -36,7 +36,7 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
       const segment = pathSegments[i];
       currentPath += `/${segment}`;
       
-      let label = formatSegmentLabel(segment);
+      const label = formatSegmentLabel(segment);
       
       // Se for o último segmento, marcar como atual
       const isLast = i === pathSegments.length - 1;

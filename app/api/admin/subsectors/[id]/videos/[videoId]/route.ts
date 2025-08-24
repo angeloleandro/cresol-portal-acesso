@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 
+import { CreateClient } from '@/lib/supabase/server';
+
+
+/**
+ * PUT function
+ * @todo Add proper documentation
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string; videoId: string } }
@@ -9,17 +15,8 @@ export async function PUT(
     const subsectorId = params.id;
     const videoId = params.videoId;
     const body = await request.json();
-    
-    console.log('[SUBSECTOR-VIDEO-UPDATE] Iniciando update de vídeo:', {
-      subsectorId,
-      videoId,
-      uploadType: body.upload_type,
-      hasTitle: !!body.title,
-      hasVideoUrl: !!body.video_url,
-      hasThumbnailUrl: !!body.thumbnail_url
-    });
 
-    const supabase = createClient();
+    const supabase = CreateClient();
 
     // Verify authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -54,14 +51,6 @@ export async function PUT(
     if (fetchError || !existingVideo) {
       return NextResponse.json({ error: 'Video not found' }, { status: 404 });
     }
-    
-    console.log('[SUBSECTOR-VIDEO-UPDATE] Vídeo existente encontrado:', {
-      exists: !!existingVideo,
-      uploadType: existingVideo?.upload_type,
-      hasVideoUrl: !!existingVideo?.video_url,
-      hasThumbnailUrl: !!existingVideo?.thumbnail_url,
-      hasFilePath: !!existingVideo?.file_path
-    });
 
     // Extract YouTube thumbnail if it's a YouTube video and URL changed
     let thumbnailUrl = body.thumbnail_url;
@@ -80,16 +69,9 @@ export async function PUT(
           thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
         }
       } catch (e) {
-        console.error('Error parsing YouTube URL:', e);
+
       }
     }
-    
-    console.log('[SUBSECTOR-VIDEO-UPDATE] Processando thumbnail:', {
-      originalThumbnail: body.thumbnail_url,
-      processedThumbnail: thumbnailUrl,
-      isYoutube: body.upload_type === 'youtube',
-      isDirectUpload: body.upload_type === 'upload'
-    });
 
     // Update video
     const { data: video, error: updateError } = await supabase
@@ -115,24 +97,21 @@ export async function PUT(
       .single();
 
     if (updateError) {
-      console.error('[SUBSECTOR-VIDEO-UPDATE] Erro ao atualizar vídeo:', updateError);
+
       return NextResponse.json({ error: 'Failed to update video' }, { status: 500 });
     }
-    
-    console.log('[SUBSECTOR-VIDEO-UPDATE] Vídeo atualizado com sucesso:', {
-      videoId: video?.id,
-      title: video?.title,
-      uploadType: video?.upload_type,
-      thumbnailUrl: video?.thumbnail_url
-    });
 
     return NextResponse.json(video);
   } catch (error) {
-    console.error('Unexpected error:', error);
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
+/**
+ * DELETE function
+ * @todo Add proper documentation
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string; videoId: string } }
@@ -141,7 +120,7 @@ export async function DELETE(
     const subsectorId = params.id;
     const videoId = params.videoId;
 
-    const supabase = createClient();
+    const supabase = CreateClient();
 
     // Verify authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -184,7 +163,7 @@ export async function DELETE(
         .remove([video.file_path]);
 
       if (storageError) {
-        console.error('Error deleting video file:', storageError);
+
         // Continue with deletion even if storage deletion fails
       }
 
@@ -207,13 +186,13 @@ export async function DELETE(
       .eq('subsector_id', subsectorId);
 
     if (deleteError) {
-      console.error('Error deleting video:', deleteError);
+
       return NextResponse.json({ error: 'Failed to delete video' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Unexpected error:', error);
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

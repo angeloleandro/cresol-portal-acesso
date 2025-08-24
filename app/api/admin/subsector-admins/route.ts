@@ -1,7 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+
 import type { NextRequest } from 'next/server';
 
+
+
+/**
+ * GET function
+ * @todo Add proper documentation
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -73,6 +80,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST function
+ * @todo Add proper documentation
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -202,6 +213,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * DELETE function
+ * @todo Add proper documentation
+ */
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

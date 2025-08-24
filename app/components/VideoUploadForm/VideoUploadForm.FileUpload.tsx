@@ -1,26 +1,23 @@
-/**
- * VideoUploadForm File Upload Component
- * Drag & drop area with progress and existing file info
- */
-
 import { memo, useCallback, useRef, useState } from 'react'
-import { FileUploadProps } from './VideoUploadForm.types'
-import { videoUploadStyles } from './VideoUploadForm.styles'
-import { a11yTokens } from '@/lib/design-tokens/video-system'
-import { formatFileSize, isValidVideoMimeType } from '@/lib/video-utils'
-import { VIDEO_CONFIG } from '@/lib/constants'
+
 import {
   VIDEO_MESSAGES,
   VIDEO_FILE_CONFIG,
   VIDEO_UI_CONFIG,
   VIDEO_HELPERS
 } from '@/lib/constants/video-ui'
+import { a11yTokens } from '@/lib/design-tokens/video-system'
+import { FormatFileSize, IsValidVideoMimeType } from '@/lib/video-utils'
+
+import { videoUploadStyles } from './VideoUploadForm.styles'
+import { FileUploadProps } from './VideoUploadForm.types'
+
 
 // File validation function
 function validateVideoFile(file: File): { valid: boolean; error?: string } {
   const fileExt = '.' + file.name.split('.').pop()?.toLowerCase()
   
-  if (!isValidVideoMimeType(file.type) && !VIDEO_FILE_CONFIG.supportedFormats.includes(fileExt.slice(1) as any)) {
+  if (!IsValidVideoMimeType(file.type) && !VIDEO_FILE_CONFIG.supportedFormats.includes(fileExt.slice(1) as any)) {
     return { 
       valid: false, 
       error: VIDEO_MESSAGES.ERRORS.UNSUPPORTED_FORMAT
@@ -159,7 +156,7 @@ export const VideoUploadFormFileUpload = memo(({
           )}
           {existingVideoInfo.fileSize && (
             <div className="text-xs text-gray-500 mb-2">
-              {formatFileSize(existingVideoInfo.fileSize)}
+              {FormatFileSize(existingVideoInfo.fileSize)}
             </div>
           )}
           <div className="text-xs text-gray-600">
@@ -256,7 +253,7 @@ export const VideoUploadFormFileUpload = memo(({
                   {videoFile.name}
                 </p>
                 <p className={videoUploadStyles.filePreview.size}>
-                  {formatFileSize(videoFile.size)}
+                  {FormatFileSize(videoFile.size)}
                 </p>
               </div>
             </div>

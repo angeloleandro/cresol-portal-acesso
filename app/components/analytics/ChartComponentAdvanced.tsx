@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+
 import { useAlert } from '@/app/components/alerts';
 
 interface ChartData {

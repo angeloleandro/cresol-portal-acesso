@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { processSupabaseImageUrl } from '@/lib/imageUtils';
+
+import { ProcessSupabaseImageUrl } from '@/lib/imageUtils';
 
 interface OptimizedImageProps {
   src: string;
@@ -22,14 +23,6 @@ interface OptimizedImageProps {
   onError?: () => void;
 }
 
-/**
- * Componente de imagem super otimizada com:
- * - Blur placeholder automático
- * - Priority para imagens above-the-fold
- * - Lazy loading inteligente
- * - Fallback para erros
- * - Processamento de URLs do Supabase
- */
 export default function OptimizedImageWithBlur({
   src,
   alt,
@@ -56,7 +49,7 @@ export default function OptimizedImageWithBlur({
   
   useEffect(() => {
     if (src) {
-      const processedUrl = processSupabaseImageUrl(src);
+      const processedUrl = ProcessSupabaseImageUrl(src);
       setImgSrc(processedUrl || src);
     }
   }, [src]);
@@ -129,8 +122,8 @@ export default function OptimizedImageWithBlur({
 }
 
 /**
- * Componente para hero images (imagens grandes no topo)
- * Sempre usa priority e otimizações máximas
+ * HeroImage function
+ * @todo Add proper documentation
  */
 export function HeroImage(props: Omit<OptimizedImageProps, 'priority'>) {
   return (
@@ -144,8 +137,8 @@ export function HeroImage(props: Omit<OptimizedImageProps, 'priority'>) {
 }
 
 /**
- * Componente para thumbnails
- * Otimizado para imagens pequenas em listas
+ * ThumbnailImage function
+ * @todo Add proper documentation
  */
 export function ThumbnailImage(props: Omit<OptimizedImageProps, 'priority' | 'sizes'>) {
   return (
@@ -159,8 +152,8 @@ export function ThumbnailImage(props: Omit<OptimizedImageProps, 'priority' | 'si
 }
 
 /**
- * Componente para cards
- * Otimizado para imagens médias em cards
+ * CardImage function
+ * @todo Add proper documentation
  */
 export function CardImage(props: Omit<OptimizedImageProps, 'sizes'>) {
   return (

@@ -1,16 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import OptimizedImage from '../components/OptimizedImage';
-import { Button } from '@/app/components/ui/Button';
-import { Icon } from '@/app/components/icons/Icon';
-import { getSupabaseClient } from '@/lib/supabase';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import { useState, useEffect } from 'react';
+
 import { FormSelect } from '@/app/components/forms/FormSelect';
+import { Icon } from '@/app/components/icons/Icon';
+import { Button } from '@/app/components/ui/Button';
+import { getSupabaseClient } from '@/lib/supabase';
+
+import Footer from '../components/Footer';
+import Navbar from '../components/Navbar';
+import OptimizedImage from '../components/OptimizedImage';
+
+
 import type { SelectOption } from '@/app/components/forms/FormSelect';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+
+
 
 interface Profile {
   id: string;
@@ -40,7 +46,6 @@ interface Position {
   description?: string;
   department?: string;
 }
-
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -84,7 +89,7 @@ export default function ProfilePage() {
         await loadWorkLocations();
         await loadPositions();
       } catch (error) {
-        console.error('Erro ao carregar usuário:', error);
+
         setError('Erro ao carregar informações do usuário');
       } finally {
         setLoading(false);
@@ -112,7 +117,7 @@ export default function ProfilePage() {
       setBio(data.bio || '');
       setAvatarUrl(data.avatar_url || null);
     } catch (error) {
-      console.error('Erro ao carregar perfil:', error);
+
       setError('Erro ao carregar informações do perfil');
     }
   };
@@ -127,7 +132,7 @@ export default function ProfilePage() {
       if (error) throw error;
       setWorkLocations(data || []);
     } catch (error) {
-      console.error('Erro ao carregar locais de trabalho:', error);
+
     }
   };
 
@@ -141,10 +146,9 @@ export default function ProfilePage() {
       if (error) throw error;
       setPositions(data || []);
     } catch (error) {
-      console.error('Erro ao carregar cargos:', error);
+
     }
   };
-
 
   const formatPhoneNumber = (value: string) => {
     // Remove todos os caracteres não numéricos
@@ -211,18 +215,18 @@ export default function ProfilePage() {
           .getPublicUrl(filePath);
 
         if (!urlData || !urlData.publicUrl) {
-          console.error('URL pública não retornada');
+
           throw new Error('URL da imagem não disponível');
         }
 
         return urlData.publicUrl;
       } catch (urlError) {
-        console.error('Erro ao acessar bucket de imagens:', urlError);
+
         setError('Erro ao processar URL da imagem. Verifique se o bucket existe e está acessível.');
         return null;
       }
     } catch (error) {
-      console.error('Erro ao fazer upload do avatar:', error);
+
       setError('Erro ao fazer upload da imagem');
       return null;
     } finally {
@@ -295,14 +299,13 @@ export default function ProfilePage() {
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
-      console.error('Erro ao atualizar:', error);
+
       const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar perfil';
       setError(errorMessage);
     } finally {
       setUpdating(false);
     }
   };
-
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Nunca';
@@ -398,18 +401,13 @@ export default function ProfilePage() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={handleAvatarChange}
                       className="hidden"
+                      onChange={handleAvatarChange}
                     />
                   </label>
                 </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">{profile?.full_name || 'Usuário'}</h3>
-                  <p className="text-sm text-gray-500">Formatos aceitos: JPG, PNG. Máximo: 2MB.</p>
-                </div>
               </div>
 
-              {/* Campos do Formulário em Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* E-mail (não editável) */}
                 <div>

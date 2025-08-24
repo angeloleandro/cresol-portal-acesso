@@ -1,19 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, useCallback, Suspense, useMemo } from 'react';
+
 import { StandardizedButton } from '@/app/components/admin';
-import EventCalendar from '../components/EventCalendar';
-import Navbar from '../components/Navbar';
+import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
 import Breadcrumbs from '../components/Breadcrumbs';
+import EventCalendar from '../components/EventCalendar';
 import Footer from '../components/Footer';
 import { Icon } from '../components/icons/Icon';
-import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
+import Navbar from '../components/Navbar';
+
+
 
 interface EventItem {
   id: string;
@@ -57,7 +60,7 @@ function EventosPageContent() {
         .order('start_date', { ascending: true });
 
       if (error) {
-        console.error('Erro ao buscar eventos:', error);
+
         setEvents([]);
       } else {
         // Formatar dados do Supabase
@@ -68,7 +71,7 @@ function EventosPageContent() {
         setEvents(formattedEvents);
       }
     } catch (error) {
-      console.error('Erro geral:', error);
+
       setEvents([]);
     } finally {
       setLoading(false);
@@ -121,13 +124,13 @@ function EventosPageContent() {
         .order('name');
 
       if (error) {
-        console.error('Erro ao buscar setores:', error);
+
         return;
       }
 
       setSectors(data || []);
     } catch (error) {
-      console.error('Erro ao buscar setores:', error);
+
     }
   };
 

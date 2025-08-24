@@ -1,8 +1,10 @@
 // Hook para gerenciamento de autenticação e autorização do setor
 
-import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+
 import { supabase } from '@/lib/supabase';
+
 import { User } from '../types/sector.types';
 
 interface UseSectorAuthReturn {
@@ -13,6 +15,10 @@ interface UseSectorAuthReturn {
   handleLogout: () => Promise<void>;
 }
 
+/**
+ * useSectorAuth function
+ * @todo Add proper documentation
+ */
 export function useSectorAuth(sectorId: string): UseSectorAuthReturn {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);

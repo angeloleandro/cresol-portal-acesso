@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Dropdown,
   DropdownTrigger,
@@ -8,11 +7,13 @@ import {
   DropdownItem,
   Button
 } from '@nextui-org/react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+
+import { supabase } from '@/lib/supabase';
+
 import { Icon } from './icons/Icon';
 import OptimizedImage from './OptimizedImage';
-import { supabase } from '@/lib/supabase';
-import { CRESOL_UI_CONFIG } from '@/lib/design-tokens';
-import Link from 'next/link';
+
 
 interface SearchResult {
   id: string;
@@ -45,6 +46,16 @@ interface SearchHistory {
   filters: SearchFilter;
   timestamp: string;
   resultCount: number;
+}
+
+interface Sector {
+  id: string;
+  name: string;
+}
+
+interface Location {
+  id: string;
+  name: string;
 }
 
 interface AdvancedSearchProps {
@@ -81,8 +92,8 @@ export default function AdvancedSearch({
   const modalRef = useRef<HTMLDivElement>(null);
   
   // Estados auxiliares
-  const [sectors, setSectors] = useState<any[]>([]);
-  const [locations, setLocations] = useState<any[]>([]);
+  const [sectors, setSectors] = useState<Sector[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [popularTags, setPopularTags] = useState<string[]>([]);
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [selectedResultIndex, setSelectedResultIndex] = useState(-1);
@@ -115,7 +126,7 @@ export default function AdvancedSearch({
       setSearchHistory(updated);
       localStorage.setItem('search_history', JSON.stringify(updated));
     } catch (error) {
-      console.error('Erro ao salvar no histórico:', error);
+
     }
   }, [searchHistory]);
 
@@ -239,7 +250,7 @@ export default function AdvancedSearch({
         saveToHistory(query.trim(), selectedFilter, totalCount);
       }
     } catch (error) {
-      console.error('Erro na busca:', error);
+
     } finally {
       setLoading(false);
     }
@@ -315,7 +326,7 @@ export default function AdvancedSearch({
         setSearchHistory(Array.isArray(history) ? history.slice(0, 10) : []);
       }
     } catch (error) {
-      console.error('Erro ao carregar histórico de busca:', error);
+
     }
   };
 
@@ -338,7 +349,7 @@ export default function AdvancedSearch({
       // Tags populares (mockup - implementar com dados reais)
       setPopularTags(['treinamento', 'cooperativismo', 'sustentabilidade', 'tecnologia', 'inovação']);
     } catch (error) {
-      console.error('Erro ao carregar opções de filtro:', error);
+
     }
   };
 

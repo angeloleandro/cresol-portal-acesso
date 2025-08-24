@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
+
 import { supabase } from '@/lib/supabase';
+
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
 interface MessageItem {
   id: string;
@@ -89,7 +90,7 @@ export default function MensagensDestaque({ compact = false, limit = 4 }: Mensag
         
         setMessages(allMessages.slice(0, limit));
       } catch (error) {
-        console.error('Erro ao buscar mensagens:', error);
+
         setMessages([]);
       } finally {
         setIsLoading(false);

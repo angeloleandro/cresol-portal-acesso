@@ -1,9 +1,6 @@
-/**
- * Video System Design Tokens
- * Enterprise-grade design system for video upload components
- * Based on Chakra UI v3 and Ant Design patterns
- */
 import { CRESOL_COLORS } from './design-tokens';
+
+
 
 export const videoSystemTokens = {
   // Colors - Using centralized Cresol design tokens

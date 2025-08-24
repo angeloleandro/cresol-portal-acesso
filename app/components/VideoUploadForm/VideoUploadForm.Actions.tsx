@@ -1,11 +1,9 @@
-/**
- * VideoUploadForm Clean Actions Component
- * Minimalist button design with neutral colors and simple loading states
- */
-
 import { memo, useCallback } from 'react'
+
 import { VideoActionsProps } from './VideoUploadForm.types'
-import { CRESOL_UI_CONFIG } from '@/lib/design-tokens'
+
+
+
 
 export const VideoUploadFormActions = memo(({ 
   onSave,

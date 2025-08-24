@@ -1,19 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseClient } from '@/lib/supabase';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { useState, useEffect, useCallback } from 'react';
+
+import { StandardizedButton } from '@/app/components/admin';
 import AdminHeader from '@/app/components/AdminHeader';
 import { useAlert } from '@/app/components/alerts';
 import Breadcrumb from '@/app/components/Breadcrumb';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { getSupabaseClient } from '@/lib/supabase';
+
+import RoleModal from './components/RoleModal';
 import UserFilters from './components/UserFilters';
 import UserForm from './components/UserForm';
 import UserList from './components/UserList';
-import RoleModal from './components/RoleModal';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { StandardizedButton } from '@/app/components/admin';
+
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface ProfileUser {
   id: string;
@@ -100,7 +103,7 @@ export default function UsersManagement() {
         [userId]: sectorIds
       }));
     } catch (error) {
-      console.error('Erro ao buscar setores do usuário:', error);
+
     }
   }, []);
 
@@ -119,7 +122,7 @@ export default function UsersManagement() {
         [userId]: subsectorIds
       }));
     } catch (error) {
-      console.error('Erro ao buscar sub-setores do usuário:', error);
+
     }
   }, []);
 
@@ -142,12 +145,7 @@ export default function UsersManagement() {
         .order('full_name');
       
       if (error) {
-        console.error('Erro detalhado do Supabase:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
+
         throw error;
       }
       
@@ -218,7 +216,7 @@ export default function UsersManagement() {
           fetchSubsectors()
         ]);
       } catch (error) {
-        console.error('Erro ao verificar usuário:', error);
+
         router.replace('/login');
       }
     };
@@ -239,7 +237,7 @@ export default function UsersManagement() {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       // Apenas log em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
-        console.error('Erro ao buscar locais de trabalho:', errorMessage);
+
       }
     }
   };
@@ -257,7 +255,7 @@ export default function UsersManagement() {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       // Apenas log em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
-        console.error('Erro ao buscar posições:', errorMessage);
+
       }
     }
   };
@@ -275,7 +273,7 @@ export default function UsersManagement() {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       // Apenas log em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
-        console.error('Erro ao buscar setores:', errorMessage);
+
       }
     }
   };
@@ -299,7 +297,7 @@ export default function UsersManagement() {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       // Apenas log em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
-        console.error('Erro ao buscar sub-setores:', errorMessage);
+
       }
     }
   };

@@ -34,9 +34,9 @@ interface LogContext {
   sectorId?: string;
   includeUnpublished?: boolean;
   timings?: Record<string, number>;
-  error?: any;
-  metadata?: Record<string, any>;
-  [key: string]: any;
+  error?: Error | string | null;
+  metadata?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 interface TimingResult {
@@ -64,8 +64,8 @@ class PerformanceLogger {
   private colorLog(color: string, bgColor: string, icon: string, level: string, message: string, context?: LogContext) {
     if (!this.isDevelopment) return;
     
-    const timestamp = this.getTimestamp();
-    const contextStr = context ? 
+    const _timestamp = this.getTimestamp();
+    const _contextStr = context ? 
       ` | ${Object.entries(context).map(([k, v]) => `${k}:${v}`).join(' ')}` : '';
     
       }
@@ -270,6 +270,7 @@ class PerformanceLogger {
     this.colorLog(colors.red, colors.bgRed, '❌', 'ERROR', errorMsg, context);
     
     if (error && this.isDevelopment && error.stack) {
+      // eslint-disable-next-line no-console
       console.error(`${colors.dim}${error.stack}${colors.reset}`);
     }
   }
@@ -293,10 +294,11 @@ class PerformanceLogger {
   // === UTILITÁRIOS ===
 
   // Debugar objeto complexo
-  debugObject(label: string, data: any, context?: LogContext) {
+  debugObject(label: string, data: unknown, context?: LogContext) {
     if (!this.isDevelopment) return;
     
     this.colorLog(colors.magenta, colors.bgMagenta, '🔍', 'DEBUG', label, context);
+    // eslint-disable-next-line no-console
     console.log(`${colors.dim}`, JSON.stringify(data, null, 2), `${colors.reset}`);
   }
 
@@ -304,8 +306,8 @@ class PerformanceLogger {
   separator(title?: string) {
     if (!this.isDevelopment) return;
     
-    const line = '═'.repeat(80);
-    const titleStr = title ? ` ${title} ` : '';
+    const _line = '═'.repeat(80);
+    const _titleStr = title ? ` ${title} ` : '';
       }
 
   // Limprar timers órfãos

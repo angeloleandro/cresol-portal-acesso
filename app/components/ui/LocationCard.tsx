@@ -1,5 +1,6 @@
 import { TruncatedText } from './TruncatedText';
 
+
 interface LocationCardProps {
   name: string;
   users: number;

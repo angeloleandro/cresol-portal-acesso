@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-import type { SupabaseClient } from '@supabase/supabase-js';
+
 import { logger } from '@/lib/logger';
+
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 
 // Helper para detectar se estamos em build time
 const isBuildTime = () => {
@@ -10,10 +13,10 @@ const isBuildTime = () => {
 };
 
 /**
- * Cria um cliente Supabase com privilégios administrativos usando a service role key
- * @returns Cliente Supabase configurado com service role
+ * createAdminSupabaseClient function
+ * @todo Add proper documentation
  */
-export function createAdminSupabaseClient(): SupabaseClient {
+export function CreateAdminSupabaseClient(): SupabaseClient {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   
@@ -27,13 +30,12 @@ export function createAdminSupabaseClient(): SupabaseClient {
 }
 
 /**
- * Valida se um usuário é administrador usando o service role key
- * @param userId ID do usuário para verificar
- * @returns boolean indicando se o usuário é admin
+ * validateAdminUser function
+ * @todo Add proper documentation
  */
 export async function validateAdminUser(userId: string): Promise<boolean> {
   try {
-    const supabaseAdmin = createAdminSupabaseClient();
+    const supabaseAdmin = CreateAdminSupabaseClient();
     
     const { data, error } = await supabaseAdmin
       .from('profiles')
@@ -48,20 +50,19 @@ export async function validateAdminUser(userId: string): Promise<boolean> {
     return data.role === 'admin';
   } catch (error) {
     if (!isBuildTime()) {
-      console.error('Erro ao validar admin user:', error);
+
     }
     return false;
   }
 }
 
 /**
- * Valida se um usuário é admin ou sector admin
- * @param userId ID do usuário para verificar
- * @returns boolean indicando se o usuário tem privilégios de admin/sector admin
+ * validateAdminOrSectorAdminUser function
+ * @todo Add proper documentation
  */
 export async function validateAdminOrSectorAdminUser(userId: string): Promise<boolean> {
   try {
-    const supabaseAdmin = createAdminSupabaseClient();
+    const supabaseAdmin = CreateAdminSupabaseClient();
     
     const { data, error } = await supabaseAdmin
       .from('profiles')
@@ -76,18 +77,17 @@ export async function validateAdminOrSectorAdminUser(userId: string): Promise<bo
     return ['admin', 'sector_admin'].includes(data.role);
   } catch (error) {
     if (!isBuildTime()) {
-      console.error('Erro ao validar admin/sector admin user:', error);
+
     }
     return false;
   }
 }
 
 /**
- * Extrai e valida token de autorização do header
- * @param authHeader Header de autorização
- * @returns Token limpo ou null se inválido
+ * extractAuthToken function
+ * @todo Add proper documentation
  */
-export function extractAuthToken(authHeader: string | null): string | null {
+export function ExtractAuthToken(authHeader: string | null): string | null {
   if (!authHeader) return null;
   
   const token = authHeader.replace('Bearer ', '');
@@ -95,9 +95,8 @@ export function extractAuthToken(authHeader: string | null): string | null {
 }
 
 /**
- * Middleware de autenticação para APIs administrativas
- * @param request Request object do Next.js (suporta Request e NextRequest)
- * @returns Objeto com informações do usuário autenticado ou erro
+ * authenticateAdminRequest function
+ * @todo Add proper documentation
  */
 export async function authenticateAdminRequest(request: Request | { headers: Headers | { get: (name: string) => string | null } }) {
   const requestId = logger.generateRequestId();
@@ -106,7 +105,7 @@ export async function authenticateAdminRequest(request: Request | { headers: Hea
   try {
     // Timer para criação do client
     const clientTimer = logger.dbStart('Create Admin Client', { requestId });
-    const supabaseAdmin = createAdminSupabaseClient();
+    const supabaseAdmin = CreateAdminSupabaseClient();
     logger.dbEnd(clientTimer);
     
     // Extrair token do header - compatível com Request e NextRequest
@@ -124,7 +123,7 @@ export async function authenticateAdminRequest(request: Request | { headers: Hea
       authHeaderLength: authHeader?.length || 0
     });
     
-    const token = extractAuthToken(authHeader);
+    const token = ExtractAuthToken(authHeader);
     
     if (!token) {
       logger.authEnd(authTimer);
@@ -200,12 +199,10 @@ export async function authenticateAdminRequest(request: Request | { headers: Hea
 }
 
 /**
- * Middleware de autorização para operações administrativas
- * @param userRole Role do usuário
- * @param requiredRoles Roles permitidas para a operação
- * @returns boolean indicando se tem autorização
+ * authorizeAdminOperation function
+ * @todo Add proper documentation
  */
-export function authorizeAdminOperation(
+export function AuthorizeAdminOperation(
   userRole: string, 
   requiredRoles: string[] = ['admin']
 ): boolean {
@@ -220,8 +217,10 @@ export const AdminAPIResponses = {
   forbidden: () => ({ error: 'Acesso negado' }),
   notFound: (resource: string) => ({ error: `${resource} não encontrado` }),
   serverError: (message?: string) => ({ error: message || 'Erro interno do servidor' }),
-  success: (data?: any, message?: string) => ({ 
-    ...(message && { message }), 
-    ...(data && { data }) 
-  })
+  success: (data?: unknown, message?: string) => {
+    const response: Record<string, unknown> = {};
+    if (message) response.message = message;
+    if (data) response.data = data;
+    return response;
+  }
 } as const;

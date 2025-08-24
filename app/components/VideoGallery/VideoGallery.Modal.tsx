@@ -1,23 +1,26 @@
-/**
- * Unified Video Modal System
- * Enterprise-grade modal with focus management and accessibility
- */
+
 
 "use client";
 
-import { useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import clsx from 'clsx';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import clsx from 'clsx';
-import { Icon } from '../icons/Icon';
-import { formatFileSize } from '@/lib/video-utils';
-import { modalAnimations } from './VideoGallery.animations';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useCallback } from 'react';
+
+
+import { FormatFileSize as formatFileSize } from '@/lib/video-utils';
+
 import { useFocusManagement, useEscapeKey } from './VideoGallery.hooks';
 import { VideoModalProps, DashboardVideo } from './VideoGallery.types';
+import { Icon } from '../icons/Icon';
 
 /**
  * Main Video Modal Component
+ */
+/**
+ * VideoModal function
+ * @todo Add proper documentation
  */
 export function VideoModal({ isOpen, video, onClose }: VideoModalProps) {
   const { containerRef } = useFocusManagement(isOpen);
@@ -420,6 +423,10 @@ function VideoStatusBadge({
 
 /**
  * Compact Modal for mobile/smaller screens
+ */
+/**
+ * CompactVideoModal function
+ * @todo Add proper documentation
  */
 export function CompactVideoModal({ isOpen, video, onClose }: VideoModalProps) {
   const { containerRef } = useFocusManagement(isOpen);

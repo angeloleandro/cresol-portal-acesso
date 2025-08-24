@@ -1,0 +1,119 @@
+{
+  "timestamp": "2025-08-24T11:54:12.776Z",
+  "largeComponents": [
+    {
+      "file": "app/admin-setor/setores/[id]/page.tsx",
+      "lines": 1315,
+      "complexity": 52,
+      "suggestedSplits": [
+        "Extract custom hooks to separate files",
+        "Extract state management to a context or custom hook",
+        "Break down complex conditional logic",
+        "Extract utility functions"
+      ]
+    },
+    {
+      "file": "app/api/admin/sector-content/route.ts",
+      "lines": 1018,
+      "complexity": 100,
+      "suggestedSplits": [
+        "Break down complex conditional logic",
+        "Extract utility functions"
+      ]
+    },
+    {
+      "file": "app/admin/users/components/UserEditModal.tsx",
+      "lines": 906,
+      "complexity": 53,
+      "suggestedSplits": [
+        "Extract custom hooks to separate files",
+        "Extract state management to a context or custom hook",
+        "Split form validation logic",
+        "Extract form fields to separate components",
+        "Break down complex conditional logic",
+        "Extract utility functions"
+      ]
+    },
+    {
+      "file": "app/api/admin/events/route.ts",
+      "lines": 881,
+      "complexity": 74,
+      "suggestedSplits": [
+        "Break down complex conditional logic",
+        "Extract utility functions"
+      ]
+    },
+    {
+      "file": "app/components/AdvancedSearch.tsx",
+      "lines": 859,
+      "complexity": 51,
+      "suggestedSplits": [
+        "Extract custom hooks to separate files",
+        "Extract state management to a context or custom hook",
+        "Break down complex conditional logic",
+        "Extract utility functions"
+      ]
+    },
+    {
+      "file": "app/api/admin/documents/route.ts",
+      "lines": 844,
+      "complexity": 71,
+      "suggestedSplits": [
+        "Break down complex conditional logic",
+        "Extract utility functions"
+      ]
+    },
+    {
+      "file": "app/setores/[id]/equipe/page.tsx",
+      "lines": 843,
+      "complexity": 44,
+      "suggestedSplits": [
+        "Extract custom hooks to separate files",
+        "Extract state management to a context or custom hook",
+        "Break down complex conditional logic",
+        "Extract utility functions"
+      ]
+    },
+    {
+      "file": "app/api/admin/messages/route.ts",
+      "lines": 841,
+      "complexity": 56,
+      "suggestedSplits": [
+        "Break down complex conditional logic",
+        "Extract utility functions"
+      ]
+    },
+    {
+      "file": "app/components/VideoUploadForm/VideoUploadForm.Root.tsx",
+      "lines": 809,
+      "complexity": 67,
+      "suggestedSplits": [
+        "Extract custom hooks to separate files",
+        "Extract state management to a context or custom hook",
+        "Split form validation logic",
+        "Extract form fields to separate components",
+        "Break down complex conditional logic",
+        "Extract utility functions"
+      ]
+    },
+    {
+      "file": "app/api/admin/news/route.ts",
+      "lines": 802,
+      "complexity": 69,
+      "suggestedSplits": [
+        "Break down complex conditional logic",
+        "Extract utility functions"
+      ]
+    }
+  ],
+  "recommendations": [
+    "Start with the highest complexity components first",
+    "Extract custom hooks for reusable logic",
+    "Move utility functions to separate files",
+    "Create smaller, focused components",
+    "Use composition over large monolithic components",
+    "Implement proper TypeScript interfaces for props",
+    "Add JSDoc comments for public APIs"
+  ],
+  "estimatedTime": 11
+}

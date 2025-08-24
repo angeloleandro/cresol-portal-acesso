@@ -1,27 +1,27 @@
-/**
- * VideoThumbnail Placeholder Components
- * Elegant visual fallback system with brand-appropriate design
- */
+
 
 "use client";
 
-import { motion } from 'framer-motion';
-import Button from '@/app/components/ui/Button';
 import clsx from 'clsx';
-import { Icon } from '../icons/Icon';
+import { motion } from 'framer-motion';
+
+import Button from '@/app/components/ui/Button';
+import { TIMINGS } from '@/lib/constants/timing';
+import { CRESOL_COLORS as COLORS } from '@/lib/design-tokens/design-tokens';
+
 import { 
   PlaceholderConfig, 
   PlaceholderVariant, 
   GradientConfig, 
-  AspectRatio, 
-  ThumbnailVariant 
+  AspectRatio
 } from './VideoThumbnail.types';
 import { getAspectRatioClass, getPlaceholderGradient } from './VideoThumbnail.utils';
+import { Icon } from '../icons/Icon';
+
 
 interface ThumbnailPlaceholderProps {
   variant?: PlaceholderVariant;
   aspectRatio?: AspectRatio;
-  size?: ThumbnailVariant;
   config?: PlaceholderConfig;
   className?: string;
   animated?: boolean;
@@ -31,10 +31,13 @@ interface ThumbnailPlaceholderProps {
 /**
  * Main Thumbnail Placeholder Component
  */
+/**
+ * ThumbnailPlaceholder function
+ * @todo Add proper documentation
+ */
 export function ThumbnailPlaceholder({
   variant = 'gradient',
   aspectRatio = '16/9',
-  size = 'default',
   config,
   className,
   animated = true,
@@ -60,7 +63,7 @@ export function ThumbnailPlaceholder({
       case 'blur':
         return <BlurPlaceholder config={config} animated={animated} />;
       case 'skeleton':
-        return <SkeletonPlaceholder config={config} animated={animated} />;
+        return <SkeletonPlaceholder animated={animated} />;
       default:
         return <GradientPlaceholder config={config} animated={animated} />;
     }
@@ -112,8 +115,8 @@ function GradientPlaceholder({
   animated?: boolean; 
 }) {
   const gradient = config?.gradient || {
-    from: '#F58220', // Cresol Orange
-    to: '#005C46',   // Cresol Green
+    from: COLORS.primary.DEFAULT, // Cresol Orange
+    to: COLORS.secondary.DEFAULT,   // Cresol Green
     direction: 'diagonal-tl' as const
   };
 
@@ -189,8 +192,8 @@ function PatternPlaceholder({
     <motion.div
       className="absolute inset-0 flex items-center justify-center"
       style={{
-        background: `linear-gradient(45deg, #F58220 25%, transparent 25%, transparent 75%, #F58220 75%), 
-                     linear-gradient(45deg, #F58220 25%, transparent 25%, transparent 75%, #F58220 75%)`,
+        background: `linear-gradient(45deg, ${COLORS.primary.DEFAULT} 25%, transparent 25%, transparent 75%, ${COLORS.primary.DEFAULT} 75%), 
+                     linear-gradient(45deg, ${COLORS.primary.DEFAULT} 25%, transparent 25%, transparent 75%, ${COLORS.primary.DEFAULT} 75%)`,
         backgroundSize: '20px 20px',
         backgroundPosition: '0 0, 10px 10px'
       }}
@@ -234,7 +237,7 @@ function BlurPlaceholder({
       <div 
         className="absolute inset-0"
         style={{
-          background: getPlaceholderGradient('#F58220', '#005C46', 'diagonal-tl')
+          background: getPlaceholderGradient(COLORS.primary.DEFAULT, COLORS.secondary.DEFAULT, 'diagonal-tl')
         }}
       />
       
@@ -270,10 +273,8 @@ function BlurPlaceholder({
  * Skeleton Loading Placeholder
  */
 function SkeletonPlaceholder({ 
-  config, 
   animated 
 }: { 
-  config?: PlaceholderConfig; 
   animated?: boolean; 
 }) {
   return (
@@ -356,6 +357,10 @@ function PlaceholderIcon({
 /**
  * Loading State Placeholder
  */
+/**
+ * LoadingThumbnailPlaceholder function
+ * @todo Add proper documentation
+ */
 export function LoadingThumbnailPlaceholder({
   aspectRatio = '16/9',
   className,
@@ -429,6 +434,10 @@ export function LoadingThumbnailPlaceholder({
 /**
  * Error State Placeholder
  */
+/**
+ * ErrorThumbnailPlaceholder function
+ * @todo Add proper documentation
+ */
 export function ErrorThumbnailPlaceholder({
   aspectRatio = '16/9',
   className,
@@ -482,7 +491,7 @@ export function ErrorThumbnailPlaceholder({
               'px-3 py-1 text-xs font-medium rounded-md',
               'bg-red-100 text-red-700 hover:bg-red-200',
               'focus:outline-none focus:ring-2 focus:ring-red-500/20',
-              'transition-colors duration-200'
+              `transition-colors duration-[${TIMINGS.animationNormal}ms]`
             )}
             onClick={onRetry}
             initial={{ opacity: 0, y: 5 }}
@@ -499,6 +508,10 @@ export function ErrorThumbnailPlaceholder({
 
 /**
  * Compact Placeholder for smaller thumbnails
+ */
+/**
+ * CompactThumbnailPlaceholder function
+ * @todo Add proper documentation
  */
 export function CompactThumbnailPlaceholder({
   className,

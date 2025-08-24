@@ -1,14 +1,18 @@
 'use client';
 
 import { ConfigProvider } from 'antd';
-import type { ThemeConfig } from 'antd';
 import ptBR from 'antd/locale/pt_BR';
+
+// Importação corrigida para usar CRESOL_COLORS diretamente
+import { CRESOL_COLORS } from '@/lib/design-tokens';
+
+import type { ThemeConfig } from 'antd';
 
 // Tema customizado com cores Cresol
 const cresolTheme: ThemeConfig = {
   token: {
     // Cores principais
-    colorPrimary: '#F58220', // Cresol Orange
+    colorPrimary: CRESOL_COLORS.primary.DEFAULT, // Cresol Orange
     colorSuccess: '#52c41a',
     colorWarning: '#faad14',
     colorError: '#f5222d',
@@ -34,13 +38,13 @@ const cresolTheme: ThemeConfig = {
   components: {
     // Configuração específica do Spin
     Spin: {
-      colorPrimary: '#F58220', // Cor do spinner
+      colorPrimary: CRESOL_COLORS.primary.DEFAULT, // Cor do spinner
       colorBgContainer: 'rgba(255, 255, 255, 0.9)', // Background do container
       contentHeight: 400, // Altura mínima do conteúdo
     },
     // Configuração de botões
     Button: {
-      colorPrimary: '#F58220',
+      colorPrimary: CRESOL_COLORS.primary.DEFAULT,
       algorithm: true, // Habilita algoritmo de cores derivadas
     },
     // Configuração de mensagens/notificações
@@ -60,10 +64,6 @@ interface AntdConfigProviderProps {
   children: React.ReactNode;
 }
 
-/**
- * Provider global para configuração do Ant Design
- * Define tema com cores Cresol e localização pt-BR
- */
 export const AntdConfigProvider: React.FC<AntdConfigProviderProps> = ({ children }) => {
   return (
     <ConfigProvider 

@@ -1,12 +1,14 @@
 // Componente OTIMIZADO de gerenciamento de grupos de notificação com memoização
 
 import React, { useState, memo, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { Group, User, WorkLocation } from '../types/sector.types';
-import { formatDate } from '@/lib/utils/formatters';
+
+import DeleteModal from '@/app/components/ui/DeleteModal';
 import UserSelectionFilter from '@/app/components/ui/UserSelectionFilter';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
-import DeleteModal from '@/app/components/ui/DeleteModal';
+import { createClient } from '@/lib/supabase/client';
+import { FormatDate } from '@/lib/utils/formatters';
+
+import { Group, User, WorkLocation } from '../types/sector.types';
 
 interface GroupsManagementProps {
   sectorId: string;
@@ -26,11 +28,11 @@ const GroupsManagement = memo(function GroupsManagement({
   groups,
   automaticGroups,
   workLocations,
-  userSearchTerm,
-  userLocationFilter,
+  userSearchTerm: _userSearchTerm,
+  userLocationFilter: _userLocationFilter,
   filteredUsers,
-  onSearchTermChange,
-  onLocationFilterChange,
+  onSearchTermChange: _onSearchTermChange,
+  onLocationFilterChange: _onLocationFilterChange,
   onRefresh
 }: GroupsManagementProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -136,7 +138,7 @@ const GroupsManagement = memo(function GroupsManagement({
         throw new Error(errorData?.error || `Erro ao ${isEditMode ? 'atualizar' : 'criar'} grupo`);
       }
 
-      const result = await response.json();
+      const _result = await response.json();
       await onRefresh();
       handleCloseModal();
     } catch (error) {
@@ -260,7 +262,7 @@ const GroupsManagement = memo(function GroupsManagement({
                   <p className="text-sm text-gray-600 mb-3">{group.description}</p>
                   <div className="flex justify-between items-center text-xs text-gray-500">
                     <span>{group.member_count || 0} membros</span>
-                    <span>Criado em {formatDate(group.created_at)}</span>
+                    <span>Criado em {FormatDate(group.created_at)}</span>
                   </div>
                 </div>
               ))}
@@ -353,5 +355,7 @@ const GroupsManagement = memo(function GroupsManagement({
     </div>
   );
 });
+
+GroupsManagement.displayName = 'GroupsManagement';
 
 export { GroupsManagement };

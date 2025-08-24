@@ -1,20 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import GlobalSearch from '../components/GlobalSearch';
+import { supabase } from '@/lib/supabase';
+
 import Breadcrumbs from '../components/Breadcrumbs';
 import EventosDestaque from '../components/EventosDestaque';
-import NoticiasDestaque from '../components/NoticiasDestaque';
+import Footer from '../components/Footer';
+import GlobalSearch from '../components/GlobalSearch';
 import { Icon } from '../components/icons/Icon';
-
+import Navbar from '../components/Navbar';
+import NoticiasDestaque from '../components/NoticiasDestaque';
 
 interface DashboardStats {
   newsCount: number;
@@ -65,13 +66,13 @@ export default function Dashboard() {
         .single();
 
       if (error) {
-        console.error('Erro ao buscar perfil:', error);
+
         return;
       }
 
       setProfile(data);
     } catch (error) {
-      console.error('Erro ao buscar perfil:', error);
+
     }
   };
 
@@ -101,13 +102,11 @@ export default function Dashboard() {
       });
       
       setRecentSystems(recentSystems);
-      
-      
+
     } catch (error: any) {
-      console.error('[Dashboard] ❌ Erro ao carregar dados:', error.message);
+
     }
   };
-
 
   const getCurrentGreeting = () => {
     const hour = new Date().getHours();
@@ -206,7 +205,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-
 
         {/* Sistemas Recentes */}
         {recentSystems.length > 0 && (

@@ -1,10 +1,9 @@
-/**
- * Middleware Authentication Utilities
- * Funções otimizadas para verificação de autenticação e autorização
- */
+import { GetCachedUserData, SetCachedUserData } from './middleware-cache';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { getCachedUserData, setCachedUserData } from './middleware-cache';
+
+
+
 
 export interface UserAuthData {
   id: string;
@@ -22,6 +21,10 @@ export interface AuthResult {
 /**
  * Verifica usuário com cache otimizado - ÚNICA query para user + profile
  */
+/**
+ * getOptimizedUserAuth function
+ * @todo Add proper documentation
+ */
 export async function getOptimizedUserAuth(
   supabase: SupabaseClient,
   accessToken?: string
@@ -31,7 +34,7 @@ export async function getOptimizedUserAuth(
   try {
     // Verificar cache primeiro se temos access token
     if (accessToken) {
-      const cachedData = getCachedUserData(accessToken);
+      const cachedData = GetCachedUserData(accessToken);
       
       if (cachedData) {
         return {
@@ -83,7 +86,7 @@ export async function getOptimizedUserAuth(
 
     // Cache os dados se temos access token
     if (accessToken) {
-      setCachedUserData(accessToken, {
+      SetCachedUserData(accessToken, {
         id: userData.id,
         role: userData.role,
         email: userData.email,
@@ -110,22 +113,30 @@ export async function getOptimizedUserAuth(
 /**
  * Verifica se usuário tem permissão para acessar rota admin
  */
-export function hasAdminAccess(role: string): boolean {
+/**
+ * hasAdminAccess function
+ * @todo Add proper documentation
+ */
+export function HasAdminAccess(role: string): boolean {
   return role === 'admin';
 }
 
 /**
  * Verifica se usuário tem permissão para acessar rota sector_admin
  */
-export function hasSectorAdminAccess(role: string): boolean {
+/**
+ * hasSectorAdminAccess function
+ * @todo Add proper documentation
+ */
+export function HasSectorAdminAccess(role: string): boolean {
   return role === 'admin' || role === 'sector_admin';
 }
 
 /**
- * Extrair access token dos cookies de forma otimizada
- * Suporta múltiplos formatos de cookie do Supabase
+ * extractAccessToken function
+ * @todo Add proper documentation
  */
-export function extractAccessToken(request: Request): string | null {
+export function ExtractAccessToken(request: Request): string | null {
   const cookieHeader = request.headers.get('cookie');
   if (!cookieHeader) return null;
 
@@ -173,7 +184,11 @@ export function extractAccessToken(request: Request): string | null {
 /**
  * Determina tipo de rota para otimizar verificações
  */
-export function getRouteType(pathname: string): {
+/**
+ * getRouteType function
+ * @todo Add proper documentation
+ */
+export function GetRouteType(pathname: string): {
   isAdmin: boolean;
   isSectorAdmin: boolean;
   isApiAdmin: boolean;
@@ -199,3 +214,10 @@ export function getRouteType(pathname: string): {
     requiresAuth: pathname === '/' || pathname === '/dashboard' || isAdminRoute || isSectorAdminRoute || isApiAdminRoute || isPublicApi
   };
 }
+
+// === COMPATIBILITY EXPORTS ===
+// Export camelCase versions for backward compatibility
+export const hasAdminAccess = HasAdminAccess;
+export const hasSectorAdminAccess = HasSectorAdminAccess;
+export const extractAccessToken = ExtractAccessToken;
+export const getRouteType = GetRouteType;

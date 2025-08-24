@@ -1,8 +1,6 @@
 // Componente compartilhado de botão toggle para mostrar/ocultar rascunhos
 // Usado em admin, sector e subsector
 
-import React from 'react';
-
 interface ToggleDraftsButtonProps {
   showDrafts: boolean;
   onToggle: () => void;
@@ -10,6 +8,10 @@ interface ToggleDraftsButtonProps {
   type: 'news' | 'events' | 'messages' | 'documents' | 'videos' | 'images';
 }
 
+/**
+ * ToggleDraftsButton function
+ * @todo Add proper documentation
+ */
 export function ToggleDraftsButton({
   showDrafts,
   onToggle,

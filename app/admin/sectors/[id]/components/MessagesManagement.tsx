@@ -1,10 +1,11 @@
 // Componente de gerenciamento de mensagens do setor - SIMPLIFICADO
 import React, { useState } from 'react';
-import { useAlert } from '@/app/components/alerts';
-import { formatDate } from '@/lib/utils/formatters';
+
 import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
+import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { FormatDate } from '@/lib/utils/formatters';
 
 interface SectorMessage {
   id: string;
@@ -26,6 +27,10 @@ interface MessagesManagementProps {
   onDelete: (id: string) => Promise<void>;
 }
 
+/**
+ * MessagesManagement function
+ * @todo Add proper documentation
+ */
 export function MessagesManagement({
   sectorId,
   messages,
@@ -184,7 +189,7 @@ export function MessagesManagement({
                     )}
                   </div>
                   <p className="text-gray-600 mb-2">{item.content}</p>
-                  <p className="text-sm text-gray-500">{formatDate(item.created_at)}</p>
+                  <p className="text-sm text-gray-500">{FormatDate(item.created_at)}</p>
                 </div>
                 <div className="flex space-x-2 ml-4">
                   <button

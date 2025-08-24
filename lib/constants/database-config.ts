@@ -1,7 +1,4 @@
-/**
- * Database Configuration Constants
- * Centralizes all database table and column names
- */
+
 
 // Table Names
 export const TABLES = {

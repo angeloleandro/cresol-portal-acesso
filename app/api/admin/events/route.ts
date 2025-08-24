@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { z } from 'zod';
+
+import { CreateAdminSupabaseClient } from '@/lib/supabase/admin';
+
 
 // Schema de validação para criação/edição de evento
 const eventSchema = z.object({
@@ -65,7 +67,7 @@ const searchFiltersSchema = z.object({
 
 // Função auxiliar para verificar permissões de admin
 async function checkAdminPermissions(userId: string) {
-  const supabase = createAdminSupabaseClient();
+  const supabase = CreateAdminSupabaseClient();
   
   const { data: profile } = await supabase
     .from('profiles')
@@ -99,7 +101,7 @@ export async function GET(request: NextRequest) {
     
     const filters = searchFiltersSchema.parse(cleanedFilters);
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
 
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -131,9 +133,6 @@ export async function GET(request: NextRequest) {
     }
 
     const timestamp = new Date().toISOString();
-    console.log(`[API-EVENTS] ${timestamp} - Iniciando busca de eventos de admin:`, {
-      timestamp
-    });
 
     // Construir queries para eventos de setor e subsetor
     let sectorEvents: any[] = [];
@@ -199,7 +198,7 @@ export async function GET(request: NextRequest) {
             const { data: sectorData, count: sectorCount } = await sectorQuery
         .order(filters.order_by, { ascending: filters.order_direction === 'asc' });
 
-      sectorEvents = (sectorData || []).map(event => ({
+      sectorEvents = (sectorData || []).map((event: any) => ({
         ...event,
         type: 'sector',
         location_name: (event as any).sectors?.name,
@@ -272,7 +271,7 @@ export async function GET(request: NextRequest) {
             const { data: subsectorData, count: subsectorCount } = await subsectorQuery
         .order(filters.order_by, { ascending: filters.order_direction === 'asc' });
 
-      subsectorEvents = (subsectorData || []).map(event => ({
+      subsectorEvents = (subsectorData || []).map((event: any) => ({
         ...event,
         type: 'subsector',
         location_name: (event as any).subsectors?.name,
@@ -348,10 +347,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       const timestamp = new Date().toISOString();
-      console.error(`[API-EVENTS-ERROR] ${timestamp} - Erro de validação:`, {
-        error: error.issues,
-        timestamp
-      });
+
       return NextResponse.json(
         { 
           error: 'Filtros inválidos',
@@ -382,7 +378,7 @@ export async function POST(request: NextRequest) {
         
     const validatedData = eventSchema.parse(body);
     
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -476,7 +472,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao criar evento de subsetor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao criar evento' },
           { status: 500 }
@@ -508,7 +504,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Erro no POST events:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -523,7 +518,7 @@ export async function PUT(request: NextRequest) {
     const validatedData = updateEventSchema.parse(body);
     const { id, type, ...updateData } = validatedData;
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -576,7 +571,7 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao atualizar evento de setor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao atualizar evento' },
           { status: 500 }
@@ -601,7 +596,7 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Erro ao atualizar evento de subsetor:', error);
+
         return NextResponse.json(
           { error: 'Erro ao atualizar evento' },
           { status: 500 }
@@ -633,7 +628,6 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.error('Erro no PUT events:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -662,7 +656,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -702,7 +696,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (error) {
-      console.error(`Erro ao excluir evento de ${type}:`, error);
+
       return NextResponse.json(
         { error: 'Erro ao excluir evento' },
         { status: 500 }
@@ -715,7 +709,7 @@ export async function DELETE(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Erro no DELETE events:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -752,7 +746,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const supabase = createAdminSupabaseClient();
+    const supabase = CreateAdminSupabaseClient();
     
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
@@ -821,7 +815,7 @@ export async function PATCH(request: NextRequest) {
         .single();
 
       if (duplicateError) {
-        console.error('Erro ao duplicar evento:', duplicateError);
+
         return NextResponse.json(
           { error: 'Erro ao duplicar evento' },
           { status: 500 }
@@ -858,7 +852,7 @@ export async function PATCH(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error(`Erro ao ${action} evento:`, error);
+
         return NextResponse.json(
           { error: `Erro ao executar ação ${action}` },
           { status: 500 }
@@ -880,7 +874,7 @@ export async function PATCH(request: NextRequest) {
     }
 
   } catch (error: any) {
-    console.error('Erro no PATCH events:', error);
+
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

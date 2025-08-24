@@ -1,39 +1,47 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
+
+import { useAdminAuth, useAdminData, type AdminUser } from '@/app/admin/hooks';
 
 // [DEBUG] Context tracking
-let adminDataContextInstanceCount = 0;
+let _adminDataContextInstanceCount = 0;
+
+interface AdminStats {
+  total: number;
+  active: number;
+  inactive: number;
+  [key: string]: number;
+}
 
 interface AdminDataContextType<T> {
   // Auth data
-  user: any;
+  user: AdminUser | null;
   authLoading: boolean;
   
   // Data management
   data: T[];
   loading: boolean;
-  stats: any;
+  stats: AdminStats;
   pagination: {
     currentPage: number;
     totalPages: number;
     totalCount: number;
     limit: number;
   };
-  filters: Record<string, any>;
-  updateFilters: (newFilters: Record<string, any>) => void;
+  filters: Record<string, unknown>;
+  updateFilters: (newFilters: Record<string, unknown>) => void;
   updatePagination: (newPagination: Partial<{ currentPage: number; limit: number }>) => void;
   reload: () => void;
   isLoading: boolean;
 }
 
-const AdminDataContext = createContext<AdminDataContextType<any> | null>(null);
+const AdminDataContext = createContext<AdminDataContextType<unknown> | null>(null);
 
-interface AdminDataProviderProps<T> {
+interface AdminDataProviderProps<_T> {
   children: ReactNode;
   endpoint: string;
-  initialFilters?: Record<string, any>;
+  initialFilters?: Record<string, unknown>;
   initialPagination?: {
     currentPage: number;
     limit: number;
@@ -41,6 +49,10 @@ interface AdminDataProviderProps<T> {
   debounceMs?: number;
 }
 
+/**
+ * AdminDataProvider function
+ * @todo Add proper documentation
+ */
 export function AdminDataProvider<T>({
   children,
   endpoint,
@@ -48,16 +60,7 @@ export function AdminDataProvider<T>({
   initialPagination = { currentPage: 1, limit: 20 },
   debounceMs = 300
 }: AdminDataProviderProps<T>) {
-  adminDataContextInstanceCount++;
-  const contextInstanceId = `admin-context-${endpoint}-${adminDataContextInstanceCount}-${Date.now()}`;
-  
-  console.log('[DEBUG-CONTEXT] =============== ADMIN CONTEXT CRIADO ===============');
-  console.log('[DEBUG-CONTEXT] AdminDataProvider created:', {
-    contextInstanceId,
-    endpoint,
-    instanceCount: adminDataContextInstanceCount,
-    timestamp: new Date().toISOString()
-  });
+  _adminDataContextInstanceCount++;
 
   // Usar hooks estáveis dentro do contexto
   const { user, loading: authLoading } = useAdminAuth();
@@ -74,15 +77,6 @@ export function AdminDataProvider<T>({
     ...adminData
   };
 
-  console.log('[DEBUG-CONTEXT] AdminDataProvider value:', {
-    contextInstanceId,
-    endpoint,
-    hasUser: !!user,
-    dataLength: adminData.data.length,
-    loading: adminData.loading,
-    timestamp: new Date().toISOString()
-  });
-
   return (
     <AdminDataContext.Provider value={contextValue}>
       {children}
@@ -90,6 +84,10 @@ export function AdminDataProvider<T>({
   );
 }
 
+/**
+ * useAdminDataContext function
+ * @todo Add proper documentation
+ */
 export function useAdminDataContext<T>(): AdminDataContextType<T> {
   const context = useContext(AdminDataContext);
   if (!context) {

@@ -1,7 +1,4 @@
-/**
- * VideoThumbnail System - Main Export File
- * Comprehensive thumbnail system for video gallery
- */
+
 
 // Main Components
 export { default as VideoThumbnail } from './VideoThumbnail';

@@ -1,10 +1,4 @@
-/**
- * CRESOL PORTAL - SISTEMA CENTRALIZADO DE DESIGN TOKENS
- * 
- * Sistema unificado de design tokens baseado na identidade visual Cresol
- * Elimina valores hardcoded e garante consistência visual em toda aplicação
- * Baseado na auditoria comprehensive de 164+ arquivos identificados
- */
+
 
 // === CORES CRESOL ===
 // Consolidação das cores da marca baseada em tailwind.config.js

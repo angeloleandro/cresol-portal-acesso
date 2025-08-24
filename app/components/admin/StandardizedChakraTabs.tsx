@@ -2,21 +2,6 @@
 
 import { Tabs } from "@chakra-ui/react";
 
-/**
- * STANDARDIZED CHAKRA UI V3 TABS COMPONENT
- * 
- * Implementação correta do Chakra UI v3 Tabs seguindo a documentação oficial.
- * Garante visual consistente com separação adequada entre abas.
- * 
- * Features:
- * - Sintaxe correta do Chakra UI v3 com Tabs.Root wrapper
- * - Visual limpo com separação clara entre abas
- * - Focado na funcionalidade essencial 
- * - TypeScript completo
- * - Responsivo e acessível (WCAG 2.1 AA)
- * - Variants e sizing support
- */
-
 interface TabItem {
   value: string;
   label: string;
@@ -43,10 +28,6 @@ interface StandardizedChakraTabsProps {
   listProps?: React.ComponentProps<typeof Tabs.List>;
 }
 
-/**
- * Componente completo de Tabs do Chakra UI v3
- * Inclui Root, List e Triggers em um único componente
- */
 export const StandardizedChakraTabs: React.FC<StandardizedChakraTabsProps> = ({
   tabs,
   className = '',
@@ -94,10 +75,6 @@ export const StandardizedChakraTabs: React.FC<StandardizedChakraTabsProps> = ({
   );
 };
 
-/**
- * Componente separado apenas para a lista de tabs (para casos especiais)
- * Use quando já tiver um Tabs.Root externo
- */
 export const StandardizedTabsList: React.FC<{
   tabs: TabItem[];
   className?: string;
@@ -129,16 +106,6 @@ export const StandardizedTabsList: React.FC<{
   );
 };
 
-/**
- * Componente de conteúdo de tabs - use dentro do Tabs.Root
- * 
- * @example
- * <Tabs.Root defaultValue="tab1">
- *   <StandardizedChakraTabs tabs={tabs} />
- *   <StandardizedTabContent value="tab1">Conteúdo 1</StandardizedTabContent>
- *   <StandardizedTabContent value="tab2">Conteúdo 2</StandardizedTabContent>
- * </Tabs.Root>
- */
 export const StandardizedTabContent: React.FC<{
   value: string;
   children: React.ReactNode;

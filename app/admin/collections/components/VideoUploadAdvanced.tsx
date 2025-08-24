@@ -1,19 +1,15 @@
 'use client';
 
-/**
- * VideoUploadAdvanced Component
- * Wrapper component que oferece opção avançada de upload para vídeos nas coleções
- * Integração entre BulkUpload e VideoUploadModal
- * Suporta upload de vídeos do YouTube e diretos com geração de thumbnails
- */
+import { useState } from 'react';
+
+import { Icon } from '@/app/components/icons/Icon';
+import Button from '@/app/components/ui/Button';
+import { Collection } from '@/lib/types/collections';
+
+import VideoUploadModal from './VideoUploadModal';
+
 
 import type React from 'react';
-import Button from '@/app/components/ui/Button';
-import { useState } from 'react';
-import { Collection } from '@/lib/types/collections';
-import VideoUploadModal from './VideoUploadModal';
-import { Icon } from '@/app/components/icons/Icon';
-import { motion } from 'framer-motion';
 
 interface VideoUploadAdvancedProps {
   collection: Collection;

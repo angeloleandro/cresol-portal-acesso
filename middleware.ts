@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { updateSession } from './lib/supabase/middleware';
 import { 
   getOptimizedUserAuth, 
@@ -9,6 +9,10 @@ import {
 } from './lib/middleware-auth';
 import { logger } from './lib/logger';
 
+/**
+ * middleware function
+ * @todo Add proper documentation
+ */
 export async function middleware(request: NextRequest) {
   const requestId = logger.generateRequestId();
   

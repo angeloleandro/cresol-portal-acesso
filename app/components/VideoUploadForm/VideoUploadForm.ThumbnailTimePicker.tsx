@@ -1,9 +1,7 @@
-/**
- * Seletor de tempo para thumbnail automática
- * Permite visualizar o vídeo e escolher o frame específico
- */
-
 import { memo, useState, useRef, useCallback, useEffect } from 'react'
+
+
+
 
 interface ThumbnailTimePickerProps {
   videoFile: File | null

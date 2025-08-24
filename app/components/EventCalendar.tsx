@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useState, useEffect, useCallback } from 'react';
+
 import { supabase } from '@/lib/supabase';
 
 interface EventItem {
@@ -45,7 +46,7 @@ export default function EventCalendar() {
         .order('start_date', { ascending: true });
 
       if (error) {
-        console.error('Erro ao buscar eventos:', error);
+
         setEvents([]);
       } else {
         // Formatar dados do Supabase
@@ -56,7 +57,7 @@ export default function EventCalendar() {
         setEvents(formattedEvents);
       }
     } catch (error) {
-      console.error('Erro geral:', error);
+
       setEvents([]);
     } finally {
       setIsLoading(false);
@@ -190,8 +191,6 @@ export default function EventCalendar() {
       generateCalendarDays();
     }
   }, [currentDate, events, generateCalendarDays]);
-
-  
 
   // Navegar para o mês anterior
   const goToPreviousMonth = () => {

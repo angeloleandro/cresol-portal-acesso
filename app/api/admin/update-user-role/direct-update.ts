@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
+
 /**
- * Atualiza diretamente a role de um usuário usando SQL
- * Esta função deve contornar quaisquer políticas de segurança do RLS
+ * directUpdateUserRole function
+ * @todo Add proper documentation
  */
 export async function directUpdateUserRole(userId: string, newRole: 'user' | 'sector_admin' | 'admin') {
   // Validação básica

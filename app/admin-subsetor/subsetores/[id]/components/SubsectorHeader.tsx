@@ -1,6 +1,7 @@
 // Componente de cabeçalho do subsetor
 
 import Link from 'next/link';
+
 import { Profile, Subsector } from '../types/subsector.types';
 
 interface SubsectorHeaderProps {
@@ -9,6 +10,10 @@ interface SubsectorHeaderProps {
   onLogout?: () => void;
 }
 
+/**
+ * SubsectorHeader function
+ * @todo Add proper documentation
+ */
 export function SubsectorHeader({ subsector, profile, onLogout }: SubsectorHeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200">

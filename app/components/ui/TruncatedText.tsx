@@ -4,12 +4,6 @@
 
 import React, { useState } from 'react';
 
-/**
- * Trunca texto longo e adiciona tooltip
- * @param text - Texto a ser truncado
- * @param maxLength - Comprimento máximo do texto
- * @returns Texto truncado ou original se menor que maxLength
- */
 export const truncateText = (text: string, maxLength: number = 25): string => {
   if (text.length <= maxLength) {
     return text;
@@ -18,12 +12,6 @@ export const truncateText = (text: string, maxLength: number = 25): string => {
   return text.substring(0, maxLength) + '...';
 };
 
-/**
- * Trunca texto de forma inteligente, preservando palavras
- * @param text - Texto a ser truncado
- * @param maxLength - Comprimento máximo do texto
- * @returns Texto truncado preservando palavras
- */
 export const smartTruncate = (text: string, maxLength: number = 25): string => {
   if (text.length <= maxLength) {
     return text;

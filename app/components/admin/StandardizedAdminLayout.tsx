@@ -1,10 +1,12 @@
 'use client';
 
 import { ReactNode } from 'react';
+
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
+
 import type { IconName } from '@/app/components/icons/Icon';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface BreadcrumbItem {
   label: string;
@@ -19,15 +21,6 @@ interface StandardizedAdminLayoutProps {
   className?: string;
 }
 
-/**
- * Layout padronizado para páginas administrativas seguindo o padrão da página /admin/users
- * 
- * Features:
- * - Header limpo com breadcrumb navigation
- * - Background padronizado (bg-gray-50)
- * - Container responsivo (max-w-7xl mx-auto)
- * - Espaçamento consistente (px-4 sm:px-6 lg:px-8 py-8)
- */
 export default function StandardizedAdminLayout({
   user,
   children,

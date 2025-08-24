@@ -12,11 +12,15 @@ export const ADMIN_EMAIL = 'comunicacao.fronteiras@cresol.com.br';
 export const KNOWN_ADMIN_ID = '67552259-be23-4c9c-bd06-6d57a6c041eb';
 
 // Helper functions
-export function generateTemporaryPassword(): string {
+export function GenerateTemporaryPassword(): string {
   return Math.random().toString(36).slice(-TEMP_PASSWORD_LENGTH);
 }
 
-export function validateCrescolEmail(email: string): boolean {
+/**
+ * validateCrescolEmail function
+ * @todo Add proper documentation
+ */
+export function ValidateCrescolEmail(email: string): boolean {
   return email.endsWith(CRESOL_EMAIL_DOMAIN);
 }
 

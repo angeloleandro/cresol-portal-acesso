@@ -1,16 +1,13 @@
-/**
- * ImagePreview Grid Component
- * High-performance grid with lazy loading, responsive layout, and accessibility
- */
+
 
 "use client";
 
-import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
+import { motion } from 'framer-motion';
+import { useState, useMemo } from 'react';
+
 import { Icon } from '../icons/Icon';
 import OptimizedImage from '../OptimizedImage';
-import { useLazyLoading } from './ImagePreview.hooks';
 import {
   gridContainerVariants,
   gridItemVariants,
@@ -18,10 +15,15 @@ import {
   overlayVariants,
   skeletonVariants
 } from './ImagePreview.animations';
+import { useLazyLoading } from './ImagePreview.hooks';
 import { ImageGridProps, ImageCardProps, GalleryImage } from './ImagePreview.types';
 
 /**
  * Main Image Grid Component
+ */
+/**
+ * ImageGrid function
+ * @todo Add proper documentation
  */
 export function ImageGrid({
   images,
@@ -104,6 +106,10 @@ export function ImageGrid({
 
 /**
  * Individual Image Card Component
+ */
+/**
+ * ImageCard function
+ * @todo Add proper documentation
  */
 export function ImageCard({
   image,
@@ -319,6 +325,10 @@ function EmptyState({
 
 /**
  * Responsive Masonry Grid Component (Alternative Layout)
+ */
+/**
+ * ImageMasonryGrid function
+ * @todo Add proper documentation
  */
 export function ImageMasonryGrid({
   images,

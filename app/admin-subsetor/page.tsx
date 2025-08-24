@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { ADMIN_LAYOUT, ADMIN_TYPOGRAPHY, ADMIN_COLORS, ADMIN_BUTTONS, ADMIN_MEDIA, ADMIN_STATES, ADMIN_DIMENSIONS } from '@/lib/constants/admin-config';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { SUBSECTOR_ROLES, SUBSECTOR_CARD_LAYOUT, SUBSECTOR_EMPTY_STATE, SUBSECTOR_PAGE_CONFIG, SUBSECTOR_ACTIONS, SUBSECTOR_ERRORS, SUBSECTOR_STATS, SUBSECTOR_PERMISSIONS } from '@/lib/constants/subsector-config';
-import { ADMIN_LAYOUT, ADMIN_TYPOGRAPHY, ADMIN_COLORS, ADMIN_BUTTONS, ADMIN_MEDIA, ADMIN_STATES, ADMIN_DIMENSIONS } from '@/lib/constants/admin-config';
+import { supabase } from '@/lib/supabase';
+
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface Profile {
   id: string;

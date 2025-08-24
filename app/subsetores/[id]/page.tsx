@@ -1,16 +1,17 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import Navbar from '../../components/Navbar';
-import SubsectorTeam from '../../components/SubsectorTeam';
-import { Icon } from '../../components/icons';
-import Breadcrumb from '../../components/Breadcrumb';
+import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
+import Breadcrumb from '../../components/Breadcrumb';
+import { Icon } from '../../components/icons';
+import Navbar from '../../components/Navbar';
+import SubsectorTeam from '../../components/SubsectorTeam';
 
 interface Subsector {
   id: string;
@@ -70,7 +71,7 @@ export default function SubsectorDetailsPage() {
   const [messages, setMessages] = useState<SubsectorMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<ErrorState>({ hasError: false, message: '' });
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [_isAdmin, _setIsAdmin] = useState(false);
 
   const fetchSubsector = useCallback(async () => {
     const { data, error } = await supabase
@@ -169,7 +170,7 @@ export default function SubsectorDetailsPage() {
             .single();
           
           const userIsAdmin = profileData?.role === 'admin' || profileData?.role === 'sector_admin';
-          setIsAdmin(userIsAdmin);
+          _setIsAdmin(userIsAdmin);
           
           // Página pública sempre mostra apenas conteúdo publicado
         }
@@ -418,7 +419,6 @@ export default function SubsectorDetailsPage() {
                 )}
               </div>
             </section>
-
 
             {/* Mensagens Recentes */}
             <section 

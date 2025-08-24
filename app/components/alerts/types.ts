@@ -1,9 +1,4 @@
-/**
- * Tipos TypeScript para o Sistema de Alertas Cresol
- * 
- * Sistema unificado de alertas baseado em Chakra UI v3
- * Suporta toast (flutuante) e inline (estático)
- */
+
 
 export type AlertStatus = 'success' | 'error' | 'warning' | 'info' | 'neutral';
 

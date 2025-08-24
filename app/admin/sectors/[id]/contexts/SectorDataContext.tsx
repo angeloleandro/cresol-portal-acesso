@@ -1,7 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+
 import { createClient } from '@/lib/supabase/client';
+
 import { Group, User, WorkLocation, Sector, Subsector } from '../types/sector.types';
 
 interface FilterOption {
@@ -55,6 +57,10 @@ interface SectorDataProviderProps {
   children: React.ReactNode;
 }
 
+/**
+ * SectorDataProvider function
+ * @todo Add proper documentation
+ */
 export function SectorDataProvider({ sectorId, children }: SectorDataProviderProps) {
   // Estados dos dados
   const [sector, setSector] = useState<Sector | null>(null);
@@ -82,7 +88,6 @@ export function SectorDataProvider({ sectorId, children }: SectorDataProviderPro
     positions?: { data: FilterOption[]; timestamp: number };
     allUsers?: { data: User[]; timestamp: number };
   }>({});
-  
 
   // Buscar dados do setor
   const fetchSectorData = useCallback(async () => {
@@ -438,7 +443,7 @@ export function SectorDataProvider({ sectorId, children }: SectorDataProviderPro
     .then(() => {
       // Sucesso silencioso
     })
-    .catch((err) => {
+    .catch((_err) => {
       if (mountedRef.current) {
         setError('Erro ao carregar dados do setor');
       }

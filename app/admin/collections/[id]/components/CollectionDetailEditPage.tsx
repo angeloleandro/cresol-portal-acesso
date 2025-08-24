@@ -3,24 +3,27 @@
 // Collection Detail Edit Page Component
 // Interface completa para visualizar e editar coleções individuais
 
-import { useState, useEffect, useCallback } from 'react';
-import Button from '@/app/components/ui/Button';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
+import clsx from 'clsx';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
+
 import Breadcrumb from '@/app/components/Breadcrumb';
-import Icon from '@/app/components/icons/Icon';
-import CollectionForm, { CollectionFormData } from '../../components/CollectionForm';
-import ItemSelector from '../../components/ItemSelector';
-import BulkUpload from '../../components/BulkUpload';
-import VideoUploadModal from '../../components/VideoUploadModal';
 import CollectionDetail from '@/app/components/Collections/Collection.Detail';
-import { Collection, CollectionWithItems, CollectionItem } from '@/lib/types/collections';
-import { useCollectionItems } from '@/app/components/Collections/Collection.hooks';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
+import Icon from '@/app/components/icons/Icon';
+import Button from '@/app/components/ui/Button';
 import DeleteModal from '@/app/components/ui/DeleteModal';
-import clsx from 'clsx';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { Collection, CollectionWithItems, CollectionItem, CollectionFormData } from '@/lib/types/collections';
+
+import BulkUpload from '../../components/BulkUpload';
+import CollectionForm from '../../components/CollectionForm';
+import ItemSelector from '../../components/ItemSelector';
+import VideoUploadModal from '../../components/VideoUploadModal';
+
+
 
 interface CollectionDetailEditPageProps {
   collectionId: string;
@@ -63,8 +66,8 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
       const data = await response.json();
       setCollection(data.collection);
       
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar coleção');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar coleção');
     } finally {
       setIsLoading(false);
     }
@@ -105,9 +108,10 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
       setIsEditing(false);
       toast.success('Coleção atualizada com sucesso!');
       
-    } catch (error: any) {
-      setEditErrors({ submit: error.message });
-      toast.error(error.message || 'Erro ao salvar coleção');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar coleção';
+      setEditErrors({ submit: errorMessage });
+      toast.error(errorMessage);
       throw error; // Keep form open
     } finally {
       setIsSubmitting(false);
@@ -121,7 +125,7 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   };
 
   // Handle collection deletion
-  const handleDelete = async (collection: CollectionWithItems) => {
+  const handleDelete = async (_collection: CollectionWithItems) => {
     try {
       const response = await fetch(`/api/collections/${collectionId}`, {
         method: 'DELETE',
@@ -135,28 +139,28 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
       toast.success('Coleção excluída com sucesso!');
       router.push('/admin/collections');
       
-    } catch (error: any) {
-      toast.error(error.message || 'Erro ao excluir coleção');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao excluir coleção');
     }
   };
 
   // Handle item addition
-  const handleItemAdd = (collection: Collection) => {
+  const handleItemAdd = (_collection: Collection) => {
     setIsItemSelectorOpen(true);
   };
 
   // Handle bulk upload
-  const handleBulkUpload = (collection: Collection) => {
+  const handleBulkUpload = (_collection: Collection) => {
     setIsBulkUploadOpen(true);
   };
 
   // Handle advanced video upload
-  const handleVideoUpload = (collection: Collection) => {
+  const handleVideoUpload = (_collection: Collection) => {
     setIsVideoUploadOpen(true);
   };
 
   // Handle video added through advanced upload
-  const handleVideoAdded = async (videoData: any) => {
+  const handleVideoAdded = async (videoData: { title: string; [key: string]: unknown }) => {
     try {
       await loadCollection(); // Reload collection to show new video
       toast.success(`Vídeo "${videoData.title}" adicionado com sucesso!`);
@@ -167,7 +171,7 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   };
 
   // Handle items selected from selector
-  const handleItemsSelected = async (items: { type: 'image' | 'video'; data: any }[]) => {
+  const handleItemsSelected = async (items: { type: 'image' | 'video'; data: { item_id: string; [key: string]: unknown } }[]) => {
     try {
       // Process items one by one since API expects individual items
       const results = [];
@@ -198,14 +202,14 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
       await loadCollection();
       toast.success(`${items.length} ite${items.length !== 1 ? 'ns adicionados' : 'm adicionado'} com sucesso!`);
       
-    } catch (error: any) {
-      toast.error(error.message || 'Erro ao adicionar itens');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao adicionar itens');
       throw error; // Let ItemSelector handle the error
     }
   };
 
   // Handle bulk uploaded files
-  const handleBulkFilesUploaded = async (items: { type: 'image' | 'video'; data: any }[]) => {
+  const handleBulkFilesUploaded = async (items: { type: 'image' | 'video'; data: { item_id: string; [key: string]: unknown } }[]) => {
     try {
       // Process items one by one since API expects individual items
       const results = [];
@@ -236,8 +240,8 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
       await loadCollection();
       toast.success(`${items.length} arquivo${items.length !== 1 ? 's adicionados' : ' adicionado'} à coleção com sucesso!`);
       
-    } catch (error: any) {
-      toast.error(error.message || 'Erro ao adicionar arquivos à coleção');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao adicionar arquivos à coleção');
       throw error; // Let BulkUpload handle the error
     }
   };
@@ -258,8 +262,8 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
       await loadCollection();
       toast.success('Item removido com sucesso!');
       
-    } catch (error: any) {
-      toast.error(error.message || 'Erro ao remover item');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao remover item');
     }
   };
 
@@ -288,8 +292,8 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
       await loadCollection();
       toast.success('Ordem dos itens atualizada com sucesso!');
       
-    } catch (error: any) {
-      toast.error(error.message || 'Erro ao reordenar itens');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao reordenar itens');
       throw error; // Re-throw so component can handle appropriately
     }
   };

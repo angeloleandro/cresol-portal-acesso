@@ -1,14 +1,19 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
+import type { NextRequest } from 'next/server';
+
+
+/**
+ * POST function
+ * @todo Add proper documentation
+ */
 export async function POST(request: NextRequest) {
   const requestCookies = cookies();
   
   try {
     const { email, fullName, positionId, workLocationId, role, avatarUrl, adminToken } = await request.json();
-
 
     if (!email || !fullName) {
       return NextResponse.json({ 
@@ -28,7 +33,7 @@ export async function POST(request: NextRequest) {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
     if (!supabaseUrl || !serviceKey) {
-      console.error('Variáveis de ambiente SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configuradas.');
+
       throw new Error('Configuração do servidor incompleta.');
     }
     
@@ -45,7 +50,7 @@ export async function POST(request: NextRequest) {
       const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(adminToken);
       
       if (authError || !user) {
-        console.error('Erro ao verificar token admin:', authError);
+
         return NextResponse.json({ 
           error: 'Token de administrador inválido ou expirado.' 
         }, { status: 401 });
@@ -61,7 +66,7 @@ export async function POST(request: NextRequest) {
         .single();
       
       if (profileError) {
-        console.error('Erro ao verificar perfil do admin:', profileError);
+
         return NextResponse.json({ 
           error: 'Não foi possível verificar permissões de administrador.' 
         }, { status: 500 });
@@ -118,7 +123,7 @@ export async function POST(request: NextRequest) {
         
         isAdmin = adminProfile?.role === 'admin';
       } catch (err) {
-        console.error('Erro ao processar cookie:', err);
+
         return NextResponse.json({ 
           error: 'Erro de autenticação. Faça login novamente.' 
         }, { status: 401 });
@@ -156,7 +161,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (createUserError) {
-      console.error('Erro ao criar usuário:', createUserError);
+
       return NextResponse.json({ 
         error: `Falha ao criar usuário: ${createUserError.message}` 
       }, { status: 500 });
@@ -234,12 +239,12 @@ export async function POST(request: NextRequest) {
           .insert(memberData);
 
         if (membersError) {
-          console.error('Erro ao adicionar usuário aos grupos automáticos:', membersError);
+
           // Não retornar erro, apenas logar
         }
       }
     } catch (groupError) {
-      console.error('Erro ao processar grupos automáticos:', groupError);
+
       // Não retornar erro, apenas logar
     }
 

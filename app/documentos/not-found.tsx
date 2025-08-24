@@ -1,5 +1,7 @@
 import Link from 'next/link';
+
 import OptimizedImage from '@/app/components/OptimizedImage';
+
 
 export default function NotFound() {
   return (

@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import React from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 interface User {

@@ -286,6 +286,10 @@ const shimmerIntensityConfig = {
   strong: 'opacity-70'
 };
 
+/**
+ * ShimmerButton function
+ * @todo Add proper documentation
+ */
 export function ShimmerButton({
   children,
   size = 'md',

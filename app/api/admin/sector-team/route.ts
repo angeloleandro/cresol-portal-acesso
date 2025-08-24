@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { supabase } from '@/lib/supabase';
+
 
 // Tipos para melhor type safety
 interface TeamMemberProfile {
@@ -12,18 +14,12 @@ interface TeamMemberProfile {
   work_locations?: { name: string };
 }
 
-interface TeamMember {
-  id: string;
-  user_id: string;
-  sector_id: string;
-  position?: string;
-  is_from_subsector: boolean;
-  subsector_id?: string;
-  created_at: string;
-  profiles?: TeamMemberProfile;
-  subsectors?: { id: string; name: string };
-}
+// Removed unused TeamMember interface
 
+/**
+ * GET function
+ * @todo Add proper documentation
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -34,8 +30,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar membros da equipe do setor com informações completas
-    console.log('[SECTOR-TEAM API] Buscando membros do setor:', sectorId);
-    
+
     // Primeiro, tentar buscar com joins completos
     let { data: teamMembers, error } = await supabase
       .from('sector_team_members')
@@ -67,8 +62,7 @@ export async function GET(request: NextRequest) {
 
     // Se houver erro de relacionamento, tentar busca alternativa
     if (error && error.message?.includes('relationship')) {
-      console.warn('[SECTOR-TEAM API] Erro de relacionamento detectado, tentando busca alternativa:', error);
-      
+
       // Buscar dados básicos primeiro
       const { data: basicMembers, error: basicError } = await supabase
         .from('sector_team_members')
@@ -137,28 +131,18 @@ export async function GET(request: NextRequest) {
             subsectors: subsector || undefined
           };
         });
-        
-        console.log('[SECTOR-TEAM API] Busca alternativa bem-sucedida, retornando', teamMembers?.length, 'membros');
+
       } else {
         teamMembers = [];
       }
     } else if (error) {
-      console.error('[SECTOR-TEAM API] Erro ao buscar membros:', error);
+
       throw error;
     }
-    
-    console.log('[SECTOR-TEAM API] Retornando', teamMembers?.length || 0, 'membros');
 
     return NextResponse.json({ teamMembers: teamMembers || [] });
   } catch (error: any) {
-    console.error('[SECTOR-TEAM API] Erro detalhado:', {
-      message: error?.message,
-      code: error?.code,
-      details: error?.details,
-      hint: error?.hint,
-      stack: error?.stack
-    });
-    
+
     // Retornar erro mais específico para ajudar no debug
     return NextResponse.json({ 
       error: 'Erro ao buscar equipe do setor',
@@ -171,6 +155,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST function
+ * @todo Add proper documentation
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -181,8 +169,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se o usuário já está na equipe do setor
-    console.log('[SECTOR-TEAM API] Verificando se usuário já está na equipe:', { user_id, sector_id });
-    
+
     const { data: existing, error: checkError } = await supabase
       .from('sector_team_members')
       .select('id')
@@ -191,7 +178,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = não encontrado
-      console.error('[SECTOR-TEAM API] Erro ao verificar membro existente:', checkError);
+
       throw checkError;
     }
 
@@ -200,8 +187,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Adicionar membro à equipe do setor
-    console.log('[SECTOR-TEAM API] Adicionando membro:', { user_id, sector_id, position });
-    
+
     const { data, error } = await supabase
       .from('sector_team_members')
       .insert({
@@ -215,21 +201,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('[SECTOR-TEAM API] Erro ao adicionar membro:', error);
+
       throw error;
     }
-    
-    console.log('[SECTOR-TEAM API] Membro adicionado com sucesso:', data);
 
     return NextResponse.json({ success: true, member: data });
   } catch (error: any) {
-    console.error('[SECTOR-TEAM API POST] Erro detalhado:', {
-      message: error?.message,
-      code: error?.code,
-      details: error?.details,
-      hint: error?.hint
-    });
-    
+
     return NextResponse.json({ 
       error: 'Erro ao adicionar membro ao setor',
       details: process.env.NODE_ENV === 'development' ? {
@@ -240,6 +218,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * DELETE function
+ * @todo Add proper documentation
+ */
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -278,12 +260,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('[SECTOR-TEAM API DELETE] Erro detalhado:', {
-      message: error?.message,
-      code: error?.code,
-      details: error?.details
-    });
-    
+
     return NextResponse.json({ 
       error: 'Erro ao remover membro do setor',
       details: process.env.NODE_ENV === 'development' ? {
@@ -294,6 +271,10 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
+/**
+ * PUT function
+ * @todo Add proper documentation
+ */
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
@@ -319,12 +300,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, member: data });
   } catch (error: any) {
-    console.error('[SECTOR-TEAM API PUT] Erro detalhado:', {
-      message: error?.message,
-      code: error?.code,
-      details: error?.details
-    });
-    
+
     return NextResponse.json({ 
       error: 'Erro ao atualizar membro do setor',
       details: process.env.NODE_ENV === 'development' ? {

@@ -1,9 +1,5 @@
 import { logger } from './production-logger';
 
-/**
- * Middleware Performance Cache System
- * Otimiza performance do middleware através de cache de dados de usuário e sessão
- */
 
 interface UserCacheData {
   id: string;
@@ -83,10 +79,6 @@ const CACHE_DURATION = 15 * 60 * 1000; // 15 minutos (aumentado para reduzir mis
 let cacheHits = 0;
 let cacheMisses = 0;
 
-/**
- * Limpa cache expirado para evitar memory leaks
- * Com LRU, a limpeza é mais eficiente
- */
 function cleanExpiredCache(): void {
   const now = Date.now();
   const expiredKeys: string[] = [];
@@ -117,7 +109,11 @@ function getCacheKey(accessToken: string): string {
 /**
  * Recupera dados do usuário do cache com refresh automático
  */
-export function getCachedUserData(accessToken: string): UserCacheData | null {
+/**
+ * getCachedUserData function
+ * @todo Add proper documentation
+ */
+export function GetCachedUserData(accessToken: string): UserCacheData | null {
   const cacheKey = getCacheKey(accessToken);
   const cached = userCache.get(cacheKey); // LRU atualiza ordem automaticamente
   
@@ -149,7 +145,11 @@ export function getCachedUserData(accessToken: string): UserCacheData | null {
 /**
  * Armazena dados do usuário no cache com métricas aprimoradas
  */
-export function setCachedUserData(accessToken: string, userData: UserCacheData): void {
+/**
+ * setCachedUserData function
+ * @todo Add proper documentation
+ */
+export function SetCachedUserData(accessToken: string, userData: UserCacheData): void {
   const cacheKey = getCacheKey(accessToken);
   const now = Date.now();
   const expiresAt = now + CACHE_DURATION;
@@ -177,7 +177,11 @@ export function setCachedUserData(accessToken: string, userData: UserCacheData):
 /**
  * Remove dados do cache (usado no logout)
  */
-export function clearCachedUserData(accessToken: string): void {
+/**
+ * clearCachedUserData function
+ * @todo Add proper documentation
+ */
+export function ClearCachedUserData(accessToken: string): void {
   const cacheKey = getCacheKey(accessToken);
   userCache.delete(cacheKey);
 }
@@ -185,14 +189,22 @@ export function clearCachedUserData(accessToken: string): void {
 /**
  * Limpa todo o cache (usado em desenvolvimento)
  */
-export function clearAllCache(): void {
+/**
+ * clearAllCache function
+ * @todo Add proper documentation
+ */
+export function ClearAllCache(): void {
   userCache.clear();
 }
 
 /**
  * Estatísticas do cache (para debugging)
  */
-export function getCacheStats(): {
+/**
+ * getCacheStats function
+ * @todo Add proper documentation
+ */
+export function GetCacheStats(): {
   size: number;
   hitRate: number;
   totalRequests: number;
@@ -219,10 +231,10 @@ export function getCacheStats(): {
 }
 
 /**
- * Implementa cache warming para usuários ativos
- * Pre-aquece o cache com dados de usuários frequentes
+ * warmupCache function
+ * @todo Add proper documentation
  */
-export function warmupCache(userDataList: UserCacheData[], accessTokens: string[]): void {
+export function WarmupCache(userDataList: UserCacheData[], accessTokens: string[]): void {
   if (userDataList.length !== accessTokens.length) {
     logger.warn('[Cache] Warmup: Número de tokens e dados não coincidem');
     return;
@@ -233,7 +245,7 @@ export function warmupCache(userDataList: UserCacheData[], accessTokens: string[
     const token = accessTokens[i];
     
     if (userData && token) {
-      setCachedUserData(token, userData);
+      SetCachedUserData(token, userData);
     }
   }
   
@@ -242,7 +254,11 @@ export function warmupCache(userDataList: UserCacheData[], accessTokens: string[
 /**
  * Reset das métricas de cache (para testes)
  */
-export function resetCacheMetrics(): void {
+/**
+ * resetCacheMetrics function
+ * @todo Add proper documentation
+ */
+export function ResetCacheMetrics(): void {
   cacheHits = 0;
   cacheMisses = 0;
 }

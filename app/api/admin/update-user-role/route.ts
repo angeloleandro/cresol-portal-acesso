@@ -1,9 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+
+
 import { directUpdateUserRole } from './direct-update';
 
+import type { NextRequest } from 'next/server';
+
+
+/**
+ * POST function
+ * @todo Add proper documentation
+ */
 export async function POST(request: NextRequest) {
   try {
     const requestBody = await request.json();
@@ -38,7 +45,7 @@ export async function POST(request: NextRequest) {
       const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(adminToken);
       
       if (authError || !user) {
-        console.error('Erro ao verificar token admin:', authError);
+
         return NextResponse.json({ 
           error: 'Token de administrador inválido ou expirado.' 
         }, { status: 401 });
@@ -47,7 +54,7 @@ export async function POST(request: NextRequest) {
       currentAdminId = user.id;
     } else if (adminId) {
       // Método legado usando adminId
-      console.warn('Método legado: usando adminId sem token');
+
       currentAdminId = adminId;
     } else {
       return NextResponse.json({ error: 'Credenciais de administrador não fornecidas.' }, { status: 401 });

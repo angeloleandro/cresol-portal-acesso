@@ -1,22 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import OptimizedImage from "@/app/components/OptimizedImage";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
+
 import { 
   StandardizedAdminLayout, 
-  StandardizedPageHeader, 
   StandardizedButton,
   StandardizedCard,
   StandardizedEmptyState,
+  StandardizedPageHeader, 
   type BreadcrumbItem
 } from '@/app/components/admin';
 import BannerUploadForm from '@/app/components/BannerUploadForm';
+import { Icon } from '@/app/components/icons';
+import OptimizedImage from "@/app/components/OptimizedImage";
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { Icon } from '@/app/components/icons';
+import { supabase } from "@/lib/supabase";
 
 interface Banner {
   id: string;

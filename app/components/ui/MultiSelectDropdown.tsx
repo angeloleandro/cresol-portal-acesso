@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 interface MultiSelectOption {

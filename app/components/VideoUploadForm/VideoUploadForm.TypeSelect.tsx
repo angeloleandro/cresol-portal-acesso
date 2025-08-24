@@ -1,10 +1,9 @@
-/**
- * VideoUploadForm Clean Type Selection Component
- * Minimalist radio selection without decorative icons
- */
-
 import { memo, useCallback } from 'react'
+
 import { VideoTypeSelectProps } from './VideoUploadForm.types'
+
+
+
 
 export const VideoUploadFormTypeSelect = memo(({ 
   uploadType, 

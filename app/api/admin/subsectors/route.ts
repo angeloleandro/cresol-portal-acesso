@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { authenticateAdminRequest } from '@/lib/supabase/admin';
-import { logger } from '@/lib/logger';
+
 import { adminCORS } from '@/lib/cors-config';
+import { logger } from '@/lib/logger';
+import { authenticateAdminRequest } from '@/lib/supabase/admin';
+
+import type { NextRequest } from 'next/server';
+
 
 export const GET = adminCORS(async (request: NextRequest) => {
   const apiTimer = logger.apiStart('GET /api/admin/subsectors');

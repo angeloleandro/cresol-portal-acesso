@@ -105,11 +105,16 @@ export interface BulkOperation {
 
 // Form Props (específico para formulários)
 export interface CollectionFormProps {
-  collection?: Collection;
+  collection?: Collection | null;
+  mode?: 'create' | 'edit';
   onSubmit: (data: CollectionFormData) => Promise<void>;
-  onCancel: () => void;
+  onCancel?: () => void;
   isLoading?: boolean;
+  isSubmitting?: boolean;
+  errors?: Record<string, string>;
   className?: string;
+  cancelButtonText?: string;
+  submitButtonText?: string;
 }
 
 // Estados dos Hooks

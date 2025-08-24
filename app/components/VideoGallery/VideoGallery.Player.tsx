@@ -1,16 +1,14 @@
-/**
- * Video Player Component
- * Enterprise-grade video player with accessibility and performance
- */
+
 
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
-import { Icon } from '../icons/Icon';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef, useEffect, useCallback } from 'react';
+
+import { errorAnimations } from './VideoGallery.animations';
 import { DashboardVideo } from './VideoGallery.types';
-import { loadingAnimations, errorAnimations } from './VideoGallery.animations';
+import { Icon } from '../icons/Icon';
 
 interface VideoPlayerProps {
   video: DashboardVideo;
@@ -27,6 +25,10 @@ interface VideoPlayerProps {
 
 /**
  * Universal Video Player Component
+ */
+/**
+ * VideoPlayer function
+ * @todo Add proper documentation
  */
 export function VideoPlayer({
   video,

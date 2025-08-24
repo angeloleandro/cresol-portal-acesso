@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import AdminHeader from '@/app/components/AdminHeader';
-import Breadcrumb from '@/app/components/Breadcrumb';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import AdminHeader from '@/app/components/AdminHeader';
+import { useAlert } from '@/app/components/alerts';
+import Breadcrumb from '@/app/components/Breadcrumb';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { useAlert } from '@/app/components/alerts';
+import { supabase } from '@/lib/supabase';
 
 interface WorkLocation {
   id: string;
@@ -25,7 +26,7 @@ export default function WorkLocationsAdmin() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [_isAdmin, _setIsAdmin] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [newName, setNewName] = useState('');
@@ -38,8 +39,8 @@ export default function WorkLocationsAdmin() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<WorkLocation | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [formError, setFormError] = useState('');
-  const [formSuccess, setFormSuccess] = useState('');
+  const [formError, _setFormError] = useState('');
+  const [formSuccess, _setFormSuccess] = useState('');
 
   useEffect(() => {
     const checkUser = async () => {
@@ -55,7 +56,7 @@ export default function WorkLocationsAdmin() {
         .eq('id', userData.user.id)
         .single();
       if (profile?.role === 'admin') {
-        setIsAdmin(true);
+        _setIsAdmin(true);
         fetchWorkLocations();
       } else {
         router.replace('/home');

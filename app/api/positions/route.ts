@@ -1,33 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { authenticateAdminRequest } from '@/lib/supabase/admin';
-import { logger } from '@/lib/logger';
+
+import { CreateClient } from '@/lib/supabase/server';
+
+
+// Força renderização dinâmica para usar cookies via createClient
+export const dynamic = 'force-dynamic';
 
 // GET - Listar todas as posições/cargos
-export async function GET(request: NextRequest) {
-  const apiTimer = logger.apiStart('GET /api/positions');
-  
+export async function GET(_request: NextRequest) {
   try {
-    logger.info('Iniciando busca de posições/cargos');
+    const supabase = CreateClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    // Single auth check com profile - UMA QUERY OTIMIZADA
-    const authResult = await authenticateAdminRequest(request);
-    if (!authResult.success) {
-      logger.apiEnd(apiTimer);
-      logger.warn('Acesso negado na busca de posições', { error: authResult.error });
-      return NextResponse.json({ error: authResult.error }, { status: 401 });
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { user } = authResult;
-    logger.success('Usuario autenticado para buscar posições', { userId: user?.id, role: user?.role });
+    // Verificar se o usuário está autenticado (todos os usuários autenticados podem ver posições)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    
+    if (!profile) {
+      return NextResponse.json({ error: 'Perfil não encontrado' }, { status: 403 });
+    }
 
-    // Timer para criação do client
-    const clientTimer = logger.dbStart('Create Supabase Client');
-    const supabase = createClient();
-    logger.dbEnd(clientTimer);
-
-    // Buscar posições - ÚNICA QUERY RESTANTE
-    const positionsTimer = logger.dbStart('positions.select(all)', { userId: user?.id });
+    // Buscar todas as posições/cargos
     const { data: positions, error } = await supabase
       .from('positions')
       .select(`
@@ -39,31 +39,20 @@ export async function GET(request: NextRequest) {
         updated_at
       `)
       .order('name');
-    logger.dbEnd(positionsTimer);
 
     if (error) {
-      logger.apiEnd(apiTimer);
-      logger.error('Erro ao buscar cargos no banco', error);
-      return NextResponse.json({ error: 'Erro ao buscar cargos' }, { status: 500 });
+      console.error('Erro ao buscar posições/cargos:', error);
+      return NextResponse.json({ error: 'Erro ao buscar posições/cargos' }, { status: 500 });
     }
 
-    const positionCount = positions?.length || 0;
-    logger.success(`Posições carregadas com sucesso`, { positionCount });
-
-    const apiResult = logger.apiEnd(apiTimer);
     return NextResponse.json({ 
       success: true, 
-      positions: positions || [],
-      _debug: {
-        totalTime: apiResult?.duration,
-        positionCount,
-        queriesCount: 2 // authenticateAdminRequest (auth+profile) + positions.select
-      }
+      positions: positions || [] 
     });
     
-  } catch (error: any) {
-    logger.apiEnd(apiTimer);
-    logger.error('Erro crítico ao buscar cargos', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('Erro crítico ao buscar posições/cargos:', message);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

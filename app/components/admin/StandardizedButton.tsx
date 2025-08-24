@@ -1,7 +1,7 @@
 'use client';
 
+import { Button } from '@chakra-ui/react';
 import { ReactNode, ElementType, forwardRef } from 'react';
-import { Button, ButtonProps } from '@/app/components/ui/Button';
 
 // =============================================================================
 // BACKWARDS COMPATIBILITY WRAPPER
@@ -32,20 +32,22 @@ interface LegacyStandardizedButtonProps {
 // =============================================================================
 // LEGACY VARIANT MAPPING TO CHAKRA UI V3
 // =============================================================================
-const mapLegacyVariant = (variant: LegacyStandardizedButtonProps['variant']): 'primary' | 'secondary' => {
+const mapLegacyVariant = (variant: LegacyStandardizedButtonProps['variant']): 'solid' | 'outline' | 'ghost' | 'subtle' => {
   switch (variant) {
     case 'primary':
     case 'danger':
     case 'success':
-      return 'primary';
-    case 'secondary':
+      return 'solid';
     case 'outline':
+      return 'outline';
     case 'ghost':
+      return 'ghost';
+    case 'secondary':
     case 'link':
     case 'warning':
     case 'info':
     default:
-      return 'secondary';
+      return 'subtle';
   }
 };
 
@@ -66,27 +68,6 @@ const mapLegacySize = (size: LegacyStandardizedButtonProps['size']): 'xs' | 'sm'
   }
 };
 
-/**
- * LEGACY STANDARDIZED BUTTON WRAPPER
- * 
- * This component provides backwards compatibility for existing StandardizedButton usage.
- * It maps legacy props to the new Chakra UI v3 Button component specifications.
- * 
- * @deprecated Use Button from '@/app/components/ui/Button' directly for new implementations
- * 
- * LEGACY VARIANT MAPPING:
- * - primary → solid + orange
- * - secondary → outline + gray  
- * - danger → solid + red
- * - outline → outline + orange
- * - ghost → ghost + gray
- * - link → plain + orange
- * - success → solid + green
- * - warning → solid + yellow
- * - info → solid + blue
- * 
- * All other functionality is preserved exactly as before.
- */
 const StandardizedButton = forwardRef<HTMLButtonElement, LegacyStandardizedButtonProps>(
   (
     {
@@ -96,15 +77,15 @@ const StandardizedButton = forwardRef<HTMLButtonElement, LegacyStandardizedButto
       variant = 'primary',
       size = 'md',
       disabled = false,
-      loading = false,
-      fullWidth = false,
+      loading: _loading = false,
+      fullWidth: _fullWidth = false,
       icon,
       iconPosition = 'left',
       className = '',
-      href,
-      target,
-      rel,
-      as,
+      href: _href,
+      target: _target,
+      rel: _rel,
+      as: _as,
       ...rest
     },
     ref
@@ -114,7 +95,9 @@ const StandardizedButton = forwardRef<HTMLButtonElement, LegacyStandardizedButto
     const newSize = mapLegacySize(size);
 
     // Handle icon composition (legacy support)
-    const iconElement = icon && iconPosition ? icon : undefined;
+    const hasIcon = icon && iconPosition;
+    const iconLeft = hasIcon && iconPosition === 'left';
+    const iconRight = hasIcon && iconPosition === 'right';
 
     return (
       <Button
@@ -125,11 +108,11 @@ const StandardizedButton = forwardRef<HTMLButtonElement, LegacyStandardizedButto
         disabled={disabled}
         onClick={onClick}
         className={className}
-        icon={iconElement}
-        iconPosition={iconPosition}
         {...rest}
       >
+        {iconLeft && <span className="mr-2">{icon}</span>}
         {children}
+        {iconRight && <span className="ml-2">{icon}</span>}
       </Button>
     );
   }

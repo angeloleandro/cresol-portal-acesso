@@ -3,10 +3,9 @@
 // Collection Loading Components
 // Componentes de loading/skeleton para sistema de coleções
 
-import { cn } from '@/lib/utils/cn';
-import { CSS_CLASSES } from '@/lib/constants/collections';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { CSS_CLASSES } from '@/lib/constants/collections';
+import { cn } from '@/lib/utils/cn';
 
 // Loading Spinner
 export const CollectionSpinner: React.FC<{ className?: string }> = ({ className }) => (

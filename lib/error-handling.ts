@@ -43,6 +43,10 @@ export class ApiError extends Error {
 /**
  * Process API response with robust error handling
  */
+/**
+ * processApiResponse function
+ * @todo Add proper documentation
+ */
 export async function processApiResponse<T = any>(
   response: Response,
   context: ErrorContext
@@ -89,7 +93,11 @@ export async function processApiResponse<T = any>(
 /**
  * Create standardized error context
  */
-export function createErrorContext(
+/**
+ * createErrorContext function
+ * @todo Add proper documentation
+ */
+export function CreateErrorContext(
   operation: string,
   resource?: string,
   metadata?: Record<string, any>
@@ -107,7 +115,11 @@ export function createErrorContext(
 /**
  * Handle API errors with user-friendly messages
  */
-export function handleApiError(error: unknown, fallbackMessage: string = 'Erro desconhecido'): string {
+/**
+ * handleApiError function
+ * @todo Add proper documentation
+ */
+export function HandleApiError(error: unknown, fallbackMessage: string = 'Erro desconhecido'): string {
   console.error('🔥 [ERROR_HANDLER] Handling API error:', error);
 
   if (error instanceof ApiError) {
@@ -127,7 +139,11 @@ export function handleApiError(error: unknown, fallbackMessage: string = 'Erro d
 /**
  * Validate required environment variables for admin operations
  */
-export function validateAdminEnvironment(): void {
+/**
+ * validateAdminEnvironment function
+ * @todo Add proper documentation
+ */
+export function ValidateAdminEnvironment(): void {
   const requiredVars = [
     'NEXT_PUBLIC_SUPABASE_URL',
     'NEXT_PUBLIC_SUPABASE_ANON_KEY',

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+
 import { createClient } from '@/lib/supabase/client';
 
 // Types
@@ -41,7 +42,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  sectorId,
+  sectorId: _sectorId,
   editingGroup
 }) => {
   // Form states

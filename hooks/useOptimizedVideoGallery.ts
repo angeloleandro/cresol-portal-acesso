@@ -1,12 +1,8 @@
-/**
- * Optimized VideoGallery Hooks
- * Memory-optimized hooks com cleanup automático e lazy loading
- */
-
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { TIMINGS } from '@/lib/constants/timing';
 import { supabase } from '@/lib/supabase';
 import { 
-  resolveVideoUrl, 
+  ResolveVideoUrl as resolveVideoUrl, 
   checkVideoUrlAccessibility 
 } from '@/lib/video-utils';
 import { 
@@ -27,8 +23,8 @@ const videoCache: VideoCache | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
 /**
- * Hook otimizado para gerenciar estado da galeria de vídeos
- * Implementa cache, cleanup e otimizações de memória
+ * useOptimizedVideoGallery function
+ * @todo Add proper documentation
  */
 export function useOptimizedVideoGallery(limit?: number) {
   const [state, setState] = useState<VideoGalleryState>({
@@ -168,7 +164,7 @@ export function useOptimizedVideoGallery(limit?: number) {
     }));
     
     // Cleanup com delay para permitir animação de saída
-    cleanupTimeoutRef.current = setTimeout(cleanup, 300);
+    cleanupTimeoutRef.current = setTimeout(cleanup, TIMINGS.animationNormal);
   }, [cleanup]);
 
   const handleVideoError = useCallback(() => {
@@ -214,6 +210,10 @@ export function useOptimizedVideoGallery(limit?: number) {
 /**
  * Hook otimizado para ESC key modal close
  */
+/**
+ * useOptimizedEscapeKey function
+ * @todo Add proper documentation
+ */
 export function useOptimizedEscapeKey(callback: () => void, enabled: boolean = true) {
   const callbackRef = useRef(callback);
   const enabledRef = useRef(enabled);
@@ -239,6 +239,10 @@ export function useOptimizedEscapeKey(callback: () => void, enabled: boolean = t
 
 /**
  * Hook otimizado para focus management em modais
+ */
+/**
+ * useOptimizedFocusManagement function
+ * @todo Add proper documentation
  */
 export function useOptimizedFocusManagement(isOpen: boolean) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -295,6 +299,10 @@ export function useOptimizedFocusManagement(isOpen: boolean) {
 /**
  * Hook otimizado para intersection observer com cleanup automático
  */
+/**
+ * useOptimizedInView function
+ * @todo Add proper documentation
+ */
 export function useOptimizedInView(options: IntersectionObserverInit = {}) {
   const [isInView, setIsInView] = useState(false);
   const [hasBeenInView, setHasBeenInView] = useState(false);
@@ -346,6 +354,10 @@ export function useOptimizedInView(options: IntersectionObserverInit = {}) {
 
 /**
  * Hook otimizado para preload de imagens com resource management
+ */
+/**
+ * useOptimizedImagePreload function
+ * @todo Add proper documentation
  */
 export function useOptimizedImagePreload(urls: string[], enabled = true) {
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
@@ -423,6 +435,10 @@ export function useOptimizedImagePreload(urls: string[], enabled = true) {
 
 /**
  * Hook para debounce otimizado
+ */
+/**
+ * useOptimizedDebounce function
+ * @todo Add proper documentation
  */
 export function useOptimizedDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);

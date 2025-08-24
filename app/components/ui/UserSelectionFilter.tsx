@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
-import MultiSelectDropdown from './MultiSelectDropdown';
+import { memo, useState, useMemo, useCallback, useEffect } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
+
+import MultiSelectDropdown from './MultiSelectDropdown';
 
 interface User {
   id: string;
@@ -78,7 +80,7 @@ const UserSelectionFilter = memo(function UserSelectionFilter({
     // Filtrar por cargo/posição
     if (selectedPositions.length > 0) {
       filtered = filtered.filter(user => {
-        const positionMatch = selectedPositions.some(posId => {
+        const positionMatch = selectedPositions.some((posId: string) => {
           const position = positions.find(p => p.id === posId);
           return position && (
             user.position === position.meta?.name ||
@@ -260,7 +262,7 @@ const UserSelectionFilter = memo(function UserSelectionFilter({
             </div>
           ) : (
             <div className="divide-y divide-cresol-gray-light">
-              {filteredUsers.map((user) => (
+              {filteredUsers.map((user: User) => (
                 <label
                   key={user.id}
                   className="flex items-center p-3 hover:bg-gray-50 cursor-pointer"

@@ -1,42 +1,4 @@
-/**
- * Forms Components - Professional Form Library
- * 
- * Enterprise-grade form components with:
- * - Chakra UI v3 design patterns
- * - React Hook Form integration
- * - WCAG 2.1 AA accessibility compliance
- * - Cresol design system integration
- * - TypeScript support
- * - Professional loading and error states
- * - Mobile-first responsive design
- * 
- * Components:
- * - FormField: Unified field wrapper with labels, errors, help text
- * - FormInput: Professional input with icons, validation, states
- * - FormSelect: Advanced dropdown with search, keyboard navigation
- * 
- * Usage:
- * ```tsx
- * import { FormField, FormInput, FormSelect } from '@/app/components/forms';
- * 
- * <FormField label="Email" error={errors.email?.message} required>
- *   <FormInput 
- *     type="email" 
- *     placeholder="seu@email.com"
- *     startIcon="Mail"
- *     clearable
- *   />
- * </FormField>
- * 
- * <FormField label="Cargo" required>
- *   <FormSelect 
- *     options={positions}
- *     searchable
- *     placeholder="Selecione um cargo..."
- *   />
- * </FormField>
- * ```
- */
+
 
 export { FormField, type FormFieldProps } from './FormField';
 export { FormInput, type FormInputProps } from './FormInput';

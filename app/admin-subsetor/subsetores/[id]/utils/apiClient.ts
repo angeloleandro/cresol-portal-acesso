@@ -1,6 +1,6 @@
 // Cliente API centralizado para operações do subsetor
 
-import { SubsectorEvent, SubsectorNews, Group, Message } from '../types/subsector.types';
+import { SubsectorEvent, SubsectorNews, Group } from '../types/subsector.types';
 
 // Payloads para criação/atualização
 export interface SubsectorEventPayload extends Omit<SubsectorEvent, 'id'> {

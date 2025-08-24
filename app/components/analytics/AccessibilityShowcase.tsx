@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import AccessibleMetricCard from './AccessibleMetricCard';
-import AccessibleNavigation from './AccessibleNavigation';
+import { useState } from 'react';
+
 import AccessibleChartContainer from './AccessibleChartContainer';
+import AccessibleMetricCard from './AccessibleMetricCard';
 import AccessibleModal from './AccessibleModals';
-import { useAccessibleFocus, useScreenReaderAnnouncement } from './hooks/useAccessibleFocus';
+import AccessibleNavigation from './AccessibleNavigation';
 import AnnouncementRegion from './AnnouncementRegion';
+import { useAccessibleFocus, useScreenReaderAnnouncement } from './hooks/useAccessibleFocus';
 
 interface AccessibilityShowcaseProps {
   className?: string;

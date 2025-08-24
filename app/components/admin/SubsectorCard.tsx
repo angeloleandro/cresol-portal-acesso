@@ -1,9 +1,10 @@
 'use client';
 
+import { Box, HStack, Text, Badge } from '@chakra-ui/react';
 import Link from 'next/link';
+
 import { Icon } from '../icons/Icon';
 import { Button } from "../ui/Button";
-import { Badge, Box, HStack, Stack, Text } from "@chakra-ui/react";
 
 interface SubsectorCardProps {
   subsector: {

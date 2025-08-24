@@ -1,10 +1,7 @@
-/**
- * VideoUploadForm Design System Styles
- * Consistent CSS classes using design tokens and mobile-first responsive design
- */
-
 import { cn } from '@/lib/utils/cn'
-import { videoSystemTokens, videoComponentTokens } from '@/lib/design-tokens/video-system'
+
+
+
 
 export const videoUploadStyles = {
   // Container styles - Enterprise Professional Modal

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { authenticateAdminRequest } from '@/lib/supabase/admin';
-import { logger } from '@/lib/logger';
+
 import { adminCORS } from '@/lib/cors-config';
+import { logger } from '@/lib/logger';
+import { authenticateAdminRequest } from '@/lib/supabase/admin';
+import { CreateClient } from '@/lib/supabase/server';
+
 
 // GET - Listar todos os usuários para seleção em grupos
 export const GET = adminCORS(async (request: NextRequest) => {
@@ -24,7 +26,7 @@ export const GET = adminCORS(async (request: NextRequest) => {
 
     // Timer para criação do client
     const clientTimer = logger.dbStart('Create Supabase Client');
-    const supabase = createClient();
+    const supabase = CreateClient();
     logger.dbEnd(clientTimer);
 
     // Buscar todos os usuários com informações relacionadas

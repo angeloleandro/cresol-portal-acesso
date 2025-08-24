@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useMemo } from 'react';
 import {
   Dropdown,
   DropdownTrigger,
@@ -9,13 +8,15 @@ import {
   Button,
   Input
 } from '@nextui-org/react';
-import { Icon } from '@/app/components/icons/Icon';
+import { useState, useMemo } from 'react';
+
 import { useAlert } from '@/app/components/alerts';
+import { FormSelect } from '@/app/components/forms';
+import { Icon } from '@/app/components/icons/Icon';
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
 import { Button as CButton } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
-import { FormSelect, type SelectOption } from '@/app/components/forms';
+import { supabase } from '@/lib/supabase';
 
 interface WorkLocation {
   id: string;
@@ -150,7 +151,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
           
           avatarUrl = publicUrl;
         } catch (error) {
-          console.error('Erro ao fazer upload da imagem:', error);
+
           const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
           alert.showError('Erro no upload', `Erro ao fazer upload da imagem: ${errorMessage}`);
           setFormLoading(false);
@@ -206,7 +207,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
       
       onSuccess();
     } catch (error: unknown) {
-      console.error('Erro ao criar usuário:', error);
+
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       alert.showError('Falha ao criar usuário', errorMessage);
     } finally {
@@ -535,7 +536,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
             </label>
             <FormSelect
               value={newUserRole}
-              onChange={(e) => setNewUserRole(e.currentTarget.value as 'user' | 'sector_admin' | 'subsector_admin' | 'admin')}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewUserRole(e.currentTarget.value as 'user' | 'sector_admin' | 'subsector_admin' | 'admin')}
               placeholder="Selecione o papel no sistema"
               options={[
                 { value: 'user', label: 'Usuário' },

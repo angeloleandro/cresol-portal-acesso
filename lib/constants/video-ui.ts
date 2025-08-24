@@ -1,7 +1,4 @@
-/**
- * Video System Configuration
- * Comprehensive centralized configuration eliminating all hardcoded values
- */
+
 
 // API Configuration
 export const VIDEO_API_CONFIG = {

@@ -4,6 +4,7 @@
 // Modal de confirmação de exclusão de coleções - Portal Cresol
 
 import { useState, useEffect } from 'react';
+
 import { Collection } from '@/lib/types/collections';
 import { formatCollection } from '@/lib/utils/collections';
 

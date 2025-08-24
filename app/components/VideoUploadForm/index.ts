@@ -1,7 +1,4 @@
-/**
- * VideoUploadForm Component Export
- * Modular video upload form with enterprise-grade architecture
- */
+
 
 export { VideoUploadFormRoot as VideoUploadForm } from './VideoUploadForm.Root'
 export { VideoUploadFormRoot } from './VideoUploadForm.Root'
@@ -19,7 +16,7 @@ export { VideoUploadFormActions } from './VideoUploadForm.Actions'
 export * from './VideoUploadForm.types'
 export { videoUploadStyles } from './VideoUploadForm.styles'
 export { 
-  videoUploadReducer, 
+  VideoUploadReducer as videoUploadReducer, 
   videoUploadSelectors, 
   videoUploadActions 
 } from './VideoUploadForm.reducer'

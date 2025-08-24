@@ -1,7 +1,8 @@
 'use client';
 
-import { ReactNode, useState, useEffect, Fragment } from 'react';
 import { Tab, Menu, Combobox, Transition } from '@headlessui/react';
+import { ReactNode, useState, useEffect, Fragment } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 interface FilterOption {

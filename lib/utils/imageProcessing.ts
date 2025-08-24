@@ -2,13 +2,9 @@
 // Used across the application for image cropping and upload
 
 import { SupabaseClient } from '@supabase/supabase-js';
+
 import { CropArea } from '@/lib/types/common';
 
-/**
- * Create an image element from a URL
- * @param url - Image URL
- * @returns Promise resolving to HTMLImageElement
- */
 export const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     // Check if we're in browser environment
@@ -26,11 +22,8 @@ export const createImage = (url: string): Promise<HTMLImageElement> =>
   });
 
 /**
- * Get cropped image from source
- * @param imageSrc - Source image URL
- * @param pixelCrop - Crop area coordinates
- * @param rotation - Rotation angle in degrees
- * @returns Promise resolving to Blob and URL
+ * getCroppedImg function
+ * @todo Add proper documentation
  */
 export async function getCroppedImg(
   imageSrc: string,
@@ -81,12 +74,8 @@ export async function getCroppedImg(
 }
 
 /**
- * Upload image to Supabase storage
- * @param file - File to upload
- * @param supabase - Supabase client instance
- * @param bucket - Storage bucket name
- * @param folder - Folder path within bucket
- * @returns Promise resolving to public URL
+ * uploadImageToSupabase function
+ * @todo Add proper documentation
  */
 export async function uploadImageToSupabase(
   file: File,
@@ -151,11 +140,10 @@ export async function uploadImageToSupabase(
 }
 
 /**
- * Validate image file type and size
- * @param file - File to validate
- * @returns Validation result with error message if invalid
+ * validateImageFile function
+ * @todo Add proper documentation
  */
-export function validateImageFile(file: File): { valid: boolean; error?: string } {
+export function ValidateImageFile(file: File): { valid: boolean; error?: string } {
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   const maxSize = 5 * 1024 * 1024; // 5MB
 
@@ -177,11 +165,8 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
 }
 
 /**
- * Delete image from Supabase storage
- * @param imageUrl - Public URL of the image
- * @param supabase - Supabase client instance
- * @param bucket - Storage bucket name
- * @returns Promise resolving to boolean success
+ * deleteImageFromSupabase function
+ * @todo Add proper documentation
  */
 export async function deleteImageFromSupabase(
   imageUrl: string,
@@ -194,7 +179,7 @@ export async function deleteImageFromSupabase(
     const pathParts = url.pathname.split(`/storage/v1/object/public/${bucket}/`);
     
     if (pathParts.length < 2) {
-      console.error('Invalid image URL format');
+
       return false;
     }
     
@@ -205,13 +190,13 @@ export async function deleteImageFromSupabase(
       .remove([filePath]);
     
     if (error) {
-      console.error('Error deleting image:', error.message);
+
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error('Error deleting image:', error);
+
     return false;
   }
 }

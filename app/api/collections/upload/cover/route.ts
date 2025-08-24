@@ -2,8 +2,9 @@
 // Upload de capas para coleções usando Supabase Storage
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
 import { handleApiError, devLog } from '@/lib/error-handler';
+import { CreateClient } from '@/lib/supabase/server';
 
 // Force dynamic rendering - this route requires authentication
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic';
 // POST /api/collections/upload/cover - Upload de capa da coleção
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar se usuário está autenticado e é admin
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/collections/upload/cover - Remover capa do storage
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = CreateClient();
     
     // Verificar se usuário está autenticado e é admin
     const { data: { user }, error: authError } = await supabase.auth.getUser();

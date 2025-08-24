@@ -1,7 +1,4 @@
-/**
- * ImagePreview Component Types
- * Type definitions for the image preview modal system
- */
+
 
 // Generic image interface for flexible usage
 export interface BaseImage {
@@ -12,7 +9,7 @@ export interface BaseImage {
 }
 
 // Helper function to convert BaseImage to GalleryImage
-export function baseImageToGalleryImage(baseImage: BaseImage): GalleryImage {
+export function BaseImageToGalleryImage(baseImage: BaseImage): GalleryImage {
   return {
     id: baseImage.id,
     title: baseImage.title || null,
@@ -247,3 +244,7 @@ export interface ImagePreviewTheme {
   /** Focus ring colors */
   focusRing: string;
 }
+
+// === COMPATIBILITY EXPORTS ===
+// Export camelCase version for backward compatibility with existing imports
+export const baseImageToGalleryImage = BaseImageToGalleryImage;

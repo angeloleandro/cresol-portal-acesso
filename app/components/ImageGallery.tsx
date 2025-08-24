@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
-import OptimizedImage from "./OptimizedImage";
+
 import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
+import { supabase } from "@/lib/supabase";
+
+import OptimizedImage from "./OptimizedImage";
 
 interface GalleryImage {
   id: string;

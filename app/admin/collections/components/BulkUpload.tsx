@@ -4,11 +4,13 @@
 // Upload múltiplo de arquivos com drag & drop e progress tracking - Portal Cresol
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Collection } from '@/lib/types/collections';
+
 import CollectionLoading from '@/app/components/Collections/Collection.Loading';
-import { cn } from '@/lib/utils/cn';
 import Icon from '@/app/components/icons/Icon';
 import { createClient } from '@/lib/supabase/client';
+import { Collection } from '@/lib/types/collections';
+import { cn } from '@/lib/utils/cn';
+
 import VideoUploadAdvanced from './VideoUploadAdvanced';
 
 // Supported file types
@@ -251,7 +253,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
               const response = JSON.parse(xhr.responseText);
               
               // Extract relevant data based on file type
-              const fileData = uploadFile.type === 'image' 
+              const _fileData = uploadFile.type === 'image' 
                 ? {
                     item_id: response.id,
                     title: uploadFile.name.replace(/\.[^/.]+$/, ''), // Remove extension
@@ -517,7 +519,7 @@ const BulkUpload: React.FC<BulkUploadProps> = ({
                   <div className="ml-4 flex-shrink-0">
                     <VideoUploadAdvanced
                       collection={collection}
-                      onVideoAdded={(videoData) => {
+                      onVideoAdded={(_videoData) => {
                         // Opcional: callback para atualizar lista local
                                                 // Aqui poderia atualizar o estado local se necessário
                         onClose(); // Fechar modal após sucesso

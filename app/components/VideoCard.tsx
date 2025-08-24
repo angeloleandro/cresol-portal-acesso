@@ -1,17 +1,15 @@
-/**
- * HomeVideoCard Component
- * Clean video card following Chakra UI pattern for home page
- * Adapted for React/Next.js with Tailwind CSS
- */
+
 
 "use client";
 
-import { useState, useCallback, memo } from 'react';
-import Button from '@/app/components/ui/Button';
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import { Icon } from './icons/Icon';
+import { motion } from 'framer-motion';
+import { useState, useCallback, memo } from 'react';
+
+import Button from '@/app/components/ui/Button';
 import { DashboardVideo } from '@/app/types/video';
+
+import { Icon } from './icons/Icon';
 import OptimizedImage from './OptimizedImage';
 
 interface HomeVideoCardProps {
@@ -21,10 +19,6 @@ interface HomeVideoCardProps {
   priority?: boolean;
 }
 
-/**
- * Clean Video Card following Chakra UI pattern
- * Simplified card without file metadata
- */
 export const HomeVideoCard = memo(function HomeVideoCard({ 
   video, 
   onClick, 
@@ -81,7 +75,6 @@ export const HomeVideoCard = memo(function HomeVideoCard({
             <Icon name="monitor-play" className="w-12 h-12 text-gray-400" />
           </div>
         )}
-        
 
       </div>
 

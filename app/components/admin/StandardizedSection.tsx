@@ -11,10 +11,6 @@ interface StandardizedSectionProps {
   footer?: ReactNode;
 }
 
-/**
- * Seção padronizada: wrapper para blocos de conteúdo com header limpo + body + footer
- * Inspirado no visual de /admin/users e conceitos do Chakra (seções claras, hierarquia e espaçamento).
- */
 export default function StandardizedSection({
   title,
   subtitle,

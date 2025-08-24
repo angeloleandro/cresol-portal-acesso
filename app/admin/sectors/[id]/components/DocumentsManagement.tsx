@@ -1,15 +1,16 @@
 // Componente de gerenciamento de documentos do setor
 
 import React, { useState, useMemo } from 'react';
-import { SectorDocument } from '../types/sector.types';
-import { formatDate } from '@/lib/utils/formatters';
+
 import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
-import DeleteModal from '@/app/components/ui/DeleteModal';
-import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
-import { formatFileSize } from '@/lib/utils/formatters';
-import { supabase } from '@/lib/supabase';
 import { useAlert } from '@/app/components/alerts';
+import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
+import DeleteModal from '@/app/components/ui/DeleteModal';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { supabase } from '@/lib/supabase';
+import { FormatDate, FormatFileSize } from '@/lib/utils/formatters';
+
+import { SectorDocument } from '../types/sector.types';
 
 interface DocumentsManagementProps {
   sectorId: string;
@@ -39,6 +40,10 @@ const ALLOWED_FILE_TYPES = Object.values(FILE_TYPES);
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_FILE_SIZE_LABEL = '10MB';
 
+/**
+ * DocumentsManagement function
+ * @todo Add proper documentation
+ */
 export function DocumentsManagement({
   sectorId,
   documents,
@@ -65,7 +70,7 @@ export function DocumentsManagement({
   const [inputType, setInputType] = useState<'url' | 'upload'>('url');
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const { showError, showSuccess } = useAlert();
+  const { showError, showSuccess: _showSuccess } = useAlert();
 
   // File type options para o ChakraSelect
   const fileTypeOptions = useMemo((): ChakraSelectOption[] => [
@@ -140,7 +145,7 @@ export function DocumentsManagement({
         const allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar'];
         
         if (!allowedExtensions.includes(extension)) {
-          console.warn(`Unsupported file extension: ${extension}, defaulting to .bin`);
+
           extension = 'bin';
         }
         
@@ -153,14 +158,14 @@ export function DocumentsManagement({
       const fileName = `documents-${uniqueId}.${extension}`;
       const filePath = `uploads/${fileName}`;
 
-      const { data, error } = await supabase.storage
+      const { data: _uploadData, error } = await supabase.storage
         .from('images')
         .upload(filePath, documentFile, {
           upsert: false
         });
 
       if (error) {
-        console.error('Erro no upload do arquivo:', error);
+
         throw error;
       }
 
@@ -171,7 +176,7 @@ export function DocumentsManagement({
 
       return publicUrl;
     } catch (error: any) {
-      console.error('Erro ao fazer upload do arquivo:', error);
+
       throw new Error('Erro ao fazer upload do arquivo');
     } finally {
       setIsUploading(false);
@@ -345,10 +350,9 @@ export function DocumentsManagement({
       await onDelete(documentItem.id);
       // onDelete já chama refreshContent internamente
     } catch (error) {
-      console.error('Erro ao deletar documento:', error);
+
     }
   };
-
 
   return (
     <div className="p-6">
@@ -404,14 +408,14 @@ export function DocumentsManagement({
                     <p className="text-gray-600 mb-2">{item.description}</p>
                   )}
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <span>{formatDate(item.created_at)}</span>
+                    <span>{FormatDate(item.created_at)}</span>
                     {item.file_type && (
                       <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
                         {item.file_type.toUpperCase()}
                       </span>
                     )}
                     {item.file_size && (
-                      <span>{formatFileSize(item.file_size)}</span>
+                      <span>{FormatFileSize(item.file_size)}</span>
                     )}
                   </div>
                 </div>
@@ -601,7 +605,7 @@ export function DocumentsManagement({
                               <div>
                                 <p className="font-medium text-sm">{documentFile.name}</p>
                                 <p className="text-xs text-gray-500">
-                                  {formatFileSize(documentFile.size)}
+                                  {FormatFileSize(documentFile.size)}
                                 </p>
                               </div>
                             </div>

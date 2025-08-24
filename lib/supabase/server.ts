@@ -1,8 +1,13 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import type { CookieOptions } from '@supabase/ssr';
 
-export function createClient() {
+
+
+/**
+ * createClient function
+ * @todo Add proper documentation
+ */
+export function CreateClient() {
   const cookieStore = cookies();
   
   return createServerClient(
@@ -19,14 +24,13 @@ export function createClient() {
           } catch (error) {
             // Cookies cannot be set in Server Actions or middleware.
             // If you need to set cookies, consider using a Client Component
-            console.error('Erro ao definir cookie:', error);
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: '', ...options });
           } catch (error) {
-            console.error('Erro ao remover cookie:', error);
+            // Error removing cookie
           }
         },
       },

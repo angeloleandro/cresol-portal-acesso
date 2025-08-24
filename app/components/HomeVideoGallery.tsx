@@ -1,23 +1,21 @@
-/**
- * HomeVideoGallery Component
- * Specialized video gallery for home page with clean Chakra UI-inspired cards
- * Limited to 3 videos maximum
- */
+
 
 "use client";
 
-import { useState, memo } from 'react';
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
+import { motion } from 'framer-motion';
+import { useState, memo } from 'react';
+
 import { useOptimizedVideoGallery, useOptimizedInView } from '@/hooks/useOptimizedVideoGallery';
-import { useKeyboardNavigation, usePerformanceMonitor } from './VideoGallery/VideoGallery.hooks';
+
+import HomeVideoCard from './VideoCard';
+import { containerAnimations } from './VideoGallery/VideoGallery.animations';
 import { VideoCleanModal } from './VideoGallery/VideoGallery.CleanModal';
-import { VideoGalleryHeader } from './VideoGallery/VideoGallery.Header';
-import { VideoGalleryLoadingState } from './VideoGallery/VideoGallery.LoadingState';
 import { VideoGalleryEmptyState } from './VideoGallery/VideoGallery.EmptyState';
 import { AsymmetricGrid } from './VideoGallery/VideoGallery.Grid';
-import { containerAnimations } from './VideoGallery/VideoGallery.animations';
-import HomeVideoCard from './VideoCard';
+import { VideoGalleryHeader } from './VideoGallery/VideoGallery.Header';
+import { useKeyboardNavigation, usePerformanceMonitor } from './VideoGallery/VideoGallery.hooks';
+import { VideoGalleryLoadingState } from './VideoGallery/VideoGallery.LoadingState';
 import { ThumbnailPerformanceProvider } from './VideoThumbnail';
 
 interface HomeVideoGalleryProps {

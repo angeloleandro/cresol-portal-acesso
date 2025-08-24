@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import Navbar from '../components/Navbar';
-import Breadcrumb from '../components/Breadcrumb';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
+
+import Breadcrumb from '../components/Breadcrumb';
+import Navbar from '../components/Navbar';
 
 interface Sector {
   id: string;
@@ -41,7 +42,7 @@ export default function SetoresPage() {
         .order('name', { ascending: true });
       
       if (error) {
-        console.error('Erro ao buscar setores:', error);
+
       } else {
         setSectors(sectorsData || []);
       }

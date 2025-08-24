@@ -1,5 +1,6 @@
 // Componente unificado para gerenciar conteúdo do setor com lógica limpa
 import { useState, useCallback, useEffect, useRef } from 'react';
+
 import type { 
   SectorNews, 
   SectorEvent, 
@@ -40,6 +41,10 @@ interface UseSectorContentReturn {
   deleteImage: (id: string) => Promise<void>;
 }
 
+/**
+ * useSectorContent function
+ * @todo Add proper documentation
+ */
 export function useSectorContent(sectorId: string | undefined): UseSectorContentReturn {
 
   const [news, setNews] = useState<SectorNews[]>([]);

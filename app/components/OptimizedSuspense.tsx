@@ -1,4 +1,5 @@
-import { Suspense, type ReactNode } from 'react';
+import { ReactNode, Suspense } from 'react';
+
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 
 interface OptimizedSuspenseProps {
@@ -8,8 +9,8 @@ interface OptimizedSuspenseProps {
 }
 
 /**
- * Wrapper otimizado para React Suspense com fallback padrão
- * Reduz reflows e melhora percepção de performance
+ * OptimizedSuspense function
+ * @todo Add proper documentation
  */
 export function OptimizedSuspense({ 
   children, 
@@ -32,6 +33,10 @@ export function OptimizedSuspense({
 /**
  * Suspense específico para páginas com altura completa
  */
+/**
+ * PageSuspense function
+ * @todo Add proper documentation
+ */
 export function PageSuspense({ 
   children,
   message = 'Carregando página...'
@@ -51,6 +56,10 @@ export function PageSuspense({
 
 /**
  * Suspense para componentes inline sem altura mínima
+ */
+/**
+ * InlineSuspense function
+ * @todo Add proper documentation
  */
 export function InlineSuspense({ 
   children,

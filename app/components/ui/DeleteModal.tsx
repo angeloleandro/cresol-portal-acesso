@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 interface DeleteModalProps {

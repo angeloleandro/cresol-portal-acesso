@@ -1,15 +1,29 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import OptimizedImage from '@/app/components/OptimizedImage';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { ADMIN_LAYOUT, ADMIN_TYPOGRAPHY, ADMIN_COLORS, ADMIN_BUTTONS, ADMIN_FORMS, ADMIN_MODALS, ADMIN_CARDS, ADMIN_NAVIGATION, ADMIN_MEDIA, ADMIN_STATES, ADMIN_ICONS, ADMIN_VALIDATION, ADMIN_DIMENSIONS } from '@/lib/constants/admin-config';
-import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+
+import OptimizedImage from '@/app/components/OptimizedImage';
 import DeleteModal from '@/app/components/ui/DeleteModal';
+import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { 
+  ADMIN_ICONS,
+  ADMIN_STATES,
+  ADMIN_COLORS,
+  ADMIN_BUTTONS,
+  ADMIN_FORMS,
+  ADMIN_LAYOUT,
+  ADMIN_MEDIA,
+  ADMIN_TYPOGRAPHY,
+  ADMIN_NAVIGATION,
+  ADMIN_DIMENSIONS,
+  ADMIN_CARDS,
+  ADMIN_MODALS
+} from '@/lib/constants/admin-config';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import { supabase } from '@/lib/supabase';
 
 interface Sector {
   id: string;
@@ -172,7 +186,7 @@ export default function SectorSystemsManagement() {
     } catch (error) {
       // Debug log removed
       // TODO: Implementar sistema de notificação moderno (toast/alert)
-      console.error('Erro ao salvar sistema:', error);
+
       // Por ora, mostrar erro no console até implementar sistema de notificação
     }
   };
@@ -206,7 +220,7 @@ export default function SectorSystemsManagement() {
     } catch (error) {
       // Debug log removed
       // TODO: Implementar sistema de notificação moderno (toast/alert) 
-      console.error('Erro ao excluir sistema:', error);
+
       // Por ora, mostrar erro no console até implementar sistema de notificação
     }
   };

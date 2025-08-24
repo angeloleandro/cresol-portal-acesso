@@ -1,6 +1,9 @@
 'use client';
 
 import { Flex, Spin, ConfigProvider } from 'antd';
+
+import { CRESOL_COLORS } from '@/lib/design-tokens/design-tokens';
+
 import type { SpinProps } from 'antd';
 
 interface UnifiedLoadingSpinnerProps extends SpinProps {
@@ -8,10 +11,6 @@ interface UnifiedLoadingSpinnerProps extends SpinProps {
   fullScreen?: boolean;
 }
 
-/**
- * Componente unificado de loading usando Ant Design
- * Segue exatamente o padrão do Ant Design com cor laranja Cresol
- */
 const UnifiedLoadingSpinner: React.FC<UnifiedLoadingSpinnerProps> = ({
   message = 'Carregando...',
   fullScreen = false,
@@ -21,7 +20,7 @@ const UnifiedLoadingSpinner: React.FC<UnifiedLoadingSpinnerProps> = ({
   // Configuração de tema com cor laranja Cresol
   const theme = {
     token: {
-      colorPrimary: '#F58220', // Cor laranja Cresol
+      colorPrimary: CRESOL_COLORS.primary.DEFAULT, // Cor laranja Cresol
     },
   };
 

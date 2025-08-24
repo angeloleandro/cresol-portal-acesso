@@ -1,9 +1,5 @@
 import { logger } from './production-logger';
 
-/**
- * Sistema de Cache para Queries do Supabase
- * Implementa cache em memória com TTL e invalidação inteligente
- */
 
 interface CacheEntry<T> {
   data: T;
@@ -19,7 +15,7 @@ interface CacheOptions {
 }
 
 class SupabaseCache {
-  private cache: Map<string, CacheEntry<any>>;
+  private cache: Map<string, CacheEntry<unknown>>;
   private revalidating: Set<string>;
   private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutos
   private readonly MAX_CACHE_SIZE = 100;
@@ -35,7 +31,7 @@ class SupabaseCache {
   /**
    * Gera chave única para a query
    */
-  private generateKey(table: string, query: any): string {
+  private generateKey(table: string, query: unknown): string {
     const queryString = JSON.stringify(query);
     return `${table}:${queryString}`;
   }
@@ -43,7 +39,7 @@ class SupabaseCache {
   /**
    * Verifica se o cache está válido
    */
-  private isValid(entry: CacheEntry<any>): boolean {
+  private isValid(entry: CacheEntry<unknown>): boolean {
     const now = Date.now();
     return now - entry.timestamp < entry.ttl;
   }
@@ -106,7 +102,7 @@ class SupabaseCache {
     // Se o cache está válido, retorna
     if (this.isValid(cached)) {
       logger.info(`[Cache] HIT: ${key} (hits: ${cached.hits})`);
-      return cached.data;
+      return cached.data as T;
     }
     
     // Se staleWhileRevalidate está ativo
@@ -129,7 +125,7 @@ class SupabaseCache {
         });
       
       // Retorna dados antigos
-      return cached.data;
+      return cached.data as T;
     }
     
     // Se não pode usar stale, busca novo
@@ -166,7 +162,7 @@ class SupabaseCache {
       const cached = this.cache.get(key);
       if (cached) {
         logger.warn(`[Cache] Using stale data due to fetch error: ${key}`);
-        return cached.data;
+        return cached.data as T;
       }
       
       throw error;
@@ -237,6 +233,10 @@ export const supabaseCache = new SupabaseCache();
 /**
  * Hook helper para usar com React Query ou SWR
  */
+/**
+ * createCachedQuery function
+ * @todo Add proper documentation
+ */
 export function createCachedQuery<T>(
   key: string,
   fetcher: () => Promise<T>,
@@ -248,16 +248,20 @@ export function createCachedQuery<T>(
 /**
  * Decorator para métodos que fazem queries
  */
-export function cached(options?: CacheOptions) {
+/**
+ * cached function
+ * @todo Add proper documentation
+ */
+export function Cached(options?: CacheOptions) {
   return function (
-    target: any,
+    target: unknown,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
     
-    descriptor.value = async function (...args: any[]) {
-      const key = `${target.constructor.name}.${propertyKey}:${JSON.stringify(args)}`;
+    descriptor.value = async function (...args: unknown[]) {
+      const key = `${(target as any).constructor.name}.${propertyKey}:${JSON.stringify(args)}`;
       return supabaseCache.get(
         key,
         () => originalMethod.apply(this, args),

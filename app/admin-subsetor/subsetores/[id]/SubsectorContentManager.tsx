@@ -1,5 +1,6 @@
 // Componente unificado para gerenciar conteúdo do subsetor com lógica limpa
 import { useState, useCallback, useEffect, useRef } from 'react';
+
 import type { 
   SubsectorNews, 
   SubsectorEvent, 
@@ -40,6 +41,10 @@ interface SubsectorContentProps {
   deleteImage: (id: string) => Promise<void>;
 }
 
+/**
+ * useSubsectorContent function
+ * @todo Add proper documentation
+ */
 export function useSubsectorContent(subsectorId: string | null): SubsectorContentProps {
   const [news, setNews] = useState<SubsectorNews[]>([]);
   const [events, setEvents] = useState<SubsectorEvent[]>([]);
@@ -190,7 +195,7 @@ export function useSubsectorContent(subsectorId: string | null): SubsectorConten
       }
       
     } catch (err: any) {
-      console.error('Erro ao buscar conteúdo:', err);
+      // Error loading content
       if (mountedRef.current) {
         setError(err.message || 'Erro ao carregar conteúdo');
       }

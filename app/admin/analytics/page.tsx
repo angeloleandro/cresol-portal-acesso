@@ -1,18 +1,20 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { Tabs } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useCallback, useEffect, useState } from 'react';
+
+import { StandardizedButton, StandardizedTabsList } from '@/app/components/admin';
 import AdminHeader from '@/app/components/AdminHeader';
-import Breadcrumb from '@/app/components/Breadcrumb';
-import { Icon } from '@/app/components/icons/Icon';
-// Professional Analytics Components
-import MetricCards from '@/app/components/analytics/MetricCards';
 import AnimatedChart from '@/app/components/analytics/AnimatedChart';
 import { ResponsiveContainer } from '@/app/components/analytics/GridLayoutResponsivo';
+import MetricCards from '@/app/components/analytics/MetricCards';
 import { DashboardShimmer } from '@/app/components/analytics/ShimmerLoading';
-import { Tabs } from "@chakra-ui/react";
-import { StandardizedTabsList, StandardizedButton } from '@/app/components/admin';
+import Breadcrumb from '@/app/components/Breadcrumb';
+import { Icon } from '@/app/components/icons/Icon';
+import { supabase } from '@/lib/supabase';
+
+import type { User } from '@supabase/supabase-js';
 
 interface AnalyticsData {
   users: {
@@ -50,7 +52,7 @@ interface ChartData {
 
 export default function AnalyticsPage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
@@ -79,7 +81,6 @@ export default function AnalyticsPage() {
 
       setUser(user);
     } catch (error) {
-      console.error('Erro ao verificar autenticação:', error);
       router.replace('/login');
     } finally {
       setLoading(false);
@@ -190,7 +191,7 @@ export default function AnalyticsPage() {
 
       setAnalytics(analyticsData);
     } catch (error) {
-      console.error('Erro ao buscar dados de analytics:', error);
+      // Error fetching analytics data
     }
   }, [selectedPeriod]);
 
@@ -239,7 +240,7 @@ export default function AnalyticsPage() {
     }
   };
 
-  const getPeriodLabel = (period: string): string => {
+  const _getPeriodLabel = (period: string): string => {
     switch (period) {
       case '7d': return 'Últimos 7 dias';
       case '30d': return 'Últimos 30 dias';
@@ -480,7 +481,7 @@ export default function AnalyticsPage() {
                       {analytics.locations.userDistribution
                         .sort((a, b) => b.users - a.users)
                         .slice(0, 5)
-                        .map((location, index) => {
+                        .map((location, _index) => {
                           const percentage = analytics.users.total > 0 
                             ? Math.round((location.users / analytics.users.total) * 100)
                             : 0;

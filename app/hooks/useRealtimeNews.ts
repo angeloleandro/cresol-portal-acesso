@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useEffect, useState, useCallback } from 'react';
 
 export interface NewsEvent {
   id: string;
@@ -31,6 +31,10 @@ interface UseRealtimeNewsOptions {
   onDelete?: (payload: { id: string }) => void;
 }
 
+/**
+ * useRealtimeNews function
+ * @todo Add proper documentation
+ */
 export function useRealtimeNews({
   tableName,
   entityId,

@@ -1,8 +1,9 @@
 'use client';
 
-import { ReactNode, useState, useRef, useEffect } from 'react';
 import { Dialog, Transition, Disclosure } from '@headlessui/react';
+import { ReactNode, useState, useRef, useEffect } from 'react';
 import { Fragment } from 'react';
+
 import { Icon } from '@/app/components/icons/Icon';
 
 interface ChartDataPoint {

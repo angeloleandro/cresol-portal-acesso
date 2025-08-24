@@ -1,14 +1,11 @@
-/**
- * VideoGallery Custom Hooks
- * Enterprise-grade hooks for video gallery functionality
- */
-
 import { useEffect, useState, useCallback, useRef } from 'react';
+
 import { supabase } from '@/lib/supabase';
 import { 
-  resolveVideoUrl, 
+  ResolveVideoUrl as resolveVideoUrl, 
   checkVideoUrlAccessibility 
 } from '@/lib/video-utils';
+
 import { 
   DashboardVideo, 
   VideoGalleryState, 
@@ -18,6 +15,10 @@ import {
 
 /**
  * Hook para gerenciar estado da galeria de vídeos
+ */
+/**
+ * useVideoGallery function
+ * @todo Add proper documentation
  */
 export function useVideoGallery(limit?: number) {
   const [state, setState] = useState<VideoGalleryState>({
@@ -168,6 +169,10 @@ export function useVideoGallery(limit?: number) {
 /**
  * Hook para navegação por teclado
  */
+/**
+ * useKeyboardNavigation function
+ * @todo Add proper documentation
+ */
 export function useKeyboardNavigation(config: KeyboardNavigationConfig) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -211,6 +216,10 @@ export function useKeyboardNavigation(config: KeyboardNavigationConfig) {
 /**
  * Hook para ESC key modal close
  */
+/**
+ * useEscapeKey function
+ * @todo Add proper documentation
+ */
 export function useEscapeKey(callback: () => void, enabled: boolean = true) {
   const escListener = useCallback((e: KeyboardEvent) => {
     if (e.key === "Escape") callback();
@@ -226,6 +235,10 @@ export function useEscapeKey(callback: () => void, enabled: boolean = true) {
 
 /**
  * Hook para intersection observer (lazy loading)
+ */
+/**
+ * useInView function
+ * @todo Add proper documentation
  */
 export function useInView(options: IntersectionObserverInit = {}) {
   const [isInView, setIsInView] = useState(false);
@@ -259,6 +272,10 @@ export function useInView(options: IntersectionObserverInit = {}) {
 
 /**
  * Hook para focus management em modais
+ */
+/**
+ * useFocusManagement function
+ * @todo Add proper documentation
  */
 export function useFocusManagement(isOpen: boolean) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -296,6 +313,10 @@ export function useFocusManagement(isOpen: boolean) {
 /**
  * Hook para performance monitoring
  */
+/**
+ * usePerformanceMonitor function
+ * @todo Add proper documentation
+ */
 export function usePerformanceMonitor(componentName: string) {
   const renderCountRef = useRef(0);
   const startTimeRef = useRef(performance.now());
@@ -321,6 +342,10 @@ export function usePerformanceMonitor(componentName: string) {
 /**
  * Hook para debounce de operações
  */
+/**
+ * useDebounce function
+ * @todo Add proper documentation
+ */
 export function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
@@ -339,6 +364,10 @@ export function useDebounce<T>(value: T, delay: number): T {
 
 /**
  * Hook para preload de imagens
+ */
+/**
+ * useImagePreload function
+ * @todo Add proper documentation
  */
 export function useImagePreload(urls: string[]) {
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());

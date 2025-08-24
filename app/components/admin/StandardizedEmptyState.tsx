@@ -1,9 +1,11 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { Icon, IconName } from '../icons';
+
 import { Button } from '@/app/components/ui/Button';
 import { CRESOL_UI_CONFIG } from '@/lib/design-tokens';
+
+import { Icon, IconName } from '../icons';
 
 interface StandardizedEmptyStateProps {
   title: string;
@@ -17,17 +19,6 @@ interface StandardizedEmptyStateProps {
   className?: string;
 }
 
-/**
- * Estado vazio padronizado seguindo o design system da página /admin/users
- * 
- * Features:
- * - Ícone central consistente
- * - Título e descrição bem hierarquizados
- * - Botão de ação opcional
- * - Layout centralizado
- * - Espaçamento vertical consistente
- * - Cores padronizadas (cinza)
- */
 export default function StandardizedEmptyState({
   title,
   description,
