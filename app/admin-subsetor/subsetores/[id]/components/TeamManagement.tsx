@@ -9,10 +9,9 @@ import type { SubsectorTeamMember, Profile } from '@/types/team';
 
 interface TeamManagementProps {
   subsectorId: string;
-  subsectorName: string;
 }
 
-export function TeamManagement({ subsectorId, subsectorName }: TeamManagementProps) {
+export function TeamManagement({ subsectorId }: TeamManagementProps) {
   const supabase = useSupabaseClient();
   const [teamMembers, setTeamMembers] = useState<SubsectorTeamMember[]>([]);
   const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
@@ -24,9 +23,12 @@ export function TeamManagement({ subsectorId, subsectorName }: TeamManagementPro
   const [editPosition, setEditPosition] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchingUsers, setSearchingUsers] = useState(false);
+  const [currentUserAdminVisibility, setCurrentUserAdminVisibility] = useState<boolean | null>(null);
+  const [updatingVisibility, setUpdatingVisibility] = useState(false);
 
   useEffect(() => {
     fetchTeamMembers();
+    checkAdminVisibility();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subsectorId]);
 
@@ -53,6 +55,57 @@ export function TeamManagement({ subsectorId, subsectorName }: TeamManagementPro
       console.error('Erro ao buscar equipe:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkAdminVisibility = async () => {
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Check if user is a subsector admin for this subsector
+      const { data: adminData, error } = await supabase
+        .from('subsector_admins')
+        .select('show_as_team_member')
+        .eq('user_id', user.id)
+        .eq('subsector_id', subsectorId)
+        .single();
+
+      if (!error && adminData) {
+        setCurrentUserAdminVisibility(adminData.show_as_team_member);
+      }
+    } catch (error) {
+      console.error('Erro ao verificar visibilidade do admin:', error);
+    }
+  };
+
+  const toggleAdminVisibility = async () => {
+    setUpdatingVisibility(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const newVisibility = !currentUserAdminVisibility;
+
+      const { error } = await supabase
+        .from('subsector_admins')
+        .update({ 
+          show_as_team_member: newVisibility,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id)
+        .eq('subsector_id', subsectorId);
+
+      if (error) throw error;
+
+      setCurrentUserAdminVisibility(newVisibility);
+      await fetchTeamMembers(); // Refresh the team list
+    } catch (error) {
+      console.error('Erro ao atualizar visibilidade:', error);
+      alert('Erro ao atualizar visibilidade. Tente novamente.');
+    } finally {
+      setUpdatingVisibility(false);
     }
   };
 
@@ -160,6 +213,10 @@ export function TeamManagement({ subsectorId, subsectorName }: TeamManagementPro
     }
   };
 
+  // Separate admin members from regular members
+  const adminMembers = teamMembers.filter(m => (m as any).is_admin === true);
+  const regularMembers = teamMembers.filter(m => !(m as any).is_admin);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -181,6 +238,82 @@ export function TeamManagement({ subsectorId, subsectorName }: TeamManagementPro
         </button>
       </div>
 
+      {/* Controle de Visibilidade do Admin */}
+      {currentUserAdminVisibility !== null && (
+        <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-green-900">Visibilidade como Administrador</h3>
+              <p className="text-sm text-green-700 mt-1">
+                {currentUserAdminVisibility 
+                  ? 'Você está visível como membro da equipe do subsetor'
+                  : 'Você está oculto da lista de membros da equipe'}
+              </p>
+            </div>
+            <button
+              onClick={toggleAdminVisibility}
+              disabled={updatingVisibility}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                updatingVisibility 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : currentUserAdminVisibility
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-600 text-white hover:bg-gray-700'
+              }`}
+            >
+              {updatingVisibility ? 'Atualizando...' : (currentUserAdminVisibility ? 'Ocultar-me' : 'Mostrar-me')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Administradores do Subsetor */}
+      {adminMembers.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+            <HiUserGroup className="h-5 w-5 text-green-600" />
+            Administradores do Subsetor
+          </h3>
+          
+          <div className="space-y-3">
+            {adminMembers.map(member => (
+              <div key={member.id} className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-200">
+                    {member.profiles?.avatar_url ? (
+                      <OptimizedImage
+                        src={member.profiles.avatar_url}
+                        alt={member.profiles?.full_name || 'Admin'}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-green-600/10 text-green-600">
+                        <HiUserGroup className="h-5 w-5" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {member.profiles?.full_name || 'Nome não disponível'}
+                    </p>
+                    <p className="text-sm text-green-600 font-medium">
+                      Administrador do Subsetor
+                    </p>
+                    {member.profiles?.email && (
+                      <p className="text-xs text-gray-500">{member.profiles.email}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
+                  Admin
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Lista de Membros */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
@@ -188,13 +321,13 @@ export function TeamManagement({ subsectorId, subsectorName }: TeamManagementPro
           Membros da Equipe
         </h3>
         
-        {teamMembers.length === 0 ? (
+        {regularMembers.length === 0 ? (
           <p className="text-gray-500 text-center py-8">
             Nenhum membro cadastrado
           </p>
         ) : (
           <div className="space-y-3">
-            {teamMembers.map(member => (
+            {regularMembers.map(member => (
               <div key={member.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-200">

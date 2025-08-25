@@ -210,7 +210,6 @@ export default function SubsectorManagementPage() {
                 {activeTab === 'team' && (
                   <TeamManagement 
                     subsectorId={subsectorId} 
-                    subsectorName={subsector?.name || 'Subsetor'} 
                   />
                 )}
               </Suspense>

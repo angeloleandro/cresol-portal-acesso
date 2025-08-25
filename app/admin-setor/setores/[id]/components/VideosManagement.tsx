@@ -1,14 +1,20 @@
-// Componente para gerenciar vídeos do setor - versão simplificada
+// Componente para gerenciar vídeos do setor - versão padronizada com upload completo
 
 'use client';
 
-import { useState } from 'react';
+import Image from 'next/image';
+import React, { useState } from 'react';
 
+import { ToggleDraftsButton } from '@/app/components/admin/shared/ToggleDraftsButton';
 import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
+import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { VIDEO_HELPERS, VIDEO_API_CONFIG } from '@/lib/constants/video-ui';
+import { FormatDate } from '@/lib/utils/formatters';
 
 import type { SectorVideo } from '../types/sector.types';
+import type { VideoUploadFormData } from '@/lib/types/video-system';
 
 interface VideosManagementProps {
   sectorId: string;
@@ -20,6 +26,62 @@ interface VideosManagementProps {
   onDelete: (id: string) => Promise<void>;
 }
 
+// Componente para player de vídeo
+const VideoPlayer = ({ video, onClose }: { video: SectorVideo; onClose: () => void }) => {
+  if (video.upload_type === 'youtube' && video.video_url) {
+    const videoId = VIDEO_HELPERS.extractYouTubeId(video.video_url);
+    if (videoId) {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={onClose}>
+          <div className="relative w-full max-w-4xl mx-4" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={onClose}
+              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="relative aspect-video">
+              <iframe
+                src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                title={video.title}
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // Player para vídeos diretos
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={onClose}>
+      <div className="relative w-full max-w-4xl mx-4" onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={onClose}
+          className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+        >
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <video
+          src={video.video_url}
+          controls
+          autoPlay
+          className="w-full rounded-lg"
+        >
+          Seu navegador não suporta a tag de vídeo.
+        </video>
+      </div>
+    </div>
+  );
+};
+
 export function VideosManagement({
   sectorId,
   videos,
@@ -29,285 +91,235 @@ export function VideosManagement({
   onRefresh,
   onDelete
 }: VideosManagementProps) {
-  const { showError, showSuccess } = useAlert();
+  const alert = useAlert();
   const deleteModal = useDeleteModal('vídeo');
-  
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<Partial<SectorVideo>>({
-    title: '',
-    description: '',
-    video_url: '',
-    upload_type: 'youtube',
-    is_published: true
-  });
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState<SectorVideo | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<SectorVideo | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleOpenModal = (video?: SectorVideo) => {
+    setCurrentVideo(video || null);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentVideo(null);
+  };
+
+  const handleSaveComplete = async () => {
+    alert.showSuccess(
+      currentVideo ? 'Vídeo atualizado' : 'Vídeo criado', 
+      'O vídeo foi salvo com sucesso.'
+    );
+    handleCloseModal();
+    await onRefresh();
+  };
+
+  const handleDeleteVideo = async (videoToDelete: SectorVideo) => {
+    try {
+      await onDelete(videoToDelete.id);
+      alert.showSuccess('Vídeo excluído', 'O vídeo foi removido com sucesso.');
+    } catch (error) {
+      alert.showError('Erro ao deletar vídeo', error instanceof Error ? error.message : 'Erro desconhecido');
+    }
+  };
+
+  const getVideoThumbnail = (video: SectorVideo): string => {
+    // 1. Prioridade para thumbnail_url se existir
+    if (video.thumbnail_url) {
+      return video.thumbnail_url;
+    }
     
-    try {
-      const videoData = {
-        title: formData.title,
-        description: formData.description,
-        video_url: formData.video_url,
-        upload_type: formData.upload_type,
-        is_published: formData.is_published
-      };
-
-      const url = editingId 
-        ? `/api/admin/sectors/${sectorId}/videos/${editingId}`
-        : `/api/admin/sectors/${sectorId}/videos`;
-      
-      const method = editingId ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(videoData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao salvar vídeo');
+    // 2. Para vídeos do YouTube, gerar thumbnail
+    if (video.upload_type === 'youtube' && video.video_url) {
+      const videoId = VIDEO_HELPERS.extractYouTubeId(video.video_url);
+      if (videoId) {
+        return VIDEO_HELPERS.getYouTubeThumbnail(videoId);
       }
-
-      showSuccess(editingId ? 'Vídeo atualizado' : 'Vídeo criado', 'O vídeo foi salvo com sucesso.');
-      setShowForm(false);
-      setFormData({ title: '', description: '', video_url: '', upload_type: 'youtube', is_published: true });
-      setEditingId(null);
-      await onRefresh();
-    } catch (error) {
-      showError('Erro ao salvar vídeo', 'Tente novamente.');
     }
+    
+    // 3. Fallback para placeholder
+    return '/images/video-placeholder.svg';
   };
 
-  const handleEdit = (video: SectorVideo) => {
-    setFormData({
-      title: video.title,
-      description: video.description,
-      video_url: video.video_url,
-      upload_type: video.upload_type,
-      is_published: video.is_published
-    });
-    setEditingId(video.id);
-    setShowForm(true);
-  };
-
-  const handleDeleteClick = (video: SectorVideo) => {
-    deleteModal.openDeleteModal(video, video.title);
-  };
-
-  const handleDelete = async (video: SectorVideo) => {
-    try {
-      await onDelete(video.id);
-      showSuccess('Vídeo excluído', 'O vídeo foi removido com sucesso.');
-    } catch (error) {
-      showError('Erro ao excluir vídeo', 'Tente novamente.');
-    }
-  };
+  // Converter SectorVideo para formato esperado pelo VideoUploadFormRoot
+  const convertToFormData = (video: SectorVideo): Partial<VideoUploadFormData> => ({
+    id: video.id,
+    title: video.title,
+    description: video.description || '',
+    video_url: video.video_url,
+    thumbnail_url: video.thumbnail_url || undefined,
+    thumbnail_timestamp: video.thumbnail_timestamp,
+    upload_type: video.upload_type === 'youtube' ? 'youtube' : 'direct',
+    is_active: video.is_published,
+    order_index: 0,
+    file_size: undefined,
+    original_filename: undefined,
+    videoFile: null,
+    thumbnailFile: null,
+  });
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Vídeos do Setor</h3>
+    <div className="p-6">
+      {/* Cabeçalho com ações */}
+      <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-4">
-          <button
-            onClick={onToggleDrafts}
-            className="flex items-center space-x-2 bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"
-          >
-            <span>{showDrafts ? 'Ocultar Rascunhos' : 'Mostrar Rascunhos'}</span>
-            <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded font-medium">
-              {totalDraftVideosCount} {totalDraftVideosCount === 1 ? 'rascunho' : 'rascunhos'}
-            </span>
-          </button>
-          <button
-            onClick={() => {
-              setFormData({ title: '', description: '', video_url: '', upload_type: 'youtube', is_published: true });
-              setEditingId(null);
-              setShowForm(true);
-            }}
-            className="bg-primary text-white px-3 py-1 rounded-md hover:bg-primary-dark text-sm"
-          >
-            Adicionar Vídeo
-          </button>
+          <h2 className="text-xl font-semibold text-gray-900">Vídeos</h2>
+          <ToggleDraftsButton
+            showDrafts={showDrafts}
+            onToggle={onToggleDrafts}
+            draftCount={totalDraftVideosCount}
+            type="videos"
+          />
         </div>
+        <button
+          onClick={() => handleOpenModal()}
+          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+        >
+          Novo Vídeo
+        </button>
       </div>
 
-      {showForm && (
-        <div className="bg-white p-4 rounded-md border border-gray-200 mb-6">
-          <h4 className="text-lg font-medium mb-3">
-            {editingId ? 'Editar Vídeo' : 'Novo Vídeo'}
-          </h4>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                Título
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Descrição (opcional)
-              </label>
-              <textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md h-20"
-                placeholder="Breve descrição do vídeo"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="upload_type" className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo de Vídeo
-              </label>
-              <select
-                id="upload_type"
-                value={formData.upload_type}
-                onChange={(e) => setFormData({ ...formData, upload_type: e.target.value as 'youtube' | 'file' })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+      {/* Grid de vídeos */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {videos.length === 0 ? (
+          <div className="col-span-full text-center py-12 bg-gray-50 rounded-lg">
+            <p className="text-gray-500">
+              {showDrafts 
+                ? 'Nenhum rascunho de vídeo encontrado'
+                : 'Nenhum vídeo publicado ainda'
+              }
+            </p>
+          </div>
+        ) : (
+          videos.map((video) => (
+            <div key={video.id} className="bg-white border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+              {/* Thumbnail */}
+              <div 
+                className="relative aspect-video cursor-pointer group"
+                onClick={() => setPlayingVideo(video)}
               >
-                <option value="youtube">YouTube</option>
-                <option value="file">Upload de Arquivo</option>
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="video_url" className="block text-sm font-medium text-gray-700 mb-1">
-                {formData.upload_type === 'youtube' ? 'URL do YouTube' : 'URL do Vídeo'}
-              </label>
-              <input
-                type="url"
-                id="video_url"
-                value={formData.video_url}
-                onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder={formData.upload_type === 'youtube' ? 'https://www.youtube.com/watch?v=...' : 'URL do vídeo'}
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="is_published"
-                  checked={formData.is_published}
-                  onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                <Image
+                  src={getVideoThumbnail(video)}
+                  alt={video.title}
+                  width={300}
+                  height={200}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/images/video-placeholder.svg';
+                  }}
                 />
-                <label htmlFor="is_published" className="text-sm text-gray-700">
-                  Publicar imediatamente
-                </label>
-                {!formData.is_published && (
-                  <span className="text-xs text-yellow-600 ml-2">
-                    (Será salvo como rascunho)
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                }}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-              >
-                Salvar
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {videos.length === 0 ? (
-        <div className="bg-white p-6 rounded-md border border-gray-200 text-center">
-          <p className="text-gray-500">Nenhum vídeo cadastrado para este setor.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {videos.map((video) => (
-            <div key={video.id} className="bg-white rounded-md border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-              {video.thumbnail_url && (
-                <div className="aspect-video bg-gray-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
-                    src={video.thumbnail_url} 
-                    alt={video.title}
-                    className="w-full h-full object-cover"
-                  />
+                
+                {/* Play button overlay */}
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
+                  <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
                 </div>
-              )}
+                
+                {/* Badges */}
+                <div className="absolute top-2 right-2 flex flex-col space-y-1">
+                  {!video.is_published && (
+                    <span className="px-2 py-1 text-xs bg-yellow-500 text-white rounded">
+                      Rascunho
+                    </span>
+                  )}
+                  {video.upload_type === 'youtube' && (
+                    <span className="px-2 py-1 text-xs bg-red-600 text-white rounded">
+                      YouTube
+                    </span>
+                  )}
+                </div>
+              </div>
               
+              {/* Informações */}
               <div className="p-4">
-                <div className="flex justify-between mb-2">
-                  <h3 className="text-lg font-medium flex-1 truncate">{video.title}</h3>
-                  <div className="flex space-x-1 ml-2">
+                <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">
+                  {video.title}
+                </h3>
+                {video.description && (
+                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                    {video.description}
+                  </p>
+                )}
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">
+                    {FormatDate(video.created_at)}
+                  </span>
+                  <div className="flex space-x-1">
                     <button
-                      onClick={() => handleEdit(video)}
-                      className="text-primary hover:text-primary-dark"
+                      onClick={() => handleOpenModal(video)}
+                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      title="Editar"
                     >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
                     <button
-                      onClick={() => handleDeleteClick(video)}
-                      className="text-red-500 hover:text-red-700"
+                      onClick={() => deleteModal.openDeleteModal(video, video.title)}
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                      title="Excluir"
                     >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
                   </div>
                 </div>
-                
-                {video.description && (
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{video.description}</p>
-                )}
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">
-                    {video.upload_type === 'youtube' ? 'YouTube' : 'Upload'}
-                  </span>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    video.is_published 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {video.is_published ? 'Publicado' : 'Rascunho'}
-                  </span>
-                </div>
               </div>
             </div>
-          ))}
+          ))
+        )}
+      </div>
+
+      {/* Modal de Upload/Edição */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+              <VideoUploadFormRoot
+                initialData={currentVideo ? convertToFormData(currentVideo) : undefined}
+                onSave={handleSaveComplete}
+                onCancel={handleCloseModal}
+                customContext={{
+                  entityType: 'sector',
+                  entityId: sectorId,
+                  apiEndpoint: VIDEO_API_CONFIG.endpoints.sectorVideoUpload(sectorId),
+                  thumbnailEndpoint: currentVideo 
+                    ? VIDEO_API_CONFIG.endpoints.sectorVideoThumbnail(sectorId, currentVideo.id)
+                    : undefined
+                }}
+              />
+            </div>
+          </div>
         </div>
       )}
 
+      {/* Player de Vídeo */}
+      {playingVideo && (
+        <VideoPlayer video={playingVideo} onClose={() => setPlayingVideo(null)} />
+      )}
+
+      {/* Modal de Confirmação de Exclusão */}
       <DeleteModal
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeDeleteModal}
-        onConfirm={() => deleteModal.confirmDelete(handleDelete)}
+        onConfirm={() => deleteModal.confirmDelete(handleDeleteVideo)}
         itemName={deleteModal.itemName}
-        itemType={deleteModal.itemType}
-        isLoading={deleteModal.isDeleting}
+        itemType="vídeo"
       />
     </div>
   );

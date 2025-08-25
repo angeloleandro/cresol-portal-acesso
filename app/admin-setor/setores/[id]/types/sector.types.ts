@@ -76,7 +76,7 @@ export interface SectorVideo {
   video_url: string;
   thumbnail_url?: string;
   thumbnail_timestamp?: number;
-  upload_type: 'youtube' | 'file';
+  upload_type: 'youtube' | 'direct';
   is_published: boolean;
   created_at: string;
   updated_at?: string;
@@ -121,6 +121,8 @@ export interface TeamMember {
     id: string;
     email: string;
     full_name: string;
+    avatar_url?: string;
+    position?: string;
   };
   subsectors?: {
     id: string;

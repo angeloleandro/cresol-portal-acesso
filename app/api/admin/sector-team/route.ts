@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
+import { CreateClient } from '@/lib/supabase/server';
 import { supabase } from '@/lib/supabase';
 
 
@@ -17,6 +17,57 @@ interface TeamMemberProfile {
 // Removed unused TeamMember interface
 
 /**
+ * Helper function to verify user permissions for sector team management
+ */
+async function verifyPermissions(sectorId: string, requiredAction: 'read' | 'write') {
+  const supabaseClient = CreateClient();
+  
+  // Get authenticated user
+  const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+  
+  if (authError || !user) {
+    return { authorized: false, error: 'Não autorizado', status: 401 };
+  }
+  
+  // Get user profile with role
+  const { data: profile, error: profileError } = await supabaseClient
+    .from('profiles')
+    .select('id, role')
+    .eq('id', user.id)
+    .single();
+  
+  if (profileError || !profile) {
+    return { authorized: false, error: 'Perfil não encontrado', status: 403 };
+  }
+  
+  // Read access is public for authenticated users
+  if (requiredAction === 'read') {
+    return { authorized: true, user, profile };
+  }
+  
+  // Write access requires admin or sector_admin role
+  if (profile.role === 'admin') {
+    return { authorized: true, user, profile };
+  }
+  
+  if (profile.role === 'sector_admin') {
+    // Check if sector_admin has permission for this specific sector
+    const { data: sectorAdmin } = await supabaseClient
+      .from('sector_admins')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('sector_id', sectorId)
+      .single();
+    
+    if (sectorAdmin) {
+      return { authorized: true, user, profile };
+    }
+  }
+  
+  return { authorized: false, error: 'Sem permissão para gerenciar membros deste setor', status: 403 };
+}
+
+/**
  * GET function
  * @todo Add proper documentation
  */
@@ -31,7 +82,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar membros da equipe do setor com informações completas
 
-    // Primeiro, tentar buscar com joins completos
+    // Primeiro, buscar membros regulares da equipe
     let { data: teamMembers, error } = await supabase
       .from('sector_team_members')
       .select(`
@@ -60,6 +111,52 @@ export async function GET(request: NextRequest) {
       .order('is_from_subsector', { ascending: true })
       .order('created_at', { ascending: false });
 
+    // Buscar admins do setor que devem aparecer como membros da equipe
+    const { data: sectorAdmins, error: adminError } = await supabase
+      .from('sector_admins')
+      .select(`
+        id,
+        user_id,
+        sector_id,
+        show_as_team_member,
+        created_at,
+        profiles(
+          id,
+          full_name,
+          email,
+          avatar_url,
+          position,
+          work_location_id,
+          work_locations(name)
+        )
+      `)
+      .eq('sector_id', sectorId)
+      .eq('show_as_team_member', true);
+
+    // Combinar os resultados se houver admins visíveis
+    if (sectorAdmins && sectorAdmins.length > 0 && !adminError) {
+      // Transformar admins para o formato de team members
+      const adminMembers = sectorAdmins.map(admin => ({
+        id: `admin-${admin.id}`,
+        user_id: admin.user_id,
+        sector_id: admin.sector_id,
+        position: 'Administrador do Setor',
+        is_from_subsector: false,
+        subsector_id: null,
+        created_at: admin.created_at,
+        profiles: admin.profiles,
+        subsectors: null as any,
+        is_admin: true
+      }));
+
+      // Combinar com membros regulares, removendo duplicatas
+      const userIds = new Set(teamMembers?.map(m => m.user_id) || []);
+      const uniqueAdmins = adminMembers.filter(admin => !userIds.has(admin.user_id));
+      
+      teamMembers = [...uniqueAdmins, ...(teamMembers || [])];
+
+    }
+    
     // Se houver erro de relacionamento, tentar busca alternativa
     if (error && error.message?.includes('relationship')) {
 
@@ -74,13 +171,25 @@ export async function GET(request: NextRequest) {
       if (basicError) {
         throw basicError;
       }
+
+      // Buscar admins básicos também
+      const { data: basicAdmins } = await supabase
+        .from('sector_admins')
+        .select('*')
+        .eq('sector_id', sectorId)
+        .eq('show_as_team_member', true);
+      
+      // Coletar todos os user_ids (membros + admins)
+      const allUserIds = new Set<string>();
+      basicMembers?.forEach(m => allUserIds.add(m.user_id));
+      basicAdmins?.forEach(a => allUserIds.add(a.user_id));
       
       // Buscar dados dos profiles separadamente
-      if (basicMembers && basicMembers.length > 0) {
-        const userIds = basicMembers.map(m => m.user_id);
+      if (allUserIds.size > 0) {
+        const userIds = Array.from(allUserIds);
         const subsectorIds = basicMembers
-          .filter(m => m.subsector_id)
-          .map(m => m.subsector_id);
+          ?.filter(m => m.subsector_id)
+          .map(m => m.subsector_id) || [];
         
         // Buscar profiles
         const { data: profiles } = await supabase
@@ -113,7 +222,7 @@ export async function GET(request: NextRequest) {
         }
         
         // Montar resposta combinada
-        teamMembers = basicMembers.map(member => {
+        const regularMembers = basicMembers?.map(member => {
           const profile = profiles?.find(p => p.id === member.user_id);
           const workLocation = profile?.work_location_id 
             ? workLocations.find(w => w.id === profile.work_location_id)
@@ -130,7 +239,37 @@ export async function GET(request: NextRequest) {
             } : undefined,
             subsectors: subsector || undefined
           };
-        });
+        }) || [];
+
+        // Adicionar admins visíveis
+        const adminMembers = basicAdmins?.map(admin => {
+          const profile = profiles?.find(p => p.id === admin.user_id);
+          const workLocation = profile?.work_location_id 
+            ? workLocations.find(w => w.id === profile.work_location_id)
+            : null;
+          
+          return {
+            id: `admin-${admin.id}`,
+            user_id: admin.user_id,
+            sector_id: admin.sector_id,
+            position: 'Administrador do Setor',
+            is_from_subsector: false,
+            subsector_id: null,
+            created_at: admin.created_at,
+            profiles: profile ? {
+              ...profile,
+              work_locations: workLocation ? { name: workLocation.name } : undefined
+            } : undefined,
+            subsectors: null as any,
+            is_admin: true
+          };
+        }) || [];
+
+        // Combinar, removendo duplicatas
+        const memberUserIds = new Set(regularMembers.map(m => m.user_id));
+        const uniqueAdmins = adminMembers.filter(admin => !memberUserIds.has(admin.user_id));
+        
+        teamMembers = [...uniqueAdmins, ...regularMembers];
 
       } else {
         teamMembers = [];
@@ -166,6 +305,12 @@ export async function POST(request: NextRequest) {
 
     if (!user_id || !sector_id) {
       return NextResponse.json({ error: 'User ID e Sector ID são obrigatórios' }, { status: 400 });
+    }
+    
+    // Verify permissions
+    const permissionCheck = await verifyPermissions(sector_id, 'write');
+    if (!permissionCheck.authorized) {
+      return NextResponse.json({ error: permissionCheck.error }, { status: permissionCheck.status });
     }
 
     // Verificar se o usuário já está na equipe do setor
@@ -230,6 +375,23 @@ export async function DELETE(request: NextRequest) {
     if (!memberId) {
       return NextResponse.json({ error: 'ID do membro é obrigatório' }, { status: 400 });
     }
+    
+    // Get the sector_id from the member to verify permissions
+    const { data: memberData, error: memberError } = await supabase
+      .from('sector_team_members')
+      .select('sector_id')
+      .eq('id', memberId)
+      .single();
+    
+    if (memberError || !memberData) {
+      return NextResponse.json({ error: 'Membro não encontrado' }, { status: 404 });
+    }
+    
+    // Verify permissions
+    const permissionCheck = await verifyPermissions(memberData.sector_id, 'write');
+    if (!permissionCheck.authorized) {
+      return NextResponse.json({ error: permissionCheck.error }, { status: permissionCheck.status });
+    }
 
     // Verificar se o membro veio de um subsetor
     const { data: member, error: checkError } = await supabase
@@ -282,6 +444,23 @@ export async function PUT(request: NextRequest) {
 
     if (!member_id) {
       return NextResponse.json({ error: 'ID do membro é obrigatório' }, { status: 400 });
+    }
+    
+    // Get the sector_id from the member to verify permissions
+    const { data: memberData, error: memberError } = await supabase
+      .from('sector_team_members')
+      .select('sector_id')
+      .eq('id', member_id)
+      .single();
+    
+    if (memberError || !memberData) {
+      return NextResponse.json({ error: 'Membro não encontrado' }, { status: 404 });
+    }
+    
+    // Verify permissions
+    const permissionCheck = await verifyPermissions(memberData.sector_id, 'write');
+    if (!permissionCheck.authorized) {
+      return NextResponse.json({ error: permissionCheck.error }, { status: permissionCheck.status });
     }
 
     const { data, error } = await supabase

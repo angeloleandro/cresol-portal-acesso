@@ -64,7 +64,7 @@ export interface SubsectorVideo {
   video_url: string;
   thumbnail_url: string | null;
   thumbnail_timestamp: number | null;
-  upload_type: 'youtube' | 'upload';
+  upload_type: 'youtube' | 'direct';
   file_path: string | null;
   file_size: number | null;
   mime_type: string | null;

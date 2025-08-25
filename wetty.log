@@ -1,0 +1,2 @@
+{"base":"/wetty/","label":"Wetty","level":"info","message":"Starting server","port":3001,"timestamp":"2025-08-25T15:01:57.460Z","title":"Claude Code Terminal - Cresol Portal"}
+{"connection":"http","label":"Wetty","level":"info","message":"Server started","port":3001,"timestamp":"2025-08-25T15:01:57.469Z"}

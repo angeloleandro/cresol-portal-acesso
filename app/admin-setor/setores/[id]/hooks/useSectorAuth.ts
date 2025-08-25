@@ -28,11 +28,18 @@ export function useSectorAuth(sectorId: string) {
       if (profile?.role === 'admin') {
         setIsAuthorized(true);
       } else if (profile?.role === 'sector_admin') {
+        // Check if user exists before accessing id
+        if (!user) {
+          console.error('User not authenticated but passed authentication check');
+          router.replace('/login');
+          return;
+        }
+        
         // Verificar se é admin deste setor específico
         const { data: sectorAdmin } = await supabase
           .from('sector_admins')
           .select('*')
-          .eq('user_id', user!.id)
+          .eq('user_id', user.id)
           .eq('sector_id', sectorId);
         
         if (sectorAdmin && sectorAdmin.length > 0) {

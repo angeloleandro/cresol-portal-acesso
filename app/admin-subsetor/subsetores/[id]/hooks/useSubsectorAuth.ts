@@ -1,7 +1,6 @@
 // Hook para verificar autenticação e autorização do admin de subsetor
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useSupabaseClient } from '@/hooks/useSupabaseClient';
@@ -17,7 +16,6 @@ interface ProfileWithSector {
 
 export function useSubsectorAuth(subsectorId: string) {
   const { user, profile } = useAuth();
-  const router = useRouter();
   const supabase = useSupabaseClient();
   
   const [isAuthorized, setIsAuthorized] = useState(false);

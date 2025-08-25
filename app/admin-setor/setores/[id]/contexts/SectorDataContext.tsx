@@ -52,9 +52,6 @@ export function SectorDataProvider({
     if (!sectorId) return;
 
     try {
-      setIsLoading(true);
-      setError(null);
-
       // Buscar dados do setor
       const { data: sectorData, error: sectorError } = await supabase
         .from('sectors')
@@ -78,8 +75,7 @@ export function SectorDataProvider({
     } catch (err) {
       console.error('Erro ao buscar dados do setor:', err);
       setError('Erro ao carregar dados do setor');
-    } finally {
-      setIsLoading(false);
+      throw err; // Re-throw to handle in loadData
     }
   }, [sectorId, supabase]);
 
@@ -114,25 +110,48 @@ export function SectorDataProvider({
       setWorkLocations(locations || []);
 
       // Criar grupos automáticos baseados em localização
-      const autoGroups: GroupWithUsers[] = [];
-      for (const location of locations || []) {
-        const { data: usersInLocation } = await supabase
+      if (locations && locations.length > 0) {
+        // Collect all location IDs
+        const locationIds = locations.map(loc => loc.id);
+        
+        // Fetch all profiles once
+        const { data: allProfiles } = await supabase
           .from('profiles')
-          .select('id, email, full_name')
-          .eq('work_location_id', location.id);
-
-        if (usersInLocation && usersInLocation.length > 0) {
-          autoGroups.push({
-            id: `location-${location.id}`,
-            name: location.name,
-            description: `Todos os usuários de ${location.name}`,
-            user_ids: usersInLocation.map(u => u.id),
-            users: usersInLocation,
-            created_at: location.created_at
-          });
+          .select('id, email, full_name, work_location_id')
+          .in('work_location_id', locationIds);
+        
+        // Group profiles by work_location_id
+        const profilesByLocation = new Map<string, typeof allProfiles>();
+        if (allProfiles) {
+          for (const profile of allProfiles) {
+            if (profile.work_location_id) {
+              if (!profilesByLocation.has(profile.work_location_id)) {
+                profilesByLocation.set(profile.work_location_id, []);
+              }
+              profilesByLocation.get(profile.work_location_id)!.push(profile);
+            }
+          }
         }
+        
+        // Create automatic groups
+        const autoGroups: GroupWithUsers[] = [];
+        for (const location of locations) {
+          const usersInLocation = profilesByLocation.get(location.id) || [];
+          if (usersInLocation.length > 0) {
+            autoGroups.push({
+              id: `location-${location.id}`,
+              name: location.name,
+              description: `Todos os usuários de ${location.name}`,
+              user_ids: usersInLocation.map(u => u.id),
+              users: usersInLocation,
+              created_at: location.created_at
+            });
+          }
+        }
+        setAutomaticGroups(autoGroups);
+      } else {
+        setAutomaticGroups([]);
       }
-      setAutomaticGroups(autoGroups);
 
     } catch (err) {
       console.error('Erro ao buscar grupos:', err);
@@ -187,11 +206,21 @@ export function SectorDataProvider({
   // Carregar dados iniciais
   useEffect(() => {
     const loadData = async () => {
-      await Promise.all([
-        fetchSectorData(),
-        fetchGroupsData(),
-        fetchAllUsers()
-      ]);
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        await Promise.all([
+          fetchSectorData(),
+          fetchGroupsData(),
+          fetchAllUsers()
+        ]);
+      } catch (err) {
+        console.error('Erro ao carregar dados:', err);
+        // Error is already set in individual fetch functions
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadData();
   }, [fetchSectorData, fetchGroupsData, fetchAllUsers]);

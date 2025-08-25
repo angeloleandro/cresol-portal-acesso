@@ -43,34 +43,30 @@ export function useSectorContentManager(sectorId: string) {
   // Fetch News
   const fetchNews = useCallback(async () => {
     try {
-      // Primeiro, buscar TODAS as notícias para contar os rascunhos
-      const { data: allNews } = await supabase
+      // Buscar todas as notícias de uma só vez com ordenação
+      const { data: allNews, error } = await supabase
         .from('sector_news')
         .select('*')
-        .eq('sector_id', sectorId);
-      
-      if (allNews) {
-        const totalDrafts = allNews.filter(n => !n.is_published).length;
-        setTotalDraftNewsCount(totalDrafts);
-      }
-      
-      // Construir query base
-      let query = supabase
-        .from('sector_news')
-        .select('*')
-        .eq('sector_id', sectorId);
-      
-      // Aplicar filtro de publicação
-      if (!showDraftNews) {
-        query = query.eq('is_published', true);
-      }
-      
-      // Executar query com ordenação
-      const { data, error } = await query
+        .eq('sector_id', sectorId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setNews(data || []);
+      
+      if (allNews) {
+        // Contar rascunhos in-memory
+        const totalDrafts = allNews.filter(n => !n.is_published).length;
+        setTotalDraftNewsCount(totalDrafts);
+        
+        // Aplicar filtro de publicação in-memory
+        const filteredNews = showDraftNews 
+          ? allNews 
+          : allNews.filter(n => n.is_published);
+        
+        setNews(filteredNews);
+      } else {
+        setNews([]);
+        setTotalDraftNewsCount(0);
+      }
     } catch (error) {
       console.error('Erro ao buscar notícias:', error);
     }
@@ -79,34 +75,30 @@ export function useSectorContentManager(sectorId: string) {
   // Fetch Events
   const fetchEvents = useCallback(async () => {
     try {
-      // Primeiro, buscar TODOS os eventos para contar os rascunhos
-      const { data: allEvents } = await supabase
+      // Buscar todos os eventos de uma só vez com ordenação
+      const { data: allEvents, error } = await supabase
         .from('sector_events')
         .select('*')
-        .eq('sector_id', sectorId);
-      
-      if (allEvents) {
-        const totalDrafts = allEvents.filter(e => !e.is_published).length;
-        setTotalDraftEventsCount(totalDrafts);
-      }
-      
-      // Construir query base
-      let query = supabase
-        .from('sector_events')
-        .select('*')
-        .eq('sector_id', sectorId);
-      
-      // Aplicar filtro de publicação
-      if (!showDraftEvents) {
-        query = query.eq('is_published', true);
-      }
-      
-      // Executar query com ordenação
-      const { data, error } = await query
+        .eq('sector_id', sectorId)
         .order('start_date', { ascending: false });
       
       if (error) throw error;
-      setEvents(data || []);
+      
+      if (allEvents) {
+        // Contar rascunhos in-memory
+        const totalDrafts = allEvents.filter(e => !e.is_published).length;
+        setTotalDraftEventsCount(totalDrafts);
+        
+        // Aplicar filtro de publicação in-memory
+        const filteredEvents = showDraftEvents
+          ? allEvents
+          : allEvents.filter(e => e.is_published);
+        
+        setEvents(filteredEvents);
+      } else {
+        setEvents([]);
+        setTotalDraftEventsCount(0);
+      }
     } catch (error) {
       console.error('Erro ao buscar eventos:', error);
     }
@@ -115,34 +107,30 @@ export function useSectorContentManager(sectorId: string) {
   // Fetch Messages
   const fetchMessages = useCallback(async () => {
     try {
-      // Primeiro, buscar TODAS as mensagens para contar os rascunhos
-      const { data: allMessages } = await supabase
+      // Buscar todas as mensagens de uma só vez com ordenação
+      const { data: allMessages, error } = await supabase
         .from('sector_messages')
         .select('*')
-        .eq('sector_id', sectorId);
-      
-      if (allMessages) {
-        const totalDrafts = allMessages.filter(m => !m.is_published).length;
-        setTotalDraftMessagesCount(totalDrafts);
-      }
-      
-      // Construir query base
-      let query = supabase
-        .from('sector_messages')
-        .select('*')
-        .eq('sector_id', sectorId);
-      
-      // Aplicar filtro de publicação
-      if (!showDraftMessages) {
-        query = query.eq('is_published', true);
-      }
-      
-      // Executar query com ordenação
-      const { data, error } = await query
+        .eq('sector_id', sectorId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setMessages(data || []);
+      
+      if (allMessages) {
+        // Contar rascunhos in-memory
+        const totalDrafts = allMessages.filter(m => !m.is_published).length;
+        setTotalDraftMessagesCount(totalDrafts);
+        
+        // Aplicar filtro de publicação in-memory
+        const filteredMessages = showDraftMessages
+          ? allMessages
+          : allMessages.filter(m => m.is_published);
+        
+        setMessages(filteredMessages);
+      } else {
+        setMessages([]);
+        setTotalDraftMessagesCount(0);
+      }
     } catch (error) {
       console.error('Erro ao buscar mensagens:', error);
     }
@@ -151,34 +139,30 @@ export function useSectorContentManager(sectorId: string) {
   // Fetch Documents
   const fetchDocuments = useCallback(async () => {
     try {
-      // Primeiro, buscar TODOS os documentos para contar os rascunhos
-      const { data: allDocuments } = await supabase
+      // Buscar todos os documentos de uma só vez com ordenação
+      const { data: allDocuments, error } = await supabase
         .from('sector_documents')
         .select('*')
-        .eq('sector_id', sectorId);
-      
-      if (allDocuments) {
-        const totalDrafts = allDocuments.filter(d => !d.is_published).length;
-        setTotalDraftDocumentsCount(totalDrafts);
-      }
-      
-      // Construir query base
-      let query = supabase
-        .from('sector_documents')
-        .select('*')
-        .eq('sector_id', sectorId);
-      
-      // Aplicar filtro de publicação
-      if (!showDraftDocuments) {
-        query = query.eq('is_published', true);
-      }
-      
-      // Executar query com ordenação
-      const { data, error } = await query
+        .eq('sector_id', sectorId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setDocuments(data || []);
+      
+      if (allDocuments) {
+        // Contar rascunhos in-memory
+        const totalDrafts = allDocuments.filter(d => !d.is_published).length;
+        setTotalDraftDocumentsCount(totalDrafts);
+        
+        // Aplicar filtro de publicação in-memory
+        const filteredDocuments = showDraftDocuments
+          ? allDocuments
+          : allDocuments.filter(d => d.is_published);
+        
+        setDocuments(filteredDocuments);
+      } else {
+        setDocuments([]);
+        setTotalDraftDocumentsCount(0);
+      }
     } catch (error) {
       console.error('Erro ao buscar documentos:', error);
     }
@@ -187,34 +171,30 @@ export function useSectorContentManager(sectorId: string) {
   // Fetch Videos
   const fetchVideos = useCallback(async () => {
     try {
-      // Primeiro, buscar TODOS os vídeos para contar os rascunhos
-      const { data: allVideos } = await supabase
+      // Buscar todos os vídeos de uma só vez com ordenação
+      const { data: allVideos, error } = await supabase
         .from('sector_videos')
         .select('*')
-        .eq('sector_id', sectorId);
-      
-      if (allVideos) {
-        const totalDrafts = allVideos.filter(v => !v.is_published).length;
-        setTotalDraftVideosCount(totalDrafts);
-      }
-      
-      // Construir query base
-      let query = supabase
-        .from('sector_videos')
-        .select('*')
-        .eq('sector_id', sectorId);
-      
-      // Aplicar filtro de publicação
-      if (!showDraftVideos) {
-        query = query.eq('is_published', true);
-      }
-      
-      // Executar query com ordenação
-      const { data, error } = await query
+        .eq('sector_id', sectorId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setVideos(data || []);
+      
+      if (allVideos) {
+        // Contar rascunhos in-memory
+        const totalDrafts = allVideos.filter(v => !v.is_published).length;
+        setTotalDraftVideosCount(totalDrafts);
+        
+        // Aplicar filtro de publicação in-memory
+        const filteredVideos = showDraftVideos
+          ? allVideos
+          : allVideos.filter(v => v.is_published);
+        
+        setVideos(filteredVideos);
+      } else {
+        setVideos([]);
+        setTotalDraftVideosCount(0);
+      }
     } catch (error) {
       console.error('Erro ao buscar vídeos:', error);
     }
@@ -223,34 +203,30 @@ export function useSectorContentManager(sectorId: string) {
   // Fetch Images
   const fetchImages = useCallback(async () => {
     try {
-      // Primeiro, buscar TODAS as imagens para contar os rascunhos
-      const { data: allImages } = await supabase
+      // Buscar todas as imagens de uma só vez com ordenação
+      const { data: allImages, error } = await supabase
         .from('sector_images')
         .select('*')
-        .eq('sector_id', sectorId);
-      
-      if (allImages) {
-        const totalDrafts = allImages.filter(i => !i.is_published).length;
-        setTotalDraftImagesCount(totalDrafts);
-      }
-      
-      // Construir query base
-      let query = supabase
-        .from('sector_images')
-        .select('*')
-        .eq('sector_id', sectorId);
-      
-      // Aplicar filtro de publicação
-      if (!showDraftImages) {
-        query = query.eq('is_published', true);
-      }
-      
-      // Executar query com ordenação
-      const { data, error } = await query
+        .eq('sector_id', sectorId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setImages(data || []);
+      
+      if (allImages) {
+        // Contar rascunhos in-memory
+        const totalDrafts = allImages.filter(i => !i.is_published).length;
+        setTotalDraftImagesCount(totalDrafts);
+        
+        // Aplicar filtro de publicação in-memory
+        const filteredImages = showDraftImages
+          ? allImages
+          : allImages.filter(i => i.is_published);
+        
+        setImages(filteredImages);
+      } else {
+        setImages([]);
+        setTotalDraftImagesCount(0);
+      }
     } catch (error) {
       console.error('Erro ao buscar imagens:', error);
     }

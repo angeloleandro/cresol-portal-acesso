@@ -62,10 +62,17 @@ export function DocumentsManagement({
     if (!documentFile) return null;
     
     try {
-      const fileExt = documentFile.name.split('.').pop()?.toLowerCase();
+      // Safe file extension extraction
+      const lastDotIndex = documentFile.name.lastIndexOf('.');
+      const fileExt = lastDotIndex > 0 
+        ? documentFile.name.slice(lastDotIndex + 1).toLowerCase()
+        : '';
+      
       const timestamp = Date.now();
       const randomSuffix = Math.random().toString(36).substring(2, 8);
-      const fileName = `sector-documents/${sectorId}/${timestamp}_${randomSuffix}.${fileExt}`;
+      const fileName = fileExt 
+        ? `sector-documents/${sectorId}/${timestamp}_${randomSuffix}.${fileExt}`
+        : `sector-documents/${sectorId}/${timestamp}_${randomSuffix}`;
       
       const { error: uploadError } = await supabase.storage
         .from('documents')
