@@ -21,6 +21,7 @@ import {
 import GlobalSearch from './GlobalSearch';
 import HeroUIAgenciesDropdown from './HeroUIAgenciesDropdown';
 import HeroUISectorsDropdown from './HeroUISectorsDropdown';
+import QuickLinksDropdown from './QuickLinksDropdown';
 import { Icon } from './icons/Icon';
 
 // Types
@@ -410,14 +411,7 @@ function Navbar() {
               Home
             </Link>
             
-            <Link 
-              href="/dashboard" 
-              className={`text-sm font-medium ${
-                pathname === '/dashboard' ? 'text-white' : 'text-white/80 hover:text-white'
-              }`}
-            >
-              Dashboard
-            </Link>
+            <QuickLinksDropdown />
             
             <HeroUISectorsDropdown 
               pathname={pathname}
@@ -432,23 +426,6 @@ function Navbar() {
             <GalleryDropdown 
               pathname={pathname}
             />
-            
-            <Link 
-              href="/eventos?view=calendar" 
-              className={`text-sm font-medium ${
-                pathname === '/eventos' && pathname.includes('view=calendar') ? 'text-white' : 'text-white/80 hover:text-white'
-              }`}
-            >
-              Calendário
-            </Link>
-            <Link 
-              href="/sistemas" 
-              className={`text-sm font-medium ${
-                pathname === '/sistemas' ? 'text-white' : 'text-white/80 hover:text-white'
-              }`}
-            >
-              Sistemas
-            </Link>
           </nav>
           
           <div className="flex items-center border-l border-white/30 pl-4 space-x-3">
@@ -611,6 +588,14 @@ function Navbar() {
             }`}
           >
             Sistemas
+          </Link>
+          <Link 
+            href="/noticias" 
+            className={`block py-2 text-sm font-medium ${
+              pathname === '/noticias' ? 'text-white' : 'text-white/80'
+            }`}
+          >
+            Notícias
           </Link>
           
           <div className="mt-4 pt-4 border-t border-white/30">

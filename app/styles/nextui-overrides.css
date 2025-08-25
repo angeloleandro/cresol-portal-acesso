@@ -11,6 +11,29 @@
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
+/* Remove hover laranja forçado do NextUI Dropdown */
+[data-slot="base"][data-hover="true"],
+[data-slot="wrapper"][data-hover="true"],
+.nextui-dropdown-item[data-hover="true"],
+.nextui-dropdown-menu [data-hover="true"] {
+  background-color: transparent !important;
+}
+
+/* Garante que o QuickLinksDropdown não tenha hover laranja */
+[aria-label="Menu de Links Rápidos"] [data-hover="true"] {
+  background-color: transparent !important;
+}
+
+/* Remove hover laranja específico do QuickLinksDropdown */
+.quick-links-dropdown [data-hover="true"],
+.quick-links-dropdown [data-hover="true"] > *,
+.quick-links-dropdown [data-pressed="true"],
+.quick-links-dropdown [data-focus="true"],
+.quick-links-dropdown [data-focus-visible="true"] {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
 /* Scrollbar customizada para dropdowns */
 .scrollbar-branded {
   scrollbar-width: thin;

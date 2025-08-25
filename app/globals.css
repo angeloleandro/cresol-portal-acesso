@@ -3167,3 +3167,12 @@ li:not(:first-child)::before,
 /* ================================ */
 
 /* Chakra Select - Estilos removidos para evitar duplicação com inline styles */
+
+/* Force remove orange hover from QuickLinksDropdown */
+.quick-links-dropdown [role="menu"] [role="menuitem"][data-hover="true"],
+.quick-links-dropdown [role="menu"] [role="menuitem"]:hover,
+[aria-label="Menu de Links Rápidos"] [data-hover="true"],
+[aria-label="Menu de Links Rápidos"] li[data-hover="true"] {
+  background-color: transparent !important;
+  background: transparent !important;
+}
