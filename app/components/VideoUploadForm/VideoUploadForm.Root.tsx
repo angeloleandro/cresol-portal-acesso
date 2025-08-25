@@ -9,7 +9,7 @@ import {
   VIDEO_MESSAGES,
   VIDEO_HELPERS
 } from '@/lib/constants/video-ui'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { getAuthenticatedSession, makeAuthenticatedRequest } from '@/lib/video-utils'
 
 import { VideoUploadFormAsyncThumbnailStatus } from './VideoUploadForm.AsyncThumbnailStatus'
@@ -323,6 +323,7 @@ export const VideoUploadFormRoot = memo(({
     const fileName = `video-thumb-${Date.now()}.${fileExt}`
     const filePath = `${fileName}`
     
+    const supabase = createClient()
     const { error: uploadError } = await supabase.storage
       .from('banners')
       .upload(filePath, state.formData.thumbnailFile, { upsert: true })

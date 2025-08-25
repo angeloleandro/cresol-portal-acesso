@@ -219,13 +219,56 @@ export function GetRouteType(pathname: string): {
   ];
   const isPublicApi = publicApiRoutes.some(route => pathname === route);
   
+  // Rotas públicas que NÃO requerem autenticação
+  const publicRoutes = [
+    '/login',
+    '/signup', 
+    '/forgot-password',
+    '/reset-password',
+    '/api/auth/login',
+    '/api/auth/signup',
+    '/api/auth/forgot-password',
+    '/api/auth/reset-password'
+  ];
+  
+  // Rotas que SEMPRE requerem autenticação
+  const protectedRoutes = [
+    '/',
+    '/home',
+    '/dashboard',
+    '/setores',
+    '/subsetores', 
+    '/mensagens',
+    '/noticias',
+    '/eventos',
+    '/documentos',
+    '/galeria',
+    '/videos',
+    '/sistemas',
+    '/profile',
+    '/configuracoes'
+  ];
+  
+  // Verificar se é rota pública (não requer auth)
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+  
+  // Verificar se é rota protegida (requer auth)
+  const isProtectedRoute = protectedRoutes.some(route => 
+    pathname === route || pathname.startsWith(route + '/')
+  );
+  
+  // Determinar se requer autenticação
+  // Requer auth se: NÃO é pública OU é protegida OU é admin
+  const requiresAuth = !isPublicRoute || isProtectedRoute || isAdminRoute || 
+                      isSectorAdminRoute || isSubsectorAdminRoute || isApiAdminRoute;
+  
   return {
     isAdmin: isAdminRoute,
     isSectorAdmin: isSectorAdminRoute,
     isSubsectorAdmin: isSubsectorAdminRoute,
     isApiAdmin: isApiAdminRoute && !isPublicApi,
     isPublicApi,
-    requiresAuth: pathname === '/' || pathname === '/dashboard' || isAdminRoute || isSectorAdminRoute || isSubsectorAdminRoute || isApiAdminRoute || isPublicApi
+    requiresAuth
   };
 }
 

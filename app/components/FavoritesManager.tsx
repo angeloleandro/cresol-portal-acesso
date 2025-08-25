@@ -2,7 +2,8 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import OptimizedImage from './OptimizedImage';
 

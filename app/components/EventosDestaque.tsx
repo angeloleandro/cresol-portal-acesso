@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 

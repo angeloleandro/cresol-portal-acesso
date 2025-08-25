@@ -15,7 +15,8 @@ import { Icon } from '@/app/components/icons/Icon';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import { DocumentForm } from './components/DocumentForm';
 

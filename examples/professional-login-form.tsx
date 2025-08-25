@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import OptimizedImage from '@/app/components/OptimizedImage';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 import { FormField, FormInput } from '@/app/components/forms';
 
 function ProfessionalLoginForm() {

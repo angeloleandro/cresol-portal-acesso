@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState } from 'react';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import CresolLogo from './CresolLogo';
 import { Icon } from './icons/Icon';

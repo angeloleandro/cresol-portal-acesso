@@ -15,7 +15,8 @@ import Button from '@/app/components/ui/Button';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { useCollectionsStats } from '@/app/contexts/CollectionsContext';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import CollectionsManager from './components/CollectionsManager';
 

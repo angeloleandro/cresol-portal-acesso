@@ -12,7 +12,8 @@ import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/Sta
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { handleComponentError, devLog } from '@/lib/error-handler';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 interface EconomicIndicator {
   id?: string;

@@ -23,7 +23,8 @@ import {
   ADMIN_MODALS
 } from '@/lib/constants/admin-config';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 interface Sector {
   id: string;

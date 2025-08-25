@@ -9,7 +9,8 @@ import {
 } from '@nextui-org/react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import { Icon } from './icons/Icon';
 import OptimizedImage from './OptimizedImage';

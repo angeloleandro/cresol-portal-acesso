@@ -9,7 +9,8 @@ import Breadcrumb from '@/app/components/Breadcrumb';
 import { FormSelect } from '@/app/components/forms/FormSelect';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import type { User } from '@supabase/supabase-js';
 

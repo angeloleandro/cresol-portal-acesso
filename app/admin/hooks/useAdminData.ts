@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { useAlert } from '@/app/components/alerts';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 interface UseAdminDataOptions {
   endpoint: string;

@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import Breadcrumb from '../../components/Breadcrumb';
 

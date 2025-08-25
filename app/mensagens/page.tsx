@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { FormSelect } from '@/app/components/forms/FormSelect';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import Breadcrumb from '../components/Breadcrumb';
 import Footer from '../components/Footer';

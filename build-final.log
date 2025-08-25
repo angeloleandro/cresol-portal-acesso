@@ -1,0 +1,143 @@
+
+> cresol-portal-acesso@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.31
+  - Environments: .env.local, .env
+  - Experiments (use with caution):
+    · scrollRestoration
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/70) ...
+   Generating static pages (17/70) 
+   Generating static pages (34/70) 
+   Generating static pages (52/70) 
+ ✓ Generating static pages (70/70)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                Size     First Load JS
+┌ ○ /                                                      425 B           482 kB
+├ ○ /_not-found                                            880 B          88.9 kB
+├ ○ /admin                                                 2.32 kB         484 kB
+├ ○ /admin-setor                                           1.58 kB         483 kB
+├ ƒ /admin-setor/setores/[id]                              4.22 kB         486 kB
+├ ƒ /admin-setor/setores/[id]/sistemas                     2.69 kB         484 kB
+├ ○ /admin-subsetor                                        2.76 kB         484 kB
+├ ƒ /admin-subsetor/subsetores/[id]                        5.19 kB         487 kB
+├ ○ /admin/access-requests                                 3.25 kB         485 kB
+├ ○ /admin/analytics                                       6.78 kB         488 kB
+├ ○ /admin/banners                                         3.9 kB          485 kB
+├ ○ /admin/collections                                     1.47 kB         483 kB
+├ ƒ /admin/collections/[id]                                17.2 kB         498 kB
+├ ○ /admin/documents                                       6.58 kB         488 kB
+├ ○ /admin/economic-indicators                             3.65 kB         485 kB
+├ ○ /admin/events                                          5.73 kB         487 kB
+├ ○ /admin/gallery                                         4.49 kB         486 kB
+├ ○ /admin/messages                                        5.12 kB         486 kB
+├ ○ /admin/monitoring                                      1.85 kB         483 kB
+├ ○ /admin/news                                            5.9 kB          487 kB
+├ ○ /admin/positions                                       3.57 kB         485 kB
+├ ○ /admin/sectors                                         4.96 kB         486 kB
+├ ƒ /admin/sectors/[id]                                    4.7 kB          486 kB
+├ ƒ /admin/sectors/[id]/systems                            3.34 kB         485 kB
+├ ○ /admin/system-links                                    3.22 kB         485 kB
+├ ○ /admin/systems                                         3.21 kB         485 kB
+├ ○ /admin/users                                           25.3 kB         507 kB
+├ ○ /admin/videos                                          4.07 kB         485 kB
+├ ○ /admin/work-locations                                  3.82 kB         485 kB
+├ ƒ /api/admin/approve-access-request                      0 B                0 B
+├ ƒ /api/admin/banners                                     0 B                0 B
+├ ƒ /api/admin/banners/positions                           0 B                0 B
+├ ƒ /api/admin/collections/stats                           0 B                0 B
+├ ƒ /api/admin/create-user                                 0 B                0 B
+├ ƒ /api/admin/documents                                   0 B                0 B
+├ ƒ /api/admin/economic-indicators                         0 B                0 B
+├ ƒ /api/admin/events                                      0 B                0 B
+├ ƒ /api/admin/gallery                                     0 B                0 B
+├ ƒ /api/admin/gallery/upload                              0 B                0 B
+├ ƒ /api/admin/message-groups                              0 B                0 B
+├ ƒ /api/admin/messages                                    0 B                0 B
+├ ƒ /api/admin/news                                        0 B                0 B
+├ ƒ /api/admin/positions                                   0 B                0 B
+├ ƒ /api/admin/reset-password                              0 B                0 B
+├ ƒ /api/admin/sector-content                              0 B                0 B
+├ ƒ /api/admin/sector-content-batch                        0 B                0 B
+├ ƒ /api/admin/sector-team                                 0 B                0 B
+├ ƒ /api/admin/sectors                                     0 B                0 B
+├ ƒ /api/admin/sectors/[id]/images                         0 B                0 B
+├ ƒ /api/admin/sectors/[id]/images/[imageId]               0 B                0 B
+├ ƒ /api/admin/sectors/[id]/images/upload                  0 B                0 B
+├ ƒ /api/admin/sectors/[id]/videos                         0 B                0 B
+├ ƒ /api/admin/sectors/[id]/videos/[videoId]               0 B                0 B
+├ ƒ /api/admin/sectors/[id]/videos/[videoId]/thumbnail     0 B                0 B
+├ ƒ /api/admin/sectors/[id]/videos/upload                  0 B                0 B
+├ ƒ /api/admin/subsector-admins                            0 B                0 B
+├ ƒ /api/admin/subsector-content                           0 B                0 B
+├ ƒ /api/admin/subsector-content-batch                     0 B                0 B
+├ ƒ /api/admin/subsector-team                              0 B                0 B
+├ ƒ /api/admin/subsectors                                  0 B                0 B
+├ ƒ /api/admin/subsectors/[id]/images                      0 B                0 B
+├ ƒ /api/admin/subsectors/[id]/images/[imageId]            0 B                0 B
+├ ƒ /api/admin/subsectors/[id]/images/upload               0 B                0 B
+├ ƒ /api/admin/subsectors/[id]/videos                      0 B                0 B
+├ ƒ /api/admin/subsectors/[id]/videos/[videoId]            0 B                0 B
+├ ƒ /api/admin/subsectors/[id]/videos/[videoId]/thumbnail  0 B                0 B
+├ ƒ /api/admin/subsectors/[id]/videos/upload               0 B                0 B
+├ ƒ /api/admin/system-links                                0 B                0 B
+├ ƒ /api/admin/update-user-role                            0 B                0 B
+├ ƒ /api/admin/users                                       0 B                0 B
+├ ƒ /api/admin/users/all                                   0 B                0 B
+├ ƒ /api/admin/videos                                      0 B                0 B
+├ ƒ /api/admin/videos/upload                               0 B                0 B
+├ ƒ /api/auth/login                                        0 B                0 B
+├ ƒ /api/auth/signup                                       0 B                0 B
+├ ƒ /api/collections                                       0 B                0 B
+├ ƒ /api/collections/[id]                                  0 B                0 B
+├ ƒ /api/collections/[id]/items                            0 B                0 B
+├ ƒ /api/collections/[id]/items/[itemId]                   0 B                0 B
+├ ƒ /api/collections/[id]/reorder                          0 B                0 B
+├ ƒ /api/collections/upload/cover                          0 B                0 B
+├ ƒ /api/dashboard/stats                                   0 B                0 B
+├ ƒ /api/positions                                         0 B                0 B
+├ ƒ /api/sectors                                           0 B                0 B
+├ ƒ /api/users/list                                        0 B                0 B
+├ ƒ /api/videos/generate-thumbnail                         0 B                0 B
+├ ƒ /api/videos/simple-upload                              0 B                0 B
+├ ƒ /api/work-locations                                    0 B                0 B
+├ ○ /dashboard                                             1.97 kB         483 kB
+├ ○ /documentos                                            2.48 kB         484 kB
+├ ƒ /documentos/[id]                                       2.72 kB         484 kB
+├ ○ /eventos                                               4.91 kB         486 kB
+├ ƒ /eventos/[id]                                          2.49 kB         484 kB
+├ ○ /galeria                                               1.48 kB         483 kB
+├ ○ /home                                                  2.77 kB         484 kB
+├ ○ /login                                                 1.69 kB         483 kB
+├ ○ /mensagens                                             2.07 kB         483 kB
+├ ƒ /mensagens/[id]                                        2.19 kB         484 kB
+├ ○ /messages                                              3.28 kB         485 kB
+├ ○ /noticias                                              1.91 kB         483 kB
+├ ƒ /noticias/[id]                                         1.94 kB         483 kB
+├ ○ /profile                                               3.23 kB         485 kB
+├ ○ /setores                                               1.34 kB         483 kB
+├ ƒ /setores/[id]                                          4.03 kB         485 kB
+├ ƒ /setores/[id]/equipe                                   4.22 kB         486 kB
+├ ○ /signup                                                2.26 kB         484 kB
+├ ○ /sistemas                                              2.71 kB         484 kB
+├ ƒ /subsetores/[id]                                       3.83 kB         485 kB
+├ ƒ /subsetores/[id]/equipe                                4.23 kB         486 kB
+└ ○ /videos                                                2.4 kB          484 kB
++ First Load JS shared by all                              88.1 kB
+  ├ chunks/2117-7003ec99805a1453.js                        31.7 kB
+  ├ chunks/c29d28d2-732918645a159f10.js                    53.6 kB
+  └ other shared chunks (total)                            2.69 kB
+
+
+ƒ Middleware                                               61.3 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

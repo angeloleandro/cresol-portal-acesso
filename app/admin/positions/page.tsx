@@ -9,7 +9,8 @@ import { Icon } from '@/app/components/icons/Icon';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 interface Position {
   id: string;

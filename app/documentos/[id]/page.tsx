@@ -8,7 +8,8 @@ import Breadcrumb from '@/app/components/Breadcrumb';
 import Footer from '@/app/components/Footer';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 // Helper functions movidas para inline
 function formatFileSize(bytes?: number): string {
   if (!bytes) return '0 Bytes';

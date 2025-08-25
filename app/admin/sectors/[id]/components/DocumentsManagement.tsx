@@ -7,7 +7,8 @@ import { useAlert } from '@/app/components/alerts';
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 import { FormatDate, FormatFileSize } from '@/lib/utils/formatters';
 
 import { SectorDocument } from '../types/sector.types';

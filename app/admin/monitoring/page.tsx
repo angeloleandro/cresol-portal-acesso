@@ -6,7 +6,8 @@ import { useState, useEffect, useCallback } from 'react';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import { Icon } from '../../components/icons/Icon';
 

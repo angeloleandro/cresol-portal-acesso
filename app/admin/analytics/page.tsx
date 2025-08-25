@@ -12,7 +12,8 @@ import MetricCards from '@/app/components/analytics/MetricCards';
 import { DashboardShimmer } from '@/app/components/analytics/ShimmerLoading';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { Icon } from '@/app/components/icons/Icon';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import type { User } from '@supabase/supabase-js';
 

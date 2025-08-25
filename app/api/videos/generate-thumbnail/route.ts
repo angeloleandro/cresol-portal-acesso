@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { uploadThumbnailWithFallback } from '@/lib/supabase-storage'
 import { generateVideoThumbnailSimple } from '@/lib/thumbnail-generator'
 
@@ -21,6 +21,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Criar cliente Supabase
+    const supabase = createClient()
 
     // Buscar informações do vídeo
     const { data: video, error: videoError } = await supabase
@@ -117,6 +120,9 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     )
   }
+
+  // Criar cliente Supabase
+  const supabase = createClient()
 
   try {
     const { data: video, error } = await supabase

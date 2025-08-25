@@ -6,7 +6,8 @@ import {
   VIDEO_FILE_CONFIG,
   YOUTUBE_CONFIG
 } from '@/lib/constants/video-ui';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 /**
  * extractYouTubeVideoId function

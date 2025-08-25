@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CreateClient } from '@/lib/supabase/server';
-import { supabase } from '@/lib/supabase';
 
 
 // Tipos para melhor type safety
@@ -79,6 +78,9 @@ export async function GET(request: NextRequest) {
     if (!sectorId) {
       return NextResponse.json({ error: 'ID do setor é obrigatório' }, { status: 400 });
     }
+
+    // Criar cliente Supabase
+    const supabase = CreateClient();
 
     // Buscar membros da equipe do setor com informações completas
 
@@ -307,6 +309,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User ID e Sector ID são obrigatórios' }, { status: 400 });
     }
     
+    // Criar cliente Supabase
+    const supabase = CreateClient();
+    
     // Verify permissions
     const permissionCheck = await verifyPermissions(sector_id, 'write');
     if (!permissionCheck.authorized) {
@@ -375,6 +380,9 @@ export async function DELETE(request: NextRequest) {
     if (!memberId) {
       return NextResponse.json({ error: 'ID do membro é obrigatório' }, { status: 400 });
     }
+    
+    // Criar cliente Supabase
+    const supabase = CreateClient();
     
     // Get the sector_id from the member to verify permissions
     const { data: memberData, error: memberError } = await supabase
@@ -445,6 +453,9 @@ export async function PUT(request: NextRequest) {
     if (!member_id) {
       return NextResponse.json({ error: 'ID do membro é obrigatório' }, { status: 400 });
     }
+    
+    // Criar cliente Supabase
+    const supabase = CreateClient();
     
     // Get the sector_id from the member to verify permissions
     const { data: memberData, error: memberError } = await supabase

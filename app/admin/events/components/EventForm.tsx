@@ -6,7 +6,8 @@ import { StandardizedButton } from '@/app/components/admin';
 import { useAlert } from '@/app/components/alerts';
 import { FormSelect } from '@/app/components/forms';
 import { Icon } from '@/app/components/icons/Icon';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 interface Event {
   id: string;

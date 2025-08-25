@@ -7,7 +7,8 @@ import { useAlert } from '@/app/components/alerts';
 import { FormSelect } from '@/app/components/forms';
 import { Icon } from '@/app/components/icons/Icon';
 import { FILE_LIMITS } from '@/lib/constants/dimensions';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 // Tipos e constantes movidos para inline (seguindo padrão)
 const FILE_TYPES = {
   PDF: 'application/pdf',

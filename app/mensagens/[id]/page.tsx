@@ -5,7 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import Breadcrumb from '../../components/Breadcrumb';
 import Footer from '../../components/Footer';

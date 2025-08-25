@@ -5,7 +5,8 @@ import { useState, useEffect, useCallback, lazy } from 'react';
 
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { logger } from '@/lib/logger';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import Navbar from '../components/Navbar';
 import { InlineSuspense } from '../components/OptimizedSuspense';

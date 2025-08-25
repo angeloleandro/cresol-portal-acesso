@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import { FormatDate } from '@/lib/utils/formatters';
 interface EventItem {

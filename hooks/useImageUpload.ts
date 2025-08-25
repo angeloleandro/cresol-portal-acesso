@@ -3,7 +3,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { supabase } from '@/lib/supabase';
+const supabase = createClient();
 import { useAlert } from '@/app/components/alerts';
 import { getCroppedImg, uploadImageToSupabase, ValidateImageFile } from '@/lib/utils/imageProcessing';
 import { CropArea } from '@/lib/types/common';

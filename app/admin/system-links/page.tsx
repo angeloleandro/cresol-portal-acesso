@@ -17,7 +17,8 @@ import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { handleComponentError, devLog } from '@/lib/error-handler';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 interface SystemLink {
   id?: string;

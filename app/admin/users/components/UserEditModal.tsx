@@ -16,7 +16,8 @@ import { Icon } from '@/app/components/icons/Icon';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { Button as CButton } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 interface UserProfile {
   id: string;

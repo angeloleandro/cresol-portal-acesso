@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { TIMINGS } from '@/lib/constants/timing';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 import { 
   ResolveVideoUrl as resolveVideoUrl, 
   checkVideoUrlAccessibility 

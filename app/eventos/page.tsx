@@ -8,7 +8,8 @@ import { StandardizedButton } from '@/app/components/admin';
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import Breadcrumbs from '../components/Breadcrumbs';
 import EventCalendar from '../components/EventCalendar';
