@@ -1,28 +1,28 @@
-// Hook principal para gerenciar conteúdo do subsetor
+// Hook principal para gerenciar conteúdo do setor
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useSupabaseClient } from '@/hooks/useSupabaseClient';
 
 import type { 
-  SubsectorNews, 
-  SubsectorEvent, 
-  SubsectorDocument, 
-  SubsectorVideo,
-  SubsectorImage,
-  SubsectorMessage
-} from './types/subsector.types';
+  SectorDocument, 
+  SectorEvent, 
+  SectorImage, 
+  SectorMessage, 
+  SectorNews, 
+  SectorVideo 
+} from './types/sector.types';
 
-export function useSubsectorContentManager(subsectorId: string) {
+export function useSectorContentManager(sectorId: string) {
   const supabase = useSupabaseClient();
   
   // Estados para cada tipo de conteúdo
-  const [news, setNews] = useState<SubsectorNews[]>([]);
-  const [events, setEvents] = useState<SubsectorEvent[]>([]);
-  const [messages, setMessages] = useState<SubsectorMessage[]>([]);
-  const [documents, setDocuments] = useState<SubsectorDocument[]>([]);
-  const [videos, setVideos] = useState<SubsectorVideo[]>([]);
-  const [images, setImages] = useState<SubsectorImage[]>([]);
+  const [news, setNews] = useState<SectorNews[]>([]);
+  const [events, setEvents] = useState<SectorEvent[]>([]);
+  const [messages, setMessages] = useState<SectorMessage[]>([]);
+  const [documents, setDocuments] = useState<SectorDocument[]>([]);
+  const [videos, setVideos] = useState<SectorVideo[]>([]);
+  const [images, setImages] = useState<SectorImage[]>([]);
   
   // Estados para controle de rascunhos por tipo
   const [showDraftNews, setShowDraftNews] = useState(false);
@@ -39,15 +39,15 @@ export function useSubsectorContentManager(subsectorId: string) {
   const [totalDraftDocumentsCount, setTotalDraftDocumentsCount] = useState(0);
   const [totalDraftVideosCount, setTotalDraftVideosCount] = useState(0);
   const [totalDraftImagesCount, setTotalDraftImagesCount] = useState(0);
-  
+
   // Fetch News
   const fetchNews = useCallback(async () => {
     try {
       // Primeiro, buscar TODAS as notícias para contar os rascunhos
       const { data: allNews } = await supabase
-        .from('subsector_news')
+        .from('sector_news')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       if (allNews) {
         const totalDrafts = allNews.filter(n => !n.is_published).length;
@@ -56,9 +56,9 @@ export function useSubsectorContentManager(subsectorId: string) {
       
       // Construir query base
       let query = supabase
-        .from('subsector_news')
+        .from('sector_news')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       // Aplicar filtro de publicação
       if (!showDraftNews) {
@@ -74,16 +74,16 @@ export function useSubsectorContentManager(subsectorId: string) {
     } catch (error) {
       console.error('Erro ao buscar notícias:', error);
     }
-  }, [subsectorId, supabase, showDraftNews]);
+  }, [sectorId, supabase, showDraftNews]);
 
   // Fetch Events
   const fetchEvents = useCallback(async () => {
     try {
       // Primeiro, buscar TODOS os eventos para contar os rascunhos
       const { data: allEvents } = await supabase
-        .from('subsector_events')
+        .from('sector_events')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       if (allEvents) {
         const totalDrafts = allEvents.filter(e => !e.is_published).length;
@@ -92,9 +92,9 @@ export function useSubsectorContentManager(subsectorId: string) {
       
       // Construir query base
       let query = supabase
-        .from('subsector_events')
+        .from('sector_events')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       // Aplicar filtro de publicação
       if (!showDraftEvents) {
@@ -110,16 +110,16 @@ export function useSubsectorContentManager(subsectorId: string) {
     } catch (error) {
       console.error('Erro ao buscar eventos:', error);
     }
-  }, [subsectorId, supabase, showDraftEvents]);
+  }, [sectorId, supabase, showDraftEvents]);
 
   // Fetch Messages
   const fetchMessages = useCallback(async () => {
     try {
       // Primeiro, buscar TODAS as mensagens para contar os rascunhos
       const { data: allMessages } = await supabase
-        .from('subsector_messages')
+        .from('sector_messages')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       if (allMessages) {
         const totalDrafts = allMessages.filter(m => !m.is_published).length;
@@ -128,9 +128,9 @@ export function useSubsectorContentManager(subsectorId: string) {
       
       // Construir query base
       let query = supabase
-        .from('subsector_messages')
+        .from('sector_messages')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       // Aplicar filtro de publicação
       if (!showDraftMessages) {
@@ -146,16 +146,16 @@ export function useSubsectorContentManager(subsectorId: string) {
     } catch (error) {
       console.error('Erro ao buscar mensagens:', error);
     }
-  }, [subsectorId, supabase, showDraftMessages]);
+  }, [sectorId, supabase, showDraftMessages]);
 
   // Fetch Documents
   const fetchDocuments = useCallback(async () => {
     try {
       // Primeiro, buscar TODOS os documentos para contar os rascunhos
       const { data: allDocuments } = await supabase
-        .from('subsector_documents')
+        .from('sector_documents')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       if (allDocuments) {
         const totalDrafts = allDocuments.filter(d => !d.is_published).length;
@@ -164,9 +164,9 @@ export function useSubsectorContentManager(subsectorId: string) {
       
       // Construir query base
       let query = supabase
-        .from('subsector_documents')
+        .from('sector_documents')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       // Aplicar filtro de publicação
       if (!showDraftDocuments) {
@@ -182,16 +182,16 @@ export function useSubsectorContentManager(subsectorId: string) {
     } catch (error) {
       console.error('Erro ao buscar documentos:', error);
     }
-  }, [subsectorId, supabase, showDraftDocuments]);
+  }, [sectorId, supabase, showDraftDocuments]);
 
   // Fetch Videos
   const fetchVideos = useCallback(async () => {
     try {
       // Primeiro, buscar TODOS os vídeos para contar os rascunhos
       const { data: allVideos } = await supabase
-        .from('subsector_videos')
+        .from('sector_videos')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       if (allVideos) {
         const totalDrafts = allVideos.filter(v => !v.is_published).length;
@@ -200,9 +200,9 @@ export function useSubsectorContentManager(subsectorId: string) {
       
       // Construir query base
       let query = supabase
-        .from('subsector_videos')
+        .from('sector_videos')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       // Aplicar filtro de publicação
       if (!showDraftVideos) {
@@ -218,16 +218,16 @@ export function useSubsectorContentManager(subsectorId: string) {
     } catch (error) {
       console.error('Erro ao buscar vídeos:', error);
     }
-  }, [subsectorId, supabase, showDraftVideos]);
+  }, [sectorId, supabase, showDraftVideos]);
 
   // Fetch Images
   const fetchImages = useCallback(async () => {
     try {
       // Primeiro, buscar TODAS as imagens para contar os rascunhos
       const { data: allImages } = await supabase
-        .from('subsector_images')
+        .from('sector_images')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       if (allImages) {
         const totalDrafts = allImages.filter(i => !i.is_published).length;
@@ -236,9 +236,9 @@ export function useSubsectorContentManager(subsectorId: string) {
       
       // Construir query base
       let query = supabase
-        .from('subsector_images')
+        .from('sector_images')
         .select('*')
-        .eq('subsector_id', subsectorId);
+        .eq('sector_id', sectorId);
       
       // Aplicar filtro de publicação
       if (!showDraftImages) {
@@ -254,7 +254,7 @@ export function useSubsectorContentManager(subsectorId: string) {
     } catch (error) {
       console.error('Erro ao buscar imagens:', error);
     }
-  }, [subsectorId, supabase, showDraftImages]);
+  }, [sectorId, supabase, showDraftImages]);
 
   // Toggle drafts visibility por tipo
   const toggleDraftNews = useCallback(async () => {
@@ -309,7 +309,7 @@ export function useSubsectorContentManager(subsectorId: string) {
   // Delete functions
   const deleteNews = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_news&id=${id}`, {
+      const response = await fetch(`/api/admin/sector-content?type=sector_news&id=${id}`, {
         method: 'DELETE',
       });
       
@@ -326,7 +326,7 @@ export function useSubsectorContentManager(subsectorId: string) {
 
   const deleteEvent = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_events&id=${id}`, {
+      const response = await fetch(`/api/admin/sector-content?type=sector_events&id=${id}`, {
         method: 'DELETE',
       });
       
@@ -343,7 +343,7 @@ export function useSubsectorContentManager(subsectorId: string) {
 
   const deleteMessage = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_messages&id=${id}`, {
+      const response = await fetch(`/api/admin/sector-content?type=sector_messages&id=${id}`, {
         method: 'DELETE',
       });
       
@@ -360,7 +360,7 @@ export function useSubsectorContentManager(subsectorId: string) {
 
   const deleteDocument = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_documents&id=${id}`, {
+      const response = await fetch(`/api/admin/sector-content?type=sector_documents&id=${id}`, {
         method: 'DELETE',
       });
       
@@ -377,7 +377,7 @@ export function useSubsectorContentManager(subsectorId: string) {
 
   const deleteVideo = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_videos&id=${id}`, {
+      const response = await fetch(`/api/admin/sector-content?type=sector_videos&id=${id}`, {
         method: 'DELETE',
       });
       
@@ -394,7 +394,7 @@ export function useSubsectorContentManager(subsectorId: string) {
 
   const deleteImage = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_images&id=${id}`, {
+      const response = await fetch(`/api/admin/sector-content?type=sector_images&id=${id}`, {
         method: 'DELETE',
       });
       

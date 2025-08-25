@@ -161,7 +161,7 @@ export interface WorkLocation {
   name: string;
 }
 
-export type TabType = 'events' | 'news' | 'documents' | 'videos' | 'images' | 'systems' | 'groups' | 'messages';
+export type TabType = 'events' | 'news' | 'documents' | 'videos' | 'images' | 'systems' | 'groups' | 'messages' | 'team';
 
 // Interface para dados do grupo no modal
 export interface GroupData {

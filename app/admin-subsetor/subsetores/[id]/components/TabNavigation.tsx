@@ -6,12 +6,14 @@ import { TabType } from '../types/subsector.types';
 interface TabNavigationProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
-  totalDraftNewsCount?: number;
-  totalDraftEventsCount?: number;
-  totalDraftDocumentsCount?: number;
-  totalDraftVideosCount?: number;
-  totalDraftImagesCount?: number;
-  totalDraftMessagesCount?: number;
+  draftCounts?: {
+    news?: number;
+    events?: number;
+    messages?: number;
+    documents?: number;
+    videos?: number;
+    images?: number;
+  };
 }
 
 /**
@@ -21,25 +23,21 @@ interface TabNavigationProps {
 export function TabNavigation({ 
   activeTab, 
   onTabChange,
-  totalDraftNewsCount = 0,
-  totalDraftEventsCount = 0,
-  totalDraftDocumentsCount = 0,
-  totalDraftVideosCount = 0,
-  totalDraftImagesCount = 0,
-  totalDraftMessagesCount = 0
+  draftCounts = {}
 }: TabNavigationProps) {
   const tabs: Array<{
     id: TabType;
     label: string;
     draftCount?: number;
   }> = [
-    { id: 'news', label: 'Notícias', draftCount: totalDraftNewsCount },
-    { id: 'events', label: 'Eventos', draftCount: totalDraftEventsCount },
-    { id: 'documents', label: 'Documentos', draftCount: totalDraftDocumentsCount },
-    { id: 'videos', label: 'Vídeos', draftCount: totalDraftVideosCount },
-    { id: 'images', label: 'Imagens', draftCount: totalDraftImagesCount },
+    { id: 'news', label: 'Notícias', draftCount: draftCounts.news },
+    { id: 'events', label: 'Eventos', draftCount: draftCounts.events },
+    { id: 'messages', label: 'Mensagens', draftCount: draftCounts.messages },
+    { id: 'documents', label: 'Documentos', draftCount: draftCounts.documents },
+    { id: 'videos', label: 'Vídeos', draftCount: draftCounts.videos },
+    { id: 'images', label: 'Imagens', draftCount: draftCounts.images },
     { id: 'groups', label: 'Grupos' },
-    { id: 'messages', label: 'Mensagens', draftCount: totalDraftMessagesCount }
+    { id: 'team', label: 'Equipe' }
   ];
 
   return (
