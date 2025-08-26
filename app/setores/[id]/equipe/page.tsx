@@ -831,13 +831,7 @@ export default function SectorTeamPage() {
         onClose={handleRemoveMemberCancel}
         onConfirm={handleRemoveMemberConfirm}
         title="Confirmar Remoção"
-        message={
-          <>
-            Tem certeza que deseja remover <strong>{memberToDelete?.profiles?.full_name}</strong> da equipe?
-            <br /><br />
-            Esta ação não pode ser desfeita e o membro será removido permanentemente da equipe do setor.
-          </>
-        }
+        message={`Tem certeza que deseja remover ${memberToDelete?.profiles?.full_name} da equipe?\n\nEsta ação não pode ser desfeita e o membro será removido permanentemente da equipe do setor.`}
         isLoading={isDeleting}
         confirmButtonText="Remover Membro"
         cancelButtonText="Cancelar"

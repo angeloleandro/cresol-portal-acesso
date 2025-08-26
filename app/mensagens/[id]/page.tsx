@@ -10,7 +10,8 @@ const supabase = createClient();
 
 import Breadcrumb from '../../components/Breadcrumb';
 import Footer from '../../components/Footer';
-import Navbar from '../../components/Navbar';
+// import Navbar from '../../components/Navbar' // NextUI version
+import ChakraNavbar from '../../components/ChakraNavbar' // Chakra UI version;
 
 import { FormatDate } from '@/lib/utils/formatters';
 interface MessageItem {
@@ -193,7 +194,7 @@ export default function MensagemDetalhePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
+        <ChakraNavbar />
         <UnifiedLoadingSpinner 
           fullScreen={true}
           size="large" 
@@ -207,7 +208,7 @@ export default function MensagemDetalhePage() {
   if (!message) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
+        <ChakraNavbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
             <p className="text-cresol-gray text-xl">Mensagem não encontrada</p>
@@ -223,7 +224,7 @@ export default function MensagemDetalhePage() {
 
   return (
     <div className="min-h-screen bg-cresol-gray-light/30">
-      <Navbar />
+      <ChakraNavbar />
 
       {/* Conteúdo principal */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -3,7 +3,8 @@
  */
 
 import { logger } from './production-logger';
-import { supabase } from "./supabase";
+import { createClient } from './supabase/client';
+const supabase = createClient();
 
 import { UPLOAD_LIMITS } from '@/lib/constants/limits';
 export const STORAGE_BUCKETS = {
@@ -22,7 +23,7 @@ export async function ensureVideosBucket(): Promise<boolean> {
   try {
     // Check if bucket exists
     const { data: buckets } = await supabase.storage.listBuckets();
-    const videosBucketExists = buckets?.some(bucket => bucket.name === STORAGE_BUCKETS.videos);
+    const videosBucketExists = buckets?.some((bucket: any) => bucket.name === STORAGE_BUCKETS.videos);
     
     if (!videosBucketExists) {
       // Create videos bucket if it doesn't exist

@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import CollectionsManager from '@/app/admin/collections/components/CollectionsManager';
 import { StandardizedButton } from "@/app/components/admin";

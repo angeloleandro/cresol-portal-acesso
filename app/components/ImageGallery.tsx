@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 
 import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
-import { supabase } from "@/lib/supabase";
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import OptimizedImage from "./OptimizedImage";
 

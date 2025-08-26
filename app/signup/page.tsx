@@ -8,7 +8,7 @@ import { FormSelect } from '@/app/components/forms/FormSelect';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import { Button } from '@/app/components/ui/Button';
 import { StandardizedInput } from '@/app/components/ui/StandardizedInput';
-import { getSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Signup() {
   const router = useRouter();
@@ -30,7 +30,7 @@ export default function Signup() {
     // Buscar locais de atuação e cargos do Supabase
     const fetchData = async () => {
       try {
-        const supabase = getSupabaseClient();
+        const supabase = createClient();
         
         // Buscar locais de trabalho
         const { data: workLocationsData, error: workLocationsError } = await supabase
@@ -71,7 +71,7 @@ export default function Signup() {
     }
 
     try {
-      const supabase = getSupabaseClient();
+      const supabase = createClient();
       
       // Verificar se já existe uma solicitação para este e-mail
       const { data: existingRequest, error: checkError } = await supabase

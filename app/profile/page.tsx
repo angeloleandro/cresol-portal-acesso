@@ -6,10 +6,11 @@ import { useState, useEffect } from 'react';
 import { FormSelect } from '@/app/components/forms/FormSelect';
 import { Icon } from '@/app/components/icons/Icon';
 import { Button } from '@/app/components/ui/Button';
-import { getSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 
 import Footer from '../components/Footer';
-import Navbar from '../components/Navbar';
+// import Navbar from '../components/Navbar' // NextUI version
+import ChakraNavbar from '../components/ChakraNavbar' // Chakra UI version;
 import OptimizedImage from '../components/OptimizedImage';
 
 
@@ -80,7 +81,8 @@ export default function ProfilePage() {
     
     const checkUser = async () => {
       try {
-        const { data } = await getSupabaseClient().auth.getUser();
+        const supabase = createClient();
+        const { data } = await supabase.auth.getUser();
         if (!data.user) {
           router.replace('/login');
           return;
@@ -102,7 +104,8 @@ export default function ProfilePage() {
 
   const loadProfile = async (userId: string) => {
     try {
-      const { data, error } = await getSupabaseClient()
+      const supabase = createClient();
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
@@ -125,7 +128,8 @@ export default function ProfilePage() {
 
   const loadWorkLocations = async () => {
     try {
-      const { data, error } = await getSupabaseClient()
+      const supabase = createClient();
+      const { data, error } = await supabase
         .from('work_locations')
         .select('*')
         .order('name');
@@ -139,7 +143,8 @@ export default function ProfilePage() {
 
   const loadPositions = async () => {
     try {
-      const { data, error } = await getSupabaseClient()
+      const supabase = createClient();
+      const { data, error } = await supabase
         .from('positions')
         .select('*')
         .order('name');
@@ -198,11 +203,12 @@ export default function ProfilePage() {
 
     setIsUploading(true);
     try {
+      const supabase = createClient();
       const fileExt = avatarFile.name.split('.').pop();
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
 
-      const { error: uploadError } = await getSupabaseClient()
+      const { error: uploadError } = await supabase
         .storage
         .from('images')
         .upload(filePath, avatarFile);
@@ -210,7 +216,7 @@ export default function ProfilePage() {
       if (uploadError) throw uploadError;
 
       try {
-        const { data: urlData } = getSupabaseClient()
+        const { data: urlData } = supabase
           .storage
           .from('images')
           .getPublicUrl(filePath);
@@ -268,7 +274,8 @@ export default function ProfilePage() {
       const selectedPosition = positions.find(p => p.id === positionId);
 
       // Atualizar perfil
-      const { error: updateError } = await getSupabaseClient()
+      const supabase = createClient();
+      const { error: updateError } = await supabase
         .from('profiles')
         .update({
           full_name: fullName,
@@ -286,7 +293,7 @@ export default function ProfilePage() {
 
       // Atualizar senha se fornecida
       if (newPassword) {
-        const { error: passwordError } = await getSupabaseClient().auth.updateUser({
+        const { error: passwordError } = await supabase.auth.updateUser({
           password: newPassword
         });
 
@@ -320,7 +327,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
+        <ChakraNavbar />
         <div className="flex items-center justify-center h-screen">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
@@ -345,7 +352,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <ChakraNavbar />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Simples */}

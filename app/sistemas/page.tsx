@@ -13,7 +13,8 @@ const supabase = createClient();
 import Breadcrumb from '../components/Breadcrumb';
 import Footer from '../components/Footer';
 import { Icon } from '../components/icons';
-import Navbar from '../components/Navbar';
+// import Navbar from '../components/Navbar' // NextUI version
+import ChakraNavbar from '../components/ChakraNavbar' // Chakra UI version;
 import ErrorMessage from '../components/ui/ErrorMessage';
 
 interface SystemLink {
@@ -147,7 +148,7 @@ export default function SistemasPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
+        <ChakraNavbar />
         <UnifiedLoadingSpinner fullScreen message={LOADING_MESSAGES.systems} />
         <Footer />
       </div>
@@ -156,7 +157,7 @@ export default function SistemasPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <ChakraNavbar />
       
       <main className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
         {/* Breadcrumb */}

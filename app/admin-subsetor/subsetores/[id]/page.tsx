@@ -7,6 +7,13 @@ import { useParams, useRouter } from 'next/navigation';
 
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { AlertProvider } from '@/app/components/alerts';
+import { 
+  StandardizedAdminLayout, 
+  StandardizedPageHeader,
+  type BreadcrumbItem
+} from '@/app/components/admin';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import { useSubsectorAuth } from './hooks/useSubsectorAuth';
 import { useSubsectorData } from './hooks/useSubsectorData';
@@ -31,6 +38,7 @@ export default function SubsectorManagementPage() {
   const subsectorId = params.id as string;
   
   const [activeTab, setActiveTab] = useState<TabType>('news');
+  const [user, setUser] = useState<any>(null);
   
   // Authentication
   const { isAuthorized, loading: authLoading } = useSubsectorAuth(subsectorId);
@@ -40,6 +48,17 @@ export default function SubsectorManagementPage() {
   
   // Content management
   const contentManager = useSubsectorContentManager(subsectorId);
+
+  // Get user data
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        setUser(userData.user);
+      }
+    };
+    getUser();
+  }, []);
 
   // Redirect if not authorized
   useEffect(() => {
@@ -93,35 +112,23 @@ export default function SubsectorManagementPage() {
     images: contentManager.totalDraftImagesCount,
   };
 
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Home', href: '/home', icon: 'house' },
+    { label: 'Administração de Sub-setores', href: '/admin-subsetor' },
+    { label: subsector.name || 'Subsetor' }
+  ];
+
   return (
     <AlertProvider>
       <SubsectorDataProvider subsectorId={subsectorId}>
-        <div className="min-h-screen bg-gray-50">
-          {/* Header */}
-          <div className="bg-white shadow">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    Gerenciamento do Subsetor: {subsector.name}
-                  </h1>
-                  {subsector.description && (
-                    <p className="mt-1 text-sm text-gray-600">{subsector.description}</p>
-                  )}
-                </div>
-                <button
-                  onClick={() => router.push('/admin-subsetor')}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                >
-                  Voltar
-                </button>
-              </div>
-            </div>
-          </div>
+        <StandardizedAdminLayout user={user} breadcrumbs={breadcrumbs}>
+          <StandardizedPageHeader
+            title={`Gerenciamento do Sub-setor: ${subsector.name}`}
+            subtitle={subsector.description || 'Gerencie conteúdos, equipes e configurações do sub-setor'}
+          />
 
-          {/* Content */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="p-6">
               {/* Tab Navigation */}
               <TabNavigation
                 activeTab={activeTab}
@@ -215,7 +222,7 @@ export default function SubsectorManagementPage() {
               </Suspense>
             </div>
           </div>
-        </div>
+        </StandardizedAdminLayout>
       </SubsectorDataProvider>
     </AlertProvider>
   );

@@ -7,6 +7,13 @@ import { useParams, useRouter } from 'next/navigation';
 
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { AlertProvider } from '@/app/components/alerts';
+import { 
+  StandardizedAdminLayout, 
+  StandardizedPageHeader,
+  type BreadcrumbItem
+} from '@/app/components/admin';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import { useSectorAuth } from './hooks/useSectorAuth';
 import { useSectorData } from './hooks/useSectorData';
@@ -31,6 +38,7 @@ export default function SectorManagementPage() {
   const sectorId = params.id as string;
   
   const [activeTab, setActiveTab] = useState('news');
+  const [user, setUser] = useState<any>(null);
   
   // Authentication
   const { isAuthorized, loading: authLoading } = useSectorAuth(sectorId);
@@ -40,6 +48,17 @@ export default function SectorManagementPage() {
   
   // Content management
   const contentManager = useSectorContentManager(sectorId);
+
+  // Get user data
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        setUser(userData.user);
+      }
+    };
+    getUser();
+  }, []);
 
   // Redirect if not authorized
   useEffect(() => {
@@ -93,35 +112,23 @@ export default function SectorManagementPage() {
     images: contentManager.totalDraftImagesCount,
   };
 
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Home', href: '/home', icon: 'house' },
+    { label: 'Administração Setorial', href: '/admin-setor' },
+    { label: sector.name || 'Setor' }
+  ];
+
   return (
     <AlertProvider>
       <SectorDataProvider sectorId={sectorId}>
-        <div className="min-h-screen bg-gray-50">
-          {/* Header */}
-          <div className="bg-white shadow">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    Gerenciamento do Setor: {sector.name}
-                  </h1>
-                  {sector.description && (
-                    <p className="mt-1 text-sm text-gray-600">{sector.description}</p>
-                  )}
-                </div>
-                <button
-                  onClick={() => router.push('/admin-setor')}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                >
-                  Voltar
-                </button>
-              </div>
-            </div>
-          </div>
+        <StandardizedAdminLayout user={user} breadcrumbs={breadcrumbs}>
+          <StandardizedPageHeader
+            title={`Gerenciamento do Setor: ${sector.name}`}
+            subtitle={sector.description || 'Gerencie conteúdos, equipes e configurações do setor'}
+          />
 
-          {/* Content */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="p-6">
               {/* Tab Navigation */}
               <TabNavigation
                 activeTab={activeTab}
@@ -220,7 +227,7 @@ export default function SectorManagementPage() {
               </Suspense>
             </div>
           </div>
-        </div>
+        </StandardizedAdminLayout>
       </SectorDataProvider>
     </AlertProvider>
   );

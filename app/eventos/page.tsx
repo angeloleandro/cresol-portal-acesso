@@ -15,7 +15,8 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import EventCalendar from '../components/EventCalendar';
 import Footer from '../components/Footer';
 import { Icon } from '../components/icons/Icon';
-import Navbar from '../components/Navbar';
+// import Navbar from '../components/Navbar' // NextUI version
+import ChakraNavbar from '../components/ChakraNavbar' // Chakra UI version;
 
 
 
@@ -236,7 +237,7 @@ function EventosPageContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
+        <ChakraNavbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
 <UnifiedLoadingSpinner 
@@ -252,7 +253,7 @@ function EventosPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <ChakraNavbar />
       
       <main className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
         <Breadcrumbs className="mb-6" />
@@ -524,7 +525,7 @@ export default function EventosPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
+        <ChakraNavbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
 <UnifiedLoadingSpinner 

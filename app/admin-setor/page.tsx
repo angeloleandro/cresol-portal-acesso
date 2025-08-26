@@ -4,7 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 
-import OptimizedImage from '@/app/components/OptimizedImage';
+import { 
+  StandardizedAdminLayout, 
+  StandardizedPageHeader,
+  type BreadcrumbItem
+} from '@/app/components/admin';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
@@ -139,84 +143,52 @@ export default function AdminSetorDashboard() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="relative h-10 w-24 mr-4">
-              <OptimizedImage 
-                src="/logo-horizontal-laranja.svg" 
-                alt="Logo Cresol" 
-                fill
-                className="object-contain"
-              />
-            </div>
-            <h1 className="text-xl font-semibold text-gray-800">Painel Admin Setorial</h1>
-          </div>
-          
-          <div className="flex items-center">
-            <Link href="/dashboard" className="text-sm text-gray-600 mr-4 hover:text-primary">
-              Dashboard
-            </Link>
-            <span className="text-sm text-gray-600 mr-4">
-              Olá, {user?.full_name || user?.email}
-            </span>
-            <button 
-              onClick={handleLogout}
-              className="text-sm text-primary hover:text-primary-dark"
-            >
-              Sair
-            </button>
-          </div>
-        </div>
-      </header>
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Home', href: '/home', icon: 'house' },
+    { label: 'Administração Setorial' }
+  ];
 
-      {/* Conteúdo principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-primary">Setores sob sua gestão</h2>
-          <p className="text-cresol-gray mt-1">
-            Gerencie conteúdos e sistemas dos setores designados a você.
+  return (
+    <StandardizedAdminLayout user={user as any} breadcrumbs={breadcrumbs}>
+      <StandardizedPageHeader
+        title="Administração Setorial"
+        subtitle="Gerencie conteúdos e sistemas dos setores designados a você"
+      />
+
+      {managedSectors.length === 0 ? (
+        <div className="bg-white rounded-lg p-8 text-center border border-gray-200">
+          <p className="text-cresol-gray">
+            Você ainda não foi designado como administrador de nenhum setor.
+          </p>
+          <p className="text-cresol-gray mt-2">
+            Entre em contato com um administrador para solicitar acesso.
           </p>
         </div>
-
-        {managedSectors.length === 0 ? (
-          <div className="bg-white rounded-lg  p-8 text-center">
-            <p className="text-cresol-gray">
-              Você ainda não foi designado como administrador de nenhum setor.
-            </p>
-            <p className="text-cresol-gray mt-2">
-              Entre em contato com um administrador para solicitar acesso.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {managedSectors.map((sector) => (
-              <div key={sector.id} className="bg-white rounded-lg  p-6 border border-gray-200">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">{sector.name}</h3>
-                <p className="text-gray-600 mb-6">{sector.description || 'Sem descrição'}</p>
-                
-                <div className="flex flex-col space-y-2">
-                  <Link 
-                    href={`/admin-setor/setores/${sector.id}`}
-                    className="text-primary hover:text-primary-dark text-sm font-medium"
-                  >
-                    Gerenciar conteúdo do setor →
-                  </Link>
-                  <Link 
-                    href={`/admin-setor/setores/${sector.id}/sistemas`}
-                    className="text-primary hover:text-primary-dark text-sm font-medium"
-                  >
-                    Gerenciar sistemas do setor →
-                  </Link>
-                </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {managedSectors.map((sector) => (
+            <div key={sector.id} className="bg-white rounded-lg p-6 border border-gray-200">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">{sector.name}</h3>
+              <p className="text-gray-600 mb-6">{sector.description || 'Sem descrição'}</p>
+              
+              <div className="flex flex-col space-y-2">
+                <Link 
+                  href={`/admin-setor/setores/${sector.id}`}
+                  className="text-primary hover:text-primary-dark text-sm font-medium"
+                >
+                  Gerenciar conteúdo do setor →
+                </Link>
+                <Link 
+                  href={`/admin-setor/setores/${sector.id}/sistemas`}
+                  className="text-primary hover:text-primary-dark text-sm font-medium"
+                >
+                  Gerenciar sistemas do setor →
+                </Link>
               </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </StandardizedAdminLayout>
   );
 } 

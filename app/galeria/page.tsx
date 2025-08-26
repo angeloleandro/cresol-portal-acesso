@@ -6,7 +6,7 @@ import { useEffect, useState, Suspense } from "react";
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
-import { getSupabaseClient } from "@/lib/supabase";
+import { createClient } from '@/lib/supabase/client';
 
 import Breadcrumb from "../components/Breadcrumb";
 import { CollectionSection } from "../components/Collections/CollectionSection";
@@ -14,7 +14,8 @@ import Footer from "../components/Footer";
 import { Icon } from "../components/icons/Icon";
 import { ImagePreviewWithGrid } from "../components/ImagePreview";
 import { BaseImage, baseImageToGalleryImage } from "../components/ImagePreview/ImagePreview.types";
-import Navbar from "../components/Navbar";
+// import Navbar from "../components/Navbar"; // NextUI version
+import ChakraNavbar from '../components/ChakraNavbar'; // Chakra UI version
 
 interface GalleryImage {
   id: string;
@@ -47,7 +48,7 @@ function GalleryContent() {
         // If collection ID is provided, fetch collection details and its items
         if (collectionId) {
           // Fetch collection details
-          const { data: collectionData } = await getSupabaseClient()
+          const { data: collectionData } = await createClient()
             .from("collections")
             .select("*")
             .eq("id", collectionId)
@@ -56,7 +57,7 @@ function GalleryContent() {
           setCollection(collectionData);
 
           // Fetch collection items
-          const { data: itemsData } = await getSupabaseClient()
+          const { data: itemsData } = await createClient()
             .from("collection_items")
             .select(`
               *,
@@ -71,7 +72,7 @@ function GalleryContent() {
           setImages(activeImages);
         } else {
           // Fetch all images if no collection specified
-          const { data } = await getSupabaseClient()
+          const { data } = await createClient()
             .from("gallery_images")
             .select("*")
             .eq("is_active", true)
@@ -110,7 +111,7 @@ function GalleryContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <ChakraNavbar />
       <main className="container py-8">
         {/* Breadcrumb */}
         <div className="mb-6">
@@ -188,7 +189,7 @@ export default function GalleryPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
+        <ChakraNavbar />
         <main className="container py-8">
           <div className="flex items-center justify-center py-16">
             <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.gallery} fullScreen={false} />

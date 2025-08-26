@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { getSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 
 import AdminHeader from '../AdminHeader';
 import Breadcrumb from '../Breadcrumb';
@@ -55,7 +55,8 @@ export default function AdminDashboard({ initialUser, initialStats }: AdminDashb
     
     const checkUser = async () => {
       try {
-        const { data: userData } = await getSupabaseClient().auth.getUser();
+        const supabase = createClient();
+        const { data: userData } = await supabase.auth.getUser();
         
         if (!userData.user) {
           router.replace('/login');
@@ -65,7 +66,7 @@ export default function AdminDashboard({ initialUser, initialStats }: AdminDashb
         setUser(userData.user as User);
 
         // Check if user is admin
-        const { data: profile } = await getSupabaseClient()
+        const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', userData.user.id)
@@ -91,12 +92,13 @@ export default function AdminDashboard({ initialUser, initialStats }: AdminDashb
 
   const fetchStats = async () => {
     try {
+      const supabase = createClient();
       // Fetch basic statistics
       const [usersResult, requestsResult, sectorsResult, subsectorsResult] = await Promise.all([
-        getSupabaseClient().from('profiles').select('id', { count: 'exact' }),
-        getSupabaseClient().from('access_requests').select('id', { count: 'exact' }).eq('status', 'pending'),
-        getSupabaseClient().from('sectors').select('id', { count: 'exact' }),
-        getSupabaseClient().from('subsectors').select('id', { count: 'exact' }),
+        supabase.from('profiles').select('id', { count: 'exact' }),
+        supabase.from('access_requests').select('id', { count: 'exact' }).eq('status', 'pending'),
+        supabase.from('sectors').select('id', { count: 'exact' }),
+        supabase.from('subsectors').select('id', { count: 'exact' }),
       ]);
 
       setStats({

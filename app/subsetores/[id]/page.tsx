@@ -11,7 +11,8 @@ const supabase = createClient();
 
 import Breadcrumb from '../../components/Breadcrumb';
 import { Icon } from '../../components/icons';
-import Navbar from '../../components/Navbar';
+// import Navbar from '../../components/Navbar' // NextUI version
+import ChakraNavbar from '../../components/ChakraNavbar' // Chakra UI version;
 import SubsectorTeam from '../../components/SubsectorTeam';
 
 interface Subsector {
@@ -228,7 +229,7 @@ export default function SubsectorDetailsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-cresol-gray-light/30">
-        <Navbar />
+        <ChakraNavbar />
         <UnifiedLoadingSpinner message={LOADING_MESSAGES.subsectors} size="large" />
       </div>
     );
@@ -237,7 +238,7 @@ export default function SubsectorDetailsPage() {
   if (error.hasError) {
     return (
       <div className="min-h-screen bg-cresol-gray-light/30">
-        <Navbar />
+        <ChakraNavbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center max-w-md mx-auto px-4">
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
@@ -272,7 +273,7 @@ export default function SubsectorDetailsPage() {
   if (!subsector) {
     return (
       <div className="min-h-screen bg-cresol-gray-light/30">
-        <Navbar />
+        <ChakraNavbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center max-w-md mx-auto px-4">
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
@@ -299,7 +300,7 @@ export default function SubsectorDetailsPage() {
 
   return (
     <div className="min-h-screen bg-cresol-gray-light/30">
-      <Navbar />
+      <ChakraNavbar />
       
       {/* Header do Sub-setor */}
       <header className="bg-white border-b border-cresol-gray-light">

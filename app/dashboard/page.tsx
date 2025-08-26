@@ -15,7 +15,8 @@ import EventosDestaque from '../components/EventosDestaque';
 import Footer from '../components/Footer';
 import GlobalSearch from '../components/GlobalSearch';
 import { Icon } from '../components/icons/Icon';
-import Navbar from '../components/Navbar';
+// import Navbar from '../components/Navbar' // NextUI version
+import ChakraNavbar from '../components/ChakraNavbar' // Chakra UI version;
 import NoticiasDestaque from '../components/NoticiasDestaque';
 
 interface DashboardStats {
@@ -128,7 +129,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <ChakraNavbar />
       
       <main className="container py-8">
         {/* Breadcrumbs */}

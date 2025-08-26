@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
-import { supabase } from "@/lib/supabase";
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import { Icon } from "./icons/Icon";
 import { ImagePreviewWithGrid } from "./ImagePreview";

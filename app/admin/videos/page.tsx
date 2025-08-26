@@ -23,7 +23,8 @@ import { VideoModal } from '@/app/components/VideoGallery/VideoGallery.Modal';
 import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
 import { DashboardVideo, VideoFilters } from '@/app/types/video';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { supabase } from "@/lib/supabase";
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 // Removed unused Collection import
 
 interface AdminVideoFilters extends VideoFilters {

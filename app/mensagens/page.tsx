@@ -10,7 +10,8 @@ const supabase = createClient();
 
 import Breadcrumb from '../components/Breadcrumb';
 import Footer from '../components/Footer';
-import Navbar from '../components/Navbar';
+// import Navbar from '../components/Navbar' // NextUI version
+import ChakraNavbar from '../components/ChakraNavbar' // Chakra UI version;
 import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
 
 import { FormatDate } from '@/lib/utils/formatters';
@@ -154,7 +155,7 @@ export default function MensagensPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
+        <ChakraNavbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
             <UnifiedLoadingSpinner 
@@ -170,7 +171,7 @@ export default function MensagensPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <ChakraNavbar />
 
       {/* Conteúdo principal */}
       <main className="container py-8">

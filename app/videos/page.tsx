@@ -9,13 +9,14 @@ import { useEffect, useState, Suspense } from "react";
 
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { getSupabaseClient } from "@/lib/supabase";
+import { createClient } from '@/lib/supabase/client';
 
 import Breadcrumb from "../components/Breadcrumb";
 import { CollectionSection } from "../components/Collections/CollectionSection";
 import Footer from "../components/Footer";
 import { Icon } from "../components/icons/Icon";
-import Navbar from "../components/Navbar";
+// import Navbar from "../components/Navbar"; // NextUI version
+import ChakraNavbar from '../components/ChakraNavbar'; // Chakra UI version
 
 
 import { EnhancedVideoCard } from "../components/VideoGallery/VideoGallery.Card";
@@ -56,7 +57,7 @@ function VideosContent() {
         // If collection ID is provided, fetch collection details and its items
         if (collectionId) {
           // Fetch collection details
-          const { data: collectionData } = await getSupabaseClient()
+          const { data: collectionData } = await createClient()
             .from("collections")
             .select("*")
             .eq("id", collectionId)
@@ -65,7 +66,7 @@ function VideosContent() {
           setCollection(collectionData);
 
           // Fetch collection items
-          const { data: itemsData } = await getSupabaseClient()
+          const { data: itemsData } = await createClient()
             .from("collection_items")
             .select(`
               *,
@@ -91,7 +92,7 @@ function VideosContent() {
           setFilteredVideos(readyVideos);
         } else {
           // Fetch all videos if no collection specified
-          const { data, error: fetchError } = await getSupabaseClient()
+          const { data, error: fetchError } = await createClient()
             .from("dashboard_videos")
             .select("*")
             .eq("is_active", true)
@@ -169,7 +170,7 @@ function VideosContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-50">
-        <Navbar />
+        <ChakraNavbar />
         <main className="container mx-auto px-4 py-8 max-w-7xl">
           <motion.div 
             initial={{ opacity: 0 }}
@@ -240,7 +241,7 @@ function VideosContent() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <Navbar />
+      <ChakraNavbar />
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Breadcrumb */}
         <motion.div 
@@ -372,7 +373,7 @@ export default function VideosPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-neutral-50">
-        <Navbar />
+        <ChakraNavbar />
         <main className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="flex flex-col items-center justify-center py-16 space-y-4">
             <UnifiedLoadingSpinner size="default" message={LOADING_MESSAGES.videos} />

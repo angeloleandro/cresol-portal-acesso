@@ -9,7 +9,7 @@ import { useAlert } from '@/app/components/alerts';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { getSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 
 import RoleModal from './components/RoleModal';
 import UserFilters from './components/UserFilters';
@@ -90,14 +90,14 @@ export default function UsersManagement() {
 
   const fetchUserSectors = useCallback(async (userId: string) => {
     try {
-      const { data, error } = await getSupabaseClient()
+      const { data, error } = await createClient()
         .from('sector_admins')
         .select('sector_id')
         .eq('user_id', userId);
       
       if (error) throw error;
       
-      const sectorIds = data?.map(item => item.sector_id) || [];
+      const sectorIds = data?.map((item: { sector_id: string }) => item.sector_id) || [];
       setUserSectors(prev => ({
         ...prev,
         [userId]: sectorIds
@@ -109,14 +109,14 @@ export default function UsersManagement() {
 
   const fetchUserSubsectors = useCallback(async (userId: string) => {
     try {
-      const { data, error } = await getSupabaseClient()
+      const { data, error } = await createClient()
         .from('subsector_admins')
         .select('subsector_id')
         .eq('user_id', userId);
       
       if (error) throw error;
       
-      const subsectorIds = data?.map(item => item.subsector_id) || [];
+      const subsectorIds = data?.map((item: { subsector_id: string }) => item.subsector_id) || [];
       setUserSubsectors(prev => ({
         ...prev,
         [userId]: subsectorIds
@@ -132,14 +132,14 @@ export default function UsersManagement() {
       if (typeof window === 'undefined') return;
       
       // Primeiro verificar se há um usuário válido
-      const { data: { user }, error: authError } = await getSupabaseClient().auth.getUser();
+      const { data: { user }, error: authError } = await createClient().auth.getUser();
       if (!user || authError) {
         router.replace('/login');
         return;
       }
 
       // Query específica com campos necessários (removendo created_at que não existe)
-      const { data, error } = await getSupabaseClient()
+      const { data, error } = await createClient()
         .from('profiles')
         .select('id, full_name, email, position, position_id, work_location_id, role, avatar_url')
         .order('full_name');
@@ -151,7 +151,7 @@ export default function UsersManagement() {
       
       if (data) {
         // Mapear os dados para garantir compatibilidade de tipos
-        const mappedUsers: ProfileUser[] = data.map(profile => ({
+        const mappedUsers: ProfileUser[] = data.map((profile: any) => ({
           id: profile.id,
           full_name: profile.full_name,
           email: profile.email,
@@ -190,13 +190,13 @@ export default function UsersManagement() {
     
     const checkUser = async () => {
       try {
-        const { data } = await getSupabaseClient().auth.getUser();
+        const { data } = await createClient().auth.getUser();
         if (!data.user) {
           router.replace('/login');
           return;
         }
         
-        const { data: profile } = await getSupabaseClient()
+        const { data: profile } = await createClient()
           .from('profiles')
           .select('role')
           .eq('id', data.user.id)
@@ -226,7 +226,7 @@ export default function UsersManagement() {
 
   const fetchWorkLocations = async () => {
     try {
-      const { data, error } = await getSupabaseClient()
+      const { data, error } = await createClient()
         .from('work_locations')
         .select('id, name')
         .order('name');
@@ -244,7 +244,7 @@ export default function UsersManagement() {
 
   const fetchPositions = async () => {
     try {
-      const { data, error } = await getSupabaseClient()
+      const { data, error } = await createClient()
         .from('positions')
         .select('id, name, description, department')
         .order('name');
@@ -262,7 +262,7 @@ export default function UsersManagement() {
 
   const fetchSectors = async () => {
     try {
-      const { data, error } = await getSupabaseClient()
+      const { data, error } = await createClient()
         .from('sectors')
         .select('id, name')
         .order('name');
@@ -280,7 +280,7 @@ export default function UsersManagement() {
 
   const fetchSubsectors = async (sectorId?: string) => {
     try {
-      let query = getSupabaseClient()
+      let query = createClient()
         .from('subsectors')
         .select('id, name, sector_id')
         .order('name');
@@ -303,7 +303,7 @@ export default function UsersManagement() {
   };
 
   const handleLogout = async () => {
-    await getSupabaseClient().auth.signOut();
+    await createClient().auth.signOut();
     router.replace('/login');
   };
 

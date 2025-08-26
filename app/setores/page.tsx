@@ -10,7 +10,8 @@ import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
 import Breadcrumb from '../components/Breadcrumb';
-import Navbar from '../components/Navbar';
+// import Navbar from '../components/Navbar' // NextUI version
+import ChakraNavbar from '../components/ChakraNavbar' // Chakra UI version;
 
 interface Sector {
   id: string;
@@ -69,7 +70,7 @@ export default function SetoresPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <ChakraNavbar />
 
       {/* Conteúdo principal */}
       <main className="container py-8">

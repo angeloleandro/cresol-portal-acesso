@@ -8,7 +8,8 @@ import { logger } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
-import Navbar from '../components/Navbar';
+// import Navbar from '../components/Navbar' // NextUI version
+import ChakraNavbar from '../components/ChakraNavbar' // Chakra UI version;
 import { InlineSuspense } from '../components/OptimizedSuspense';
 import UnifiedLoadingSpinner from '../components/ui/UnifiedLoadingSpinner';
 
@@ -98,7 +99,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <ChakraNavbar />
       
       {/* Banner Carousel - Compacto */}
       <div className="py-3">

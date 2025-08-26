@@ -12,7 +12,8 @@ const supabase = createClient();
 
 import Breadcrumb from '../../components/Breadcrumb';
 import { Icon } from '../../components/icons';
-import Navbar from '../../components/Navbar';
+// import Navbar from '../../components/Navbar' // NextUI version
+import ChakraNavbar from '../../components/ChakraNavbar' // Chakra UI version;
 import SectorTeam from '../../components/SectorTeam';
 
 interface Sector {
@@ -222,7 +223,7 @@ export default function SetorDetalhesPage() {
 
   return (
     <div className="min-h-screen bg-cresol-gray-light/30">
-      <Navbar />
+      <ChakraNavbar />
       
       {/* Header do Setor */}
       <header className="bg-white border-b border-cresol-gray-light">

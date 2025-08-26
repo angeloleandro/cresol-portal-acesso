@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAlert } from '@/app/components/alerts';
 import { FormSelect } from '@/app/components/forms/FormSelect';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { getSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 
 interface Sector {
   id: string;
@@ -55,9 +55,10 @@ export default function RoleModal({
 
   const handleSave = async () => {
     try {
+      const supabase = createClient();
                               
       // Atualizar role no perfil
-      const { data: roleData, error: roleError } = await getSupabaseClient()
+      const { error: roleError } = await supabase
         .from('profiles')
         .update({ role: selectedRole })
         .eq('id', userId)
@@ -68,8 +69,8 @@ export default function RoleModal({
       }
       
       // Limpar associações existentes
-            const { error: deleteSectorError } = await getSupabaseClient().from('sector_admins').delete().eq('user_id', userId);
-      const { error: deleteSubsectorError } = await getSupabaseClient().from('subsector_admins').delete().eq('user_id', userId);
+            const { error: deleteSectorError } = await supabase.from('sector_admins').delete().eq('user_id', userId);
+      const { error: deleteSubsectorError } = await supabase.from('subsector_admins').delete().eq('user_id', userId);
       
       if (deleteSectorError) {
 
@@ -85,7 +86,7 @@ export default function RoleModal({
           sector_id: sectorId
         }));
         
-        const { data: sectorData, error: sectorError } = await getSupabaseClient()
+        const { error: sectorError } = await supabase
           .from('sector_admins')
           .insert(sectorInserts)
           .select();
@@ -97,7 +98,7 @@ export default function RoleModal({
           subsector_id: subsectorId
         }));
         
-        const { data: subsectorData, error: subsectorError } = await getSupabaseClient()
+        const { error: subsectorError } = await supabase
           .from('subsector_admins')
           .insert(subsectorInserts)
           .select();
@@ -118,7 +119,8 @@ export default function RoleModal({
   const fetchSubsectors = async (sectorId?: string) => {
     try {
       setLoadingSubsectors(true);
-      let query = getSupabaseClient()
+      const supabase = createClient();
+      let query = supabase
         .from('subsectors')
         .select('id, name, sector_id')
         .order('name');
@@ -127,7 +129,7 @@ export default function RoleModal({
         query = query.eq('sector_id', sectorId);
       }
       
-      const { data, error } = await query;
+      const { error } = await query;
       
       if (error) throw error;
       onRefreshSubsectors(sectorId);

@@ -4,7 +4,8 @@ import { useState } from "react";
 import Cropper from "react-easy-crop";
 
 import { StandardizedButton } from "@/app/components/admin";
-import { supabase } from "@/lib/supabase";
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 
 import { getCroppedImg } from "./getCroppedImg";
 import OptimizedImage from "./OptimizedImage";
