@@ -46,7 +46,7 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   const [isVideoUploadOpen, setIsVideoUploadOpen] = useState(false);
   
   // Modal de exclusão
-  const deleteModal = useDeleteModal('coleção');
+  const deleteModal = useDeleteModal<Collection>('coleção');
 
   const loadCollection = useCallback(async () => {
     setIsLoading(true);
@@ -125,7 +125,7 @@ const CollectionDetailEditPage: React.FC<CollectionDetailEditPageProps> = ({
   };
 
   // Handle collection deletion
-  const handleDelete = async (_collection: CollectionWithItems) => {
+  const handleDelete = async (_collection: Collection) => {
     try {
       const response = await fetch(`/api/collections/${collectionId}`, {
         method: 'DELETE',

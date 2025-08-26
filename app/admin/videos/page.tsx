@@ -145,7 +145,7 @@ export default function AdminVideos() {
     try {
       const { data, error } = await supabase
         .from("dashboard_videos")
-        .select("*")
+        .select("id, title, video_url, thumbnail_url, thumbnail_timestamp, is_active, order_index, upload_type, file_path, file_size, mime_type, original_filename, processing_status, created_at, updated_at")
         .order("order_index", { ascending: true });
       
       if (error) throw error;

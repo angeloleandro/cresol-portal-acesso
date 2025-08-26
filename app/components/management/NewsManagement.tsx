@@ -22,6 +22,7 @@ export interface BaseNews {
   is_featured: boolean;
   is_published: boolean;
   created_at: string;
+  [key: string]: unknown;
 }
 
 // Configuration interface for different contexts
@@ -71,7 +72,7 @@ export function NewsManagement<T extends BaseNews>({
   } as Partial<T>);
 
   const imageUpload = useImageUpload();
-  const deleteModal = useDeleteModal('notícia');
+  const deleteModal = useDeleteModal<T>('notícia');
   const alert = useAlert();
 
   const handleOpenModal = (newsItem?: T) => {

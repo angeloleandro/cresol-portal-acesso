@@ -13,6 +13,13 @@ import {
   SimpleGrid,
   Center,
   Group,
+  DrawerRoot,
+  DrawerContent,
+  DrawerBody,
+  DrawerHeader,
+  DrawerCloseTrigger,
+  DrawerBackdrop,
+  DrawerTitle,
 } from '@chakra-ui/react';
 // Removed Collapsible import - will use conditional rendering instead
 import {
@@ -73,7 +80,7 @@ const NavbarSkeleton = memo(() => (
 ));
 NavbarSkeleton.displayName = 'NavbarSkeleton';
 
-// Custom Card Dropdown Component
+// Custom Card Dropdown Component with Mobile Support
 const CardDropdown = memo(({ 
   trigger, 
   children, 
@@ -81,7 +88,8 @@ const CardDropdown = memo(({
   onClose, 
   width = "600px",
   showFooter = false,
-  footerContent 
+  footerContent,
+  title = ""
 }: { 
   trigger: React.ReactNode;
   children: React.ReactNode;
@@ -90,9 +98,20 @@ const CardDropdown = memo(({
   width?: string;
   showFooter?: boolean;
   footerContent?: React.ReactNode;
+  title?: string;
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -109,8 +128,55 @@ const CardDropdown = memo(({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, isMobile]);
 
+  // Mobile version - Drawer
+  if (isMobile) {
+    return (
+      <>
+        <Box ref={triggerRef}>
+          {trigger}
+        </Box>
+        <DrawerRoot 
+          open={isOpen} 
+          onOpenChange={(e) => !e.open && onClose()}
+          placement="bottom"
+        >
+          <DrawerBackdrop />
+          <DrawerContent maxH="85vh" borderTopRadius="lg">
+            <DrawerHeader borderBottom="1px" borderColor="gray.200">
+              <DrawerTitle>{title}</DrawerTitle>
+              <DrawerCloseTrigger />
+            </DrawerHeader>
+            <DrawerBody p={0} overflowY="auto">
+              <Box pb={showFooter && footerContent ? 20 : 0}>
+                {children}
+              </Box>
+              {showFooter && footerContent && (
+                <Box
+                  bg="gray.50"
+                  borderTop="1px solid"
+                  borderColor="gray.200"
+                  px={6}
+                  py={5}
+                  pb={6}
+                  position="fixed"
+                  bottom={0}
+                  left={0}
+                  right={0}
+                  zIndex={10}
+                >
+                  {footerContent}
+                </Box>
+              )}
+            </DrawerBody>
+          </DrawerContent>
+        </DrawerRoot>
+      </>
+    );
+  }
+
+  // Desktop version - Dropdown
   return (
     <Box position="relative" ref={triggerRef}>
       {trigger}
@@ -178,6 +244,7 @@ const GalleryDropdown = memo(({ pathname }: { pathname: string }) => {
       isOpen={isOpen}
       onClose={onClose}
       width="500px"
+      title="Galeria"
       trigger={
         <Button
           variant="ghost"
@@ -195,8 +262,8 @@ const GalleryDropdown = memo(({ pathname }: { pathname: string }) => {
       }
       showFooter={true}
       footerContent={
-        <Flex justify="space-between" align="center">
-          <Box>
+        <Flex justify="space-between" align="center" flexDir={{ base: 'column', md: 'row' }} gap={{ base: 4, md: 0 }}>
+          <Box textAlign={{ base: 'center', md: 'left' }}>
             <Text fontSize="sm" fontWeight="semibold" color="gray.900">
               Explorar galerias
             </Text>
@@ -211,6 +278,8 @@ const GalleryDropdown = memo(({ pathname }: { pathname: string }) => {
             borderColor="orange.500"
             borderWidth="2px"
             color="orange.500"
+            px={6}
+            w={{ base: 'full', md: 'auto' }}
             _hover={{ bg: 'orange.50', borderColor: 'orange.600', color: 'orange.600' }}
           >
             Ver todas
@@ -219,22 +288,9 @@ const GalleryDropdown = memo(({ pathname }: { pathname: string }) => {
       }
     >
       <Box p={5}>
-        <Flex justify="space-between" align="center" mb={4}>
-          <Text fontWeight="semibold" fontSize="sm" color="gray.900">
-            Galeria
-          </Text>
-          <ChakraLink
-            as={Link}
-            href="/galeria"
-            fontSize="xs"
-            color="orange.500"
-            fontWeight="medium"
-            _hover={{ color: 'orange.600', textDecoration: 'underline' }}
-            onClick={onClose}
-          >
-            Ver tudo
-          </ChakraLink>
-        </Flex>
+        <Text fontWeight="semibold" fontSize="sm" color="gray.900" mb={4}>
+          Galeria
+        </Text>
         
         <Separator mb={4} borderColor="gray.200" />
         
@@ -327,6 +383,7 @@ const QuickLinksDropdown = memo(() => {
       isOpen={isOpen}
       onClose={onClose}
       width="600px"
+      title="Acesso Rápido"
       trigger={
         <Button
           variant="ghost"
@@ -344,8 +401,8 @@ const QuickLinksDropdown = memo(() => {
       }
       showFooter={true}
       footerContent={
-        <Flex justify="space-between" align="center">
-          <Box>
+        <Flex justify="space-between" align="center" flexDir={{ base: 'column', md: 'row' }} gap={{ base: 4, md: 0 }}>
+          <Box textAlign={{ base: 'center', md: 'left' }}>
             <Text fontSize="sm" fontWeight="semibold" color="gray.900">
               Começar agora
             </Text>
@@ -360,6 +417,8 @@ const QuickLinksDropdown = memo(() => {
             borderColor="orange.500"
             borderWidth="2px"
             color="orange.500"
+            px={6}
+            w={{ base: 'full', md: 'auto' }}
             _hover={{ bg: 'orange.50', borderColor: 'orange.600', color: 'orange.600' }}
           >
             Acessar dashboard
@@ -368,26 +427,13 @@ const QuickLinksDropdown = memo(() => {
       }
     >
       <Box p={5}>
-        <Flex justify="space-between" align="center" mb={4}>
-          <Text fontWeight="semibold" fontSize="sm" color="gray.900">
-            Acesso Rápido
-          </Text>
-          <ChakraLink
-            as={Link}
-            href="/dashboard"
-            fontSize="xs"
-            color="orange.500"
-            fontWeight="medium"
-            _hover={{ color: 'orange.600', textDecoration: 'underline' }}
-            onClick={onClose}
-          >
-            Ver tudo
-          </ChakraLink>
-        </Flex>
+        <Text fontWeight="semibold" fontSize="sm" color="gray.900" mb={4}>
+          Acesso Rápido
+        </Text>
         
         <Separator mb={4} borderColor="gray.200" />
         
-        <SimpleGrid columns={2} gap={2}>
+        <SimpleGrid columns={{ base: 1, md: 2 }} gap={2}>
           {menuItems.map((item) => (
             <ChakraLink
               key={item.key}
@@ -435,28 +481,48 @@ const SectorItem = memo(({ sector, onClose }: SectorItemProps) => {
   const hasSubsectors = sector.subsectors && sector.subsectors.length > 0;
 
   return (
-    <Box>
+    <Box 
+      borderRadius="md"
+      border="1px solid"
+      borderColor="gray.100"
+      _hover={{ borderColor: 'gray.200', bg: 'gray.50' }}
+      transition="all 0.2s"
+      overflow="hidden"
+    >
       <Flex
-        px={4}
-        py={3}
-        mx={2}
-        borderRadius="md"
-        _hover={{ bg: 'gray.50' }}
-        transition="all 0.2s"
-        cursor="pointer"
-        onClick={() => hasSubsectors ? setIsExpanded(!isExpanded) : window.location.href = `/setores/${sector.id}`}
+        px={3}
+        py={2.5}
+        align="center"
+        gap={2}
       >
-        <HStack align="flex-start" gap={3} flex={1}>
+        <ChakraLink
+          as={Link}
+          href={`/setores/${sector.id}`}
+          display="flex"
+          flex={1}
+          gap={2.5}
+          alignItems="center"
+          _hover={{ textDecoration: 'none' }}
+          onClick={onClose}
+        >
           <Box
-            p={2}
+            p={1.5}
             bg="orange.50"
             borderRadius="md"
             color="orange.500"
+            flexShrink={0}
           >
-            <Icon name="suitcase" className="h-5 w-5" />
+            <Icon name="folder" className="h-4 w-4" />
           </Box>
-          <VStack align="stretch" gap={0.5} flex={1}>
-            <Text fontSize="sm" fontWeight="medium" color="gray.900">
+          <VStack align="stretch" gap={0} flex={1} minW={0}>
+            <Text 
+              fontSize="sm" 
+              fontWeight="medium" 
+              color="gray.900" 
+              lineClamp={1}
+              _groupHover={{ color: 'orange.600' }}
+              transition="color 0.2s"
+            >
               {sector.name}
             </Text>
             {sector.description && (
@@ -465,42 +531,54 @@ const SectorItem = memo(({ sector, onClose }: SectorItemProps) => {
               </Text>
             )}
           </VStack>
-          {hasSubsectors && (
+        </ChakraLink>
+        {hasSubsectors && (
+          <IconButton
+            size="xs"
+            variant="ghost"
+            aria-label={isExpanded ? "Recolher subsetores" : "Expandir subsetores"}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+            _hover={{ bg: 'gray.200' }}
+            color="gray.500"
+            borderRadius="md"
+          >
             <Icon 
               name="chevron-down" 
-              className={`h-4 w-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+              className={`h-3.5 w-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
             />
-          )}
-        </HStack>
+          </IconButton>
+        )}
       </Flex>
       
       {isExpanded && hasSubsectors && (
-        <VStack align="stretch" gap={1} pl={12} pr={2} pb={2}>
-          {sector.subsectors!.map(subsector => (
-            <ChakraLink
-              key={subsector.id}
-              as={Link}
-              href={`/subsetores/${subsector.id}`}
-              display="block"
-              px={3}
-              py={2}
-              borderRadius="md"
-              fontSize="xs"
-              color="gray.700"
-              _hover={{ bg: 'gray.50', textDecoration: 'none' }}
-              transition="all 0.2s"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-            >
-              <HStack gap={2}>
-                <Box w={1} h={1} bg="orange.400" borderRadius="full" />
-                <Text>{subsector.name}</Text>
-              </HStack>
-            </ChakraLink>
-          ))}
-        </VStack>
+        <Box borderTop="1px solid" borderColor="gray.100" bg="gray.50">
+          <VStack align="stretch" gap={0.5} p={2}>
+            {sector.subsectors!.map(subsector => (
+              <ChakraLink
+                key={subsector.id}
+                as={Link}
+                href={`/subsetores/${subsector.id}`}
+                display="block"
+                px={2.5}
+                py={1.5}
+                borderRadius="md"
+                fontSize="xs"
+                color="gray.700"
+                _hover={{ bg: 'white', textDecoration: 'none', color: 'orange.600' }}
+                transition="all 0.2s"
+                onClick={onClose}
+              >
+                <HStack gap={2}>
+                  <Box w={1} h={1} bg="orange.400" borderRadius="full" flexShrink={0} />
+                  <Text lineClamp={1}>{subsector.name}</Text>
+                </HStack>
+              </ChakraLink>
+            ))}
+          </VStack>
+        </Box>
       )}
     </Box>
   );
@@ -531,7 +609,8 @@ const SectorsDropdown = memo(({ pathname, sectors }: { pathname: string; sectors
     <CardDropdown
       isOpen={isOpen}
       onClose={onClose}
-      width="650px"
+      width="750px"
+      title="Setores"
       trigger={
         <Button
           variant="ghost"
@@ -549,8 +628,8 @@ const SectorsDropdown = memo(({ pathname, sectors }: { pathname: string; sectors
       }
       showFooter={true}
       footerContent={
-        <Flex justify="space-between" align="center">
-          <Box>
+        <Flex justify="space-between" align="center" flexDir={{ base: 'column', md: 'row' }} gap={{ base: 4, md: 0 }}>
+          <Box textAlign={{ base: 'center', md: 'left' }}>
             <Text fontSize="sm" fontWeight="semibold" color="gray.900">
               Explorar setores
             </Text>
@@ -565,6 +644,8 @@ const SectorsDropdown = memo(({ pathname, sectors }: { pathname: string; sectors
             borderColor="orange.500"
             borderWidth="2px"
             color="orange.500"
+            px={6}
+            w={{ base: 'full', md: 'auto' }}
             _hover={{ bg: 'orange.50', borderColor: 'orange.600', color: 'orange.600' }}
           >
             Ver todos
@@ -573,30 +654,19 @@ const SectorsDropdown = memo(({ pathname, sectors }: { pathname: string; sectors
       }
     >
       <Box p={5}>
-        <Flex justify="space-between" align="center" mb={4}>
-          <Text fontWeight="semibold" fontSize="sm" color="gray.900">
-            Setores
-          </Text>
-          <ChakraLink
-            as={Link}
-            href="/setores"
-            fontSize="xs"
-            color="orange.500"
-            fontWeight="medium"
-            _hover={{ color: 'orange.600', textDecoration: 'underline' }}
-            onClick={onClose}
-          >
-            Ver todos
-          </ChakraLink>
-        </Flex>
+        <Text fontWeight="semibold" fontSize="sm" color="gray.900" mb={4}>
+          Setores
+        </Text>
         
         <Separator mb={4} borderColor="gray.200" />
         
-        <VStack align="stretch" gap={0} maxH="320px" overflowY="auto">
-          {sectors.map(sector => (
-            <SectorItem key={sector.id} sector={sector} onClose={onClose} />
-          ))}
-        </VStack>
+        <Box maxH="400px" overflowY="auto">
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={2}>
+            {sectors.map(sector => (
+              <SectorItem key={sector.id} sector={sector} onClose={onClose} />
+            ))}
+          </SimpleGrid>
+        </Box>
       </Box>
     </CardDropdown>
   );
@@ -628,6 +698,7 @@ const AgenciesDropdown = memo(({ pathname, agencies }: { pathname: string; agenc
       isOpen={isOpen}
       onClose={onClose}
       width="700px"
+      title="Agências"
       trigger={
         <Button
           variant="ghost"
@@ -645,8 +716,8 @@ const AgenciesDropdown = memo(({ pathname, agencies }: { pathname: string; agenc
       }
       showFooter={true}
       footerContent={
-        <Flex justify="space-between" align="center">
-          <Box>
+        <Flex justify="space-between" align="center" flexDir={{ base: 'column', md: 'row' }} gap={{ base: 4, md: 0 }}>
+          <Box textAlign={{ base: 'center', md: 'left' }}>
             <Text fontSize="sm" fontWeight="semibold" color="gray.900">
               Encontre sua agência
             </Text>
@@ -661,6 +732,8 @@ const AgenciesDropdown = memo(({ pathname, agencies }: { pathname: string; agenc
             borderColor="orange.500"
             borderWidth="2px"
             color="orange.500"
+            px={6}
+            w={{ base: 'full', md: 'auto' }}
             _hover={{ bg: 'orange.50', borderColor: 'orange.600', color: 'orange.600' }}
           >
             Ver todas
@@ -669,27 +742,14 @@ const AgenciesDropdown = memo(({ pathname, agencies }: { pathname: string; agenc
       }
     >
       <Box p={5}>
-        <Flex justify="space-between" align="center" mb={4}>
-          <Text fontWeight="semibold" fontSize="sm" color="gray.900">
-            Agências
-          </Text>
-          <ChakraLink
-            as={Link}
-            href="/setores/5463d1ba-c290-428e-b39e-d7ad9c66eb71"
-            fontSize="xs"
-            color="orange.500"
-            fontWeight="medium"
-            _hover={{ color: 'orange.600', textDecoration: 'underline' }}
-            onClick={onClose}
-          >
-            Ver todas
-          </ChakraLink>
-        </Flex>
+        <Text fontWeight="semibold" fontSize="sm" color="gray.900" mb={4}>
+          Agências
+        </Text>
         
         <Separator mb={4} borderColor="gray.200" />
         
         <Box maxH="320px" overflowY="auto">
-          <SimpleGrid columns={2} gap={2}>
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={2}>
             {agencies.map(agency => (
               <ChakraLink
                 key={agency.id}
@@ -736,6 +796,7 @@ const AdminSectorDropdown = memo(({ sectors }: { sectors: Sector[] }) => {
       isOpen={isOpen}
       onClose={onClose}
       width="550px"
+      title="Administração de Setores"
       trigger={
         <Button
           variant="ghost"
@@ -753,8 +814,8 @@ const AdminSectorDropdown = memo(({ sectors }: { sectors: Sector[] }) => {
       }
       showFooter={true}
       footerContent={
-        <Flex justify="space-between" align="center">
-          <Box>
+        <Flex justify="space-between" align="center" flexDir={{ base: 'column', md: 'row' }} gap={{ base: 4, md: 0 }}>
+          <Box textAlign={{ base: 'center', md: 'left' }}>
             <Text fontSize="sm" fontWeight="semibold" color="gray.900">
               Gerenciar setores
             </Text>
@@ -769,6 +830,8 @@ const AdminSectorDropdown = memo(({ sectors }: { sectors: Sector[] }) => {
             borderColor="orange.500"
             borderWidth="2px"
             color="orange.500"
+            px={6}
+            w={{ base: 'full', md: 'auto' }}
             _hover={{ bg: 'orange.50', borderColor: 'orange.600', color: 'orange.600' }}
           >
             Ir para painel
@@ -777,22 +840,9 @@ const AdminSectorDropdown = memo(({ sectors }: { sectors: Sector[] }) => {
       }
     >
       <Box p={5}>
-        <Flex justify="space-between" align="center" mb={4}>
-          <Text fontWeight="semibold" fontSize="sm" color="gray.900">
-            Administração de Setores
-          </Text>
-          <ChakraLink
-            as={Link}
-            href="/admin-setor"
-            fontSize="xs"
-            color="orange.500"
-            fontWeight="medium"
-            _hover={{ color: 'orange.600', textDecoration: 'underline' }}
-            onClick={onClose}
-          >
-            Ver painel
-          </ChakraLink>
-        </Flex>
+        <Text fontWeight="semibold" fontSize="sm" color="gray.900" mb={4}>
+          Administração de Setores
+        </Text>
         
         <Separator mb={4} borderColor="gray.200" />
         
@@ -949,8 +999,12 @@ function ChakraNavbar() {
   const { agencies } = useOptimizedAgencies();
   
   // Mobile menu state
-  const { open: isMobileMenuOpen, onToggle: toggleMobileMenu } = useDisclosure();
+  const { open: isMobileMenuOpen, onToggle: toggleMobileMenu, onClose: closeMobileMenu } = useDisclosure();
   const { open: isMobileSectorsOpen, onToggle: toggleMobileSectors } = useDisclosure();
+  
+  // Mobile dropdown states
+  const { open: isMobileGalleryOpen, onToggle: toggleMobileGallery, onClose: closeMobileGallery } = useDisclosure();
+  const { open: isMobileQuickLinksOpen, onToggle: toggleMobileQuickLinks, onClose: closeMobileQuickLinks } = useDisclosure();
   
   // Early return if loading
   if (loading) {
@@ -1107,142 +1161,37 @@ function ChakraNavbar() {
             fontWeight="medium"
             color={pathname === '/home' ? 'white' : 'whiteAlpha.800'}
             _hover={{ color: 'white', textDecoration: 'none' }}
+            onClick={() => closeMobileMenu()}
           >
             Home
           </ChakraLink>
           
-          <ChakraLink
-            as={Link}
-            href="/dashboard"
-            py={2}
-            fontSize="sm"
-            fontWeight="medium"
-            color={pathname === '/dashboard' ? 'white' : 'whiteAlpha.800'}
-            _hover={{ color: 'white', textDecoration: 'none' }}
-          >
-            Dashboard
-          </ChakraLink>
-          
-          <Box>
-            <Flex
-              justify="space-between"
-              align="center"
-              py={2}
-              onClick={toggleMobileSectors}
-              cursor="pointer"
-            >
-              <ChakraLink
-                as={Link}
-                href="/setores"
-                fontSize="sm"
-                fontWeight="medium"
-                color={pathname.startsWith('/setores') ? 'white' : 'whiteAlpha.800'}
-                onClick={(e: any) => {
-                  if (navigationSectors.length > 0) {
-                    e.preventDefault();
-                  }
-                }}
-              >
-                Setores
-              </ChakraLink>
-              {navigationSectors.length > 0 && (
-                <Icon 
-                  name="chevron-down" 
-                  className={`h-4 w-4 transition-transform text-white/80 ${
-                    isMobileSectorsOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              )}
-            </Flex>
-            
-            {isMobileSectorsOpen && navigationSectors.length > 0 && (
-              <VStack
-                pl={4}
-                borderLeft="1px"
-                borderColor="whiteAlpha.300"
-                ml={2}
-                mt={1}
-                maxH="240px"
-                overflowY="auto"
-                align="stretch"
-                gap={1}
-              >
-                {navigationSectors.map((sector) => (
-                  <ChakraLink
-                    key={sector.id}
-                    as={Link}
-                    href={`/setores/${sector.id}`}
-                    py={1}
-                    fontSize="sm"
-                    color="whiteAlpha.800"
-                    _hover={{ color: 'white', textDecoration: 'none' }}
-                  >
-                    {sector.name}
-                  </ChakraLink>
-                ))}
-              </VStack>
-            )}
+          {/* Quick Links Mobile Dropdown */}
+          <Box display={{ base: 'block', md: 'none' }}>
+            <QuickLinksDropdown />
           </Box>
           
-          <ChakraLink
-            as={Link}
-            href="/setores/5463d1ba-c290-428e-b39e-d7ad9c66eb71"
-            py={2}
-            fontSize="sm"
-            fontWeight="medium"
-            color={pathname.includes('5463d1ba-c290-428e-b39e-d7ad9c66eb71') ? 'white' : 'whiteAlpha.800'}
-            _hover={{ color: 'white', textDecoration: 'none' }}
-          >
-            Agências
-          </ChakraLink>
+          {/* Gallery Mobile Dropdown */}
+          <Box display={{ base: 'block', md: 'none' }}>
+            <GalleryDropdown pathname={pathname} />
+          </Box>
           
-          <ChakraLink
-            as={Link}
-            href="/galeria"
-            py={2}
-            fontSize="sm"
-            fontWeight="medium"
-            color={pathname === '/galeria' ? 'white' : 'whiteAlpha.800'}
-            _hover={{ color: 'white', textDecoration: 'none' }}
-          >
-            Galeria
-          </ChakraLink>
+          {/* Sectors Mobile Dropdown */}
+          <Box display={{ base: 'block', md: 'none' }}>
+            <SectorsDropdown pathname={pathname} sectors={navigationSectors} />
+          </Box>
           
-          <ChakraLink
-            as={Link}
-            href="/eventos?view=calendar"
-            py={2}
-            fontSize="sm"
-            fontWeight="medium"
-            color={pathname === '/eventos' && pathname.includes('view=calendar') ? 'white' : 'whiteAlpha.800'}
-            _hover={{ color: 'white', textDecoration: 'none' }}
-          >
-            Calendário
-          </ChakraLink>
+          {/* Agencies Mobile Dropdown */}
+          <Box display={{ base: 'block', md: 'none' }}>
+            <AgenciesDropdown pathname={pathname} agencies={agencies} />
+          </Box>
           
-          <ChakraLink
-            as={Link}
-            href="/sistemas"
-            py={2}
-            fontSize="sm"
-            fontWeight="medium"
-            color={pathname === '/sistemas' ? 'white' : 'whiteAlpha.800'}
-            _hover={{ color: 'white', textDecoration: 'none' }}
-          >
-            Sistemas
-          </ChakraLink>
-          
-          <ChakraLink
-            as={Link}
-            href="/noticias"
-            py={2}
-            fontSize="sm"
-            fontWeight="medium"
-            color={pathname === '/noticias' ? 'white' : 'whiteAlpha.800'}
-            _hover={{ color: 'white', textDecoration: 'none' }}
-          >
-            Notícias
-          </ChakraLink>
+          {/* Admin Panels for Mobile */}
+          {profile?.isSectorAdmin && (
+            <Box display={{ base: 'block', md: 'none' }}>
+              <AdminSectorDropdown sectors={adminSectors} />
+            </Box>
+          )}
           
           <Separator my={4} borderColor="whiteAlpha.300" />
           

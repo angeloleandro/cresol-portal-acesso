@@ -18,6 +18,7 @@ export interface Collection {
   item_count?: number;
   items?: CollectionItem[];
   preview_items?: CollectionItem[];
+  [key: string]: unknown;
 }
 
 export interface CollectionItem {
@@ -31,6 +32,7 @@ export interface CollectionItem {
   
   // Dados do item associado (populated via join)
   item_data?: GalleryImage | DashboardVideo;
+  [key: string]: unknown;
 }
 
 export interface CollectionWithItems extends Collection {

@@ -62,7 +62,7 @@ export function DocumentsManagement({
     { value: 'rar', label: 'RAR' }
   ], []);
 
-  const deleteModal = useDeleteModal('documento');
+  const deleteModal = useDeleteModal<SubsectorDocument>('documento');
 
   const handleOpenModal = (documentItem?: SubsectorDocument) => {
     if (documentItem) {

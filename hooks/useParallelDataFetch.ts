@@ -3,6 +3,94 @@
 import { useEffect, useState, useCallback } from 'react';
 import { cachedQueries, supabase } from '@/lib/supabase/cached-client';
 import { logger } from '@/lib/production-logger';
+import type { UserProfile } from '@/lib/types/common';
+
+/**
+ * Interface para banners da página inicial
+ */
+export interface Banner {
+  id: string;
+  title: string;
+  image_url: string;
+  link_url?: string;
+  order_index: number;
+  is_active: boolean;
+}
+
+/**
+ * Interface para notícias
+ */
+export interface News {
+  id: string;
+  title: string;
+  content: string;
+  image_url?: string;
+  is_featured: boolean;
+  created_at: string;
+}
+
+/**
+ * Interface para eventos
+ */
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  start_date: string;
+  end_date?: string;
+  location?: string;
+  is_active: boolean;
+}
+
+/**
+ * Interface para vídeos
+ */
+export interface Video {
+  id: string;
+  title: string;
+  description?: string;
+  video_url: string;
+  thumbnail_url?: string;
+  duration?: number;
+  created_at: string;
+}
+
+/**
+ * Interface para imagens da galeria
+ */
+export interface GalleryImage {
+  id: string;
+  title: string;
+  image_url: string;
+  description?: string;
+  category?: string;
+  created_at: string;
+}
+
+/**
+ * Interface para links do sistema
+ */
+export interface SystemLink {
+  id: string;
+  name: string;
+  url: string;
+  icon?: string;
+  description?: string;
+  order_index: number;
+  is_active: boolean;
+}
+
+/**
+ * Interface para indicadores econômicos
+ */
+export interface EconomicIndicator {
+  id: string;
+  name: string;
+  value: string;
+  unit?: string;
+  change_percentage?: number;
+  updated_at: string;
+}
 
 interface ParallelFetchConfig {
   banners?: boolean;
@@ -16,21 +104,22 @@ interface ParallelFetchConfig {
 }
 
 interface ParallelFetchResult {
-  banners?: any[];
-  news?: any[];
-  events?: any[];
-  videos?: any[];
-  gallery?: any[];
-  systemLinks?: any[];
-  economicIndicators?: any[];
-  userProfile?: any;
+  banners?: Banner[];
+  news?: News[];
+  events?: Event[];
+  videos?: Video[];
+  gallery?: GalleryImage[];
+  systemLinks?: SystemLink[];
+  economicIndicators?: EconomicIndicator[];
+  userProfile?: UserProfile;
   loading: boolean;
   error: Error | null;
 }
 
 /**
- * useParallelDataFetch function
- * @todo Add proper documentation
+ * Hook para carregamento paralelo de dados da aplicação
+ * @param config - Configuração dos dados a serem carregados
+ * @returns Resultado do carregamento com dados tipados
  */
 export function useParallelDataFetch(config: ParallelFetchConfig): ParallelFetchResult {
   const [data, setData] = useState<ParallelFetchResult>({
@@ -139,8 +228,8 @@ export function useParallelDataFetch(config: ParallelFetchConfig): ParallelFetch
  * Hook para página home que carrega todos os dados necessários em paralelo
  */
 /**
- * useHomePageData function
- * @todo Add proper documentation
+ * Hook especializado para dados da página inicial
+ * @returns Dados da homepage com tipos específicos
  */
 export function useHomePageData() {
   return useParallelDataFetch({
@@ -157,11 +246,12 @@ export function useHomePageData() {
  * Hook para páginas de setor que carrega dados específicos
  */
 /**
- * useSectorPageData function
- * @todo Add proper documentation
+ * Hook especializado para dados de páginas de setor
+ * @param sectorId - ID do setor
+ * @returns Dados do setor com informações paralelas
  */
 export function useSectorPageData(sectorId: string) {
-  const [sectorData, setSectorData] = useState<any>(null);
+  const [sectorData, setSectorData] = useState<{ id: string; name: string; description?: string } | null>(null);
   const parallelData = useParallelDataFetch({
     news: 6,
     events: 6,
@@ -197,8 +287,9 @@ export function useSectorPageData(sectorId: string) {
  * Hook para pré-carregar dados antes da navegação
  */
 /**
- * usePrefetchData function
- * @todo Add proper documentation
+ * Hook para pré-carregamento de dados
+ * @param config - Configuração dos dados a serem pré-carregados
+ * @returns Função de prefetch
  */
 export function usePrefetchData(config: ParallelFetchConfig) {
   const prefetch = useCallback(() => {

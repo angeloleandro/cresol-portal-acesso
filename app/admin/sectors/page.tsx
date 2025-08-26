@@ -3,8 +3,6 @@
 import { Tabs } from "@chakra-ui/react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LuFolder } from "react-icons/lu";
-
 import { 
   StandardizedAdminLayout, 
   StandardizedPageHeader, 
@@ -17,6 +15,7 @@ import SectorCard from '@/app/components/admin/SectorCard';
 import SubsectorCard from '@/app/components/admin/SubsectorCard';
 import { useAlert } from '@/app/components/alerts';
 import { FormSelect } from '@/app/components/forms/FormSelect';
+import { Icon } from '@/app/components/icons/Icon';
 import { Button } from '@/app/components/ui/Button';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
@@ -24,8 +23,6 @@ import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
-
-import { Icon } from '../../components/icons';
 
 interface Sector {
   id: string;
@@ -341,12 +338,12 @@ export default function SectorsManagement() {
     {
       value: 'sectors',
       label: 'Setores',
-      icon: <LuFolder />
+      icon: <Icon name="folder" />
     },
     {
       value: 'subsectors',
       label: 'Sub-setores',
-      icon: <LuFolder />
+      icon: <Icon name="folder" />
     }
   ];
 

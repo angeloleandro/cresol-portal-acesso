@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 
+import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { createClient } from '@/lib/supabase/client';
@@ -35,8 +36,11 @@ export function SubsectorsManagement({
     sector_id: sectorId
   });
 
+  // Alert system
+  const { showAlert } = useAlert();
+  
   // Modal de exclusão
-  const deleteModal = useDeleteModal('subsetor');
+  const deleteModal = useDeleteModal<Subsector>('subsetor');
 
   const handleOpenModal = (subsector?: Subsector) => {
     // Reset states
@@ -152,9 +156,11 @@ export function SubsectorsManagement({
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        // TODO: Implementar sistema de notificação moderno (toast/alert)
-        console.error('Erro: Usuário não autenticado');
-        // Por ora, mostrar erro no console até implementar sistema de notificação
+        showAlert({
+          status: 'error',
+          title: 'Erro de Autenticação',
+          description: 'Usuário não autenticado'
+        });
         return;
       }
 
@@ -174,9 +180,12 @@ export function SubsectorsManagement({
       await onRefresh();
     } catch (error: any) {
       console.error('Erro ao excluir subsetor:', error);
-      // TODO: Implementar sistema de notificação moderno (toast/alert)
-      console.error('Erro ao excluir subsetor:', error.message || error);
-      // Por ora, mostrar erro no console até implementar sistema de notificação
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao excluir subsetor';
+      showAlert({
+        status: 'error',
+        title: 'Erro ao Excluir Subsetor',
+        description: errorMessage
+      });
     }
   };
 

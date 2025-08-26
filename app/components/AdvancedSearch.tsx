@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Button
-} from '@nextui-org/react';
+import { Button, Menu, Checkbox } from '@chakra-ui/react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { createClient } from '@/lib/supabase/client';
@@ -595,53 +589,58 @@ export default function AdvancedSearch({
                       )}
                     </label>
                     
-                    <Dropdown placement="bottom-start">
-                      <DropdownTrigger>
+                    <Menu.Root closeOnSelect={false}>
+                      <Menu.Trigger asChild>
                         <Button
-                          variant="bordered"
-                          className="w-full justify-between font-normal border-gray-300 hover:border-primary"
-                          endContent={
-                            <Icon name="chevron-down" className="h-4 w-4 text-gray-400" />
-                          }
+                          variant="outline"
+                          w="full"
+                          justifyContent="space-between"
+                          fontWeight="normal"
+                          borderColor="gray.300"
+                          _hover={{ borderColor: 'orange.500' }}
                         >
-                          <span className="truncate text-left">
+                          <span className="truncate">
                             {selectedFilter.sectors.length > 0
                               ? `${selectedFilter.sectors.length} selecionado${selectedFilter.sectors.length > 1 ? 's' : ''}`
                               : 'Selecionar setores'
                             }
                           </span>
+                          <Icon name="chevron-down" className="h-4 w-4 text-gray-400" />
                         </Button>
-                      </DropdownTrigger>
+                      </Menu.Trigger>
                       
-                      <DropdownMenu
-                        aria-label="Selecionar setores"
-                        className="min-w-[250px] max-h-[300px] overflow-y-auto scrollbar-branded"
-                        selectedKeys={selectedFilter.sectors}
-                        selectionMode="multiple"
-                        closeOnSelect={false}
-                        onSelectionChange={(keys) => {
-                          const selected = Array.from(keys) as string[];
-                          setSelectedFilter(prev => ({ ...prev, sectors: selected }));
-                        }}
-                        itemClasses={{
-                          base: [
-                            "rounded-md",
-                            "text-default-700",
-                            "transition-colors",
-                            "data-[hover=true]:bg-primary",
-                            "data-[hover=true]:text-white",
-                            "data-[selectable=true]:focus:bg-primary",
-                            "data-[selectable=true]:focus:text-white",
-                          ]
-                        }}
-                      >
-                        {sectors.map((sector) => (
-                          <DropdownItem key={sector.id} textValue={sector.name}>
-                            <span className="truncate">{sector.name}</span>
-                          </DropdownItem>
-                        ))}
-                      </DropdownMenu>
-                    </Dropdown>
+                      <Menu.Positioner>
+                        <Menu.Content minW="250px" maxH="300px" overflowY="auto" className="scrollbar-branded">
+                          {sectors.map((sector) => (
+                            <Menu.Item key={sector.id} value={sector.id} closeOnSelect={false}>
+                              <Checkbox.Root
+                                checked={selectedFilter.sectors.includes(sector.id)}
+                                onCheckedChange={(details: any) => {
+                                  const checked = details.checked;
+                                  if (checked) {
+                                    setSelectedFilter(prev => ({
+                                      ...prev,
+                                      sectors: [...prev.sectors, sector.id]
+                                    }));
+                                  } else {
+                                    setSelectedFilter(prev => ({
+                                      ...prev,
+                                      sectors: prev.sectors.filter(id => id !== sector.id)
+                                    }));
+                                  }
+                                }}
+                                colorPalette="orange"
+                              >
+                                <Checkbox.Indicator />
+                                <Checkbox.Label>
+                                  <span className="truncate">{sector.name}</span>
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                            </Menu.Item>
+                          ))}
+                        </Menu.Content>
+                      </Menu.Positioner>
+                    </Menu.Root>
                   </div>
 
                   {/* Tags populares */}

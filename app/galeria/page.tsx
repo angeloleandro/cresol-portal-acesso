@@ -1,12 +1,9 @@
-"use client";
-
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState, Suspense } from "react";
+import { Suspense } from "react";
 
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { processSupabaseImageUrl, debugImageUrl } from "@/lib/imageUtils";
-import { createClient } from '@/lib/supabase/client';
+import { CreateClient } from '@/lib/supabase/server';
 
 import Breadcrumb from "../components/Breadcrumb";
 import { CollectionSection } from "../components/Collections/CollectionSection";
@@ -31,83 +28,70 @@ interface Collection {
   description: string | null;
 }
 
-function GalleryContent() {
-  const [images, setImages] = useState<GalleryImage[]>([]);
-  const [previewImages, setPreviewImages] = useState<BaseImage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [collection, setCollection] = useState<Collection | null>(null);
-  const searchParams = useSearchParams();
-  const collectionId = searchParams.get('collection');
+async function GalleryContent({ 
+  searchParams 
+}: { 
+  searchParams: { collection?: string } 
+}) {
+  const collectionId = searchParams.collection;
+  let images: GalleryImage[] = [];
+  let collection: Collection | null = null;
 
-  useEffect(() => {
-    // Só executar no lado do cliente
-    if (typeof window === 'undefined') return;
+  try {
+    const supabase = CreateClient();
     
-    const fetchData = async () => {
-      try {
-        // If collection ID is provided, fetch collection details and its items
-        if (collectionId) {
-          // Fetch collection details
-          const { data: collectionData } = await createClient()
-            .from("collections")
-            .select("*")
-            .eq("id", collectionId)
-            .single();
-          
-          setCollection(collectionData);
+    if (collectionId) {
+      // Fetch collection details
+      const { data: collectionData } = await supabase
+        .from("collections")
+        .select("id, name, description")
+        .eq("id", collectionId)
+        .single();
+      
+      collection = collectionData;
 
-          // Fetch collection items
-          const { data: itemsData } = await createClient()
-            .from("collection_items")
-            .select(`
-              *,
-              gallery_images!inner(*)
-            `)
-            .eq("collection_id", collectionId)
-            .eq("item_type", "image")
-            .order("order_index", { ascending: true });
+      // Fetch collection items
+      const { data: itemsData } = await supabase
+        .from("collection_items")
+        .select(`
+          order_index,
+          gallery_images!inner(id, title, image_url, is_active, order_index)
+        `)
+        .eq("collection_id", collectionId)
+        .eq("item_type", "image")
+        .order("order_index", { ascending: true });
 
-          const collectionImages = itemsData?.map(item => item.gallery_images) || [];
-          const activeImages = collectionImages.filter(img => img.is_active);
-          setImages(activeImages);
-        } else {
-          // Fetch all images if no collection specified
-          const { data } = await createClient()
-            .from("gallery_images")
-            .select("*")
-            .eq("is_active", true)
-            .order("order_index", { ascending: true });
-          setImages(data || []);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar imagens:', error);
-      } finally {
-        setLoading(false);
-      }
+      const collectionImages = itemsData?.map((item: any) => item.gallery_images) || [];
+      images = collectionImages.filter((img: any) => img.is_active);
+    } else {
+      // Fetch all images if no collection specified
+      const { data } = await supabase
+        .from("gallery_images")
+        .select("id, title, image_url, is_active, order_index")
+        .eq("is_active", true)
+        .order("order_index", { ascending: true });
+      images = data || [];
+    }
+  } catch (error) {
+    console.error('Erro ao buscar imagens:', error);
+  }
+
+  // Process images for the ImagePreview component
+  const previewImages: BaseImage[] = images.map(img => {
+    const processedUrl = processSupabaseImageUrl(img.image_url) || img.image_url;
+    
+    // Debug URLs in development
+    if (process.env.NODE_ENV === 'development') {
+      debugImageUrl(processedUrl, `Gallery Image: ${img.title}`);
+    }
+    
+    return {
+      id: img.id,
+      url: processedUrl,
+      title: img.title || "Imagem da galeria",
+      alt: img.title || "Imagem da galeria"
     };
-    fetchData();
-  }, [collectionId]);
-
-  // Processar imagens para o componente ImagePreview
-  useEffect(() => {
-    const processedImages = images.map(img => {
-      const processedUrl = processSupabaseImageUrl(img.image_url) || img.image_url;
-      
-      // Debug das URLs em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
-        debugImageUrl(processedUrl, `Gallery Image: ${img.title}`);
-      }
-      
-      return {
-        id: img.id,
-        url: processedUrl,
-        title: img.title || "Imagem da galeria",
-        alt: img.title || "Imagem da galeria"
-      };
-    });
-    
-    setPreviewImages(processedImages);
-  }, [images]);
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -154,14 +138,7 @@ function GalleryContent() {
         )}
 
         <div className="card">
-          {loading ? (
-            <div className="text-center py-12">
-              <UnifiedLoadingSpinner 
-                size="default" 
-                message={LOADING_MESSAGES.gallery}
-              />
-            </div>
-          ) : images.length === 0 ? (
+          {images.length === 0 ? (
             <div className="text-center py-12">
               <Icon name="image" className="mx-auto h-16 w-16 text-muted mb-4" />
               <h3 className="heading-3 text-title mb-2">Nenhuma imagem encontrada</h3>
@@ -185,7 +162,11 @@ function GalleryContent() {
   );
 }
 
-export default function GalleryPage() {
+export default function GalleryPage({
+  searchParams,
+}: {
+  searchParams: { collection?: string }
+}) {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50">
@@ -198,7 +179,7 @@ export default function GalleryPage() {
         <Footer />
       </div>
     }>
-      <GalleryContent />
+      <GalleryContent searchParams={searchParams} />
     </Suspense>
   );
 } 

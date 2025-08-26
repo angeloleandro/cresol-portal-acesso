@@ -2,6 +2,7 @@
 
 import React, { useState, memo, useCallback } from 'react';
 
+import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import UserSelectionFilter from '@/app/components/ui/UserSelectionFilter';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
@@ -46,8 +47,11 @@ const GroupsManagement = memo(function GroupsManagement({
   });
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   
+  // Alert system
+  const { showAlert } = useAlert();
+  
   // Modal de exclusão
-  const deleteModal = useDeleteModal('grupo');
+  const deleteModal = useDeleteModal<Group>('grupo');
 
   const handleOpenModal = useCallback((editGroup?: Group) => {
     if (editGroup) {
@@ -95,9 +99,11 @@ const GroupsManagement = memo(function GroupsManagement({
     }
 
     if (selectedUserIds.length === 0) {
-      // TODO: Implementar sistema de notificação moderno (toast/alert)
-      console.warn('Validação: Selecione pelo menos um membro para o grupo');
-      // Por ora, retornar sem ação até implementar sistema de notificação
+      showAlert({
+        status: 'warning',
+        title: 'Validação',
+        description: 'Selecione pelo menos um membro para o grupo'
+      });
       return;
     }
 
@@ -142,13 +148,16 @@ const GroupsManagement = memo(function GroupsManagement({
       await onRefresh();
       handleCloseModal();
     } catch (error) {
-      // TODO: Implementar sistema de notificação moderno (toast/alert)
-      console.error('Erro ao salvar grupo:', error instanceof Error ? error.message : error);
-      // Por ora, mostrar erro no console até implementar sistema de notificação
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar grupo';
+      showAlert({
+        status: 'error',
+        title: 'Erro ao Salvar Grupo',
+        description: errorMessage
+      });
     } finally {
       setIsSubmitting(false);
     }
-  }, [isSubmitting, currentGroup, selectedUserIds, isEditMode, editingGroupId, sectorId, onRefresh, handleCloseModal]);
+  }, [isSubmitting, currentGroup, selectedUserIds, isEditMode, editingGroupId, sectorId, onRefresh, handleCloseModal, showAlert]);
 
   const handleUserSelectionChange = useCallback((userIds: string[]) => {
     setSelectedUserIds(userIds);
@@ -181,11 +190,14 @@ const GroupsManagement = memo(function GroupsManagement({
 
       await onRefresh();
     } catch (error) {
-      // TODO: Implementar sistema de notificação moderno (toast/alert)
-      console.error('Erro ao excluir grupo:', error instanceof Error ? error.message : error);
-      // Por ora, mostrar erro no console até implementar sistema de notificação
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao excluir grupo';
+      showAlert({
+        status: 'error',
+        title: 'Erro ao Excluir Grupo',
+        description: errorMessage
+      });
     }
-  }, [onRefresh]);
+  }, [onRefresh, showAlert]);
 
   return (
     <div className="p-6">

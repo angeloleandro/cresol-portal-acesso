@@ -37,6 +37,7 @@ interface Event {
   location_name?: string;
   location_id?: string;
   sector_name?: string;
+  [key: string]: unknown;
 }
 
 export default function EventsPage() {
@@ -70,7 +71,7 @@ export default function EventsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Modal de exclusão
-  const deleteModal = useDeleteModal('evento');
+  const deleteModal = useDeleteModal<Event>('evento');
 
   // Estados do modal de evento
   const [eventModal, setEventModal] = useState({

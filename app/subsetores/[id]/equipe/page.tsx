@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { useAlert } from '@/app/components/alerts';
+import { logger } from '@/lib/production-logger';
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
@@ -102,7 +103,7 @@ export default function SubsectorTeamPage() {
       .single();
 
     if (error) {
-      console.error('Erro ao buscar sub-setor:', error);
+      logger.error('Erro ao buscar sub-setor', error, { subsectorId });
     } else {
       setSubsector(data);
     }
@@ -116,10 +117,10 @@ export default function SubsectorTeamPage() {
       if (response.ok) {
         setTeamMembers(data.teamMembers || []);
       } else {
-        console.error('Erro ao buscar equipe:', data.error);
+        logger.error('Erro ao buscar equipe', data.error, { subsectorId });
       }
     } catch (error) {
-      console.error('Erro ao buscar equipe:', error);
+      logger.error('Erro ao buscar equipe', error, { subsectorId });
     }
   }, [subsectorId]);
 
@@ -193,7 +194,7 @@ export default function SubsectorTeamPage() {
       .order('full_name');
 
     if (error) {
-      console.error('Erro ao buscar usuários:', error);
+      logger.error('Erro ao buscar usuários', error, { context: 'loadUsers' });
     } else {
       setAllUsers(data || []);
     }
@@ -206,7 +207,7 @@ export default function SubsectorTeamPage() {
       .order('name');
 
     if (error) {
-      console.error('Erro ao buscar cargos:', error);
+      logger.error('Erro ao buscar cargos', error, { context: 'loadPositions' });
     } else {
       setPositions(data || []);
     }
@@ -248,7 +249,11 @@ export default function SubsectorTeamPage() {
         showError('Erro ao adicionar membro', data.error);
       }
     } catch (error) {
-      console.error('Erro ao adicionar membro:', error);
+      logger.error('Erro ao adicionar membro', error, { 
+        userId: selectedUserId, 
+        positionId: memberPositionId,
+        subsectorId 
+      });
       showError('Erro ao adicionar membro', 'Ocorreu um erro inesperado. Tente novamente.');
     }
   };

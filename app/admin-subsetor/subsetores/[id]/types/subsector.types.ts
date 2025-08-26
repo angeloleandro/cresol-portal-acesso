@@ -27,6 +27,7 @@ export interface SubsectorEvent {
   created_at: string;
   updated_at: string;
   subsector_id: string;
+  [key: string]: unknown;
 }
 
 export interface SubsectorNews {
@@ -40,6 +41,7 @@ export interface SubsectorNews {
   created_at: string;
   updated_at: string;
   subsector_id: string;
+  [key: string]: unknown;
 }
 
 export interface SubsectorDocument {
@@ -54,6 +56,7 @@ export interface SubsectorDocument {
   created_at: string;
   updated_at: string;
   subsector_id: string;
+  [key: string]: unknown;
 }
 
 export interface SubsectorVideo {
@@ -75,6 +78,7 @@ export interface SubsectorVideo {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  [key: string]: unknown;
 }
 
 export interface SubsectorImage {
@@ -96,6 +100,7 @@ export interface SubsectorImage {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  [key: string]: unknown;
 }
 
 export interface System {
@@ -104,6 +109,7 @@ export interface System {
   description?: string;
   url: string;
   icon?: string;
+  [key: string]: unknown;
 }
 
 export interface MessageGroup {
@@ -121,12 +127,14 @@ export interface MessageGroup {
   sectors?: { name: string };
   subsectors?: { name: string; sectors: { name: string } };
   profiles?: { full_name: string };
+  [key: string]: unknown;
 }
 
 // Mantendo interface Group para compatibilidade com código existente
 export interface Group extends MessageGroup {
   is_automatic: boolean;
   members: string[];
+  [key: string]: unknown;
 }
 
 export type MessageType = 'general' | 'urgent' | 'announcement';
@@ -147,6 +155,7 @@ export interface SubsectorMessage {
   created_at: string;
   updated_at: string;
   subsector_id: string;
+  [key: string]: unknown;
 }
 
 export interface User {

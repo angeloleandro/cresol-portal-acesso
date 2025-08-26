@@ -62,4 +62,9 @@ export const createClient = () => {
 
 // IMPORTANTE: Exportar uma função que cria nova instância, não uma instância fixa
 // Isso resolve o problema de carregamento direto de páginas
-export const supabase = createClient()
+// export const supabase = createClient() // REMOVIDO - causava problemas de sessão
+
+// Para compatibilidade com código existente, criar função helper
+export function getSupabase() {
+  return createClient()
+}

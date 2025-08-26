@@ -38,6 +38,7 @@ interface Document {
   sector_name?: string;
   sector_id?: string;
   subsector_id?: string;
+  [key: string]: unknown;
 }
 
 
@@ -201,7 +202,7 @@ export default function DocumentsAdminPage() {
     }
   };
 
-  const deleteModal = useDeleteModal('documento');
+  const deleteModal = useDeleteModal<Document>('documento');
 
   const handleDelete = async (document: Document) => {
     try {

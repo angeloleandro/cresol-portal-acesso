@@ -20,6 +20,7 @@ export interface BaseEvent {
   is_featured: boolean;
   is_published: boolean;
   created_at: string;
+  [key: string]: unknown;
 }
 
 // Configuration interface for different contexts
@@ -57,7 +58,7 @@ export function EventsManagement<T extends BaseEvent>({
   config
 }: EventsManagementProps<T>) {
   const alert = useAlert();
-  const deleteModal = useDeleteModal('evento');
+  const deleteModal = useDeleteModal<T>('evento');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);

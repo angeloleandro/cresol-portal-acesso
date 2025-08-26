@@ -32,7 +32,7 @@ export function DocumentsManagement({
 }: DocumentsManagementProps) {
   const { showError, showSuccess } = useAlert();
   const supabase = useSupabaseClient();
-  const deleteModal = useDeleteModal('documento');
+  const deleteModal = useDeleteModal<SectorDocument>('documento');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<SectorDocument>>({

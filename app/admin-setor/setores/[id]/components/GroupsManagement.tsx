@@ -18,7 +18,7 @@ interface GroupsManagementProps {
 export function GroupsManagement({ sectorId }: GroupsManagementProps) {
   const { showError, showSuccess } = useAlert();
   const { groups, automaticGroups, refreshGroupsData } = useSectorDataContext();
-  const deleteModal = useDeleteModal('grupo');
+  const deleteModal = useDeleteModal<GroupWithUsers>('grupo');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({

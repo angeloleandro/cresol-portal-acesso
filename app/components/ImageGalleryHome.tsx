@@ -34,9 +34,10 @@ export default function ImageGalleryHome({ limit = 6 }: ImageGalleryHomeProps) {
       try {
         const { data, error } = await supabase
           .from("gallery_images")
-          .select("*")
+          .select("id, title, image_url, order_index")
           .eq("is_active", true)
-          .order("order_index", { ascending: true });
+          .order("order_index", { ascending: true })
+          .limit(limit);
         
         if (error) {
           console.error('Erro ao buscar imagens da galeria:', error);

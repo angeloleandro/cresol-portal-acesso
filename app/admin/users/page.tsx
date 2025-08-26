@@ -1,22 +1,6 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
-import { useState, useEffect, useCallback } from 'react';
-
-import { StandardizedButton } from '@/app/components/admin';
-import AdminHeader from '@/app/components/AdminHeader';
-import { useAlert } from '@/app/components/alerts';
-import Breadcrumb from '@/app/components/Breadcrumb';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
-import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { createClient } from '@/lib/supabase/client';
-
-import RoleModal from './components/RoleModal';
-import UserFilters from './components/UserFilters';
-import UserForm from './components/UserForm';
-import UserList from './components/UserList';
-
-import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { CreateClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import UsersClient from './components/UsersClient';
 
 interface ProfileUser {
   id: string;
@@ -53,375 +37,84 @@ interface Subsector {
   sector_id: string;
 }
 
-export default function UsersManagement() {
-  const router = useRouter();
-  const { showError, auth } = useAlert();
-  const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [users, setUsers] = useState<ProfileUser[]>([]);
-  const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
-  const [positions, setPositions] = useState<Position[]>([]);
-  const [sectors, setSectors] = useState<Sector[]>([]);
-  const [subsectors, setSubsectors] = useState<Subsector[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+export default async function UsersManagement() {
+  const supabase = CreateClient();
   
-  // Estados de filtro
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [locationFilter, setLocationFilter] = useState('all');
+  // Verificar autenticação e permissões
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
   
-  // Estados do modal de role
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [roleModalUserId, setRoleModalUserId] = useState<string | null>(null);
-  const [roleModalSelectedRole, setRoleModalSelectedRole] = useState<'user' | 'sector_admin' | 'subsector_admin' | 'admin'>('user');
-  
-  // Estados para associações de usuários
-  const [userSectors, setUserSectors] = useState<Record<string, string[]>>({});
-  const [userSubsectors, setUserSubsectors] = useState<Record<string, string[]>>({});
-
-  const handleAuthError = useCallback((error: string) => {
-    if (error.includes('JWT') || error.includes('token') || error.includes('unauthorized')) {
-      auth.sessionExpired();
-      router.replace('/login');
-      return true;
-    }
-    return false;
-  }, [router, auth]);
-
-  const fetchUserSectors = useCallback(async (userId: string) => {
-    try {
-      const { data, error } = await createClient()
-        .from('sector_admins')
-        .select('sector_id')
-        .eq('user_id', userId);
-      
-      if (error) throw error;
-      
-      const sectorIds = data?.map((item: { sector_id: string }) => item.sector_id) || [];
-      setUserSectors(prev => ({
-        ...prev,
-        [userId]: sectorIds
-      }));
-    } catch (error) {
-
-    }
-  }, []);
-
-  const fetchUserSubsectors = useCallback(async (userId: string) => {
-    try {
-      const { data, error } = await createClient()
-        .from('subsector_admins')
-        .select('subsector_id')
-        .eq('user_id', userId);
-      
-      if (error) throw error;
-      
-      const subsectorIds = data?.map((item: { subsector_id: string }) => item.subsector_id) || [];
-      setUserSubsectors(prev => ({
-        ...prev,
-        [userId]: subsectorIds
-      }));
-    } catch (error) {
-
-    }
-  }, []);
-
-  const fetchUsers = useCallback(async () => {
-    try {
-      // Só executar no lado do cliente
-      if (typeof window === 'undefined') return;
-      
-      // Primeiro verificar se há um usuário válido
-      const { data: { user }, error: authError } = await createClient().auth.getUser();
-      if (!user || authError) {
-        router.replace('/login');
-        return;
-      }
-
-      // Query específica com campos necessários (removendo created_at que não existe)
-      const { data, error } = await createClient()
-        .from('profiles')
-        .select('id, full_name, email, position, position_id, work_location_id, role, avatar_url')
-        .order('full_name');
-      
-      if (error) {
-
-        throw error;
-      }
-      
-      if (data) {
-        // Mapear os dados para garantir compatibilidade de tipos
-        const mappedUsers: ProfileUser[] = data.map((profile: any) => ({
-          id: profile.id,
-          full_name: profile.full_name,
-          email: profile.email,
-          position: profile.position,
-          position_id: profile.position_id,
-          work_location_id: profile.work_location_id,
-          role: profile.role,
-          avatar_url: profile.avatar_url,
-          created_at: new Date().toISOString() // Valor padrão já que o campo não existe
-        }));
-        
-        setUsers(mappedUsers);
-        
-        // Buscar associações para cada usuário
-        for (const userProfile of mappedUsers) {
-          if (userProfile.role === 'sector_admin') {
-            await fetchUserSectors(userProfile.id);
-          } else if (userProfile.role === 'subsector_admin') {
-            await fetchUserSubsectors(userProfile.id);
-          }
-        }
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      if (!handleAuthError(errorMessage)) {
-        showError('Erro ao buscar usuários', errorMessage);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [router, handleAuthError, fetchUserSectors, fetchUserSubsectors, showError]);
-
-  useEffect(() => {
-    // Só executar no lado do cliente
-    if (typeof window === 'undefined') return;
-    
-    const checkUser = async () => {
-      try {
-        const { data } = await createClient().auth.getUser();
-        if (!data.user) {
-          router.replace('/login');
-          return;
-        }
-        
-        const { data: profile } = await createClient()
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .single();
-        
-        if (!profile || profile.role !== 'admin') {
-          router.replace('/home');
-          return;
-        }
-        
-        setUser(data.user);
-        await Promise.all([
-          fetchUsers(),
-          fetchWorkLocations(),
-          fetchPositions(),
-          fetchSectors(),
-          fetchSubsectors()
-        ]);
-      } catch (error) {
-
-        router.replace('/login');
-      }
-    };
-
-    checkUser();
-  }, [router, fetchUsers]);
-
-  const fetchWorkLocations = async () => {
-    try {
-      const { data, error } = await createClient()
-        .from('work_locations')
-        .select('id, name')
-        .order('name');
-      
-      if (error) throw error;
-      if (data) setWorkLocations(data);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      // Apenas log em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
-
-      }
-    }
-  };
-
-  const fetchPositions = async () => {
-    try {
-      const { data, error } = await createClient()
-        .from('positions')
-        .select('id, name, description, department')
-        .order('name');
-      
-      if (error) throw error;
-      if (data) setPositions(data);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      // Apenas log em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
-
-      }
-    }
-  };
-
-  const fetchSectors = async () => {
-    try {
-      const { data, error } = await createClient()
-        .from('sectors')
-        .select('id, name')
-        .order('name');
-      
-      if (error) throw error;
-      if (data) setSectors(data);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      // Apenas log em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
-
-      }
-    }
-  };
-
-  const fetchSubsectors = async (sectorId?: string) => {
-    try {
-      let query = createClient()
-        .from('subsectors')
-        .select('id, name, sector_id')
-        .order('name');
-      
-      if (sectorId) {
-        query = query.eq('sector_id', sectorId);
-      }
-      
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      if (data) setSubsectors(data);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      // Apenas log em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
-
-      }
-    }
-  };
-
-  const handleLogout = async () => {
-    await createClient().auth.signOut();
-    router.replace('/login');
-  };
-
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.position?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-    const matchesLocation = locationFilter === 'all' || user.work_location_id === locationFilter;
-    
-    return matchesSearch && matchesRole && matchesLocation;
-  });
-
-  if (loading && !users.length) {
-    return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.users} />;
+  if (!user || authError) {
+    redirect('/login');
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  
+  if (!profile || profile.role !== 'admin') {
+    redirect('/home');
+  }
+
+  // Buscar dados em paralelo no servidor
+  const [usersResult, workLocationsResult, positionsResult, sectorsResult, subsectorsResult] = await Promise.all([
+    // Usuários
+    supabase
+      .from('profiles')
+      .select('id, full_name, email, position, position_id, work_location_id, role, avatar_url')
+      .order('full_name'),
+    
+    // Locais de trabalho
+    supabase
+      .from('work_locations')
+      .select('id, name')
+      .order('name'),
+    
+    // Posições
+    supabase
+      .from('positions')
+      .select('id, name, description, department')
+      .order('name'),
+    
+    // Setores
+    supabase
+      .from('sectors')
+      .select('id, name')
+      .order('name'),
+    
+    // Subsetores
+    supabase
+      .from('subsectors')
+      .select('id, name, sector_id')
+      .order('name')
+  ]);
+
+  // Processar usuários
+  const users: ProfileUser[] = usersResult.data?.map((profile: any) => ({
+    id: profile.id,
+    full_name: profile.full_name,
+    email: profile.email,
+    position: profile.position,
+    position_id: profile.position_id,
+    work_location_id: profile.work_location_id,
+    role: profile.role,
+    avatar_url: profile.avatar_url,
+    created_at: new Date().toISOString()
+  })) || [];
+
+  const workLocations: WorkLocation[] = workLocationsResult.data || [];
+  const positions: Position[] = positionsResult.data || [];
+  const sectors: Sector[] = sectorsResult.data || [];
+  const subsectors: Subsector[] = subsectorsResult.data || [];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminHeader user={user} />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <div className="mb-6">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', href: '/home', icon: 'house' },
-              { label: 'Administração', href: '/admin' },
-              { label: 'Usuários' }
-            ]} 
-          />
-        </div>
-
-        <div className="mb-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-              <div>
-                <h1 className="text-3xl font-bold text-primary mb-1">Gestão de Usuários</h1>
-                <p className="text-sm text-gray-600">Gerencie os usuários do portal.</p>
-              </div>
-              
-              <StandardizedButton
-                type="button"
-                onClick={() => setShowForm(!showForm)}
-                variant={showForm ? 'secondary' : 'primary'}
-                className="mt-3 md:mt-0"
-              >
-                {showForm ? 'Cancelar' : 'Adicionar Usuário'}
-              </StandardizedButton>
-            </div>
-          </div>
-        </div>
-        
-        {showForm && (
-          <UserForm 
-            workLocations={workLocations}
-            positions={positions}
-            onSuccess={() => {
-              setShowForm(false);
-              fetchUsers();
-            }}
-            onCancel={() => setShowForm(false)}
-          />
-        )}
-        
-        <UserFilters
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          roleFilter={roleFilter}
-          setRoleFilter={setRoleFilter}
-          locationFilter={locationFilter}
-          setLocationFilter={setLocationFilter}
-          workLocations={workLocations}
-          totalUsers={users.length}
-          filteredCount={filteredUsers.length}
-        />
-        
-        <UserList
-          users={filteredUsers}
-          workLocations={workLocations}
-          positions={positions}
-          sectors={sectors}
-          subsectors={subsectors}
-          userSectors={userSectors}
-          userSubsectors={userSubsectors}
-          onUserUpdate={fetchUsers}
-          onOpenRoleModal={(userId, role) => {
-            setRoleModalUserId(userId);
-            setRoleModalSelectedRole(role);
-            setShowRoleModal(true);
-          }}
-          onRefreshUserSectors={fetchUserSectors}
-          onRefreshUserSubsectors={fetchUserSubsectors}
-        />
-      </main>
-
-      {showRoleModal && roleModalUserId && (
-        <RoleModal
-          userId={roleModalUserId}
-          currentRole={roleModalSelectedRole}
-          sectors={sectors}
-          subsectors={subsectors}
-          userSectors={userSectors[roleModalUserId] || []}
-          userSubsectors={userSubsectors[roleModalUserId] || []}
-          onClose={() => {
-            setShowRoleModal(false);
-            setRoleModalUserId(null);
-          }}
-          onSuccess={() => {
-            setShowRoleModal(false);
-            setRoleModalUserId(null);
-            fetchUsers();
-          }}
-          onRefreshSubsectors={fetchSubsectors}
-        />
-      )}
-    </div>
+    <UsersClient
+      initialUsers={users}
+      initialWorkLocations={workLocations}
+      initialPositions={positions}
+      initialSectors={sectors}
+      initialSubsectors={subsectors}
+    />
   );
 }

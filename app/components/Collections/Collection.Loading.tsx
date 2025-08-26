@@ -78,7 +78,7 @@ export const CollectionInlineLoading: React.FC<{
 // Button Loading
 export const CollectionButtonLoading: React.FC<{ className?: string }> = ({ className }) => (
   <div className={cn("inline-flex items-center", className)}>
-    <UnifiedLoadingSpinner size="small" className="inline-flex items-center mr-2" />
+    <UnifiedLoadingSpinner size="sm" />
     <span>Processando...</span>
   </div>
 );

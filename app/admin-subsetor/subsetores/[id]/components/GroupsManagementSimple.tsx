@@ -19,7 +19,7 @@ interface GroupsManagementProps {
 export function GroupsManagement({ subsectorId }: GroupsManagementProps) {
   const { showError, showSuccess } = useAlert();
   const { groups, automaticGroups, refreshGroupsData } = useSubsectorDataContext();
-  const deleteModal = useDeleteModal('grupo');
+  const deleteModal = useDeleteModal<Group>('grupo');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({

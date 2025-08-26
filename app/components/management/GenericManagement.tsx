@@ -17,6 +17,7 @@ export interface BaseManagementItem {
   is_featured: boolean;
   is_published: boolean;
   created_at: string;
+  [key: string]: unknown;
 }
 
 // Field definition for dynamic form generation
@@ -79,7 +80,7 @@ interface GenericManagementProps<T extends BaseManagementItem> {
  * GenericManagement function
  * @todo Add proper documentation
  */
-export function GenericManagement<T extends BaseManagementItem>({
+const GenericManagementComponent = function GenericManagement<T extends BaseManagementItem>({
   entityId,
   items,
   showDrafts,
@@ -90,7 +91,7 @@ export function GenericManagement<T extends BaseManagementItem>({
   config
 }: GenericManagementProps<T>) {
   const alert = useAlert();
-  const deleteModal = useDeleteModal(config.contentType === 'news' ? 'notícia' : 
+  const deleteModal = useDeleteModal<T>(config.contentType === 'news' ? 'notícia' : 
     config.contentType === 'events' ? 'evento' :
     config.contentType === 'documents' ? 'documento' :
     config.contentType === 'messages' ? 'mensagem' :
@@ -661,4 +662,7 @@ export function GenericManagement<T extends BaseManagementItem>({
       />
     </div>
   );
-}
+};
+
+// Export otimizado com React.memo para evitar re-renders desnecessários
+export const GenericManagement = React.memo(GenericManagementComponent) as typeof GenericManagementComponent;

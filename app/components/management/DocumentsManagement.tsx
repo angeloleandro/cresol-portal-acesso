@@ -25,6 +25,7 @@ export interface BaseDocument {
   is_featured: boolean;
   is_published: boolean;
   created_at: string;
+  [key: string]: unknown;
 }
 
 // Configuration interface for different contexts
@@ -88,7 +89,7 @@ export function DocumentsManagement<T extends BaseDocument>({
     folder: 'uploads'
   });
 
-  const deleteModal = useDeleteModal('documento');
+  const deleteModal = useDeleteModal<T>('documento');
 
   // File type options para o ChakraSelect
   const fileTypeOptions = useMemo((): ChakraSelectOption[] => [

@@ -31,7 +31,7 @@ export function ImagesManagement({
   onDelete
 }: ImagesManagementProps) {
   const { showError, showSuccess } = useAlert();
-  const deleteModal = useDeleteModal('imagem');
+  const deleteModal = useDeleteModal<SectorImage>('imagem');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<SectorImage>>({

@@ -5,7 +5,7 @@ import { lazy } from 'react';
 import { useHomePageData } from '@/hooks/useParallelDataFetch';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 
-import Navbar from './Navbar';
+import ChakraNavbar from './ChakraNavbar';
 import { InlineSuspense } from './OptimizedSuspense';
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 
@@ -50,7 +50,7 @@ export default function HomePageOptimized() {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <ChakraNavbar />
       
       {/* Banner Carousel - Renderiza imediatamente com dados pré-carregados */}
       <div className="py-3">

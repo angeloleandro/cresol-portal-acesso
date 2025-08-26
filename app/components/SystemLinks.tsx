@@ -52,7 +52,7 @@ export default function SystemLinks() {
   };
 
   if (loading) {
-    return <UnifiedLoadingSpinner size="small" message={LOADING_MESSAGES.systems} />;
+    return <UnifiedLoadingSpinner size="sm" message={LOADING_MESSAGES.systems} />;
   }
 
   if (error) {

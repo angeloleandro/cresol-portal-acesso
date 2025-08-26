@@ -478,7 +478,7 @@ export default function GlobalSearch({
         {/* Indicador de carregamento */}
         {loading && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            <UnifiedLoadingSpinner size="small" />
+            <UnifiedLoadingSpinner size="sm" />
           </div>
         )}
       </div>

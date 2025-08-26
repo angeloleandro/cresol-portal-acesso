@@ -7,14 +7,19 @@ import { AlertProvider } from './components/alerts/AlertProvider'
 import { CollectionsProvider } from './contexts/CollectionsContext'
 import { AuthProvider } from './providers/AuthProvider'
 import { ChakraUIProvider } from './providers/ChakraProvider'
-import { NextUIProviderWrapper } from './providers/NextUIProvider'
+import QueryProvider from '@/lib/react-query/query-provider'
 
 import type { Metadata } from 'next'
 
 import './globals.css'
 
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap', // Critical for font optimization
+  preload: true,
+  fallback: ['system-ui', 'arial']
+})
 
 export const metadata: Metadata = {
   title: 'HUB - Cresol Fronteiras PR/SC/SP/ES',
@@ -69,8 +74,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
+      <head>
+        <link 
+          rel="preconnect" 
+          href="https://fonts.googleapis.com" 
+        />
+        <link 
+          rel="preconnect" 
+          href="https://fonts.gstatic.com" 
+          crossOrigin="anonymous" 
+        />
+        <link 
+          rel="preload" 
+          href="/_next/static/css/app/layout.css" 
+          as="style"
+        />
+      </head>
       <body className={inter.className}>
-        <NextUIProviderWrapper>
+        <QueryProvider>
           <ChakraUIProvider>
             <AlertProvider>
               <AuthProvider>
@@ -83,7 +104,7 @@ export default function RootLayout({
               </AuthProvider>
             </AlertProvider>
           </ChakraUIProvider>
-        </NextUIProviderWrapper>
+        </QueryProvider>
       </body>
     </html>
   )

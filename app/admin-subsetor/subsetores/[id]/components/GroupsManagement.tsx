@@ -38,7 +38,7 @@ const GroupsManagement = memo(function GroupsManagement({
   onRefresh
 }: GroupsManagementProps) {
   const alert = useAlert();
-  const deleteModal = useDeleteModal('grupo');
+  const deleteModal = useDeleteModal<Group>('grupo');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
 

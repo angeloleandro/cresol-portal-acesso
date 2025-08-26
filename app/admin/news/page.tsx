@@ -37,6 +37,7 @@ interface News {
   location_name?: string;
   location_id?: string;
   sector_name?: string;
+  [key: string]: unknown;
 }
 
 export default function NewsAdminPage() {
@@ -150,7 +151,7 @@ export default function NewsAdminPage() {
     }
   };
 
-  const deleteModal = useDeleteModal('notícia');
+  const deleteModal = useDeleteModal<News>('notícia');
 
   const handleDelete = async (newsItem: News) => {
     try {

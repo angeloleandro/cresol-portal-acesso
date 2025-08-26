@@ -8,6 +8,7 @@ import OptimizedImage from '@/app/components/OptimizedImage';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
+import { useAlert } from '@/app/components/alerts';
 import { 
   ADMIN_ICONS,
   ADMIN_STATES,
@@ -40,6 +41,7 @@ interface System {
   icon: string;
   sector_id: string;
   created_at: string;
+  [key: string]: unknown;
 }
 
 export default function SectorSystemsManagement() {
@@ -67,7 +69,8 @@ export default function SectorSystemsManagement() {
   const availableIcons = ADMIN_ICONS.system.available;
   
   // Modal de exclusão
-  const deleteModal = useDeleteModal('sistema');
+  const deleteModal = useDeleteModal<System>('sistema');
+  const { showAlert } = useAlert();
 
   const fetchSector = useCallback(async () => {
     const { data, error } = await supabase
@@ -185,10 +188,12 @@ export default function SectorSystemsManagement() {
       setShowSystemForm(false);
       fetchSystems();
     } catch (error) {
-      // Debug log removed
-      // TODO: Implementar sistema de notificação moderno (toast/alert)
-
-      // Por ora, mostrar erro no console até implementar sistema de notificação
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar sistema';
+      showAlert({
+        status: 'error',
+        title: 'Erro ao Salvar Sistema',
+        description: errorMessage
+      });
     }
   };
 
@@ -219,10 +224,12 @@ export default function SectorSystemsManagement() {
       
       fetchSystems();
     } catch (error) {
-      // Debug log removed
-      // TODO: Implementar sistema de notificação moderno (toast/alert) 
-
-      // Por ora, mostrar erro no console até implementar sistema de notificação
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao excluir sistema';
+      showAlert({
+        status: 'error',
+        title: 'Erro ao Excluir Sistema',
+        description: errorMessage
+      });
     }
   };
 

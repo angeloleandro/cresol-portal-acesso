@@ -36,6 +36,7 @@ interface Message {
   author_name?: string;
   group_name?: string;
   group_color?: string;
+  [key: string]: unknown;
 }
 
 
@@ -73,7 +74,7 @@ export default function MessagesAdminPage() {
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   
   // Modal de exclusão
-  const deleteModal = useDeleteModal('mensagem');
+  const deleteModal = useDeleteModal<Message>('mensagem');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const loadInitialData = async () => {

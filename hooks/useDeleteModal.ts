@@ -1,19 +1,29 @@
 import { useState, useCallback } from 'react';
 
+/**
+ * Interface para itens que podem ser deletados
+ */
+export interface DeletableItem {
+  id: string;
+  title?: string;
+  name?: string;
+  [key: string]: unknown;
+}
 
-interface DeleteModalState {
+interface DeleteModalState<T extends DeletableItem = DeletableItem> {
   isOpen: boolean;
-  itemToDelete: any | null;
+  itemToDelete: T | null;
   itemName: string;
   itemType: string;
 }
 
 /**
- * useDeleteModal function
- * @todo Add proper documentation
+ * Hook para gerenciar modal de confirmação de exclusão
+ * @param itemType - Tipo do item para exibição no modal
+ * @returns Objeto com estado e funções do modal de exclusão
  */
-export function useDeleteModal(itemType: string = 'item') {
-  const [modalState, setModalState] = useState<DeleteModalState>({
+export function useDeleteModal<T extends DeletableItem = DeletableItem>(itemType: string = 'item') {
+  const [modalState, setModalState] = useState<DeleteModalState<T>>({
     isOpen: false,
     itemToDelete: null,
     itemName: '',
@@ -21,7 +31,7 @@ export function useDeleteModal(itemType: string = 'item') {
   });
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const openDeleteModal = useCallback((item: any, name?: string) => {
+  const openDeleteModal = useCallback((item: T, name?: string) => {
     setModalState({
       isOpen: true,
       itemToDelete: item,
@@ -41,7 +51,7 @@ export function useDeleteModal(itemType: string = 'item') {
     }
   }, [isDeleting]);
 
-  const confirmDelete = useCallback(async (deleteFunction: (item: any) => Promise<void>) => {
+  const confirmDelete = useCallback(async (deleteFunction: (item: T) => Promise<void>) => {
     if (!modalState.itemToDelete || isDeleting) return;
     
     setIsDeleting(true);

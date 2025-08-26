@@ -1,10 +1,4 @@
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Button
-} from '@nextui-org/react';
+import { Button, Menu } from '@chakra-ui/react';
 import { useMemo, useCallback } from 'react';
 
 import { Icon } from '@/app/components/icons/Icon';
@@ -102,92 +96,74 @@ export default function UserFilters({
           <label className="block text-xs font-medium text-cresol-gray mb-1">
             Filtrar por papel
           </label>
-          <Dropdown placement="bottom-start">
-            <DropdownTrigger>
+          <Menu.Root>
+            <Menu.Trigger asChild>
               <Button
-                variant="bordered"
-                className="w-full justify-between font-normal border-cresol-gray-light hover:border-primary focus:border-primary"
-                endContent={
-                  <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
-                }
+                variant="outline"
+                w="full"
+                justifyContent="space-between"
+                fontWeight="normal"
+                borderColor="gray.300"
+                _hover={{ borderColor: 'orange.500' }}
+                _focus={{ borderColor: 'orange.500' }}
               >
-                <span className="truncate text-left">{selectedRoleLabel}</span>
+                <span className="truncate">{selectedRoleLabel}</span>
+                <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
               </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Filtrar por papel"
-              className="min-w-[200px]"
-              selectedKeys={[roleFilter]}
-              selectionMode="single"
-              onSelectionChange={(keys) => {
-                const selected = Array.from(keys)[0] as string;
-                if (selected) handleRoleSelect(selected);
-              }}
-              itemClasses={{
-                base: [
-                  "rounded-md",
-                  "text-default-700",
-                  "transition-colors",
-                  "data-[hover=true]:bg-primary",
-                  "data-[hover=true]:text-white",
-                  "data-[selectable=true]:focus:bg-primary",
-                  "data-[selectable=true]:focus:text-white",
-                ]
-              }}
-            >
-              {roleOptions.map((role) => (
-                <DropdownItem key={role.value} textValue={role.label}>
-                  <span>{role.label}</span>
-                </DropdownItem>
-              ))}
-            </DropdownMenu>
-          </Dropdown>
+            </Menu.Trigger>
+            <Menu.Positioner>
+              <Menu.Content minW="200px">
+                {roleOptions.map((role) => (
+                  <Menu.Item
+                    key={role.value}
+                    value={role.value}
+                    onClick={() => handleRoleSelect(role.value)}
+                    bg={roleFilter === role.value ? 'orange.50' : undefined}
+                    _hover={{ bg: 'orange.100' }}
+                  >
+                    {role.label}
+                  </Menu.Item>
+                ))}
+              </Menu.Content>
+            </Menu.Positioner>
+          </Menu.Root>
         </div>
         
         <div className="w-full md:w-48">
           <label className="block text-xs font-medium text-cresol-gray mb-1">
             Filtrar por local
           </label>
-          <Dropdown placement="bottom-start">
-            <DropdownTrigger>
+          <Menu.Root>
+            <Menu.Trigger asChild>
               <Button
-                variant="bordered"
-                className="w-full justify-between font-normal border-cresol-gray-light hover:border-primary focus:border-primary"
-                endContent={
-                  <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
-                }
+                variant="outline"
+                w="full"
+                justifyContent="space-between"
+                fontWeight="normal"
+                borderColor="gray.300"
+                _hover={{ borderColor: 'orange.500' }}
+                _focus={{ borderColor: 'orange.500' }}
               >
-                <span className="truncate text-left">{selectedLocationLabel}</span>
+                <span className="truncate">{selectedLocationLabel}</span>
+                <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
               </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Filtrar por local"
-              className="min-w-[250px] max-h-[300px] overflow-y-auto scrollbar-branded"
-              selectedKeys={[locationFilter]}
-              selectionMode="single"
-              onSelectionChange={(keys) => {
-                const selected = Array.from(keys)[0] as string;
-                if (selected) handleLocationSelect(selected);
-              }}
-              itemClasses={{
-                base: [
-                  "rounded-md",
-                  "text-default-700",
-                  "transition-colors",
-                  "data-[hover=true]:bg-primary",
-                  "data-[hover=true]:text-white",
-                  "data-[selectable=true]:focus:bg-primary",
-                  "data-[selectable=true]:focus:text-white",
-                ]
-              }}
-            >
-              {locationOptions.map((location) => (
-                <DropdownItem key={location.id} textValue={location.name}>
-                  <span className="truncate">{location.name}</span>
-                </DropdownItem>
-              ))}
-            </DropdownMenu>
-          </Dropdown>
+            </Menu.Trigger>
+            <Menu.Positioner>
+              <Menu.Content minW="250px" maxH="300px" overflowY="auto" className="scrollbar-branded">
+                {locationOptions.map((location) => (
+                  <Menu.Item
+                    key={location.id}
+                    value={location.id}
+                    onClick={() => handleLocationSelect(location.id)}
+                    bg={locationFilter === location.id ? 'orange.50' : undefined}
+                    _hover={{ bg: 'orange.100' }}
+                  >
+                    <span className="truncate">{location.name}</span>
+                  </Menu.Item>
+                ))}
+              </Menu.Content>
+            </Menu.Positioner>
+          </Menu.Root>
         </div>
       </div>
       

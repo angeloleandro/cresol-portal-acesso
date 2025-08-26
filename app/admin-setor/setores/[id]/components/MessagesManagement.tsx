@@ -30,7 +30,7 @@ export function MessagesManagement({
   onDelete
 }: MessagesManagementProps) {
   const { showError, showSuccess } = useAlert();
-  const deleteModal = useDeleteModal('mensagem');
+  const deleteModal = useDeleteModal<SectorMessage>('mensagem');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<SectorMessage>>({

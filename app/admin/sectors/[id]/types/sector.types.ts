@@ -13,6 +13,7 @@ export interface Subsector {
   description: string;
   sector_id: string;
   created_at: string;
+  [key: string]: unknown;
 }
 
 export interface SectorNews {
@@ -26,6 +27,7 @@ export interface SectorNews {
   is_published: boolean;
   created_at: string;
   updated_at: string;
+  [key: string]: unknown;
 }
 
 export interface SectorEvent {
@@ -40,6 +42,7 @@ export interface SectorEvent {
   is_published: boolean;
   created_at: string;
   updated_at: string;
+  [key: string]: unknown;
 }
 
 export interface SectorDocument {
@@ -54,6 +57,7 @@ export interface SectorDocument {
   is_published: boolean;
   created_at: string;
   updated_at: string;
+  [key: string]: unknown;
 }
 
 export interface MessageGroup {
@@ -79,6 +83,7 @@ export interface Group extends MessageGroup {
   type?: 'manual' | 'automatic';
   members: string[];
   member_count: number;
+  [key: string]: unknown;
 }
 
 export interface Message {
@@ -113,6 +118,7 @@ export interface SectorMessage {
   created_at: string;
   updated_at: string;
   sector_id: string;
+  [key: string]: unknown;
 }
 
 export interface User {
@@ -151,6 +157,7 @@ export interface SectorVideo {
   created_at: string;
   updated_at: string;
   published_at: string | null;
+  [key: string]: unknown;
 }
 
 export interface SectorImage {
@@ -172,6 +179,7 @@ export interface SectorImage {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  [key: string]: unknown;
 }
 
 export type TabType = 'news' | 'events' | 'documents' | 'subsectors' | 'groups' | 'messages' | 'videos' | 'images';

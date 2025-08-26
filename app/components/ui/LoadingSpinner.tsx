@@ -61,10 +61,9 @@ export default function LoadingSpinner({
   
   return (
     <UnifiedLoadingSpinner
-      size={size === 'xs' ? 'small' : size === 'sm' ? 'small' : size === 'md' ? 'default' : size === 'lg' ? 'large' : 'large'}
+      size={size === 'xs' ? 'sm' : size === 'sm' ? 'sm' : size === 'md' ? 'default' : size === 'lg' ? 'large' : 'large'}
       message={message}
       fullScreen={fullScreen}
-      className={className}
     />
   );
 } 

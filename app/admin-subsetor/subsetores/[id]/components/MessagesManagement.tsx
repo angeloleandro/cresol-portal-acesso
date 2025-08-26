@@ -15,6 +15,7 @@ interface SubsectorMessage {
   created_at: string;
   updated_at: string;
   subsector_id: string;
+  [key: string]: unknown;
 }
 
 interface MessagesManagementProps {
@@ -41,7 +42,7 @@ export function MessagesManagement({
   onDelete
 }: MessagesManagementProps) {
   const alert = useAlert();
-  const deleteModal = useDeleteModal('mensagem');
+  const deleteModal = useDeleteModal<SubsectorMessage>('mensagem');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentMessage, setCurrentMessage] = useState<Partial<SubsectorMessage>>({

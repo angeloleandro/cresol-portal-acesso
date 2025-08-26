@@ -1,56 +1,66 @@
 'use client';
 
-import { Flex, Spin, ConfigProvider } from 'antd';
+import { Flex, Spinner, Center } from '@chakra-ui/react';
 
 import { CRESOL_COLORS } from '@/lib/design-tokens/design-tokens';
 
-import type { SpinProps } from 'antd';
-
-interface UnifiedLoadingSpinnerProps extends SpinProps {
+interface UnifiedLoadingSpinnerProps {
   message?: string;
   fullScreen?: boolean;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'default' | 'large';
 }
 
 const UnifiedLoadingSpinner: React.FC<UnifiedLoadingSpinnerProps> = ({
   message = 'Carregando...',
   fullScreen = false,
-  size = 'default',
-  ...props
+  size = 'md'
 }) => {
-  // Configuração de tema com cor laranja Cresol
-  const theme = {
-    token: {
-      colorPrimary: CRESOL_COLORS.primary.DEFAULT, // Cor laranja Cresol
-    },
+  // Mapear tamanhos legacy para Chakra UI
+  const getSpinnerSize = () => {
+    switch (size) {
+      case 'default': return 'md';
+      case 'large': return 'lg';
+      default: return size;
+    }
   };
 
   const spinnerContent = (
-    <ConfigProvider theme={theme}>
-      <Flex align="center" gap="middle" vertical>
-        <Spin size={size} {...props} />
-        {message && (
-          <div className="text-gray-600 text-sm mt-2 text-center">
-            {message}
-          </div>
-        )}
-      </Flex>
-    </ConfigProvider>
+    <Flex align="center" direction="column" gap={3}>
+      <Spinner 
+        size={getSpinnerSize()}
+        color="orange.500"
+      />
+      {message && (
+        <div className="text-gray-600 text-sm text-center">
+          {message}
+        </div>
+      )}
+    </Flex>
   );
 
   // Se for tela cheia, adiciona overlay
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+      <Center
+        position="fixed"
+        top="0"
+        left="0"
+        width="100vw"
+        height="100vh"
+        bg="whiteAlpha.800"
+        backdropFilter="blur(4px)"
+        zIndex="9999"
+      >
         {spinnerContent}
-      </div>
+      </Center>
     );
   }
 
   // Renderização padrão centralizada
   return (
-    <div className="flex items-center justify-center py-8">
+    <Center py={8}>
       {spinnerContent}
-    </div>
+    </Center>
   );
 };
 

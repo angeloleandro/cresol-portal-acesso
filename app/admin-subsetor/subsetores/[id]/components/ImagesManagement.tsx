@@ -37,7 +37,7 @@ export function ImagesManagement({
   onDelete
 }: ImagesManagementProps) {
   const alert = useAlert();
-  const deleteModal = useDeleteModal('imagem');
+  const deleteModal = useDeleteModal<SubsectorImage>('imagem');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -613,7 +613,11 @@ export function ImagesManagement({
       <DeleteModal
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.closeDeleteModal}
-        onConfirm={() => deleteModal.itemToDelete && handleDeleteImage(deleteModal.itemToDelete)}
+        onConfirm={async () => {
+          if (deleteModal.itemToDelete) {
+            await handleDeleteImage(deleteModal.itemToDelete);
+          }
+        }}
         itemName={deleteModal.itemName}
         itemType="imagem"
       />

@@ -12,12 +12,7 @@ export { default as NavigationControlsPro } from './NavigationControlsPro';
 export { default as DashboardGridAdvanced } from './DashboardGridAdvanced';
 export { default as AnalyticsShowcase } from './AnalyticsShowcase';
 
-// WCAG 2.1 AA Accessible Components with HeadlessUI
-export { default as AccessibleMetricCard } from './AccessibleMetricCard';
-export { default as AccessibleNavigation } from './AccessibleNavigation';
-export { default as AccessibleChartContainer } from './AccessibleChartContainer';
-export { default as AccessibleModal } from './AccessibleModals';
-export { default as AccessibilityShowcase } from './AccessibilityShowcase';
+// WCAG 2.1 AA Accessible Components (removed - HeadlessUI no longer available)
 
 // Accessibility Hooks
 export { useAccessibleFocus, useScreenReaderAnnouncement, useReducedMotion } from './hooks/useAccessibleFocus';

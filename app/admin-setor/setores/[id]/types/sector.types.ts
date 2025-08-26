@@ -15,6 +15,7 @@ export interface Subsector {
   description: string;
   created_at: string;
   updated_at?: string;
+  [key: string]: unknown;
 }
 
 export interface SectorNews {
@@ -28,6 +29,7 @@ export interface SectorNews {
   is_featured: boolean;
   created_at: string;
   updated_at?: string;
+  [key: string]: unknown;
 }
 
 export interface SectorEvent {
@@ -42,6 +44,7 @@ export interface SectorEvent {
   is_featured: boolean;
   created_at: string;
   updated_at?: string;
+  [key: string]: unknown;
 }
 
 export interface SectorMessage {
@@ -53,6 +56,7 @@ export interface SectorMessage {
   is_published: boolean;
   created_at: string;
   updated_at?: string;
+  [key: string]: unknown;
 }
 
 export interface SectorDocument {
@@ -66,6 +70,7 @@ export interface SectorDocument {
   is_published: boolean;
   created_at: string;
   updated_at?: string;
+  [key: string]: unknown;
 }
 
 export interface SectorVideo {
@@ -80,6 +85,7 @@ export interface SectorVideo {
   is_published: boolean;
   created_at: string;
   updated_at?: string;
+  [key: string]: unknown;
 }
 
 export interface SectorImage {
@@ -91,6 +97,7 @@ export interface SectorImage {
   is_published: boolean;
   created_at: string;
   updated_at?: string;
+  [key: string]: unknown;
 }
 
 export interface MessageGroup {
@@ -108,6 +115,7 @@ export interface GroupWithUsers extends MessageGroup {
     email: string;
     full_name: string;
   }>;
+  [key: string]: unknown;
 }
 
 export interface TeamMember {

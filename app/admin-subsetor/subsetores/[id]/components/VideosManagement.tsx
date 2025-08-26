@@ -92,7 +92,7 @@ export function VideosManagement({
   onDelete
 }: VideosManagementProps) {
   const alert = useAlert();
-  const deleteModal = useDeleteModal('vídeo');
+  const deleteModal = useDeleteModal<SubsectorVideo>('vídeo');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideo, setCurrentVideo] = useState<SubsectorVideo | null>(null);
   const [playingVideo, setPlayingVideo] = useState<SubsectorVideo | null>(null);

@@ -20,7 +20,7 @@ interface SubsectorsManagementProps {
 export function SubsectorsManagement({ sectorId }: SubsectorsManagementProps) {
   const { showError, showSuccess } = useAlert();
   const { subsectors, refreshSectorData } = useSectorDataContext();
-  const deleteModal = useDeleteModal('subsetor');
+  const deleteModal = useDeleteModal<Subsector>('subsetor');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<Subsector>>({

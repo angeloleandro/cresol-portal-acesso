@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSupabaseClient } from '@/hooks/useSupabaseClient';
-import { FiUserPlus, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi';
-import { HiUserGroup } from 'react-icons/hi';
+import { Icon } from '@/app/components/icons/Icon';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import type { SubsectorTeamMember, Profile } from '@/types/team';
 
@@ -233,7 +232,7 @@ export function TeamManagement({ subsectorId }: TeamManagementProps) {
           onClick={() => setShowAddModal(true)}
           className="flex items-center gap-2 px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark transition-colors"
         >
-          <FiUserPlus className="h-4 w-4" />
+          <Icon name="user-add" className="h-4 w-4" />
           Adicionar Membro
         </button>
       </div>
@@ -271,7 +270,7 @@ export function TeamManagement({ subsectorId }: TeamManagementProps) {
       {adminMembers.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
-            <HiUserGroup className="h-5 w-5 text-green-600" />
+            <Icon name="user-group" className="h-5 w-5 text-green-600" />
             Administradores do Subsetor
           </h3>
           
@@ -289,7 +288,7 @@ export function TeamManagement({ subsectorId }: TeamManagementProps) {
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-green-600/10 text-green-600">
-                        <HiUserGroup className="h-5 w-5" />
+                        <Icon name="user-group" className="h-5 w-5" />
                       </div>
                     )}
                   </div>
@@ -317,7 +316,7 @@ export function TeamManagement({ subsectorId }: TeamManagementProps) {
       {/* Lista de Membros */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
-          <HiUserGroup className="h-5 w-5 text-secondary" />
+          <Icon name="user-group" className="h-5 w-5 text-secondary" />
           Membros da Equipe
         </h3>
         
@@ -340,7 +339,7 @@ export function TeamManagement({ subsectorId }: TeamManagementProps) {
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-secondary/10 text-secondary">
-                        <HiUserGroup className="h-5 w-5" />
+                        <Icon name="user-group" className="h-5 w-5" />
                       </div>
                     )}
                   </div>
@@ -364,13 +363,13 @@ export function TeamManagement({ subsectorId }: TeamManagementProps) {
                     }}
                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                   >
-                    <FiEdit2 className="h-4 w-4" />
+                    <Icon name="edit" className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleRemoveMember(member.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
                   >
-                    <FiTrash2 className="h-4 w-4" />
+                    <Icon name="trash" className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -391,7 +390,7 @@ export function TeamManagement({ subsectorId }: TeamManagementProps) {
                   Buscar Usuário
                 </label>
                 <div className="relative">
-                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Icon name="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
                     type="text"
                     value={searchTerm}

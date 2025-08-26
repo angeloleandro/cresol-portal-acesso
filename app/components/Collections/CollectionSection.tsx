@@ -196,3 +196,5 @@ export const CollectionSection = memo<CollectionSectionProps>(({
 });
 
 CollectionSection.displayName = 'CollectionSection';
+
+export default CollectionSection;

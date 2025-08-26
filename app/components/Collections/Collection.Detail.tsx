@@ -10,7 +10,7 @@ import React, { useMemo, useState } from 'react';
 import Icon from '@/app/components/icons/Icon';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
-import { CollectionWithItems } from '@/lib/types/collections';
+import { CollectionWithItems, CollectionItem } from '@/lib/types/collections';
 import { cn } from '@/lib/utils/cn';
 import { formatCollection } from '@/lib/utils/collections';
 
@@ -44,7 +44,7 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
   onBulkUpload,
   onVideoUpload,
 }) => {
-  const deleteModal = useDeleteModal('item');
+  const deleteModal = useDeleteModal<CollectionItem>('item');
   // Determine if we need to fetch items
   const needsFetchItems = !('items' in initialCollection);
   const collectionId = needsFetchItems ? initialCollection.id : null;
