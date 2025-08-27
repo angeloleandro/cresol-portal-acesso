@@ -3,7 +3,7 @@
 import { SECTOR_EVENTS_CONFIG } from '@/app/components/management/configs/news-config';
 import { EventsManagement as GenericEventsManagement } from '@/app/components/management/EventsManagement';
 
-import type { SectorEvent } from '../types/sector.types';
+import type { SectorEvent, SectorEventDTO, mapSectorEventFromDTO } from '../types/sector.types';
 
 interface EventsManagementProps {
   sectorId: string;
@@ -17,9 +17,9 @@ interface EventsManagementProps {
 
 export function EventsManagement(props: EventsManagementProps) {
   return (
-    <GenericEventsManagement<SectorEvent>
+    <GenericEventsManagement<SectorEventDTO>
       entityId={props.sectorId}
-      events={props.events}
+      events={props.events as SectorEventDTO[]}
       showDrafts={props.showDrafts}
       totalDraftEventsCount={props.totalDraftEventsCount}
       onToggleDrafts={props.onToggleDrafts}

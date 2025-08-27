@@ -19,7 +19,7 @@ export const UserManagement = dynamic(
 );
 
 export const BannerManagement = dynamic(
-  () => import('@/app/admin/banners/page'),
+  () => import('@/app/admin/banners/BannersClient'),
   {
     loading: () => <UnifiedLoadingSpinner size="large" message="Carregando gestão de banners..." />,
     ssr: false
@@ -27,7 +27,7 @@ export const BannerManagement = dynamic(
 );
 
 export const GalleryManagement = dynamic(
-  () => import('@/app/admin/gallery/page'),
+  () => import('@/app/admin/gallery/GalleryClient'),
   {
     loading: () => <UnifiedLoadingSpinner size="large" message="Carregando gestão da galeria..." />,
     ssr: false
@@ -35,7 +35,7 @@ export const GalleryManagement = dynamic(
 );
 
 export const VideoManagement = dynamic(
-  () => import('@/app/admin/videos/page'),
+  () => import('@/app/admin/videos/VideosClient'),
   {
     loading: () => <UnifiedLoadingSpinner size="large" message="Carregando gestão de vídeos..." />,
     ssr: false
@@ -174,8 +174,8 @@ export const routeBasedImports = {
     users: () => import('@/app/admin/users/page'),
     sectors: () => import('@/app/admin/sectors/page'),
     banners: () => import('@/app/admin/banners/page'),
-    gallery: () => import('@/app/admin/gallery/page'),
-    videos: () => import('@/app/admin/videos/page'),
+    gallery: () => import('@/app/admin/gallery/GalleryClient'),
+    videos: () => import('@/app/admin/videos/VideosClient'),
   },
   public: {
     home: () => import('@/app/home/page'),

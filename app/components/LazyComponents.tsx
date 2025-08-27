@@ -4,16 +4,16 @@ import { lazy, Suspense, ComponentType } from 'react';
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 
 // Função helper para lazy loading otimizado
-function createLazyComponent<T extends {} = {}>(
-  importFn: () => Promise<{ default: ComponentType<T> }> | Promise<{ default: ComponentType<any> }>,
+function createLazyComponent(
+  importFn: () => Promise<{ default: ComponentType<any> }>,
   fallback?: React.ReactNode
 ) {
-  const LazyComponent = lazy(importFn as () => Promise<{ default: ComponentType<T> }>);
+  const LazyComponent = lazy(importFn);
   
-  return function LazyWrapper(props: T) {
+  return function LazyWrapper(props: any) {
     return (
       <Suspense fallback={fallback || <div className="animate-pulse bg-gray-200 h-32 rounded" />}>
-        <LazyComponent {...(props as any)} />
+        <LazyComponent {...props} />
       </Suspense>
     );
   };
@@ -141,7 +141,13 @@ export const LazyUserEditModal = createLazyComponent(
 );
 
 export const LazyVideoUploadForm = createLazyComponent(
-  () => import('./VideoUploadForm/VideoUploadForm.Root').then(mod => ({ default: mod.VideoUploadFormRoot })) as any,
+  () => import('./VideoUploadForm/VideoUploadForm.Root').then((mod) => {
+    const videoFormModule = mod as { VideoUploadFormRoot?: ComponentType<any> };
+    if (!videoFormModule.VideoUploadFormRoot) {
+      throw new Error('VideoUploadFormRoot export not found in VideoUploadForm.Root module');
+    }
+    return { default: videoFormModule.VideoUploadFormRoot };
+  }),
   <UnifiedLoadingSpinner size="large" message="Carregando formulário de upload..." />
 );
 

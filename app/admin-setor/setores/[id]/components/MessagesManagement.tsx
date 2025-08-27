@@ -8,7 +8,7 @@ import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 
-import type { SectorMessage } from '../types/sector.types';
+import type { SectorMessage, SectorMessageDTO, mapSectorMessageFromDTO } from '../types/sector.types';
 
 interface MessagesManagementProps {
   sectorId: string;
@@ -30,7 +30,7 @@ export function MessagesManagement({
   onDelete
 }: MessagesManagementProps) {
   const { showError, showSuccess } = useAlert();
-  const deleteModal = useDeleteModal<SectorMessage>('mensagem');
+  const deleteModal = useDeleteModal<SectorMessageDTO>('mensagem');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<SectorMessage>>({
@@ -91,7 +91,7 @@ export function MessagesManagement({
   };
 
   const handleDeleteClick = (message: SectorMessage) => {
-    deleteModal.openDeleteModal(message, message.title);
+    deleteModal.openDeleteModal(message as SectorMessageDTO, message.title);
   };
 
   const handleDelete = async (message: SectorMessage) => {

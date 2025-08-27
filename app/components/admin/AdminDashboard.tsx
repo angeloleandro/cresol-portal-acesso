@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, startTransition } from 'react';
 
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
@@ -73,7 +73,10 @@ export default function AdminDashboard({ initialUser, initialStats }: AdminDashb
           .single();
 
         if (profile?.role === 'admin') {
-          await fetchStats();
+          // Usar transição para não bloquear UI
+          startTransition(() => {
+            fetchStats();
+          });
         } else {
           // Redirect non-admin users to dashboard
           router.replace('/dashboard');

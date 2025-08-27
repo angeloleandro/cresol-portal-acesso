@@ -99,22 +99,46 @@ export const useOptimizedAuth = () => {
     },
   });
 
-  // Atualizar estado quando cache muda
+  // Atualizar estado quando cache muda - evitando renders desnecessários
   useEffect(() => {
-    setState(prev => ({
-      ...prev,
-      session: cachedSession || null,
-      user: cachedSession?.user || null,
-      loading: sessionLoading || profileLoading,
-      initialized: !sessionLoading
-    }));
+    setState(prev => {
+      const newSession = cachedSession || null;
+      const newUser = cachedSession?.user || null;
+      const newLoading = sessionLoading || profileLoading;
+      const newInitialized = !sessionLoading;
+      
+      // Only update if values actually changed
+      if (
+        prev.session !== newSession ||
+        prev.user !== newUser ||
+        prev.loading !== newLoading ||
+        prev.initialized !== newInitialized
+      ) {
+        return {
+          ...prev,
+          session: newSession,
+          user: newUser,
+          loading: newLoading,
+          initialized: newInitialized
+        };
+      }
+      return prev;
+    });
   }, [cachedSession, sessionLoading, profileLoading]);
 
   useEffect(() => {
-    setState(prev => ({
-      ...prev,
-      profile: cachedProfile || null
-    }));
+    setState(prev => {
+      const newProfile = cachedProfile || null;
+      
+      // Only update if profile actually changed
+      if (prev.profile !== newProfile) {
+        return {
+          ...prev,
+          profile: newProfile
+        };
+      }
+      return prev;
+    });
   }, [cachedProfile]);
 
   // Sign in otimizado com cache

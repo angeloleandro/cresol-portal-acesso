@@ -615,8 +615,8 @@ export default function AdvancedSearch({
                             <Menu.Item key={sector.id} value={sector.id} closeOnSelect={false}>
                               <Checkbox.Root
                                 checked={selectedFilter.sectors.includes(sector.id)}
-                                onCheckedChange={(details: any) => {
-                                  const checked = details.checked;
+                                onCheckedChange={(details: { checked: boolean | 'indeterminate' }) => {
+                                  const checked = details.checked === true;
                                   if (checked) {
                                     setSelectedFilter(prev => ({
                                       ...prev,

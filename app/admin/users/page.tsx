@@ -62,7 +62,7 @@ export default async function UsersManagement() {
     // Usuários
     supabase
       .from('profiles')
-      .select('id, full_name, email, position, position_id, work_location_id, role, avatar_url')
+      .select('id, full_name, email, position, position_id, work_location_id, role, avatar_url, created_at')
       .order('full_name'),
     
     // Locais de trabalho
@@ -100,7 +100,7 @@ export default async function UsersManagement() {
     work_location_id: profile.work_location_id,
     role: profile.role,
     avatar_url: profile.avatar_url,
-    created_at: new Date().toISOString()
+    created_at: profile.created_at ? new Date(profile.created_at).toISOString() : new Date().toISOString()
   })) || [];
 
   const workLocations: WorkLocation[] = workLocationsResult.data || [];

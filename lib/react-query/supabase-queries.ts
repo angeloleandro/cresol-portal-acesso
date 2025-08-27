@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Database } from '@/types/supabase'
+import { createClient } from '@/lib/supabase/client'
 
-const supabase = createClientComponentClient<Database>()
+
+const supabase = createClient()
 
 // Query Keys para cache consistent
 export const queryKeys = {
@@ -36,7 +36,7 @@ export const useUsers = () => {
           position,
           position_id,
           work_location_id,
-          sectors!inner (
+          sectors (
             id,
             name,
             slug

@@ -9,7 +9,7 @@ import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 
 import { useSectorDataContext } from '../contexts/SectorDataContext';
-import type { GroupWithUsers } from '../types/sector.types';
+import type { GroupWithUsers, GroupWithUsersDTO, mapGroupWithUsersFromDTO } from '../types/sector.types';
 
 interface GroupsManagementProps {
   sectorId: string;
@@ -18,7 +18,7 @@ interface GroupsManagementProps {
 export function GroupsManagement({ sectorId }: GroupsManagementProps) {
   const { showError, showSuccess } = useAlert();
   const { groups, automaticGroups, refreshGroupsData } = useSectorDataContext();
-  const deleteModal = useDeleteModal<GroupWithUsers>('grupo');
+  const deleteModal = useDeleteModal<GroupWithUsersDTO>('grupo');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -73,7 +73,7 @@ export function GroupsManagement({ sectorId }: GroupsManagementProps) {
   };
 
   const handleDeleteClick = (group: GroupWithUsers) => {
-    deleteModal.openDeleteModal(group, group.name);
+    deleteModal.openDeleteModal(group as GroupWithUsersDTO, group.name);
   };
 
   const handleDelete = async (group: GroupWithUsers) => {

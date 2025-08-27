@@ -20,6 +20,7 @@ import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
 import { EventForm } from './components/EventForm';
+import { AdminActionMenu } from '@/app/components/ui/AdminActionMenu';
 
 import { FormatDate } from '@/lib/utils/formatters';
 interface Event {
@@ -339,75 +340,99 @@ export default function EventsPage() {
         </div>
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-8">
-          <div className="card p-6">
+        <div className="grid-modern-stats mb-8">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <Icon name="calendar" className="h-6 w-6 text-blue-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="calendar" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Total</p>
-                <p className="text-2xl font-bold text-primary">{stats?.total || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.total || 0}
+                </div>
+                <div className="stat-label">
+                  Total
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <Icon name="check-circle" className="h-6 w-6 text-green-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="check-circle" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Publicados</p>
-                <p className="text-2xl font-bold text-green-600">{stats?.published || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.published || 0}
+                </div>
+                <div className="stat-label">
+                  Publicados
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100 mr-4">
-                <Icon name="edit" className="h-6 w-6 text-yellow-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="edit" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Rascunhos</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats?.drafts || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.drafts || 0}
+                </div>
+                <div className="stat-label">
+                  Rascunhos
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-purple-100 mr-4">
-                <Icon name="star" className="h-6 w-6 text-purple-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="star" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Em Destaque</p>
-                <p className="text-2xl font-bold text-purple-600">{stats?.featured || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.featured || 0}
+                </div>
+                <div className="stat-label">
+                  Em Destaque
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-orange-100 mr-4">
-                <Icon name="clock" className="h-6 w-6 text-orange-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="clock" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Próximos</p>
-                <p className="text-2xl font-bold text-orange-600">{stats?.upcoming || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.upcoming || 0}
+                </div>
+                <div className="stat-label">
+                  Próximos
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-gray-100 mr-4">
-                <Icon name="folder" className="h-6 w-6 text-gray-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="folder" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Passados</p>
-                <p className="text-2xl font-bold text-gray-600">{stats?.past || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.past || 0}
+                </div>
+                <div className="stat-label">
+                  Passados
+                </div>
               </div>
             </div>
           </div>
@@ -420,15 +445,13 @@ export default function EventsPage() {
             <div className="xl:col-span-2">
               <label className="label">Buscar</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Icon name="search" className="h-5 w-5 text-gray-400" />
-                </div>
+                <Icon name="search" className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
                 <input
                   type="text"
                   placeholder="Título ou descrição..."
                   value={filters.search}
                   onChange={(e) => updateFilters({ search: e.target.value })}
-                  className="input pl-10"
+                  className="input !pl-12 h-10"
                 />
               </div>
             </div>
@@ -629,57 +652,38 @@ export default function EventsPage() {
                       </td>
 
                       <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end space-x-2">
-                          <StandardizedButton
-                            variant="secondary"
-                            size="sm"
-                            icon={<Icon name="edit" className="h-4 w-4" />}
-                            onClick={() => handleEditEvent(event)}
-                            disabled={actionLoading === `${event.type}-${event.id}`}
-                          >
-                            Editar
-                          </StandardizedButton>
-
-                          <StandardizedButton
-                            variant={event.is_published ? "warning" : "success"}
-                            size="sm"
-                            icon={<Icon name={event.is_published ? "eye-slash" : "eye"} className="h-4 w-4" />}
-                            onClick={() => handleToggleStatus(event)}
-                            disabled={actionLoading === `${event.type}-${event.id}`}
-                            loading={actionLoading === `${event.type}-${event.id}`}
-                          >
-                            {event.is_published ? 'Despublicar' : 'Publicar'}
-                          </StandardizedButton>
-
-                          <StandardizedButton
-                            variant={event.is_featured ? "warning" : "secondary"}
-                            size="sm"
-                            icon={<Icon name="star" className="h-4 w-4" />}
-                            onClick={() => handleToggleFeatured(event)}
-                            disabled={actionLoading === `${event.type}-${event.id}`}
-                          >
-                            {event.is_featured ? 'Remover destaque' : 'Destacar'}
-                          </StandardizedButton>
-
-                          <StandardizedButton
-                            variant="secondary"
-                            size="sm"
-                            icon={<Icon name="copy" className="h-4 w-4" />}
-                            onClick={() => handleDuplicate(event)}
-                            disabled={actionLoading === `${event.type}-${event.id}`}
-                          >
-                            Duplicar
-                          </StandardizedButton>
-
-                          <StandardizedButton
-                            variant="danger"
-                            size="sm"
-                            icon={<Icon name="trash" className="h-4 w-4" />}
-                            onClick={() => handleDeleteClick(event)}
-                            disabled={actionLoading === `${event.type}-${event.id}`}
-                          >
-                            Excluir
-                          </StandardizedButton>
+                        <div className="flex justify-end">
+                          <AdminActionMenu
+                            items={[
+                              {
+                                label: 'Editar',
+                                icon: 'edit',
+                                onClick: () => handleEditEvent(event),
+                              },
+                              {
+                                label: event.is_published ? 'Despublicar' : 'Publicar',
+                                icon: event.is_published ? 'eye-slash' : 'eye',
+                                onClick: () => handleToggleStatus(event),
+                              },
+                              {
+                                label: event.is_featured ? 'Remover destaque' : 'Destacar',
+                                icon: 'star',
+                                onClick: () => handleToggleFeatured(event),
+                              },
+                              {
+                                label: 'Duplicar',
+                                icon: 'copy',
+                                onClick: () => handleDuplicate(event),
+                              },
+                              {
+                                label: 'Excluir',
+                                icon: 'trash',
+                                onClick: () => handleDeleteClick(event),
+                                variant: 'danger',
+                                showDivider: true,
+                              },
+                            ]}
+                          />
                         </div>
                       </td>
                     </tr>

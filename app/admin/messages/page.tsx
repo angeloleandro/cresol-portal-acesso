@@ -20,6 +20,7 @@ import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
 import { MessageForm } from './components/MessageForm';
+import { AdminActionMenu } from '@/app/components/ui/AdminActionMenu';
 
 import { FormatDate } from '@/lib/utils/formatters';
 interface Message {
@@ -304,53 +305,67 @@ export default function MessagesAdminPage() {
         </div>
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card p-6">
+        <div className="grid-modern-stats mb-8">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <Icon name="message-square" className="h-6 w-6 text-blue-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="message-square" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Total</p>
-                <p className="text-2xl font-bold text-primary">{stats?.total || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.total || 0}
+                </div>
+                <div className="stat-label">
+                  Total
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <Icon name="check-circle" className="h-6 w-6 text-green-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="check-circle" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Publicadas</p>
-                <p className="text-2xl font-bold text-green-600">{stats?.published || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.published || 0}
+                </div>
+                <div className="stat-label">
+                  Publicadas
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100 mr-4">
-                <Icon name="edit" className="h-6 w-6 text-yellow-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="edit" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Rascunhos</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats?.drafts || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.drafts || 0}
+                </div>
+                <div className="stat-label">
+                  Rascunhos
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-purple-100 mr-4">
-                <Icon name="building-1" className="h-6 w-6 text-purple-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="building-1" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Setores</p>
-                <p className="text-2xl font-bold text-purple-600">
+              <div className="flex-1">
+                <div className="stat-value mb-1">
                   {stats?.byType?.sector || 0}
-                </p>
+                </div>
+                <div className="stat-label">
+                  Setores
+                </div>
               </div>
             </div>
           </div>
@@ -363,15 +378,13 @@ export default function MessagesAdminPage() {
             <div className="xl:col-span-2">
               <label className="label">Buscar</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Icon name="search" className="h-5 w-5 text-gray-400" />
-                </div>
+                <Icon name="search" className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
                 <input
                   type="text"
                   placeholder="Título ou conteúdo..."
                   value={filters.search}
                   onChange={(e) => updateFilters({ search: e.target.value })}
-                  className="input pl-10"
+                  className="input !pl-12 h-10"
                 />
               </div>
             </div>
@@ -564,50 +577,36 @@ export default function MessagesAdminPage() {
                     </div>
 
                     {/* Ações */}
-                    <div className="flex items-center space-x-2">
-                      <StandardizedButton
-                        variant="secondary"
-                        size="sm"
-                        icon={<Icon name="edit" className="h-4 w-4" />}
-                        onClick={() => {
-                          setEditingMessage(message);
-                          setIsModalOpen(true);
-                        }}
-                        disabled={isLoading}
-                      >
-                        Editar
-                      </StandardizedButton>
-
-                      <StandardizedButton
-                        variant={message.is_published ? "warning" : "success"}
-                        size="sm"
-                        icon={<Icon name={message.is_published ? "eye-slash" : "eye"} className="h-4 w-4" />}
-                        onClick={() => handleToggleStatus(message)}
-                        disabled={isLoading}
-                        loading={isLoading}
-                      >
-                        {message.is_published ? 'Despublicar' : 'Publicar'}
-                      </StandardizedButton>
-
-                      <StandardizedButton
-                        variant="secondary"
-                        size="sm"
-                        icon={<Icon name="copy" className="h-4 w-4" />}
-                        onClick={() => handleDuplicate(message)}
-                        disabled={isLoading}
-                      >
-                        Duplicar
-                      </StandardizedButton>
-
-                      <StandardizedButton
-                        variant="danger"
-                        size="sm"
-                        icon={<Icon name="trash" className="h-4 w-4" />}
-                        onClick={() => handleDeleteClick(message)}
-                        disabled={isLoading}
-                      >
-                        Excluir
-                      </StandardizedButton>
+                    <div className="flex-shrink-0">
+                      <AdminActionMenu
+                        items={[
+                          {
+                            label: 'Editar',
+                            icon: 'edit',
+                            onClick: () => {
+                              setEditingMessage(message);
+                              setIsModalOpen(true);
+                            },
+                          },
+                          {
+                            label: message.is_published ? 'Despublicar' : 'Publicar',
+                            icon: message.is_published ? 'eye-slash' : 'eye',
+                            onClick: () => handleToggleStatus(message),
+                          },
+                          {
+                            label: 'Duplicar',
+                            icon: 'copy',
+                            onClick: () => handleDuplicate(message),
+                          },
+                          {
+                            label: 'Excluir',
+                            icon: 'trash',
+                            onClick: () => handleDeleteClick(message),
+                            variant: 'danger',
+                            showDivider: true,
+                          },
+                        ]}
+                      />
                     </div>
                   </div>
                 </div>

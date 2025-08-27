@@ -32,19 +32,23 @@ const CollectionsManager: React.FC<CollectionsManagerProps> = ({
 
   // Hooks
   const alert = useAlert();
+  const collectionsData = useCollections();
+  
   const {
     collections: _collections,
     loading: _loading,
     error: _error,
     stats: _stats,
-    actions: {
-      refresh: _refresh,
-      createCollection,
-      updateCollection,
-      deleteCollection,
-      toggleCollectionStatus,
-    }
-  } = useCollections();
+    actions
+  } = collectionsData;
+
+  const {
+    refresh: _refresh,
+    createCollection,
+    updateCollection,
+    deleteCollection,
+    toggleCollectionStatus,
+  } = actions;
 
   // Handle showCreateCollection prop
   useEffect(() => {

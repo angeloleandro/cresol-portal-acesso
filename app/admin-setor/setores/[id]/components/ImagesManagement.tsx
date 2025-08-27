@@ -9,7 +9,7 @@ import OptimizedImage from '@/app/components/OptimizedImage';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 
-import type { SectorImage } from '../types/sector.types';
+import type { SectorImage, SectorImageDTO, mapSectorImageFromDTO } from '../types/sector.types';
 
 interface ImagesManagementProps {
   sectorId: string;
@@ -31,7 +31,7 @@ export function ImagesManagement({
   onDelete
 }: ImagesManagementProps) {
   const { showError, showSuccess } = useAlert();
-  const deleteModal = useDeleteModal<SectorImage>('imagem');
+  const deleteModal = useDeleteModal<SectorImageDTO>('imagem');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<SectorImage>>({
@@ -123,7 +123,7 @@ export function ImagesManagement({
   };
 
   const handleDeleteClick = (image: SectorImage) => {
-    deleteModal.openDeleteModal(image, image.title);
+    deleteModal.openDeleteModal(image as SectorImageDTO, image.title);
   };
 
   const handleDelete = async (image: SectorImage) => {

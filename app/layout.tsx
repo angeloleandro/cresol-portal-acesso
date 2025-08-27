@@ -3,10 +3,9 @@ import { Inter } from 'next/font/google'
 import { CRESOL_COLORS as COLORS } from '@/lib/design-tokens'
 
 import { AlertContainer } from './components/alerts/AlertContainer'
-import { AlertProvider } from './components/alerts/AlertProvider'
-import { CollectionsProvider } from './contexts/CollectionsContext'
 import { AuthProvider } from './providers/AuthProvider'
 import { ChakraUIProvider } from './providers/ChakraProvider'
+import { ConditionalProviders } from './providers/ConditionalProviders'
 import QueryProvider from '@/lib/react-query/query-provider'
 
 import type { Metadata } from 'next'
@@ -93,16 +92,14 @@ export default function RootLayout({
       <body className={inter.className}>
         <QueryProvider>
           <ChakraUIProvider>
-            <AlertProvider>
-              <AuthProvider>
-                <CollectionsProvider>
-                  <main className="min-h-screen bg-gray-50">
-                    {children}
-                  </main>
-                  <AlertContainer position="top-right" />
-                </CollectionsProvider>
-              </AuthProvider>
-            </AlertProvider>
+            <AuthProvider>
+              <ConditionalProviders>
+                <main className="min-h-screen bg-gray-50">
+                  {children}
+                </main>
+                <AlertContainer position="top-right" />
+              </ConditionalProviders>
+            </AuthProvider>
           </ChakraUIProvider>
         </QueryProvider>
       </body>

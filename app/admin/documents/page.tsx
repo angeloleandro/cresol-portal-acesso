@@ -19,6 +19,7 @@ import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
 import { DocumentForm } from './components/DocumentForm';
+import { AdminActionMenu } from '@/app/components/ui/AdminActionMenu';
 
 // Tipos definidos inline seguindo padrão do news
 interface Document {
@@ -324,51 +325,67 @@ export default function DocumentsAdminPage() {
         </div>
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="card p-6">
+        <div className="grid-modern-stats mb-8">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 mr-4">
-                <Icon name="file" className="h-6 w-6 text-blue-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="file" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Total</p>
-                <p className="text-2xl font-bold text-primary">{stats?.total || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.total || 0}
+                </div>
+                <div className="stat-label">
+                  Total
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <Icon name="check-circle" className="h-6 w-6 text-green-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="check-circle" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Publicados</p>
-                <p className="text-2xl font-bold text-green-600">{stats?.published || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.published || 0}
+                </div>
+                <div className="stat-label">
+                  Publicados
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100 mr-4">
-                <Icon name="edit" className="h-6 w-6 text-yellow-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="edit" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Rascunhos</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats?.drafts || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.drafts || 0}
+                </div>
+                <div className="stat-label">
+                  Rascunhos
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="card p-6">
+          <div className="stat-card-orange">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-purple-100 mr-4">
-                <Icon name="star" className="h-6 w-6 text-purple-600" />
+              <div className="icon-container-orange mr-5 flex-shrink-0">
+                <Icon name="star" className="h-6 w-6" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted">Em Destaque</p>
-                <p className="text-2xl font-bold text-purple-600">{stats?.featured || 0}</p>
+              <div className="flex-1">
+                <div className="stat-value mb-1">
+                  {stats?.featured || 0}
+                </div>
+                <div className="stat-label">
+                  Em Destaque
+                </div>
               </div>
             </div>
           </div>
@@ -380,13 +397,16 @@ export default function DocumentsAdminPage() {
             {/* Busca */}
             <div className="xl:col-span-2">
               <label className="label">Buscar</label>
-              <input
-                type="text"
-                placeholder="Título ou descrição..."
-                value={filters.search}
-                onChange={(e) => updateFilters({ search: e.target.value })}
-                className="input"
-              />
+              <div className="relative">
+                <Icon name="search" className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
+                <input
+                  type="text"
+                  placeholder="Título ou descrição..."
+                  value={filters.search}
+                  onChange={(e) => updateFilters({ search: e.target.value })}
+                  className="input !pl-12 h-10"
+                />
+              </div>
             </div>
 
             {/* Tipo */}
@@ -560,66 +580,43 @@ export default function DocumentsAdminPage() {
                         </div>
 
                         {/* Ações */}
-                        <div className="flex items-center space-x-2 flex-shrink-0">
-                          <StandardizedButton
-                            variant="secondary"
-                            size="sm"
-                            icon={<Icon name="download" className="h-4 w-4" />}
-                            onClick={() => handleDownload(document)}
-                          >
-                            Download
-                          </StandardizedButton>
-
-                          <StandardizedButton
-                            variant="secondary"
-                            size="sm"
-                            icon={<Icon name="edit" className="h-4 w-4" />}
-                            onClick={() => handleEdit(document)}
-                            disabled={actionLoading === `edit-${document.id}`}
-                          >
-                            Editar
-                          </StandardizedButton>
-
-                          <StandardizedButton
-                            variant={document.is_published ? "warning" : "success"}
-                            size="sm"
-                            icon={<Icon name={document.is_published ? "eye-slash" : "eye"} className="h-4 w-4" />}
-                            onClick={() => handleAction(document.is_published ? 'unpublish' : 'publish', document)}
-                            disabled={actionLoading === `${document.is_published ? 'unpublish' : 'publish'}-${document.id}`}
-                            loading={actionLoading === `${document.is_published ? 'unpublish' : 'publish'}-${document.id}`}
-                          >
-                            {document.is_published ? 'Despublicar' : 'Publicar'}
-                          </StandardizedButton>
-
-                          <StandardizedButton
-                            variant={document.is_featured ? "warning" : "secondary"}
-                            size="sm"
-                            icon={<Icon name="star" className="h-4 w-4" />}
-                            onClick={() => handleAction(document.is_featured ? 'unfeature' : 'feature', document)}
-                            disabled={actionLoading === `${document.is_featured ? 'unfeature' : 'feature'}-${document.id}`}
-                          >
-                            {document.is_featured ? 'Remover destaque' : 'Destacar'}
-                          </StandardizedButton>
-
-                          <StandardizedButton
-                            variant="secondary"
-                            size="sm"
-                            icon={<Icon name="copy" className="h-4 w-4" />}
-                            onClick={() => handleAction('duplicate', document)}
-                            disabled={actionLoading === `duplicate-${document.id}`}
-                          >
-                            Duplicar
-                          </StandardizedButton>
-
-                          <StandardizedButton
-                            variant="danger"
-                            size="sm"
-                            icon={<Icon name="trash" className="h-4 w-4" />}
-                            onClick={() => deleteModal.openDeleteModal(document, document.title)}
-                            disabled={actionLoading === `delete-${document.id}`}
-                          >
-                            Excluir
-                          </StandardizedButton>
+                        <div className="flex-shrink-0">
+                          <AdminActionMenu
+                            items={[
+                              {
+                                label: 'Download',
+                                icon: 'download',
+                                onClick: () => handleDownload(document),
+                              },
+                              {
+                                label: 'Editar',
+                                icon: 'edit',
+                                onClick: () => handleEdit(document),
+                              },
+                              {
+                                label: document.is_published ? 'Despublicar' : 'Publicar',
+                                icon: document.is_published ? 'eye-slash' : 'eye',
+                                onClick: () => handleAction(document.is_published ? 'unpublish' : 'publish', document),
+                              },
+                              {
+                                label: document.is_featured ? 'Remover destaque' : 'Destacar',
+                                icon: 'star',
+                                onClick: () => handleAction(document.is_featured ? 'unfeature' : 'feature', document),
+                              },
+                              {
+                                label: 'Duplicar',
+                                icon: 'copy',
+                                onClick: () => handleAction('duplicate', document),
+                              },
+                              {
+                                label: 'Excluir',
+                                icon: 'trash',
+                                onClick: () => deleteModal.openDeleteModal(document, document.title),
+                                variant: 'danger',
+                                showDivider: true,
+                              },
+                            ]}
+                          />
                         </div>
                       </div>
                     </div>

@@ -1,5 +1,6 @@
 // Tipos para o painel de administração de setores
 
+// Domain interfaces - strict typing without index signatures
 export interface Sector {
   id: string;
   name: string;
@@ -15,7 +16,6 @@ export interface Subsector {
   description: string;
   created_at: string;
   updated_at?: string;
-  [key: string]: unknown;
 }
 
 export interface SectorNews {
@@ -29,7 +29,6 @@ export interface SectorNews {
   is_featured: boolean;
   created_at: string;
   updated_at?: string;
-  [key: string]: unknown;
 }
 
 export interface SectorEvent {
@@ -44,7 +43,6 @@ export interface SectorEvent {
   is_featured: boolean;
   created_at: string;
   updated_at?: string;
-  [key: string]: unknown;
 }
 
 export interface SectorMessage {
@@ -56,7 +54,6 @@ export interface SectorMessage {
   is_published: boolean;
   created_at: string;
   updated_at?: string;
-  [key: string]: unknown;
 }
 
 export interface SectorDocument {
@@ -70,7 +67,6 @@ export interface SectorDocument {
   is_published: boolean;
   created_at: string;
   updated_at?: string;
-  [key: string]: unknown;
 }
 
 export interface SectorVideo {
@@ -85,7 +81,6 @@ export interface SectorVideo {
   is_published: boolean;
   created_at: string;
   updated_at?: string;
-  [key: string]: unknown;
 }
 
 export interface SectorImage {
@@ -97,7 +92,6 @@ export interface SectorImage {
   is_published: boolean;
   created_at: string;
   updated_at?: string;
-  [key: string]: unknown;
 }
 
 export interface MessageGroup {
@@ -115,7 +109,151 @@ export interface GroupWithUsers extends MessageGroup {
     email: string;
     full_name: string;
   }>;
+}
+
+// DTO interfaces - for API responses with potential extra fields
+export interface SubsectorDTO extends Subsector {
   [key: string]: unknown;
+}
+
+export interface SectorNewsDTO extends SectorNews {
+  [key: string]: unknown;
+}
+
+export interface SectorEventDTO extends SectorEvent {
+  [key: string]: unknown;
+}
+
+export interface SectorMessageDTO extends SectorMessage {
+  [key: string]: unknown;
+}
+
+export interface SectorDocumentDTO extends SectorDocument {
+  [key: string]: unknown;
+}
+
+export interface SectorVideoDTO extends SectorVideo {
+  [key: string]: unknown;
+}
+
+export interface SectorImageDTO extends SectorImage {
+  [key: string]: unknown;
+}
+
+export interface GroupWithUsersDTO extends GroupWithUsers {
+  [key: string]: unknown;
+}
+
+// Mapper functions to convert DTOs to domain models
+export function mapSubsectorFromDTO(dto: SubsectorDTO): Subsector {
+  return {
+    id: dto.id,
+    sector_id: dto.sector_id,
+    name: dto.name,
+    description: dto.description,
+    created_at: dto.created_at,
+    updated_at: dto.updated_at,
+  };
+}
+
+export function mapSectorNewsFromDTO(dto: SectorNewsDTO): SectorNews {
+  return {
+    id: dto.id,
+    sector_id: dto.sector_id,
+    title: dto.title,
+    summary: dto.summary,
+    content: dto.content,
+    image_url: dto.image_url,
+    is_published: dto.is_published,
+    is_featured: dto.is_featured,
+    created_at: dto.created_at,
+    updated_at: dto.updated_at,
+  };
+}
+
+export function mapSectorEventFromDTO(dto: SectorEventDTO): SectorEvent {
+  return {
+    id: dto.id,
+    sector_id: dto.sector_id,
+    title: dto.title,
+    description: dto.description,
+    start_date: dto.start_date,
+    end_date: dto.end_date,
+    location: dto.location,
+    is_published: dto.is_published,
+    is_featured: dto.is_featured,
+    created_at: dto.created_at,
+    updated_at: dto.updated_at,
+  };
+}
+
+export function mapSectorMessageFromDTO(dto: SectorMessageDTO): SectorMessage {
+  return {
+    id: dto.id,
+    sector_id: dto.sector_id,
+    title: dto.title,
+    content: dto.content,
+    priority: dto.priority,
+    is_published: dto.is_published,
+    created_at: dto.created_at,
+    updated_at: dto.updated_at,
+  };
+}
+
+export function mapSectorDocumentFromDTO(dto: SectorDocumentDTO): SectorDocument {
+  return {
+    id: dto.id,
+    sector_id: dto.sector_id,
+    title: dto.title,
+    description: dto.description,
+    file_url: dto.file_url,
+    file_size: dto.file_size,
+    file_type: dto.file_type,
+    is_published: dto.is_published,
+    created_at: dto.created_at,
+    updated_at: dto.updated_at,
+  };
+}
+
+export function mapSectorVideoFromDTO(dto: SectorVideoDTO): SectorVideo {
+  return {
+    id: dto.id,
+    sector_id: dto.sector_id,
+    title: dto.title,
+    description: dto.description,
+    video_url: dto.video_url,
+    thumbnail_url: dto.thumbnail_url,
+    thumbnail_timestamp: dto.thumbnail_timestamp,
+    upload_type: dto.upload_type,
+    is_published: dto.is_published,
+    created_at: dto.created_at,
+    updated_at: dto.updated_at,
+  };
+}
+
+export function mapSectorImageFromDTO(dto: SectorImageDTO): SectorImage {
+  return {
+    id: dto.id,
+    sector_id: dto.sector_id,
+    title: dto.title,
+    description: dto.description,
+    image_url: dto.image_url,
+    is_published: dto.is_published,
+    created_at: dto.created_at,
+    updated_at: dto.updated_at,
+  };
+}
+
+export function mapGroupWithUsersFromDTO(dto: GroupWithUsersDTO): GroupWithUsers {
+  return {
+    id: dto.id,
+    name: dto.name,
+    description: dto.description,
+    user_ids: dto.user_ids,
+    created_at: dto.created_at,
+    updated_at: dto.updated_at,
+    users: dto.users,
+  };
 }
 
 export interface TeamMember {

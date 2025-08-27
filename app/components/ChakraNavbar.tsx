@@ -28,6 +28,7 @@ import {
   MenuContent,
   MenuItem,
 } from '@chakra-ui/react/menu';
+import { Portal } from '@chakra-ui/react';
 import { useDisclosure } from '@chakra-ui/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -961,31 +962,97 @@ const SearchButton = memo(({ user }: { user: any }) => {
 SearchButton.displayName = 'SearchButton';
 
 // User Menu Component
-const UserMenu = memo(({ user, onLogout }: { user: any; onLogout: () => void }) => (
-  <MenuRoot positioning={{ placement: "bottom-end" }}>
-    <MenuTrigger asChild>
+const UserMenu = memo(({ user, onLogout }: { user: any; onLogout: () => void }) => {
+  const { open: isOpen, onToggle, onClose } = useDisclosure();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
+          triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  return (
+    <Box position="relative">
       <Button
+        ref={triggerRef}
         variant="ghost"
         size="sm"
         color="whiteAlpha.800"
         _hover={{ color: 'white', bg: 'whiteAlpha.100' }}
         _active={{ bg: 'whiteAlpha.100' }}
         fontSize="sm"
+        onClick={onToggle}
       >
         {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Usuário'}
         <Icon name="user-circle" className="h-5 w-5 ml-1" />
       </Button>
-    </MenuTrigger>
-    <MenuContent bg="white" borderColor="gray.200" borderRadius="md" py={1} minW="192px">
-      <MenuItem value="profile" asChild>
-        <Link href="/profile">Perfil</Link>
-      </MenuItem>
-      <MenuItem value="logout" onClick={onLogout}>
-        Sair
-      </MenuItem>
-    </MenuContent>
-  </MenuRoot>
-));
+      
+      {isOpen && (
+        <Portal>
+          <Box
+            ref={dropdownRef}
+            position="fixed"
+            top={triggerRef.current ? triggerRef.current.getBoundingClientRect().bottom + 8 : 0}
+            right={triggerRef.current ? window.innerWidth - triggerRef.current.getBoundingClientRect().right : 0}
+            bg="white"
+            borderRadius="md"
+            boxShadow="0 10px 38px -10px rgba(22, 23, 24, 0.35), 0 10px 20px -15px rgba(22, 23, 24, 0.2)"
+            border="1px solid"
+            borderColor="gray.200"
+            py={1}
+            minW="192px"
+            zIndex={1001}
+          >
+            <VStack align="stretch" gap={0}>
+              <ChakraLink
+                as={Link}
+                href="/profile"
+                display="block"
+                px={4}
+                py={2}
+                fontSize="sm"
+                color="gray.700"
+                _hover={{ bg: 'gray.50', textDecoration: 'none' }}
+                onClick={onClose}
+              >
+                Perfil
+              </ChakraLink>
+              <Box
+                as="button"
+                px={4}
+                py={2}
+                fontSize="sm"
+                color="gray.700"
+                textAlign="left"
+                w="full"
+                _hover={{ bg: 'gray.50' }}
+                onClick={() => {
+                  onClose();
+                  onLogout();
+                }}
+              >
+                Sair
+              </Box>
+            </VStack>
+          </Box>
+        </Portal>
+      )}
+    </Box>
+  );
+});
 UserMenu.displayName = 'UserMenu';
 
 // Main Navbar Component
@@ -1012,8 +1079,24 @@ function ChakraNavbar() {
   }
 
   return (
-    <Box as="header" bg="orange.500" borderBottom="1px" borderColor="orange.600" zIndex={30} position="relative">
-      <Flex maxW="7xl" mx="auto" px={{ base: 4, sm: 6, lg: 8 }} py={4} justify="space-between" align="center">
+    <Box 
+      as="header" 
+      bg="orange.500" 
+      borderBottom="1px" 
+      borderColor="orange.600" 
+      zIndex={30} 
+      position="relative"
+      overflow="visible"
+    >
+      <Flex 
+        maxW="7xl" 
+        mx="auto" 
+        px={{ base: 4, sm: 6, lg: 8 }} 
+        py={4} 
+        justify="space-between" 
+        align="center"
+        position="relative"
+      >
         {/* Logo */}
         <Flex align="center">
           <ChakraLink as={Link} href="/home" display="flex" alignItems="center">

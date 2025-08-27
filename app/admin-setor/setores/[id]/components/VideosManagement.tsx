@@ -13,7 +13,7 @@ import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { VIDEO_HELPERS, VIDEO_API_CONFIG } from '@/lib/constants/video-ui';
 import { FormatDate } from '@/lib/utils/formatters';
 
-import type { SectorVideo } from '../types/sector.types';
+import type { SectorVideo, SectorVideoDTO, mapSectorVideoFromDTO } from '../types/sector.types';
 import type { VideoUploadFormData } from '@/lib/types/video-system';
 
 interface VideosManagementProps {
@@ -92,7 +92,7 @@ export function VideosManagement({
   onDelete
 }: VideosManagementProps) {
   const alert = useAlert();
-  const deleteModal = useDeleteModal<SectorVideo>('vídeo');
+  const deleteModal = useDeleteModal<SectorVideoDTO>('vídeo');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideo, setCurrentVideo] = useState<SectorVideo | null>(null);
   const [playingVideo, setPlayingVideo] = useState<SectorVideo | null>(null);
@@ -262,7 +262,7 @@ export function VideosManagement({
                       </svg>
                     </button>
                     <button
-                      onClick={() => deleteModal.openDeleteModal(video, video.title)}
+                      onClick={() => deleteModal.openDeleteModal(video as SectorVideoDTO, video.title)}
                       className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
                       title="Excluir"
                     >

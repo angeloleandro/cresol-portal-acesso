@@ -12,6 +12,7 @@ import {
   DialogCloseTrigger,
   DialogTitle,
   DialogBackdrop,
+  Portal,
 } from '@chakra-ui/react';
 import { useDisclosure } from '@chakra-ui/react';
 import { ReactNode } from 'react';
@@ -38,37 +39,64 @@ export function Modal({
   closeOnOverlayClick = true,
   size = 'md',
 }: ModalProps) {
+  if (!isOpen) return null;
+  
   return (
-    <DialogRoot
-      open={isOpen}
-      onOpenChange={(e) => {
-        if (!e.open && closeOnOverlayClick) {
-          onClose();
-        }
-      }}
-      size={size}
-    >
-      <DialogBackdrop bg="blackAlpha.600" />
-      <DialogContent>
-        {title && (
-          <DialogHeader>
-            <DialogTitle fontSize="lg" fontWeight="semibold">
-              {title}
-            </DialogTitle>
-          </DialogHeader>
-        )}
-        
-        {showCloseButton && <DialogCloseTrigger />}
-        
-        <DialogBody>{children}</DialogBody>
-        
-        {footer && (
-          <DialogFooter gap={3}>
-            {footer}
-          </DialogFooter>
-        )}
-      </DialogContent>
-    </DialogRoot>
+    <Portal>
+      <DialogRoot
+        open={true}
+        onOpenChange={(e) => {
+          if (!e.open && closeOnOverlayClick) {
+            onClose();
+          }
+        }}
+        size={size}
+        placement="center"
+        motionPreset="slide-in-bottom"
+        unmountOnExit={false}
+      >
+        <DialogBackdrop 
+          bg="blackAlpha.600" 
+          position="fixed"
+          inset={0}
+          style={{ zIndex: 10000 }}
+          backdropFilter="blur(4px)"
+        />
+        <DialogContent
+          bg="white"
+          borderRadius="md"
+          boxShadow="lg"
+          position="fixed"
+          top="50%"
+          left="50%"
+          transform="translate(-50%, -50%)"
+          style={{ zIndex: 10001 }}
+          maxH="90vh"
+          overflow="auto"
+          m={4}
+          w={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
+          maxW="95vw"
+        >
+          {title && (
+            <DialogHeader borderBottom="1px solid" borderColor="gray.200" pb={3}>
+              <DialogTitle fontSize="lg" fontWeight="semibold">
+                {title}
+              </DialogTitle>
+            </DialogHeader>
+          )}
+          
+          {showCloseButton && <DialogCloseTrigger />}
+          
+          <DialogBody py={4}>{children}</DialogBody>
+          
+          {footer && (
+            <DialogFooter borderTop="1px solid" borderColor="gray.200" pt={3} gap={3}>
+              {footer}
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </DialogRoot>
+    </Portal>
   );
 }
 

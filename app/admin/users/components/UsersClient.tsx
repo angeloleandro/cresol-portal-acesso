@@ -97,15 +97,6 @@ export default function UsersClient({
   const [userSectors, setUserSectors] = useState<Record<string, string[]>>({});
   const [userSubsectors, setUserSubsectors] = useState<Record<string, string[]>>({});
 
-  const handleAuthError = useCallback((error: string) => {
-    if (error.includes('JWT') || error.includes('token') || error.includes('unauthorized')) {
-      auth.sessionExpired();
-      router.replace('/login');
-      return true;
-    }
-    return false;
-  }, [router, auth]);
-
   const fetchUserSectors = useCallback(async (userId: string) => {
     try {
       const { data, error } = await createClient()
@@ -186,13 +177,21 @@ export default function UsersClient({
         
         setUser(data.user);
         
-        // Buscar associações para usuários que precisam
-        for (const userProfile of users) {
+        // Take a snapshot of users and fetch associations in parallel
+        const currentUsers = [...users];
+        const fetchPromises = currentUsers.map(userProfile => {
           if (userProfile.role === 'sector_admin') {
-            await fetchUserSectors(userProfile.id);
+            return fetchUserSectors(userProfile.id);
           } else if (userProfile.role === 'subsector_admin') {
-            await fetchUserSubsectors(userProfile.id);
+            return fetchUserSubsectors(userProfile.id);
           }
+          return Promise.resolve();
+        });
+        
+        try {
+          await Promise.allSettled(fetchPromises);
+        } catch (error) {
+          // Silently handle errors - individual failures are already caught
         }
       } catch (error) {
         router.replace('/login');

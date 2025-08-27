@@ -3,7 +3,7 @@
 import { SECTOR_NEWS_CONFIG } from '@/app/components/management/configs/news-config';
 import { NewsManagement as GenericNewsManagement } from '@/app/components/management/NewsManagement';
 
-import type { SectorNews } from '../types/sector.types';
+import type { SectorNews, SectorNewsDTO, mapSectorNewsFromDTO } from '../types/sector.types';
 
 interface NewsManagementProps {
   sectorId: string;
@@ -17,9 +17,9 @@ interface NewsManagementProps {
 
 export function NewsManagement(props: NewsManagementProps) {
   return (
-    <GenericNewsManagement<SectorNews>
+    <GenericNewsManagement<SectorNewsDTO>
       entityId={props.sectorId}
-      news={props.news}
+      news={props.news as SectorNewsDTO[]}
       showDrafts={props.showDrafts}
       totalDraftNewsCount={props.totalDraftNewsCount}
       onToggleDrafts={props.onToggleDrafts}

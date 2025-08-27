@@ -408,21 +408,69 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
 export function useCollectionsContext() {
   const context = useContext(CollectionsContext);
   if (!context) {
-    throw new Error('useCollectionsContext deve ser usado dentro de CollectionsProvider');
+    // Return default values instead of throwing error
+    // This allows components to work without the provider
+    console.warn('useCollectionsContext foi chamado fora do CollectionsProvider. Retornando valores padrão.');
+    return null;
   }
   return context;
 }
 
 // Hook otimizado para componentes que só precisam de collections (backward compatibility)
 export function useCollections(initialFilters?: Partial<CollectionFilters>) {
-  const { state, actions } = useCollectionsContext();
+  const context = useCollectionsContext();
   
-  // Apply initial filters apenas uma vez
+  // Apply initial filters apenas uma vez - deve estar antes do early return
   useEffect(() => {
-    if (initialFilters) {
-      actions.updateFilters(initialFilters);
+    if (context && initialFilters) {
+      context.actions.updateFilters(initialFilters);
     }
-  }, [actions, initialFilters]);
+  }, [context, initialFilters]);
+  
+  // Se não houver contexto, retornar valores padrão
+  if (!context) {
+    return {
+      collections: [],
+      loading: false,
+      error: null,
+      stats: {
+        total: 0,
+        active: 0,
+        inactive: 0,
+        by_type: {
+          mixed: 0,
+          images: 0,
+          videos: 0
+        },
+        total_items: 0,
+        recent_activity: 0
+      },
+      filters: {
+        search: '',
+        type: 'all',
+        status: 'all',
+        sort_by: 'created_at',
+        sort_order: 'desc',
+        page: 1,
+        limit: 10
+      },
+      hasMore: false,
+      actions: {
+        fetchCollections: async () => {},
+        fetchStats: async () => {},
+        updateFilters: () => {},
+        refresh: async () => {},
+        clearCache: () => {},
+        createCollection: async () => ({ success: false, error: 'Provider não disponível' }),
+        updateCollection: async () => ({ success: false, error: 'Provider não disponível' }),
+        deleteCollection: async () => ({ success: false, error: 'Provider não disponível' }),
+        toggleCollectionStatus: async () => {},
+        loadMore: async () => {}
+      },
+    };
+  }
+  
+  const { state, actions } = context;
 
   return {
     collections: state.collections,
@@ -437,7 +485,28 @@ export function useCollections(initialFilters?: Partial<CollectionFilters>) {
 
 // Hook otimizado para componentes que só precisam de stats
 export function useCollectionsStats() {
-  const { state, actions } = useCollectionsContext();
+  const context = useCollectionsContext();
+  
+  if (!context) {
+    return {
+      stats: {
+        total: 0,
+        active: 0,
+        inactive: 0,
+        by_type: {
+          mixed: 0,
+          images: 0,
+          videos: 0
+        },
+        total_items: 0,
+        recent_activity: 0
+      },
+      loading: false,
+      loadStats: async () => {}
+    };
+  }
+  
+  const { state, actions } = context;
   
   return {
     stats: state.stats,

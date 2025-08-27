@@ -30,6 +30,7 @@ const CollectionList: React.FC<CollectionListProps> = memo(({
   onCollectionClick,
 }) => {
   // State management usando contexto otimizado
+  const collectionsData = useCollections({ limit });
   const {
     collections,
     loading,
@@ -38,7 +39,7 @@ const CollectionList: React.FC<CollectionListProps> = memo(({
     stats,
     hasMore,
     actions
-  } = useCollections({ limit });
+  } = collectionsData;
 
   // Local state for UI
   const [isCreating, setIsCreating] = useState(false);
@@ -102,7 +103,9 @@ const CollectionList: React.FC<CollectionListProps> = memo(({
   }, []);
 
   const handleRefresh = useCallback(() => {
-    actions.refresh();
+    if (actions.refresh) {
+      actions.refresh();
+    }
   }, [actions]);
 
   const handleLoadMore = useCallback(() => {
@@ -122,7 +125,7 @@ const CollectionList: React.FC<CollectionListProps> = memo(({
             </h2>
             {showStats && stats && (
               <p className="text-sm text-gray-600 mt-1">
-                {stats.total} coleção{stats.total !== 1 ? 'ões' : ''} • {stats.active} ativa{stats.active !== 1 ? 's' : ''}
+                {stats.total} coleção{stats.total !== 1 ? 'ões' : ''} • {stats.active || 0} ativa{(stats.active || 0) !== 1 ? 's' : ''}
               </p>
             )}
           </div>
@@ -189,7 +192,7 @@ const CollectionList: React.FC<CollectionListProps> = memo(({
               <ChakraSelect
                 label="Tipo"
                 options={typeOptions}
-                value={filters.type}
+                value={filters.type || 'all'}
                 onChange={(value) => handleTypeFilter(value as string)}
                 placeholder="Todos os tipos"
                 size="md"
@@ -203,7 +206,7 @@ const CollectionList: React.FC<CollectionListProps> = memo(({
               <ChakraSelect
                 label="Status"
                 options={statusOptions}
-                value={filters.status}
+                value={filters.status || 'all'}
                 onChange={(value) => handleStatusFilter(value as string)}
                 placeholder="Todos"
                 size="md"
@@ -219,7 +222,7 @@ const CollectionList: React.FC<CollectionListProps> = memo(({
               <label className="text-sm font-medium text-gray-700">Ordenar por:</label>
               <ChakraSelect
                 options={sortOptions}
-                value={`${filters.sort_by}-${filters.sort_order}`}
+                value={`${filters.sort_by || 'order_index'}-${filters.sort_order || 'asc'}`}
                 onChange={(value) => {
                   const [sortBy, sortOrder] = (value as string).split('-');
                   handleSortChange(sortBy, sortOrder as 'asc' | 'desc');

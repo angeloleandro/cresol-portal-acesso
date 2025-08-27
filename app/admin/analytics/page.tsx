@@ -8,7 +8,6 @@ import { StandardizedButton, StandardizedTabsList } from '@/app/components/admin
 import AdminHeader from '@/app/components/AdminHeader';
 import AnimatedChart from '@/app/components/analytics/AnimatedChart';
 import { ResponsiveContainer } from '@/app/components/analytics/GridLayoutResponsivo';
-import MetricCards from '@/app/components/analytics/MetricCards';
 import { DashboardShimmer } from '@/app/components/analytics/ShimmerLoading';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { Icon } from '@/app/components/icons/Icon';
@@ -352,51 +351,71 @@ export default function AnalyticsPage() {
 
         {analytics && (
           <>
-            {/* Metrics Cards - Professional Responsive Design */}
-            <div className="mb-6 lg:mb-8">
-              <MetricCards
-                data={[
-                  {
-                    title: 'Visão Geral',
-                    value: 12,
-                    icon: 'chart-bar-vertical',
-                    description: 'Indicadores principais',
-                    trend: 'stable',
-                    color: 'orange'
-                  },
-                  {
-                    title: 'Usuários',
-                    value: analytics.users.total,
-                    previousValue: analytics.users.total - analytics.users.new,
-                    icon: 'user-group',
-                    description: `+${analytics.users.new} novos usuários`,
-                    trend: analytics.users.new > 0 ? 'up' : 'stable',
-                    color: 'blue',
-                    onClick: () => router.push('/admin/users')
-                  },
-                  {
-                    title: 'Sistemas',
-                    value: analytics.systems.active,
-                    previousValue: analytics.systems.total,
-                    icon: 'monitor',
-                    description: `${analytics.systems.total} sistemas total`,
-                    trend: 'stable',
-                    color: 'green',
-                    onClick: () => router.push('/admin/systems')
-                  },
-                  {
-                    title: 'Relatórios',
-                    value: 8,
-                    icon: 'file',
-                    description: 'Relatórios disponíveis',
-                    trend: 'stable',
-                    color: 'purple'
-                  }
-                ]}
-                size="md"
-                responsive={true}
-                isLoading={false}
-              />
+            {/* Estatísticas - Padrão Golden Cresol */}
+            <div className="grid-modern-stats mb-8">
+              <div className="stat-card-orange" onClick={() => window.location.href = '/admin'} role="button" tabIndex={0}>
+                <div className="flex items-center">
+                  <div className="icon-container-orange mr-5 flex-shrink-0">
+                    <Icon name="chart-bar-vertical" className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="stat-value mb-1">
+                      12
+                    </div>
+                    <div className="stat-label">
+                      Indicadores
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="stat-card-orange" onClick={() => router.push('/admin/users')} role="button" tabIndex={0}>
+                <div className="flex items-center">
+                  <div className="icon-container-orange mr-5 flex-shrink-0">
+                    <Icon name="user-group" className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="stat-value mb-1">
+                      {analytics.users.total}
+                    </div>
+                    <div className="stat-label">
+                      Usuários
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="stat-card-orange" onClick={() => router.push('/admin/systems')} role="button" tabIndex={0}>
+                <div className="flex items-center">
+                  <div className="icon-container-orange mr-5 flex-shrink-0">
+                    <Icon name="monitor" className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="stat-value mb-1">
+                      {analytics.systems.active}
+                    </div>
+                    <div className="stat-label">
+                      Sistemas
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="stat-card-orange">
+                <div className="flex items-center">
+                  <div className="icon-container-orange mr-5 flex-shrink-0">
+                    <Icon name="file" className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="stat-value mb-1">
+                      8
+                    </div>
+                    <div className="stat-label">
+                      Relatórios
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Charts Section - Responsive Professional Layout */}
@@ -461,7 +480,7 @@ export default function AnalyticsPage() {
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>Atualizado: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                       <div className="flex items-center space-x-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
                         <span>Tempo real</span>
                       </div>
                     </div>
@@ -489,7 +508,7 @@ export default function AnalyticsPage() {
                           return (
                             <div key={location.name} className="flex items-center justify-between py-1.5">
                               <div className="flex items-center space-x-2 flex-1 min-w-0">
-                                <div className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0"></div>
+                                <div className="w-2 h-2 rounded-full bg-orange-600 flex-shrink-0"></div>
                                 <span className="text-xs font-medium text-gray-700 truncate">
                                   {location.name}
                                 </span>
@@ -512,11 +531,11 @@ export default function AnalyticsPage() {
                     <p className="text-xs text-gray-500">Indicadores de performance</p>
                   </div>
                   <div className="p-3 space-y-3">
-                    {/* Compact Metric Cards */}
-                    <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                    {/* Compact Metric Cards - Padrão Cresol */}
+                    <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 hover:border-orange-300 transition-all duration-200">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium text-gray-700">Usuários Ativos</span>
-                        <Icon name="trending-up" className="h-3 w-3 text-orange-500" />
+                        <Icon name="trending-up" className="h-3 w-3 text-orange-600" />
                       </div>
                       <div className="text-lg font-bold text-orange-600">
                         {Math.round((analytics.users.active / analytics.users.total) * 100)}%
@@ -526,12 +545,12 @@ export default function AnalyticsPage() {
                       </div>
                     </div>
                     
-                    <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                    <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 hover:border-orange-300 transition-all duration-200">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium text-gray-700">Taxa de Leitura</span>
-                        <Icon name="check" className="h-3 w-3 text-green-500" />
+                        <Icon name="check" className="h-3 w-3 text-orange-600" />
                       </div>
-                      <div className="text-lg font-bold text-green-600">
+                      <div className="text-lg font-bold text-orange-600">
                         {Math.round((analytics.activity.notificationsRead / Math.max(analytics.content.notifications, 1)) * 100)}%
                       </div>
                       <div className="text-xs text-gray-600">
@@ -539,12 +558,12 @@ export default function AnalyticsPage() {
                       </div>
                     </div>
                     
-                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 hover:border-orange-300 transition-all duration-200">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium text-gray-700">Crescimento</span>
-                        <Icon name="user-add" className="h-3 w-3 text-blue-500" />
+                        <Icon name="user-add" className="h-3 w-3 text-orange-600" />
                       </div>
-                      <div className="text-lg font-bold text-blue-600">
+                      <div className="text-lg font-bold text-orange-600">
                         +{Math.round((analytics.users.new / Math.max(analytics.users.total - analytics.users.new, 1)) * 100)}%
                       </div>
                       <div className="text-xs text-gray-600">

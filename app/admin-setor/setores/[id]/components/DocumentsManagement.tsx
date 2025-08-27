@@ -9,7 +9,7 @@ import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { useSupabaseClient } from '@/hooks/useSupabaseClient';
 
-import type { SectorDocument } from '../types/sector.types';
+import type { SectorDocument, SectorDocumentDTO, mapSectorDocumentFromDTO } from '../types/sector.types';
 
 interface DocumentsManagementProps {
   sectorId: string;
@@ -32,7 +32,7 @@ export function DocumentsManagement({
 }: DocumentsManagementProps) {
   const { showError, showSuccess } = useAlert();
   const supabase = useSupabaseClient();
-  const deleteModal = useDeleteModal<SectorDocument>('documento');
+  const deleteModal = useDeleteModal<SectorDocumentDTO>('documento');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<SectorDocument>>({
@@ -167,7 +167,7 @@ export function DocumentsManagement({
   };
 
   const handleDeleteClick = (document: SectorDocument) => {
-    deleteModal.openDeleteModal(document, document.title);
+    deleteModal.openDeleteModal(document as SectorDocumentDTO, document.title);
   };
 
   const handleDelete = async (document: SectorDocument) => {
