@@ -104,7 +104,7 @@ function SubsectorTeamPageContent() {
       .single();
 
     if (error) {
-      logger.error('Erro ao buscar sub-setor', error, { subsectorId });
+      logger.error('Erro ao buscar Subsetor', error, { subsectorId });
     } else {
       setSubsector(data);
     }
@@ -130,11 +130,11 @@ function SubsectorTeamPageContent() {
       if (!user || !profile) return;
 
       // Verificar permissões
-      // Usuário pode editar se for admin geral, admin do setor ou admin do sub-setor
+      // Usuário pode editar se for admin geral, admin do setor ou admin do Subsetor
       if (profile.role === 'admin') {
         setCanEdit(true);
       } else {
-        // Verificar se é admin do setor ou sub-setor
+        // Verificar se é admin do setor ou Subsetor
         const [sectorAdmin, subsectorAdmin] = await Promise.all([
           supabase
             .from('sector_admins')
@@ -352,7 +352,7 @@ function SubsectorTeamPageContent() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <p className="text-cresol-gray">Sub-setor não encontrado</p>
+          <p className="text-cresol-gray">Subsetor não encontrado</p>
           <button
             onClick={() => router.back()}
             className="mt-4 text-primary hover:underline"
@@ -430,19 +430,19 @@ function SubsectorTeamPageContent() {
                 { label: 'Home', href: '/home', icon: 'house' },
                 { label: 'Setores', href: '/setores' },
                 { label: Array.isArray(subsector?.sectors) ? subsector.sectors[0]?.name || 'Setor' : subsector?.sectors?.name || 'Setor', href: `/setores/${Array.isArray(subsector?.sectors) ? subsector.sectors[0]?.id : subsector?.sectors?.id}` },
-                { label: subsector?.name || 'Sub-setor', href: `/subsetores/${subsectorId}` },
+                { label: subsector?.name || 'Subsetor', href: `/subsetores/${subsectorId}` },
                 { label: 'Equipe' }
               ]} 
             />
           </div>
         </div>
 
-        {/* Descrição do Sub-setor */}
+        {/* Descrição do Subsetor */}
         {subsector.description && (
           <div className="bg-white rounded-lg border border-cresol-gray-light p-6 mb-8">
             <div className="flex items-center mb-3">
               <Icon name="building-2" className="h-5 w-5 text-secondary mr-2" />
-              <h2 className="text-lg font-semibold text-cresol-gray-dark">Sobre o Sub-setor</h2>
+              <h2 className="text-lg font-semibold text-cresol-gray-dark">Sobre o Subsetor</h2>
             </div>
             <p className="text-cresol-gray">{subsector.description}</p>
           </div>

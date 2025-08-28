@@ -180,9 +180,9 @@ function AnalyticsPageContent() {
         return {
           labels: Object.keys(analytics.users.byRole).map(role => {
             switch (role) {
-              case 'admin': return 'Administradores';
-              case 'sector_admin': return 'Admin. Setores';
-              case 'subsector_admin': return 'Admin. Sub-setores';
+              case 'admin': return 'Administradores Gerais';
+              case 'sector_admin': return 'Admin. de Setores';
+              case 'subsector_admin': return 'Admin. de Subsetores';
               case 'user': return 'Usuários';
               default: return role;
             }

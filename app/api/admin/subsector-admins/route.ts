@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 });
     }
 
-    // Buscar administradores de sub-setor
+    // Buscar administradores de Subsetor
     let query = supabaseAdmin
       .from('subsector_admins')
       .select(`
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error('Erro na API de administradores de sub-setor:', error);
+    console.error('Erro na API de administradores de Subsetor:', error);
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
 }
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     const { user_id, subsector_id } = body;
 
     if (!user_id || !subsector_id) {
-      return NextResponse.json({ error: 'ID do usuário e ID do sub-setor são obrigatórios.' }, { status: 400 });
+      return NextResponse.json({ error: 'ID do usuário e ID do Subsetor são obrigatórios.' }, { status: 400 });
     }
 
     // Criar cliente do Supabase com a chave de serviço
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 });
     }
 
-    // Se for admin de setor, verificar se tem permissão para o setor deste sub-setor
+    // Se for admin de setor, verificar se tem permissão para o setor deste Subsetor
     if (isSectorAdmin) {
       const { data: subsector } = await supabaseAdmin
         .from('subsectors')
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (!subsector) {
-        return NextResponse.json({ error: 'Sub-setor não encontrado.' }, { status: 404 });
+        return NextResponse.json({ error: 'Subsetor não encontrado.' }, { status: 404 });
       }
 
       const { data: sectorAdminData } = await supabaseAdmin
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
         .eq('sector_id', subsector.sector_id);
 
       if (!sectorAdminData || sectorAdminData.length === 0) {
-        return NextResponse.json({ error: 'Você não tem permissão para gerenciar este sub-setor.' }, { status: 403 });
+        return NextResponse.json({ error: 'Você não tem permissão para gerenciar este Subsetor.' }, { status: 403 });
       }
     }
 
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 });
     }
 
-    // Verificar se já é administrador deste sub-setor
+    // Verificar se já é administrador deste Subsetor
     const { data: existingAdmin } = await supabaseAdmin
       .from('subsector_admins')
       .select('*')
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
       .eq('subsector_id', subsector_id);
 
     if (existingAdmin && existingAdmin.length > 0) {
-      return NextResponse.json({ error: 'Este usuário já é administrador deste sub-setor.' }, { status: 400 });
+      return NextResponse.json({ error: 'Este usuário já é administrador deste Subsetor.' }, { status: 400 });
     }
 
     // Atualizar o role do usuário para subsector_admin se necessário
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
         .eq('id', user_id);
     }
 
-    // Adicionar como administrador do sub-setor
+    // Adicionar como administrador do Subsetor
     const { data, error } = await supabaseAdmin
       .from('subsector_admins')
       .insert([{ user_id, subsector_id }])
@@ -205,10 +205,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       data, 
-      message: `${targetUser.full_name} foi adicionado como administrador do sub-setor.` 
+      message: `${targetUser.full_name} foi adicionado como administrador do Subsetor.` 
     });
   } catch (error) {
-    console.error('Erro ao adicionar administrador de sub-setor:', error);
+    console.error('Erro ao adicionar administrador de Subsetor:', error);
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
 }
@@ -262,7 +262,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 });
     }
 
-    // Buscar dados do administrador de sub-setor
+    // Buscar dados do administrador de Subsetor
     const { data: subsectorAdmin } = await supabaseAdmin
       .from('subsector_admins')
       .select(`
@@ -274,7 +274,7 @@ export async function DELETE(request: NextRequest) {
       .single();
 
     if (!subsectorAdmin) {
-      return NextResponse.json({ error: 'Administrador de sub-setor não encontrado.' }, { status: 404 });
+      return NextResponse.json({ error: 'Administrador de Subsetor não encontrado.' }, { status: 404 });
     }
 
     // Se for admin de setor, verificar se tem permissão para este setor
@@ -286,7 +286,7 @@ export async function DELETE(request: NextRequest) {
                         : undefined);
 
       if (!sectorId) {
-        return NextResponse.json({ error: 'Erro ao identificar setor do sub-setor.' }, { status: 500 });
+        return NextResponse.json({ error: 'Erro ao identificar setor do Subsetor.' }, { status: 500 });
       }
 
       const { data: sectorAdminData } = await supabaseAdmin
@@ -296,11 +296,11 @@ export async function DELETE(request: NextRequest) {
         .eq('sector_id', sectorId);
 
       if (!sectorAdminData || sectorAdminData.length === 0) {
-        return NextResponse.json({ error: 'Você não tem permissão para gerenciar este sub-setor.' }, { status: 403 });
+        return NextResponse.json({ error: 'Você não tem permissão para gerenciar este Subsetor.' }, { status: 403 });
       }
     }
 
-    // Remover administrador do sub-setor
+    // Remover administrador do Subsetor
     const { error } = await supabaseAdmin
       .from('subsector_admins')
       .delete()
@@ -310,7 +310,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Verificar se o usuário ainda tem outros sub-setores ou se deve ter seu role alterado
+    // Verificar se o usuário ainda tem outros Subsetores ou se deve ter seu role alterado
     const { data: otherSubsectors } = await supabaseAdmin
       .from('subsector_admins')
       .select('*')
@@ -327,7 +327,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', subsectorAdmin.user_id)
       .single();
 
-    // Se não é admin geral, não é admin de setor e não tem outros sub-setores, alterar para user
+    // Se não é admin geral, não é admin de setor e não tem outros Subsetores, alterar para user
     if (userProfile?.role === 'subsector_admin' && 
         (!otherSubsectors || otherSubsectors.length === 0) &&
         (!sectorAdmin || sectorAdmin.length === 0)) {
@@ -337,9 +337,9 @@ export async function DELETE(request: NextRequest) {
         .eq('id', subsectorAdmin.user_id);
     }
 
-    return NextResponse.json({ message: 'Administrador de sub-setor removido com sucesso.' });
+    return NextResponse.json({ message: 'Administrador de Subsetor removido com sucesso.' });
   } catch (error) {
-    console.error('Erro ao remover administrador de sub-setor:', error);
+    console.error('Erro ao remover administrador de Subsetor:', error);
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
 } 

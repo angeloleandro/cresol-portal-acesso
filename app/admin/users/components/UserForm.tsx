@@ -454,8 +454,8 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
               options={[
                 { value: 'user', label: 'Usuário' },
                 { value: 'sector_admin', label: 'Administrador de Setor' },
-                { value: 'subsector_admin', label: 'Admin. Subsetorial' },
-                { value: 'admin', label: 'Administrador' }
+                { value: 'subsector_admin', label: 'Administrador de Subsetor' },
+                { value: 'admin', label: 'Administrador Geral' }
               ]}
               required
               fullWidth

@@ -14,7 +14,7 @@ export const GET = adminCORS(async (request: NextRequest) => {
     const { searchParams } = new URL(request.url);
     const sectorId = searchParams.get('sector_id');
     
-    logger.info('Iniciando busca de sub-setores', { sectorId: sectorId || 'undefined' });
+    logger.info('Iniciando busca de Subsetores', { sectorId: sectorId || 'undefined' });
 
     // Verificar autenticação usando helper
     const authResult = await authenticateAdminRequest(request);
@@ -36,11 +36,11 @@ export const GET = adminCORS(async (request: NextRequest) => {
 
     if (!profile || !['admin', 'sector_admin'].includes(profile.role)) {
       logger.apiEnd(apiTimer);
-      logger.warn('Permissão negada para sub-setores', { role: profile?.role });
+      logger.warn('Permissão negada para Subsetores', { role: profile?.role });
       return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 });
     }
 
-    // Buscar sub-setores usando admin client
+    // Buscar Subsetores usando admin client
     const subsectorsTimer = logger.dbStart('subsectors.select', { 
       sectorId: sectorId || undefined, 
       userId: authResult.user?.id || undefined 
@@ -69,12 +69,12 @@ export const GET = adminCORS(async (request: NextRequest) => {
 
     if (error) {
       logger.apiEnd(apiTimer);
-      logger.error('Erro ao buscar sub-setores no banco', error);
+      logger.error('Erro ao buscar Subsetores no banco', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     const subsectorCount = data?.length || 0;
-    logger.success('Sub-setores carregados com sucesso', { subsectorCount, sectorId: sectorId || undefined });
+    logger.success('Subsetores carregados com sucesso', { subsectorCount, sectorId: sectorId || undefined });
     
     const apiResult = logger.apiEnd(apiTimer);
     return NextResponse.json({ 
@@ -88,7 +88,7 @@ export const GET = adminCORS(async (request: NextRequest) => {
     
   } catch (error) {
     logger.apiEnd(apiTimer);
-    logger.error('Erro crítico na API de sub-setores', error instanceof Error ? error : new Error(String(error)));
+    logger.error('Erro crítico na API de Subsetores', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
 });
@@ -134,7 +134,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
       }
     }
 
-    // Criar sub-setor usando admin client
+    // Criar Subsetor usando admin client
     const { data, error } = await supabaseAdmin
       .from('subsectors')
       .insert([{ name, description, sector_id }])
@@ -145,9 +145,9 @@ export const POST = adminCORS(async (request: NextRequest) => {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ data, message: 'Sub-setor criado com sucesso.' });
+    return NextResponse.json({ data, message: 'Subsetor criado com sucesso.' });
   } catch (error) {
-    console.error('Erro ao criar sub-setor:', error);
+    console.error('Erro ao criar Subsetor:', error);
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
 });
@@ -180,7 +180,7 @@ export const PUT = adminCORS(async (request: NextRequest) => {
       return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 });
     }
 
-    // Atualizar sub-setor usando admin client
+    // Atualizar Subsetor usando admin client
     const { data, error } = await supabaseAdmin
       .from('subsectors')
       .update({ name, description, updated_at: new Date().toISOString() })
@@ -192,9 +192,9 @@ export const PUT = adminCORS(async (request: NextRequest) => {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ data, message: 'Sub-setor atualizado com sucesso.' });
+    return NextResponse.json({ data, message: 'Subsetor atualizado com sucesso.' });
   } catch (error) {
-    console.error('Erro ao atualizar sub-setor:', error);
+    console.error('Erro ao atualizar Subsetor:', error);
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
 });
@@ -220,7 +220,7 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
       return NextResponse.json({ error: 'Permissão negada.' }, { status: 403 });
     }
 
-    // Deletar sub-setor usando admin client (CASCADE deletará dados relacionados)
+    // Deletar Subsetor usando admin client (CASCADE deletará dados relacionados)
     const { error } = await supabaseAdmin
       .from('subsectors')
       .delete()
@@ -230,7 +230,7 @@ export const DELETE = adminCORS(async (request: NextRequest) => {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ message: 'Sub-setor deletado com sucesso.' });
+    return NextResponse.json({ message: 'Subsetor deletado com sucesso.' });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
     return NextResponse.json({ 

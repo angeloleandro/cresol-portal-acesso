@@ -88,7 +88,7 @@ function SubsectorManagementPageContent() {
 
   const breadcrumbs: BreadcrumbItem[] = [
     { label: 'Home', href: '/home', icon: 'house' },
-    { label: 'Administração de Sub-setores', href: '/admin-subsetor' },
+    { label: 'Administração de Subsetores', href: '/admin-subsetor' },
     { label: subsector.name || 'Subsetor' }
   ];
 
@@ -97,8 +97,8 @@ function SubsectorManagementPageContent() {
       <SubsectorDataProvider subsectorId={subsectorId}>
         <StandardizedAdminLayout user={user} breadcrumbs={breadcrumbs}>
           <StandardizedPageHeader
-            title={`Gerenciamento do Sub-setor: ${subsector.name}`}
-            subtitle={subsector.description || 'Gerencie conteúdos, equipes e configurações do sub-setor'}
+            title={`Gerenciamento do Subsetor: ${subsector.name}`}
+            subtitle={subsector.description || 'Gerencie conteúdos, equipes e configurações do Subsetor'}
           />
 
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">

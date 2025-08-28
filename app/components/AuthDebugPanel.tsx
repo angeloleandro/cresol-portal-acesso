@@ -82,7 +82,7 @@ export default function AuthDebugPanel() {
         {authState.user && (
           <div className="pl-4 text-xs text-gray-600">
             <div>ID: {authState.user.id}</div>
-            <div>Role: {authState.user.role}</div>
+            <div>Permissões: {authState.user.role}</div>
           </div>
         )}
         
@@ -93,7 +93,7 @@ export default function AuthDebugPanel() {
         {authState.profile && (
           <div className="pl-4 text-xs text-gray-600">
             <div>Nome: {authState.profile.full_name}</div>
-            <div>Role: {authState.profile.role}</div>
+            <div>Permissões: {authState.profile.role}</div>
             <div>Setor: {authState.profile.sector_id || 'N/A'}</div>
           </div>
         )}

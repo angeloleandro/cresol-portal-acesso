@@ -27,7 +27,7 @@ const ADMIN_MODULES: AdminModule[] = [
     link: '/admin/users',
   },
   {
-    title: 'Setores & Sub-setores',
+    title: 'Setores & Subsetores',
     description: 'Gerenciar estrutura organizacional e hierarquia',
     icon: 'building-1',
     link: '/admin/sectors',

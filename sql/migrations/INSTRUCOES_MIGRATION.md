@@ -77,7 +77,7 @@ supabase db push < sql/migrations/001_fix_team_members_relationships.sql
 1. Acesse um subsetor: `/subsetores/[id]`
 2. Adicione um membro à equipe
 3. Volte ao setor pai: `/setores/[id]/equipe`
-4. Verifique se o membro aparece na seção "Membros dos Sub-setores"
+4. Verifique se o membro aparece na seção "Membros dos Subsetores"
 
 ### 3. Teste de Remoção
 

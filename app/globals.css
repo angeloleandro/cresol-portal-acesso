@@ -1215,7 +1215,7 @@ html {
 }
 
 .card:hover {
-  border-color: rgba(210, 210, 206, 1);
+  border-color: var(--cresol-primary);
 }
 
 /* Variações sutis para cards dentro de seções */
@@ -1228,7 +1228,7 @@ html {
 }
 
 .card-section:hover {
-  border-color: rgba(210, 210, 206, 1);
+  border-color: var(--cresol-primary);
 }
 
 .card-nested {
@@ -1240,7 +1240,7 @@ html {
 }
 
 .card-nested:hover {
-  border-color: rgba(210, 210, 206, 0.6);
+  border-color: var(--cresol-primary);
 }
 
 .card-subtle {
@@ -1252,7 +1252,7 @@ html {
 }
 
 .card-subtle:hover {
-  border-color: rgba(210, 210, 206, 0.65);
+  border-color: var(--cresol-primary);
 }
 
 /* Links Padronizados */
@@ -1364,7 +1364,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-standard:hover {
-  border-color: rgba(210, 210, 206, 1);
+  border-color: var(--cresol-primary);
 }
 
 .card-status {
@@ -1377,7 +1377,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-status:hover {
-  border-color: rgba(210, 210, 206, 1);
+  border-color: var(--cresol-primary);
 }
 
 /* Classes Utilitárias de Cor */
@@ -1482,7 +1482,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-modern:hover {
-  border-color: rgba(245, 130, 32, 0.4);
+  border-color: var(--cresol-primary);
 }
 
 /* Enhanced stat cards */
@@ -1903,7 +1903,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .economic-indicator-icon-container {
   background: linear-gradient(135deg, rgba(245, 130, 32, 0.1) 0%, rgba(245, 130, 32, 0.05) 100%);
-  border: 2px solid rgba(245, 130, 32, 0.15);
+  border: 1px solid rgba(245, 130, 32, 0.15);
   border-radius: var(--border-radius-full);
   padding: var(--spacing-3);
   display: flex;
@@ -3118,14 +3118,14 @@ li:not(:first-child)::before,
 /* Specific override for our admin cards - ONLY the root element */
 .admin-sector-card,
 .admin-subsector-card {
-  border: 1.5px solid rgba(229, 231, 235, 0.5) !important; /* Mais grossa e um pouco mais opaca */
+  border: 1px solid rgba(229, 231, 235, 1) !important; /* Borda visível padrão */
   border-radius: 0.375rem !important; /* rounded-md */
   transition: border-color 150ms ease !important;
 }
 
 .admin-sector-card:hover,
 .admin-subsector-card:hover {
-  border-color: rgba(229, 231, 235, 0.8) !important; /* Mais visível no hover */
+  border-color: rgba(229, 231, 235, 1) !important; /* Hover consistente */
 }
 
 /* Remove borders from child elements inside our admin cards */

@@ -61,8 +61,8 @@ export default function SubsectorImages({ subsectorId, limit = 6 }: SubsectorIma
         const previewImages: BaseImage[] = processedImages.map(img => ({
           id: img.id,
           url: img.image_url,
-          title: img.title || "Imagem do sub-setor",
-          alt: img.title || "Imagem do sub-setor"
+          title: img.title || "Imagem do Subsetor",
+          alt: img.title || "Imagem do Subsetor"
         }));
         
         setImages(previewImages);

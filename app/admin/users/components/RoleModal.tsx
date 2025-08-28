@@ -147,7 +147,7 @@ export default function RoleModal({
       <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col">
         <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Alterar Role do Usuário</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Alterar Permissões do Usuário</h3>
             <p className="mt-1 text-sm text-gray-500">Configure o tipo de acesso e permissões</p>
           </div>
           <button
@@ -178,8 +178,8 @@ export default function RoleModal({
               options={[
                 { value: 'user', label: 'Usuário' },
                 { value: 'sector_admin', label: 'Administrador de Setor' },
-                { value: 'subsector_admin', label: 'Administrador de Sub-setor' },
-                { value: 'admin', label: 'Administrador' }
+                { value: 'subsector_admin', label: 'Administrador de Subsetor' },
+                { value: 'admin', label: 'Administrador Geral' }
               ]}
               placeholder="Selecione o tipo de conta"
             />
@@ -238,7 +238,7 @@ export default function RoleModal({
             <div className="border-t border-cresol-gray-light pt-4">
               <div className="flex justify-between items-center mb-3">
                 <label className="block text-sm font-medium text-cresol-gray">
-                  Sub-setores a administrar
+                  Subsetores a administrar
                 </label>
                 <span className="text-xs text-cresol-gray">
                   {selectedSubsectors.length} selecionado(s)
@@ -274,13 +274,13 @@ export default function RoleModal({
               <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-md p-3">
                 {loadingSubsectors ? (
                   <div className="text-center py-4">
-                    <UnifiedLoadingSpinner size="default" message="Carregando sub-setores..." />
+                    <UnifiedLoadingSpinner size="default" message="Carregando Subsetores..." />
                   </div>
                 ) : subsectors.length === 0 ? (
                   <p className="text-sm text-cresol-gray">
                     {selectedSectorForSubs 
-                      ? 'Nenhum sub-setor encontrado para este setor' 
-                      : 'Nenhum sub-setor disponível'
+                      ? 'Nenhum Subsetor encontrado para este setor' 
+                      : 'Nenhum Subsetor disponível'
                     }
                   </p>
                 ) : (
@@ -326,7 +326,7 @@ export default function RoleModal({
               </div>
               
               <p className="text-xs text-cresol-gray mt-2">
-                Selecione os sub-setores que este administrador de sub-setor irá gerenciar.
+                Selecione os Subsetores que este administrador de Subsetor irá gerenciar.
               </p>
             </div>
           )}
@@ -335,9 +335,9 @@ export default function RoleModal({
             <h4 className="text-sm font-medium text-cresol-gray mb-2">Descrição dos Tipos de Conta:</h4>
             <ul className="text-xs text-cresol-gray space-y-1">
               <li><strong>Usuário:</strong> Acesso básico ao portal, pode visualizar conteúdo público.</li>
-              <li><strong>Admin. Setor:</strong> Gerencia setores específicos, seus sub-setores, eventos e notícias.</li>
-              <li><strong>Admin. Sub-setor:</strong> Gerencia sub-setores específicos, seus eventos e notícias.</li>
-              <li><strong>Administrador:</strong> Acesso completo ao sistema, gerencia usuários e configurações.</li>
+              <li><strong>Admin. Setor:</strong> Gerencia setores específicos, seus Subsetores, eventos e notícias.</li>
+              <li><strong>Admin. Subsetor:</strong> Gerencia Subsetores específicos, seus eventos e notícias.</li>
+              <li><strong>Administrador Geral:</strong> Acesso completo ao sistema, gerencia usuários e configurações.</li>
             </ul>
           </div>
         </div>

@@ -8,6 +8,16 @@ import ConfirmationModal from '@/app/components/ui/ConfirmationModal'; // Import
 
 import UserEditModal from './UserEditModal';
 
+// Função para converter roles técnicas em labels amigáveis
+const getRoleLabel = (role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user'): string => {
+  switch (role) {
+    case 'admin': return 'Administrador Geral';
+    case 'sector_admin': return 'Administrador de Setor';
+    case 'subsector_admin': return 'Administrador de Subsetor';
+    case 'user': return 'Usuário';
+    default: return role;
+  }
+};
 
 interface UserProfile {
   id: string;
@@ -172,9 +182,9 @@ export default function UserList({
               
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-cresol-gray">Role:</span>
+                  <span className="text-xs font-medium text-cresol-gray">Permissões:</span>
                   <span className="text-xs px-2 py-1 bg-cresol-gray-light text-cresol-gray-dark rounded-sm">
-                    {user.role}
+                    {getRoleLabel(user.role)}
                   </span>
                 </div>
                 

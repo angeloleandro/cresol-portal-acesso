@@ -251,7 +251,7 @@ export function useOptimizedSectors(
 }
 
 /**
- * Hook otimizado para gerenciar agências (sub-setores do setor Agências)
+ * Hook otimizado para gerenciar agências (Subsetores do setor Agências)
  */
 /**
  * useOptimizedAgencies function
@@ -279,7 +279,7 @@ export function useOptimizedAgencies() {
         }
       }
 
-      // Buscar sub-setores específicos do setor Agências
+      // Buscar Subsetores específicos do setor Agências
       const { data, error } = await supabase
         .from('subsectors')
         .select('id, name, sector_id')

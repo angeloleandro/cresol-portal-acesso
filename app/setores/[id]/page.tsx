@@ -517,7 +517,7 @@ function SetorDetalhesContent() {
               </div>
             </section>
 
-            {/* Sub-setores */}
+            {/* Subsetores */}
             {subsectors.length > 0 && (
               <section 
                 className="bg-white rounded-lg border border-cresol-gray-light"
@@ -528,7 +528,7 @@ function SetorDetalhesContent() {
                     <div className="flex items-center">
                       <Icon name="building-2" className="h-5 w-5 text-primary mr-2" aria-hidden="true" />
                       <h3 id="subsectors-heading" className="font-semibold text-cresol-gray-dark">
-                        Sub-setores ({subsectors.length})
+                        Subsetores ({subsectors.length})
                       </h3>
                     </div>
                   </div>
@@ -540,7 +540,7 @@ function SetorDetalhesContent() {
                         href={`/subsetores/${subsector.id}`} 
                         key={subsector.id}
                         className="block group"
-                        aria-label={`Acessar sub-setor ${subsector.name}`}
+                        aria-label={`Acessar Subsetor ${subsector.name}`}
                       >
                         <div className="flex items-center p-3 border border-cresol-gray-light rounded-lg hover:border-primary transition-colors group">
                           <div className="flex-1">
@@ -564,7 +564,7 @@ function SetorDetalhesContent() {
                     {subsectors.length > 5 && (
                       <div className="pt-2 border-t border-cresol-gray-light">
                         <p className="text-xs text-cresol-gray text-center">
-                          + {subsectors.length - 5} sub-setores adicionais
+                          + {subsectors.length - 5} Subsetores adicionais
                         </p>
                       </div>
                     )}
@@ -589,7 +589,7 @@ function SetorDetalhesContent() {
               <div className="p-4">
                 <dl className="space-y-3 text-sm">
                   <div>
-                    <dt className="font-medium text-cresol-gray-dark">Total de Sub-setores:</dt>
+                    <dt className="font-medium text-cresol-gray-dark">Total de Subsetores:</dt>
                     <dd className="text-cresol-gray mt-1">{subsectors.length}</dd>
                   </div>
                   <div>

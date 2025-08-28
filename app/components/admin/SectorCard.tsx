@@ -1,9 +1,10 @@
 'use client';
 
-import { Badge, Box, HStack, Stack, Text } from "@chakra-ui/react";
+import { Badge, Card, HStack, Stack, Text } from "@chakra-ui/react";
 import Link from 'next/link';
-
+import { AdminActionMenu, ActionItem } from '@/app/components/ui/AdminActionMenu';
 import { Icon } from '@/app/components/icons/Icon';
+import { Button } from '@/app/components/ui/Button';
 
 interface SectorCardProps {
   sector: {
@@ -32,127 +33,134 @@ export default function SectorCard({
   const limitedSubsectors = subsectors.slice(0, 3);
   const remainingCount = subsectors.length - 3;
 
+  // Menu de ações usando o componente padrão
+  const actionItems: ActionItem[] = [
+    {
+      label: 'Editar',
+      icon: 'pencil',
+      onClick: onEdit
+    },
+    {
+      label: 'Excluir',
+      icon: 'trash',
+      onClick: onDelete,
+      variant: 'danger',
+      showDivider: true
+    }
+  ];
+
   return (
-    <Box 
-      borderWidth="1px"
-      borderRadius="md"
-      bg="white"
-      transition="border-color 0.15s"
-      className={`${className} admin-sector-card flex flex-col h-full`}
-      css={{
-        borderColor: 'rgba(210, 210, 206, 0.6)',
-        '&:hover': {
-          borderColor: 'rgba(210, 210, 206, 1)'
-        }
-      }}
+    <Card.Root 
+      variant="outline"
+      colorPalette="gray"
+      size="md"
+      className={`${className} admin-sector-card flex flex-col h-full transition-all duration-200`}
     >
-      {/* Header com ícone, título e ações */}
-      <Box className="p-6 pb-0">
-        <HStack justify="space-between" align="flex-start">
-          <Text fontSize="lg" fontWeight="semibold" color="gray.800">
-            {sector.name}
-          </Text>
-
-          <div className="relative group">
-            <button
-              title="Opções"
-              className="p-2 text-primary hover:bg-orange-50 rounded-md transition-colors"
-            >
-              <Icon name="more-horizontal" className="h-5 w-5" />
-            </button>
-            
-            {/* Menu dropdown que aparece no hover */}
-            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200/60 hover:border-gray-200 rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-              <div className="py-1 min-w-[120px]">
-                <button
-                  onClick={onEdit}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  title="Editar setor"
-                >
-                  <Icon name="pencil" className="h-4 w-4" />
-                  Editar
-                </button>
-                <button
-                  onClick={onDelete}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                  title="Excluir setor"
-                >
-                  <Icon name="trash" className="h-4 w-4" />
-                  Excluir
-                </button>
-              </div>
+      {/* Header com título e menu de ações */}
+      <Card.Header className="pb-2">
+        <HStack justify="space-between" align="center">
+          <HStack gap="2">
+            <div className="w-8 h-8 bg-orange-50 rounded-md flex items-center justify-center">
+              <Icon name="building-1" className="w-4 h-4 text-primary" />
             </div>
-          </div>
-        </HStack>
-      </Box>
+            <Card.Title fontSize="lg" color="gray.800">
+              {sector.name}
+            </Card.Title>
+          </HStack>
 
-      {/* Body com descrição e métricas - flex-grow para ocupar espaço disponível */}
-      <Box className="p-6 space-y-5 flex-grow">
+          {/* Menu de ações padronizado */}
+          <AdminActionMenu 
+            items={actionItems}
+            triggerLabel=""
+          />
+        </HStack>
+      </Card.Header>
+
+      {/* Body com descrição e métricas */}
+      <Card.Body className="space-y-4 flex-grow">
         {/* Descrição */}
         {sector.description && (
-          <Text color="gray.600">
+          <Card.Description fontSize="sm" lineHeight="relaxed">
             {sector.description}
-          </Text>
+          </Card.Description>
         )}
 
-        {/* Métricas principais */}
-        <Stack gap="3">
-          <HStack justify="space-between">
-            <Text fontSize="sm" color="gray.600">Sub-setores:</Text>
-            <Badge colorScheme="orange" variant="subtle">
+        {/* Métricas em grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-gray-50 rounded-md px-3 py-2">
+            <Text fontSize="xs" color="gray.500" mb="0.5">
+              Subsetores
+            </Text>
+            <Text fontSize="lg" fontWeight="semibold" color="gray.800">
               {subsectorsCount}
-            </Badge>
-          </HStack>
-          <HStack justify="space-between">
-            <Text fontSize="sm" color="gray.600">Administradores:</Text>
-            <Badge colorScheme="gray" variant="subtle">
+            </Text>
+          </div>
+          <div className="bg-gray-50 rounded-md px-3 py-2">
+            <Text fontSize="xs" color="gray.500" mb="0.5">
+              Administradores
+            </Text>
+            <Text fontSize="lg" fontWeight="semibold" color="gray.800">
               {adminsCount}
-            </Badge>
-          </HStack>
-        </Stack>
+            </Text>
+          </div>
+        </div>
 
-        {/* Lista de sub-setores */}
+        {/* Lista de Subsetores */}
         {limitedSubsectors.length > 0 && (
-          <Box pt="4" borderTop="1px" borderColor="gray.100">
-            <Text fontSize="xs" color="gray.600" mb="2">Sub-setores:</Text>
-            <Stack gap="1" direction="row" wrap="wrap">
+          <div>
+            <Text fontSize="xs" fontWeight="medium" color="gray.600" mb="2">
+              Subsetores vinculados:
+            </Text>
+            <Stack gap="1.5" direction="row" wrap="wrap">
               {limitedSubsectors.map(subsector => (
                 <Badge 
                   key={subsector.id}
-                  colorScheme="orange"
+                  colorPalette="orange"
                   variant="subtle"
-                  fontSize="xs"
+                  size="sm"
                 >
                   {subsector.name}
                 </Badge>
               ))}
               {remainingCount > 0 && (
                 <Badge 
-                  colorScheme="gray"
+                  colorPalette="gray"
                   variant="subtle"
-                  fontSize="xs"
+                  size="sm"
                 >
                   +{remainingCount} mais
                 </Badge>
               )}
             </Stack>
-          </Box>
+          </div>
         )}
-      </Box>
+      </Card.Body>
 
-      {/* Footer com ações - sempre fixo no final */}
-      <Box className="p-6 pt-3 flex gap-2 justify-start border-t border-gray-100">
-        <Link href={`/admin/sectors/${sector.id}`}>
-          <button className="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary-dark transition-colors">
+      {/* Footer com ações principais */}
+      <Card.Footer className="flex gap-2">
+        <Link href={`/admin/sectors/${sector.id}`} className="flex-1">
+          <Button
+            variant="solid"
+            colorPalette="orange"
+            size="sm"
+            className="w-full"
+            startElement={<Icon name="settings" className="w-3.5 h-3.5" />}
+          >
             Gerenciar
-          </button>
+          </Button>
         </Link>
-        <Link href={`/admin/sectors/${sector.id}/systems`}>
-          <button className="px-4 py-2 border border-primary text-primary rounded-md text-sm font-medium hover:bg-orange-50 transition-colors">
+        <Link href={`/admin/sectors/${sector.id}/systems`} className="flex-1">
+          <Button
+            variant="outline"
+            colorPalette="orange"
+            size="sm"
+            className="w-full"
+            startElement={<Icon name="grid" className="w-3.5 h-3.5" />}
+          >
             Sistemas
-          </button>
+          </Button>
         </Link>
-      </Box>
-    </Box>
+      </Card.Footer>
+    </Card.Root>
   );
 }

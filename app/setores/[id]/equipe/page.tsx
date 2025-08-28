@@ -273,7 +273,7 @@ function SectorTeamPageContent() {
 
   const handleRemoveMemberClick = (member: TeamMember) => {
     if (member.is_from_subsector) {
-      showWarning('Este membro foi adicionado através de um sub-setor. Para removê-lo, acesse o sub-setor correspondente.');
+      showWarning('Este membro foi adicionado através de um Subsetor. Para removê-lo, acesse o Subsetor correspondente.');
       return;
     }
     setMemberToDelete(member);
@@ -573,7 +573,7 @@ function SectorTeamPageContent() {
                 {subsectorMembers.length > 0 && (
                   <div>
                     <h3 className="text-sm font-medium text-cresol-gray-dark uppercase tracking-wider mb-4">
-                      Membros dos Sub-setores
+                      Membros dos Subsetores
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {subsectorMembers.map(member => (

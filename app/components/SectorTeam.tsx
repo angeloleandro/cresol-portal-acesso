@@ -163,7 +163,7 @@ export default function SectorTeam({
           {subsectorMembers.length > 0 && (
             <>
               <div className="text-xs font-medium text-cresol-gray-dark uppercase tracking-wider mt-3">
-                Membros dos Sub-setores
+                Membros dos Subsetores
               </div>
               {subsectorMembers.slice(0, subsectorShown).map(member => (
                 <div key={member.id} className="flex items-center">

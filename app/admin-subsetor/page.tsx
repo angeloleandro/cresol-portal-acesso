@@ -50,7 +50,7 @@ function AdminSubsectorPageContent() {
     if (!user) return;
     const userId = user.id;
     try {
-      // Usar a função RPC para obter sub-setores do usuário
+      // Usar a função RPC para obter Subsetores do usuário
       const { data, error } = await supabase.rpc('get_user_subsectors', {
         p_user_id: userId
       });
@@ -67,14 +67,14 @@ function AdminSubsectorPageContent() {
 
         setSubsectors(subsectorList);
 
-        // Buscar estatísticas para cada sub-setor
+        // Buscar estatísticas para cada Subsetor
         for (const subsector of subsectorList) {
           await fetchSubsectorStats(subsector.id);
         }
       }
     } catch (error) {
       // Debug log removed
-      setError('Erro ao carregar sub-setores');
+      setError('Erro ao carregar Subsetores');
     }
   }, [user]);
 
@@ -83,7 +83,7 @@ function AdminSubsectorPageContent() {
     try {
       await fetchUserSubsectors();
     } catch (error) {
-      setError('Erro ao carregar sub-setores');
+      setError('Erro ao carregar Subsetores');
     } finally {
       setLoading(false);
     }
@@ -146,7 +146,7 @@ function AdminSubsectorPageContent() {
 
   const breadcrumbs: BreadcrumbItem[] = [
     { label: 'Home', href: '/home', icon: 'house' },
-    { label: 'Administração de Sub-setores' }
+    { label: 'Administração de Subsetores' }
   ];
 
   return (
@@ -160,10 +160,10 @@ function AdminSubsectorPageContent() {
         <div className={SUBSECTOR_EMPTY_STATE.noSubsectors.container}>
           <div className={SUBSECTOR_EMPTY_STATE.noSubsectors.iconSize}>📂</div>
           <h3 className={SUBSECTOR_EMPTY_STATE.noSubsectors.title}>
-            Nenhum sub-setor encontrado
+            Nenhum Subsetor encontrado
           </h3>
           <p className={SUBSECTOR_EMPTY_STATE.noSubsectors.message}>
-            Você não possui sub-setores atribuídos no momento.
+            Você não possui Subsetores atribuídos no momento.
           </p>
         </div>
       ) : (

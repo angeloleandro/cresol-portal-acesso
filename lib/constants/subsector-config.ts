@@ -114,7 +114,7 @@ export const SUBSECTOR_EMPTY_STATE = {
 // ===== MANAGEMENT ACTIONS =====
 export const SUBSECTOR_ACTIONS = {
   manage: {
-    label: 'Gerenciar Sub-setor',
+    label: 'Gerenciar Subsetor',
     classes: 'w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors text-sm'
   },
   
@@ -149,8 +149,8 @@ export const SUBSECTOR_LOADING = {
 
 // ===== PAGE CONFIGURATION =====
 export const SUBSECTOR_PAGE_CONFIG = {
-  title: 'Administração de Sub-setores',
-  subtitle: 'Gerencie os sub-setores sob sua responsabilidade',
+  title: 'Administração de Subsetores',
+  subtitle: 'Gerencie os Subsetores sob sua responsabilidade',
   
   header: {
     container: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8',

@@ -333,7 +333,7 @@ export default function UserEditModal({
 
       }
       
-      // Atualizar setores ou sub-setores administrados pelo usuário
+      // Atualizar setores ou Subsetores administrados pelo usuário
       if (user.role === 'sector_admin') {
         await supabase
           .from('sector_admins')
@@ -687,7 +687,7 @@ export default function UserEditModal({
             {user.role === 'subsector_admin' && (
               <div className="border-t border-cresol-gray-light pt-4 mt-4">
                 <label className="block text-sm font-medium text-cresol-gray mb-2">
-                  Sub-setores administrados
+                  Subsetores administrados
                 </label>
                 
                 <div className="mb-4">
@@ -713,8 +713,8 @@ export default function UserEditModal({
                   {subsectors.length === 0 ? (
                     <p className="text-sm text-cresol-gray">
                       {selectedSectorForSubsectors 
-                        ? 'Nenhum sub-setor encontrado para este setor' 
-                        : 'Nenhum sub-setor disponível'
+                        ? 'Nenhum Subsetor encontrado para este setor' 
+                        : 'Nenhum Subsetor disponível'
                       }
                     </p>
                   ) : (
@@ -754,7 +754,7 @@ export default function UserEditModal({
                 </div>
                 
                 <p className="text-xs text-cresol-gray mt-2">
-                  Selecione os sub-setores que este administrador de sub-setor irá gerenciar.
+                  Selecione os Subsetores que este administrador de Subsetor irá gerenciar.
                 </p>
               </div>
             )}

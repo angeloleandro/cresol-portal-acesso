@@ -97,13 +97,13 @@ export async function GET(request: NextRequest) {
     const subsectorId = searchParams.get('subsector_id');
 
     if (!subsectorId) {
-      return NextResponse.json({ error: 'ID do sub-setor é obrigatório' }, { status: 400 });
+      return NextResponse.json({ error: 'ID do Subsetor é obrigatório' }, { status: 400 });
     }
 
     // Criar cliente Supabase
     const supabase = CreateClient();
 
-    // Buscar membros da equipe do sub-setor
+    // Buscar membros da equipe do Subsetor
 
     // Primeiro, buscar membros regulares da equipe
     let { data: teamMembers, error } = await supabase
@@ -156,7 +156,7 @@ export async function GET(request: NextRequest) {
         id: `admin-${admin.id}`,
         user_id: admin.user_id,
         subsector_id: admin.subsector_id,
-        position: 'Administrador do Sub-setor',
+        position: 'Administrador do Subsetor',
         created_at: admin.created_at,
         profiles: admin.profiles,
         is_admin: true
@@ -247,7 +247,7 @@ export async function GET(request: NextRequest) {
             id: `admin-${admin.id}`,
             user_id: admin.user_id,
             subsector_id: admin.subsector_id,
-            position: 'Administrador do Sub-setor',
+            position: 'Administrador do Subsetor',
             created_at: admin.created_at,
             profiles: profile ? {
               ...profile,

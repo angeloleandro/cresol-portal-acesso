@@ -35,9 +35,9 @@ export default function UserFilters({
   // Role options with labels
   const roleOptions = useMemo(() => [
     { value: 'all', label: 'Todos' },
-    { value: 'admin', label: 'Administrador' },
-    { value: 'sector_admin', label: 'Admin. Setorial' },
-    { value: 'subsector_admin', label: 'Admin. Subsetorial' },
+    { value: 'admin', label: 'Administrador Geral' },
+    { value: 'sector_admin', label: 'Administrador de Setor' },
+    { value: 'subsector_admin', label: 'Administrador de Subsetor' },
     { value: 'user', label: 'Usuário' }
   ], []);
   

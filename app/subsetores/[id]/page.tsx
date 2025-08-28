@@ -99,11 +99,11 @@ function SubsectorDetailsContent() {
       .single();
 
     if (error) {
-      throw new Error(`Falha ao buscar informações do sub-setor: ${error.message}`);
+      throw new Error(`Falha ao buscar informações do Subsetor: ${error.message}`);
     }
     
     if (!data) {
-      throw new Error('Sub-setor não encontrado');
+      throw new Error('Subsetor não encontrado');
     }
     
     setSubsector(data);
@@ -169,7 +169,7 @@ function SubsectorDetailsContent() {
         setError({ hasError: false, message: '' });
         
         // Usuário já está autenticado graças ao AuthGuard
-        // Apenas carregar os dados do sub-setor
+        // Apenas carregar os dados do Subsetor
         
         await Promise.all([
           fetchSubsector(),
@@ -181,7 +181,7 @@ function SubsectorDetailsContent() {
         const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao carregar dados';
         setError({ 
           hasError: true, 
-          message: `Erro ao carregar dados do sub-setor: ${errorMessage}` 
+          message: `Erro ao carregar dados do Subsetor: ${errorMessage}` 
         });
       } finally {
         setLoading(false);
@@ -207,7 +207,7 @@ function SubsectorDetailsContent() {
         const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao carregar dados';
         setError({ 
           hasError: true, 
-          message: `Erro ao carregar dados do sub-setor: ${errorMessage}` 
+          message: `Erro ao carregar dados do Subsetor: ${errorMessage}` 
         });
       } finally {
         setLoading(false);
@@ -238,7 +238,7 @@ function SubsectorDetailsContent() {
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
               <Icon name="triangle-alert" className="h-12 w-12 text-red-500 mx-auto mb-4" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-red-800 mb-2">
-                Erro ao Carregar Sub-setor
+                Erro ao Carregar Subsetor
               </h2>
               <p className="text-red-700 mb-4">{error.message}</p>
               <div className="space-y-2">
@@ -273,10 +273,10 @@ function SubsectorDetailsContent() {
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
               <Icon name="triangle-alert" className="h-12 w-12 text-yellow-500 mx-auto mb-4" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-yellow-800 mb-2">
-                Sub-setor Não Encontrado
+                Subsetor Não Encontrado
               </h2>
               <p className="text-yellow-700 mb-4">
-                O sub-setor solicitado não foi encontrado ou não existe.
+                O Subsetor solicitado não foi encontrado ou não existe.
               </p>
               <Link
                 href="/home"
@@ -296,7 +296,7 @@ function SubsectorDetailsContent() {
     <div className="min-h-screen bg-gray-50">
       <ChakraNavbar />
       
-      {/* Header do Sub-setor */}
+      {/* Header do Subsetor */}
       <header className="bg-white border-b border-cresol-gray-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center mb-4">
@@ -487,7 +487,7 @@ function SubsectorDetailsContent() {
           {/* Sidebar */}
           <aside className="lg:col-span-1 space-y-6" role="complementary" aria-label="Informações adicionais">
             
-            {/* Equipe do Sub-setor */}
+            {/* Equipe do Subsetor */}
             <SubsectorTeam 
               subsectorId={subsector.id}
               subsectorName={subsector.name}

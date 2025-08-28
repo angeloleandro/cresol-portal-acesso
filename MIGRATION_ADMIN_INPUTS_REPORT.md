@@ -73,11 +73,11 @@ Aplicar padronização Chakra UI nos componentes admin mais importantes, preserv
 ### 6. `/app/admin/sectors/page.tsx`
 **Inputs migrados:**
 - Campo "Nome do Setor" → `StandardizedInput` com ícone `building-1`
-- Campo "Nome do Sub-setor" → `StandardizedInput` com ícone `folder`
+- Campo "Nome do Subsetor" → `StandardizedInput` com ícone `folder`
 - Campos "Descrição" → `StandardizedTextarea`
 
 **Funcionalidades preservadas:**
-- ✅ Sistema de abas (Setores/Sub-setores)
+- ✅ Sistema de abas (Setores/Subsetores)
 - ✅ Cards padronizados
 - ✅ Validação de dependências
 - ✅ Modal de confirmação de exclusão
@@ -118,7 +118,7 @@ Aplicar padronização Chakra UI nos componentes admin mais importantes, preserv
 - `link` - URLs
 - `image` - Imagens/ícones
 - `building-1` - Setores
-- `folder` - Sub-setores
+- `folder` - Subsetores
 
 ## Selects Mantidos
 Conforme instruções, selects complexos foram mantidos com styling manual, apenas atualizando as classes CSS para consistência visual:

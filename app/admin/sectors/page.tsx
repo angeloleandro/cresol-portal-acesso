@@ -192,13 +192,13 @@ function SectorsManagementContent() {
     e.preventDefault();
     
     if (!subsectorForm.name.trim() || !subsectorForm.sector_id) {
-      showWarning('Nome do sub-setor e setor são obrigatórios');
+      showWarning('Nome do Subsetor e setor são obrigatórios');
       return;
     }
     
     try {
       if (editingSubsector) {
-        // Editar sub-setor
+        // Editar Subsetor
         const { error } = await supabase
           .from('subsectors')
           .update({
@@ -209,9 +209,9 @@ function SectorsManagementContent() {
           .eq('id', editingSubsector.id);
         
         if (error) throw error;
-        showSuccess('Sub-setor atualizado com sucesso');
+        showSuccess('Subsetor atualizado com sucesso');
       } else {
-        // Criar sub-setor
+        // Criar Subsetor
         const { error } = await supabase
           .from('subsectors')
           .insert([{
@@ -221,14 +221,14 @@ function SectorsManagementContent() {
           }]);
         
         if (error) throw error;
-        showSuccess('Sub-setor criado com sucesso');
+        showSuccess('Subsetor criado com sucesso');
       }
       
       resetSubsectorForm();
       fetchSubsectors();
     } catch (error) {
 
-      showError('Erro ao salvar sub-setor', 'Tente novamente.');
+      showError('Erro ao salvar Subsetor', 'Tente novamente.');
     }
   };
 
@@ -238,12 +238,12 @@ function SectorsManagementContent() {
     if (type === 'sector' && relatedSubsectors.length > 0) {
       setModalContent({
         title: 'Exclusão não permitida',
-        message: `Não é possível excluir o setor "<strong>${item.name}</strong>". Há <strong>${relatedSubsectors.length}</strong> sub-setor(es) vinculado(s) a ele.`
+        message: `Não é possível excluir o setor "${item.name}". Há ${relatedSubsectors.length} Subsetor(es) vinculado(s) a ele.`
       });
     } else {
       setModalContent({
-        title: `Confirmar Exclusão de ${type === 'sector' ? 'Setor' : 'Sub-setor'}`,
-        message: `Tem certeza que deseja excluir o ${type === 'sector' ? 'setor' : 'sub-setor'} "<strong>${item.name}</strong>"? Esta ação não pode ser desfeita.`
+        title: `Confirmar Exclusão de ${type === 'sector' ? 'Setor' : 'Subsetor'}`,
+        message: `Tem certeza que deseja excluir o ${type === 'sector' ? 'setor' : 'Subsetor'} "${item.name}"? Esta ação não pode ser desfeita.`
       });
     }
 
@@ -266,7 +266,7 @@ function SectorsManagementContent() {
       } else {
         await supabase.from('subsector_admins').delete().eq('subsector_id', data.id);
         await supabase.from('subsectors').delete().eq('id', data.id);
-        showSuccess('Sub-setor excluído com sucesso');
+        showSuccess('Subsetor excluído com sucesso');
         fetchSubsectors();
       }
     } catch (error) {
@@ -320,11 +320,11 @@ function SectorsManagementContent() {
     {
       value: 'sectors',
       label: 'Setores',
-      icon: <Icon name="folder" />
+      icon: <Icon name="building-1" />
     },
     {
       value: 'subsectors',
-      label: 'Sub-setores',
+      label: 'Subsetores',
       icon: <Icon name="folder" />
     }
   ];
@@ -334,7 +334,7 @@ function SectorsManagementContent() {
       <StandardizedAdminLayout user={user} breadcrumbs={breadcrumbs}>
         <StandardizedPageHeader
           title="Gerenciamento de Setores"
-          subtitle="Gerencie os setores da Cresol e seus sub-setores"
+          subtitle="Gerencie os setores da Cresol e seus Subsetores"
           action={
             <div className="flex gap-3">
               <Button
@@ -353,7 +353,7 @@ function SectorsManagementContent() {
                 size="md"
                 startElement={<Icon name="folder-plus" className="h-4 w-4" />}
               >
-                Novo Sub-setor
+                Novo Subsetor
               </Button>
             </div>
           }
@@ -423,16 +423,16 @@ function SectorsManagementContent() {
                       </div>
                     ) : (
                       <StandardizedEmptyState
-                        title="Nenhum sub-setor cadastrado"
+                        title="Nenhum Subsetor cadastrado"
                         description={
                           sectors.length === 0 
-                            ? 'Primeiro crie um setor, depois adicione sub-setores a ele.'
-                            : 'Comece criando o primeiro sub-setor.'
+                            ? 'Primeiro crie um setor, depois adicione Subsetores a ele.'
+                            : 'Comece criando o primeiro Subsetor.'
                         }
                         icon="folder"
                         action={
                           sectors.length > 0 ? {
-                            label: 'Criar Primeiro Sub-setor',
+                            label: 'Criar Primeiro Subsetor',
                             onClick: () => setShowSubsectorModal(true)
                           } : undefined
                         }
@@ -513,13 +513,13 @@ function SectorsManagementContent() {
           </div>
         )}
 
-        {/* Modal Sub-setor */}
+        {/* Modal Subsetor */}
         {showSubsectorModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-md max-w-md w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  {editingSubsector ? 'Editar Sub-setor' : 'Novo Sub-setor'}
+                  {editingSubsector ? 'Editar Subsetor' : 'Novo Subsetor'}
                 </h3>
                 
                 <form onSubmit={handleSubsectorSubmit} className="space-y-4">
@@ -544,7 +544,7 @@ function SectorsManagementContent() {
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nome do Sub-setor *
+                      Nome do Subsetor *
                     </label>
                     <StandardizedInput
                       type="text"
@@ -565,7 +565,7 @@ function SectorsManagementContent() {
                     <StandardizedTextarea
                       value={subsectorForm.description}
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setSubsectorForm({ ...subsectorForm, description: e.target.value })}
-                      placeholder="Descrição opcional do sub-setor..."
+                      placeholder="Descrição opcional do Subsetor..."
                       rows={3}
                       variant="outline"
                       size="md"
