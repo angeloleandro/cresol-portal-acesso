@@ -200,7 +200,13 @@ function AdminGalleryContent() {
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir a imagem <strong>"${imageToDelete?.title || '(Sem título)'}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá a imagem permanentemente da galeria.`}
+        message={
+          <div>
+            <p>Tem certeza que deseja excluir a imagem <strong>&quot;{imageToDelete?.title || '(Sem título)'}&quot;</strong>?</p>
+            <br />
+            <p>Esta ação não pode ser desfeita e removerá a imagem permanentemente da galeria.</p>
+          </div>
+        }
         isLoading={isDeleting}
         confirmButtonText="Excluir Imagem"
         cancelButtonText="Cancelar"
@@ -263,7 +269,7 @@ function AdminGalleryContent() {
                     <button
                       key={collection.id}
                       onClick={() => handleAddToCollectionSubmit(collection.id)}
-                      className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 transition-colors"
+                      className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-card-hover hover:bg-card-hover/5 transition-colors"
                     >
                       <div className="font-medium text-gray-900">{collection.name}</div>
                       {collection.description && (

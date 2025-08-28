@@ -5,13 +5,13 @@ import { useState, useEffect } from "react";
 import AuthGuard from '@/app/components/AuthGuard';
 import { 
   StandardizedAdminLayout, 
-  StandardizedButton,
   StandardizedCard,
   StandardizedEmptyState,
   StandardizedPageHeader, 
   type BreadcrumbItem
 } from '@/app/components/admin';
-import BannerUploadForm from '@/app/components/BannerUploadForm';
+import { Button } from '@/app/components/ui/Button';
+import BannerModal from '@/app/components/BannerModal';
 import { Icon } from '@/app/components/icons';
 import OptimizedImage from "@/app/components/OptimizedImage";
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
@@ -22,7 +22,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 
 const supabase = createClient();
 
-interface Banner {
+interface BannerData {
   id: string;
   title: string | null;
   image_url: string;
@@ -34,12 +34,12 @@ interface Banner {
 function AdminBannersContent() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [banners, setBanners] = useState<Banner[]>([]);
+  const [banners, setBanners] = useState<BannerData[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [editBanner, setEditBanner] = useState<Banner | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [editingBanner, setEditingBanner] = useState<BannerData | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [bannerToDelete, setBannerToDelete] = useState<Banner | null>(null);
+  const [bannerToDelete, setBannerToDelete] = useState<BannerData | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -57,7 +57,7 @@ function AdminBannersContent() {
     setLoading(false);
   };
 
-  const handleDeleteClick = (banner: Banner) => {
+  const handleDeleteClick = (banner: BannerData) => {
     setBannerToDelete(banner);
     setShowDeleteModal(true);
   };
@@ -69,17 +69,10 @@ function AdminBannersContent() {
     setError(null);
     
     try {
-      // Obter sessão para incluir token de autenticação
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        throw new Error('Sessão expirada. Por favor, faça login novamente.');
-      }
-      
+      // API foi corrigida para usar sessão
       const response = await fetch(`/api/admin/banners?id=${bannerToDelete.id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -121,42 +114,31 @@ function AdminBannersContent() {
           title="Gerenciar Banners"
           subtitle="Adicione, edite ou remova banners exibidos na página inicial do portal"
           action={
-            <StandardizedButton
-              onClick={() => setShowForm(true)}
+            <Button
+              onClick={() => {
+                setEditingBanner(null);
+                setShowModal(true);
+              }}
               variant="primary"
+              icon="plus"
             >
-              <Icon name="plus" className="h-4 w-4" />
               Novo Banner
-            </StandardizedButton>
+            </Button>
           }
         />
-        {showForm && !editBanner && (
-          <BannerUploadForm onSave={() => { setShowForm(false); fetchBanners(); }} onCancel={() => setShowForm(false)} />
-        )}
-        {editBanner && (
-          <BannerUploadForm
-            initialData={{
-              id: editBanner.id,
-              title: editBanner.title ?? undefined,
-              image_url: editBanner.image_url ?? undefined,
-              link: editBanner.link ?? undefined,
-              is_active: editBanner.is_active,
-              order_index: editBanner.order_index,
-            }}
-            onSave={() => { setEditBanner(null); fetchBanners(); }}
-            onCancel={() => setEditBanner(null)}
-          />
-        )}
         {error && <div className="text-red-500 mb-4">Erro: {error}</div>}
         
-        {banners.length === 0 && !showForm ? (
+        {banners.length === 0 ? (
           <StandardizedEmptyState
             title="Nenhum banner cadastrado"
             description="Comece criando o primeiro banner para exibir na página inicial."
             icon="image"
             action={{
               label: "Criar Banner",
-              onClick: () => setShowForm(true)
+              onClick: () => {
+                setEditingBanner(null);
+                setShowModal(true);
+              }
             }}
           />
         ) : (
@@ -188,23 +170,27 @@ function AdminBannersContent() {
                     </a>
                   )}
                   <div className="mt-auto flex gap-2 pt-4">
-                    <StandardizedButton
-                      onClick={() => setEditBanner(banner)}
+                    <Button
+                      onClick={() => {
+                        setEditingBanner(banner);
+                        setShowModal(true);
+                      }}
                       variant="secondary"
                       size="sm"
+                      icon="pencil"
                       className="text-primary border-primary hover:bg-primary hover:text-white"
                     >
-                      <Icon name="pencil" className="h-4 w-4" />
                       Editar
-                    </StandardizedButton>
-                    <StandardizedButton
+                    </Button>
+                    <Button
                       onClick={() => handleDeleteClick(banner)}
-                      variant="danger"
+                      variant="secondary"
                       size="sm"
+                      icon="trash"
+                      className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
                     >
-                      <Icon name="trash" className="h-4 w-4" />
                       Remover
-                    </StandardizedButton>
+                    </Button>
                   </div>
                 </div>
               </StandardizedCard>
@@ -213,12 +199,33 @@ function AdminBannersContent() {
         )}
       </StandardizedAdminLayout>
       
+      {/* Banner Modal */}
+      <BannerModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditingBanner(null);
+        }}
+        onSave={() => {
+          setShowModal(false);
+          setEditingBanner(null);
+          fetchBanners();
+        }}
+        banner={editingBanner}
+      />
+      
       <ConfirmationModal
         isOpen={showDeleteModal}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir o banner <strong>"${bannerToDelete?.title || '(Sem título)'}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá o banner permanentemente da página inicial.`}
+        message={
+          <div>
+            <p>Tem certeza que deseja excluir o banner <strong>&quot;{bannerToDelete?.title || '(Sem título)'}&quot;</strong>?</p>
+            <br />
+            <p>Esta ação não pode ser desfeita e removerá o banner permanentemente da página inicial.</p>
+          </div>
+        }
         isLoading={isDeleting}
         confirmButtonText="Excluir Banner"
         cancelButtonText="Cancelar"

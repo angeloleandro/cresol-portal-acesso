@@ -597,7 +597,7 @@ export default function AdvancedSearch({
                           justifyContent="space-between"
                           fontWeight="normal"
                           borderColor="gray.300"
-                          _hover={{ borderColor: 'orange.500' }}
+                          _hover={{ borderColor: 'gray.500' }}
                         >
                           <span className="truncate">
                             {selectedFilter.sectors.length > 0

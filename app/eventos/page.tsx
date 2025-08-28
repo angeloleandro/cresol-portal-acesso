@@ -65,7 +65,7 @@ function EventosPageContent() {
         .order('start_date', { ascending: true });
 
       if (error) {
-
+        console.error('Erro ao buscar eventos:', error);
         setEvents([]);
       } else {
         // Formatar dados do Supabase
@@ -76,7 +76,7 @@ function EventosPageContent() {
         setEvents(formattedEvents);
       }
     } catch (error) {
-
+      console.error('Erro inesperado ao buscar eventos:', error);
       setEvents([]);
     } finally {
       setLoading(false);
@@ -119,13 +119,13 @@ function EventosPageContent() {
         .order('name');
 
       if (error) {
-
+        console.error('Erro ao buscar setores:', error);
         return;
       }
 
       setSectors(data || []);
     } catch (error) {
-
+      console.error('Erro inesperado ao buscar setores:', error);
     }
   };
 
@@ -257,7 +257,7 @@ function EventosPageContent() {
               className={`px-4 py-2 font-medium text-sm border-b-2 ${
                 viewMode === 'list' 
                   ? 'border-primary text-primary' 
-                  : 'border-transparent text-muted hover:text-primary hover:border-primary/30'
+                  : 'border-transparent text-muted hover:text-primary hover:border-card-hover/60'
               }`}
             >
               <div className="flex items-center">
@@ -270,7 +270,7 @@ function EventosPageContent() {
               className={`px-4 py-2 font-medium text-sm border-b-2 ${
                 viewMode === 'calendar' 
                   ? 'border-primary text-primary' 
-                  : 'border-transparent text-muted hover:text-primary hover:border-primary/30'
+                  : 'border-transparent text-muted hover:text-primary hover:border-card-hover/60'
               }`}
             >
               <div className="flex items-center">

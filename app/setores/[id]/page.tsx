@@ -542,7 +542,7 @@ function SetorDetalhesContent() {
                         className="block group"
                         aria-label={`Acessar Subsetor ${subsector.name}`}
                       >
-                        <div className="flex items-center p-3 border border-cresol-gray-light rounded-lg hover:border-primary transition-colors group">
+                        <div className="flex items-center p-3 border border-cresol-gray-light rounded-lg hover:border-card-hover transition-colors group">
                           <div className="flex-1">
                             <h4 className="font-medium text-cresol-gray-dark group-hover:text-primary transition-colors text-sm">
                               {subsector.name}

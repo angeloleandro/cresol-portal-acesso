@@ -104,8 +104,8 @@ export default function UserFilters({
                 justifyContent="space-between"
                 fontWeight="normal"
                 borderColor="gray.300"
-                _hover={{ borderColor: 'orange.500' }}
-                _focus={{ borderColor: 'orange.500' }}
+                _hover={{ borderColor: 'gray.500' }}
+                _focus={{ borderColor: 'gray.500' }}
               >
                 <span className="truncate">{selectedRoleLabel}</span>
                 <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
@@ -119,7 +119,7 @@ export default function UserFilters({
                     value={role.value}
                     onClick={() => handleRoleSelect(role.value)}
                     bg={roleFilter === role.value ? 'orange.50' : undefined}
-                    _hover={{ bg: 'orange.100' }}
+                    _hover={{ bg: 'gray.100' }}
                   >
                     {role.label}
                   </Menu.Item>
@@ -141,8 +141,8 @@ export default function UserFilters({
                 justifyContent="space-between"
                 fontWeight="normal"
                 borderColor="gray.300"
-                _hover={{ borderColor: 'orange.500' }}
-                _focus={{ borderColor: 'orange.500' }}
+                _hover={{ borderColor: 'gray.500' }}
+                _focus={{ borderColor: 'gray.500' }}
               >
                 <span className="truncate">{selectedLocationLabel}</span>
                 <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
@@ -156,7 +156,7 @@ export default function UserFilters({
                     value={location.id}
                     onClick={() => handleLocationSelect(location.id)}
                     bg={locationFilter === location.id ? 'orange.50' : undefined}
-                    _hover={{ bg: 'orange.100' }}
+                    _hover={{ bg: 'gray.100' }}
                   >
                     <span className="truncate">{location.name}</span>
                   </Menu.Item>

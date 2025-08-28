@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 import AuthGuard from '@/app/components/AuthGuard';
 import { useAuth } from '@/app/providers/AuthProvider';
 
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import LoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { AlertProvider } from '@/app/components/alerts';
 import { 
   StandardizedAdminLayout, 

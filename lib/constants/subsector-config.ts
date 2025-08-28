@@ -79,7 +79,7 @@ export const SUBSECTOR_CARD_LAYOUT = {
   grid: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6',
   
   card: {
-    base: 'bg-white rounded-lg border border-gray-200 hover:border-primary/30 transition-colors',
+    base: 'bg-white rounded-lg border border-gray-200 hover:border-card-hover/60 transition-colors',
     content: 'p-6',
     header: 'flex items-center justify-between mb-4',
     title: 'text-lg font-semibold text-cresol-gray',

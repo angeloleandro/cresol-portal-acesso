@@ -162,7 +162,7 @@ const NavigationControlsPro = memo(function NavigationControlsPro({
       orange: {
         primary: 'border-orange-200 bg-orange-50',
         accent: 'text-orange-600 bg-orange-500',
-        hover: 'hover:border-orange-300 hover:bg-orange-100',
+        hover: 'hover:border-[#727176] hover:bg-orange-100',
         active: 'bg-orange-500 text-white border-orange-500',
         focus: 'focus:ring-orange-200 focus:border-orange-400'
       },

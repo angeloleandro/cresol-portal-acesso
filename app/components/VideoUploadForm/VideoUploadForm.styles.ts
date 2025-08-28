@@ -138,7 +138,7 @@ export const videoUploadStyles = {
     
     active: cn(
       'border-primary bg-primary/5',
-      'hover:border-primary/70 hover:bg-primary/10'
+      'hover:border-card-hover/70 hover:bg-card-hover/10'
     ),
     
     content: 'flex flex-col items-center gap-3',

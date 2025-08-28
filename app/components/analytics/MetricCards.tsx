@@ -82,7 +82,7 @@ const colorConfig = {
     icon: 'text-orange-500',
     value: 'text-orange-600',
     accent: 'bg-orange-500',
-    hover: 'hover:border-orange-300 hover:bg-orange-100'
+    hover: 'hover:border-[#727176] hover:bg-orange-100'
   },
   green: {
     bg: 'bg-green-50',

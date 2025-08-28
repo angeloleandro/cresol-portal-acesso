@@ -110,7 +110,7 @@ export default function SubsectorVideos({ subsectorId, limit = 4 }: SubsectorVid
             {videos.map((video, index) => (
               <div
                 key={video.id}
-                className="border border-cresol-gray-light rounded-lg overflow-hidden hover:border-primary transition-colors cursor-pointer"
+                className="border border-cresol-gray-light rounded-lg overflow-hidden hover:border-card-hover transition-colors cursor-pointer"
                 role="listitem"
                 aria-labelledby={`video-title-${index}`}
               >

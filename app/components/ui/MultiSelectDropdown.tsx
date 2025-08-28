@@ -105,7 +105,7 @@ export default function MultiSelectDropdown({
           transition-all duration-200
           ${disabled || loading 
             ? 'bg-gray-100 cursor-not-allowed opacity-60' 
-            : 'bg-white hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer'
+            : 'bg-white hover:border-card-hover focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer'
           }
           ${error ? 'border-red-500' : 'border-cresol-gray-light'}
           ${isOpen ? 'ring-2 ring-primary/20 border-primary' : ''}

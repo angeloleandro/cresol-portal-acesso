@@ -43,6 +43,10 @@ const cresolColors = {
     800: { value: CRESOL_COLORS.secondary[800] },
     900: { value: CRESOL_COLORS.secondary[900] },
     950: { value: "#052e16" }, // Complementar
+  },
+  // Design tokens semânticos para hover states
+  cresol: {
+    cardHover: { value: "#8A8A8A" }, // Card hover unificado - cinza mais claro
   }
 };
 
@@ -138,6 +142,54 @@ export const cresolSystem = createSystem(defaultConfig, {
         "bg.pressed": { value: "{colors.orange.100}" },
         "fg.hover": { value: "{colors.orange.700}" },
         "fg.pressed": { value: "{colors.orange.800}" },
+      }
+    },
+    // Layer Styles para componentes padronizados
+    layerStyles: {
+      // Sistema unificado de cards Cresol
+      "cresol.card": {
+        value: {
+          bg: "white",
+          border: "1px solid",
+          borderColor: "{colors.gray.300}",
+          borderRadius: "md",
+          padding: "4",
+          shadow: "sm",
+          transition: "all 0.2s",
+        }
+      },
+      "cresol.cardHover": {
+        value: {
+          bg: "white",
+          border: "1px solid",
+          borderColor: "{colors.gray.300}",
+          borderRadius: "md",
+          padding: "4",
+          shadow: "sm",
+          transition: "all 0.2s",
+          _hover: {
+            borderColor: "{colors.cresol.cardHover}",
+            shadow: "md",
+            transform: "translateY(-1px)"
+          }
+        }
+      },
+      "cresol.cardClickable": {
+        value: {
+          bg: "white",
+          border: "1px solid",
+          borderColor: "{colors.gray.300}",
+          borderRadius: "md",
+          padding: "4",
+          shadow: "sm",
+          transition: "all 0.2s",
+          cursor: "pointer",
+          _hover: {
+            borderColor: "{colors.cresol.cardHover}",
+            shadow: "md",
+            transform: "translateY(-1px)"
+          }
+        }
       }
     }
   },

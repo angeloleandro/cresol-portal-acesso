@@ -108,7 +108,7 @@ const QuickLinksDropdown = memo(() => {
             <Text 
               fontSize="xs" 
               color="gray.600" 
-              _hover={{ color: 'orange.500' }}
+              _hover={{ color: 'gray.500' }}
               transition="colors"
             >
               Ver todos

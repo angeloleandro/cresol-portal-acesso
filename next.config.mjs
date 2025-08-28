@@ -43,6 +43,25 @@ const nextConfig = {
     ]
   },
   
+  // Headers para Google Fonts
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          }
+        ]
+      }
+    ]
+  },
+  
   // Compilação básica sem removeConsole (causa problemas de hidratação)
   compiler: {
     // removeConsole desabilitado - pode interferir na hidratação

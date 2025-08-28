@@ -491,7 +491,7 @@ function SectorTeamPageContent() {
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {directMembers.map(member => (
-                        <div key={member.id} className="border border-cresol-gray-light rounded-lg p-4 hover:border-primary/30 transition-colors">
+                        <div key={member.id} className="border border-cresol-gray-light rounded-lg p-4 hover:border-card-hover/60 transition-colors">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center">
                               <div className="relative h-12 w-12 rounded-full overflow-hidden bg-cresol-gray-light mr-3">

@@ -16,7 +16,8 @@ const inter = Inter({
   subsets: ['latin'],
   display: 'swap', // Critical for font optimization
   preload: true,
-  fallback: ['system-ui', 'arial']
+  fallback: ['system-ui', 'arial'],
+  variable: '--font-inter'
 })
 
 export const metadata: Metadata = {
@@ -88,7 +89,7 @@ export default function RootLayout({
           as="style"
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} ${inter.variable}`}>
         <AuthProvider>
           <QueryProvider>
             <ChakraUIProvider>

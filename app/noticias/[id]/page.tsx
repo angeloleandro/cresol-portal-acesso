@@ -218,7 +218,7 @@ function NoticiaDetalheContent() {
                 <Link 
                   key={item.id} 
                   href={`/noticias/${item.id}`}
-                  className="block bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-primary/30 transition-colors"
+                  className="block bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-card-hover/60 transition-colors"
                 >
                   {item.image_url && (
                     <div className="relative h-40 w-full bg-cresol-gray-light">

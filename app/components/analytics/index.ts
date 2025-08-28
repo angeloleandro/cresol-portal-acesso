@@ -7,9 +7,7 @@ export { default as ShimmerButton } from './ShimmerButton';
 
 // Enhanced Pro Components (Enterprise Level)
 export { default as MetricCardEnterprisePro } from './MetricCardEnterprisePro';
-export { default as ChartContainerPro } from './ChartContainerPro';
 export { default as NavigationControlsPro } from './NavigationControlsPro';
-export { default as DashboardGridAdvanced } from './DashboardGridAdvanced';
 export { default as AnalyticsShowcase } from './AnalyticsShowcase';
 
 // WCAG 2.1 AA Accessible Components (removed - HeadlessUI no longer available)

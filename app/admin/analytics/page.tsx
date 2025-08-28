@@ -490,7 +490,7 @@ function AnalyticsPageContent() {
                   </div>
                   <div className="p-3 space-y-3">
                     {/* Compact Metric Cards - Padrão Cresol */}
-                    <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 hover:border-orange-300 transition-all duration-200">
+                    <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 hover:border-[#727176] transition-all duration-200">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium text-gray-700">Usuários Ativos</span>
                         <Icon name="trending-up" className="h-3 w-3 text-orange-600" />
@@ -503,7 +503,7 @@ function AnalyticsPageContent() {
                       </div>
                     </div>
                     
-                    <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 hover:border-orange-300 transition-all duration-200">
+                    <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 hover:border-[#727176] transition-all duration-200">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium text-gray-700">Taxa de Leitura</span>
                         <Icon name="check" className="h-3 w-3 text-orange-600" />
@@ -516,7 +516,7 @@ function AnalyticsPageContent() {
                       </div>
                     </div>
                     
-                    <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 hover:border-orange-300 transition-all duration-200">
+                    <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 hover:border-[#727176] transition-all duration-200">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium text-gray-700">Crescimento</span>
                         <Icon name="user-add" className="h-3 w-3 text-orange-600" />

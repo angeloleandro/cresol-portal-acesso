@@ -141,7 +141,7 @@ export default function MetricCardEnterprise({
           border: 'border-orange-200',
           iconBg: 'bg-orange-50',
           iconColor: 'text-orange-600',
-          hoverBorder: 'hover:border-orange-300',
+          hoverBorder: 'hover:border-[#727176]',
           hoverShadow: 'hover:shadow-orange-100/50',
           topGradient: 'from-orange-400 to-orange-600',
           numberColor: 'orange' as const

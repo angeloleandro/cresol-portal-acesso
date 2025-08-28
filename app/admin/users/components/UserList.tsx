@@ -252,7 +252,12 @@ export default function UserList({
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={confirmDelete}
           title="Confirmar Exclusão de Usuário"
-          message={`Atenção! Você está prestes a remover o usuário <strong>${userToDelete.full_name}</strong>, revogando permanentemente seu acesso. Para confirmar, digite o e-mail do usuário (<strong>${userToDelete.email}</strong>) no campo abaixo.`}
+          message={
+            <div>
+              <p>Atenção! Você está prestes a remover o usuário <strong>{userToDelete.full_name}</strong>, revogando permanentemente seu acesso.</p>
+              <p>Para confirmar, digite o e-mail do usuário (<strong>{userToDelete.email}</strong>) no campo abaixo.</p>
+            </div>
+          }
           isLoading={deletingUserId === userToDelete.id}
           requiresConfirmationInput={true}
           confirmationText={userToDelete.email}

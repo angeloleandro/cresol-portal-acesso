@@ -298,7 +298,7 @@ function MensagemDetalheContent() {
                 <Link 
                   key={item.id} 
                   href={`/mensagens/${item.id}`}
-                  className="block bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-primary/30 transition-colors"
+                  className="block bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-card-hover/60 transition-colors"
                 >
                   <div className="p-4">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-2">

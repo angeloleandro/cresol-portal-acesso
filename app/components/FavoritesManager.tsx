@@ -463,7 +463,7 @@ export function FavoritesList({
           key={favorite.id} 
           className={`flex items-center space-x-3 ${
             compact ? 'p-2' : 'p-3'
-          } bg-white border border-gray-200 rounded-md hover:border-primary/30 transition-colors`}
+          } bg-white border border-gray-200 rounded-md hover:border-card-hover/60 transition-colors`}
         >
           {/* Ícone ou thumbnail */}
           <div className="flex-shrink-0">

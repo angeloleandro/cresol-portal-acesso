@@ -535,7 +535,13 @@ function PositionsAdminContent() {
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir o cargo <strong>"${positionToDelete?.name}"</strong>?<br><br>Esta ação não pode ser desfeita e pode afetar usuários que possuem este cargo.`}
+        message={
+          <div>
+            <p>Tem certeza que deseja excluir o cargo <strong>&quot;{positionToDelete?.name}&quot;</strong>?</p>
+            <br />
+            <p>Esta ação não pode ser desfeita e pode afetar usuários que possuem este cargo.</p>
+          </div>
+        }
         isLoading={isDeleting}
         confirmButtonText="Excluir Cargo"
         cancelButtonText="Cancelar"

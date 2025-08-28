@@ -274,7 +274,7 @@ function EventoDetalheContent() {
                 <Link 
                   key={item.id} 
                   href={`/eventos/${item.id}`}
-                  className="block bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-primary/30 transition-colors"
+                  className="block bg-white rounded-lg border border-cresol-gray-light overflow-hidden hover:border-card-hover/60 transition-colors"
                 >
                   <div className="p-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 mb-2">

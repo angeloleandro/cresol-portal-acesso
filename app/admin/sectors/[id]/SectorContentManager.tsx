@@ -160,28 +160,28 @@ export function useSectorContent(sectorId: string | undefined): UseSectorContent
   }, [refreshContent]);
 
   const deleteNews = useCallback(async (id: string) => {
-    await deleteItem(`/api/admin/sectors/${sectorId}/news/${id}`, id, 'notícia');
-  }, [sectorId, deleteItem]);
+    await deleteItem(`/api/admin/sector-content?type=sector_news&id=${id}`, id, 'notícia');
+  }, [deleteItem]);
 
   const deleteEvent = useCallback(async (id: string) => {
-    await deleteItem(`/api/admin/sectors/${sectorId}/events/${id}`, id, 'evento');
-  }, [sectorId, deleteItem]);
+    await deleteItem(`/api/admin/sector-content?type=sector_events&id=${id}`, id, 'evento');
+  }, [deleteItem]);
 
   const deleteMessage = useCallback(async (id: string) => {
-    await deleteItem(`/api/admin/sectors/${sectorId}/messages/${id}`, id, 'mensagem');
-  }, [sectorId, deleteItem]);
+    await deleteItem(`/api/admin/sector-content?type=sector_messages&id=${id}`, id, 'mensagem');
+  }, [deleteItem]);
 
   const deleteDocument = useCallback(async (id: string) => {
-    await deleteItem(`/api/admin/sectors/${sectorId}/documents/${id}`, id, 'documento');
-  }, [sectorId, deleteItem]);
+    await deleteItem(`/api/admin/sector-content?type=sector_documents&id=${id}`, id, 'documento');
+  }, [deleteItem]);
 
   const deleteVideo = useCallback(async (id: string) => {
-    await deleteItem(`/api/admin/sectors/${sectorId}/videos/${id}`, id, 'vídeo');
-  }, [sectorId, deleteItem]);
+    await deleteItem(`/api/admin/sector-content?type=sector_videos&id=${id}`, id, 'vídeo');
+  }, [deleteItem]);
 
   const deleteImage = useCallback(async (id: string) => {
-    await deleteItem(`/api/admin/sectors/${sectorId}/images/${id}`, id, 'imagem');
-  }, [sectorId, deleteItem]);
+    await deleteItem(`/api/admin/sector-content?type=sector_images&id=${id}`, id, 'imagem');
+  }, [deleteItem]);
 
   return {
     news,

@@ -39,8 +39,7 @@ function WorkLocationsAdminContent() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<WorkLocation | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [formError, _setFormError] = useState('');
-  const [formSuccess, _setFormSuccess] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchWorkLocations();
@@ -48,12 +47,27 @@ function WorkLocationsAdminContent() {
 
   const fetchWorkLocations = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('work_locations')
-      .select('*')
-      .order('name');
-    if (!error && data) setWorkLocations(data);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from('work_locations')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error('Erro ao buscar locais de trabalho:', error);
+        setError('Erro ao carregar locais de trabalho. Tente novamente mais tarde.');
+        setWorkLocations([]);
+      } else {
+        setWorkLocations(data || []);
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Erro inesperado:', err);
+      setError('Erro inesperado ao carregar dados. Tente novamente mais tarde.');
+      setWorkLocations([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCreateOrEdit = async (e: React.FormEvent) => {
@@ -302,12 +316,6 @@ function WorkLocationsAdminContent() {
         {showForm && (
           <div className="bg-white rounded-lg border border-cresol-gray-light p-6 mb-6">
             <h3 className="text-lg font-semibold text-primary mb-4">{editing ? 'Editar Local' : 'Cadastrar Novo Local'}</h3>
-            {formError && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-sm">{formError}</div>
-            )}
-            {formSuccess && (
-              <div className="bg-green-50 text-green-600 p-3 rounded-md mb-4 text-sm">{formSuccess}</div>
-            )}
             <form onSubmit={handleCreateOrEdit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
@@ -537,7 +545,13 @@ function WorkLocationsAdminContent() {
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir o local <strong>"${locationToDelete?.name}"</strong>?<br><br>Esta ação não pode ser desfeita e pode afetar usuários que possuem este local de atuação.`}
+        message={
+          <div>
+            <p>Tem certeza que deseja excluir o local <strong>&quot;{locationToDelete?.name}&quot;</strong>?</p>
+            <br />
+            <p>Esta ação não pode ser desfeita e pode afetar usuários que possuem este local de atuação.</p>
+          </div>
+        }
         isLoading={isDeleting}
         confirmButtonText="Excluir Local"
         cancelButtonText="Cancelar"

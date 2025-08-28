@@ -491,7 +491,7 @@ function SubsectorTeamPageContent() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {teamMembers.map(member => (
-                  <div key={member.id} className="border border-cresol-gray-light rounded-lg p-4 hover:border-primary/30 transition-colors">
+                  <div key={member.id} className="border border-cresol-gray-light rounded-lg p-4 hover:border-card-hover/60 transition-colors">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center">
                         <div className="relative h-12 w-12 rounded-full overflow-hidden bg-cresol-gray-light mr-3">
@@ -740,7 +740,13 @@ function SubsectorTeamPageContent() {
         onClose={handleRemoveMemberCancel}
         onConfirm={handleRemoveMemberConfirm}
         title="Confirmar Remoção"
-        message={`Tem certeza que deseja remover <strong>${memberToDelete?.profiles?.full_name}</strong> da equipe?<br><br>Esta ação não pode ser desfeita e o membro será removido permanentemente da equipe do subsetor.`}
+        message={
+          <div>
+            <p>Tem certeza que deseja remover <strong>{memberToDelete?.profiles?.full_name}</strong> da equipe?</p>
+            <br />
+            <p>Esta ação não pode ser desfeita e o membro será removido permanentemente da equipe do subsetor.</p>
+          </div>
+        }
         isLoading={isDeleting}
         confirmButtonText="Remover Membro"
         cancelButtonText="Cancelar"

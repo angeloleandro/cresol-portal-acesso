@@ -7,15 +7,13 @@ import { useParams } from 'next/navigation';
 import AuthGuard from '@/app/components/AuthGuard';
 import { useAuth } from '@/app/providers/AuthProvider';
 
-import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
+import LoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { AlertProvider } from '@/app/components/alerts';
 import { 
   StandardizedAdminLayout, 
   StandardizedPageHeader,
   type BreadcrumbItem
 } from '@/app/components/admin';
-import { createClient } from '@/lib/supabase/client';
-const supabase = createClient();
 
 import { useSectorData } from './hooks/useSectorData';
 import { useSectorContentManager } from './SectorContentManager';

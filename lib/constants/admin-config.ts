@@ -147,7 +147,7 @@ export const ADMIN_MODALS = {
 // ===== CARDS =====
 export const ADMIN_CARDS = {
   base: 'bg-white rounded-lg border border-gray-200',
-  hover: 'bg-white rounded-lg border border-gray-200 hover:border-primary/30 transition-colors',
+  hover: 'bg-white rounded-lg border border-gray-200 hover:border-card-hover/60 transition-colors',
   content: 'p-6',
   stats: 'text-center',
   actions: 'flex space-x-2'

@@ -295,7 +295,7 @@ export const HOVER_EFFECTS = {
   
   // Border emphasis effects (replacing glow)
   borderEmphasis: {
-    primary: `hover:border-primary ${TRANSITION_PRESETS.colors}`,
+    primary: `hover:border-card-hover ${TRANSITION_PRESETS.colors}`,
     success: `hover:border-green-500 ${TRANSITION_PRESETS.colors}`,
     warning: `hover:border-yellow-500 ${TRANSITION_PRESETS.colors}`,
     error: `hover:border-red-500 ${TRANSITION_PRESETS.colors}`,

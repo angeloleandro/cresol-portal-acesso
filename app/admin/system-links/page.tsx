@@ -39,6 +39,7 @@ function SystemLinksAdminContent() {
   const [editingLink, setEditingLink] = useState<SystemLink | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [linkToDelete, setLinkToDelete] = useState<SystemLink | null>(null);
@@ -150,8 +151,9 @@ function SystemLinksAdminContent() {
   };
 
   const confirmDelete = async () => {
-    if (!linkToDelete) return;
+    if (!linkToDelete || isDeleting) return;
 
+    setIsDeleting(true);
     try {
       const response = await fetch(`/api/admin/system-links?id=${linkToDelete.id}`, {
         method: 'DELETE',
@@ -168,6 +170,7 @@ function SystemLinksAdminContent() {
       const errorMessage = handleComponentError(error, 'deleteLink');
       setError(errorMessage);
     } finally {
+      setIsDeleting(false);
       setIsDeleteModalOpen(false);
       setLinkToDelete(null);
     }
@@ -435,8 +438,13 @@ function SystemLinksAdminContent() {
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={confirmDelete}
           title="Confirmar Exclusão de Link"
-          message={`Tem certeza que deseja excluir o link "<strong>${linkToDelete.name}</strong>"? Esta ação não pode ser desfeita.`}
-          isLoading={formLoading}
+          message={
+            <div>
+              <p>Tem certeza que deseja excluir o link <strong>&quot;{linkToDelete.name}&quot;</strong>?</p>
+              <p>Esta ação não pode ser desfeita.</p>
+            </div>
+          }
+          isLoading={isDeleting}
           confirmButtonText="Excluir"
           cancelButtonText="Cancelar"
         />

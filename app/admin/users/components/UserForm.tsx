@@ -323,8 +323,8 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                   justifyContent="space-between"
                   fontWeight="normal"
                   borderColor="gray.300"
-                  _hover={{ borderColor: 'orange.500' }}
-                  _focus={{ borderColor: 'orange.500', outline: 'none', boxShadow: 'none' }}
+                  _hover={{ borderColor: 'gray.500' }}
+                  _focus={{ borderColor: 'gray.500', outline: 'none', boxShadow: 'none' }}
                 >
                   <span className="truncate">{selectedPositionLabel}</span>
                   <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
@@ -351,7 +351,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                       setPositionSearch('');
                     }}
                     bg={!newUserPositionId ? 'orange.50' : undefined}
-                    _hover={{ bg: 'orange.100' }}
+                    _hover={{ bg: 'gray.100' }}
                   >
                     <span className="text-gray-500">Nenhum cargo</span>
                   </Menu.Item>
@@ -369,7 +369,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                           setPositionSearch('');
                         }}
                         bg={newUserPositionId === position.id ? 'orange.50' : undefined}
-                        _hover={{ bg: 'orange.100' }}
+                        _hover={{ bg: 'gray.100' }}
                       >
                         <div>
                           <span className="font-medium">{position.name}</span>
@@ -397,8 +397,8 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                   justifyContent="space-between"
                   fontWeight="normal"
                   borderColor="gray.300"
-                  _hover={{ borderColor: 'orange.500' }}
-                  _focus={{ borderColor: 'orange.500', outline: 'none', boxShadow: 'none' }}
+                  _hover={{ borderColor: 'gray.500' }}
+                  _focus={{ borderColor: 'gray.500', outline: 'none', boxShadow: 'none' }}
                 >
                   <span className="truncate">{selectedLocationLabel}</span>
                   <Icon name="chevron-down" className="h-4 w-4 text-default-400" />
@@ -432,7 +432,7 @@ export default function UserForm({ workLocations, positions, onSuccess, onCancel
                           setLocationSearch('');
                         }}
                         bg={newUserWorkLocationId === location.id ? 'orange.50' : undefined}
-                        _hover={{ bg: 'orange.100' }}
+                        _hover={{ bg: 'gray.100' }}
                       >
                         <span className="truncate">{location.name}</span>
                       </Menu.Item>

@@ -509,7 +509,12 @@ function EconomicIndicatorsAdminContent() {
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={confirmDelete}
           title="Confirmar Exclusão de Indicador"
-          message={`Tem certeza que deseja excluir o indicador "<strong>${indicatorToDelete.title}</strong>"? Esta ação não pode ser desfeita.`}
+          message={
+            <div>
+              <p>Tem certeza que deseja excluir o indicador <strong>&quot;{indicatorToDelete.title}&quot;</strong>?</p>
+              <p>Esta ação não pode ser desfeita.</p>
+            </div>
+          }
           isLoading={formLoading}
           confirmButtonText="Excluir"
           cancelButtonText="Cancelar"

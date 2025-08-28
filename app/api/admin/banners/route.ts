@@ -1,54 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { adminCORS } from '@/lib/cors-config';
-import { 
-  CreateAdminSupabaseClient, 
-  authenticateAdminRequest, 
-  AuthorizeAdminOperation,
-  AdminAPIResponses 
-} from '@/lib/supabase/admin';
+import { CreateClient } from '@/lib/supabase/server';
+
+// Força renderização dinâmica para usar cookies via createClient
+export const dynamic = 'force-dynamic';
 
 // GET /api/admin/banners - Listar todos os banners
-export const GET = adminCORS(async (request: NextRequest) => {
+export async function GET(_request: NextRequest) {
   try {
-    const auth = await authenticateAdminRequest(request);
+    const supabase = CreateClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (!auth.success) {
-      return NextResponse.json(
-        AdminAPIResponses.unauthorized(), 
-        { status: auth.status }
-      );
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    if (!AuthorizeAdminOperation(auth.profile?.role)) {
-      return NextResponse.json(
-        AdminAPIResponses.forbidden(), 
-        { status: 403 }
-      );
-    }
-
-    const supabaseAdmin = CreateAdminSupabaseClient();
+    // Verificar se é admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
     
-    const { data: banners, error } = await supabaseAdmin
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+    }
+    
+    const { data: banners, error } = await supabase
       .from('banners')
       .select('*')
       .order('order_index', { ascending: true });
 
     if (error) {
       console.error('Erro ao buscar banners:', error);
-      return NextResponse.json(
-        AdminAPIResponses.serverError('Erro ao buscar banners'), 
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Erro ao buscar banners' }, { status: 500 });
     }
 
-    // Obter próxima posição disponível para novos banners
-    const { data: nextPosition, error: positionError } = await supabaseAdmin
-      .rpc('get_next_available_banner_position');
+    // Calcular próxima posição disponível simples (como nos vídeos)
+    const maxOrder = banners && banners.length > 0 
+      ? Math.max(...banners.map((b: any) => b.order_index))
+      : -1;
+    const nextPosition = maxOrder + 1;
 
-    if (positionError) {
-      console.error('Erro ao obter próxima posição:', positionError);
-    }
 
     // Obter estatísticas de posições
     const usedPositions = banners?.map((b: any) => b.order_index).sort((a: number, b: number) => a - b) || [];
@@ -61,87 +54,72 @@ export const GET = adminCORS(async (request: NextRequest) => {
       }
     }
 
-    return NextResponse.json(AdminAPIResponses.success({ 
-      banners,
-      positioning: {
-        nextAvailablePosition: nextPosition || maxPosition + 1,
-        usedPositions,
-        availableGaps: gaps,
-        totalBanners: banners?.length || 0
+    return NextResponse.json({ 
+      success: true,
+      data: {
+        banners,
+        positioning: {
+          nextAvailablePosition: nextPosition,
+          usedPositions,
+          availableGaps: gaps,
+          totalBanners: banners?.length || 0
+        }
       }
-    }));
+    });
 
-  } catch (error) {
-    console.error('Erro interno GET banners:', error);
-    return NextResponse.json(
-      AdminAPIResponses.serverError(), 
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('Erro interno GET banners:', message);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
-});
+}
 
 // POST /api/admin/banners - Criar novo banner
-export const POST = adminCORS(async (request: NextRequest) => {
+export async function POST(request: NextRequest) {
   try {
-    const auth = await authenticateAdminRequest(request);
+    const supabase = CreateClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (!auth.success) {
-      return NextResponse.json(
-        AdminAPIResponses.unauthorized(), 
-        { status: auth.status }
-      );
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    if (!AuthorizeAdminOperation(auth.profile?.role)) {
-      return NextResponse.json(
-        AdminAPIResponses.forbidden(), 
-        { status: 403 }
-      );
+    // Verificar se é admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const requestBody = await request.json();
     const { title, image_url, link, is_active, order_index } = requestBody;
 
     if (!title || !image_url) {
-      return NextResponse.json(
-        { error: 'Título e URL da imagem são obrigatórios' }, 
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Título e URL da imagem são obrigatórios' }, { status: 400 });
     }
 
-    const supabaseAdmin = CreateAdminSupabaseClient();
-
-    // Determinar posição usando sistema inteligente
+    // Lógica de posição automática simples (como nos vídeos)
     let finalOrderIndex = order_index;
     
-    if (finalOrderIndex === undefined || finalOrderIndex === null) {
-      // Usar função para encontrar próxima posição disponível
-      const { data: nextPosition, error: positionError } = await supabaseAdmin
-        .rpc('get_next_available_banner_position');
+    if (finalOrderIndex === undefined || finalOrderIndex === null || finalOrderIndex === 0) {
+      // Buscar o máximo order_index existente
+      const { data: maxOrderData, error: maxOrderError } = await supabase
+        .from('banners')
+        .select('order_index')
+        .order('order_index', { ascending: false })
+        .limit(1);
 
-      if (positionError) {
-        console.error('Erro ao obter próxima posição disponível:', positionError);
-        return NextResponse.json(
-          AdminAPIResponses.serverError('Erro ao calcular posição'), 
-          { status: 500 }
-        );
+      if (maxOrderError) {
+        return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
       }
 
-      finalOrderIndex = nextPosition || 0;
-    } else {
-      // Verificar se a posição solicitada está disponível e resolver conflitos
-      const { data: resolvedPosition, error: resolveError } = await supabaseAdmin
-        .rpc('resolve_banner_position_conflict', {
-          banner_id: '00000000-0000-0000-0000-000000000000', // ID temporário para novos banners
-          requested_position: finalOrderIndex
-        });
-
-      if (resolveError) {
-        console.error('Erro ao resolver conflito de posição:', resolveError);
-        // Continuar com a posição original em caso de erro
-      } else if (resolvedPosition !== finalOrderIndex) {
-        finalOrderIndex = resolvedPosition;
-      }
+      finalOrderIndex = maxOrderData && maxOrderData.length > 0 
+        ? maxOrderData[0].order_index + 1 
+        : 0;
     }
 
     const insertData = {
@@ -152,7 +130,7 @@ export const POST = adminCORS(async (request: NextRequest) => {
       order_index: finalOrderIndex
     };
 
-    const { data: newBanner, error: insertError } = await supabaseAdmin
+    const { data: newBanner, error: insertError } = await supabase
       .from('banners')
       .insert([insertData])
       .select()
@@ -160,79 +138,64 @@ export const POST = adminCORS(async (request: NextRequest) => {
 
     if (insertError) {
       console.error('Erro ao criar banner:', insertError);
-      return NextResponse.json(
-        AdminAPIResponses.serverError('Erro ao criar banner'), 
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Erro ao criar banner' }, { status: 500 });
     }
 
-    const responseMessage = finalOrderIndex !== order_index 
-      ? `Banner criado com sucesso na posição ${finalOrderIndex} (posição ${order_index} estava ocupada)`
-      : 'Banner criado com sucesso';
-
-    return NextResponse.json(
-      AdminAPIResponses.success({ 
+    return NextResponse.json({
+      success: true,
+      message: 'Banner criado com sucesso',
+      data: { 
         banner: newBanner,
         positioning: {
-          requestedPosition: order_index,
-          finalPosition: finalOrderIndex,
-          positionChanged: finalOrderIndex !== order_index
+          finalPosition: finalOrderIndex
         }
-      }, responseMessage)
-    );
+      }
+    });
 
-  } catch (error) {
-    console.error('Erro interno POST banners:', error);
-    return NextResponse.json(
-      AdminAPIResponses.serverError(), 
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('Erro interno POST banners:', message);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
-});
+}
 
 // PUT /api/admin/banners - Atualizar banner existente
-export const PUT = adminCORS(async (request: NextRequest) => {
+export async function PUT(request: NextRequest) {
   try {
-    const auth = await authenticateAdminRequest(request);
+    const supabase = CreateClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (!auth.success) {
-      return NextResponse.json(
-        AdminAPIResponses.unauthorized(), 
-        { status: auth.status }
-      );
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    if (!AuthorizeAdminOperation(auth.profile?.role)) {
-      return NextResponse.json(
-        AdminAPIResponses.forbidden(), 
-        { status: 403 }
-      );
+    // Verificar se é admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const requestBody = await request.json();
     const { id, title, image_url, link, is_active, order_index } = requestBody;
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'ID do banner é obrigatório' }, 
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID do banner é obrigatório' }, { status: 400 });
     }
 
-    const supabaseAdmin = CreateAdminSupabaseClient();
-
     // Verificar se o banner existe
-    const { data: existingBanner, error: fetchError } = await supabaseAdmin
+    const { data: existingBanner, error: fetchError } = await supabase
       .from('banners')
       .select('*')
       .eq('id', id)
       .single();
 
     if (fetchError || !existingBanner) {
-      return NextResponse.json(
-        AdminAPIResponses.notFound('Banner'), 
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Banner não encontrado' }, { status: 404 });
     }
 
     const updateData: any = {};
@@ -240,33 +203,9 @@ export const PUT = adminCORS(async (request: NextRequest) => {
     if (image_url !== undefined) updateData.image_url = image_url;
     if (link !== undefined) updateData.link = link;
     if (is_active !== undefined) updateData.is_active = is_active;
-    
-    let finalOrderIndex = order_index;
-    let positionChanged = false;
-    
-    if (order_index !== undefined) {
-      // Verificar se a nova posição está disponível e resolver conflitos
-      const { data: resolvedPosition, error: resolveError } = await supabaseAdmin
-        .rpc('resolve_banner_position_conflict', {
-          banner_id: id,
-          requested_position: order_index
-        });
+    if (order_index !== undefined) updateData.order_index = order_index;
 
-      if (resolveError) {
-        console.error('Erro ao resolver conflito de posição na atualização:', resolveError);
-        finalOrderIndex = order_index; // Usar posição original se falhar
-      } else {
-        finalOrderIndex = resolvedPosition;
-        positionChanged = resolvedPosition !== order_index;
-        
-        if (positionChanged) {
-        }
-      }
-      
-      updateData.order_index = finalOrderIndex;
-    }
-
-    const { data: updatedBanner, error: updateError } = await supabaseAdmin
+    const { data: updatedBanner, error: updateError } = await supabase
       .from('banners')
       .update(updateData)
       .eq('id', id)
@@ -275,104 +214,82 @@ export const PUT = adminCORS(async (request: NextRequest) => {
 
     if (updateError) {
       console.error('Erro ao atualizar banner:', updateError);
-      return NextResponse.json(
-        AdminAPIResponses.serverError('Erro ao atualizar banner'), 
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Erro ao atualizar banner' }, { status: 500 });
     }
 
-    const responseMessage = positionChanged
-      ? `Banner atualizado com sucesso na posição ${finalOrderIndex} (posição ${order_index} estava ocupada)`
-      : 'Banner atualizado com sucesso';
+    return NextResponse.json({
+      success: true,
+      message: 'Banner atualizado com sucesso',
+      data: { 
+        banner: updatedBanner
+      }
+    });
 
-    return NextResponse.json(
-      AdminAPIResponses.success({ 
-        banner: updatedBanner,
-        positioning: order_index !== undefined ? {
-          requestedPosition: order_index,
-          finalPosition: finalOrderIndex,
-          positionChanged
-        } : undefined
-      }, responseMessage)
-    );
-
-  } catch (error) {
-    console.error('Erro interno PUT banners:', error);
-    return NextResponse.json(
-      AdminAPIResponses.serverError(), 
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('Erro interno PUT banners:', message);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
-});
+}
 
 // DELETE /api/admin/banners - Excluir banner
-export const DELETE = adminCORS(async (request: NextRequest) => {
+export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'ID é obrigatório' }, 
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 });
     }
 
-    const auth = await authenticateAdminRequest(request);
+    const supabase = CreateClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (!auth.success) {
-      return NextResponse.json(
-        AdminAPIResponses.unauthorized(), 
-        { status: auth.status }
-      );
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    if (!AuthorizeAdminOperation(auth.profile?.role)) {
-      return NextResponse.json(
-        AdminAPIResponses.forbidden(), 
-        { status: 403 }
-      );
+    // Verificar se é admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
-
-    const supabaseAdmin = CreateAdminSupabaseClient();
 
     // Verificar se o banner existe antes de deletar
-    const { data: banner, error: fetchError } = await supabaseAdmin
+    const { data: banner, error: fetchError } = await supabase
       .from('banners')
       .select('*')
       .eq('id', id)
       .single();
 
     if (fetchError || !banner) {
-      return NextResponse.json(
-        AdminAPIResponses.notFound('Banner'), 
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Banner não encontrado' }, { status: 404 });
     }
 
     // Deletar o banner
-    const { error: deleteError } = await supabaseAdmin
+    const { error: deleteError } = await supabase
       .from('banners')
       .delete()
       .eq('id', id);
 
     if (deleteError) {
       console.error('Erro ao excluir banner:', deleteError);
-      return NextResponse.json(
-        AdminAPIResponses.serverError('Erro ao excluir banner'), 
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Erro ao excluir banner' }, { status: 500 });
     }
 
-    return NextResponse.json(
-      AdminAPIResponses.success(null, 'Banner excluído com sucesso')
-    );
+    return NextResponse.json({
+      success: true,
+      message: 'Banner excluído com sucesso'
+    });
 
-  } catch (error) {
-    console.error('Erro interno DELETE banners:', error);
-    return NextResponse.json(
-      AdminAPIResponses.serverError(), 
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('Erro interno DELETE banners:', message);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
-});
+}

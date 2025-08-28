@@ -113,7 +113,7 @@ export default function SubsectorDocuments({ subsectorId, compact = false, limit
                 href={document.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block border border-cresol-gray-light rounded-lg p-4 hover:border-primary transition-colors"
+                className="block border border-cresol-gray-light rounded-lg p-4 hover:border-card-hover transition-colors"
                 role="listitem"
                 aria-labelledby={`document-title-${index}`}
               >

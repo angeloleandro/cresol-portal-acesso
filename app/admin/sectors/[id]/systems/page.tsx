@@ -574,7 +574,13 @@ function SectorSystemsManagementContent() {
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir o sistema <strong>"${systemToDelete?.name}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá o sistema permanentemente do setor.`}
+        message={
+          <div>
+            <p>Tem certeza que deseja excluir o sistema <strong>&quot;{systemToDelete?.name}&quot;</strong>?</p>
+            <br />
+            <p>Esta ação não pode ser desfeita e removerá o sistema permanentemente do setor.</p>
+          </div>
+        }
         isLoading={isDeleting}
         confirmButtonText="Excluir Sistema"
         cancelButtonText="Cancelar"

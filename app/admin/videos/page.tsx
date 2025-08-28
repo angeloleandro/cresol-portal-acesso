@@ -58,7 +58,10 @@ function AdminVideosContent() {
   const { collections } = useCollections();
 
   useEffect(() => {
-    fetchVideos();
+    fetchVideos().catch((error) => {
+      console.error('Erro ao carregar vídeos:', error);
+      setError('Erro ao carregar vídeos. Tente novamente mais tarde.');
+    });
   }, []);
 
   // Lock body scroll when create/edit modal is open
@@ -524,7 +527,13 @@ function AdminVideosContent() {
               onClose={handleDeleteCancel}
               onConfirm={handleDeleteConfirm}
               title="Confirmar Exclusão"
-              message={`Tem certeza que deseja excluir o vídeo <strong>"${videoToDelete?.title}"</strong>?<br><br>Esta ação não pode ser desfeita e removerá o vídeo permanentemente do sistema.`}
+              message={
+                <div>
+                  <p>Tem certeza que deseja excluir o vídeo <strong>&quot;{videoToDelete?.title}&quot;</strong>?</p>
+                  <br />
+                  <p>Esta ação não pode ser desfeita e removerá o vídeo permanentemente do sistema.</p>
+                </div>
+              }
               isLoading={isDeleting}
               confirmButtonText="Excluir Vídeo"
               cancelButtonText="Cancelar"

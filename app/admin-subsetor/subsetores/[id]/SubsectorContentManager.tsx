@@ -285,7 +285,7 @@ export function useSubsectorContentManager(subsectorId: string) {
   // Delete functions
   const deleteNews = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_news&id=${id}`, {
+      const response = await fetch(`/api/admin/subsector-content?type=news&id=${id}`, {
         method: 'DELETE',
       });
       
@@ -302,7 +302,7 @@ export function useSubsectorContentManager(subsectorId: string) {
 
   const deleteEvent = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_events&id=${id}`, {
+      const response = await fetch(`/api/admin/subsector-content?type=events&id=${id}`, {
         method: 'DELETE',
       });
       
@@ -319,7 +319,7 @@ export function useSubsectorContentManager(subsectorId: string) {
 
   const deleteMessage = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_messages&id=${id}`, {
+      const response = await fetch(`/api/admin/subsector-content?type=messages&id=${id}`, {
         method: 'DELETE',
       });
       
@@ -336,7 +336,7 @@ export function useSubsectorContentManager(subsectorId: string) {
 
   const deleteDocument = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_documents&id=${id}`, {
+      const response = await fetch(`/api/admin/subsector-content?type=documents&id=${id}`, {
         method: 'DELETE',
       });
       
@@ -353,7 +353,7 @@ export function useSubsectorContentManager(subsectorId: string) {
 
   const deleteVideo = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_videos&id=${id}`, {
+      const response = await fetch(`/api/admin/subsector-content?type=videos&id=${id}`, {
         method: 'DELETE',
       });
       
@@ -370,7 +370,7 @@ export function useSubsectorContentManager(subsectorId: string) {
 
   const deleteImage = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/subsector-content?type=subsector_images&id=${id}`, {
+      const response = await fetch(`/api/admin/subsector-content?type=images&id=${id}`, {
         method: 'DELETE',
       });
       

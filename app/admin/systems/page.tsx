@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import AuthGuard from '@/app/components/AuthGuard';
 import { useAuth } from '@/app/providers/AuthProvider';
 
@@ -31,6 +32,7 @@ interface System {
 
 function SystemsManagementContent() {
   const { user } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [systems, setSystems] = useState<System[]>([]);
   const [sectors, setSectors] = useState<any[]>([]);
@@ -48,6 +50,7 @@ function SystemsManagementContent() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [systemToDelete, setSystemToDelete] = useState<System | null>(null);
   const [sectorFilter, setSectorFilter] = useState('all');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -78,8 +81,11 @@ function SystemsManagementContent() {
     
     if (error) {
       console.error('Erro ao buscar sistemas:', error);
+      setError('Erro ao carregar sistemas. Tente novamente mais tarde.');
+      setSystems([]);
     } else {
       setSystems(data || []);
+      setError(null);
     }
     
     setLoading(false);
@@ -186,8 +192,14 @@ function SystemsManagementContent() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/login';
+    try {
+      await supabase.auth.signOut();
+      router.replace('/login');
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      // Em caso de erro, ainda tenta navegar para login
+      router.replace('/login');
+    }
   };
 
   // Filtrar sistemas por setor se um filtro estiver selecionado
@@ -280,7 +292,13 @@ function SystemsManagementContent() {
             </div>
           </div>
           
-          {filteredSystems.length === 0 ? (
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+              <p className="text-red-800">{error}</p>
+            </div>
+          )}
+          
+          {filteredSystems.length === 0 && !error ? (
             <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
               <p className="text-gray-600">Nenhum sistema cadastrado. Adicione o primeiro sistema clicando no botão acima.</p>
             </div>
@@ -550,7 +568,12 @@ function SystemsManagementContent() {
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={confirmDelete}
           title="Confirmar Exclusão de Sistema"
-          message={`Tem certeza que deseja excluir o sistema "<strong>${systemToDelete.name}</strong>"? Todos os acessos de usuários a este sistema serão removidos. Esta ação não pode ser desfeita.`}
+          message={
+            <div>
+              <p>Tem certeza que deseja excluir o sistema <strong>&quot;{systemToDelete.name}&quot;</strong>?</p>
+              <p>Todos os acessos de usuários a este sistema serão removidos. Esta ação não pode ser desfeita.</p>
+            </div>
+          }
           isLoading={loading}
           confirmButtonText="Excluir"
           cancelButtonText="Cancelar"
