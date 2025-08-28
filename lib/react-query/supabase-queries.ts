@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/app/providers/AuthProvider'
 
 
 const supabase = createClient()
@@ -21,6 +22,8 @@ export const queryKeys = {
 
 // USERS QUERIES - Otimizada sem SELECT *
 export const useUsers = () => {
+  const { isAuthenticated, initialized } = useAuth()
+  
   return useQuery({
     queryKey: queryKeys.users,
     queryFn: async () => {
@@ -31,16 +34,14 @@ export const useUsers = () => {
           email,
           full_name,
           role,
-          sector_id,
           avatar_url,
           position,
           position_id,
           work_location_id,
-          sectors (
-            id,
-            name,
-            slug
-          )
+          phone,
+          bio,
+          username,
+          updated_at
         `)
         .order('full_name')
         .limit(500) // Paginação para performance
@@ -48,6 +49,7 @@ export const useUsers = () => {
       if (error) throw error
       return data
     },
+    enabled: initialized && isAuthenticated, // Só executar se autenticado
     staleTime: 1000 * 60 * 5, // 5 minutos para dados de usuários
   })
 }
@@ -63,16 +65,14 @@ export const useUser = (id: string) => {
           email,
           full_name,
           role,
-          sector_id,
           avatar_url,
           position,
           position_id,
           work_location_id,
-          sectors!left (
-            id,
-            name,
-            slug
-          )
+          phone,
+          bio,
+          username,
+          updated_at
         `)
         .eq('id', id)
         .maybeSingle() // Usar maybeSingle para evitar erro se não encontrar

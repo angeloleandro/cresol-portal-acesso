@@ -1,31 +1,17 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { createClient } from '@/lib/supabase/client';
-const supabase = createClient();
 
+/**
+ * Página raiz simplificada - apenas mostra loading
+ * O middleware.ts já cuida de todo o redirecionamento
+ * Isso evita race conditions e verificações duplicadas
+ */
 export default function RootPage() {
-  const router = useRouter();
-
   useEffect(() => {
-    const checkAuthAndRedirect = async () => {
-      const { data } = await supabase.auth.getUser();
-      
-      if (data.user) {
-        // Se estiver logado, redireciona para home
-        router.replace('/home');
-      } else {
-        // Se não estiver logado, redireciona para login
-        router.replace('/login');
-      }
-    };
-
-    checkAuthAndRedirect();
-  }, [router]);
+  }, []);
 
   return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.checkingSession} fullScreen />;
 }

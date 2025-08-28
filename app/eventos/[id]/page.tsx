@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { StandardizedButton } from '@/app/components/admin';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
@@ -29,24 +31,18 @@ interface EventItem {
   sector_name?: string;
 }
 
-export default function EventoDetalhePage() {
+function EventoDetalheContent() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { user, profile } = useAuth();
   
-  const [user, setUser] = useState<any>(null);
   const [event, setEvent] = useState<EventItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedEvents, setRelatedEvents] = useState<EventItem[]>([]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(data.user);
+    const fetchEventData = async () => {
 
       try {
         // Buscar evento específico do Supabase
@@ -100,7 +96,7 @@ export default function EventoDetalhePage() {
       }
     };
 
-    checkUser();
+    fetchEventData();
   }, [router, id]);
 
   // Formatador de data
@@ -317,5 +313,13 @@ export default function EventoDetalhePage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function EventoDetalhePage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.events}>
+      <EventoDetalheContent />
+    </AuthGuard>
   );
 } 

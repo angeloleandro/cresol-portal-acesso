@@ -3,10 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, lazy } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { logger } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/client';
-const supabase = createClient();
+import { useAuth } from '@/app/providers/AuthProvider';
 
 // import Navbar from '../components/Navbar' // NextUI version
 import ChakraNavbar from '../components/ChakraNavbar' // Chakra UI version;
@@ -33,10 +34,11 @@ interface QuickStats {
   pendingApprovals: number;
 }
 
-export default function Home() {
+function HomeContent() {
   const router = useRouter();
+  const { user, profile } = useAuth();
+  const supabase = createClient();
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState<QuickStats>({
     activeUsers: 15,
     systemsOnline: 0,
@@ -44,47 +46,34 @@ export default function Home() {
     pendingApprovals: 2
   });
 
-  const checkUser = useCallback(async () => {
-    const pageTimer = logger.componentStart('HomePage.checkUser');
-    logger.info('Iniciando verificação de usuário na home page');
-    
-    try {
-      const authTimer = logger.dbStart('supabase.auth.getUser');
-      const { data: userData } = await supabase.auth.getUser();
-      logger.dbEnd(authTimer);
-      
-      if (!userData.user) {
-        logger.warn('Usuário não autenticado - redirecionando para login');
-        logger.componentEnd(pageTimer);
-        router.replace('/login');
-        return;
-      }
-
-      setUser(userData.user);
-      logger.info('Usuário autenticado na home page', { userId: userData.user.id });
-      
-      // Simular dados de estatísticas rápidas
-      const statsTimer = logger.componentStart('HomePage.loadStats');
-      setStats({
-        activeUsers: 15,
-        systemsOnline: 25, // Todos os sistemas ativos
-        unreadNotifications: 3,
-        pendingApprovals: 2
-      });
-      logger.componentEnd(statsTimer);
-      
-      setLoading(false);
-      logger.componentEnd(pageTimer);
-    } catch (error) {
-      logger.error('Erro crítico ao verificar usuário na home', error instanceof Error ? error : new Error(String(error)));
-      logger.componentEnd(pageTimer);
-      router.replace('/login');
-    }
-  }, [router]);
 
   useEffect(() => {
-    checkUser();
-  }, [checkUser]);
+    const loadHomeData = async () => {
+      const pageTimer = logger.componentStart('HomePage.loadData');
+      logger.info('Carregando dados da home page', { userId: user?.id });
+      
+      try {
+        // Simular dados de estatísticas rápidas
+        const statsTimer = logger.componentStart('HomePage.loadStats');
+        setStats({
+          activeUsers: 15,
+          systemsOnline: 25, // Todos os sistemas ativos
+          unreadNotifications: 3,
+          pendingApprovals: 2
+        });
+        logger.componentEnd(statsTimer);
+        
+        setLoading(false);
+        logger.componentEnd(pageTimer);
+      } catch (error) {
+        logger.error('Erro ao carregar dados da home', error instanceof Error ? error : new Error(String(error)));
+        logger.componentEnd(pageTimer);
+        setLoading(false);
+      }
+    };
+
+    loadHomeData();
+  }, [user]);
 
   if (loading) {
     return <UnifiedLoadingSpinner fullScreen message={LOADING_MESSAGES.home} />;
@@ -159,5 +148,13 @@ export default function Home() {
         <Footer />
       </InlineSuspense>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.home}>
+      <HomeContent />
+    </AuthGuard>
   );
 } 

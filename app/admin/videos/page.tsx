@@ -4,7 +4,6 @@
 
 import clsx from 'clsx';
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import CollectionsManager from '@/app/admin/collections/components/CollectionsManager';
@@ -23,6 +22,8 @@ import { VideoModal } from '@/app/components/VideoGallery/VideoGallery.Modal';
 import { VideoUploadFormRoot } from '@/app/components/VideoUploadForm/VideoUploadForm.Root';
 import { DashboardVideo, VideoFilters } from '@/app/types/video';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 // Removed unused Collection import
@@ -31,11 +32,9 @@ interface AdminVideoFilters extends VideoFilters {
   status: 'all' | 'active' | 'inactive' | 'processing';
 }
 
-export default function AdminVideos() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+function AdminVideosContent() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [videos, setVideos] = useState<DashboardVideo[]>([]);
   const [filteredVideos, setFilteredVideos] = useState<DashboardVideo[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -59,32 +58,8 @@ export default function AdminVideos() {
   const { collections } = useCollections();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        router.replace("/login");
-        return;
-      }
-      setUser(userData.user);
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userData.user.id)
-        .single();
-      if (profile?.role === "admin") {
-        setIsAdmin(true);
-      } else {
-        router.replace("/dashboard");
-      }
-      setLoading(false);
-    };
-    checkUser();
-  }, [router]);
-
-  useEffect(() => {
-    if (isAdmin) fetchVideos();
-    // eslint-disable-next-line
-  }, [isAdmin]);
+    fetchVideos();
+  }, []);
 
   // Lock body scroll when create/edit modal is open
   useEffect(() => {
@@ -275,18 +250,6 @@ export default function AdminVideos() {
   // Loading state
   if (loading) {
     return <UnifiedLoadingSpinner size="large" message={LOADING_MESSAGES.videos} />;
-  }
-
-  // Access control
-  if (!isAdmin) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl font-bold text-red-600">Acesso Negado</h1>
-          <p className="text-neutral-600">Você não tem permissão para acessar esta página.</p>
-        </div>
-      </div>
-    );
   }
 
   // Filter components
@@ -667,5 +630,13 @@ export default function AdminVideos() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function AdminVideos() {
+  return (
+    <AuthGuard requireRole="admin">
+      <AdminVideosContent />
+    </AuthGuard>
   );
 }

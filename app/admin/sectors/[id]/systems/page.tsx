@@ -4,14 +4,14 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import { StandardizedInput, StandardizedTextarea } from '@/app/components/ui/StandardizedInput';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
-
-import type { User } from '@supabase/supabase-js';
 
 interface System {
   id: string;
@@ -32,12 +32,12 @@ interface Sector {
   description: string;
 }
 
-export default function SectorSystemsManagement() {
+function SectorSystemsManagementContent() {
   const router = useRouter();
   const params = useParams();
   const sectorId = params.id as string;
+  const { user } = useAuth();
   
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [systems, setSystems] = useState<System[]>([]);
   const [sector, setSector] = useState<Sector | null>(null);
@@ -99,21 +99,14 @@ export default function SectorSystemsManagement() {
   }, [sectorId]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setUser(userData.user);
+    const checkAuthorization = async () => {
+      if (!user) return;
 
       // Verificar se o usuário é admin
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', userData.user.id)
+        .eq('id', user.id)
         .single();
 
       if (profile?.role === 'admin') {
@@ -125,7 +118,7 @@ export default function SectorSystemsManagement() {
         const { data: sectorAdmin } = await supabase
           .from('sector_admins')
           .select('*')
-          .eq('user_id', userData.user.id)
+          .eq('user_id', user.id)
           .eq('sector_id', sectorId);
         
         if (sectorAdmin && sectorAdmin.length > 0) {
@@ -142,8 +135,8 @@ export default function SectorSystemsManagement() {
       setLoading(false);
     };
 
-    checkUser();
-  }, [router, sectorId, fetchSector, fetchSystems]);
+    checkAuthorization();
+  }, [user, router, sectorId, fetchSector, fetchSystems]);
 
   const handleAddSystem = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -587,5 +580,13 @@ export default function SectorSystemsManagement() {
         cancelButtonText="Cancelar"
       />
     </div>
+  );
+}
+
+export default function SectorSystemsManagement() {
+  return (
+    <AuthGuard requireRole="admin">
+      <SectorSystemsManagementContent />
+    </AuthGuard>
   );
 } 

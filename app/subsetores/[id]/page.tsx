@@ -4,16 +4,20 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
-const supabase = createClient();
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import Breadcrumb from '../../components/Breadcrumb';
 import { Icon } from '../../components/icons';
 // import Navbar from '../../components/Navbar' // NextUI version
 import ChakraNavbar from '../../components/ChakraNavbar' // Chakra UI version;
 import SubsectorTeam from '../../components/SubsectorTeam';
+import SubsectorDocuments from '../../components/subsectors/SubsectorDocuments';
+import SubsectorImages from '../../components/subsectors/SubsectorImages';
+import SubsectorVideos from '../../components/subsectors/SubsectorVideos';
 
 interface Subsector {
   id: string;
@@ -62,10 +66,12 @@ interface ErrorState {
   message: string;
 }
 
-export default function SubsectorDetailsPage() {
+function SubsectorDetailsContent() {
   const router = useRouter();
   const params = useParams();
   const subsectorId = params?.id as string;
+  const { user, profile, isAdmin, isSectorAdmin } = useAuth();
+  const supabase = createClient();
   
   const [subsector, setSubsector] = useState<Subsector | null>(null);
   const [news, setNews] = useState<SubsectorNews[]>([]);
@@ -73,7 +79,7 @@ export default function SubsectorDetailsPage() {
   const [messages, setMessages] = useState<SubsectorMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<ErrorState>({ hasError: false, message: '' });
-  const [_isAdmin, _setIsAdmin] = useState(false);
+  const userIsAdmin = isAdmin || isSectorAdmin;
 
   const fetchSubsector = useCallback(async () => {
     const { data, error } = await supabase
@@ -101,7 +107,7 @@ export default function SubsectorDetailsPage() {
     }
     
     setSubsector(data);
-  }, [subsectorId]);
+  }, [subsectorId, supabase]);
 
   const fetchNews = useCallback(async () => {
     // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
@@ -118,7 +124,7 @@ export default function SubsectorDetailsPage() {
     }
     
     setNews(data || []);
-  }, [subsectorId]);
+  }, [subsectorId, supabase]);
 
   const fetchEvents = useCallback(async () => {
     // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
@@ -136,7 +142,7 @@ export default function SubsectorDetailsPage() {
     }
     
     setEvents(data || []);
-  }, [subsectorId]);
+  }, [subsectorId, supabase]);
 
   const fetchMessages = useCallback(async () => {
     // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
@@ -153,7 +159,7 @@ export default function SubsectorDetailsPage() {
     }
     
     setMessages(data || []);
-  }, [subsectorId]);
+  }, [subsectorId, supabase]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -162,20 +168,8 @@ export default function SubsectorDetailsPage() {
       try {
         setError({ hasError: false, message: '' });
         
-        // Verificar se o usuário é admin
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData?.user) {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', userData.user.id)
-            .single();
-          
-          const userIsAdmin = profileData?.role === 'admin' || profileData?.role === 'sector_admin';
-          _setIsAdmin(userIsAdmin);
-          
-          // Página pública sempre mostra apenas conteúdo publicado
-        }
+        // Usuário já está autenticado graças ao AuthGuard
+        // Apenas carregar os dados do sub-setor
         
         await Promise.all([
           fetchSubsector(),
@@ -228,7 +222,7 @@ export default function SubsectorDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cresol-gray-light/30">
+      <div className="min-h-screen bg-gray-50">
         <ChakraNavbar />
         <UnifiedLoadingSpinner message={LOADING_MESSAGES.subsectors} size="large" />
       </div>
@@ -237,7 +231,7 @@ export default function SubsectorDetailsPage() {
 
   if (error.hasError) {
     return (
-      <div className="min-h-screen bg-cresol-gray-light/30">
+      <div className="min-h-screen bg-gray-50">
         <ChakraNavbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center max-w-md mx-auto px-4">
@@ -272,7 +266,7 @@ export default function SubsectorDetailsPage() {
 
   if (!subsector) {
     return (
-      <div className="min-h-screen bg-cresol-gray-light/30">
+      <div className="min-h-screen bg-gray-50">
         <ChakraNavbar />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center max-w-md mx-auto px-4">
@@ -299,7 +293,7 @@ export default function SubsectorDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cresol-gray-light/30">
+    <div className="min-h-screen bg-gray-50">
       <ChakraNavbar />
       
       {/* Header do Sub-setor */}
@@ -479,6 +473,15 @@ export default function SubsectorDetailsPage() {
                 )}
               </div>
             </section>
+
+            {/* Documentos */}
+            <SubsectorDocuments subsectorId={subsectorId} limit={3} />
+
+            {/* Imagens */}
+            <SubsectorImages subsectorId={subsectorId} limit={6} />
+
+            {/* Vídeos */}
+            <SubsectorVideos subsectorId={subsectorId} limit={4} />
           </div>
 
           {/* Sidebar */}
@@ -591,5 +594,13 @@ export default function SubsectorDetailsPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function SubsectorDetailsPage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.subsectors}>
+      <SubsectorDetailsContent />
+    </AuthGuard>
   );
 }

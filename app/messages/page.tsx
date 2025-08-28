@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
@@ -28,12 +30,12 @@ interface Message {
   priority?: string;
 }
 
-export default function MessagesPage() {
+function MessagesContent() {
   const router = useRouter();
+  const { user, profile } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [filteredMessages, setFilteredMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
@@ -141,26 +143,11 @@ export default function MessagesPage() {
     setFilteredMessages(filtered);
   }, [messages, filter, searchTerm]);
 
-  const checkUserAndFetch = useCallback(async () => {
-    try {
-      const { data: userData, error } = await supabase.auth.getUser();
-      
-      if (error || !userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setUser(userData.user);
-      await fetchMessages(userData.user.id);
-    } catch (error) {
-      console.error('Erro ao verificar usuário:', error);
-      router.replace('/login');
-    }
-  }, [router, fetchMessages]);
-
   useEffect(() => {
-    checkUserAndFetch();
-  }, [checkUserAndFetch]);
+    if (user) {
+      fetchMessages(user.id);
+    }
+  }, [user, fetchMessages]);
 
   useEffect(() => {
     applyFilters();
@@ -444,5 +431,13 @@ export default function MessagesPage() {
       
       <Footer />
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.notifications}>
+      <MessagesContent />
+    </AuthGuard>
   );
 }

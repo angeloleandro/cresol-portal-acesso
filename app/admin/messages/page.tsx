@@ -1,12 +1,9 @@
 'use client';
 
-// [DEBUG] Component tracking
-let _messagesPageRenderCount = 0;
-const _messagesPageInstanceId = `messages-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
 import React, { useState, useEffect } from 'react';
-
-import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { useAdminData } from '@/app/admin/hooks';
 import { StandardizedButton } from '@/app/components/admin';
 import AdminHeader from '@/app/components/AdminHeader';
 import { useAlert } from '@/app/components/alerts';
@@ -41,13 +38,9 @@ interface Message {
 }
 
 
-export default function MessagesAdminPage() {
-  // [DEBUG] Component render tracking
-  _messagesPageRenderCount++;
-  // Debug component render logging removed for production
-
+function MessagesAdminPageContent() {
   const alert = useAlert();
-  const { user, loading: _authLoading } = useAdminAuth();
+  const { user } = useAuth();
   const { 
     data: messages, 
     loading, 
@@ -113,18 +106,11 @@ export default function MessagesAdminPage() {
     
     try {
       setActionLoading(messageKey);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        return;
-      }
-
       const response = await fetch(
         `/api/admin/messages?id=${message.id}&type=${message.type}&action=${action}`,
         {
+          method: 'PATCH',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -162,18 +148,11 @@ export default function MessagesAdminPage() {
     
     try {
       setActionLoading(messageKey);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        return;
-      }
-
       const response = await fetch(
         `/api/admin/messages?id=${message.id}&type=${message.type}`,
         {
+          method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -204,18 +183,11 @@ export default function MessagesAdminPage() {
     
     try {
       setActionLoading(messageKey);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        return;
-      }
-
       const response = await fetch(
         `/api/admin/messages?id=${message.id}&type=${message.type}&action=duplicate`,
         {
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -674,5 +646,13 @@ export default function MessagesAdminPage() {
         isLoading={deleteModal.isDeleting}
       />
     </div>
+  );
+}
+
+export default function MessagesAdminPage() {
+  return (
+    <AuthGuard requireRole="admin">
+      <MessagesAdminPageContent />
+    </AuthGuard>
   );
 }

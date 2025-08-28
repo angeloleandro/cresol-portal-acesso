@@ -2,7 +2,6 @@ import { Inter } from 'next/font/google'
 
 import { CRESOL_COLORS as COLORS } from '@/lib/design-tokens'
 
-import { AlertContainer } from './components/alerts/AlertContainer'
 import { AuthProvider } from './providers/AuthProvider'
 import { ChakraUIProvider } from './providers/ChakraProvider'
 import { ConditionalProviders } from './providers/ConditionalProviders'
@@ -90,18 +89,17 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <QueryProvider>
-          <ChakraUIProvider>
-            <AuthProvider>
+        <AuthProvider>
+          <QueryProvider>
+            <ChakraUIProvider>
               <ConditionalProviders>
                 <main className="min-h-screen bg-gray-50">
                   {children}
                 </main>
-                <AlertContainer position="top-right" />
               </ConditionalProviders>
-            </AuthProvider>
-          </ChakraUIProvider>
-        </QueryProvider>
+            </ChakraUIProvider>
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   )

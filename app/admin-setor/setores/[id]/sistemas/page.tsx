@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
@@ -44,12 +46,12 @@ interface System {
   [key: string]: unknown;
 }
 
-export default function SectorSystemsManagement() {
+function SectorSystemsManagementContent() {
   const router = useRouter();
   const params = useParams();
   const sectorId = params.id as string;
+  const { user, profile } = useAuth();
   
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sector, setSector] = useState<Sector | null>(null);
   const [systems, setSystems] = useState<System[]>([]);
@@ -103,31 +105,18 @@ export default function SectorSystemsManagement() {
   }, [sectorId]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setUser(userData.user);
+    const checkAuthorizationAndFetch = async () => {
+      if (!user || !profile) return;
 
       // Verificar se o usuário é admin ou admin do setor
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
-      if (profile?.role === 'admin') {
+      if (profile.role === 'admin') {
         setIsAuthorized(true);
-      } else if (profile?.role === 'sector_admin') {
+      } else if (profile.role === 'sector_admin') {
         // Verificar se é admin deste setor específico
         const { data: sectorAdmin } = await supabase
           .from('sector_admins')
           .select('*')
-          .eq('user_id', userData.user.id)
+          .eq('user_id', user.id)
           .eq('sector_id', sectorId);
         
         if (sectorAdmin && sectorAdmin.length > 0) {
@@ -151,8 +140,10 @@ export default function SectorSystemsManagement() {
       setLoading(false);
     };
 
-    checkUser();
-  }, [sectorId, router, fetchSector, fetchSystems]);
+    if (user && profile) {
+      checkAuthorizationAndFetch();
+    }
+  }, [sectorId, user, profile, router, fetchSector, fetchSystems]);
 
   const handleSystemSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -495,5 +486,13 @@ export default function SectorSystemsManagement() {
         />
       </main>
     </div>
+  );
+}
+
+export default function SectorSystemsManagement() {
+  return (
+    <AuthGuard requireRole="sector_admin" loadingMessage={LOADING_MESSAGES.systems}>
+      <SectorSystemsManagementContent />
+    </AuthGuard>
   );
 } 

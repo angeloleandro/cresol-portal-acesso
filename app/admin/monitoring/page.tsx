@@ -4,8 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 
 import AdminHeader from '@/app/components/AdminHeader';
+import AuthGuard from '@/app/components/AuthGuard';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
@@ -21,10 +23,10 @@ interface UserActivity {
   success: boolean;
 }
 
-export default function MonitoringPage() {
+function MonitoringPageContent() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [userActivities, setUserActivities] = useState<UserActivity[]>([]);
 
   const loadUserActivities = useCallback(async () => {
@@ -78,32 +80,15 @@ export default function MonitoringPage() {
   }, []);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-
-      // Verificar se é admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      if (!profile || profile.role !== 'admin') {
-        router.replace('/dashboard');
-        return;
-      }
-
-      setUser(data.user);
+    const loadData = async () => {
+      if (!user) return;
+      setLoading(true);
       await loadUserActivities();
       setLoading(false);
     };
 
-    checkUser();
-  }, [router, loadUserActivities]);
+    loadData();
+  }, [user, loadUserActivities]);
 
   const formatTimeAgo = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -234,5 +219,13 @@ export default function MonitoringPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MonitoringPage() {
+  return (
+    <AuthGuard requireRole="admin">
+      <MonitoringPageContent />
+    </AuthGuard>
   );
 } 

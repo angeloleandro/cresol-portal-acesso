@@ -3,12 +3,13 @@
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { useAlert } from '@/app/components/alerts';
 import { logger } from '@/lib/production-logger';
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
@@ -53,13 +54,13 @@ interface Subsector {
   sectors: { id: string; name: string } | { id: string; name: string }[];
 }
 
-export default function SubsectorTeamPage() {
+function SubsectorTeamPageContent() {
   const router = useRouter();
   const params = useParams();
   const subsectorId = params?.id as string;
+  const { user, profile } = useAuth();
   const { showSuccess, showError, showWarning, subsectors } = useAlert();
   
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const [subsector, setSubsector] = useState<Subsector | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -125,25 +126,12 @@ export default function SubsectorTeamPage() {
   }, [subsectorId]);
 
   useEffect(() => {
-    const checkUserAndFetchData = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setCurrentUser(userData.user);
+    const checkPermissionsAndFetchData = async () => {
+      if (!user || !profile) return;
 
       // Verificar permissões
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
       // Usuário pode editar se for admin geral, admin do setor ou admin do sub-setor
-      if (profile?.role === 'admin') {
+      if (profile.role === 'admin') {
         setCanEdit(true);
       } else {
         // Verificar se é admin do setor ou sub-setor
@@ -151,11 +139,11 @@ export default function SubsectorTeamPage() {
           supabase
             .from('sector_admins')
             .select('id')
-            .eq('user_id', userData.user.id),
+            .eq('user_id', user.id),
           supabase
             .from('subsector_admins')
             .select('id')
-            .eq('user_id', userData.user.id)
+            .eq('user_id', user.id)
             .eq('subsector_id', subsectorId)
         ]);
 
@@ -174,10 +162,10 @@ export default function SubsectorTeamPage() {
       setLoading(false);
     };
 
-    if (subsectorId) {
-      checkUserAndFetchData();
+    if (subsectorId && user && profile) {
+      checkPermissionsAndFetchData();
     }
-  }, [subsectorId, router, fetchSubsector, fetchTeamMembers]);
+  }, [subsectorId, user, profile, fetchSubsector, fetchTeamMembers]);
 
   const fetchAllUsers = async () => {
     const { data, error } = await supabase
@@ -354,12 +342,7 @@ export default function SubsectorTeamPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-<UnifiedLoadingSpinner 
-        fullScreen={true}
-        size="large" 
-        message={LOADING_MESSAGES.loading}
-      />
-          <p className="mt-4 text-cresol-gray">Carregando...</p>
+          <p className="text-cresol-gray">Carregando equipe...</p>
         </div>
       </div>
     );
@@ -763,5 +746,13 @@ export default function SubsectorTeamPage() {
         cancelButtonText="Cancelar"
       />
     </div>
+  );
+}
+
+export default function SubsectorTeamPage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.loading}>
+      <SubsectorTeamPageContent />
+    </AuthGuard>
   );
 }

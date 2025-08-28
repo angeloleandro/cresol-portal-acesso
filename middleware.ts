@@ -16,6 +16,7 @@ import { logger } from './lib/logger';
  */
 export async function middleware(request: NextRequest) {
   const requestId = logger.generateRequestId();
+  const startTime = Date.now();
   
   try {
     // Atualizar a sessão Supabase (refresh tokens se necessário)

@@ -1,7 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
@@ -21,12 +22,10 @@ interface Position {
   updated_at: string;
 }
 
-export default function PositionsAdmin() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+function PositionsAdminContent() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [positions, setPositions] = useState<Position[]>([]);
-  const [_isAdmin, _setIsAdmin] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -43,27 +42,8 @@ export default function PositionsAdmin() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(userData.user);
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-      if (profile?.role === 'admin') {
-        _setIsAdmin(true);
-        fetchPositions();
-      } else {
-        router.replace('/home');
-      }
-    };
-    checkUser();
-  }, [router]);
+    fetchPositions();
+  }, []);
 
   const fetchPositions = async () => {
     setLoading(true);
@@ -561,5 +541,13 @@ export default function PositionsAdmin() {
         cancelButtonText="Cancelar"
       />
     </div>
+  );
+}
+
+export default function PositionsAdmin() {
+  return (
+    <AuthGuard requireRole="admin">
+      <PositionsAdminContent />
+    </AuthGuard>
   );
 }

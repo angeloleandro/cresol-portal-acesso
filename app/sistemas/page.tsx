@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { StandardizedButton } from '@/app/components/admin';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
@@ -26,9 +28,9 @@ interface SystemLink {
   is_active: boolean;
 }
 
-export default function SistemasPage() {
+function SistemasContent() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const { user, profile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [systems, setSystems] = useState<SystemLink[]>([]);
   const [filteredSystems, setFilteredSystems] = useState<SystemLink[]>([]);
@@ -70,24 +72,18 @@ export default function SistemasPage() {
   }, [systems, searchTerm, favorites]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
+    const loadData = async () => {
+      if (user) {
+        await Promise.all([
+          fetchSystemLinks(),
+          loadFavorites(user.id)
+        ]);
       }
-      
-      setUser(data.user);
-      await Promise.all([
-        fetchSystemLinks(),
-        loadFavorites(data.user.id)
-      ]);
-      
       setLoading(false);
     };
 
-    checkUser();
-  }, [router]);
+    loadData();
+  }, [user]);
 
   useEffect(() => {
     applyFilters();
@@ -372,5 +368,13 @@ export default function SistemasPage() {
       
       <Footer />
     </div>
+  );
+}
+
+export default function SistemasPage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.systems}>
+      <SistemasContent />
+    </AuthGuard>
   );
 }

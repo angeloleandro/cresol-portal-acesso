@@ -1,7 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
@@ -40,10 +41,9 @@ const AVAILABLE_ICONS = [
   { value: 'briefcase', label: 'Carteira', icon: '' },
 ];
 
-export default function EconomicIndicatorsAdmin() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+function EconomicIndicatorsAdminContent() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [indicators, setIndicators] = useState<EconomicIndicator[]>([]);
   const [editingIndicator, setEditingIndicator] = useState<EconomicIndicator | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -63,41 +63,21 @@ export default function EconomicIndicatorsAdmin() {
     issue_date: ''
   });
 
-  const checkUserAndFetchData = useCallback(async () => {
+  const loadData = useCallback(async () => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setUser(userData.user);
-
-      // Verificar se é admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
-      if (profile?.role !== 'admin') {
-        router.replace('/dashboard');
-        return;
-      }
-
+      setLoading(true);
       await fetchIndicators();
       setLoading(false);
     } catch (error: any) {
-      const errorMessage = handleComponentError(error, 'checkUserAndFetchData');
+      const errorMessage = handleComponentError(error, 'loadData');
       setError(errorMessage);
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
-    checkUserAndFetchData();
-  }, [checkUserAndFetchData]);
+    loadData();
+  }, [loadData]);
 
   const fetchIndicators = async () => {
     try {
@@ -536,5 +516,13 @@ export default function EconomicIndicatorsAdmin() {
         />
       )}
     </>
+  );
+}
+
+export default function EconomicIndicatorsAdmin() {
+  return (
+    <AuthGuard requireRole="admin">
+      <EconomicIndicatorsAdminContent />
+    </AuthGuard>
   );
 } 

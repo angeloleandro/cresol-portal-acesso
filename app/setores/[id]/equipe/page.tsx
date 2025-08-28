@@ -3,11 +3,12 @@
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { useAlert } from '@/app/components/alerts';
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
@@ -57,13 +58,13 @@ interface Sector {
   description?: string;
 }
 
-export default function SectorTeamPage() {
+function SectorTeamPageContent() {
   const router = useRouter();
   const params = useParams();
   const sectorId = params?.id as string;
+  const { user, profile } = useAuth();
   const { showSuccess, showError, showWarning } = useAlert();
   
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const [sector, setSector] = useState<Sector | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -123,32 +124,19 @@ export default function SectorTeamPage() {
   }, [sectorId]);
 
   useEffect(() => {
-    const checkUserAndFetchData = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setCurrentUser(userData.user);
+    const checkPermissionsAndFetchData = async () => {
+      if (!user || !profile) return;
 
       // Verificar permissões
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
       // Usuário pode editar se for admin geral ou admin do setor
-      if (profile?.role === 'admin') {
+      if (profile.role === 'admin') {
         setCanEdit(true);
-      } else if (profile?.role === 'sector_admin') {
+      } else if (profile.role === 'sector_admin') {
         // Verificar se é admin deste setor específico
         const { data: sectorAdmin } = await supabase
           .from('sector_admins')
           .select('id')
-          .eq('user_id', userData.user.id)
+          .eq('user_id', user.id)
           .eq('sector_id', sectorId);
 
         if (sectorAdmin?.length) {
@@ -166,10 +154,10 @@ export default function SectorTeamPage() {
       setLoading(false);
     };
 
-    if (sectorId) {
-      checkUserAndFetchData();
+    if (sectorId && user && profile) {
+      checkPermissionsAndFetchData();
     }
-  }, [sectorId, router, fetchSector, fetchTeamMembers]);
+  }, [sectorId, user, profile, fetchSector, fetchTeamMembers]);
 
   const fetchAllUsers = async () => {
     const { data, error } = await supabase
@@ -370,11 +358,7 @@ export default function SectorTeamPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <UnifiedLoadingSpinner 
-            fullScreen={true}
-            size="large" 
-            message={LOADING_MESSAGES.loading}
-          />
+          <p className="text-cresol-gray">Carregando equipe...</p>
         </div>
       </div>
     );
@@ -837,5 +821,13 @@ export default function SectorTeamPage() {
         cancelButtonText="Cancelar"
       />
     </div>
+  );
+}
+
+export default function SectorTeamPage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.loading}>
+      <SectorTeamPageContent />
+    </AuthGuard>
   );
 }

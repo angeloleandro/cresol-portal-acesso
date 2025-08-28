@@ -1,15 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { 
   StandardizedAdminLayout, 
   StandardizedPageHeader,
   type BreadcrumbItem
 } from '@/app/components/admin';
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
@@ -30,17 +30,18 @@ interface AdminUser {
   role: 'sector_admin' | 'admin';
 }
 
-export default function AdminSetorDashboard() {
-  const router = useRouter();
-  const [user, setUser] = useState<AdminUser | null>(null);
+function AdminSetorDashboardContent() {
+  const { user, profile } = useAuth();
   const [managedSectors, setManagedSectors] = useState<Sector[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Buscar os setores que o administrador gerencia
-  const fetchManagedSectors = useCallback(async (userId: string) => {
+  const fetchManagedSectors = useCallback(async () => {
+    if (!user) return;
+    
     try {
       // Para admins normais, trazer todos os setores
-      if (user?.role === 'admin') {
+      if (profile?.role === 'admin') {
         const { data: allSectors, error: sectorsError } = await supabase
           .from('sectors')
           .select('*')
@@ -55,7 +56,7 @@ export default function AdminSetorDashboard() {
       const { data: sectorAdmins, error: adminError } = await supabase
         .from('sector_admins')
         .select('sector_id')
-        .eq('user_id', userId);
+        .eq('user_id', user.id);
       
       if (adminError) throw adminError;
       
@@ -80,66 +81,28 @@ export default function AdminSetorDashboard() {
       setManagedSectors(sectors || []);
     } catch (error) {
       // Error handled silently
+    } finally {
+      setLoading(false);
     }
-  }, [user?.role]);
+  }, [user, profile?.role]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        // Verificar se o usuário está autenticado
-        const { data: userData, error: userError } = await supabase.auth.getUser();
-        
-        if (userError || !userData.user) {
-          // Error handled silently
-          router.replace('/login');
-          return;
-        }
-
-        // Verificar o papel do usuário
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('id, email, full_name, role')
-          .eq('id', userData.user.id)
-          .single();
-        
-        if (profileError || !profileData) {
-          // Error handled silently
-          router.replace('/login');
-          return;
-        }
-
-        // Garantir que o usuário é um administrador de setor
-        if (profileData.role !== 'sector_admin' && profileData.role !== 'admin') {
-          // Warning handled silently
-          router.replace('/dashboard');
-          return;
-        }
-
-        setUser(profileData as AdminUser);
-        await fetchManagedSectors(userData.user.id);
-      } catch (error) {
-        // Error handled silently
-        router.replace('/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkUser();
-  }, [router, fetchManagedSectors]);
+    fetchManagedSectors();
+  }, [fetchManagedSectors]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.replace('/login');
+    window.location.href = '/login';
   };
 
   if (loading) {
     return (
-      <UnifiedLoadingSpinner 
-        fullScreen={true}
-        size="large" 
-        message={LOADING_MESSAGES.sectors}
-      />
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando setores...</p>
+        </div>
+      </div>
     );
   }
 
@@ -149,7 +112,7 @@ export default function AdminSetorDashboard() {
   ];
 
   return (
-    <StandardizedAdminLayout user={user as any} breadcrumbs={breadcrumbs}>
+    <StandardizedAdminLayout user={user} breadcrumbs={breadcrumbs}>
       <StandardizedPageHeader
         title="Administração Setorial"
         subtitle="Gerencie conteúdos e sistemas dos setores designados a você"
@@ -190,5 +153,16 @@ export default function AdminSetorDashboard() {
         </div>
       )}
     </StandardizedAdminLayout>
+  );
+}
+
+export default function AdminSetorDashboard() {
+  return (
+    <AuthGuard 
+      requireRole="sector_admin"
+      loadingMessage={LOADING_MESSAGES.sectors}
+    >
+      <AdminSetorDashboardContent />
+    </AuthGuard>
   );
 } 

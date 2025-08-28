@@ -105,7 +105,7 @@ const ImagesManagement = memo(<T extends ImageData = ImageData>({
           images.map((image) => (
             <div key={image.id} className="group relative">
               {/* Image Container */}
-              <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 hover:shadow-lg transition-shadow">
+              <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 hover:shadow-lg transition-shadow relative">
                 <Image
                   src={image.image_url}
                   alt={image.title}

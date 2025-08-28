@@ -4,17 +4,20 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 
-import Button from '@/app/components/ui/Button';
+import AuthGuard from '@/app/components/AuthGuard';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
-const supabase = createClient();
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import Breadcrumb from '../../components/Breadcrumb';
 import { Icon } from '../../components/icons';
 // import Navbar from '../../components/Navbar' // NextUI version
 import ChakraNavbar from '../../components/ChakraNavbar' // Chakra UI version;
 import SectorTeam from '../../components/SectorTeam';
+import SectorDocuments from '../../components/sectors/SectorDocuments';
+import SectorImages from '../../components/sectors/SectorImages';
+import SectorVideos from '../../components/sectors/SectorVideos';
 
 interface Sector {
   id: string;
@@ -67,19 +70,20 @@ interface SectorMessage {
   updated_at: string;
 }
 
-export default function SetorDetalhesPage() {
+function SetorDetalhesContent() {
   const router = useRouter();
   const params = useParams();
   const sectorId = params.id as string;
+  const { user, profile, isAdmin: userIsAdmin, isSectorAdmin } = useAuth();
+  const supabase = createClient();
   
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sector, setSector] = useState<Sector | null>(null);
   const [subsectors, setSubsectors] = useState<Subsector[]>([]);
   const [news, setNews] = useState<SectorNews[]>([]);
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [messages, setMessages] = useState<SectorMessage[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const isAdmin = userIsAdmin || isSectorAdmin;
 
   const fetchSector = useCallback(async () => {
     const { data, error } = await supabase
@@ -95,7 +99,7 @@ export default function SetorDetalhesPage() {
     }
     
     setSector(data);
-  }, [sectorId, router]);
+  }, [sectorId, router, supabase]);
 
   const fetchSubsectors = useCallback(async () => {
     const { data, error } = await supabase
@@ -110,7 +114,7 @@ export default function SetorDetalhesPage() {
     }
     
     setSubsectors(data || []);
-  }, [sectorId]);
+  }, [sectorId, supabase]);
 
   const fetchNews = useCallback(async () => {
     // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
@@ -128,7 +132,7 @@ export default function SetorDetalhesPage() {
     }
     
     setNews(data || []);
-  }, [sectorId]);
+  }, [sectorId, supabase]);
 
   const fetchEvents = useCallback(async () => {
     // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
@@ -147,7 +151,7 @@ export default function SetorDetalhesPage() {
     }
     
     setEvents(data || []);
-  }, [sectorId]);
+  }, [sectorId, supabase]);
 
   const fetchMessages = useCallback(async () => {
     // SEMPRE filtrar apenas conteúdo publicado em páginas públicas
@@ -165,31 +169,12 @@ export default function SetorDetalhesPage() {
     }
     
     setMessages(data || []);
-  }, [sectorId]);
+  }, [sectorId, supabase]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setUser(userData.user);
-      
-      // Verificar se o usuário é admin
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-      
-      const userIsAdmin = profileData?.role === 'admin' || profileData?.role === 'sector_admin';
-      setIsAdmin(userIsAdmin);
-      
-      // Página pública sempre mostra apenas conteúdo publicado
-
+    const loadSectorData = async () => {
+      // Usuário já está autenticado graças ao AuthGuard
+      // Apenas carregar os dados do setor
       await Promise.all([
         fetchSector(),
         fetchSubsectors(),
@@ -201,8 +186,8 @@ export default function SetorDetalhesPage() {
       setLoading(false);
     };
 
-    checkUser();
-  }, [sectorId, router, fetchSector, fetchSubsectors, fetchNews, fetchEvents, fetchMessages]);
+    loadSectorData();
+  }, [sectorId, fetchSector, fetchSubsectors, fetchNews, fetchEvents, fetchMessages, supabase]);
 
   if (loading) {
     return <UnifiedLoadingSpinner fullScreen message={LOADING_MESSAGES.sectors} size="large" />;
@@ -222,7 +207,7 @@ export default function SetorDetalhesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cresol-gray-light/30">
+    <div className="min-h-screen bg-gray-50">
       <ChakraNavbar />
       
       {/* Header do Setor */}
@@ -248,13 +233,10 @@ export default function SetorDetalhesPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Navigation */}
         <div className="flex items-center mb-6">
-          <Button
-            variant="secondary"
-            size="xs"
+          <button
             onClick={() => router.back()}
-            className="!p-2"
+            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors mr-4"
             title="Voltar"
-            aria-label="Voltar à página anterior"
           >
             <svg
               className="w-5 h-5 text-gray-600"
@@ -269,7 +251,7 @@ export default function SetorDetalhesPage() {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-          </Button>
+          </button>
           
           <div className="flex-1">
             <Breadcrumb 
@@ -501,6 +483,15 @@ export default function SetorDetalhesPage() {
                 )}
               </div>
             </section>
+
+            {/* Documentos */}
+            <SectorDocuments sectorId={sectorId} limit={3} />
+
+            {/* Imagens */}
+            <SectorImages sectorId={sectorId} limit={6} />
+
+            {/* Vídeos */}
+            <SectorVideos sectorId={sectorId} limit={4} />
           </div>
 
           {/* Sidebar */}
@@ -631,5 +622,13 @@ export default function SetorDetalhesPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function SetorDetalhesPage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.sectors}>
+      <SetorDetalhesContent />
+    </AuthGuard>
   );
 } 

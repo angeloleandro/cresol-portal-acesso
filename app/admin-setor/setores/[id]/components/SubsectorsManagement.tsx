@@ -11,7 +11,7 @@ import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { FormatDate } from '@/lib/utils/formatters';
 
 import { useSectorDataContext } from '../contexts/SectorDataContext';
-import type { Subsector, SubsectorDTO, mapSubsectorFromDTO } from '../types/sector.types';
+import type { Subsector } from '../types/sector.types';
 
 interface SubsectorsManagementProps {
   sectorId: string;
@@ -20,7 +20,7 @@ interface SubsectorsManagementProps {
 export function SubsectorsManagement({ sectorId }: SubsectorsManagementProps) {
   const { showError, showSuccess } = useAlert();
   const { subsectors, refreshSectorData } = useSectorDataContext();
-  const deleteModal = useDeleteModal<SubsectorDTO>('subsetor');
+  const deleteModal = useDeleteModal<Subsector>('subsetor');
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<Subsector>>({
@@ -85,7 +85,7 @@ export function SubsectorsManagement({ sectorId }: SubsectorsManagementProps) {
   };
 
   const handleDeleteClick = (subsector: Subsector) => {
-    deleteModal.openDeleteModal(subsector as SubsectorDTO, subsector.name);
+    deleteModal.openDeleteModal(subsector, subsector.name);
   };
 
   const handleDelete = async (subsector: Subsector) => {

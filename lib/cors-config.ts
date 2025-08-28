@@ -279,7 +279,4 @@ export function LogCORSConfig() {
   const env = process.env.NODE_ENV || 'development';
   const config = env === 'production' ? CORS_CONFIGS.production : CORS_CONFIGS.development;
   
-  if (process.env.NODE_ENV === 'development') {
-    console.log('CORS Configuration:', config);
-  }
 }

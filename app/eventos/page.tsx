@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, useCallback, Suspense, useMemo } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { StandardizedButton } from '@/app/components/admin';
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
@@ -38,7 +40,7 @@ interface EventItem {
 function EventosPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [user, setUser] = useState<any>(null);
+  const { user, profile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<EventItem[]>([]);
@@ -106,18 +108,8 @@ function EventosPageContent() {
   };
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(data.user);
-      fetchEvents();
-    };
-
-    checkUser();
-  }, [router, fetchEvents]);
+    fetchEvents();
+  }, [fetchEvents]);
 
   const fetchSectors = async () => {
     try {
@@ -523,21 +515,23 @@ function EventosPageContent() {
 
 export default function EventosPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50">
-        <ChakraNavbar />
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-center">
-<UnifiedLoadingSpinner 
-              size="default" 
-              message={LOADING_MESSAGES.events}
-            />
+    <AuthGuard loadingMessage={LOADING_MESSAGES.events}>
+      <Suspense fallback={
+        <div className="min-h-screen bg-gray-50">
+          <ChakraNavbar />
+          <div className="flex min-h-screen items-center justify-center">
+            <div className="text-center">
+              <UnifiedLoadingSpinner 
+                size="default" 
+                message={LOADING_MESSAGES.events}
+              />
+            </div>
           </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
-    }>
-      <EventosPageContent />
-    </Suspense>
+      }>
+        <EventosPageContent />
+      </Suspense>
+    </AuthGuard>
   );
 } 

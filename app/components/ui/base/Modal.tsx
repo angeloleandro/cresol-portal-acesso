@@ -39,14 +39,12 @@ export function Modal({
   closeOnOverlayClick = true,
   size = 'md',
 }: ModalProps) {
-  if (!isOpen) return null;
-  
   return (
     <Portal>
       <DialogRoot
-        open={true}
+        open={isOpen}
         onOpenChange={(e) => {
-          if (!e.open && closeOnOverlayClick) {
+          if (!e.open) {
             onClose();
           }
         }}
@@ -54,6 +52,7 @@ export function Modal({
         placement="center"
         motionPreset="slide-in-bottom"
         unmountOnExit={false}
+        closeOnInteractOutside={closeOnOverlayClick}
       >
         <DialogBackdrop 
           bg="blackAlpha.600" 

@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
@@ -25,23 +26,15 @@ interface NewsItem {
   author: string;
 }
 
-export default function NoticiasPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+function NoticiasPageContent() {
+  const { user } = useAuth();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(data.user);
-
+    const fetchNews = async () => {
       try {
         // Carregar notícias do Supabase
         const { data: newsData, error } = await supabase
@@ -76,8 +69,8 @@ export default function NoticiasPage() {
       }
     };
 
-    checkUser();
-  }, [router]);
+    fetchNews();
+  }, []);
 
 
   // Filtrar notícias por categoria
@@ -238,5 +231,13 @@ export default function NoticiasPage() {
       
       <Footer />
     </div>
+  );
+}
+
+export default function NoticiasPage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.default}>
+      <NoticiasPageContent />
+    </AuthGuard>
   );
 } 

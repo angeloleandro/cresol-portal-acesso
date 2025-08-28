@@ -1,17 +1,13 @@
-import { createHash } from 'crypto';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Otimizações de Performance
-  swcMinify: true, // Minificação mais rápida com SWC
-  compress: true, // Compressão gzip automática
-  poweredByHeader: false, // Remove header desnecessário
+  // Configuração balanceada - remove complexidades problemáticas mas mantém essenciais
   
-  // Otimizações de Build
-  productionBrowserSourceMaps: false, // Desativa source maps em produção
-  optimizeFonts: true, // Otimização automática de fontes
+  // Otimizações básicas essenciais
+  swcMinify: true,  // SWC é necessário para hidratação correta
+  compress: true,   // Compressão básica
+  poweredByHeader: false,
   
-  // Configuração de Imagens
+  // Configuração de imagens completa
   images: {
     remotePatterns: [
       {
@@ -31,146 +27,25 @@ const nextConfig = {
         hostname: 'i.ytimg.com',
         port: '',
         pathname: '/vi/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.youtube.com',
-        port: '',
-        pathname: '/img/**',
       }
     ],
-    formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 dias de cache
+    formats: ['image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
   },
   
-  // Headers de Segurança e Cache
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin'
-          }
-        ]
-      },
-      {
-        // Cache para assets estáticos
-        source: '/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ]
-      },
-      {
-        // Cache para imagens
-        source: '/_next/image/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ]
-      }
-    ];
-  },
-  
-  // Configuração Experimental para Performance
+  // Experimental - apenas otimizações seguras
   experimental: {
-    optimizeCss: false, // Desabilitado temporariamente até resolver critters
-    scrollRestoration: true, // Restauração de scroll
+    scrollRestoration: true,
     optimizePackageImports: [
       '@chakra-ui/react',
-      '@nextui-org/react',
-      '@supabase/supabase-js',
-      'framer-motion',
-      'date-fns'
+      '@supabase/supabase-js'
     ]
   },
   
-  // Configuração de Compilação
+  // Compilação básica sem removeConsole (causa problemas de hidratação)
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn']
-    } : false,
-  },
-  
-  // Configuração de Webpack
-  webpack: (config, { isServer }) => {
-    // Otimizações de bundle
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            framework: {
-              name: 'framework',
-              chunks: 'all',
-              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
-              priority: 40,
-              enforce: true
-            },
-            lib: {
-              test(module) {
-                return module.size() > 160000 &&
-                  /node_modules[/\\]/.test(module.identifier());
-              },
-              name(module) {
-                const hash = createHash('sha1');
-                hash.update(module.identifier());
-                return hash.digest('hex').substring(0, 8);
-              },
-              priority: 30,
-              minChunks: 1,
-              reuseExistingChunk: true
-            },
-            commons: {
-              name: 'commons',
-              minChunks: 2,
-              priority: 20
-            },
-            shared: {
-              name(_module, chunks) {
-                return createHash('sha1')
-                  .update(chunks.reduce((acc, chunk) => acc + chunk.name, ''))
-                  .digest('hex') + (isServer ? '-server' : '-client');
-              },
-              priority: 10,
-              minChunks: 2,
-              reuseExistingChunk: true
-            }
-          },
-          maxAsyncRequests: 25,
-          maxInitialRequests: 25
-        }
-      };
-    }
-    
-    return config;
+    // removeConsole desabilitado - pode interferir na hidratação
   }
 };
 

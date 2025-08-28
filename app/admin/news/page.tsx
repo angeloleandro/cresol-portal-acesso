@@ -2,12 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-
-// [DEBUG] Component tracking
-let _newsPageRenderCount = 0;
-const _newsPageInstanceId = `news-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { useAdminData } from '@/app/admin/hooks';
 import { StandardizedButton } from '@/app/components/admin';
 import AdminHeader from '@/app/components/AdminHeader';
 import { useAlert } from '@/app/components/alerts';
@@ -41,13 +38,9 @@ interface News {
   [key: string]: unknown;
 }
 
-export default function NewsAdminPage() {
-  // [DEBUG] Component render tracking
-  _newsPageRenderCount++;
-  // Debug component render logging removed for production
-
+function NewsAdminPageContent() {
   const alert = useAlert();
-  const { user } = useAdminAuth();
+  const { user } = useAuth();
   const { 
     data: news, 
     loading, 
@@ -120,18 +113,12 @@ export default function NewsAdminPage() {
   const handleAction = async (action: string, newsItem: News) => {
     try {
       setActionLoading(`${action}-${newsItem.id}`);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        return;
-      }
-
       const response = await fetch(
         `/api/admin/news?id=${newsItem.id}&type=${newsItem.type}&action=${action}`,
         {
+          method: 'PATCH',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -157,19 +144,12 @@ export default function NewsAdminPage() {
   const handleDelete = async (newsItem: News) => {
     try {
       setActionLoading(`delete-${newsItem.id}`);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        setActionLoading('');
-        return;
-      }
-
       const response = await fetch(
         `/api/admin/news?id=${newsItem.id}&type=${newsItem.type}`,
         {
+          method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -582,5 +562,13 @@ export default function NewsAdminPage() {
         isLoading={deleteModal.isDeleting}
       />
     </div>
+  );
+}
+
+export default function NewsAdminPage() {
+  return (
+    <AuthGuard requireRole="admin">
+      <NewsAdminPageContent />
+    </AuthGuard>
   );
 }

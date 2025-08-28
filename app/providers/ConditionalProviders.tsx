@@ -3,6 +3,7 @@
 import { ReactNode, Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { AlertContainer } from '@/app/components/alerts/AlertContainer';
 
 // Lazy load do CollectionsProvider apenas quando necessário
 const CollectionsProvider = dynamic(
@@ -53,10 +54,10 @@ export function ConditionalProviders({ children }: ConditionalProvidersProps) {
   return (
     <>
       {needsAlerts ? (
-        <Suspense fallback={children}>
+        <Suspense fallback={null}>
           <AlertProvider>
             {needsCollections ? (
-              <Suspense fallback={children}>
+              <Suspense fallback={null}>
                 <CollectionsProvider>
                   {children}
                 </CollectionsProvider>
@@ -64,10 +65,11 @@ export function ConditionalProviders({ children }: ConditionalProvidersProps) {
             ) : (
               children
             )}
+            <AlertContainer position="top-right" />
           </AlertProvider>
         </Suspense>
       ) : needsCollections ? (
-        <Suspense fallback={children}>
+        <Suspense fallback={null}>
           <CollectionsProvider>
             {children}
           </CollectionsProvider>

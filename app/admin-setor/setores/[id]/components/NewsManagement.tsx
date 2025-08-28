@@ -3,7 +3,7 @@
 import { SECTOR_NEWS_CONFIG } from '@/app/components/management/configs/news-config';
 import { NewsManagement as GenericNewsManagement } from '@/app/components/management/NewsManagement';
 
-import type { SectorNews, SectorNewsDTO, mapSectorNewsFromDTO } from '../types/sector.types';
+import type { SectorNews, SectorNewsDTO } from '../types/sector.types';
 
 interface NewsManagementProps {
   sectorId: string;

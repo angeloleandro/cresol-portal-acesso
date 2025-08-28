@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { ChakraSelect, ChakraSelectOption } from '@/app/components/forms';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
@@ -58,9 +60,9 @@ interface DocumentItem {
   type: 'sector' | 'subsector';
 }
 
-export default function DocumentosPage() {
+function DocumentosContent() {
   const router = useRouter();
-  const [, setUser] = useState<any>(null);
+  const { user, profile } = useAuth();
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [filteredDocuments, setFilteredDocuments] = useState<DocumentItem[]>([]);
   const [sectors, setSectors] = useState<any[]>([]);
@@ -70,13 +72,7 @@ export default function DocumentosPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(data.user);
+    const fetchDocumentsData = async () => {
 
       try {
         // Carregar documentos de setores
@@ -129,7 +125,7 @@ export default function DocumentosPage() {
       }
     };
 
-    checkUser();
+    fetchDocumentsData();
   }, [router]);
 
   useEffect(() => {
@@ -353,5 +349,13 @@ export default function DocumentosPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function DocumentosPage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.loading}>
+      <DocumentosContent />
+    </AuthGuard>
   );
 }

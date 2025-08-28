@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
@@ -26,10 +28,10 @@ interface DashboardStats {
   documentsCount: number;
 }
 
-export default function Dashboard() {
+function DashboardContent() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const { user, profile: authProfile } = useAuth();
+  const [profile, setProfile] = useState<any>(authProfile);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     newsCount: 0,
@@ -40,24 +42,18 @@ export default function Dashboard() {
   const [recentSystems, setRecentSystems] = useState<any[]>([]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
+    const loadData = async () => {
+      if (user) {
+        await Promise.all([
+          fetchProfile(user.id),
+          fetchDashboardData(user.id) // OTIMIZADO: 1 chamada em vez de 2
+        ]);
       }
-      
-      setUser(data.user);
-      await Promise.all([
-        fetchProfile(data.user.id),
-        fetchDashboardData(data.user.id) // OTIMIZADO: 1 chamada em vez de 2
-      ]);
-      
       setLoading(false);
     };
 
-    checkUser();
-  }, [router]);
+    loadData();
+  }, [user]);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -282,5 +278,13 @@ export default function Dashboard() {
       
       <Footer />
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.loading}>
+      <DashboardContent />
+    </AuthGuard>
   );
 }

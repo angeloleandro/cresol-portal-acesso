@@ -1,11 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
 import { FormSelect } from '@/app/components/forms/FormSelect';
 import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
+
 const supabase = createClient();
 
 import Breadcrumb from '../components/Breadcrumb';
@@ -27,9 +30,8 @@ interface MessageItem {
   type: 'sector' | 'subsector';
 }
 
-export default function MensagensPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+function MensagensPageContent() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [filteredMessages, setFilteredMessages] = useState<MessageItem[]>([]);
   const [sectors, setSectors] = useState<any[]>([]);
@@ -38,14 +40,7 @@ export default function MensagensPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(data.user);
-
+    const fetchMessages = async () => {
       try {
         // Carregar setores para filtro
         const { data: sectorsData } = await supabase
@@ -116,7 +111,6 @@ export default function MensagensPage() {
         setMessages(allMessages);
         setFilteredMessages(allMessages);
       } catch (err) {
-
         setMessages([]);
         setFilteredMessages([]);
       } finally {
@@ -124,8 +118,8 @@ export default function MensagensPage() {
       }
     };
 
-    checkUser();
-  }, [router]);
+    fetchMessages();
+  }, []);
 
   // Aplicar filtros
   useEffect(() => {
@@ -159,7 +153,7 @@ export default function MensagensPage() {
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
             <UnifiedLoadingSpinner 
-              size="default" 
+              size="large" 
               message="Carregando mensagens..."
             />
           </div>
@@ -293,5 +287,13 @@ export default function MensagensPage() {
       
       <Footer />
     </div>
+  );
+}
+
+export default function MensagensPage() {
+  return (
+    <AuthGuard>
+      <MensagensPageContent />
+    </AuthGuard>
   );
 }

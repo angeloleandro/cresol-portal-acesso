@@ -4,15 +4,15 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import AdminHeader from '@/app/components/AdminHeader';
+import AuthGuard from '@/app/components/AuthGuard';
 import { useAlert } from '@/app/components/alerts';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { FormSelect } from '@/app/components/forms/FormSelect';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
-
-import type { User } from '@supabase/supabase-js';
 
 interface AccessRequest {
   id: string;
@@ -42,13 +42,12 @@ interface EditableAccessData {
   work_location_id: string;
 }
 
-export default function AccessRequests() {
+function AccessRequestsContent() {
   const router = useRouter();
   const { showSuccess, showError, showWarning, users } = useAlert();
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [allRequests, setAllRequests] = useState<AccessRequest[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
@@ -57,7 +56,7 @@ export default function AccessRequests() {
 
   // Carregar TODOS os requests uma única vez
   const fetchAllRequests = useCallback(async () => {
-    if (!isAdmin) return;
+    if (!user) return;
     
     if (mountedRef.current) {
       setLoading(true);
@@ -90,7 +89,7 @@ export default function AccessRequests() {
     if (mountedRef.current) {
       setLoading(false);
     }
-  }, [isAdmin]);
+  }, [user]);
 
   const fetchWorkLocations = async () => {
     const { data, error } = await supabase
@@ -111,54 +110,20 @@ export default function AccessRequests() {
   useEffect(() => {
     mountedRef.current = true;
     
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
+    const loadData = async () => {
+      if (!user) return;
       
-      if (!mountedRef.current) return;
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      if (mountedRef.current) {
-        setUser(userData.user);
-      }
-
-      // Verificar se o usuário é admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
-      if (!mountedRef.current) return;
-
-      if (profile?.role === 'admin') {
-        if (mountedRef.current) {
-          setIsAdmin(true);
-        }
-        fetchWorkLocations();
-        fetchPositions();
-      } else {
-        // Redirecionar usuários não-admin para o dashboard
-        router.replace('/dashboard');
-      }
+      fetchWorkLocations();
+      fetchPositions();
+      fetchAllRequests();
     };
 
-    checkUser();
+    loadData();
 
     return () => {
       mountedRef.current = false;
     };
-  }, [router]);
-
-  // Carregar requests quando user for admin
-  useEffect(() => {
-    if (isAdmin) {
-      fetchAllRequests();
-    }
-  }, [isAdmin, fetchAllRequests]);
+  }, [user, fetchAllRequests]);
 
   const handleEditChange = (id: string, field: string, value: string) => {
     setEditData(prev => ({
@@ -518,5 +483,13 @@ export default function AccessRequests() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function AccessRequests() {
+  return (
+    <AuthGuard requireRole="admin">
+      <AccessRequestsContent />
+    </AuthGuard>
   );
 } 

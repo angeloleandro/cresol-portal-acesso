@@ -1,7 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import { 
   StandardizedAdminLayout, 
@@ -31,10 +32,9 @@ interface SystemLink {
   updated_at?: string;
 }
 
-export default function SystemLinksAdmin() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+function SystemLinksAdminContent() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [links, setLinks] = useState<SystemLink[]>([]);
   const [editingLink, setEditingLink] = useState<SystemLink | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -52,41 +52,21 @@ export default function SystemLinksAdmin() {
     is_active: true
   });
 
-  const checkUserAndFetchData = useCallback(async () => {
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setUser(userData.user);
-
-      // Verificar se é admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
-      if (profile?.role !== 'admin') {
-        router.replace('/dashboard');
-        return;
-      }
-
-      await fetchLinks();
-      setLoading(false);
-    } catch (error: any) {
-      const errorMessage = handleComponentError(error, 'checkUserAndFetchData');
-      setError(errorMessage);
-      setLoading(false);
-    }
-  }, [router]);
-
   useEffect(() => {
-    checkUserAndFetchData();
-  }, [checkUserAndFetchData]);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await fetchLinks();
+        setLoading(false);
+      } catch (error: any) {
+        const errorMessage = handleComponentError(error, 'loadData');
+        setError(errorMessage);
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const fetchLinks = async () => {
     try {
@@ -462,5 +442,13 @@ export default function SystemLinksAdmin() {
         />
       )}
     </>
+  );
+}
+
+export default function SystemLinksAdmin() {
+  return (
+    <AuthGuard requireRole="admin">
+      <SystemLinksAdminContent />
+    </AuthGuard>
   );
 } 

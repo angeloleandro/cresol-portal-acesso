@@ -36,7 +36,22 @@ export function useEntityData<T = any>(options: EntityDataOptions<T>) {
     cacheDuration = DEFAULT_CACHE_DURATION
   } = options;
 
-  const cacheKey = customCacheKey || `${table}-${entityId || 'all'}-${JSON.stringify(filters)}`;
+  // Create stable cache key with sorted keys and serialized select/orderBy
+  const stableStringify = (obj: any): string => {
+    if (!obj || typeof obj !== 'object') return JSON.stringify(obj);
+    const sortedKeys = Object.keys(obj).sort();
+    const sortedObj: Record<string, any> = {};
+    for (const key of sortedKeys) {
+      sortedObj[key] = obj[key];
+    }
+    return JSON.stringify(sortedObj);
+  };
+
+  const serializedFilters = stableStringify(filters || {});
+  const serializedSelect = JSON.stringify(select || '*');
+  const serializedOrderBy = JSON.stringify(orderBy || {});
+  
+  const cacheKey = customCacheKey || `${table}-${entityId || 'all'}-${serializedFilters}-${serializedSelect}-${serializedOrderBy}`;
 
   const [state, setState] = useState<DataState<T>>(() => {
     // Verificar cache

@@ -1,8 +1,9 @@
 'use client';
 
 import { Tabs } from "@chakra-ui/react";
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { 
   StandardizedAdminLayout, 
   StandardizedPageHeader, 
@@ -50,11 +51,10 @@ interface SectorAdmin {
   };
 }
 
-export default function SectorsManagement() {
-  const router = useRouter();
+function SectorsManagementContent() {
+  const { user } = useAuth();
   const { showSuccess, showError, showWarning } = useAlert();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [subsectors, setSubsectors] = useState<Subsector[]>([]);
   const [sectorAdmins, setSectorAdmins] = useState<SectorAdmin[]>([]);
@@ -74,26 +74,8 @@ export default function SectorsManagement() {
   const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
-      if (profile?.role !== 'admin') {
-        router.replace('/home');
-        return;
-      }
-
-      setUser(userData.user);
+    const loadData = async () => {
+      setLoading(true);
       await Promise.all([
         fetchSectors(),
         fetchSubsectors(),
@@ -102,8 +84,8 @@ export default function SectorsManagement() {
       setLoading(false);
     };
 
-    checkUser();
-  }, [router]);
+    loadData();
+  }, []);
 
   const fetchSectors = async () => {
     const { data, error } = await supabase
@@ -630,5 +612,13 @@ export default function SectorsManagement() {
         />
       )}
     </>
+  );
+}
+
+export default function SectorsManagement() {
+  return (
+    <AuthGuard requireRole="admin">
+      <SectorsManagementContent />
+    </AuthGuard>
   );
 } 

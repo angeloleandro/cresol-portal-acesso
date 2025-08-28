@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { FormSelect } from '@/app/components/forms/FormSelect';
@@ -28,13 +29,12 @@ interface System {
   };
 }
 
-export default function SystemsManagement() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+function SystemsManagementContent() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [systems, setSystems] = useState<System[]>([]);
   const [sectors, setSectors] = useState<any[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin] = useState(true); // Since AuthGuard ensures admin role
   const [newSystem, setNewSystem] = useState({ 
     name: '',
     description: '',
@@ -50,48 +50,17 @@ export default function SystemsManagement() {
   const [sectorFilter, setSectorFilter] = useState('all');
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setUser(userData.user);
-
-      // Verificar se o usuário é admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
-      if (profile?.role === 'admin') {
-        setIsAdmin(true);
-        fetchSystems();
-        fetchSectors();
-      } else {
-        // Verificar se é admin de setor
-        const { data: sectorAdmin } = await supabase
-          .from('sector_admins')
-          .select('sector_id')
-          .eq('user_id', userData.user.id);
-        
-        if (sectorAdmin && sectorAdmin.length > 0) {
-          setIsAdmin(false); // Não é admin geral, mas é admin de setor
-          setSectorFilter(sectorAdmin[0].sector_id);
-          fetchSystems(sectorAdmin[0].sector_id);
-          fetchSectors();
-        } else {
-              // Redirecionar usuários regulares para o home
-    router.replace('/home');
-        }
-      }
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchSystems(),
+        fetchSectors()
+      ]);
+      setLoading(false);
     };
 
-    checkUser();
-  }, [router]);
+    loadData();
+  }, []);
 
   const fetchSystems = async (sectorId?: string) => {
     setLoading(true);
@@ -218,7 +187,7 @@ export default function SystemsManagement() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.replace('/login');
+    window.location.href = '/login';
   };
 
   // Filtrar sistemas por setor se um filtro estiver selecionado
@@ -588,5 +557,13 @@ export default function SystemsManagement() {
         />
       )}
     </>
+  );
+}
+
+export default function SystemsManagement() {
+  return (
+    <AuthGuard requireRole="admin">
+      <SystemsManagementContent />
+    </AuthGuard>
   );
 } 

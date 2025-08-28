@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { FormSelect } from '@/app/components/forms/FormSelect';
 import { Icon } from '@/app/components/icons/Icon';
 import { Button } from '@/app/components/ui/Button';
@@ -49,9 +51,9 @@ interface Position {
   department?: string;
 }
 
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter();
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const { user, profile: authProfile } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
@@ -79,28 +81,22 @@ export default function ProfilePage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    const checkUser = async () => {
+    const loadData = async () => {
       try {
-        const supabase = createClient();
-        const { data } = await supabase.auth.getUser();
-        if (!data.user) {
-          router.replace('/login');
-          return;
+        if (user) {
+          await loadProfile(user.id);
+          await loadWorkLocations();
+          await loadPositions();
         }
-        setUser(data.user);
-        await loadProfile(data.user.id);
-        await loadWorkLocations();
-        await loadPositions();
       } catch (error) {
-
         setError('Erro ao carregar informações do usuário');
       } finally {
         setLoading(false);
       }
     };
 
-    checkUser();
-  }, [router]);
+    loadData();
+  }, [user]);
 
   const loadProfile = async (userId: string) => {
     try {
@@ -579,5 +575,13 @@ export default function ProfilePage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <AuthGuard>
+      <ProfileContent />
+    </AuthGuard>
   );
 }

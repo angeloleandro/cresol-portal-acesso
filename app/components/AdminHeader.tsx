@@ -31,9 +31,10 @@ const supabase = createClient();
 import CresolLogo from './CresolLogo';
 import { Icon } from './icons/Icon';
 import type { IconName } from './icons/Icon';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 interface AdminHeaderProps {
-  user: any;
+  user?: any; // Opcional, usa useAuth se não fornecido
 }
 
 interface NavItem {
@@ -252,6 +253,7 @@ CardDropdown.displayName = 'CardDropdown';
 
 // Quick Access Dropdown Component
 const QuickAccessDropdown = memo(({ pathname }: { pathname: string }) => {
+  const router = useRouter();
   const { open: isOpen, onToggle, onClose } = useDisclosure();
   const isActive = QUICK_ACCESS_ITEMS.some(item => pathname.startsWith(item.href));
   
@@ -284,7 +286,7 @@ const QuickAccessDropdown = memo(({ pathname }: { pathname: string }) => {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => window.location.href = '/admin'}
+            onClick={() => router.push('/admin')}
             borderColor="orange.600"
             borderWidth="2px"
             color="orange.600"
@@ -352,10 +354,16 @@ const QuickAccessDropdown = memo(({ pathname }: { pathname: string }) => {
 });
 QuickAccessDropdown.displayName = 'QuickAccessDropdown';
 
-export default function AdminHeader({ user }: AdminHeaderProps) {
+export default function AdminHeader({ user: propUser }: AdminHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Sempre chamar useAuth (hooks devem ser chamados incondicionalmente)
+  const authContext = useAuth();
+  
+  // Usar propUser se fornecido, senão usar do contexto
+  const user = propUser || authContext?.user;
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
@@ -24,24 +26,18 @@ interface NewsItem {
   author: string;
 }
 
-export default function NoticiaDetalhePage() {
+function NoticiaDetalheContent() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { user, profile } = useAuth();
   
-  const [user, setUser] = useState<any>(null);
   const [news, setNews] = useState<NewsItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedNews, setRelatedNews] = useState<NewsItem[]>([]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(data.user);
+    const fetchNewsData = async () => {
 
       try {
         // Buscar notícia específica do Supabase
@@ -97,7 +93,7 @@ export default function NoticiaDetalhePage() {
       }
     };
 
-    checkUser();
+    fetchNewsData();
   }, [router, id]);
 
   // Formatador de data
@@ -257,5 +253,13 @@ export default function NoticiaDetalhePage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function NoticiaDetalhePage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.news}>
+      <NoticiaDetalheContent />
+    </AuthGuard>
   );
 } 

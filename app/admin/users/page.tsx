@@ -1,6 +1,6 @@
-import { CreateClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+import AuthGuard from '@/app/components/AuthGuard';
 import UsersClient from './components/UsersClient';
+import { CreateClient } from '@/lib/supabase/server';
 
 interface ProfileUser {
   id: string;
@@ -10,7 +10,7 @@ interface ProfileUser {
   position_id?: string;
   work_location_id?: string;
   role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
-  created_at: string;
+  updated_at: string | null;
   avatar_url?: string;
 }
 
@@ -37,84 +37,90 @@ interface Subsector {
   sector_id: string;
 }
 
-export default async function UsersManagement() {
+async function loadInitialData() {
   const supabase = CreateClient();
   
-  // Verificar autenticação e permissões
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
-  if (!user || authError) {
-    redirect('/login');
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-  
-  if (!profile || profile.role !== 'admin') {
-    redirect('/home');
-  }
-
-  // Buscar dados em paralelo no servidor
-  const [usersResult, workLocationsResult, positionsResult, sectorsResult, subsectorsResult] = await Promise.all([
-    // Usuários
+  // Carregar todos os dados necessários em paralelo
+  const [users, locations, positions, sectors, subsectors] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, full_name, email, position, position_id, work_location_id, role, avatar_url, created_at')
+      .select(`
+        id,
+        email,
+        full_name,
+        role,
+        avatar_url,
+        position,
+        position_id,
+        work_location_id,
+        phone,
+        bio,
+        username,
+        updated_at
+      `)
       .order('full_name'),
-    
-    // Locais de trabalho
     supabase
       .from('work_locations')
-      .select('id, name')
+      .select(`
+        id,
+        name,
+        address,
+        phone,
+        created_at,
+        updated_at
+      `)
       .order('name'),
-    
-    // Posições
     supabase
       .from('positions')
-      .select('id, name, description, department')
+      .select(`
+        id,
+        name,
+        description,
+        department,
+        created_at,
+        updated_at
+      `)
       .order('name'),
-    
-    // Setores
     supabase
       .from('sectors')
-      .select('id, name')
+      .select(`
+        id,
+        name,
+        slug,
+        description,
+        image_url,
+        manager_id,
+        created_at
+      `)
       .order('name'),
-    
-    // Subsetores
     supabase
       .from('subsectors')
-      .select('id, name, sector_id')
+      .select(`
+        id,
+        name,
+        slug,
+        description,
+        sector_id,
+        created_at
+      `)
       .order('name')
   ]);
+  
+  return {
+    initialUsers: users.data || [],
+    initialWorkLocations: locations.data || [],
+    initialPositions: positions.data || [],
+    initialSectors: sectors.data || [],
+    initialSubsectors: subsectors.data || []
+  };
+}
 
-  // Processar usuários
-  const users: ProfileUser[] = usersResult.data?.map((profile: any) => ({
-    id: profile.id,
-    full_name: profile.full_name,
-    email: profile.email,
-    position: profile.position,
-    position_id: profile.position_id,
-    work_location_id: profile.work_location_id,
-    role: profile.role,
-    avatar_url: profile.avatar_url,
-    created_at: profile.created_at ? new Date(profile.created_at).toISOString() : new Date().toISOString()
-  })) || [];
-
-  const workLocations: WorkLocation[] = workLocationsResult.data || [];
-  const positions: Position[] = positionsResult.data || [];
-  const sectors: Sector[] = sectorsResult.data || [];
-  const subsectors: Subsector[] = subsectorsResult.data || [];
-
+export default async function UsersManagement() {
+  const data = await loadInitialData();
+  
   return (
-    <UsersClient
-      initialUsers={users}
-      initialWorkLocations={workLocations}
-      initialPositions={positions}
-      initialSectors={sectors}
-      initialSubsectors={subsectors}
-    />
+    <AuthGuard requireRole="admin">
+      <UsersClient {...data} />
+    </AuthGuard>
   );
 }

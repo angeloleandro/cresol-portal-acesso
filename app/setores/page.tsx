@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
@@ -20,21 +20,13 @@ interface Sector {
   created_at: string;
 }
 
-export default function SetoresPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+function SetoresPageContent() {
+  const { user } = useAuth();
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(data.user);
-
+    const fetchSectors = async () => {
       // Buscar setores usando a tabela sectors diretamente
       // As políticas de segurança no Supabase devem permitir que todos os usuários autenticados
       // possam ver os setores, mas apenas administradores podem criar/editar/excluir
@@ -44,7 +36,7 @@ export default function SetoresPage() {
         .order('name', { ascending: true });
       
       if (error) {
-
+        console.error('Erro ao buscar setores:', error);
       } else {
         setSectors(sectorsData || []);
       }
@@ -52,17 +44,14 @@ export default function SetoresPage() {
       setLoading(false);
     };
 
-    checkUser();
-  }, [router]);
+    fetchSectors();
+  }, []);
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-<UnifiedLoadingSpinner 
-            size="default" 
-            message={LOADING_MESSAGES.sectors}
-          />
+          <p className="text-cresol-gray">Carregando setores...</p>
         </div>
       </div>
     );
@@ -136,5 +125,13 @@ export default function SetoresPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function SetoresPage() {
+  return (
+    <AuthGuard loadingMessage={LOADING_MESSAGES.sectors}>
+      <SetoresPageContent />
+    </AuthGuard>
   );
 } 

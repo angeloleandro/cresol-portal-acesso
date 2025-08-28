@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
@@ -26,24 +28,18 @@ interface MessageItem {
   type: 'sector' | 'subsector';
 }
 
-export default function MensagemDetalhePage() {
+function MensagemDetalheContent() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { user, profile } = useAuth();
   
-  const [user, setUser] = useState<any>(null);
   const [message, setMessage] = useState<MessageItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedMessages, setRelatedMessages] = useState<MessageItem[]>([]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(data.user);
+    const fetchMessageData = async () => {
 
       try {
         // Tentar buscar primeiro em sector_messages
@@ -186,7 +182,7 @@ export default function MensagemDetalhePage() {
       }
     };
 
-    checkUser();
+    fetchMessageData();
   }, [router, id]);
 
   // Formatador de data
@@ -328,5 +324,13 @@ export default function MensagemDetalhePage() {
       
       <Footer />
     </div>
+  );
+}
+
+export default function MensagemDetalhePage() {
+  return (
+    <AuthGuard loadingMessage="Carregando mensagem...">
+      <MensagemDetalheContent />
+    </AuthGuard>
   );
 }

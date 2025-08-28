@@ -4,6 +4,7 @@ import { Tabs } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
+import AuthGuard from '@/app/components/AuthGuard';
 import { StandardizedButton, StandardizedTabsList } from '@/app/components/admin';
 import AdminHeader from '@/app/components/AdminHeader';
 import AnimatedChart from '@/app/components/analytics/AnimatedChart';
@@ -12,9 +13,9 @@ import { DashboardShimmer } from '@/app/components/analytics/ShimmerLoading';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { Icon } from '@/app/components/icons/Icon';
 import { createClient } from '@/lib/supabase/client';
-const supabase = createClient();
+import { useAuth } from '@/app/providers/AuthProvider';
 
-import type { User } from '@supabase/supabase-js';
+const supabase = createClient();
 
 interface AnalyticsData {
   users: {
@@ -50,42 +51,13 @@ interface ChartData {
   colors: string[];
 }
 
-export default function AnalyticsPage() {
+function AnalyticsPageContent() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
   const [activeChart, setActiveChart] = useState<'users' | 'systems' | 'activity'>('users');
-
-  const checkUserAuth = useCallback(async () => {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
-      if (error || !user) {
-        router.replace('/login');
-        return;
-      }
-
-      // Verificar se é admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile || !['admin', 'sector_admin'].includes(profile.role)) {
-        router.replace('/dashboard');
-        return;
-      }
-
-      setUser(user);
-    } catch (error) {
-      router.replace('/login');
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
 
   const fetchAnalyticsData = useCallback(async () => {
     try {
@@ -196,14 +168,9 @@ export default function AnalyticsPage() {
   }, [selectedPeriod]);
 
   useEffect(() => {
-    checkUserAuth();
-  }, [checkUserAuth]);
-
-  useEffect(() => {
-    if (user) {
-      fetchAnalyticsData();
-    }
-  }, [user, selectedPeriod, fetchAnalyticsData]);
+    fetchAnalyticsData();
+    setLoading(false);
+  }, [selectedPeriod, fetchAnalyticsData]);
 
   const getChartData = (): ChartData => {
     if (!analytics) return { labels: [], values: [], colors: [] };
@@ -240,15 +207,6 @@ export default function AnalyticsPage() {
     }
   };
 
-  const _getPeriodLabel = (period: string): string => {
-    switch (period) {
-      case '7d': return 'Últimos 7 dias';
-      case '30d': return 'Últimos 30 dias';
-      case '90d': return 'Últimos 90 dias';
-      case '1y': return 'Último ano';
-      default: return period;
-    }
-  };
 
   if (loading) {
     return (
@@ -369,7 +327,7 @@ export default function AnalyticsPage() {
                 </div>
               </div>
 
-              <div className="stat-card-orange" onClick={() => router.push('/admin/users')} role="button" tabIndex={0}>
+              <div className="stat-card-orange" onClick={() => router.push('/admin/users')} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push('/admin/users'); } }}>
                 <div className="flex items-center">
                   <div className="icon-container-orange mr-5 flex-shrink-0">
                     <Icon name="user-group" className="h-6 w-6" />
@@ -385,7 +343,7 @@ export default function AnalyticsPage() {
                 </div>
               </div>
 
-              <div className="stat-card-orange" onClick={() => router.push('/admin/systems')} role="button" tabIndex={0}>
+              <div className="stat-card-orange" onClick={() => router.push('/admin/systems')} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push('/admin/systems'); } }}>
                 <div className="flex items-center">
                   <div className="icon-container-orange mr-5 flex-shrink-0">
                     <Icon name="monitor" className="h-6 w-6" />
@@ -617,5 +575,13 @@ export default function AnalyticsPage() {
         )}
       </ResponsiveContainer>
     </div>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <AuthGuard requireRole="admin">
+      <AnalyticsPageContent />
+    </AuthGuard>
   );
 } 

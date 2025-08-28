@@ -1,22 +1,28 @@
 'use client';
 
-import { Suspense } from 'react';
-import dynamic from 'next/dynamic';
+import AuthGuard from '@/app/components/AuthGuard';
+import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { AdminDashboardSkeleton } from '@/app/components/skeletons/AdminDashboardSkeleton';
+import dynamic from 'next/dynamic';
 
 // Lazy load do AdminDashboard - carrega apenas quando necessário
 const AdminDashboard = dynamic(
-  () => import('../components/admin/AdminDashboard'),
+  () => import('../components/admin/AdminDashboard').then(mod => ({
+    default: mod.default
+  })),
   { 
-    loading: () => <AdminDashboardSkeleton />,
-    ssr: false // Desabilita SSR para componente admin (client-only)
+    ssr: false, // Desabilita SSR para componente admin (client-only)
+    loading: () => <AdminDashboardSkeleton />
   }
 );
 
 export default function AdminPage() {
   return (
-    <Suspense fallback={<AdminDashboardSkeleton />}>
+    <AuthGuard 
+      requireRole="admin"
+      loadingMessage={LOADING_MESSAGES.dashboard}
+    >
       <AdminDashboard />
-    </Suspense>
+    </AuthGuard>
   );
 }

@@ -236,7 +236,6 @@ export function useMemoizedListCallbacks<T>(items: T[]) {
       const item: T = items[index];
       // Lógica de clique
       if (process.env.NODE_ENV !== 'production') {
-        console.log('Item clicado:', item);
       }
     },
     [items]
@@ -246,7 +245,6 @@ export function useMemoizedListCallbacks<T>(items: T[]) {
     (index: number) => {
       // Lógica de remoção
       if (process.env.NODE_ENV !== 'production') {
-        console.log('Item removido no índice:', index);
       }
     },
     []

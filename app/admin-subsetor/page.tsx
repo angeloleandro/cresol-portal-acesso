@@ -1,7 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import { 
   StandardizedAdminLayout, 
@@ -14,8 +15,6 @@ import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { SUBSECTOR_ROLES, SUBSECTOR_CARD_LAYOUT, SUBSECTOR_EMPTY_STATE, SUBSECTOR_PAGE_CONFIG, SUBSECTOR_ACTIONS, SUBSECTOR_ERRORS, SUBSECTOR_STATS, SUBSECTOR_PERMISSIONS } from '@/lib/constants/subsector-config';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
-
-import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface Profile {
   id: string;
@@ -40,16 +39,16 @@ interface SubsectorStats {
   total_systems: number;
 }
 
-export default function AdminSubsectorPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+function AdminSubsectorPageContent() {
+  const { user, profile } = useAuth();
   const [subsectors, setSubsectors] = useState<Subsector[]>([]);
   const [stats, setStats] = useState<Record<string, SubsectorStats>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchUserSubsectors = useCallback(async (userId: string) => {
+  const fetchUserSubsectors = useCallback(async () => {
+    if (!user) return;
+    const userId = user.id;
     try {
       // Usar a função RPC para obter sub-setores do usuário
       const { data, error } = await supabase.rpc('get_user_subsectors', {
@@ -77,51 +76,22 @@ export default function AdminSubsectorPage() {
       // Debug log removed
       setError('Erro ao carregar sub-setores');
     }
-  }, []);
+  }, [user]);
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  // Carregar subsetores e estatísticas  
+  const loadData = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, role, full_name, email')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        setProfile(data);
-        
-        // Verificar se o usuário tem permissão para acessar esta página
-        if (!SUBSECTOR_PERMISSIONS.actions.canView(data.role)) {
-          router.replace('/home');
-          return;
-        }
-
-        await fetchUserSubsectors(userId);
-      }
+      await fetchUserSubsectors();
     } catch (error) {
-      // Debug log removed
-      setError('Erro ao carregar perfil do usuário');
+      setError('Erro ao carregar sub-setores');
     } finally {
       setLoading(false);
     }
-  }, [fetchUserSubsectors, router]);
+  }, [fetchUserSubsectors]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace('/login');
-        return;
-      }
-
-      setUser(data.user);
-      await fetchProfile(data.user.id);
-    };
-
-    checkUser();
-  }, [router, fetchProfile]);
+    loadData();
+  }, [loadData]);
 
   const fetchSubsectorStats = async (subsectorId: string) => {
     try {
@@ -163,12 +133,12 @@ export default function AdminSubsectorPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className={ADMIN_STATES.error.content}>
           <p className={ADMIN_STATES.error.message}>{error}</p>
-          <button
-            onClick={() => router.push('/home')}
-            className={`mt-4 ${ADMIN_BUTTONS.primary}`}
+          <a
+            href="/home"
+            className={`inline-block mt-4 ${ADMIN_BUTTONS.primary}`}
           >
             {SUBSECTOR_ERRORS.actions.goHome}
-          </button>
+          </a>
         </div>
       </div>
     );
@@ -236,12 +206,12 @@ export default function AdminSubsectorPage() {
                   </div>
 
                   <div className={SUBSECTOR_CARD_LAYOUT.card.actions}>
-                    <button
-                      onClick={() => router.push(`/admin-subsetor/subsetores/${subsector.id}`)}
-                      className={SUBSECTOR_ACTIONS.manage.classes}
+                    <a
+                      href={`/admin-subsetor/subsetores/${subsector.id}`}
+                      className={`inline-block text-center ${SUBSECTOR_ACTIONS.manage.classes}`}
                     >
                       {SUBSECTOR_ACTIONS.manage.label}
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -250,5 +220,16 @@ export default function AdminSubsectorPage() {
         </div>
       )}
     </StandardizedAdminLayout>
+  );
+}
+
+export default function AdminSubsectorPage() {
+  return (
+    <AuthGuard 
+      requireRole="subsector_admin"
+      loadingMessage={LOADING_MESSAGES.subsectors}
+    >
+      <AdminSubsectorPageContent />
+    </AuthGuard>
   );
 } 

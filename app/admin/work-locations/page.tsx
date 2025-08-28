@@ -1,7 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import AdminHeader from '@/app/components/AdminHeader';
 import { useAlert } from '@/app/components/alerts';
@@ -21,13 +22,11 @@ interface WorkLocation {
   updated_at: string;
 }
 
-export default function WorkLocationsAdmin() {
-  const router = useRouter();
+function WorkLocationsAdminContent() {
+  const { user } = useAuth();
   const alert = useAlert();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [workLocations, setWorkLocations] = useState<WorkLocation[]>([]);
-  const [_isAdmin, _setIsAdmin] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [newName, setNewName] = useState('');
@@ -44,27 +43,8 @@ export default function WorkLocationsAdmin() {
   const [formSuccess, _setFormSuccess] = useState('');
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(userData.user);
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-      if (profile?.role === 'admin') {
-        _setIsAdmin(true);
-        fetchWorkLocations();
-      } else {
-        router.replace('/home');
-      }
-    };
-    checkUser();
-  }, [router]);
+    fetchWorkLocations();
+  }, []);
 
   const fetchWorkLocations = async () => {
     setLoading(true);
@@ -563,5 +543,13 @@ export default function WorkLocationsAdmin() {
         cancelButtonText="Cancelar"
       />
     </div>
+  );
+}
+
+export default function WorkLocationsAdmin() {
+  return (
+    <AuthGuard requireRole="admin">
+      <WorkLocationsAdminContent />
+    </AuthGuard>
   );
 }

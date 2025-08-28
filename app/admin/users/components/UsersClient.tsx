@@ -27,7 +27,7 @@ interface ProfileUser {
   position_id?: string;
   work_location_id?: string;
   role: 'admin' | 'sector_admin' | 'subsector_admin' | 'user';
-  created_at: string;
+  updated_at: string | null;
   avatar_url?: string;
 }
 
@@ -71,7 +71,6 @@ export default function UsersClient({
 }: UsersClientProps) {
   const router = useRouter();
   const { showError, auth } = useAlert();
-  const [user, setUser] = useState<SupabaseUser | null>(null);
   
   // Usar React Query com dados iniciais
   const { data: users = initialUsers, isLoading } = useUsers();
@@ -155,51 +154,28 @@ export default function UsersClient({
     }
   };
 
+  // Carregamento das associações de usuários após dados iniciais
   useEffect(() => {
-    const checkUser = async () => {
+    const loadUserAssociations = async () => {
+      // Carregar associações apenas para usuários que precisam
+      const fetchPromises = initialUsers.map(userProfile => {
+        if (userProfile.role === 'sector_admin') {
+          return fetchUserSectors(userProfile.id);
+        } else if (userProfile.role === 'subsector_admin') {
+          return fetchUserSubsectors(userProfile.id);
+        }
+        return Promise.resolve();
+      });
+      
       try {
-        const { data } = await createClient().auth.getUser();
-        if (!data.user) {
-          router.replace('/login');
-          return;
-        }
-        
-        const { data: profile } = await createClient()
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .single();
-        
-        if (!profile || profile.role !== 'admin') {
-          router.replace('/home');
-          return;
-        }
-        
-        setUser(data.user);
-        
-        // Take a snapshot of users and fetch associations in parallel
-        const currentUsers = [...users];
-        const fetchPromises = currentUsers.map(userProfile => {
-          if (userProfile.role === 'sector_admin') {
-            return fetchUserSectors(userProfile.id);
-          } else if (userProfile.role === 'subsector_admin') {
-            return fetchUserSubsectors(userProfile.id);
-          }
-          return Promise.resolve();
-        });
-        
-        try {
-          await Promise.allSettled(fetchPromises);
-        } catch (error) {
-          // Silently handle errors - individual failures are already caught
-        }
+        await Promise.allSettled(fetchPromises);
       } catch (error) {
-        router.replace('/login');
+        // Silently handle errors - individual failures are already caught
       }
     };
 
-    checkUser();
-  }, [router, users, fetchUserSectors, fetchUserSubsectors]);
+    loadUserAssociations();
+  }, [initialUsers, fetchUserSectors, fetchUserSubsectors]); // Incluir dependencies necessárias
 
   const handleLogout = async () => {
     await createClient().auth.signOut();
@@ -224,7 +200,7 @@ export default function UsersClient({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminHeader user={user} />
+      <AdminHeader />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}

@@ -1,8 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
@@ -26,11 +27,9 @@ interface GalleryImage {
   order_index: number;
 }
 
-export default function AdminGallery() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+function AdminGalleryContent() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -46,31 +45,8 @@ export default function AdminGallery() {
   const { collections } = useCollections();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        router.replace("/login");
-        return;
-      }
-      setUser(userData.user);
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userData.user.id)
-        .single();
-      if (profile?.role === "admin") {
-        setIsAdmin(true);
-      } else {
-        router.replace("/dashboard");
-      }
-      setLoading(false);
-    };
-    checkUser();
-  }, [router]);
-
-  useEffect(() => {
-    if (isAdmin) fetchImages();
-  }, [isAdmin]);
+    fetchImages();
+  }, []);
 
   const fetchImages = async () => {
     setLoading(true);
@@ -322,5 +298,13 @@ export default function AdminGallery() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminGallery() {
+  return (
+    <AuthGuard requireRole="admin">
+      <AdminGalleryContent />
+    </AuthGuard>
   );
 } 

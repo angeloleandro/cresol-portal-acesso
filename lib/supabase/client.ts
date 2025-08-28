@@ -12,10 +12,21 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('As variáveis NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY são obrigatórias')
 }
 
-// Função para criar cliente Supabase - SEMPRE cria nova instância
-// Isso garante que a sessão seja verificada corretamente em cada acesso
+// Singleton pattern para garantir uma única instância do cliente
+let clientInstance: ReturnType<typeof createBrowserClient<Database>> | null = null;
+let instanceCount = 0;
+
+// Função para criar cliente Supabase com singleton pattern
 export const createClient = () => {
-  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
+  // Se já existe uma instância, retornar ela
+  if (clientInstance) {
+    instanceCount++;
+    return clientInstance;
+  }
+
+  instanceCount = 1;
+  
+  clientInstance = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -58,11 +69,9 @@ export const createClient = () => {
       }
     }
   })
-}
 
-// IMPORTANTE: Exportar uma função que cria nova instância, não uma instância fixa
-// Isso resolve o problema de carregamento direto de páginas
-// export const supabase = createClient() // REMOVIDO - causava problemas de sessão
+  return clientInstance;
+}
 
 // Para compatibilidade com código existente, criar função helper
 export function getSupabase() {

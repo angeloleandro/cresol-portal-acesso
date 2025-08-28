@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
+import AuthGuard from '@/app/components/AuthGuard';
 import { 
   StandardizedAdminLayout, 
   StandardizedButton,
@@ -18,6 +18,8 @@ import ConfirmationModal from '@/app/components/ui/ConfirmationModal';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/app/providers/AuthProvider';
+
 const supabase = createClient();
 
 interface Banner {
@@ -29,11 +31,9 @@ interface Banner {
   order_index: number;
 }
 
-export default function AdminBanners() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+function AdminBannersContent() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -43,32 +43,8 @@ export default function AdminBanners() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        router.replace("/login");
-        return;
-      }
-      setUser(userData.user);
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userData.user.id)
-        .single();
-      if (profile?.role === "admin") {
-        setIsAdmin(true);
-      } else {
-        router.replace("/dashboard");
-      }
-      setLoading(false);
-    };
-    checkUser();
-  }, [router]);
-
-  useEffect(() => {
-    if (isAdmin) fetchBanners();
-    // eslint-disable-next-line
-  }, [isAdmin]);
+    fetchBanners();
+  }, []);
 
   const fetchBanners = async () => {
     setLoading(true);
@@ -248,5 +224,13 @@ export default function AdminBanners() {
         cancelButtonText="Cancelar"
       />
     </>
+  );
+}
+
+export default function AdminBanners() {
+  return (
+    <AuthGuard requireRole="admin">
+      <AdminBannersContent />
+    </AuthGuard>
   );
 } 

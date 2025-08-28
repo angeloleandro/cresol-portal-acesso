@@ -7,7 +7,6 @@ export interface DeletableItem {
   id: string;
   title?: string;
   name?: string;
-  [key: string]: unknown;
 }
 
 interface DeleteModalState<T extends DeletableItem = DeletableItem> {

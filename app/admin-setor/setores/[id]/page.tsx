@@ -2,8 +2,10 @@
 
 'use client';
 
-import { lazy, Suspense, useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { lazy, Suspense, useState } from 'react';
+import { useParams } from 'next/navigation';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { AlertProvider } from '@/app/components/alerts';
@@ -15,7 +17,6 @@ import {
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
-import { useSectorAuth } from './hooks/useSectorAuth';
 import { useSectorData } from './hooks/useSectorData';
 import { useSectorContentManager } from './SectorContentManager';
 import { SectorDataProvider } from './contexts/SectorDataContext';
@@ -32,16 +33,12 @@ const GroupsManagement = lazy(() => import('./components/GroupsManagement').then
 const SubsectorsManagement = lazy(() => import('./components/SubsectorsManagement').then(m => ({ default: m.SubsectorsManagement })));
 const TeamManagement = lazy(() => import('./components/TeamManagement').then(m => ({ default: m.TeamManagement })));
 
-export default function SectorManagementPage() {
+function SectorManagementPageContent() {
   const params = useParams();
-  const router = useRouter();
   const sectorId = params.id as string;
+  const { user } = useAuth();
   
   const [activeTab, setActiveTab] = useState('news');
-  const [user, setUser] = useState<any>(null);
-  
-  // Authentication
-  const { isAuthorized, loading: authLoading } = useSectorAuth(sectorId);
   
   // Sector data
   const { sector, loading: sectorLoading, error: sectorError } = useSectorData(sectorId);
@@ -49,26 +46,8 @@ export default function SectorManagementPage() {
   // Content management
   const contentManager = useSectorContentManager(sectorId);
 
-  // Get user data
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData.user) {
-        setUser(userData.user);
-      }
-    };
-    getUser();
-  }, []);
-
-  // Redirect if not authorized
-  useEffect(() => {
-    if (!authLoading && !isAuthorized) {
-      router.push('/home');
-    }
-  }, [authLoading, isAuthorized, router]);
-
   // Loading state
-  if (authLoading || sectorLoading) {
+  if (sectorLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <LoadingSpinner />
@@ -85,11 +64,6 @@ export default function SectorManagementPage() {
         </div>
       </div>
     );
-  }
-
-  // Not authorized
-  if (!isAuthorized) {
-    return null;
   }
 
   // Not found
@@ -230,5 +204,13 @@ export default function SectorManagementPage() {
         </StandardizedAdminLayout>
       </SectorDataProvider>
     </AlertProvider>
+  );
+}
+
+export default function SectorManagementPage() {
+  return (
+    <AuthGuard requireRole="sector_admin">
+      <SectorManagementPageContent />
+    </AuthGuard>
   );
 }

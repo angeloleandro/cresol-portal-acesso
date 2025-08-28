@@ -2,8 +2,10 @@
 
 'use client';
 
-import { lazy, Suspense, useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { lazy, Suspense, useState } from 'react';
+import { useParams } from 'next/navigation';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import LoadingSpinner from '@/app/components/ui/LoadingSpinner';
 import { AlertProvider } from '@/app/components/alerts';
@@ -15,7 +17,6 @@ import {
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
-import { useSubsectorAuth } from './hooks/useSubsectorAuth';
 import { useSubsectorData } from './hooks/useSubsectorData';
 import { useSubsectorContentManager } from './SubsectorContentManager';
 import { SubsectorDataProvider } from './contexts/SubsectorDataContext';
@@ -32,16 +33,12 @@ const ImagesManagement = lazy(() => import('./components/ImagesManagement').then
 const GroupsManagement = lazy(() => import('./components/GroupsManagementSimple').then(m => ({ default: m.GroupsManagement })));
 const TeamManagement = lazy(() => import('./components/TeamManagement').then(m => ({ default: m.TeamManagement })));
 
-export default function SubsectorManagementPage() {
+function SubsectorManagementPageContent() {
   const params = useParams();
-  const router = useRouter();
   const subsectorId = params.id as string;
+  const { user } = useAuth();
   
   const [activeTab, setActiveTab] = useState<TabType>('news');
-  const [user, setUser] = useState<any>(null);
-  
-  // Authentication
-  const { isAuthorized, loading: authLoading } = useSubsectorAuth(subsectorId);
   
   // Subsector data
   const { subsector, loading: subsectorLoading, error: subsectorError } = useSubsectorData(subsectorId);
@@ -49,26 +46,8 @@ export default function SubsectorManagementPage() {
   // Content management
   const contentManager = useSubsectorContentManager(subsectorId);
 
-  // Get user data
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData.user) {
-        setUser(userData.user);
-      }
-    };
-    getUser();
-  }, []);
-
-  // Redirect if not authorized
-  useEffect(() => {
-    if (!authLoading && !isAuthorized) {
-      router.push('/home');
-    }
-  }, [authLoading, isAuthorized, router]);
-
   // Loading state
-  if (authLoading || subsectorLoading) {
+  if (subsectorLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <LoadingSpinner />
@@ -85,11 +64,6 @@ export default function SubsectorManagementPage() {
         </div>
       </div>
     );
-  }
-
-  // Not authorized
-  if (!isAuthorized) {
-    return null;
   }
 
   // Not found
@@ -225,5 +199,13 @@ export default function SubsectorManagementPage() {
         </StandardizedAdminLayout>
       </SubsectorDataProvider>
     </AlertProvider>
+  );
+}
+
+export default function SubsectorManagementPage() {
+  return (
+    <AuthGuard requireRole="subsector_admin">
+      <SubsectorManagementPageContent />
+    </AuthGuard>
   );
 }

@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 import Breadcrumb from '@/app/components/Breadcrumb';
 import Footer from '@/app/components/Footer';
@@ -65,9 +66,8 @@ interface RelatedDocument {
   created_at: string;
 }
 
-export default function DocumentDetailPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const [, setUser] = useState<any>(null);
+function DocumentDetailPageContent({ params }: { params: { id: string } }) {
+  const { user } = useAuth();
   const [document, setDocument] = useState<DocumentDetail | null>(null);
   const [relatedDocuments, setRelatedDocuments] = useState<RelatedDocument[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,12 +75,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
 
   useEffect(() => {
     const loadDocument = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        router.replace('/login');
-        return;
-      }
-      setUser(userData.user);
+      if (!user) return;
 
       try {
         // Tentar buscar em sector_documents
@@ -155,7 +150,7 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
     };
 
     loadDocument();
-  }, [params.id, router]);
+  }, [params.id, user]);
 
   // Formatador de data
 
@@ -403,5 +398,13 @@ export default function DocumentDetailPage({ params }: { params: { id: string } 
 
       <Footer />
     </div>
+  );
+}
+
+export default function DocumentDetailPage({ params }: { params: { id: string } }) {
+  return (
+    <AuthGuard>
+      <DocumentDetailPageContent params={params} />
+    </AuthGuard>
   );
 }

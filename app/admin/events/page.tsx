@@ -1,12 +1,9 @@
 'use client';
 
-// [DEBUG] Component tracking
-let _eventsPageRenderCount = 0;
-const _eventsPageInstanceId = `events-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
 import React, { useState } from 'react';
-
-import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
+import AuthGuard from '@/app/components/AuthGuard';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { useAdminData } from '@/app/admin/hooks';
 import { StandardizedButton } from '@/app/components/admin';
 import AdminHeader from '@/app/components/AdminHeader';
 import { useAlert } from '@/app/components/alerts';
@@ -41,13 +38,9 @@ interface Event {
   [key: string]: unknown;
 }
 
-export default function EventsPage() {
-  // [DEBUG] Component render tracking
-  _eventsPageRenderCount++;
-  // Debug component render logging removed for production
-
+function EventsPageContent() {
   const alert = useAlert();
-  const { user, loading: _authLoading } = useAdminAuth();
+  const { user } = useAuth();
   const { 
     data: events, 
     loading, 
@@ -91,18 +84,11 @@ export default function EventsPage() {
     
     try {
       setActionLoading(eventKey);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        return;
-      }
-
       const response = await fetch(
         `/api/admin/events?id=${event.id}&type=${event.type}`,
         {
+          method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -134,18 +120,11 @@ export default function EventsPage() {
     
     try {
       setActionLoading(eventKey);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        return;
-      }
-
       const response = await fetch(
         `/api/admin/events?id=${event.id}&type=${event.type}&action=${action}`,
         {
+          method: 'PATCH',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -180,18 +159,11 @@ export default function EventsPage() {
     
     try {
       setActionLoading(eventKey);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        return;
-      }
-
       const response = await fetch(
         `/api/admin/events?id=${event.id}&type=${event.type}&action=${action}`,
         {
+          method: 'PATCH',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -225,18 +197,11 @@ export default function EventsPage() {
     
     try {
       setActionLoading(eventKey);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        return;
-      }
-
       const response = await fetch(
         `/api/admin/events?id=${event.id}&type=${event.type}&action=duplicate`,
         {
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -744,5 +709,13 @@ export default function EventsPage() {
         isLoading={deleteModal.isDeleting}
       />
     </div>
+  );
+}
+
+export default function EventsPage() {
+  return (
+    <AuthGuard requireRole="admin">
+      <EventsPageContent />
+    </AuthGuard>
   );
 }

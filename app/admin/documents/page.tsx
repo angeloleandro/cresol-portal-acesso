@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-
-// [DEBUG] Component tracking
-let _documentsPageRenderCount = 0;
-const _documentsPageInstanceId = `documents-page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-import { useAdminAuth, useAdminData } from '@/app/admin/hooks';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { useAdminData } from '@/app/admin/hooks';
 import { StandardizedButton } from '@/app/components/admin';
 import AdminHeader from '@/app/components/AdminHeader';
 import { useAlert } from '@/app/components/alerts';
+import AuthGuard from '@/app/components/AuthGuard';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import { FormSelect } from '@/app/components/forms';
 import { Icon } from '@/app/components/icons/Icon';
@@ -84,13 +82,9 @@ function getFileTypeLabel(mimeType?: string): string {
   return FILE_TYPE_LABELS[mimeType as keyof typeof FILE_TYPE_LABELS] || 'Arquivo';
 }
 
-export default function DocumentsAdminPage() {
-  // [DEBUG] Component render tracking
-  _documentsPageRenderCount++;
-  // Debug component render logging removed for production
-
+function DocumentsPageContent() {
   const alert = useAlert();
-  const { user, loading: _authLoading } = useAdminAuth();
+  const { user } = useAuth();
   const { 
     data: documents, 
     loading, 
@@ -170,20 +164,11 @@ export default function DocumentsAdminPage() {
   const handleAction = async (action: string, document: Document) => {
     try {
       setActionLoading(`${action}-${document.id}`);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        return;
-      }
 
       const response = await fetch(
         `/api/admin/documents?id=${document.id}&type=${document.type}&action=${action}`,
         {
           method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-          },
         }
       );
 
@@ -208,21 +193,11 @@ export default function DocumentsAdminPage() {
   const handleDelete = async (document: Document) => {
     try {
       setActionLoading(`delete-${document.id}`);
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert.showError('Sessão expirada', 'Faça login novamente');
-        setActionLoading('');
-        return;
-      }
 
       const response = await fetch(
         `/api/admin/documents?id=${document.id}&type=${document.type}`,
         {
           method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-          },
         }
       );
 
@@ -287,13 +262,6 @@ export default function DocumentsAdminPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Loading Overlay para autenticação */}
-      {!user && (
-        <div className="fixed inset-0 bg-white/50 z-50 flex items-center justify-center">
-          <UnifiedLoadingSpinner fullScreen={true} size="large" message="Verificando permissões..." />
-        </div>
-      )}
-      
       <AdminHeader user={user} />
       
       <main className="container py-8">
@@ -677,5 +645,13 @@ export default function DocumentsAdminPage() {
         isLoading={deleteModal.isDeleting}
       />
     </div>
+  );
+}
+
+export default function DocumentsPage() {
+  return (
+    <AuthGuard requireRole="admin">
+      <DocumentsPageContent />
+    </AuthGuard>
   );
 }
