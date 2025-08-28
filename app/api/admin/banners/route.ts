@@ -102,44 +102,84 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Título e URL da imagem são obrigatórios' }, { status: 400 });
     }
 
-    // Lógica de posição automática simples (como nos vídeos)
+    // Iniciar transação para garantir order_index único
     let finalOrderIndex = order_index;
+    let newBanner;
     
     if (finalOrderIndex === undefined || finalOrderIndex === null || finalOrderIndex === 0) {
-      // Buscar o máximo order_index existente
-      const { data: maxOrderData, error: maxOrderError } = await supabase
-        .from('banners')
-        .select('order_index')
-        .order('order_index', { ascending: false })
-        .limit(1);
+      // Usar transação para evitar race condition
+      const { data, error } = await supabase.rpc('create_banner_with_order', {
+        p_title: title,
+        p_image_url: image_url,
+        p_link: link,
+        p_is_active: is_active ?? true
+      });
 
-      if (maxOrderError) {
-        return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+      if (error) {
+        console.error('Erro ao criar banner com order:', error);
+        // Fallback para método tradicional se RPC não existe
+        const { data: maxOrderData, error: maxOrderError } = await supabase
+          .from('banners')
+          .select('order_index')
+          .order('order_index', { ascending: false })
+          .limit(1);
+
+        if (maxOrderError) {
+          return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+        }
+
+        finalOrderIndex = maxOrderData && maxOrderData.length > 0 
+          ? maxOrderData[0].order_index + 1 
+          : 0;
+          
+        const insertData = {
+          title,
+          image_url,
+          link,
+          is_active: is_active ?? true,
+          order_index: finalOrderIndex
+        };
+
+        const { data: fallbackBanner, error: insertError } = await supabase
+          .from('banners')
+          .insert([insertData])
+          .select()
+          .single();
+          
+        if (insertError) {
+          console.error('Erro ao criar banner:', insertError);
+          return NextResponse.json({ error: 'Erro ao criar banner' }, { status: 500 });
+        }
+        
+        newBanner = fallbackBanner;
+      } else {
+        newBanner = data;
+        finalOrderIndex = data.order_index;
       }
+    } else {
+      // Order_index específico fornecido
+      const insertData = {
+        title,
+        image_url,
+        link,
+        is_active: is_active ?? true,
+        order_index: finalOrderIndex
+      };
 
-      finalOrderIndex = maxOrderData && maxOrderData.length > 0 
-        ? maxOrderData[0].order_index + 1 
-        : 0;
+      const { data: directBanner, error: insertError } = await supabase
+        .from('banners')
+        .insert([insertData])
+        .select()
+        .single();
+        
+      if (insertError) {
+        console.error('Erro ao criar banner:', insertError);
+        return NextResponse.json({ error: 'Erro ao criar banner' }, { status: 500 });
+      }
+      
+      newBanner = directBanner;
     }
 
-    const insertData = {
-      title,
-      image_url,
-      link,
-      is_active: is_active ?? true,
-      order_index: finalOrderIndex
-    };
-
-    const { data: newBanner, error: insertError } = await supabase
-      .from('banners')
-      .insert([insertData])
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error('Erro ao criar banner:', insertError);
-      return NextResponse.json({ error: 'Erro ao criar banner' }, { status: 500 });
-    }
 
     return NextResponse.json({
       success: true,

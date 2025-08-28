@@ -46,7 +46,7 @@ const cresolColors = {
   },
   // Design tokens semânticos para hover states
   cresol: {
-    cardHover: { value: "#8A8A8A" }, // Card hover unificado - cinza mais claro
+    cardHover: { value: "#A3A3A3" }, // Card hover unificado - cinza ainda mais claro
   }
 };
 

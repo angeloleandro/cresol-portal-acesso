@@ -19,6 +19,7 @@ import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { truncateBannerLink, formatUrlForTooltip } from '@/lib/utils/truncate-url';
 
 const supabase = createClient();
 
@@ -165,8 +166,14 @@ function AdminBannersContent() {
                 <div className="p-4 flex-1 flex flex-col">
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">{banner.title || "(Sem título)"}</h3>
                   {banner.link && (
-                    <a href={banner.link} className="text-primary text-sm underline break-all hover:text-primary-dark" target="_blank" rel="noopener noreferrer">
-                      {banner.link}
+                    <a 
+                      href={banner.link} 
+                      className="text-primary text-sm underline hover:text-primary-dark transition-colors duration-150 inline-block max-w-full" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      title={formatUrlForTooltip(banner.link)}
+                    >
+                      <span className="truncate block">{truncateBannerLink(banner.link)}</span>
                     </a>
                   )}
                   <div className="mt-auto flex gap-2 pt-4">

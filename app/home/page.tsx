@@ -103,8 +103,11 @@ function HomeContent() {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="text-center">
-            <p className="text-gray-600 text-sm font-medium tracking-wide">
-              Cresol Fronteiras PR/SC/SP/ES
+            <p className="text-primary text-xl tracking-wide">
+              <span className="font-bold">HUB</span>{" "}
+              <span className="font-light">2.0</span>{" - "}
+              <span className="font-bold">Cresol Fronteiras</span>{" "}
+              <span className="font-light">PR/SC/SP/ES</span>
             </p>
           </div>
         </div>

@@ -122,8 +122,10 @@ export function ImageModal({
           <motion.div
             ref={containerRef}
             className={clsx(
-              'relative w-full mx-4 bg-white border border-gray-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-300',
-              isMobile ? 'h-full' : 'max-w-6xl max-h-[90vh] rounded-md'
+              'relative bg-white border border-gray-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-300',
+              isMobile 
+                ? 'w-full h-full' 
+                : 'mx-4 max-w-[90vw] max-h-[95vh] rounded-lg shadow-2xl'
             )}
             variants={modalVariants}
             role="dialog"
@@ -134,18 +136,25 @@ export function ImageModal({
             {...swipeHandlers}
           >
             {/* Header with title and close button */}
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-3 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    Visualizador de Imagem
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Visualizador de Imagem
+                    </h2>
+                    {totalImages > 1 && (
+                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        {currentIndex + 1} de {totalImages}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500 truncate">
                     {image.title || 'Imagem da galeria'}
                   </p>
                 </div>
                 <button
-                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  className="p-1 hover:bg-gray-100 rounded transition-colors ml-4"
                   onClick={onClose}
                   aria-label="Fechar modal"
                 >
@@ -160,10 +169,17 @@ export function ImageModal({
                 {/* Previous Button */}
                 <motion.button
                   className={clsx(
-                    'absolute left-4 top-1/2 -translate-y-1/2 z-20',
-                    'w-12 h-12 rounded-full flex items-center justify-center',
+                    'absolute top-1/2 -translate-y-1/2 z-20',
+                    'bg-white/90 backdrop-blur-sm rounded-full',
+                    'flex items-center justify-center shadow-lg border border-gray-200',
+                    'transition-all duration-200',
                     'focus:outline-none focus:ring-2 focus:ring-primary/20',
-                    canNavigate.previous ? 'cursor-pointer' : 'cursor-not-allowed'
+                    isMobile 
+                      ? 'left-3 w-8 h-8' 
+                      : 'left-6 w-10 h-10',
+                    canNavigate.previous 
+                      ? 'hover:bg-white hover:shadow-xl cursor-pointer' 
+                      : 'cursor-not-allowed opacity-50'
                   )}
                   variants={navButtonVariants}
                   initial="idle"
@@ -176,8 +192,8 @@ export function ImageModal({
                   <Icon 
                     name="chevron-left" 
                     className={clsx(
-                      'w-6 h-6 text-white',
-                      !canNavigate.previous && 'opacity-50'
+                      canNavigate.previous ? 'text-gray-700' : 'text-gray-400',
+                      isMobile ? 'w-4 h-4' : 'w-5 h-5'
                     )} 
                   />
                 </motion.button>
@@ -185,10 +201,17 @@ export function ImageModal({
                 {/* Next Button */}
                 <motion.button
                   className={clsx(
-                    'absolute right-4 top-1/2 -translate-y-1/2 z-20',
-                    'w-12 h-12 rounded-full flex items-center justify-center',
+                    'absolute top-1/2 -translate-y-1/2 z-20',
+                    'bg-white/90 backdrop-blur-sm rounded-full',
+                    'flex items-center justify-center shadow-lg border border-gray-200',
+                    'transition-all duration-200',
                     'focus:outline-none focus:ring-2 focus:ring-primary/20',
-                    canNavigate.next ? 'cursor-pointer' : 'cursor-not-allowed'
+                    isMobile 
+                      ? 'right-3 w-8 h-8' 
+                      : 'right-6 w-10 h-10',
+                    canNavigate.next 
+                      ? 'hover:bg-white hover:shadow-xl cursor-pointer' 
+                      : 'cursor-not-allowed opacity-50'
                   )}
                   variants={navButtonVariants}
                   initial="idle"
@@ -201,8 +224,8 @@ export function ImageModal({
                   <Icon 
                     name="chevron-right" 
                     className={clsx(
-                      'w-6 h-6 text-white',
-                      !canNavigate.next && 'opacity-50'
+                      canNavigate.next ? 'text-gray-700' : 'text-gray-400',
+                      isMobile ? 'w-4 h-4' : 'w-5 h-5'
                     )} 
                   />
                 </motion.button>
@@ -210,11 +233,8 @@ export function ImageModal({
             )}
 
             {/* Image Container - Scrollable body */}
-            <div className="flex-1 overflow-y-auto">
-              <div className={clsx(
-                'relative bg-black flex items-center justify-center overflow-hidden',
-                isMobile ? 'h-full' : 'aspect-video max-h-[70vh]'
-              )}>
+            <div className="flex-1 overflow-auto">
+              <div className="relative bg-white flex items-center justify-center h-full">
               {/* Loading State */}
               {!imageLoaded && !imageError && (
                 <motion.div
@@ -223,7 +243,7 @@ export function ImageModal({
                   initial="loading"
                   animate="loading"
                 >
-                  <div className="text-white text-center">
+                  <div className="text-gray-700 text-center">
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -262,44 +282,53 @@ export function ImageModal({
               {/* Image */}
               {!imageError && (
                 <motion.div
-                  className="relative w-full h-full cursor-zoom-in"
+                  className={clsx(
+                    'relative cursor-zoom-in flex items-center justify-center',
+                    'w-full min-h-[400px] p-4',
+                    isMobile ? 'min-h-[50vh]' : 'min-h-[400px]'
+                  )}
                   variants={zoomVariants}
                   animate={isZoomed ? "zoomed" : "initial"}
                   onClick={toggleZoom}
-                  key={`image-${image.id}-${currentIndex}`} // Force re-render on navigation
+                  key={`image-${image.id}-${currentIndex}`}
                 >
-                  <OptimizedImage
-                    key={`optimized-${image.id}-${currentIndex}`} // Critical: Force image component re-mount
-                    src={image.image_url}
-                    alt={image.alt_text || image.title || "Imagem da galeria"}
-                    fill
-                    className={clsx(
-                      'object-contain transition-opacity duration-300',
-                      imageLoaded ? 'opacity-100' : 'opacity-0'
-                    )}
-                    sizes="90vw"
-                    quality={90}
-                    priority
-                    onLoad={handleImageLoad}
-                    onError={handleImageError}
-                    context="gallery"
-                  />
+                  <div className="relative flex items-center justify-center">
+                    <OptimizedImage
+                      key={`optimized-${image.id}-${currentIndex}`}
+                      src={image.image_url}
+                      alt={image.alt_text || image.title || "Imagem da galeria"}
+                      width={0}
+                      height={0}
+                      className={clsx(
+                        'w-auto h-auto object-contain transition-opacity duration-300',
+                        'max-w-[80vw]',
+                        isMobile ? 'max-w-[85vw] max-h-[60vh]' : 'max-h-[75vh]',
+                        imageLoaded ? 'opacity-100' : 'opacity-0'
+                      )}
+                      sizes="(max-width: 768px) 90vw, 85vw"
+                      quality={95}
+                      priority
+                      onLoad={handleImageLoad}
+                      onError={handleImageError}
+                      context="gallery"
+                    />
+                  </div>
                 </motion.div>
               )}
 
-              {/* Zoom Indicator */}
-              {imageLoaded && !imageError && (
+              {/* Zoom Indicator - Only on mobile or when zoomed */}
+              {imageLoaded && !imageError && (isMobile || isZoomed) && (
                 <div className="absolute bottom-4 left-4 z-10">
-                  <div className="bg-black/50 text-white px-3 py-1.5 rounded-lg text-sm backdrop-blur-sm">
+                  <div className="bg-black/60 text-white px-2 py-1 rounded text-xs backdrop-blur-sm">
                     {isZoomed ? (
                       <span className="flex items-center gap-1">
-                        <Icon name="search" className="w-4 h-4" />
-                        Clique para diminuir
+                        <Icon name="search" className="w-3 h-3" />
+                        Toque para diminuir
                       </span>
                     ) : (
                       <span className="flex items-center gap-1">
-                        <Icon name="search" className="w-4 h-4" />
-                        Clique para ampliar
+                        <Icon name="search" className="w-3 h-3" />
+                        Toque para ampliar
                       </span>
                     )}
                   </div>
@@ -309,10 +338,8 @@ export function ImageModal({
 
               {/* Image Information */}
               {showInfo && !isMobile && (
-                <ImageInfo 
+                <CompactImageInfo 
                   image={image} 
-                  currentIndex={currentIndex} 
-                  totalImages={totalImages} 
                 />
               )}
             </div>
@@ -326,10 +353,8 @@ export function ImageModal({
               initial="hidden"
               animate="visible"
             >
-              <MobileImageInfo 
+              <CompactMobileImageInfo 
                 image={image} 
-                currentIndex={currentIndex} 
-                totalImages={totalImages} 
               />
             </motion.div>
           )}
@@ -340,95 +365,37 @@ export function ImageModal({
 }
 
 /**
- * Desktop Image Information Panel
+ * Compact Desktop Image Information Panel
  */
-function ImageInfo({ 
-  image, 
-  currentIndex = 0, 
-  totalImages = 0 
+function CompactImageInfo({ 
+  image
 }: { 
   image: GalleryImage; 
-  currentIndex?: number; 
-  totalImages?: number; 
 }) {
-
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return null;
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let size = bytes;
-    let unitIndex = 0;
-    
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
-  };
-
   return (
-    <div className="p-6 bg-gray-50 border-t border-gray-200">
-      <div className="flex items-start justify-between gap-4">
+    <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+      <div className="flex items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
-          {/* Title */}
-          <h2 
-            id="modal-title"
-            className="text-xl font-bold text-gray-900 mb-3 truncate"
-          >
+          <h2 className="text-base font-medium text-gray-900 truncate">
             {image.title || 'Imagem da galeria'}
           </h2>
-          
-          {/* Image Details */}
-          <div 
-            id="modal-description"
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600"
-          >
-            {/* File Info */}
-            {image.file_size && (
-              <div className="flex items-center gap-2">
-                <Icon name="file" className="w-4 h-4 text-gray-400" />
-                <span>Tamanho: {formatFileSize(image.file_size)}</span>
-              </div>
-            )}
-            
-            {/* Upload Date */}
-            {image.created_at && (
-              <div className="flex items-center gap-2">
-                <Icon name="calendar" className="w-4 h-4 text-gray-400" />
-                <span>Adicionado em {FormatDate(image.created_at)}</span>
-              </div>
-            )}
-
-            {/* Image Type */}
-            {image.mime_type && (
-              <div className="flex items-center gap-2">
-                <Icon name="image" className="w-4 h-4 text-gray-400" />
-                <span className="uppercase font-mono text-xs bg-gray-100 px-2 py-1 rounded">
-                  {image.mime_type.split('/')[1] || 'IMG'}
-                </span>
-              </div>
-            )}
-          </div>
         </div>
         
-        {/* Counter and Actions */}
-        <div className="flex flex-col items-end gap-3">
-          {/* Image Counter */}
-          {totalImages > 1 && (
-            <div className="bg-gray-100 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-700">
-              {currentIndex + 1} de {totalImages}
-            </div>
-          )}
+        <div className="flex items-center gap-3">
+          {/* Zoom Hint */}
+          <span className="text-xs text-gray-500 hidden sm:block">
+            Clique para ampliar
+          </span>
           
           {/* Download Button */}
           <a
             href={image.image_url}
             download
             className={clsx(
-              'inline-flex items-center gap-2 px-3 py-1.5 text-sm',
+              'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm',
               'bg-primary hover:bg-primary-dark',
               'text-white font-medium',
-              'rounded-lg transition-colors',
+              'rounded-md transition-colors',
               'focus:outline-none focus:ring-2 focus:ring-primary/20'
             )}
           >
@@ -442,39 +409,30 @@ function ImageInfo({
 }
 
 /**
- * Mobile Image Information Overlay
+ * Compact Mobile Image Information Overlay
  */
-function MobileImageInfo({ 
-  image, 
-  currentIndex = 0, 
-  totalImages = 0 
+function CompactMobileImageInfo({ 
+  image
 }: { 
   image: GalleryImage; 
-  currentIndex?: number; 
-  totalImages?: number; 
 }) {
   return (
-    <div className="bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
+    <div className="bg-gradient-to-t from-black/70 to-transparent p-3 text-white">
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold mb-1 truncate">
+          <h2 className="text-base font-medium truncate">
             {image.title || 'Imagem da galeria'}
           </h2>
-          {totalImages > 1 && (
-            <p className="text-sm text-gray-300">
-              {currentIndex + 1} de {totalImages}
-            </p>
-          )}
         </div>
         
         {/* Download Button */}
         <a
           href={image.image_url}
           download
-          className="ml-4 p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+          className="ml-3 p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
           aria-label="Baixar imagem"
         >
-          <Icon name="download" className="w-5 h-5" />
+          <Icon name="download" className="w-4 h-4" />
         </a>
       </div>
     </div>

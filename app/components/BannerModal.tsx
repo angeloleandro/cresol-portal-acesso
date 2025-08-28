@@ -107,6 +107,21 @@ export default function BannerModal({ isOpen, onClose, onSave, banner }: BannerM
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validações básicas
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+
+      if (file.size > maxSize) {
+        setError('Arquivo muito grande. Máximo 10MB.');
+        return;
+      }
+
+      if (!allowedTypes.includes(file.type)) {
+        setError('Tipo de arquivo não permitido. Use JPG, PNG, WebP ou GIF.');
+        return;
+      }
+
+      setError(null);
       setImageFile(file);
       const url = URL.createObjectURL(file);
       setImagePreview(url);
@@ -155,35 +170,99 @@ export default function BannerModal({ isOpen, onClose, onSave, banner }: BannerM
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `banner-${Date.now()}.${fileExt}`;
-        const filePath = `${fileName}`;
+        const filePath = `banners/${fileName}`;
+        
+        // Converter File para ArrayBuffer (seguindo padrão da galeria)
+        const fileBuffer = await imageFile.arrayBuffer();
+        const uint8Array = new Uint8Array(fileBuffer);
+        
         const { error: uploadError } = await supabase.storage
-          .from('banners')
-          .upload(filePath, imageFile, { upsert: true });
-        if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage.from('banners').getPublicUrl(filePath);
+          .from('images')
+          .upload(filePath, uint8Array, { 
+            contentType: imageFile.type,
+            cacheControl: '3600',
+            upsert: true 
+          });
+        if (uploadError) {
+          console.error('Erro no upload do banner:', uploadError);
+          throw uploadError;
+        }
+        const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath);
         imageUrl = publicUrl;
       }
 
-      // Use direct Supabase calls (APIs foram corrigidas)
+      // Lógica de posição automática (como nos vídeos)
+      let finalOrderIndex = orderIndex;
+      
+      if (!banner?.id && (finalOrderIndex === 0 || finalOrderIndex === null || finalOrderIndex === undefined)) {
+        // Buscar próxima posição disponível para novos banners
+        const { data: maxOrderData } = await supabase
+          .from('banners')
+          .select('order_index')
+          .order('order_index', { ascending: false })
+          .limit(1);
+
+        finalOrderIndex = maxOrderData && maxOrderData.length > 0 
+          ? maxOrderData[0].order_index + 1 
+          : 0;
+      }
+
+      // Usar APIs em vez de Supabase direto para evitar race condition
       if (banner?.id) {
-        // Update
-        const { error: updateError } = await supabase
-          .from('banners')
-          .update({ title, link, is_active: isActive, order_index: orderIndex, image_url: imageUrl })
-          .eq('id', banner.id);
-        if (updateError) throw updateError;
+        // Update via API
+        const response = await fetch('/api/admin/banners', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: banner.id,
+            title,
+            image_url: imageUrl,
+            link,
+            is_active: isActive,
+            order_index: finalOrderIndex
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error('Erro ao atualizar banner:', error);
+          throw new Error(error.error || 'Erro ao atualizar banner');
+        }
       } else {
-        // Insert
-        const { error: insertError } = await supabase
-          .from('banners')
-          .insert([{ title, link, is_active: isActive, order_index: orderIndex, image_url: imageUrl }]);
-        if (insertError) throw insertError;
+        // Create via API - deixar a API determinar order_index
+        const response = await fetch('/api/admin/banners', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title,
+            image_url: imageUrl,
+            link,
+            is_active: isActive,
+            order_index: finalOrderIndex
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error('Erro ao criar banner:', error);
+          throw new Error(error.error || 'Erro ao criar banner');
+        }
+        
+        // A API retorna o banner criado com order_index correto
+        const result = await response.json();
+        console.log('Banner criado com sucesso:', result.data);
       }
       
       onSave();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Erro ao salvar banner');
+      console.error('Erro detalhado ao salvar banner:', err);
+      const errorMessage = err.message || 'Erro ao salvar banner';
+      setError(errorMessage);
     } finally {
       setIsUploading(false);
     }
@@ -235,7 +314,7 @@ export default function BannerModal({ isOpen, onClose, onSave, banner }: BannerM
           
           {/* Body - Scrollable content */}
           <div className="flex-1 overflow-y-auto">
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form id="banner-form" onSubmit={handleSubmit} className="p-6 space-y-6">
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
                   {error}
@@ -401,10 +480,10 @@ export default function BannerModal({ isOpen, onClose, onSave, banner }: BannerM
               Cancelar
             </Button>
             <Button
-              type="button"
+              type="submit"
               variant="primary"
-              onClick={handleSubmit}
               disabled={isUploading}
+              form="banner-form"
             >
               {isUploading ? 'Salvando...' : 'Salvar Banner'}
             </Button>

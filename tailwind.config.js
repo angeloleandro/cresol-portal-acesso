@@ -31,7 +31,7 @@ module.exports = {
           white: '#FFFFFF',      // Branco
         },
         // Sistema unificado de hover para cards
-        'card-hover': '#8A8A8A', // Cinza mais claro para melhor visibilidade
+        'card-hover': '#A3A3A3', // Cinza ainda mais claro para melhor visibilidade
         // Cores alias para compatibilidade
         'cresol-gray': '#727176',
         'cresol-gray-light': '#D0D0CE',
