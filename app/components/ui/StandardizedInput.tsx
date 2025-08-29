@@ -248,7 +248,7 @@ export const StandardizedInput = forwardRef<HTMLInputElement | HTMLTextAreaEleme
               onClick={onClick}
               disabled={effectiveDisabled}
               tabIndex={0}
-              className="flex items-center justify-center w-full h-full text-gray-400 hover:text-gray-600 transition-colors"
+              className="flex items-center justify-center w-full h-full text-gray-400 hover:text-gray-600 transition-colors border-0 outline-none focus:outline-none bg-transparent p-0 m-0"
               aria-label={iconName ? `${iconName} icon` : 'Interactive element'}
             >
               {element || (iconName && <Icon name={iconName} className={INPUT_CONFIG.sizes[size].iconSize} />)}

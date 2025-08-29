@@ -9,6 +9,7 @@ import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
+import OptimizedImage from '@/app/components/OptimizedImage';
 
 import Breadcrumb from '../../components/Breadcrumb';
 import { Icon } from '../../components/icons';
@@ -308,27 +309,41 @@ function SetorDetalhesContent() {
                         role="listitem"
                         aria-labelledby={`news-title-${index}`}
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 
-                            id={`news-title-${index}`}
-                            className="font-semibold text-cresol-gray-dark"
-                          >
-                            {article.title}
-                          </h3>
-                          {article.is_featured && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary ml-2">
-                              Destaque
-                            </span>
+                        <div className="flex gap-4">
+                          {article.image_url && (
+                            <div className="relative w-40 h-30 flex-shrink-0">
+                              <OptimizedImage
+                                src={article.image_url}
+                                alt={article.title}
+                                fill
+                                className="object-cover object-center rounded-md"
+                              />
+                            </div>
                           )}
-                        </div>
-                        <p className="text-cresol-gray text-sm mb-2">
-                          {article.summary}
-                        </p>
-                        <div className="flex items-center text-xs text-cresol-gray">
-                          <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
-                          <time dateTime={article.created_at}>
-                            {new Date(article.created_at).toLocaleDateString('pt-BR')}
-                          </time>
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 
+                                id={`news-title-${index}`}
+                                className="font-semibold text-cresol-gray-dark"
+                              >
+                                {article.title}
+                              </h3>
+                              {article.is_featured && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary ml-2">
+                                  Destaque
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-cresol-gray text-sm mb-2">
+                              {article.summary}
+                            </p>
+                            <div className="flex items-center text-xs text-cresol-gray">
+                              <Icon name="clock" className="h-3 w-3 mr-1" aria-hidden="true" />
+                              <time dateTime={article.created_at}>
+                                {new Date(article.created_at).toLocaleDateString('pt-BR')}
+                              </time>
+                            </div>
+                          </div>
                         </div>
                       </article>
                     ))}
