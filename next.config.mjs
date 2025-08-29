@@ -33,9 +33,10 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 512],
     // Cache otimizado para reduzir requisições ao Supabase
-    minimumCacheTTL: 300, // 5 minutos de cache mínimo
-    // Desabilita SVG por segurança (banners devem ser JPG/PNG/WebP)
-    dangerouslyAllowSVG: false,
+    minimumCacheTTL: 600, // 10 minutos de cache mínimo (aumentado para reduzir timeouts)
+    // Permite SVG para fallbacks e placeholders
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     // Configurações de timeout e qualidade
     unoptimized: false, // Mantém otimização ativa
   },
@@ -86,7 +87,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=604800, immutable'
+            value: 'public, max-age=2592000, immutable' // 30 dias para imagens otimizadas
+          },
+          {
+            key: 'Retry-After',
+            value: '300' // 5 minutos em caso de falha
           }
         ]
       }

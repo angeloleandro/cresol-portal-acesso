@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import { logger } from '../../lib/production-logger';
 interface OptimizedImageProps {
@@ -46,6 +46,18 @@ export default function OptimizedImage({
 }: OptimizedImageProps) {
   const [imageError, setImageError] = useState(false);
   const [imageSrc, setImageSrc] = useState(src);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [timeoutError, setTimeoutError] = useState(false);
+
+  // Reset states when src changes
+  useEffect(() => {
+    setImageError(false);
+    setRetryCount(0);
+    setIsRetrying(false);
+    setTimeoutError(false);
+    setImageSrc(src);
+  }, [src]);
 
   // ✅ QUALITY AUTOMÁTICA baseada no contexto e tamanho
   const getOptimalQuality = () => {
@@ -93,29 +105,8 @@ export default function OptimizedImage({
   //   });
   // }
 
-  const handleImageError = () => {
-    // Log detalhado apenas em desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
-      console.error('OptimizedImage Error:', {
-        src: imageSrc,
-        originalSrc: src,
-        alt,
-        isValidUrl: isValidUrl(imageSrc),
-        shouldForceUnoptimized,
-        isSupabaseImage
-      });
-    }
-    
-    setImageError(true);
-    if (fallbackSrc && fallbackSrc !== imageSrc) {
-      setImageSrc(fallbackSrc);
-    } else {
-      onError?.();
-    }
-  };
-
   // Verificar se a URL é válida (URLs externas ou caminhos locais)
-  const isValidUrl = (url: string) => {
+  const isValidUrl = useCallback((url: string) => {
     // CORREÇÃO: Permitir caminhos relativos locais (pasta public/)
     if (url.startsWith('/')) {
       // Caminhos que começam com / são válidos (arquivos da pasta public)
@@ -168,7 +159,68 @@ export default function OptimizedImage({
       // Se não conseguiu parsear como URL, rejeitar
       return false;
     }
-  };
+  }, [isVercel]);
+
+  const handleImageError = useCallback(() => {
+    const maxRetries = 3;
+    const isTimeoutLikeError = true; // Assumimos que erros são timeout por padrão
+    
+    // Log detalhado apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.error('OptimizedImage Error:', {
+        src: imageSrc,
+        originalSrc: src,
+        alt,
+        retryCount,
+        isValidUrl: isValidUrl(imageSrc),
+        shouldForceUnoptimized,
+        isSupabaseImage
+      });
+    }
+    
+    if (isTimeoutLikeError && retryCount < maxRetries) {
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = Math.min(1000 * Math.pow(2, retryCount), 8000);
+      
+      setIsRetrying(true);
+      setTimeoutError(true);
+      
+      setTimeout(() => {
+        setRetryCount(prev => prev + 1);
+        setIsRetrying(false);
+        // Força re-render da imagem adicionando timestamp
+        const newSrc = imageSrc.includes('?') 
+          ? `${imageSrc}&retry=${retryCount + 1}&t=${Date.now()}`
+          : `${imageSrc}?retry=${retryCount + 1}&t=${Date.now()}`;
+        setImageSrc(newSrc);
+      }, delay);
+      
+    } else {
+      // Após esgotar tentativas ou erro definitivo
+      setImageError(true);
+      setIsRetrying(false);
+      setTimeoutError(false);
+      
+      if (fallbackSrc && fallbackSrc !== imageSrc) {
+        setImageSrc(fallbackSrc);
+      } else {
+        onError?.();
+      }
+    }
+  }, [retryCount, imageSrc, src, alt, fallbackSrc, onError, isSupabaseImage, isValidUrl, shouldForceUnoptimized]);
+
+  // Estado de retry em progresso
+  if (isRetrying && timeoutError) {
+    return (
+      <div 
+        className={`flex flex-col items-center justify-center bg-gradient-to-br from-orange-100 to-orange-50 text-orange-600 ${className}`}
+        style={fill ? { position: 'absolute', inset: 0 } : { width, height }}
+      >
+        <div className="animate-spin w-6 h-6 border-2 border-orange-300 border-t-orange-600 rounded-full mb-2"></div>
+        <span className="text-xs font-medium">Tentativa {retryCount + 1}/3</span>
+      </div>
+    );
+  }
 
   // Se a URL não é válida ou houve erro e não há fallback
   if (!isValidUrl(imageSrc) || (imageError && !fallbackSrc)) {
