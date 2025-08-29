@@ -165,10 +165,20 @@ function DocumentsPageContent() {
     try {
       setActionLoading(`${action}-${document.id}`);
 
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        alert.showError('Erro de autenticação', 'Faça login novamente');
+        return;
+      }
+
       const response = await fetch(
         `/api/admin/documents?id=${document.id}&type=${document.type}&action=${action}`,
         {
           method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
         }
       );
 
@@ -194,10 +204,20 @@ function DocumentsPageContent() {
     try {
       setActionLoading(`delete-${document.id}`);
 
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        alert.showError('Erro de autenticação', 'Faça login novamente');
+        return;
+      }
+
       const response = await fetch(
         `/api/admin/documents?id=${document.id}&type=${document.type}`,
         {
           method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
         }
       );
 
@@ -285,10 +305,9 @@ function DocumentsPageContent() {
           <StandardizedButton
             variant="primary"
             onClick={handleCreate}
-            className="flex items-center space-x-2"
           >
-            <Icon name="plus" className="h-4 w-4" />
-            <span>Novo Documento</span>
+            <Icon name="plus" className="h-4 w-4 mr-2" />
+            Novo Documento
           </StandardizedButton>
         </div>
 

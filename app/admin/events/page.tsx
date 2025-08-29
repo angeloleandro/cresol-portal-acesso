@@ -296,9 +296,9 @@ function EventsPageContent() {
             </div>
             <StandardizedButton
               variant="primary"
-              icon={<Icon name="plus" className="h-4 w-4" />}
               onClick={handleCreateEvent}
             >
+              <Icon name="plus" className="h-4 w-4 mr-2" />
               Novo Evento
             </StandardizedButton>
           </div>
@@ -518,9 +518,9 @@ function EventsPageContent() {
             </p>
             <StandardizedButton
               variant="primary"
-              icon={<Icon name="plus" className="h-4 w-4" />}
               onClick={handleCreateEvent}
             >
+              <Icon name="plus" className="h-4 w-4 mr-2" />
               Novo Evento
             </StandardizedButton>
           </div>

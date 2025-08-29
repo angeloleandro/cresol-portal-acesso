@@ -246,10 +246,9 @@ function NewsAdminPageContent() {
           <StandardizedButton
             variant="primary"
             onClick={handleCreate}
-            className="flex items-center space-x-2"
           >
-            <Icon name="plus" className="h-4 w-4" />
-            <span>Nova Notícia</span>
+            <Icon name="plus" className="h-4 w-4 mr-2" />
+            Nova Notícia
           </StandardizedButton>
         </div>
 

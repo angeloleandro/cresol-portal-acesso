@@ -148,12 +148,21 @@ function MessagesAdminPageContent() {
     
     try {
       setActionLoading(messageKey);
+      
+      // Obter sessão para autorização
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        alert.showError('Erro de autenticação', 'Faça login novamente');
+        return;
+      }
+      
       const response = await fetch(
         `/api/admin/messages?id=${message.id}&type=${message.type}`,
         {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
           },
         }
       );
@@ -183,12 +192,21 @@ function MessagesAdminPageContent() {
     
     try {
       setActionLoading(messageKey);
+      
+      // Obter sessão para autorização
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        alert.showError('Erro de autenticação', 'Faça login novamente');
+        return;
+      }
+      
       const response = await fetch(
         `/api/admin/messages?id=${message.id}&type=${message.type}&action=duplicate`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
           },
         }
       );
@@ -265,12 +283,12 @@ function MessagesAdminPageContent() {
             </div>
             <StandardizedButton
               variant="primary"
-              icon={<Icon name="plus" className="h-4 w-4" />}
               onClick={() => {
                 setEditingMessage(null);
                 setIsModalOpen(true);
               }}
             >
+              <Icon name="plus" className="h-4 w-4 mr-2" />
               Nova Mensagem
             </StandardizedButton>
           </div>
@@ -466,12 +484,12 @@ function MessagesAdminPageContent() {
             </p>
             <StandardizedButton
               variant="primary"
-              icon={<Icon name="plus" className="h-4 w-4" />}
               onClick={() => {
                 setEditingMessage(null);
                 setIsModalOpen(true);
               }}
             >
+              <Icon name="plus" className="h-4 w-4 mr-2" />
               Nova Mensagem
             </StandardizedButton>
           </div>

@@ -149,18 +149,19 @@ function AdminGalleryContent() {
 
         {/* Header Section */}
         <div className="mb-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <h1 className="text-3xl font-bold text-primary mb-1">
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h1 className="text-3xl font-bold text-cresol-orange mb-2">
               Gerenciar Galeria de Imagens
             </h1>
-            <p className="text-sm text-gray-600">Adicione, edite ou remova imagens exibidas na galeria do portal</p>
+            <p className="text-gray-600">Adicione, edite ou remova imagens exibidas na galeria do portal</p>
           </div>
         </div>
 
         {/* Actions Section */}
         <div className="mb-6 flex gap-3 flex-wrap">
           <StandardizedButton variant="primary" onClick={() => setShowForm(true)}>
-            + Nova Imagem
+            <Icon name="plus" className="h-4 w-4 mr-2" />
+            Nova Imagem
           </StandardizedButton>
           <StandardizedButton variant="secondary" onClick={() => setShowCollectionsManager(true)}>
             <Icon name="folder" className="h-5 w-5 mr-2" />

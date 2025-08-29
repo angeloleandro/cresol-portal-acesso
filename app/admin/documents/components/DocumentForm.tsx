@@ -358,6 +358,7 @@ export function DocumentForm({ document, isOpen, onClose, onSuccess }: DocumentF
 
       // Preparar dados para envio
       const requestData: Record<string, unknown> = {
+        type: formData.type,
         title: formData.title,
         description: formData.description || null,
         file_url: finalFileUrl,

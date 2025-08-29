@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@chakra-ui/react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import AuthGuard from '@/app/components/AuthGuard';
 import AdminHeader from '@/app/components/AdminHeader';
 import Breadcrumb from '@/app/components/Breadcrumb';
+import { Icon } from '@/app/components/icons/Icon';
 import { NewsManagement, BaseNews } from '@/app/components/management/NewsManagement';
 import { GENERAL_NEWS_CONFIG } from '@/app/components/management/configs/news-config';
 import { createClient } from '@/lib/supabase/client';
@@ -17,6 +20,7 @@ interface GeneralNews extends BaseNews {
 }
 
 function GeneralNewsAdminPageContent() {
+  const router = useRouter();
   const { user } = useAuth();
   const [news, setNews] = useState<GeneralNews[]>([]);
   const [showDrafts, setShowDrafts] = useState(false);
@@ -63,6 +67,11 @@ function GeneralNewsAdminPageContent() {
   // Toggle entre rascunhos e publicadas
   const handleToggleDrafts = async () => {
     setShowDrafts(!showDrafts);
+  };
+
+  // Navegar para criar nova notícia
+  const handleCreateNews = () => {
+    router.push('/admin/general-news/create');
   };
 
   // Deletar notícia
@@ -115,10 +124,23 @@ function GeneralNewsAdminPageContent() {
 
         {/* Cabeçalho da página */}
         <div className="mb-8">
-          <h1 className="heading-1 mb-2">Notícias Gerais</h1>
-          <p className="body-text text-muted">
-            Gerencie notícias gerais que aparecem diretamente na homepage do portal
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="heading-1 mb-2">Notícias Gerais</h1>
+              <p className="body-text text-muted">
+                Gerencie notícias gerais que aparecem diretamente na homepage do portal
+              </p>
+            </div>
+            <Button
+              onClick={handleCreateNews}
+              variant="solid"
+              colorPalette="orange"
+              size="md"
+            >
+              <Icon name="plus" className="h-4 w-4 mr-2" />
+              Nova Notícia
+            </Button>
+          </div>
         </div>
 
         {/* Componente de gerenciamento de notícias */}

@@ -6,6 +6,7 @@ import { useAlert } from '@/app/components/alerts';
 import DeleteModal from '@/app/components/ui/DeleteModal';
 import { useDeleteModal } from '@/hooks/useDeleteModal';
 import { FormatDate } from '@/lib/utils/formatters';
+import { createClient } from '@/lib/supabase/client';
 
 interface SectorMessage {
   id: string;
@@ -88,6 +89,14 @@ export function MessagesManagement({
     setIsSaving(true);
 
     try {
+      // Obter sessão para autorização
+      const supabase = createClient();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        alert.showError('Erro de autenticação', 'Faça login novamente');
+        return;
+      }
+
       const method = isEditing ? 'PUT' : 'POST';
       const endpoint = '/api/admin/sector-content';
       
@@ -104,7 +113,10 @@ export function MessagesManagement({
       
       const response = await fetch(endpoint, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
         body: JSON.stringify(requestData)
       });
       

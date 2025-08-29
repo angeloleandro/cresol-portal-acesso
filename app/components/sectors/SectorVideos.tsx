@@ -127,6 +127,34 @@ export default function SectorVideos({ sectorId, limit = 4 }: SectorVideosProps)
                       order_index: 0,
                       created_at: video.created_at
                     }}
+                    variant="card"
+                    aspectRatio="16/9"
+                    priority={index < 2}
+                    showOverlay={true}
+                    showBadge={true}
+                    showDuration={video.upload_type === 'direct'}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
+                    quality={85}
+                    placeholder={{
+                      variant: 'gradient',
+                      gradient: {
+                        from: '#F58220',
+                        to: '#005C46',
+                        direction: 'diagonal-tl'
+                      },
+                      icon: {
+                        name: 'video',
+                        size: 'md',
+                        animated: true
+                      },
+                      text: video.upload_type === 'youtube' ? 'YouTube' : 'Vídeo',
+                      animated: true
+                    }}
+                    overlay={{
+                      variant: 'hover',
+                      opacity: 0.2,
+                      gradient: true
+                    }}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
