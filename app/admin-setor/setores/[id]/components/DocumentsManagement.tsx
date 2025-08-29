@@ -345,7 +345,7 @@ export function DocumentsManagement({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {documents.map((document) => (
-            <div key={document.id} className="bg-white p-4 rounded-md border border-gray-200 hover:shadow-md transition-shadow">
+            <div key={document.id} className="bg-white p-4 rounded-md border border-gray-200 hover:border-card-hover transition-colors">
               <div className="flex justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">{getFileIcon(document.file_type)}</span>

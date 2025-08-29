@@ -7,7 +7,7 @@ import { StandardizedButton } from "@/app/components/admin";
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
-import { getCroppedImg } from './getCroppedImg';
+import { getCroppedImg } from '@/lib/utils/imageProcessing';
 import OptimizedImage from "./OptimizedImage";
 
 interface BannerFormProps {

@@ -9,22 +9,11 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { createClient } from '@/lib/supabase/client';
-const supabase = createClient();
+import { FormatDate } from '@/lib/utils/formatters';
+import { fetchNewsById, getRelatedNews } from '@/lib/utils/news-helpers';
+import type { UnifiedNewsItem } from '@/types/news';
 
 import Breadcrumb from '../../components/Breadcrumb';
-
-import { FormatDate } from '@/lib/utils/formatters';
-interface NewsItem {
-  id: string;
-  title: string;
-  summary: string;
-  content: string;
-  image_url?: string;
-  created_at: string;
-  category: string;
-  author: string;
-}
 
 function NoticiaDetalheContent() {
   const router = useRouter();
@@ -32,60 +21,35 @@ function NoticiaDetalheContent() {
   const id = params.id as string;
   const { user, profile } = useAuth();
   
-  const [news, setNews] = useState<NewsItem | null>(null);
+  const [news, setNews] = useState<UnifiedNewsItem | null>(null);
   const [loading, setLoading] = useState(true);
-  const [relatedNews, setRelatedNews] = useState<NewsItem[]>([]);
+  const [relatedNews, setRelatedNews] = useState<UnifiedNewsItem[]>([]);
 
   useEffect(() => {
-    const fetchNewsData = async () => {
-
+    const loadNewsData = async () => {
       try {
-        // Buscar notícia específica do Supabase
-        const { data: newsData, error } = await supabase
-          .from('sector_news')
-          .select('*')
-          .eq('id', id)
-          .eq('is_published', true)
-          .single();
-          
-        if (error) {
-          
+        // Buscar notícia específica usando busca unificada
+        const newsData = await fetchNewsById(id);
+        
+        if (!newsData) {
           router.push('/noticias');
           return;
-        } else {
-          // Adicionar campos necessários
-          const formattedNews = {
-            ...newsData,
-            category: 'Notícia', // Podemos buscar a categoria do setor posteriormente
-            author: 'Cresol'     // Podemos buscar o autor posteriormente
-          };
-          setNews(formattedNews);
-
-          // Buscar notícias relacionadas do mesmo setor
-          const { data: relatedData, error: relatedError } = await supabase
-            .from('sector_news')
-            .select('*')
-            .eq('sector_id', newsData.sector_id)
-            .eq('is_published', true)
-            .neq('id', id)
-            .order('created_at', { ascending: false })
-            .limit(3);
-            
-          if (relatedError || !relatedData || relatedData.length === 0) {
-            // Não há notícias relacionadas disponíveis
-            setRelatedNews([]);
-          } else {
-            // Formatar notícias relacionadas
-            const formattedRelated = relatedData.map(item => ({
-              ...item,
-              category: 'Notícia',
-              author: 'Cresol'
-            }));
-            setRelatedNews(formattedRelated);
-          }
         }
-      } catch (error) {
         
+        setNews(newsData);
+
+        // Buscar notícias relacionadas baseado no tipo
+        const relatedData = await getRelatedNews({
+          newsId: id,
+          source: newsData.source,
+          sector_id: newsData.sector_id,
+          limit: 3
+        });
+        
+        setRelatedNews(relatedData);
+        
+      } catch (error) {
+        console.error('Erro ao carregar notícia:', error);
         router.push('/noticias');
         return;
       } finally {
@@ -93,7 +57,7 @@ function NoticiaDetalheContent() {
       }
     };
 
-    fetchNewsData();
+    loadNewsData();
   }, [router, id]);
 
   // Formatador de data
@@ -142,7 +106,12 @@ function NoticiaDetalheContent() {
                   className="object-contain"
                 />
               </div>
-              <h1 className="text-xl font-semibold text-cresol-gray">Portal Cresol</h1>
+              <p className="text-primary text-xl tracking-wide">
+                <span className="font-bold">HUB</span>{" "}
+                <span className="font-light">2.0</span>{" - "}
+                <span className="font-bold">Cresol Fronteiras</span>{" "}
+                <span className="font-light">PR/SC/SP/ES</span>
+              </p>
             </Link>
           </div>
           
@@ -174,9 +143,18 @@ function NoticiaDetalheContent() {
         {/* Cabeçalho da notícia */}
         <div className="mb-6">
           <div className="flex items-center space-x-2 mb-3">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              news.source === 'general' 
+                ? 'bg-blue-100 text-blue-800' 
+                : 'bg-green-100 text-green-800'
+            }`}>
               {news.category}
             </span>
+            {(news.priority && news.priority > 5) || news.is_featured ? (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Destaque
+              </span>
+            ) : null}
             <span className="text-sm text-cresol-gray">
               {FormatDate(news.created_at)}
             </span>
@@ -232,9 +210,20 @@ function NoticiaDetalheContent() {
                     </div>
                   )}
                   <div className="p-4">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary mb-2">
-                      {item.category}
-                    </span>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                        item.source === 'general' 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {item.category}
+                      </span>
+                      {(item.priority && item.priority > 5) || item.is_featured ? (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          Destaque
+                        </span>
+                      ) : null}
+                    </div>
                     <h3 className="text-base font-semibold text-cresol-gray mb-2 line-clamp-2">{item.title}</h3>
                     <p className="text-sm text-cresol-gray mb-2 line-clamp-2">{item.summary}</p>
                     <div className="flex justify-between items-center text-xs">

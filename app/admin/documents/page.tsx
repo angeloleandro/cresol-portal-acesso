@@ -483,7 +483,7 @@ function DocumentsPageContent() {
           <>
             <div className="space-y-6">
               {documents.map((document) => (
-                <div key={document.id} className="card p-6 hover:shadow-md transition-shadow">
+                <div key={document.id} className="card p-6">
                   <div className="flex items-start space-x-4">
                     {/* Ícone do tipo de arquivo */}
                     <div className="flex-shrink-0">

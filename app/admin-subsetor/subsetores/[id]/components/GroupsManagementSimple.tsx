@@ -187,7 +187,7 @@ export function GroupsManagement({ subsectorId }: GroupsManagementProps) {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {groups.map((group) => (
-              <div key={group.id} className="bg-white p-4 rounded-md border border-gray-200 hover:shadow-md transition-shadow">
+              <div key={group.id} className="bg-white p-4 rounded-md border border-gray-200 hover:border-card-hover transition-colors">
                 <div className="flex justify-between items-start mb-2">
                   <h5 className="font-medium">{group.name}</h5>
                   <div className="flex space-x-1">

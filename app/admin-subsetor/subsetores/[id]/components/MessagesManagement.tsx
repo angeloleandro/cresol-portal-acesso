@@ -181,7 +181,7 @@ export function MessagesManagement({
           </div>
         ) : (
           messages.map((item) => (
-            <div key={item.id} className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:border-card-hover transition-colors">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">

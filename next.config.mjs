@@ -7,7 +7,7 @@ const nextConfig = {
   compress: true,   // Compressão básica
   poweredByHeader: false,
   
-  // Configuração de imagens completa
+  // Configuração de imagens otimizada para Vercel e Supabase
   images: {
     remotePatterns: [
       {
@@ -29,9 +29,15 @@ const nextConfig = {
         pathname: '/vi/**',
       }
     ],
-    formats: ['image/webp'],
+    formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 512],
+    // Cache otimizado para reduzir requisições ao Supabase
+    minimumCacheTTL: 300, // 5 minutos de cache mínimo
+    // Desabilita SVG por segurança (banners devem ser JPG/PNG/WebP)
+    dangerouslyAllowSVG: false,
+    // Configurações de timeout e qualidade
+    unoptimized: false, // Mantém otimização ativa
   },
   
   // Experimental - apenas otimizações seguras
@@ -43,7 +49,7 @@ const nextConfig = {
     ]
   },
   
-  // Headers para Google Fonts
+  // Headers otimizados para performance e conectividade
   async headers() {
     return [
       {
@@ -56,6 +62,31 @@ const nextConfig = {
           {
             key: 'X-Frame-Options',
             value: 'DENY'
+          },
+          // Preconnect ao Supabase para reduzir latência
+          {
+            key: 'Link',
+            value: '<https://taodkzafqgoparihaljx.supabase.co>; rel=preconnect; crossorigin'
+          }
+        ]
+      },
+      // Cache otimizado para recursos estáticos
+      {
+        source: '/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, s-maxage=86400'
+          }
+        ]
+      },
+      // Cache para imagens otimizadas pelo Next.js
+      {
+        source: '/_next/image(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800, immutable'
           }
         ]
       }

@@ -1,0 +1,8 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="100" fill="#e5e7eb"/>
+  <g transform="translate(100,100)">
+    <!-- Ícone de pessoa -->
+    <circle cx="0" cy="-20" r="25" fill="#9ca3af"/>
+    <path d="M-40 40 C-40 10, -25 -5, 0 -5 C25 -5, 40 10, 40 40 L40 50 L-40 50 Z" fill="#9ca3af"/>
+  </g>
+</svg>

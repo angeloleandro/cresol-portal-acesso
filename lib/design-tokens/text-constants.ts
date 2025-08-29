@@ -213,7 +213,7 @@ export const VALIDATION_MESSAGES = {
 // === TEXTOS ESPECÍFICOS DO CRESOL ===
 export const CRESOL_TEXTS = {
   // Branding
-  appName: 'Portal Cresol',
+  appName: 'HUB 2.0',
   company: 'Cresol',
   companyFull: 'Cooperativa Central de Crédito Rural com Interação Solidária',
   tagline: 'Portal de Acesso Interno',

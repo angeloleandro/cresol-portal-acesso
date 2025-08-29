@@ -243,7 +243,7 @@ function MensagensPageContent() {
               <Link 
                 key={message.id} 
                 href={`/mensagens/${message.id}`}
-                className="card transition-all duration-200 block hover:shadow-md"
+                className="card transition-colors duration-200 block"
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-3">

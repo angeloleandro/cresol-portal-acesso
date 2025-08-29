@@ -69,15 +69,15 @@ export function ProcessSupabaseImageUrl(url: string | null | undefined): string 
  * @todo Add proper documentation
  */
 export function GetFallbackImageUrl(type: 'avatar' | 'gallery' | 'banner' = 'gallery'): string {
-  // Retorna uma URL de imagem padrão baseada no tipo
+  // Retorna uma URL de imagem padrão baseada no tipo (SVG otimizado)
   switch (type) {
     case 'avatar':
-      return '/images/default-avatar.png';
+      return '/images/avatar-placeholder.svg';
     case 'banner':
-      return '/images/default-banner.png';
+      return '/images/banner-placeholder.svg';
     case 'gallery':
     default:
-      return '/images/default-image.png';
+      return '/images/placeholder.svg';
   }
 }
 
@@ -124,6 +124,129 @@ export async function checkImageAccessibility(url: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/**
+ * Faz retry de carregamento de imagem com exponential backoff
+ */
+export async function RetryImageLoad(
+  url: string, 
+  maxRetries: number = 3,
+  initialDelay: number = 1000
+): Promise<boolean> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const accessible = await checkImageAccessibility(url);
+      if (accessible) {
+        logger.debug(`Imagem carregada com sucesso na tentativa ${attempt + 1}`, { url });
+        return true;
+      }
+    } catch (error) {
+      logger.warn(`Erro na tentativa ${attempt + 1} de carregar imagem`, { url, error });
+    }
+    
+    // Se não é a última tentativa, aplica delay exponencial
+    if (attempt < maxRetries) {
+      const delay = Math.min(initialDelay * Math.pow(2, attempt), 8000);
+      logger.debug(`Aguardando ${delay}ms antes da próxima tentativa`, { url, attempt: attempt + 1 });
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  logger.error(`Falha ao carregar imagem após ${maxRetries + 1} tentativas`, { url });
+  return false;
+}
+
+/**
+ * Circuit breaker para URLs com falhas repetidas
+ */
+class ImageCircuitBreaker {
+  private failureCount = new Map<string, number>();
+  private lastFailureTime = new Map<string, number>();
+  private readonly failureThreshold = 5;
+  private readonly resetTimeoutMs = 300000; // 5 minutos
+  
+  canAttempt(url: string): boolean {
+    const failures = this.failureCount.get(url) || 0;
+    const lastFailure = this.lastFailureTime.get(url) || 0;
+    
+    // Se excedeu threshold, verifica se já passou o timeout de reset
+    if (failures >= this.failureThreshold) {
+      const timeSinceLastFailure = Date.now() - lastFailure;
+      if (timeSinceLastFailure < this.resetTimeoutMs) {
+        return false; // Circuit breaker está aberto
+      } else {
+        // Reset o circuit breaker
+        this.failureCount.set(url, 0);
+        this.lastFailureTime.delete(url);
+      }
+    }
+    
+    return true;
+  }
+  
+  recordSuccess(url: string): void {
+    this.failureCount.set(url, 0);
+    this.lastFailureTime.delete(url);
+  }
+  
+  recordFailure(url: string): void {
+    const currentFailures = this.failureCount.get(url) || 0;
+    this.failureCount.set(url, currentFailures + 1);
+    this.lastFailureTime.set(url, Date.now());
+  }
+}
+
+const imageCircuitBreaker = new ImageCircuitBreaker();
+
+/**
+ * Carrega imagem com circuit breaker e retry logic
+ */
+export async function LoadImageWithCircuitBreaker(url: string): Promise<boolean> {
+  if (!imageCircuitBreaker.canAttempt(url)) {
+    logger.warn('Circuit breaker impediu tentativa de carregamento', { url });
+    return false;
+  }
+  
+  const success = await RetryImageLoad(url);
+  
+  if (success) {
+    imageCircuitBreaker.recordSuccess(url);
+  } else {
+    imageCircuitBreaker.recordFailure(url);
+  }
+  
+  return success;
+}
+
+/**
+ * Preload de imagem com timeout customizado
+ */
+export async function PreloadImageWithTimeout(
+  url: string,
+  timeoutMs: number = 10000
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const timeoutId = setTimeout(() => {
+      logger.warn('Timeout no preload da imagem', { url, timeoutMs });
+      resolve(false);
+    }, timeoutMs);
+    
+    img.onload = () => {
+      clearTimeout(timeoutId);
+      logger.debug('Imagem preloaded com sucesso', { url });
+      resolve(true);
+    };
+    
+    img.onerror = () => {
+      clearTimeout(timeoutId);
+      logger.warn('Erro no preload da imagem', { url });
+      resolve(false);
+    };
+    
+    img.src = url;
+  });
 }
 
 /**
@@ -216,3 +339,6 @@ export const isValidImageUrl = IsValidImageUrl;
 export const getFallbackImageUrl = GetFallbackImageUrl;
 export const optimizeSupabaseImage = OptimizeSupabaseImage;
 export const debugImageUrl = DebugImageUrl;
+export const retryImageLoad = RetryImageLoad;
+export const loadImageWithCircuitBreaker = LoadImageWithCircuitBreaker;
+export const preloadImageWithTimeout = PreloadImageWithTimeout;

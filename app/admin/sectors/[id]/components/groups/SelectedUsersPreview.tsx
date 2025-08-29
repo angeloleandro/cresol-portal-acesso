@@ -75,7 +75,7 @@ const SelectedUsersPreview: React.FC<SelectedUsersPreviewProps> = ({
               transition={{
                 delay: index * 0.05
               }}
-              className="group bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200"
+              className="group bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:border-card-hover transition-colors duration-200"
             >
               <div className="flex items-center space-x-3">
                 {/* Avatar */}

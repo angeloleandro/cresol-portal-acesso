@@ -20,7 +20,12 @@ export default function NotFound() {
                   className="object-contain"
                 />
               </div>
-              <h1 className="text-xl font-medium text-title">Portal Cresol</h1>
+              <p className="text-primary text-xl tracking-wide">
+                <span className="font-bold">HUB</span>{" "}
+                <span className="font-light">2.0</span>{" - "}
+                <span className="font-bold">Cresol Fronteiras</span>{" "}
+                <span className="font-light">PR/SC/SP/ES</span>
+              </p>
             </Link>
           </div>
           

@@ -286,7 +286,7 @@ export function ImagesManagement({
           </div>
         ) : (
           filteredImages.map((image) => (
-            <div key={image.id} className="bg-white border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+            <div key={image.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-card-hover transition-colors">
               {/* Imagem */}
               <div 
                 className="relative aspect-square cursor-pointer group"

@@ -30,6 +30,7 @@ export const LOADING_MESSAGES = {
   banners: 'Carregando banners...',
   news: 'Carregando notícias...',
   events: 'Carregando eventos...',
+  collections: 'Carregando coleções...',
   
   // Administração
   users: 'Carregando usuários...',

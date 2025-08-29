@@ -140,7 +140,7 @@ const GroupsManagement = memo(function GroupsManagement({
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               {groups.map((group) => (
-                <div key={group.id} className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div key={group.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:border-card-hover transition-colors">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-medium text-gray-900">{group.name}</h4>
                     <div className="flex space-x-2">

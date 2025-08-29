@@ -28,6 +28,7 @@ interface News {
   content: string;
   image_url?: string;
   is_featured: boolean;
+  show_on_homepage: boolean;
   is_published: boolean;
   created_at: string;
   updated_at: string;
@@ -113,12 +114,22 @@ function NewsAdminPageContent() {
   const handleAction = async (action: string, newsItem: News) => {
     try {
       setActionLoading(`${action}-${newsItem.id}`);
+      
+      // Obter sessão atual para autorização
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        alert.showError('Erro', 'Sessão expirada, faça login novamente');
+        return;
+      }
+
       const response = await fetch(
         `/api/admin/news?id=${newsItem.id}&type=${newsItem.type}&action=${action}`,
         {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
           },
         }
       );
@@ -139,17 +150,37 @@ function NewsAdminPageContent() {
     }
   };
 
+  const handleToggleFeature = async (newsItem: News) => {
+    const action = newsItem.is_featured ? 'unfeature' : 'feature';
+    await handleAction(action, newsItem);
+  };
+
+  const handleToggleHomepage = async (newsItem: News) => {
+    const action = newsItem.show_on_homepage ? 'unhomepage' : 'homepage';
+    await handleAction(action, newsItem);
+  };
+
   const deleteModal = useDeleteModal<News>('notícia');
 
   const handleDelete = async (newsItem: News) => {
     try {
       setActionLoading(`delete-${newsItem.id}`);
+      
+      // Obter sessão atual para autorização
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        alert.showError('Erro', 'Sessão expirada, faça login novamente');
+        return;
+      }
+
       const response = await fetch(
         `/api/admin/news?id=${newsItem.id}&type=${newsItem.type}`,
         {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
           },
         }
       );
@@ -350,6 +381,9 @@ function NewsAdminPageContent() {
                 ]}
                 placeholder="Selecione o destaque"
               />
+              <p className="text-xs text-muted mt-1">
+                Notícias em destaque aparecem na homepage
+              </p>
             </div>
 
             {/* Setor */}
@@ -413,7 +447,7 @@ function NewsAdminPageContent() {
           <>
             <div className="space-y-6">
               {news.map((newsItem) => (
-                <div key={newsItem.id} className="card p-6 hover:shadow-md transition-shadow">
+                <div key={newsItem.id} className="card p-6">
                   <div className="flex items-start space-x-4">
                     {/* Imagem */}
                     {newsItem.image_url && (
@@ -433,25 +467,81 @@ function NewsAdminPageContent() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           {/* Tags e metadata */}
-                          <div className="flex items-center space-x-2 mb-2">
-                            <span className={`badge ${newsItem.type === 'sector' ? 'badge-primary' : 'badge-secondary'}`}>
-                              {newsItem.type === 'sector' ? 'Setor' : 'Subsetor'}
-                            </span>
-                            
-                            <span className="badge badge-outline">
-                              {newsItem.location_name}
-                            </span>
-
-                            {newsItem.is_featured && (
-                              <span className="badge badge-warning">
-                                <Icon name="star" className="h-3 w-3 mr-1" />
-                                Destaque
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <span className={`badge ${newsItem.type === 'sector' ? 'badge-primary' : 'badge-secondary'}`}>
+                                {newsItem.type === 'sector' ? 'Setor' : 'Subsetor'}
                               </span>
-                            )}
+                              
+                              <span className="badge badge-outline">
+                                {newsItem.location_name}
+                              </span>
 
-                            <span className={`badge ${newsItem.is_published ? 'badge-success' : 'badge-outline'}`}>
-                              {newsItem.is_published ? 'Publicada' : 'Rascunho'}
-                            </span>
+                              <span className={`badge ${newsItem.is_published ? 'badge-success' : 'badge-outline'}`}>
+                                {newsItem.is_published ? 'Publicada' : 'Rascunho'}
+                              </span>
+                            </div>
+                            
+                            {/* Controles separados para destaque e homepage */}
+                            <div className="flex flex-col space-y-3">
+                              {/* Toggle de destaque no setor */}
+                              <div className="flex items-center space-x-2">
+                                <label className="flex items-center cursor-pointer group">
+                                  <input
+                                    type="checkbox"
+                                    checked={newsItem.is_featured}
+                                    onChange={() => handleToggleFeature(newsItem)}
+                                    disabled={actionLoading === `feature-${newsItem.id}` || actionLoading === `unfeature-${newsItem.id}`}
+                                    className="sr-only"
+                                  />
+                                  <div className={`relative flex items-center h-6 w-11 rounded-full transition-colors duration-200 ease-in-out 
+                                    ${newsItem.is_featured ? 'bg-green-500' : 'bg-gray-200'} 
+                                    ${actionLoading === `feature-${newsItem.id}` || actionLoading === `unfeature-${newsItem.id}` ? 'opacity-50 cursor-not-allowed' : 'group-hover:shadow-md'}`}
+                                  >
+                                    <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out 
+                                      ${newsItem.is_featured ? 'translate-x-6' : 'translate-x-1'}`} />
+                                  </div>
+                                </label>
+                                
+                                <div className="flex flex-col items-start">
+                                  <span className="text-xs font-medium text-gray-700">
+                                    {newsItem.is_featured ? 'Destacada' : 'Destacar'}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    No setor
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Toggle de publicação na homepage */}
+                              <div className="flex items-center space-x-2">
+                                <label className="flex items-center cursor-pointer group">
+                                  <input
+                                    type="checkbox"
+                                    checked={newsItem.show_on_homepage}
+                                    onChange={() => handleToggleHomepage(newsItem)}
+                                    disabled={actionLoading === `homepage-${newsItem.id}` || actionLoading === `unhomepage-${newsItem.id}`}
+                                    className="sr-only"
+                                  />
+                                  <div className={`relative flex items-center h-6 w-11 rounded-full transition-colors duration-200 ease-in-out 
+                                    ${newsItem.show_on_homepage ? 'bg-primary' : 'bg-gray-200'} 
+                                    ${actionLoading === `homepage-${newsItem.id}` || actionLoading === `unhomepage-${newsItem.id}` ? 'opacity-50 cursor-not-allowed' : 'group-hover:shadow-md'}`}
+                                  >
+                                    <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out 
+                                      ${newsItem.show_on_homepage ? 'translate-x-6' : 'translate-x-1'}`} />
+                                  </div>
+                                </label>
+                                
+                                <div className="flex flex-col items-start">
+                                  <span className="text-xs font-medium text-gray-700">
+                                    {newsItem.show_on_homepage ? 'Na Homepage' : 'Publicar'}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    Homepage geral
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
                           {/* Título e resumo */}
@@ -484,9 +574,14 @@ function NewsAdminPageContent() {
                                 onClick: () => handleAction(newsItem.is_published ? 'unpublish' : 'publish', newsItem),
                               },
                               {
-                                label: newsItem.is_featured ? 'Remover destaque' : 'Destacar',
+                                label: newsItem.is_featured ? 'Remover destaque do setor' : 'Destacar no setor',
                                 icon: 'star',
                                 onClick: () => handleAction(newsItem.is_featured ? 'unfeature' : 'feature', newsItem),
+                              },
+                              {
+                                label: newsItem.show_on_homepage ? 'Remover da homepage' : 'Publicar na homepage',
+                                icon: 'house',
+                                onClick: () => handleAction(newsItem.show_on_homepage ? 'unhomepage' : 'homepage', newsItem),
                               },
                               {
                                 label: 'Duplicar',

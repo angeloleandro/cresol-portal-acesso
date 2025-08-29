@@ -4,79 +4,40 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import AuthGuard from '@/app/components/AuthGuard';
-import { useAuth } from '@/app/providers/AuthProvider';
 import OptimizedImage from '@/app/components/OptimizedImage';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
-import { createClient } from '@/lib/supabase/client';
-const supabase = createClient();
 import { FormatDate } from '@/lib/utils/formatters';
+import { fetchUnifiedNews, filterNewsByCategory } from '@/lib/utils/news-helpers';
+import type { UnifiedNewsItem, NewsCategory } from '@/types/news';
 
 import Breadcrumb from '../components/Breadcrumb';
 import Footer from '../components/Footer';
 
-interface NewsItem {
-  id: string;
-  title: string;
-  summary: string;
-  content: string;
-  image_url?: string;
-  created_at: string;
-  category: string;
-  author: string;
-}
-
 function NoticiasPageContent() {
-  const { user } = useAuth();
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [allNews, setAllNews] = useState<UnifiedNewsItem[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<NewsCategory>('Todas');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchNews = async () => {
+    const loadUnifiedNews = async () => {
       try {
-        // Carregar notícias do Supabase
-        const { data: newsData, error } = await supabase
-          .from('sector_news')
-          .select('*')
-          .eq('is_published', true)
-          .order('created_at', { ascending: false });
-          
-        if (error) {
-          
-          setNews([]);
-        } else {
-          // Formatar dados do Supabase
-          const formattedNews = (newsData || []).map((item: any) => ({
-            ...item,
-            category: 'Notícia', // Podemos buscar a categoria do setor posteriormente
-            author: 'Cresol' // Podemos buscar o autor posteriormente
-          }));
-          setNews(formattedNews);
-        }
-
-        // Extrair categorias únicas dos dados reais
-        const formattedNewsForCategories = (newsData || []).map((item: any) => ({ ...item, category: 'Notícia' }));
-        const uniqueCategories = Array.from(new Set(formattedNewsForCategories.map((item: any) => item.category)));
-        setCategories(uniqueCategories);
+        const response = await fetchUnifiedNews();
+        setAllNews(response.news);
       } catch (err) {
-        
-        setNews([]);
-        setCategories([]);
+        console.error('Erro ao carregar notícias:', err);
+        setAllNews([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNews();
+    loadUnifiedNews();
   }, []);
 
 
   // Filtrar notícias por categoria
-  const filteredNews = selectedCategory === 'all' 
-    ? news 
-    : news.filter(item => item.category === selectedCategory);
+  const filteredNews = filterNewsByCategory(allNews, selectedCategory);
 
   if (loading) {
     return (
@@ -108,7 +69,12 @@ function NoticiasPageContent() {
                   className="object-contain"
                 />
               </div>
-              <h1 className="text-xl font-medium text-title">Portal Cresol</h1>
+              <p className="text-primary text-xl tracking-wide">
+                <span className="font-bold">HUB</span>{" "}
+                <span className="font-light">2.0</span>{" - "}
+                <span className="font-bold">Cresol Fronteiras</span>{" "}
+                <span className="font-light">PR/SC/SP/ES</span>
+              </p>
             </Link>
           </div>
           
@@ -141,31 +107,46 @@ function NoticiasPageContent() {
           <p className="body-text text-muted">Acompanhe as últimas atualizações e comunicados da Cresol.</p>
         </div>
 
-        {/* Filtro por categoria */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <button 
-            onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1 text-sm rounded-full transition-colors ${
-              selectedCategory === 'all' 
-                ? 'btn-primary' 
-                : 'bg-white text-muted border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Todas
-          </button>
-          {categories.map((category) => (
-            <button 
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                selectedCategory === category 
-                  ? 'btn-primary' 
-                  : 'bg-white text-muted border border-gray-300 hover:bg-gray-50'
-              }`}
+        {/* Tabs de categorias */}
+        <div className="mb-8">
+          <div className="border-b border-gray-200">
+            <nav 
+              className="-mb-px flex space-x-1 md:space-x-4 overflow-x-auto scrollbar-hide" 
+              aria-label="Tabs de categorias"
+              role="tablist"
             >
-              {category}
-            </button>
-          ))}
+              {['Todas', 'Notícias Gerais', 'Setorial'].map((tab) => (
+                <button 
+                  key={tab}
+                  onClick={() => setSelectedCategory(tab as NewsCategory)}
+                  className={`group relative flex-shrink-0 py-3 px-4 md:px-6 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-1 ${
+                    selectedCategory === tab 
+                      ? 'border-primary text-primary bg-primary/5 shadow-sm transform-gpu' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50/80 active:bg-gray-100/60 hover:scale-[1.02] active:scale-[0.98]'
+                  }`}
+                  role="tab"
+                  aria-current={selectedCategory === tab ? 'page' : undefined}
+                  aria-selected={selectedCategory === tab}
+                  tabIndex={selectedCategory === tab ? 0 : -1}
+                >
+                  <span className="relative z-20 tracking-wide">{tab}</span>
+                  
+                  {/* Active background with subtle gradient */}
+                  {selectedCategory === tab && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-primary/5 to-primary/3 rounded-t-md z-10" />
+                  )}
+                  
+                  {/* Hover shimmer effect */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-t-md">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
+                  </div>
+                  
+                  {/* Focus indicator */}
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-primary transition-all duration-200 group-focus:w-full" />
+                </button>
+              ))}
+            </nav>
+          </div>
         </div>
 
         {/* Lista de notícias vazia */}
@@ -173,7 +154,7 @@ function NoticiasPageContent() {
           <div className="card text-center py-12">
             <h3 className="heading-3 mb-2">Nenhuma notícia encontrada</h3>
             <p className="body-text text-muted">
-              {selectedCategory === 'all' 
+              {selectedCategory === 'Todas' 
                 ? 'Não há notícias publicadas no momento.' 
                 : `Não há notícias na categoria "${selectedCategory}".`
               }
@@ -204,9 +185,20 @@ function NoticiasPageContent() {
                   {/* Conteúdo */}
                   <div className={`p-6 ${item.image_url ? 'md:w-2/3' : 'w-full'}`}>
                     <div className="flex justify-between items-start mb-3">
-                      <span className="badge-success">
-                        {item.category}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          item.source === 'general' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {item.category}
+                        </span>
+                        {(item.priority && item.priority > 5) || item.is_featured ? (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Destaque
+                          </span>
+                        ) : null}
+                      </div>
                       <span className="text-xs text-muted">
                         {FormatDate(item.created_at)}
                       </span>

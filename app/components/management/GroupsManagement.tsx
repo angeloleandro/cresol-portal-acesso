@@ -83,7 +83,7 @@ const GroupsManagement = memo(<T extends Group = Group>({
           groups.map((group) => (
             <div 
               key={group.id} 
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:border-card-hover transition-colors"
             >
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">

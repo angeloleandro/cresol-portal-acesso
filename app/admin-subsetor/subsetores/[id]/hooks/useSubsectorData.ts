@@ -125,7 +125,7 @@ export function useSubsectorData(subsectorId: string): UseSubsectorDataReturn {
     try {
       const { data: allNews, error } = await supabase
         .from('subsector_news')
-        .select('id, title, summary, content, image_url, is_published, is_featured, created_at, updated_at, subsector_id')
+        .select('id, title, summary, content, image_url, is_published, is_featured, show_on_homepage, created_at, updated_at, subsector_id')
         .eq('subsector_id', subsectorId)
         .order('created_at', { ascending: false });
 

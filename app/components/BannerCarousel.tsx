@@ -20,7 +20,9 @@ interface Banner {
 export default function BannerCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [current, setCurrent] = useState(0);
+  const [imageLoadStatus, setImageLoadStatus] = useState<Record<string, boolean>>({});
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const preloadedImages = useRef<Record<string, HTMLImageElement>>({});
 
   useEffect(() => {
     const fetchBanners = async () => {
@@ -51,13 +53,84 @@ export default function BannerCarousel() {
         const bannerCount = processedBanners.length;
         logger.info(`Banners carregados com sucesso (com cache)`, { bannerCount });
         logger.componentEnd(componentTimer);
+        
+        // Inicia preload das imagens após carregar os banners
+        preloadBannerImages(processedBanners);
       } catch (error) {
         logger.error('Erro ao buscar banners', error instanceof Error ? error : new Error(String(error)));
         logger.componentEnd(componentTimer);
       }
     };
+    
+    // Função para preload inteligente das imagens
+    const preloadBannerImages = async (bannerList: Banner[]) => {
+      if (bannerList.length === 0) return;
+      
+      const preloadTimer = logger.componentStart('BannerCarousel.preloadImages');
+      
+      // Preload da imagem atual primeiro (prioridade máxima)
+      const currentBanner = bannerList[current];
+      if (currentBanner && !preloadedImages.current[currentBanner.image_url]) {
+        await preloadSingleImage(currentBanner.image_url, 'high');
+      }
+      
+      // Preload das próximas 2 imagens (média prioridade)
+      const nextIndexes = [
+        (current + 1) % bannerList.length,
+        (current + 2) % bannerList.length
+      ];
+      
+      for (const index of nextIndexes) {
+        const banner = bannerList[index];
+        if (banner && !preloadedImages.current[banner.image_url]) {
+          preloadSingleImage(banner.image_url, 'medium').catch(() => {
+            // Ignora erros de preload silenciosamente
+          });
+        }
+      }
+      
+      // Preload das demais imagens (baixa prioridade)
+      setTimeout(() => {
+        bannerList.forEach((banner, index) => {
+          if (!nextIndexes.includes(index) && index !== current && 
+              !preloadedImages.current[banner.image_url]) {
+            preloadSingleImage(banner.image_url, 'low').catch(() => {
+              // Ignora erros de preload silenciosamente
+            });
+          }
+        });
+      }, 2000); // Delay de 2s para não interferir com o carregamento principal
+      
+      logger.componentEnd(preloadTimer);
+    };
+    
+    // Função auxiliar para preload individual
+    const preloadSingleImage = async (url: string, priority: 'high' | 'medium' | 'low'): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        
+        // Define importância do fetch baseado na prioridade
+        if ('fetchPriority' in img) {
+          (img as any).fetchPriority = priority;
+        }
+        
+        img.onload = () => {
+          preloadedImages.current[url] = img;
+          setImageLoadStatus(prev => ({ ...prev, [url]: true }));
+          resolve();
+        };
+        
+        img.onerror = () => {
+          setImageLoadStatus(prev => ({ ...prev, [url]: false }));
+          reject(new Error(`Failed to preload: ${url}`));
+        };
+        
+        img.src = url;
+      });
+    };
+    
     fetchBanners();
-  }, []);
+  }, [current]);
 
   useEffect(() => {
     if (banners.length <= 1) return;
@@ -91,15 +164,29 @@ export default function BannerCarousel() {
                 className="object-cover w-full h-full rounded-md" 
                 placeholder="blur"
               />
+              {/* Indicador de carregamento para imagens não preloaded */}
+              {!imageLoadStatus[banner.image_url] && idx === current && (
+                <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-md flex items-center justify-center">
+                  <div className="w-8 h-8 border-4 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+                </div>
+              )}
             </a>
           ) : (
-            <HeroImage 
-              src={banner.image_url} 
-              alt={banner.title || "Banner"} 
-              fill 
-              className="object-cover w-full h-full rounded-md" 
-              placeholder="blur"
-            />
+            <>
+              <HeroImage 
+                src={banner.image_url} 
+                alt={banner.title || "Banner"} 
+                fill 
+                className="object-cover w-full h-full rounded-md" 
+                placeholder="blur"
+              />
+              {/* Indicador de carregamento para imagens não preloaded */}
+              {!imageLoadStatus[banner.image_url] && idx === current && (
+                <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-md flex items-center justify-center">
+                  <div className="w-8 h-8 border-4 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+                </div>
+              )}
+            </>
           )}
           {banner.title && (
             <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white px-6 py-3 text-lg font-semibold">

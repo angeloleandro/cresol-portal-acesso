@@ -23,53 +23,130 @@ export const createImage = (url: string): Promise<HTMLImageElement> =>
   });
 
 /**
- * getCroppedImg function
- * @todo Add proper documentation
+ * Crops an image using HTML5 Canvas with robust error handling
+ * @param imageSrc - Source image URL or data URL
+ * @param pixelCrop - Crop area in pixels
+ * @param rotation - Rotation angle in degrees (default: 0)
+ * @returns Promise with cropped image blob and object URL
  */
 export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: CropArea,
   rotation = 0
 ): Promise<{ file: Blob; url: string }> {
-  const image = await createImage(imageSrc);
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-
-  if (!ctx) {
-    throw new Error('No 2d context');
+  // Validate inputs
+  if (!imageSrc || typeof imageSrc !== 'string') {
+    throw new Error('Invalid image source provided');
   }
 
-  // Set canvas dimensions to crop area
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  if (!pixelCrop || pixelCrop.width <= 0 || pixelCrop.height <= 0) {
+    throw new Error('Invalid crop area: width and height must be positive');
+  }
 
-  // Apply rotation if needed
-  ctx.translate(canvas.width / 2, canvas.height / 2);
-  ctx.rotate((rotation * Math.PI) / 180);
-  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+  // Validate rotation value
+  if (typeof rotation !== 'number' || isNaN(rotation)) {
+    console.warn('Invalid rotation value, using 0 degrees');
+    rotation = 0;
+  }
 
-  // Draw cropped image to canvas
-  ctx.drawImage(
-    image,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    pixelCrop.width,
-    pixelCrop.height
-  );
+  console.log('Starting image crop process...', { pixelCrop, rotation });
 
-  // Create blob from canvas
+  const image = await createImage(imageSrc);
+  
+  // Validate loaded image
+  if (!image.width || !image.height) {
+    throw new Error('Invalid image: no dimensions detected');
+  }
+
+  console.log('Image loaded successfully', { width: image.width, height: image.height });
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { alpha: false });
+
+  if (!ctx) {
+    throw new Error('Failed to get 2d rendering context from canvas');
+  }
+
+  // Set canvas dimensions to crop area (ensure they are valid)
+  const cropWidth = Math.max(1, Math.floor(pixelCrop.width));
+  const cropHeight = Math.max(1, Math.floor(pixelCrop.height));
+  
+  canvas.width = cropWidth;
+  canvas.height = cropHeight;
+
+  console.log('Canvas configured', { width: cropWidth, height: cropHeight });
+
+  try {
+    // Clear canvas with white background for better JPEG compression
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, cropWidth, cropHeight);
+
+    // Save context state before transformations
+    ctx.save();
+
+    // Apply rotation if needed
+    if (rotation !== 0) {
+      ctx.translate(cropWidth / 2, cropHeight / 2);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.translate(-cropWidth / 2, -cropHeight / 2);
+    }
+
+    // Draw cropped image to canvas with bounds checking
+    const sourceX = Math.max(0, Math.floor(pixelCrop.x));
+    const sourceY = Math.max(0, Math.floor(pixelCrop.y));
+    const sourceWidth = Math.min(pixelCrop.width, image.width - sourceX);
+    const sourceHeight = Math.min(pixelCrop.height, image.height - sourceY);
+
+    ctx.drawImage(
+      image,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      cropWidth,
+      cropHeight
+    );
+
+    // Restore context state
+    ctx.restore();
+
+    console.log('Image drawn to canvas successfully');
+  } catch (drawError) {
+    console.error('Error drawing image to canvas:', drawError);
+    throw new Error(`Failed to draw image to canvas: ${drawError instanceof Error ? drawError.message : 'Unknown error'}`);
+  }
+
+  // Create blob from canvas with timeout
   return new Promise((resolve, reject) => {
+    // Set a timeout to prevent hanging
+    const timeoutId = setTimeout(() => {
+      reject(new Error('Canvas to blob conversion timed out'));
+    }, 15000);
+
     canvas.toBlob((blob) => {
+      clearTimeout(timeoutId);
+      
       if (!blob) {
-        reject(new Error('Canvas is empty'));
+        reject(new Error('Canvas is empty or failed to generate blob'));
         return;
       }
-      const url = URL.createObjectURL(blob);
-      resolve({ file: blob, url });
+
+      // Validate blob size
+      if (blob.size === 0) {
+        reject(new Error('Generated blob is empty'));
+        return;
+      }
+
+      console.log('Crop completed successfully', { blobSize: blob.size });
+      
+      try {
+        const url = URL.createObjectURL(blob);
+        resolve({ file: blob, url });
+      } catch (urlError) {
+        reject(new Error('Failed to create object URL from blob'));
+      }
     }, 'image/jpeg', 0.95);
   });
 }

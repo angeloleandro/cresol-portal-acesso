@@ -351,7 +351,7 @@ function DocumentDetailPageContent({ params }: { params: { id: string } }) {
                     <Link
                       key={related.id}
                       href={`/documentos/${related.id}`}
-                      className="block rounded-lg border border-gray-200 p-3 hover:border-cresol-green hover:shadow-sm"
+                      className="block rounded-lg border border-gray-200 p-3 hover:border-cresol-green transition-colors"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">

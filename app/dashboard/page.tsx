@@ -138,7 +138,7 @@ function DashboardContent() {
           </h1>
           <p className="body-text-small text-muted">
             {profile?.position && `${profile.position} • `}
-            {profile?.work_locations?.name || 'Portal Cresol'}
+            {profile?.work_locations?.name || 'HUB 2.0'}
           </p>
         </div>
 

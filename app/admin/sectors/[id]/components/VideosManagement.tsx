@@ -115,7 +115,7 @@ export function VideosManagement({
           </div>
         ) : (
           videos.map((video) => (
-            <div key={video.id} className="bg-white border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+            <div key={video.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-card-hover transition-colors">
               {/* Thumbnail */}
               <div 
                 className="relative aspect-video cursor-pointer group"

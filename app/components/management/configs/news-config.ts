@@ -21,6 +21,14 @@ export const SUBSECTOR_NEWS_CONFIG: NewsConfig = {
   requestStructure: 'subsector'
 };
 
+export const GENERAL_NEWS_CONFIG: NewsConfig = {
+  entityType: 'general',
+  apiEndpoint: '/api/admin/general-news',
+  entityIdField: '',
+  useAlerts: false,
+  requestStructure: 'admin'
+};
+
 export const SECTOR_EVENTS_CONFIG: EventConfig = {
   entityType: 'sector',
   apiEndpoint: '/api/admin/sector-content',

@@ -384,7 +384,7 @@ const CollectionDetail: React.FC<CollectionDetailProps> = ({
                   <div
                     key={item.id}
                     className={cn(
-                      "border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow",
+                      "border border-gray-200 rounded-lg overflow-hidden hover:border-card-hover transition-colors",
                       selectedView === 'list' && "flex items-center p-4",
                       showItemActions && "cursor-pointer",
                       selectedItems.includes(item.id) && "ring-2 ring-primary"

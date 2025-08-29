@@ -288,7 +288,7 @@ function DocumentosContent() {
             {filteredDocuments.map((document) => (
               <div
                 key={document.id}
-                className="group relative rounded-lg bg-white p-6 shadow transition-shadow hover:shadow-lg"
+                className="group relative rounded-lg border border-gray-200 bg-white p-6 shadow hover:border-card-hover transition-colors"
               >
                 {/* Ícone do tipo de arquivo */}
                 <div className="mb-4 flex items-center justify-between">

@@ -510,7 +510,7 @@ export function CompactVideoCard({
         'group cursor-pointer',
         'flex gap-3 p-3',
         'bg-white rounded-lg border border-neutral-200',
-        'hover:shadow-md transition-shadow duration-200',
+        'hover:border-card-hover transition-colors duration-200',
       )}
       onClick={handleClick}
       tabIndex={0}

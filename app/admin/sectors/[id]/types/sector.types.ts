@@ -24,6 +24,7 @@ export interface SectorNews {
   content: string;
   image_url: string | null;
   is_featured: boolean;
+  show_on_homepage: boolean;
   is_published: boolean;
   created_at: string;
   updated_at: string;

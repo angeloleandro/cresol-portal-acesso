@@ -14,6 +14,7 @@ const newsSchema = z.object({
   content: z.string().min(1, 'Conteúdo é obrigatório'),
   image_url: z.string().optional(),
   is_featured: z.boolean().optional().default(false),
+  show_on_homepage: z.boolean().optional().default(false),
   is_published: z.boolean().optional().default(false),
 }).refine(
   (data) => {
@@ -133,6 +134,7 @@ export async function GET(request: NextRequest) {
           content,
           image_url,
           is_featured,
+          show_on_homepage,
           is_published,
           created_at,
           updated_at,
@@ -193,6 +195,7 @@ export async function GET(request: NextRequest) {
           content,
           image_url,
           is_featured,
+          show_on_homepage,
           is_published,
           created_at,
           updated_at,
@@ -368,6 +371,7 @@ export async function POST(request: NextRequest) {
       content: validatedData.content,
       image_url: validatedData.image_url,
       is_featured: validatedData.is_featured || false,
+      show_on_homepage: validatedData.show_on_homepage || false,
       is_published: validatedData.is_published || false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -668,9 +672,9 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    if (!['publish', 'unpublish', 'duplicate', 'feature', 'unfeature'].includes(action)) {
+    if (!['publish', 'unpublish', 'duplicate', 'feature', 'unfeature', 'homepage', 'unhomepage'].includes(action)) {
       return NextResponse.json(
-        { error: 'Ação deve ser "publish", "unpublish", "duplicate", "feature" ou "unfeature"' },
+        { error: 'Ação deve ser "publish", "unpublish", "duplicate", "feature", "unfeature", "homepage" ou "unhomepage"' },
         { status: 400 }
       );
     }
@@ -731,6 +735,7 @@ export async function PATCH(request: NextRequest) {
         content,
         image_url,
         is_featured: false, // Cópia não vem destacada
+        show_on_homepage: false, // Cópia não vai para homepage
         is_published: false, // Cópia sempre começa como rascunho
         ...(type === 'sector' ? { sector_id } : { subsector_id }),
       };
@@ -764,6 +769,10 @@ export async function PATCH(request: NextRequest) {
         updateField = { is_featured: true };
       } else if (action === 'unfeature') {
         updateField = { is_featured: false };
+      } else if (action === 'homepage') {
+        updateField = { show_on_homepage: true };
+      } else if (action === 'unhomepage') {
+        updateField = { show_on_homepage: false };
       }
       
       const { data: updatedNews, error } = await supabase
@@ -785,7 +794,12 @@ export async function PATCH(request: NextRequest) {
       }
 
       const actionMessages = {
-        unfeature: 'removida dos destaques'
+        publish: 'publicada',
+        unpublish: 'despublicada', 
+        feature: 'destacada no setor',
+        unfeature: 'removida dos destaques do setor',
+        homepage: 'publicada na homepage',
+        unhomepage: 'removida da homepage'
       };
 
       return NextResponse.json({

@@ -8,7 +8,7 @@ import Cropper from 'react-easy-crop';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/icons/Icon';
 import { createClient } from '@/lib/supabase/client';
-import { getCroppedImg } from './getCroppedImg';
+import { getCroppedImg } from '@/lib/utils/imageProcessing';
 import OptimizedImage from './OptimizedImage';
 
 const supabase = createClient();

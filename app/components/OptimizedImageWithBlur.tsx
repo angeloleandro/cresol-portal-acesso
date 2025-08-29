@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { ProcessSupabaseImageUrl } from '@/lib/imageUtils';
 
@@ -43,30 +43,81 @@ export default function OptimizedImageWithBlur({
   const [imgSrc, setImgSrc] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [timeoutError, setTimeoutError] = useState(false);
   
   // Base64 blur placeholder padrão (cinza claro)
   const defaultBlurDataURL = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=';
   
+  // Cache de URLs processadas para evitar reprocessamento
+  const processUrlWithCache = useCallback((url: string) => {
+    // Verifica se já está em cache (localStorage para desenvolvimento)
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      const cacheKey = `img_url_${url}`;
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        return cached;
+      }
+    }
+    
+    const processed = ProcessSupabaseImageUrl(url);
+    
+    // Salva no cache
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development' && processed) {
+      const cacheKey = `img_url_${url}`;
+      sessionStorage.setItem(cacheKey, processed);
+    }
+    
+    return processed;
+  }, []);
+
   useEffect(() => {
     if (src) {
-      const processedUrl = ProcessSupabaseImageUrl(src);
+      const processedUrl = processUrlWithCache(src);
       setImgSrc(processedUrl || src);
+      // Reset estados quando a URL muda
+      setRetryCount(0);
+      setHasError(false);
+      setTimeoutError(false);
+      setIsLoading(true);
     }
-  }, [src]);
+  }, [src, processUrlWithCache]);
   
   const handleLoad = () => {
     setIsLoading(false);
+    setRetryCount(0); // Reset retry count on successful load
     if (onLoad) onLoad();
   };
   
-  const handleError = () => {
-    setHasError(true);
-    setIsLoading(false);
-    if (onError) onError();
+  const handleError = useCallback(() => {
+    const maxRetries = 3;
+    const isTimeoutLikeError = true; // Assumimos que erros são timeout por padrão
     
-    // Fallback para imagem padrão
-    setImgSrc('/images/placeholder.jpg');
-  };
+    if (isTimeoutLikeError && retryCount < maxRetries) {
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = Math.min(1000 * Math.pow(2, retryCount), 8000);
+      
+      setTimeout(() => {
+        setRetryCount(prev => prev + 1);
+        // Força re-render da imagem
+        const newSrc = imgSrc + `?retry=${retryCount + 1}`;
+        setImgSrc(newSrc);
+      }, delay);
+      
+      // Marca como timeout error para mostrar indicação visual
+      if (retryCount >= 1) {
+        setTimeoutError(true);
+      }
+    } else {
+      // Após esgotar tentativas ou erro definitivo
+      setHasError(true);
+      setIsLoading(false);
+      if (onError) onError();
+      
+      // Fallback para imagem padrão local (SVG otimizado)
+      setImgSrc('/images/placeholder.svg');
+    }
+  }, [retryCount, imgSrc, onError]);
   
   if (!imgSrc) {
     return (
@@ -77,17 +128,32 @@ export default function OptimizedImageWithBlur({
     );
   }
   
+  // Estado de timeout com retry em progresso
+  if (timeoutError && !hasError) {
+    return (
+      <div 
+        className={`bg-gradient-to-br from-orange-100 to-orange-50 flex flex-col items-center justify-center text-orange-600 ${className}`}
+        style={{ width: width || '100%', height: height || 'auto', ...style }}
+      >
+        <div className="animate-spin w-6 h-6 border-2 border-orange-300 border-t-orange-600 rounded-full mb-2"></div>
+        <span className="text-xs font-medium">Tentativa {retryCount}/3</span>
+      </div>
+    );
+  }
+  
+  // Estado de erro final
   if (hasError) {
     return (
       <div 
-        className={`bg-gray-100 flex items-center justify-center text-gray-400 ${className}`}
+        className={`bg-gray-100 flex flex-col items-center justify-center text-gray-400 ${className}`}
         style={{ width: width || '100%', height: height || 'auto', ...style }}
       >
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
           />
         </svg>
+        <span className="text-xs text-center px-2">Imagem indisponível</span>
       </div>
     );
   }

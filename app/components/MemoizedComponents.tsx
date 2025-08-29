@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { memo, useMemo, useCallback } from 'react';
 
-import { NewsCard, CompactNewsCard, FeaturedNewsCard } from './NewsCard';
+import { NewsCard, CompactNewsCard, FeaturedNewsCard, HorizontalNewsCard } from './NewsCard';
 
 import type { NewsItem } from './NewsCard';
 
@@ -83,6 +83,9 @@ export const MemoizedCompactNewsCard = memo(CompactNewsCard);
 
 // Memoização do FeaturedNewsCard
 export const MemoizedFeaturedNewsCard = memo(FeaturedNewsCard);
+
+// Memoização do HorizontalNewsCard
+export const MemoizedHorizontalNewsCard = memo(HorizontalNewsCard);
 
 export const MemoizedNewsList = memo<NewsListProps>(function MemoizedNewsList({ news, compact = false }) {
   // Memoiza a renderização dos itens
@@ -308,7 +311,7 @@ export const MemoizedSystemLink = memo<SystemLinkProps>(
         className={`system-link ${is_active ? 'cursor-pointer' : 'opacity-50'}`}
         onClick={handleNavigate}
       >
-        <div className="flex items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex items-center p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-card-hover transition-colors">
           {icon_url && (
             <div className="relative w-8 h-8 mr-3 flex-shrink-0">
               <Image

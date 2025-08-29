@@ -6,7 +6,7 @@ import React, { useState, useEffect, memo } from 'react';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { cachedQueries } from '@/lib/supabase/cached-client';
 
-import { MemoizedCompactNewsCard, MemoizedFeaturedNewsCard } from './MemoizedComponents';
+import { MemoizedCompactNewsCard, MemoizedFeaturedNewsCard, MemoizedHorizontalNewsCard } from './MemoizedComponents';
 import UnifiedLoadingSpinner from './ui/UnifiedLoadingSpinner';
 
 import type { NewsItem } from './NewsCard';
@@ -108,9 +108,9 @@ function NoticiasDestaque({ compact = false, limit = 4, preloadedData }: Noticia
                 />
               ))}
               
-              {/* Outras notícias em formato compacto */}
+              {/* Outras notícias em formato horizontal */}
               {featuredNews.slice(1).map((news) => (
-                <MemoizedCompactNewsCard
+                <MemoizedHorizontalNewsCard
                   key={news.id}
                   news={news}
                 />

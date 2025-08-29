@@ -200,7 +200,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
           iconColor: 'text-orange-600',
           accentColor: 'text-orange-600',
           hoverBorder: 'hover:border-gray-200',
-          hoverShadow: 'hover:shadow-md',
           numberColor: 'orange' as const,
           ringColor: 'focus:ring-orange-100',
         };
@@ -211,7 +210,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
           iconColor: 'text-blue-600',
           accentColor: 'text-blue-600',
           hoverBorder: 'hover:border-gray-200',
-          hoverShadow: 'hover:shadow-md',
           numberColor: 'blue' as const,
           ringColor: 'focus:ring-blue-100',
         };
@@ -222,7 +220,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
           iconColor: 'text-blue-600',
           accentColor: 'text-blue-600',
           hoverBorder: 'hover:border-gray-200',
-          hoverShadow: 'hover:shadow-md',
           numberColor: 'blue' as const,
           ringColor: 'focus:ring-blue-100',
         };
@@ -233,7 +230,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
           iconColor: 'text-blue-600',
           accentColor: 'text-blue-600',
           hoverBorder: 'hover:border-gray-200',
-          hoverShadow: 'hover:shadow-md',
           numberColor: 'blue' as const,
           ringColor: 'focus:ring-blue-100',
         };
@@ -244,7 +240,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
           iconColor: 'text-red-600',
           accentColor: 'text-red-600',
           hoverBorder: 'hover:border-gray-200',
-          hoverShadow: 'hover:shadow-md',
           numberColor: 'red' as const,
           ringColor: 'focus:ring-red-100',
         };
@@ -255,7 +250,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
           iconColor: 'text-purple-600',
           accentColor: 'text-purple-600',
           hoverBorder: 'hover:border-gray-200',
-          hoverShadow: 'hover:shadow-md',
           numberColor: 'purple' as const,
           ringColor: 'focus:ring-purple-100',
         };
@@ -266,7 +260,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
           iconColor: 'text-amber-600',
           accentColor: 'text-amber-600',
           hoverBorder: 'hover:border-gray-200',
-          hoverShadow: 'hover:shadow-md',
           numberColor: 'amber' as const,
           ringColor: 'focus:ring-amber-100',
         };
@@ -278,7 +271,6 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
           iconColor: 'text-gray-600',
           accentColor: 'text-gray-700',
           hoverBorder: 'hover:border-gray-200',
-          hoverShadow: 'hover:shadow-md',
           numberColor: 'gray' as const,
           ringColor: 'focus:ring-gray-100',
         };
@@ -327,7 +319,7 @@ const MetricCardEnterprisePro = memo(function MetricCardEnterprisePro({
         ${styles.border} ${styles.borderWidth} ${styles.shadow}
         ${sizeStyles.padding} ${sizeStyles.minHeight}
         group cursor-pointer overflow-hidden flex flex-col justify-between
-        ${hoverEffectStyles} ${styles.hoverBorder} ${styles.hoverShadow}
+        ${hoverEffectStyles} ${styles.hoverBorder}
         ${isPressable ? `${styles.ringColor} focus:outline-none focus:ring-2 focus:ring-opacity-50` : ''}
         ${className}
       `}

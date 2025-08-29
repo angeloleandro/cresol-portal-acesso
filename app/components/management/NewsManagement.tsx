@@ -27,7 +27,7 @@ export interface BaseNews {
 
 // Configuration interface for different contexts
 export interface NewsConfig {
-  entityType: 'sector' | 'subsector';
+  entityType: 'sector' | 'subsector' | 'general';
   apiEndpoint: string;
   entityIdField: string;
   useAlerts: boolean;
@@ -35,7 +35,7 @@ export interface NewsConfig {
 }
 
 interface NewsManagementProps<T extends BaseNews> {
-  entityId: string;
+  entityId?: string;
   news: T[];
   showDrafts: boolean;
   totalDraftNewsCount: number;
@@ -62,14 +62,32 @@ export function NewsManagement<T extends BaseNews>({
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [currentNews, setCurrentNews] = useState<Partial<T>>({
-    title: '',
-    summary: '',
-    content: '',
-    image_url: '',
-    is_featured: false,
-    is_published: true
-  } as Partial<T>);
+  // Detectar se é notícia geral para usar campos corretos
+  const isGeneralNews = config.entityType === 'general';
+  
+  const getInitialNewsState = (): Partial<T> => {
+    if (isGeneralNews) {
+      return ({
+        title: '',
+        summary: '',
+        content: '',
+        image_url: '',
+        priority: 0,
+        is_published: true
+      } as unknown) as Partial<T>;
+    } else {
+      return ({
+        title: '',
+        summary: '',
+        content: '',
+        image_url: '',
+        is_featured: false,
+        is_published: true
+      } as unknown) as Partial<T>;
+    }
+  };
+
+  const [currentNews, setCurrentNews] = useState<Partial<T>>(getInitialNewsState());
 
   const imageUpload = useImageUpload();
   const deleteModal = useDeleteModal<T>('notícia');
@@ -83,14 +101,7 @@ export function NewsManagement<T extends BaseNews>({
         imageUpload.handleRemoveImage();
       }
     } else {
-      setCurrentNews({
-        title: '',
-        summary: '',
-        content: '',
-        image_url: '',
-        is_featured: false,
-        is_published: true
-      } as Partial<T>);
+      setCurrentNews(getInitialNewsState());
       setIsEditing(false);
       imageUpload.handleRemoveImage();
     }
@@ -99,14 +110,7 @@ export function NewsManagement<T extends BaseNews>({
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setCurrentNews({
-      title: '',
-      summary: '',
-      content: '',
-      image_url: '',
-      is_featured: false,
-      is_published: true
-    } as Partial<T>);
+    setCurrentNews(getInitialNewsState());
     imageUpload.handleRemoveImage();
   };
 
@@ -178,11 +182,11 @@ export function NewsManagement<T extends BaseNews>({
       if (config.requestStructure === 'admin') {
         requestData = {
           type: 'news',
-          [config.entityIdField]: entityId,
+          ...(entityId && config.entityIdField && { [config.entityIdField]: entityId }),
           data: {
             ...currentNews,
             image_url: finalImageUrl,
-            [config.entityIdField]: entityId,
+            ...(entityId && config.entityIdField && { [config.entityIdField]: entityId }),
             title: currentNews.title?.trim(),
             summary: currentNews.summary?.trim(),
             content: currentNews.content?.trim()
@@ -190,7 +194,7 @@ export function NewsManagement<T extends BaseNews>({
         };
       } else {
         requestData = {
-          [config.entityIdField]: entityId,
+          ...(entityId && config.entityIdField && { [config.entityIdField]: entityId }),
           data: {
             ...currentNews,
             image_url: finalImageUrl,
@@ -520,15 +524,40 @@ export function NewsManagement<T extends BaseNews>({
                 <div className="flex flex-col space-y-3 p-4 bg-gray-50 rounded-md">
                   <h3 className="text-sm font-medium text-gray-900 mb-2">Opções de Publicação</h3>
                   
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={currentNews.is_featured || false}
-                      onChange={(e) => setCurrentNews({ ...currentNews, is_featured: e.target.checked })}
-                      className="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary focus:ring-2"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Destacar notícia</span>
-                  </label>
+                  {isGeneralNews ? (
+                    // Para notícias gerais: controle de prioridade
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Prioridade: {(currentNews as any).priority || 0}/10
+                        </label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="10"
+                          value={(currentNews as any).priority || 0}
+                          onChange={(e) => setCurrentNews({ ...currentNews, priority: parseInt(e.target.value) } as any)}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>Baixa (0)</span>
+                          <span>Normal (5)</span>
+                          <span>Alta (10)</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Para notícias de setor/subsetor: checkbox de destaque
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={(currentNews as any).is_featured || false}
+                        onChange={(e) => setCurrentNews({ ...currentNews, is_featured: e.target.checked } as any)}
+                        className="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary focus:ring-2"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Destacar notícia</span>
+                    </label>
+                  )}
                   
                   <label className="flex items-center cursor-pointer">
                     <input

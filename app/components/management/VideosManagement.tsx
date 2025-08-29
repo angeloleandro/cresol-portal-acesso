@@ -108,7 +108,7 @@ const VideosManagement = memo(<T extends Video = Video>({
           </div>
         ) : (
           videos.map((video) => (
-            <div key={video.id} className="bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+            <div key={video.id} className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden hover:border-card-hover transition-colors">
               {/* Thumbnail */}
               <div className="aspect-video bg-gray-200 relative">
                 {video.thumbnail_url ? (

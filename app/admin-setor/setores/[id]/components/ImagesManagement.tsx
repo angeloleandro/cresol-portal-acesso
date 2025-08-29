@@ -283,7 +283,7 @@ export function ImagesManagement({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {images.map((image) => (
-            <div key={image.id} className="bg-white rounded-md border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <div key={image.id} className="bg-white rounded-md border border-gray-200 overflow-hidden hover:border-card-hover transition-colors">
               <div className="aspect-square relative bg-gray-100">
                 <OptimizedImage
                   src={image.image_url}

@@ -194,6 +194,23 @@ class SupabaseCache {
   }
   
   /**
+   * Invalida cache baseado em padrão
+   */
+  invalidatePattern(pattern: string): void {
+    const keysToDelete: string[] = [];
+    const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+    
+    this.cache.forEach((_, key) => {
+      if (regex.test(key)) {
+        keysToDelete.push(key);
+      }
+    });
+    
+    keysToDelete.forEach(key => this.cache.delete(key));
+    logger.info(`[Cache] INVALIDATED PATTERN: ${pattern} (${keysToDelete.length} entries)`);
+  }
+  
+  /**
    * Limpa todo o cache
    */
   clear(): void {

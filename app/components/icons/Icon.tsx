@@ -60,6 +60,7 @@ import {
   IoLink as LinkIcon,
   IoBriefcase as BriefcaseIcon,
   IoDocument as DocumentIcon,
+  IoNewspaper as NewspaperIcon,
   IoVolumeHigh as SpeakerWaveIcon,
   IoVolumeOff as SpeakerXMarkIcon,
   IoFilm as FilmIcon,
@@ -169,7 +170,8 @@ export type IconName =
   | 'eye-slash'
   | 'camera'
   | 'map-pin'
-  | 'phone';
+  | 'phone'
+  | 'newspaper';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   name: IconName;
@@ -317,6 +319,7 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   'eye-slash': EyeSlashIcon,
   'camera': CameraIcon,
   'map-pin': MapPinIcon,
+  'newspaper': NewspaperIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, ...props }) => {

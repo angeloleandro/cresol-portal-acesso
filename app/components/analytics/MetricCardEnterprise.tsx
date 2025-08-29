@@ -142,7 +142,6 @@ export default function MetricCardEnterprise({
           iconBg: 'bg-orange-50',
           iconColor: 'text-orange-600',
           hoverBorder: 'hover:border-[#727176]',
-          hoverShadow: 'hover:shadow-orange-100/50',
           topGradient: 'from-orange-400 to-orange-600',
           numberColor: 'orange' as const
         };
@@ -152,7 +151,6 @@ export default function MetricCardEnterprise({
           iconBg: 'bg-green-50',
           iconColor: 'text-green-600',
           hoverBorder: 'hover:border-green-300',
-          hoverShadow: 'hover:shadow-green-100/50',
           topGradient: 'from-green-400 to-green-600',
           numberColor: 'green' as const
         };
@@ -162,7 +160,6 @@ export default function MetricCardEnterprise({
           iconBg: 'bg-blue-50',
           iconColor: 'text-blue-600',
           hoverBorder: 'hover:border-blue-300',
-          hoverShadow: 'hover:shadow-blue-100/50',
           topGradient: 'from-blue-400 to-blue-600',
           numberColor: 'blue' as const
         };
@@ -172,7 +169,6 @@ export default function MetricCardEnterprise({
           iconBg: 'bg-red-50',
           iconColor: 'text-red-600',
           hoverBorder: 'hover:border-red-300',
-          hoverShadow: 'hover:shadow-red-100/50',
           topGradient: 'from-red-400 to-red-600',
           numberColor: 'red' as const
         };
@@ -182,7 +178,6 @@ export default function MetricCardEnterprise({
           iconBg: 'bg-purple-50',
           iconColor: 'text-purple-600',
           hoverBorder: 'hover:border-purple-300',
-          hoverShadow: 'hover:shadow-purple-100/50',
           topGradient: 'from-purple-400 to-purple-600',
           numberColor: 'gray' as const
         };
@@ -193,7 +188,6 @@ export default function MetricCardEnterprise({
           iconBg: 'bg-gray-50',
           iconColor: 'text-gray-600',
           hoverBorder: 'hover:border-gray-300',
-          hoverShadow: 'hover:shadow-gray-100/50',
           topGradient: 'from-gray-400 to-gray-600',
           numberColor: 'gray' as const
         };
@@ -271,7 +265,6 @@ export default function MetricCardEnterprise({
         relative bg-white rounded-md border ${styles.border} ${sizeStyles.padding}
         transition-all duration-300 ease-out
         ${styles.hoverBorder} hover:transform hover:scale-[1.02] hover:-translate-y-1
-        hover:shadow-lg ${styles.hoverShadow}
         group cursor-pointer overflow-hidden
         ${className}
       `}

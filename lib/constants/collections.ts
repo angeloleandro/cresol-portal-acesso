@@ -171,7 +171,7 @@ export const STORAGE_BUCKETS = {
 // Classes CSS Reutilizáveis (seguindo Tailwind do projeto)
 export const CSS_CLASSES = {
   // Cards
-  CARD_BASE: 'bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow',
+  CARD_BASE: 'bg-white rounded-lg shadow-sm border border-gray-200 hover:border-card-hover transition-colors',
   CARD_CONTENT: 'p-4',
   
   // Botões

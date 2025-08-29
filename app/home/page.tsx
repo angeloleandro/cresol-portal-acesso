@@ -22,29 +22,17 @@ const MensagensDestaque = lazy(() => import('../components/MensagensDestaque'));
 const DocumentosDestaque = lazy(() => import('../components/DocumentosDestaque'));
 const VideoGallery = lazy(() => import('@/app/components/VideoGallery'));
 const ImageGalleryHome = lazy(() => import('../components/ImageGalleryHome'));
+const CollectionSection = lazy(() => import('@/app/components/Collections/CollectionSection'));
 const Footer = lazy(() => import('../components/Footer'));
 const GlobalSearch = lazy(() => import('../components/GlobalSearch'));
 const SistemasLateral = lazy(() => import('../components/SistemasLateral'));
 const ParecerSolicitacao = lazy(() => import('../components/ParecerSolicitacao'));
-
-interface QuickStats {
-  activeUsers: number;
-  systemsOnline: number;
-  unreadNotifications: number;
-  pendingApprovals: number;
-}
 
 function HomeContent() {
   const router = useRouter();
   const { user, profile } = useAuth();
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<QuickStats>({
-    activeUsers: 15,
-    systemsOnline: 0,
-    unreadNotifications: 3,
-    pendingApprovals: 2
-  });
 
 
   useEffect(() => {
@@ -53,15 +41,6 @@ function HomeContent() {
       logger.info('Carregando dados da home page', { userId: user?.id });
       
       try {
-        // Simular dados de estatísticas rápidas
-        const statsTimer = logger.componentStart('HomePage.loadStats');
-        setStats({
-          activeUsers: 15,
-          systemsOnline: 25, // Todos os sistemas ativos
-          unreadNotifications: 3,
-          pendingApprovals: 2
-        });
-        logger.componentEnd(statsTimer);
         
         setLoading(false);
         logger.componentEnd(pageTimer);
@@ -82,7 +61,6 @@ function HomeContent() {
   // Log de renderização da página
   logger.info('Renderizando página home', { 
     userId: user?.id,
-    stats,
     componentsLoaded: ['BannerCarousel', 'NoticiasDestaque', 'VideoGallery', 'ImageGalleryHome']
   });
 
@@ -127,6 +105,9 @@ function HomeContent() {
               </InlineSuspense>
               <InlineSuspense message="Carregando galeria...">
                 <ImageGalleryHome />
+              </InlineSuspense>
+              <InlineSuspense message="Carregando coleções...">
+                <CollectionSection type="all" title="Coleções" showEmptyState={false} />
               </InlineSuspense>
               <InlineSuspense message="Carregando solicitações...">
                 <ParecerSolicitacao />

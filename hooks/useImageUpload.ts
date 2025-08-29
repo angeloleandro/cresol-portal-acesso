@@ -84,21 +84,46 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
   }, []);
 
   const handleCropImage = async (): Promise<string | null> => {
-    if (!originalImage || !croppedAreaPixels) return null;
+    if (!originalImage || !croppedAreaPixels) {
+      console.warn('Crop abortado: imagem original ou área de crop não definidas');
+      showError('Erro no recorte: dados incompletos. Tente novamente.');
+      return null;
+    }
 
     try {
       setUploadingImage(true);
-      const { file } = await getCroppedImg(
-        originalImage,
+      console.log('Iniciando crop da imagem...', { 
+        originalImage: originalImage.substring(0, 50) + '...', 
         croppedAreaPixels,
-        rotation
-      );
+        rotation 
+      });
+
+      // Implementar timeout para evitar travamento
+      const cropWithTimeout = async () => {
+        return Promise.race([
+          getCroppedImg(originalImage, croppedAreaPixels, rotation),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout no crop da imagem')), 30000)
+          )
+        ]);
+      };
+
+      const { file } = await cropWithTimeout();
+
+      // Validar se o blob foi gerado corretamente
+      if (!file || file.size === 0) {
+        throw new Error('Falha na geração do arquivo recortado');
+      }
+
+      console.log('Crop realizado com sucesso', { fileSize: file.size });
 
       // Create a File from the Blob
       const croppedFile = new File([file], 'cropped-image.jpg', { type: 'image/jpeg' });
       
       // Upload cropped image
+      console.log('Iniciando upload da imagem recortada...');
       const uploadedUrl = await uploadImage(croppedFile);
+      console.log('Upload concluído:', uploadedUrl);
       
       // Revoke original URL after crop
       if (originalImageUrlRef.current) {
@@ -115,7 +140,20 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       
       return uploadedUrl;
     } catch (error) {
-      console.error('Erro ao recortar imagem:', error);
+      console.error('Erro no processo de crop:', error);
+      
+      // Mostrar erro específico ao usuário
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      if (errorMessage.includes('Timeout')) {
+        showError('Tempo esgotado no recorte da imagem. Tente com uma imagem menor.');
+      } else if (errorMessage.includes('Canvas is empty') || errorMessage.includes('No 2d context')) {
+        showError('Erro no processamento da imagem. Verifique se o arquivo é válido.');
+      } else if (errorMessage.includes('upload')) {
+        showError('Falha no upload da imagem. Verifique sua conexão.');
+      } else {
+        showError(`Erro ao recortar imagem: ${errorMessage}`);
+      }
+      
       return null;
     } finally {
       setUploadingImage(false);

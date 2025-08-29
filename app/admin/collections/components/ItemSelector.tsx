@@ -320,10 +320,10 @@ const ItemSelector: React.FC<ItemSelectorProps> = ({
                   <div
                     key={item.id}
                     onClick={() => toggleItemSelection(item.id)}
-                    className={`relative aspect-video cursor-pointer border-2 rounded-lg overflow-hidden transition-all hover:shadow-md ${
+                    className={`relative aspect-video cursor-pointer border-2 rounded-lg overflow-hidden transition-colors ${
                       selectedItems.has(item.id)
                         ? 'border-primary ring-2 ring-primary/20'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-gray-200 hover:border-card-hover'
                     }`}
                   >
                     {/* Content */}

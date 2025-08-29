@@ -209,7 +209,7 @@ const DraggableItemList: React.FC<DraggableItemListProps> = ({
             tabIndex={0}
             className={cn(
               "group relative bg-white border border-gray-200 rounded-lg p-4 transition-all duration-200",
-              "hover:shadow-md hover:border-gray-300",
+              "hover:border-card-hover",
               !isLoading && !isReordering && "cursor-move",
               draggedItem?.id === item.id && "opacity-50 scale-95",
               draggedOver === item.id && "border-primary border-2 bg-primary/5 scale-105",

@@ -38,6 +38,7 @@ export interface SubsectorNews {
   image_url: string | null;
   is_published: boolean;
   is_featured: boolean;
+  show_on_homepage: boolean;
   created_at: string;
   updated_at: string;
   subsector_id: string;

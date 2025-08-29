@@ -38,6 +38,7 @@ export const cachedQueries = {
   
   /**
    * Busca notícias em destaque com cache de 5 minutos
+   * Inclui notícias gerais (que vão direto para home) e notícias de setor com show_on_homepage=true
    */
   async getFeaturedNews(limit = 4, options?: QueryOptions) {
     const key = `news:featured:${limit}`;
@@ -45,21 +46,87 @@ export const cachedQueries = {
     return supabaseCache.get(
       key,
       async () => {
-        const { data, error } = await supabase
-          .from('sector_news')
-          .select('id, title, summary, image_url, created_at, sector_id, is_featured')
-          .eq('is_published', true)
-          .order('is_featured', { ascending: false })
-          .order('created_at', { ascending: false })
-          .limit(limit * 2);
+        // Buscar notícias gerais e notícias de setor em paralelo
+        // Usar limite maior para ter mais opções e garantir que todas tenham imagem
+        const fetchLimit = limit * 2;
         
-        if (error) throw error;
+        const [generalNewsResult, sectorNewsResult] = await Promise.all([
+          // Notícias gerais (todas vão para a home quando publicadas) - APENAS COM IMAGEM
+          supabase
+            .from('general_news')
+            .select('id, title, summary, image_url, created_at, priority')
+            .eq('is_published', true)
+            .not('image_url', 'is', null) // OBRIGATÓRIO: apenas com imagem
+            .neq('image_url', '') // E não vazia
+            .order('priority', { ascending: false })
+            .order('created_at', { ascending: false })
+            .limit(fetchLimit),
+          
+          // Notícias de setor (apenas as marcadas para homepage) - APENAS COM IMAGEM
+          supabase
+            .from('sector_news')
+            .select('id, title, summary, image_url, created_at, sector_id, is_featured, show_on_homepage')
+            .eq('is_published', true)
+            .eq('show_on_homepage', true) // IMPORTANTE: apenas notícias marcadas para homepage
+            .not('image_url', 'is', null) // OBRIGATÓRIO: apenas com imagem
+            .neq('image_url', '') // E não vazia
+            .order('is_featured', { ascending: false }) // Ordena por destaque primeiro
+            .order('created_at', { ascending: false })
+            .limit(fetchLimit)
+        ]);
         
-        // Processar e retornar apenas o limite solicitado
-        const featured = data?.filter(n => n.is_featured) || [];
-        const regular = data?.filter(n => !n.is_featured) || [];
+        if (generalNewsResult.error) throw generalNewsResult.error;
+        if (sectorNewsResult.error) throw sectorNewsResult.error;
         
-        return [...featured, ...regular].slice(0, limit);
+        // Processar notícias gerais (adicionar tipo e prioridade alta)
+        const generalNews = (generalNewsResult.data || []).map(news => ({
+          ...news,
+          type: 'general' as const,
+          is_featured: true, // Notícias gerais são sempre em destaque
+          sector_id: null
+        }));
+        
+        // Processar notícias de setor (todas já têm show_on_homepage=true)
+        const sectorNews = (sectorNewsResult.data || []).map(news => ({
+          ...news,
+          type: 'sector' as const,
+          priority: 0, // Setor não tem priority
+          show_on_homepage: true // Confirmando que está na homepage
+        }));
+        
+        // Separar notícias de setor por destaque dentro do setor
+        const featuredSector = sectorNews.filter(n => n.is_featured);
+        const regularSector = sectorNews.filter(n => !n.is_featured);
+        
+        // Combinar resultados priorizando:
+        // 1. Notícias gerais (sempre em destaque, ordenadas por priority e data)
+        // 2. Notícias de setor destacadas (is_featured=true)
+        // 3. Notícias de setor na homepage mas sem destaque
+        const combinedNews = [
+          ...generalNews,
+          ...featuredSector,
+          ...regularSector
+        ];
+        
+        // Ordenar o resultado final por prioridade e data
+        const sortedNews = combinedNews.sort((a, b) => {
+          // Primeiro por is_featured (geral e setor em destaque)
+          if (a.is_featured && !b.is_featured) return -1;
+          if (!a.is_featured && b.is_featured) return 1;
+          
+          // Depois por priority (apenas para notícias gerais)
+          if (a.type === 'general' && b.type === 'general') {
+            if (a.priority !== b.priority) return (b.priority || 0) - (a.priority || 0);
+          }
+          
+          // Por último por data de criação
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+        
+        // Garantir que retorna exatamente o limite solicitado (default: 4)
+        const finalNews = sortedNews.slice(0, limit);
+        
+        return finalNews;
       },
       { ttl: 5 * 60 * 1000, ...options } // 5 minutos
     );
@@ -206,7 +273,16 @@ export const cachedQueries = {
  */
 export const cacheInvalidation = {
   banners: () => supabaseCache.invalidateTable('banners'),
-  news: () => supabaseCache.invalidateTable('news'),
+  news: () => {
+    // Invalidar cache de notícias (setor, subsetor e geral)
+    supabaseCache.invalidateTable('news');
+    // Invalidar cache específico de notícias em destaque
+    supabaseCache.invalidatePattern('news:featured:*');
+  },
+  generalNews: () => {
+    // Invalidar cache específico para notícias gerais
+    supabaseCache.invalidatePattern('news:featured:*');
+  },
   events: () => supabaseCache.invalidateTable('events'),
   videos: () => supabaseCache.invalidateTable('videos'),
   gallery: () => supabaseCache.invalidateTable('gallery'),

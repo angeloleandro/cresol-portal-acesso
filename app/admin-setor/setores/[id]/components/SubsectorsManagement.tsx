@@ -185,7 +185,7 @@ export function SubsectorsManagement({ sectorId }: SubsectorsManagementProps) {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {subsectors.map((subsector) => (
-            <div key={subsector.id} className="bg-white p-4 rounded-md border border-gray-200 hover:shadow-md transition-shadow">
+            <div key={subsector.id} className="bg-white p-4 rounded-md border border-gray-200 hover:border-card-hover transition-colors">
               <div className="flex justify-between items-start mb-3">
                 <h4 className="text-lg font-medium">{subsector.name}</h4>
                 <div className="flex space-x-1">

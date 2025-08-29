@@ -71,12 +71,20 @@ const QUICK_ACCESS_ITEMS: QuickAccessItem[] = [
     color: 'gray'
   },
   { 
+    key: 'general-news', 
+    href: '/admin/general-news', 
+    label: 'Notícias Gerais',
+    icon: 'newspaper',
+    description: 'Notícias gerais da homepage',
+    color: 'orange'
+  },
+  { 
     key: 'events', 
     href: '/admin/events', 
     label: 'Eventos',
     icon: 'calendar',
     description: 'Gerenciar calendário de eventos',
-    color: 'orange'
+    color: 'gray'
   },
   { 
     key: 'documents', 
@@ -84,7 +92,7 @@ const QUICK_ACCESS_ITEMS: QuickAccessItem[] = [
     label: 'Documentos',
     icon: 'file',
     description: 'Administrar documentos e arquivos',
-    color: 'gray'
+    color: 'orange'
   },
   { 
     key: 'videos', 
@@ -92,7 +100,7 @@ const QUICK_ACCESS_ITEMS: QuickAccessItem[] = [
     label: 'Vídeos',
     icon: 'play',
     description: 'Galeria de vídeos institucionais',
-    color: 'orange'
+    color: 'gray'
   },
   { 
     key: 'gallery', 
@@ -100,7 +108,7 @@ const QUICK_ACCESS_ITEMS: QuickAccessItem[] = [
     label: 'Galeria',
     icon: 'image',
     description: 'Gerenciar imagens e fotos',
-    color: 'gray'
+    color: 'orange'
   },
 ];
 

@@ -360,7 +360,7 @@ export default function ChartComponentAdvanced({
   };
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-md p-6 hover:shadow-lg transition-shadow duration-300 ${className}`}>
+    <div className={`bg-white border border-gray-200 rounded-md p-6 hover:border-card-hover transition-colors duration-300 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

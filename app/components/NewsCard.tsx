@@ -77,12 +77,12 @@ export const HorizontalNewsCard = memo(({
     >
       <div className="flex">
         {showImage && news.image_url && (
-          <div className="relative w-48 h-32 flex-shrink-0">
+          <div className="relative w-48 h-40 flex-shrink-0">
             <OptimizedImage
               src={news.image_url}
               alt={news.title}
               fill
-              className="object-cover rounded-l-lg"
+              className="object-cover object-center rounded-l-lg"
               priority={priority}
             />
           </div>
@@ -151,12 +151,12 @@ export const FeaturedNewsCard = memo(({
       )}
     >
       {news.image_url && (
-        <div className="relative h-48">
+        <div className="relative h-80">
           <OptimizedImage
             src={news.image_url}
             alt={news.title}
             fill
-            className="object-cover"
+            className="object-cover object-center"
             priority={priority}
           />
         </div>

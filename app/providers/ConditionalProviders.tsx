@@ -37,7 +37,9 @@ export function ConditionalProviders({ children }: ConditionalProvidersProps) {
   // Collections apenas onde realmente é usado
   const needsCollections = 
     pathname.includes('/collections') || 
-    pathname.includes('/gallery');
+    pathname.includes('/gallery') ||
+    pathname.includes('/home') ||
+    pathname.includes('/colecoes');
   
   // Alerts apenas em áreas admin
   const needsAlerts = 
