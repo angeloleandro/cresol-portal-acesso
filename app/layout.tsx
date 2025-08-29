@@ -5,7 +5,6 @@ import { CRESOL_COLORS as COLORS } from '@/lib/design-tokens'
 import { AuthProvider } from './providers/AuthProvider'
 import { ChakraUIProvider } from './providers/ChakraProvider'
 import { ConditionalProviders } from './providers/ConditionalProviders'
-import QueryProvider from '@/lib/react-query/query-provider'
 
 import type { Metadata } from 'next'
 
@@ -91,15 +90,13 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} ${inter.variable}`}>
         <AuthProvider>
-          <QueryProvider>
-            <ChakraUIProvider>
-              <ConditionalProviders>
-                <main className="min-h-screen bg-gray-50">
-                  {children}
-                </main>
-              </ConditionalProviders>
-            </ChakraUIProvider>
-          </QueryProvider>
+          <ChakraUIProvider>
+            <ConditionalProviders>
+              <main className="min-h-screen bg-gray-50">
+                {children}
+              </main>
+            </ConditionalProviders>
+          </ChakraUIProvider>
         </AuthProvider>
       </body>
     </html>

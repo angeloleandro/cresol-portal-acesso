@@ -10,7 +10,6 @@ import Breadcrumb from '@/app/components/Breadcrumb';
 import UnifiedLoadingSpinner from '@/app/components/ui/UnifiedLoadingSpinner';
 import { LOADING_MESSAGES } from '@/lib/constants/loading-messages';
 import { createClient } from '@/lib/supabase/client';
-import { useUsers, useUpdateUser } from '@/lib/react-query/supabase-queries';
 
 import RoleModal from './RoleModal';
 import UserFilters from './UserFilters';
@@ -72,9 +71,9 @@ export default function UsersClient({
   const router = useRouter();
   const { showError, auth } = useAlert();
   
-  // Usar React Query com dados iniciais
-  const { data: users = initialUsers, isLoading } = useUsers();
-  const updateUserMutation = useUpdateUser();
+  // Estados locais
+  const [users] = useState<ProfileUser[]>(initialUsers);
+  const [isLoading] = useState(false);
   
   const [workLocations] = useState<WorkLocation[]>(initialWorkLocations);
   const [positions] = useState<Position[]>(initialPositions);
@@ -265,7 +264,10 @@ export default function UsersClient({
           subsectors={subsectors}
           userSectors={userSectors}
           userSubsectors={userSubsectors}
-          onUserUpdate={() => {}} // React Query handles updates
+          onUserUpdate={() => {
+            // Recarregar a página para atualizar os dados
+            router.refresh();
+          }}
           onOpenRoleModal={(userId, role) => {
             setRoleModalUserId(userId);
             setRoleModalSelectedRole(role);

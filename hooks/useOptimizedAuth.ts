@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { logger } from '@/lib/production-logger';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export interface UserProfile {
   id: string;
@@ -27,11 +26,18 @@ export interface AuthState {
   initialized: boolean;
 }
 
-// Cache keys
-const AUTH_QUERY_KEYS = {
-  session: ['auth', 'session'] as const,
-  profile: (userId?: string) => ['auth', 'profile', userId] as const,
-} as const;
+// Cache interface para gerenciar estado localmente
+interface AuthCache {
+  session: Session | null;
+  profile: UserProfile | null;
+  sessionCheckedAt: number;
+  profileCheckedAt: number;
+}
+
+const CACHE_DURATION = {
+  session: 5 * 60 * 1000, // 5 minutos
+  profile: 10 * 60 * 1000, // 10 minutos
+};
 
 export const useOptimizedAuth = () => {
   const [state, setState] = useState<AuthState>({
@@ -42,34 +48,55 @@ export const useOptimizedAuth = () => {
     initialized: false
   });
 
-  const queryClient = useQueryClient();
   const supabase = useMemo(() => createClient(), []);
   const authListenerRef = useRef<{ subscription: any } | null>(null);
-  
-  // Cache da sessão com React Query
-  const { data: cachedSession, isLoading: sessionLoading } = useQuery({
-    queryKey: AUTH_QUERY_KEYS.session,
-    queryFn: async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) throw error;
-      return session;
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    gcTime: 1000 * 60 * 10, // 10 minutos
-    retry: (failureCount, error: any) => {
-      if (error?.status === 401) return false;
-      return failureCount < 2;
-    },
-    refetchOnWindowFocus: true,
-    refetchOnMount: false,
+  const cacheRef = useRef<AuthCache>({
+    session: null,
+    profile: null,
+    sessionCheckedAt: 0,
+    profileCheckedAt: 0,
   });
+  
+  // Função para verificar e carregar sessão com cache local
+  const loadSession = useCallback(async (force = false) => {
+    const now = Date.now();
+    const cache = cacheRef.current;
+    
+    // Usar cache se ainda válido e não forçar refresh
+    if (!force && cache.session && (now - cache.sessionCheckedAt) < CACHE_DURATION.session) {
+      return cache.session;
+    }
 
-  // Cache do profile com React Query
-  const { data: cachedProfile, isLoading: profileLoading } = useQuery({
-    queryKey: AUTH_QUERY_KEYS.profile(state.user?.id),
-    queryFn: async () => {
-      if (!state.user?.id) return null;
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        logger.error('Erro ao carregar sessão', error);
+        return null;
+      }
       
+      // Atualizar cache
+      cacheRef.current.session = session;
+      cacheRef.current.sessionCheckedAt = now;
+      
+      return session;
+    } catch (error) {
+      logger.error('Erro fatal ao carregar sessão', error);
+      return null;
+    }
+  }, [supabase]);
+
+  // Função para carregar profile com cache local
+  const loadProfile = useCallback(async (userId: string, force = false) => {
+    const now = Date.now();
+    const cache = cacheRef.current;
+    
+    // Usar cache se ainda válido e não forçar refresh
+    if (!force && cache.profile && cache.profile.id === userId && 
+        (now - cache.profileCheckedAt) < CACHE_DURATION.profile) {
+      return cache.profile;
+    }
+
+    try {
       const { data, error } = await supabase
         .from('profiles')
         .select(`
@@ -84,62 +111,96 @@ export const useOptimizedAuth = () => {
           position_id,
           updated_at
         `)
-        .eq('id', state.user.id)
+        .eq('id', userId)
         .single();
 
-      if (error) throw error;
-      return data as UserProfile;
-    },
-    enabled: !!state.user?.id,
-    staleTime: 1000 * 60 * 10, // 10 minutos para profile
-    gcTime: 1000 * 60 * 30, // 30 minutos
-    retry: (failureCount, error: any) => {
-      if (error?.status === 401 || error?.status === 403) return false;
-      return failureCount < 2;
-    },
-  });
-
-  // Atualizar estado quando cache muda - evitando renders desnecessários
-  useEffect(() => {
-    setState(prev => {
-      const newSession = cachedSession || null;
-      const newUser = cachedSession?.user || null;
-      const newLoading = sessionLoading || profileLoading;
-      const newInitialized = !sessionLoading;
-      
-      // Only update if values actually changed
-      if (
-        prev.session !== newSession ||
-        prev.user !== newUser ||
-        prev.loading !== newLoading ||
-        prev.initialized !== newInitialized
-      ) {
-        return {
-          ...prev,
-          session: newSession,
-          user: newUser,
-          loading: newLoading,
-          initialized: newInitialized
-        };
+      if (error) {
+        logger.error('Erro ao carregar profile', error);
+        return null;
       }
-      return prev;
-    });
-  }, [cachedSession, sessionLoading, profileLoading]);
-
-  useEffect(() => {
-    setState(prev => {
-      const newProfile = cachedProfile || null;
       
-      // Only update if profile actually changed
-      if (prev.profile !== newProfile) {
-        return {
-          ...prev,
-          profile: newProfile
-        };
+      // Atualizar cache
+      const profile = data as UserProfile;
+      cacheRef.current.profile = profile;
+      cacheRef.current.profileCheckedAt = now;
+      
+      return profile;
+    } catch (error) {
+      logger.error('Erro fatal ao carregar profile', error);
+      return null;
+    }
+  }, [supabase]);
+
+  // Carregar sessão e profile na inicialização
+  useEffect(() => {
+    let mounted = true;
+
+    const initialize = async () => {
+      try {
+        // Carregar sessão
+        const session = await loadSession();
+        
+        if (!mounted) return;
+        
+        if (session?.user) {
+          // Carregar profile se tiver sessão
+          const profile = await loadProfile(session.user.id);
+          
+          if (!mounted) return;
+          
+          setState({
+            user: session.user,
+            session,
+            profile,
+            loading: false,
+            initialized: true
+          });
+        } else {
+          setState({
+            user: null,
+            session: null,
+            profile: null,
+            loading: false,
+            initialized: true
+          });
+        }
+      } catch (error) {
+        logger.error('Erro na inicialização do auth', error);
+        if (mounted) {
+          setState(prev => ({
+            ...prev,
+            loading: false,
+            initialized: true
+          }));
+        }
       }
-      return prev;
-    });
-  }, [cachedProfile]);
+    };
+
+    initialize();
+
+    return () => {
+      mounted = false;
+    };
+  }, [loadSession, loadProfile]);
+
+  // Atualizar quando a janela ganha foco
+  useEffect(() => {
+    const handleFocus = async () => {
+      const session = await loadSession();
+      if (session?.user && session.user.id !== state.user?.id) {
+        const profile = await loadProfile(session.user.id);
+        setState(prev => ({
+          ...prev,
+          user: session.user,
+          session,
+          profile
+        }));
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [loadSession, loadProfile, state.user?.id]);
 
   // Sign in otimizado com cache
   const signIn = useCallback(async (email: string, password: string) => {
@@ -156,9 +217,22 @@ export const useOptimizedAuth = () => {
         return { error };
       }
 
-      // Atualizar cache imediatamente
+      // Atualizar cache local imediatamente
       if (data.session) {
-        queryClient.setQueryData(AUTH_QUERY_KEYS.session, data.session);
+        cacheRef.current.session = data.session;
+        cacheRef.current.sessionCheckedAt = Date.now();
+        
+        // Carregar profile do novo usuário
+        if (data.session.user) {
+          const profile = await loadProfile(data.session.user.id, true);
+          setState({
+            user: data.session.user,
+            session: data.session,
+            profile,
+            loading: false,
+            initialized: true
+          });
+        }
       }
 
       return { data, error: null };
@@ -166,7 +240,7 @@ export const useOptimizedAuth = () => {
       setState(prev => ({ ...prev, loading: false }));
       return { error: error as Error };
     }
-  }, [supabase, queryClient]);
+  }, [supabase, loadProfile]);
 
   // Sign out otimizado com limpeza de cache
   const signOut = useCallback(async () => {
@@ -181,9 +255,21 @@ export const useOptimizedAuth = () => {
         return { error };
       }
 
-      // Limpar cache imediatamente
-      queryClient.removeQueries({ queryKey: ['auth'] });
-      queryClient.clear(); // Limpar todo o cache na saída
+      // Limpar cache local imediatamente
+      cacheRef.current = {
+        session: null,
+        profile: null,
+        sessionCheckedAt: 0,
+        profileCheckedAt: 0,
+      };
+      
+      setState({
+        user: null,
+        session: null,
+        profile: null,
+        loading: false,
+        initialized: true
+      });
 
       return { error: null };
     } catch (error) {
@@ -191,7 +277,7 @@ export const useOptimizedAuth = () => {
       setState(prev => ({ ...prev, loading: false }));
       return { error: error as Error };
     }
-  }, [supabase, queryClient]);
+  }, [supabase]);
 
   // Refresh session otimizado
   const refreshSession = useCallback(async () => {
@@ -203,9 +289,10 @@ export const useOptimizedAuth = () => {
         return { error };
       }
 
-      // Atualizar cache
+      // Atualizar cache local
       if (data.session) {
-        queryClient.setQueryData(AUTH_QUERY_KEYS.session, data.session);
+        cacheRef.current.session = data.session;
+        cacheRef.current.sessionCheckedAt = Date.now();
       }
 
       return { data, error: null };
@@ -213,7 +300,7 @@ export const useOptimizedAuth = () => {
       logger.error('Erro fatal ao renovar sessão', error);
       return { error: error as Error };
     }
-  }, [supabase, queryClient]);
+  }, [supabase]);
 
   // Setup otimizado do listener
   useEffect(() => {
@@ -225,18 +312,37 @@ export const useOptimizedAuth = () => {
       async (event: AuthChangeEvent, session: Session | null) => {
         logger.debug('Auth state change', { event, userEmail: session?.user?.email });
 
-        // Atualizar cache do React Query
-        queryClient.setQueryData(AUTH_QUERY_KEYS.session, session);
-
-        // Limpar cache do profile se o usuário mudou
-        if (event === 'SIGNED_OUT' || !session) {
-          queryClient.removeQueries({ queryKey: ['auth', 'profile'] });
-        }
-
-        // Invalidar queries para refetch
-        if (event === 'SIGNED_IN' && session?.user) {
-          queryClient.invalidateQueries({ 
-            queryKey: AUTH_QUERY_KEYS.profile(session.user.id) 
+        // Atualizar cache local
+        if (session) {
+          cacheRef.current.session = session;
+          cacheRef.current.sessionCheckedAt = Date.now();
+          
+          // Carregar profile para novo usuário
+          if (session.user && event === 'SIGNED_IN') {
+            const profile = await loadProfile(session.user.id, true);
+            setState({
+              user: session.user,
+              session,
+              profile,
+              loading: false,
+              initialized: true
+            });
+          }
+        } else {
+          // Limpar cache quando sair
+          cacheRef.current = {
+            session: null,
+            profile: null,
+            sessionCheckedAt: 0,
+            profileCheckedAt: 0,
+          };
+          
+          setState({
+            user: null,
+            session: null,
+            profile: null,
+            loading: false,
+            initialized: true
           });
         }
       }
@@ -250,62 +356,42 @@ export const useOptimizedAuth = () => {
         authListenerRef.current = null;
       }
     };
-  }, [supabase, queryClient]);
+  }, [supabase, loadProfile]);
 
-  // Invalidar cache do profile quando necessário
-  const invalidateProfile = useCallback(() => {
+  // Forçar recarga do profile
+  const refreshProfile = useCallback(async () => {
     if (state.user?.id) {
-      queryClient.invalidateQueries({ 
-        queryKey: AUTH_QUERY_KEYS.profile(state.user.id) 
-      });
+      const profile = await loadProfile(state.user.id, true);
+      setState(prev => ({ ...prev, profile }));
     }
-  }, [state.user?.id, queryClient]);
+  }, [state.user?.id, loadProfile]);
 
-  // Prefetch do profile para performance
-  const prefetchProfile = useCallback((userId: string) => {
-    queryClient.prefetchQuery({
-      queryKey: AUTH_QUERY_KEYS.profile(userId),
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            email,
-            full_name,
-            username,
-            avatar_url,
-            role,
-            position,
-            work_location_id,
-            position_id,
-            updated_at
-          `)
-          .eq('id', userId)
-          .single();
-
-        if (error) throw error;
-        return data as UserProfile;
-      },
-      staleTime: 1000 * 60 * 10,
-    });
-  }, [supabase, queryClient]);
+  // Limpar cache manualmente
+  const clearCache = useCallback(() => {
+    cacheRef.current = {
+      session: null,
+      profile: null,
+      sessionCheckedAt: 0,
+      profileCheckedAt: 0,
+    };
+  }, []);
 
   return {
     ...state,
     signIn,
     signOut,
     refreshSession,
-    invalidateProfile,
-    prefetchProfile,
+    refreshProfile,
+    clearCache,
     isAuthenticated: !!state.user,
     isAdmin: state.profile?.role === 'admin',
     isSectorAdmin: state.profile?.role === 'sector_admin' || state.profile?.role === 'admin',
     // Métricas de cache para debug
     cacheInfo: {
-      sessionCached: !!cachedSession,
-      profileCached: !!cachedProfile,
-      sessionLoading,
-      profileLoading,
+      sessionCached: !!cacheRef.current.session,
+      profileCached: !!cacheRef.current.profile,
+      sessionAge: Date.now() - cacheRef.current.sessionCheckedAt,
+      profileAge: Date.now() - cacheRef.current.profileCheckedAt,
     }
   };
 };
